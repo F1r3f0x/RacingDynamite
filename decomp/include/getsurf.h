@@ -97,6 +97,9 @@ typedef struct SurfaceRaycastResult {
 /* Global surface pointers matching authentic memory layout */
 extern void *g_pActiveSRF;
 extern SrfCell *g_pSRF_Grid;
+extern SrfTriangle *g_pSRF_Triangles;
+extern SrfTriangle **g_pSRF_Table1;
+extern SrfTriangle **g_pSRF_Table2;
 extern int g_SRF_GridCellsX;
 extern int g_SRF_GridCellsZ;
 extern int g_SRF_CellSizeX;
@@ -104,7 +107,11 @@ extern int g_SRF_CellSizeZ;
 extern int g_SRF_GridStrideX;
 extern int g_SRF_GridStrideZ;
 
+/* External file loader */
+void *File_LoadToMemory(const char *filename);
+
 /* Function prototypes */
+int Surface_LoadSRF(const char *filename, void *scene_objects);
 void Surface_FreeSRF(void);
 int Surface_GetTriangleHeight(SurfaceHeightContext *ctx);
 

@@ -9,12 +9,79 @@
 /* Global collision variables matching MAINDOS_32BIT.EXE memory */
 void *g_pActiveSRF = NULL;
 SrfCell *g_pSRF_Grid = NULL;
+SrfTriangle *g_pSRF_Triangles = NULL;
+SrfTriangle **g_pSRF_Table1 = NULL;
+SrfTriangle **g_pSRF_Table2 = NULL;
 int g_SRF_GridCellsX = 0;
 int g_SRF_GridCellsZ = 0;
 int g_SRF_CellSizeX = 512;
 int g_SRF_CellSizeZ = 512;
 int g_SRF_GridStrideX = 0;
 int g_SRF_GridStrideZ = 0;
+
+/**
+ * Surface_LoadSRF (MAINDOS @ 0x0001FEE0, IGN_WIN @ 0x00412670)
+ * Loads .SRF track collision surface from disk and converts relative offsets to pointers.
+ */
+int Surface_LoadSRF(const char *filename, void *scene_objects) {
+    SrfHeader *hdr;
+    int total_cells;
+    int tri_count;
+    int t1_count;
+    int t2_count;
+    int total_tables_bytes;
+    int i;
+    char *triangles;
+    char *table1;
+    char *table2;
+    SrfCell *cell;
+
+    g_pActiveSRF = File_LoadToMemory(filename);
+    hdr = (SrfHeader *)g_pActiveSRF;
+
+    g_SRF_GridCellsX = hdr->grid_cells_x;
+    g_SRF_GridCellsZ = hdr->grid_cells_z;
+    g_SRF_CellSizeZ = hdr->cell_size_z;
+    g_SRF_CellSizeX = hdr->cell_size_x;
+    g_SRF_GridStrideX = hdr->grid_stride_x;
+    g_SRF_GridStrideZ = hdr->grid_stride_z;
+
+    tri_count = hdr->triangle_count;
+    t1_count = hdr->table1_count;
+    t2_count = hdr->table2_count;
+
+    g_pSRF_Grid = (SrfCell *)((char *)hdr + sizeof(SrfHeader));
+    total_cells = g_SRF_GridStrideX * g_SRF_GridStrideZ;
+
+    triangles = (char *)g_pSRF_Grid + total_cells * sizeof(SrfCell);
+    table1 = triangles + tri_count * sizeof(SrfTriangle);
+    table2 = table1 + t1_count * sizeof(int);
+    g_pSRF_Table2 = (SrfTriangle **)table2;
+
+    for (i = 0; i < total_cells; i++) {
+        cell = &g_pSRF_Grid[i];
+        cell->table2_offset += (int)table2;
+        cell->table1_offset += (int)table1;
+    }
+
+    if (tri_count > 0) {
+        int total_tri_bytes = tri_count * sizeof(SrfTriangle);
+        for (i = 0; i < total_tri_bytes; i += sizeof(SrfTriangle)) {
+            SrfTriangle *tri = (SrfTriangle *)(triangles + i);
+            tri->v_ptr += (int)scene_objects;
+        }
+    }
+
+    total_tables_bytes = (t2_count + t1_count) * sizeof(int);
+    for (i = 0; i < total_tables_bytes; i += sizeof(int)) {
+        int *entry = (int *)(table1 + i);
+        *entry += (int)triangles;
+    }
+
+    g_pSRF_Table1 = (SrfTriangle **)table1;
+    g_pSRF_Triangles = (SrfTriangle *)triangles;
+    return 1;
+}
 
 /**
  * Surface_FreeSRF (MAINDOS @ 0x0002002C, IGN_WIN @ 0x004127A0)
