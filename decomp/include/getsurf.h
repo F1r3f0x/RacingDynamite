@@ -46,24 +46,51 @@ typedef struct SurfaceVertex {
 } SurfaceVertex;
 
 typedef struct SurfaceObject {
-    int dummy0;
+    int field0;                   /* 0x00 */
     SurfaceVertex *vertex_buffer; /* 0x04 */
-    int dummy8;
-    int dummyC;
-    int pos_y;                    /* 0x10: World Y elevation */
+    int dummy8;                   /* 0x08 */
+    int pos_x;                    /* 0x0C */
+    int pos_y;                    /* 0x10 */
+    int pos_z;                    /* 0x14 */
+    short dummy18;                /* 0x18 */
+    short dummy1a;                /* 0x1A */
+    short dummy1c;                /* 0x1C */
+    short field_1e;               /* 0x1E */
+    short field_20;               /* 0x20 */
+    short dummy22;                /* 0x22 */
 } SurfaceObject;
 
 typedef struct SurfacePolyTri {
-    int dummy0;
-    int v0_idx;                   /* 0x04: Index of vertex 0 */
-    int v1_idx;                   /* 0x08: Index of vertex 1 */
-    int v2_idx;                   /* 0x0C: Index of vertex 2 */
+    int flags_material;           /* 0x00 */
+    int v0_idx;                   /* 0x04 */
+    int v1_idx;                   /* 0x08 */
+    int v2_idx;                   /* 0x0C */
 } SurfacePolyTri;
 
 typedef struct SurfaceHeightContext {
     SurfaceObject *obj;           /* 0x00 */
     SurfacePolyTri *poly;         /* 0x04 */
 } SurfaceHeightContext;
+
+/* 64-byte Surface Raycast Result (16 x 32-bit int) */
+typedef struct SurfaceRaycastResult {
+    int material;                 /* 0x00: Material ID (-1 if no hit) */
+    int normal_x;                 /* 0x04: Face normal X */
+    int normal_y;                 /* 0x08: Face normal Y */
+    int normal_z;                 /* 0x0C: Face normal Z */
+    int v0_world_x;               /* 0x10: Vertex 0 world X */
+    int v0_world_y;               /* 0x14: Vertex 0 world Y */
+    int v0_world_z;               /* 0x18: Vertex 0 world Z */
+    int v1_world_x;               /* 0x1C: Vertex 1 world X */
+    int v1_world_y;               /* 0x20: Vertex 1 world Y */
+    int v1_world_z;               /* 0x24: Vertex 1 world Z */
+    int v2_world_x;               /* 0x28: Vertex 2 world X */
+    int v2_world_y;               /* 0x2C: Vertex 2 world Y */
+    int v2_world_z;               /* 0x30: Vertex 2 world Z */
+    int obj_field0;               /* 0x34: Object header field 0 */
+    int obj_field20;              /* 0x38: Object field at offset 0x20 */
+    int obj_field1e;              /* 0x3C: Object field at offset 0x1E */
+} SurfaceRaycastResult;
 
 #pragma pack(pop)
 
@@ -81,10 +108,12 @@ extern int g_SRF_GridStrideZ;
 void Surface_FreeSRF(void);
 int Surface_GetTriangleHeight(SurfaceHeightContext *ctx);
 
-void Surface_TestTrianglePositiveDZ(int count, int qx, int qz, SrfTriangle **table, int *out_hits);
-#pragma aux Surface_TestTrianglePositiveDZ parm [ecx] [edx] [ebx] [esi] [edi] modify [eax ebx edx esi edi];
+void *Surface_TestTrianglePositiveDZ(int count, int qx, int qz, SrfTriangle **table, void *out_hits);
+#pragma aux Surface_TestTrianglePositiveDZ parm [ecx] [edx] [ebx] [esi] [edi] value [edi] modify [eax ebx edx esi];
 
-void Surface_TestTriangleNegativeDZ(int count, int qx, int qz, SrfTriangle **table, int *out_hits);
-#pragma aux Surface_TestTriangleNegativeDZ parm [ecx] [edx] [ebx] [esi] [edi] modify [eax ebx edx esi edi];
+void *Surface_TestTriangleNegativeDZ(int count, int qx, int qz, SrfTriangle **table, void *out_hits);
+#pragma aux Surface_TestTriangleNegativeDZ parm [ecx] [edx] [ebx] [esi] [edi] value [edi] modify [eax ebx edx esi];
+
+SurfaceRaycastResult *Surface_Raycast(int qx, int qy, int qz);
 
 #endif /* GETSURF_H */

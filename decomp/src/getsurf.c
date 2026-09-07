@@ -48,8 +48,9 @@ int Surface_GetTriangleHeight(SurfaceHeightContext *ctx) {
  * Surface_TestTrianglePositiveDZ (MAINDOS @ 0x00020C18, IGN_WIN @ 0x00446578)
  * 2D trapezoidal slope span test for table2 triangles (dz >= 0).
  */
-void Surface_TestTrianglePositiveDZ(int count, int qx, int qz, SrfTriangle **table, int *out_hits) {
+void *Surface_TestTrianglePositiveDZ(int count, int qx, int qz, SrfTriangle **table, void *out_hits) {
     if (count != 0) {
+        int *hits = (int *)out_hits;
         do {
             SrfTriangle *tri = *table;
             int z_base = tri->z_base;
@@ -59,24 +60,27 @@ void Surface_TestTrianglePositiveDZ(int count, int qx, int qz, SrfTriangle **tab
                 if (qx >= x_left) {
                     int x_right = tri->x_base + ((delta_z * tri->slope2) >> 16);
                     if (qx <= x_right) {
-                        out_hits[0] = tri->v_ptr;
-                        out_hits[1] = ((unsigned short)tri->poly_offset * 4) + *(int *)(tri->v_ptr + 4);
-                        out_hits += 2;
+                        hits[0] = tri->v_ptr;
+                        hits[1] = ((unsigned short)tri->poly_offset * 4) + *(int *)(tri->v_ptr + 4);
+                        hits += 2;
                     }
                 }
             }
             table++;
             count--;
         } while (count != 0);
+        out_hits = hits;
     }
+    return out_hits;
 }
 
 /**
  * Surface_TestTriangleNegativeDZ (MAINDOS @ 0x00020C81, IGN_WIN @ 0x004465E1)
  * 2D trapezoidal slope span test for table1 triangles (dz < 0).
  */
-void Surface_TestTriangleNegativeDZ(int count, int qx, int qz, SrfTriangle **table, int *out_hits) {
+void *Surface_TestTriangleNegativeDZ(int count, int qx, int qz, SrfTriangle **table, void *out_hits) {
     if (count != 0) {
+        int *hits = (int *)out_hits;
         do {
             SrfTriangle *tri = *table;
             int z_base = tri->z_base;
@@ -86,15 +90,159 @@ void Surface_TestTriangleNegativeDZ(int count, int qx, int qz, SrfTriangle **tab
                 if (qx >= x_left) {
                     int x_right = tri->x_base + ((delta_z * tri->slope2) >> 16);
                     if (qx <= x_right) {
-                        out_hits[0] = tri->v_ptr;
-                        out_hits[1] = ((unsigned short)tri->poly_offset * 4) + *(int *)(tri->v_ptr + 4);
-                        out_hits += 2;
+                        hits[0] = tri->v_ptr;
+                        hits[1] = ((unsigned short)tri->poly_offset * 4) + *(int *)(tri->v_ptr + 4);
+                        hits += 2;
                     }
                 }
             }
             table++;
             count--;
         } while (count != 0);
+        out_hits = hits;
     }
+    return out_hits;
 }
+
+/* Static hit buffer and scratch variables for raycasting (0x000eb900 - 0x000ebb54) */
+static SurfaceHeightContext s_hits[56];
+static SurfaceHeightContext *s_cur_hit;
+static SurfaceHeightContext *s_best_hit;
+static void *s_hits_end;
+static int s_saved_ebp;
+static SrfCell *s_cur_cell;
+static SurfaceRaycastResult s_raycast_result;
+
+static int s_scratch_mat;
+static int s_scratch_pos_x;
+static int s_scratch_pos_y;
+static int s_scratch_pos_z;
+static int s_scratch_v0_x;
+static int s_scratch_v0_y;
+static int s_scratch_v0_z;
+static int s_scratch_v1_x;
+static int s_scratch_v1_y;
+static int s_scratch_v1_z;
+static int s_scratch_v2_x;
+static int s_scratch_v2_y;
+static int s_scratch_v2_z;
+static int s_scratch_obj_field0;
+static int s_scratch_obj_field20;
+static int s_scratch_obj_field1e;
+
+/**
+ * Surface_Raycast (MAINDOS @ 0x00020814, IGN_WIN @ 0x00412fc0)
+ * Evaluates spatial grid cell, queries triangle spans, selects best surface,
+ * computes face normal via cross product, and transforms triangle vertices to world space.
+ */
+SurfaceRaycastResult *Surface_Raycast(int qx, int qy, int qz) {
+    int cell_z = qz / g_SRF_CellSizeZ;
+    int cell_x = qx / g_SRF_CellSizeX;
+    int cell_idx = cell_z * g_SRF_GridStrideX + cell_x;
+    s_cur_cell = &g_pSRF_Grid[cell_idx];
+
+    s_hits_end = Surface_TestTrianglePositiveDZ(
+        s_cur_cell->table2_count, qx, qz,
+        (SrfTriangle **)s_cur_cell->table2_offset,
+        s_hits
+    );
+    s_hits_end = Surface_TestTriangleNegativeDZ(
+        s_cur_cell->table1_count, qx, qz,
+        (SrfTriangle **)s_cur_cell->table1_offset,
+        s_hits_end
+    );
+
+    if (s_hits_end == s_hits) {
+        s_raycast_result.material = -1;
+        return &s_raycast_result;
+    }
+
+    s_best_hit = s_hits;
+    if ((SurfaceHeightContext *)s_hits_end > &s_hits[1]) {
+        int best_mat = 0x4f;
+        int best_dist = 1000000000;
+        for (s_cur_hit = s_hits; (void *)s_cur_hit < s_hits_end; s_cur_hit++) {
+            int tri_y = Surface_GetTriangleHeight(s_cur_hit);
+            int dy = tri_y - qy;
+            int mat;
+            if (dy < 0) {
+                dy = -dy;
+            } else {
+                dy = dy * dy;
+            }
+            mat = s_cur_hit->poly->flags_material >> 16;
+            if ((dy < best_dist && (mat < 0x28 || mat > 0x4f)) ||
+                ((dy < best_dist || mat < 0x28 || mat > 0x4f) && (best_mat >= 0x28 && best_mat <= 0x4f))) {
+                best_mat = mat;
+                best_dist = dy;
+                s_best_hit = s_cur_hit;
+            }
+        }
+    }
+
+    {
+        SurfaceObject *obj = s_best_hit->obj;
+        SurfacePolyTri *poly = s_best_hit->poly;
+        SurfaceVertex *vbuf = (SurfaceVertex *)((char *)obj->vertex_buffer + 8);
+
+        s_scratch_mat = poly->flags_material >> 16;
+        s_scratch_pos_x = obj->pos_x;
+        s_scratch_pos_y = obj->pos_y;
+        s_scratch_pos_z = obj->pos_z;
+
+        s_scratch_v0_x = vbuf[poly->v0_idx].x;
+        s_scratch_v0_y = vbuf[poly->v0_idx].y;
+        s_scratch_v0_z = vbuf[poly->v0_idx].z;
+
+        s_scratch_v1_x = vbuf[poly->v1_idx].x;
+        s_scratch_v1_y = vbuf[poly->v1_idx].y;
+        s_scratch_v1_z = vbuf[poly->v1_idx].z;
+
+        s_scratch_v2_x = vbuf[poly->v2_idx].x;
+        s_scratch_v2_y = vbuf[poly->v2_idx].y;
+        s_scratch_v2_z = vbuf[poly->v2_idx].z;
+
+        s_scratch_obj_field0 = obj->field0;
+        s_scratch_obj_field20 = obj->field_20;
+        s_scratch_obj_field1e = obj->field_1e;
+
+        {
+            int ax = s_scratch_v0_x - s_scratch_v1_x;
+            int ay = s_scratch_v0_y - s_scratch_v1_y;
+            int az = s_scratch_v0_z - s_scratch_v1_z;
+
+            int bx = s_scratch_v2_x - s_scratch_v1_x;
+            int by = s_scratch_v2_y - s_scratch_v1_y;
+            int bz = s_scratch_v2_z - s_scratch_v1_z;
+
+            int nx = ay * bz - az * by;
+            int ny = az * bx - ax * bz;
+            int nz = ax * by - ay * bx;
+
+            s_raycast_result.material = s_scratch_mat;
+            s_raycast_result.normal_x = nx;
+            s_raycast_result.normal_y = ny;
+            s_raycast_result.normal_z = nz;
+
+            s_raycast_result.v0_world_x = s_scratch_v0_x + s_scratch_pos_x;
+            s_raycast_result.v0_world_y = s_scratch_v0_y - s_scratch_pos_y;
+            s_raycast_result.v0_world_z = s_scratch_v0_z + s_scratch_pos_z;
+
+            s_raycast_result.v1_world_x = s_scratch_v1_x + s_scratch_pos_x;
+            s_raycast_result.v1_world_y = s_scratch_v1_y - s_scratch_pos_y;
+            s_raycast_result.v1_world_z = s_scratch_v1_z + s_scratch_pos_z;
+
+            s_raycast_result.v2_world_x = s_scratch_v2_x + s_scratch_pos_x;
+            s_raycast_result.v2_world_y = s_scratch_v2_y - s_scratch_pos_y;
+            s_raycast_result.v2_world_z = s_scratch_v2_z + s_scratch_pos_z;
+
+            s_raycast_result.obj_field0 = s_scratch_obj_field0;
+            s_raycast_result.obj_field20 = s_scratch_obj_field20;
+            s_raycast_result.obj_field1e = s_scratch_obj_field1e;
+        }
+    }
+
+    return &s_raycast_result;
+}
+
 

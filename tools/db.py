@@ -80,23 +80,46 @@ def import_markdown():
             lines = f.readlines()
         
         imported_fns = 0
+        headers = {}
         for line in lines:
             line = line.strip()
-            if not line.startswith("| `0x") and not line.startswith("| 0x"):
+            if not line.startswith("|"):
                 continue
-            parts = [p.strip() for p in line.split("|")[1:-1]]
-            if len(parts) < 8:
+            parts = [clean_val(p) for p in line.split("|")[1:-1]]
+            if len(parts) < 6:
                 continue
-            
-            win_addr = clean_val(parts[0])
-            orig_ghidra = clean_val(parts[1])
-            sym_name = clean_val(parts[2])
-            raw_module = clean_val(parts[3])
-            status = clean_val(parts[4]).lower()
-            fidelity = clean_val(parts[5])
-            port_loc = clean_val(parts[6])
-            purpose = parts[7].strip()
-            
+            if not headers:
+                # Detect header row
+                norm_parts = [p.lower() for p in parts]
+                if any("addr" in p or "symbol" in p for p in norm_parts):
+                    for idx, p in enumerate(norm_parts):
+                        headers[p] = idx
+                    continue
+            if parts[0] == ":---" or parts[0].startswith("---"):
+                continue
+
+            # Resolve column values using header map
+            def get_col(candidates, default=""):
+                for c in candidates:
+                    for h, idx in headers.items():
+                        if c in h and idx < len(parts):
+                            return parts[idx]
+                return default
+
+            dos_addr = get_col(["dos addr", "dos"], "")
+            win_addr = get_col(["win addr", "win", "address"], "")
+            orig_ghidra = get_col(["ghidra label", "ghidra", "label"], "")
+            sym_name = get_col(["symbol name", "symbol", "name"], "")
+            raw_module = get_col(["module"], "")
+            status = get_col(["status"], "unidentified").lower()
+            fidelity = get_col(["fidelity"], "-")
+            port_loc = get_col(["port location", "location", "port"], "-")
+            purpose = get_col(["purpose", "notes", "description"], "")
+
+            if not win_addr or win_addr == "-":
+                if not dos_addr or dos_addr == "-":
+                    continue
+
             # Normalize module
             module_name = raw_module.split("/")[0].strip() if "/" in raw_module else raw_module
             module_name = module_name.replace("`", "").strip()
@@ -114,11 +137,16 @@ def import_markdown():
             if status not in ("unidentified", "analyzed", "decompiled", "matching"):
                 status = "analyzed" if status == "analyzed" else "decompiled" if status == "ported" else "unidentified"
             
+            if fidelity not in ("EXACT", "ADAPTED", "EXTENDED", "INFRASTRUCTURE"):
+                fidelity = "-"
+
             cur.execute("""
                 INSERT OR REPLACE INTO functions 
-                (win_address, symbol_name, original_ghidra_name, module_id, status, fidelity, port_location, purpose)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (win_addr, sym_name, orig_ghidra, mod_id, status, fidelity, port_loc, purpose))
+                (dos_address, win_address, symbol_name, original_ghidra_name, module_id, status, fidelity, port_location, purpose)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (dos_addr if dos_addr != "-" else None, 
+                  win_addr if win_addr != "-" else None, 
+                  sym_name, orig_ghidra, mod_id, status, fidelity, port_loc, purpose))
             imported_fns += 1
         print(f"Imported {imported_fns} functions.")
 
@@ -180,11 +208,16 @@ def import_markdown():
         with open(dev_md, "r", encoding="utf-8") as f:
             content = f.read()
         
-        dev_blocks = re.findall(r"###\s+(DEV-\d+):\s+([^\n]+)", content)
+        table_matches = re.findall(
+            r"\|\s*\*\*`?(DEV-\d+)`?\*\*\s*\|\s*`?([A-Z0-9_]+)`?\s*\|\s*`?(0x[0-9a-fA-F]+)`?\s*\|\s*([^|]+)\|\s*([^|]+)\s*\|",
+            content
+        )
         imported_devs = 0
-        for dev_id, title in dev_blocks:
-            cur.execute("INSERT OR REPLACE INTO deviations (id, title, category) VALUES (?, ?, ?)",
-                        (dev_id, title.strip(), "GENERAL"))
+        for dev_id, category, addr, desc, toggle in table_matches:
+            cur.execute("""
+                INSERT OR REPLACE INTO deviations (id, category, title, description, win_address, toggle_key)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (dev_id.strip(), category.strip(), desc.strip(), desc.strip(), addr.strip(), toggle.strip().strip("`")))
             imported_devs += 1
         print(f"Imported {imported_devs} deviations.")
 
@@ -381,6 +414,8 @@ def main():
     add_p.add_argument("module", type=str, help="Module name (e.g. getsurf.c)")
     add_p.add_argument("--purpose", type=str, default="", help="Function purpose")
     
+    subparsers.add_parser("dashboard", help="Generate interactive HTML decompilation progress dashboard")
+
     args = parser.parse_args()
     if args.command == "init":
         init_db()
@@ -392,6 +427,9 @@ def main():
         dump_sql()
     elif args.command == "status":
         show_status()
+    elif args.command == "dashboard":
+        from generate_dashboard import main as gen_main
+        gen_main(argv=[])
     elif args.command == "query":
         query(args.sql)
     elif args.command == "link":

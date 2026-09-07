@@ -88,4 +88,24 @@ Central tracking interface for decompiling **`MAINDOS.EXE`**:
   * `uv run python tools/db.py import-markdown`: Ingests legacy markdown documentation into the database.
   * `uv run python tools/db.py export-markdown`: Generates `docs/ghidra/functions.md` from the database.
   * `uv run python tools/db.py dump-sql`: Dumps database to version-controlled `database/dump.sql`.
+  * `uv run python tools/db.py dashboard`: Generates the interactive HTML progress dashboard (`dashboard.html`).
   * `uv run python tools/db.py query "<SQL>"`: Runs ad-hoc SQL queries.
+* **`tools/diff_func.py`**: Instruction-by-instruction bytecode comparison tool between `MAINDOS_32BIT.EXE` and Watcom-compiled COFF objects in `build/decomp/`.
+  * Usage: `uv run python tools/diff_func.py <symbol_name> <dos_addr> <byte_size> [module.c]`
+
+---
+
+## 7. Interactive HTML Decompilation Dashboard (`tools/generate_dashboard.py`)
+
+Visual analytics dashboard generator:
+* **`tools/generate_dashboard.py`**: Queries `database/decomp.db` and FCTS registries to generate a standalone, zero-dependency HTML dashboard with dark UI, live search, status filters, and structure inspection.
+* **Outputs**:
+  * `dashboard.html` (project root)
+  * `docs/dashboard.html` (documentation hub mirror)
+* **Usage**:
+  ```bash
+  uv run python tools/generate_dashboard.py
+  # Or via db manager:
+  uv run python tools/db.py dashboard
+  ```
+

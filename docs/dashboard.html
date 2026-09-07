@@ -1,0 +1,2928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Racing Dynamite // Decompilation Progress Dashboard</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --bg-surface: #111827;
+      --bg-card: #172136;
+      --bg-card-hover: #1e2c47;
+      --border: #243452;
+      --border-subtle: #1a273e;
+      --text: #f3f4f6;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --color-matching: #10b981;
+      --color-matching-bg: rgba(16, 185, 129, 0.15);
+      --color-decomp: #06b6d4;
+      --color-decomp-bg: rgba(6, 182, 212, 0.15);
+      --color-analyzed: #f59e0b;
+      --color-analyzed-bg: rgba(245, 158, 11, 0.15);
+      --color-unid: #64748b;
+      --color-unid-bg: rgba(100, 116, 139, 0.15);
+      
+      --accent-red: #ef4444;
+      --accent-orange: #f97316;
+      --accent-cyan: #38bdf8;
+      
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-dim);
+    }
+
+    .container {
+      max-width: 1560px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-flag {
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      color: #fff;
+      font-weight: 800;
+      font-size: 11px;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .header-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 6px;
+      color: var(--text-muted);
+    }
+
+    .badge strong {
+      color: var(--text);
+    }
+
+    .badge-live {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    /* KPI Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .metric-card:hover {
+      border-color: var(--text-dim);
+      transform: translateY(-1px);
+    }
+
+    .metric-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+    }
+
+    .metric-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .metric-val {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      font-family: var(--font-mono);
+      line-height: 1;
+    }
+
+    .metric-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .metric-card.primary {
+      background: linear-gradient(145deg, #111e38, #162444);
+      border-color: #2b4573;
+    }
+
+    .metric-card.primary .metric-val {
+      color: #38bdf8;
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+
+    .metric-card.matching {
+      border-left: 4px solid var(--color-matching);
+    }
+    .metric-card.matching .metric-val {
+      color: var(--color-matching);
+    }
+
+    .metric-card.decomp {
+      border-left: 4px solid var(--color-decomp);
+    }
+    .metric-card.decomp .metric-val {
+      color: var(--color-decomp);
+    }
+
+    .metric-card.analyzed {
+      border-left: 4px solid var(--color-analyzed);
+    }
+    .metric-card.analyzed .metric-val {
+      color: var(--color-analyzed);
+    }
+
+    /* Global Progress Bar */
+    .progress-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .progress-title {
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-pct {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-cyan);
+      font-size: 15px;
+    }
+
+    .bar-container {
+      width: 100%;
+      height: 14px;
+      background: #0f1624;
+      border-radius: 7px;
+      overflow: hidden;
+      display: flex;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .bar-segment {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .bar-matching {
+      background: var(--color-matching);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    }
+
+    .bar-decomp {
+      background: var(--color-decomp);
+      box-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+    }
+
+    .bar-analyzed {
+      background: var(--color-analyzed);
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+    }
+
+    .progress-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .legend-box {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 16px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .tab-btn.active {
+      color: #fff;
+      border-bottom-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .tab-count {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 10px;
+      color: var(--text-muted);
+    }
+
+    .tab-btn.active .tab-count {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+
+    /* Tab Content Views */
+    .tab-view {
+      display: none;
+    }
+
+    .tab-view.active {
+      display: block;
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+    }
+
+    .search-wrapper {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px 8px 34px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      pointer-events: none;
+      font-size: 14px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .select-filter {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 12px;
+      padding: 8px 12px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .select-filter:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .pill-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .pill-btn:hover {
+      color: #fff;
+      border-color: var(--text-dim);
+    }
+
+    .pill-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+
+    .results-count {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+
+    /* Tables */
+    .table-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      background: #131d30;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    th.sortable {
+      cursor: pointer;
+    }
+
+    th.sortable:hover {
+      color: #fff;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .font-mono {
+      font-family: var(--font-mono);
+    }
+
+    .addr {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #93c5fd;
+      cursor: pointer;
+      padding: 2px 5px;
+      border-radius: 4px;
+      display: inline-block;
+      transition: background 0.15s;
+    }
+
+    .addr:hover {
+      background: rgba(147, 197, 253, 0.15);
+    }
+
+    .symbol-name {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .ghidra-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .status-matching {
+      background: var(--color-matching-bg);
+      color: var(--color-matching);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .status-decompiled {
+      background: var(--color-decomp-bg);
+      color: var(--color-decomp);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+    }
+
+    .status-analyzed {
+      background: var(--color-analyzed-bg);
+      color: var(--color-analyzed);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .status-unidentified {
+      background: var(--color-unid-bg);
+      color: var(--color-unid);
+      border: 1px solid rgba(100, 116, 139, 0.4);
+    }
+
+    .fidelity-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #1f293d;
+      color: #94a3b8;
+      border: 1px solid #2d3c59;
+    }
+
+    .fidelity-EXACT {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .fidelity-ADAPTED {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .fidelity-EXTENDED {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .port-loc {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+    }
+
+    .purpose-text {
+      color: var(--text-muted);
+      font-size: 12px;
+      max-width: 450px;
+      line-height: 1.4;
+    }
+
+    /* Module Cards View */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 16px;
+    }
+
+    .module-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .module-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .module-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      font-family: var(--font-mono);
+    }
+
+    .module-card-pct {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+    }
+
+    .module-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      min-height: 36px;
+    }
+
+    .module-bar-wrap {
+      width: 100%;
+      height: 8px;
+      background: #0f1624;
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .module-stats-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      padding-top: 4px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .module-action-btn {
+      margin-top: 4px;
+      width: 100%;
+      padding: 7px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .module-action-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--text-dim);
+    }
+
+    /* Struct Accordion */
+    .struct-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    .struct-header {
+      padding: 14px 18px;
+      background: #141c2e;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid transparent;
+    }
+
+    .struct-header:hover {
+      background: #18233a;
+    }
+
+    .struct-card.open .struct-header {
+      border-bottom-color: var(--border);
+    }
+
+    .struct-name {
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: #fff;
+    }
+
+    .struct-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+
+    .struct-body {
+      display: none;
+      padding: 0;
+    }
+
+    .struct-card.open .struct-body {
+      display: block;
+    }
+
+    /* Deviations */
+    .deviation-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dev-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dev-id {
+      font-size: 14px;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: var(--accent-orange);
+    }
+
+    .dev-cat {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(249, 115, 22, 0.15);
+      color: var(--accent-orange);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+    }
+
+    .dev-desc {
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .dev-toggle {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      background: #0f1624;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      align-self: flex-start;
+      border: 1px solid #1e293b;
+    }
+
+    /* Watcom & Info */
+    .info-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .info-card h3 {
+      font-size: 16px;
+      color: #fff;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .code-block {
+      background: #0a0d14;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #94a3b8;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      border: 1px solid var(--accent-cyan);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="title-group">
+        <div class="logo-row">
+          <span class="badge-flag">1997 RE</span>
+          <h1>🏁 RACING DYNAMITE</h1>
+        </div>
+        <div class="subtitle">Ignition (1997) Reverse Engineering &amp; Modern C11 Source Port Dashboard</div>
+      </div>
+      <div class="header-badges">
+        <div class="badge badge-live">
+          <span class="badge-dot"></span>
+          <span>DATABASE IN SYNC</span>
+        </div>
+        <div class="badge">
+          Target: <strong>MAINDOS.EXE</strong> &amp; <strong>IGN_WIN.EXE</strong>
+        </div>
+        <div class="badge">
+          Compiler: <strong>Watcom C/C++ 10.6</strong>
+        </div>
+        <div class="badge">
+          Updated: <strong id="genTime">2026-09-07 10:44:27</strong>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top KPI Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card primary">
+        <div class="metric-label">Overall Completion</div>
+        <div class="metric-value-row">
+          <span class="metric-val">74.3%</span>
+          <span class="metric-sub">55 / 74</span>
+        </div>
+        <div class="metric-sub">0.0% byte-matching in Watcom C</div>
+      </div>
+
+      <div class="metric-card matching">
+        <div class="metric-label">Matching Functions</div>
+        <div class="metric-value-row">
+          <span class="metric-val">0</span>
+          <span class="metric-sub">(0.0%)</span>
+        </div>
+        <div class="metric-sub">Watcom 10.6 exact byte match</div>
+      </div>
+
+      <div class="metric-card decomp">
+        <div class="metric-label">Decompiled / Ported</div>
+        <div class="metric-value-row">
+          <span class="metric-val">55</span>
+          <span class="metric-sub">(74.3%)</span>
+        </div>
+        <div class="metric-sub">Ported to modern C11/SDL2</div>
+      </div>
+
+      <div class="metric-card analyzed">
+        <div class="metric-label">Analyzed / Mapped</div>
+        <div class="metric-value-row">
+          <span class="metric-val">19</span>
+          <span class="metric-sub">(25.7%)</span>
+        </div>
+        <div class="metric-sub">Identified &amp; documented in Ghidra</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Data Structures</div>
+        <div class="metric-value-row">
+          <span class="metric-val">9</span>
+          <span class="metric-sub">(69 fields)</span>
+        </div>
+        <div class="metric-sub">Memory layouts &amp; alignments</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Global Variables</div>
+        <div class="metric-value-row">
+          <span class="metric-val">62</span>
+        </div>
+        <div class="metric-sub">Documented data addresses</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">FCTS Deviations</div>
+        <div class="metric-value-row">
+          <span class="metric-val">6</span>
+        </div>
+        <div class="metric-sub">Authentic bug fixes &amp; toggles</div>
+      </div>
+    </div>
+
+    <!-- Global Progress Bar -->
+    <div class="progress-section">
+      <div class="progress-header">
+        <div class="progress-title">
+          <span>Global Decompilation &amp; Parity Progress</span>
+        </div>
+        <div class="progress-pct">
+          55 / 74 Functions Complete (74.3%)
+        </div>
+      </div>
+      <div class="bar-container">
+        <div class="bar-segment bar-matching" style="width: 0.0%" title="Matching: 0 (0.0%)"></div>
+        <div class="bar-segment bar-decomp" style="width: 74.3%" title="Decompiled: 55 (74.3%)"></div>
+        <div class="bar-segment bar-analyzed" style="width: 25.7%" title="Analyzed: 19 (25.7%)"></div>
+      </div>
+      <div class="progress-legend">
+        <div class="legend-item">
+          <div class="legend-box" style="background: var(--color-matching);"></div>
+          <span><strong>Matching:</strong> 0 (0.0%)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="background: var(--color-decomp);"></div>
+          <span><strong>Decompiled:</strong> 55 (74.3%)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="background: var(--color-analyzed);"></div>
+          <span><strong>Analyzed:</strong> 19 (25.7%)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="background: var(--color-unid);"></div>
+          <span><strong>Unidentified:</strong> 0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('functions')">
+        📁 Functions <span class="tab-count" id="countFuncs">74</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('modules')">
+        📦 Modules <span class="tab-count">8</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('structs')">
+        🏛️ Data Structures <span class="tab-count">9</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('globals')">
+        🌐 Globals &amp; Memory <span class="tab-count">62</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('deviations')">
+        🛡️ FCTS Deviations <span class="tab-count">6</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('watcom')">
+        ⚙️ Watcom Build &amp; Tooling
+      </button>
+    </div>
+
+    <!-- TAB 1: FUNCTIONS VIEW -->
+    <div id="tab-functions" class="tab-view active">
+      <div class="controls-bar">
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="funcSearch" class="search-input" placeholder="Search functions (name, address, notes, module)... [/]" oninput="filterFunctions()">
+        </div>
+
+        <div class="filter-group">
+          <button class="pill-btn active" onclick="setStatusFilter('all', this)">All</button>
+          <button class="pill-btn" onclick="setStatusFilter('matching', this)">Matching (0)</button>
+          <button class="pill-btn" onclick="setStatusFilter('decompiled', this)">Decompiled (55)</button>
+          <button class="pill-btn" onclick="setStatusFilter('analyzed', this)">Analyzed (19)</button>
+
+          <select id="moduleFilter" class="select-filter" onchange="filterFunctions()">
+            <option value="all">All Modules</option>
+            <option value="main.c">main.c (31)</option><option value="lisa3d.c">lisa3d.c (25)</option><option value="getsurf.c">getsurf.c (7)</option><option value="geputget.c">geputget.c (5)</option><option value="vehicle.c">vehicle.c (4)</option><option value="MSVC CRT">MSVC CRT (1)</option><option value="mem.c">mem.c (1)</option><option value="sound.c">sound.c (0)</option>
+          </select>
+
+          <select id="fidelityFilter" class="select-filter" onchange="filterFunctions()">
+            <option value="all">All Fidelities</option>
+            <option value="EXACT">EXACT</option>
+            <option value="ADAPTED">ADAPTED</option>
+            <option value="EXTENDED">EXTENDED</option>
+          </select>
+
+          <button class="pill-btn" onclick="resetFilters()">Reset</button>
+        </div>
+
+        <div class="results-count" id="resultsCount">
+          Showing 74 of 74
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="functionsTable">
+          <thead>
+            <tr>
+              <th class="sortable" onclick="sortTable('status')">Status</th>
+              <th class="sortable" onclick="sortTable('symbol_name')">Symbol / Label</th>
+              <th class="sortable" onclick="sortTable('dos_address')">DOS Addr</th>
+              <th class="sortable" onclick="sortTable('win_address')">Win Addr</th>
+              <th class="sortable" onclick="sortTable('module_name')">Module</th>
+              <th class="sortable" onclick="sortTable('fidelity')">Fidelity</th>
+              <th>Port Location</th>
+              <th>Purpose &amp; Technical Notes</th>
+            </tr>
+          </thead>
+          <tbody id="functionsTableBody">
+            <!-- Populated via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: MODULES VIEW -->
+    <div id="tab-modules" class="tab-view">
+      <div class="modules-grid" id="modulesGrid">
+        
+        <div class="module-card">
+          <div class="module-card-header">
+            <div class="module-card-title">main.c</div>
+            <div class="module-card-pct">67.7%</div>
+          </div>
+          <div class="module-desc">Main game loop, vehicle state, physics integration, AI navigation</div>
+          <div class="module-bar-wrap">
+            <div class="bar-segment bar-matching" style="width: 0.0%;"></div>
+            <div class="bar-segment bar-decomp" style="width: 67.74193548387096%;"></div>
+            <div class="bar-segment bar-analyzed" style="width: 32.25806451612903%;"></div>
+          </div>
+          <div class="module-stats-row">
+            <span>Total: <strong>31</strong></span>
+            <span style="color: var(--color-matching);">Match: <strong>0</strong></span>
+            <span style="color: var(--color-decomp);">Decomp: <strong>21</strong></span>
+            <span style="color: var(--color-analyzed);">Analyzed: <strong>10</strong></span>
+          </div>
+          <button class="module-action-btn" onclick="filterByModule('main.c')">
+            View Functions in Table &rarr;
+          </button>
+        </div>
+        
+        <div class="module-card">
+          <div class="module-card-header">
+            <div class="module-card-title">lisa3d.c</div>
+            <div class="module-card-pct">80.0%</div>
+          </div>
+          <div class="module-desc">Lisa 2 3D rasterizer, polygon opcodes, and scene transformation</div>
+          <div class="module-bar-wrap">
+            <div class="bar-segment bar-matching" style="width: 0.0%;"></div>
+            <div class="bar-segment bar-decomp" style="width: 80.0%;"></div>
+            <div class="bar-segment bar-analyzed" style="width: 20.0%;"></div>
+          </div>
+          <div class="module-stats-row">
+            <span>Total: <strong>25</strong></span>
+            <span style="color: var(--color-matching);">Match: <strong>0</strong></span>
+            <span style="color: var(--color-decomp);">Decomp: <strong>20</strong></span>
+            <span style="color: var(--color-analyzed);">Analyzed: <strong>5</strong></span>
+          </div>
+          <button class="module-action-btn" onclick="filterByModule('lisa3d.c')">
+            View Functions in Table &rarr;
+          </button>
+        </div>
+        
+        <div class="module-card">
+          <div class="module-card-header">
+            <div class="module-card-title">getsurf.c</div>
+            <div class="module-card-pct">100.0%</div>
+          </div>
+          <div class="module-desc">Track surface raycasting and collision grid</div>
+          <div class="module-bar-wrap">
+            <div class="bar-segment bar-matching" style="width: 0.0%;"></div>
+            <div class="bar-segment bar-decomp" style="width: 100.0%;"></div>
+            <div class="bar-segment bar-analyzed" style="width: 0.0%;"></div>
+          </div>
+          <div class="module-stats-row">
+            <span>Total: <strong>7</strong></span>
+            <span style="color: var(--color-matching);">Match: <strong>0</strong></span>
+            <span style="color: var(--color-decomp);">Decomp: <strong>7</strong></span>
+            <span style="color: var(--color-analyzed);">Analyzed: <strong>0</strong></span>
+          </div>
+          <button class="module-action-btn" onclick="filterByModule('getsurf.c')">
+            View Functions in Table &rarr;
+          </button>
+        </div>
+        
+        <div class="module-card">
+          <div class="module-card-header">
+            <div class="module-card-title">geputget.c</div>
+            <div class="module-card-pct">40.0%</div>
+          </div>
+          <div class="module-desc">2D graphics blitting, font loading, and palette management</div>
+          <div class="module-bar-wrap">
+            <div class="bar-segment bar-matching" style="width: 0.0%;"></div>
+            <div class="bar-segment bar-decomp" style="width: 40.0%;"></div>
+            <div class="bar-segment bar-analyzed" style="width: 60.0%;"></div>
+          </div>
+          <div class="module-stats-row">
+            <span>Total: <strong>5</strong></span>
+            <span style="color: var(--color-matching);">Match: <strong>0</strong></span>
+            <span style="color: var(--color-decomp);">Decomp: <strong>2</strong></span>
+            <span style="color: var(--color-analyzed);">Analyzed: <strong>3</strong></span>
+          </div>
+          <button class="module-action-btn" onclick="filterByModule('geputget.c')">
+            View Functions in Table &rarr;
+          </button>
+        </div>
+        
+        <div class="module-card">
+          <div class="module-card-header">
+            <div class="module-card-title">vehicle.c</div>
+            <div class="module-card-pct">100.0%</div>
+          </div>
+          <div class="module-desc">Module translation unit</div>
+          <div class="module-bar-wrap">
+            <div class="bar-segment bar-matching" style="width: 0.0%;"></div>
+            <div class="bar-segment bar-decomp" style="width: 100.0%;"></div>
+            <div class="bar-segment bar-analyzed" style="width: 0.0%;"></div>
+          </div>
+          <div class="module-stats-row">
+            <span>Total: <strong>4</strong></span>
+            <span style="color: var(--color-matching);">Match: <strong>0</strong></span>
+            <span style="color: var(--color-decomp);">Decomp: <strong>4</strong></span>
+            <span style="color: var(--color-analyzed);">Analyzed: <strong>0</strong></span>
+          </div>
+          <button class="module-action-btn" onclick="filterByModule('vehicle.c')">
+            View Functions in Table &rarr;
+          </button>
+        </div>
+        
+        <div class="module-card">
+          <div class="module-card-header">
+            <div class="module-card-title">MSVC CRT</div>
+            <div class="module-card-pct">0.0%</div>
+          </div>
+          <div class="module-desc">Module translation unit</div>
+          <div class="module-bar-wrap">
+            <div class="bar-segment bar-matching" style="width: 0.0%;"></div>
+            <div class="bar-segment bar-decomp" style="width: 0.0%;"></div>
+            <div class="bar-segment bar-analyzed" style="width: 100.0%;"></div>
+          </div>
+          <div class="module-stats-row">
+            <span>Total: <strong>1</strong></span>
+            <span style="color: var(--color-matching);">Match: <strong>0</strong></span>
+            <span style="color: var(--color-decomp);">Decomp: <strong>0</strong></span>
+            <span style="color: var(--color-analyzed);">Analyzed: <strong>1</strong></span>
+          </div>
+          <button class="module-action-btn" onclick="filterByModule('MSVC CRT')">
+            View Functions in Table &rarr;
+          </button>
+        </div>
+        
+        <div class="module-card">
+          <div class="module-card-header">
+            <div class="module-card-title">mem.c</div>
+            <div class="module-card-pct">100.0%</div>
+          </div>
+          <div class="module-desc">Memory management, buffer allocation, and file I/O</div>
+          <div class="module-bar-wrap">
+            <div class="bar-segment bar-matching" style="width: 0.0%;"></div>
+            <div class="bar-segment bar-decomp" style="width: 100.0%;"></div>
+            <div class="bar-segment bar-analyzed" style="width: 0.0%;"></div>
+          </div>
+          <div class="module-stats-row">
+            <span>Total: <strong>1</strong></span>
+            <span style="color: var(--color-matching);">Match: <strong>0</strong></span>
+            <span style="color: var(--color-decomp);">Decomp: <strong>1</strong></span>
+            <span style="color: var(--color-analyzed);">Analyzed: <strong>0</strong></span>
+          </div>
+          <button class="module-action-btn" onclick="filterByModule('mem.c')">
+            View Functions in Table &rarr;
+          </button>
+        </div>
+        
+        <div class="module-card">
+          <div class="module-card-header">
+            <div class="module-card-title">sound.c</div>
+            <div class="module-card-pct">0.0%</div>
+          </div>
+          <div class="module-desc">Sound effects pools, engine RPM audio synthesis, and mixer</div>
+          <div class="module-bar-wrap">
+            <div class="bar-segment bar-matching" style="width: 0.0%;"></div>
+            <div class="bar-segment bar-decomp" style="width: 0.0%;"></div>
+            <div class="bar-segment bar-analyzed" style="width: 0.0%;"></div>
+          </div>
+          <div class="module-stats-row">
+            <span>Total: <strong>0</strong></span>
+            <span style="color: var(--color-matching);">Match: <strong>0</strong></span>
+            <span style="color: var(--color-decomp);">Decomp: <strong>0</strong></span>
+            <span style="color: var(--color-analyzed);">Analyzed: <strong>0</strong></span>
+          </div>
+          <button class="module-action-btn" onclick="filterByModule('sound.c')">
+            View Functions in Table &rarr;
+          </button>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- TAB 3: STRUCTURES VIEW -->
+    <div id="tab-structs" class="tab-view">
+      <div class="controls-bar" style="margin-bottom: 16px;">
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="structSearch" class="search-input" placeholder="Search structures &amp; fields..." oninput="filterStructs()">
+        </div>
+        <button class="pill-btn" onclick="toggleAllStructs(true)">Expand All</button>
+        <button class="pill-btn" onclick="toggleAllStructs(false)">Collapse All</button>
+      </div>
+
+      <div id="structsList">
+        
+        <div class="struct-card open" data-name="carphysicsstate">
+          <div class="struct-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="struct-name">struct CarPhysicsState</div>
+            <div class="struct-meta">
+              <span>Size: <strong>124 bytes</strong></span>
+              <span>Fields: <strong>14</strong></span>
+              <span>Module: <strong>-</strong></span>
+            </div>
+          </div>
+          <div class="struct-body">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Offset</th>
+                  <th style="width: 140px;">Type</th>
+                  <th style="width: 180px;">Name</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x00</td>
+                  <td class="font-mono" style="color: #38bdf8;">double</td>
+                  <td class="font-mono" style="font-weight: 600;">engine_power</td>
+                  <td style="color: var(--text-muted);">Mass / power scaled by difficulty mode</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x08</td>
+                  <td class="font-mono" style="color: #38bdf8;">double</td>
+                  <td class="font-mono" style="font-weight: 600;">acceleration</td>
+                  <td style="color: var(--text-muted);">Forward traction acceleration</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x10</td>
+                  <td class="font-mono" style="color: #38bdf8;">double</td>
+                  <td class="font-mono" style="font-weight: 600;">top_speed</td>
+                  <td style="color: var(--text-muted);">Terminal velocity clamp</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x18</td>
+                  <td class="font-mono" style="color: #38bdf8;">double</td>
+                  <td class="font-mono" style="font-weight: 600;">steering_rate</td>
+                  <td style="color: var(--text-muted);">Turning responsiveness</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x20</td>
+                  <td class="font-mono" style="color: #38bdf8;">double</td>
+                  <td class="font-mono" style="font-weight: 600;">brake_force</td>
+                  <td style="color: var(--text-muted);">Deceleration coefficient</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x28</td>
+                  <td class="font-mono" style="color: #38bdf8;">double</td>
+                  <td class="font-mono" style="font-weight: 600;">turbo_boost</td>
+                  <td style="color: var(--text-muted);">Turbo propulsion multiplier</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x30</td>
+                  <td class="font-mono" style="color: #38bdf8;">double</td>
+                  <td class="font-mono" style="font-weight: 600;">suspension_k</td>
+                  <td style="color: var(--text-muted);">Spring rate</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x38</td>
+                  <td class="font-mono" style="color: #38bdf8;">double</td>
+                  <td class="font-mono" style="font-weight: 600;">damping_c</td>
+                  <td style="color: var(--text-muted);">Shock absorber damping</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x40</td>
+                  <td class="font-mono" style="color: #38bdf8;">double</td>
+                  <td class="font-mono" style="font-weight: 600;">collision_radius</td>
+                  <td style="color: var(--text-muted);">Spherical bounding volume</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x48</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">mass_integer</td>
+                  <td style="color: var(--text-muted);">Fixed-point mass value</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x60</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">wheel_fl_y</td>
+                  <td style="color: var(--text-muted);">Front-left wheel elevation</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x68</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">wheel_fr_y</td>
+                  <td style="color: var(--text-muted);">Front-right wheel elevation</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x70</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">wheel_rl_y</td>
+                  <td style="color: var(--text-muted);">Rear-left wheel elevation</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x78</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">wheel_rr_y</td>
+                  <td style="color: var(--text-muted);">Rear-right wheel elevation</td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="struct-card open" data-name="mshpolygon">
+          <div class="struct-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="struct-name">struct MshPolygon</div>
+            <div class="struct-meta">
+              <span>Size: <strong>44 bytes</strong></span>
+              <span>Fields: <strong>11</strong></span>
+              <span>Module: <strong>-</strong></span>
+            </div>
+          </div>
+          <div class="struct-body">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Offset</th>
+                  <th style="width: 140px;">Type</th>
+                  <th style="width: 180px;">Name</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x00</td>
+                  <td class="font-mono" style="color: #38bdf8;">uint32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">header</td>
+                  <td style="color: var(--text-muted);">Opcode in low byte (0x11, 0x12, 0x13, 0x15, 0x16, 0x17), flags in high 24 bits</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x04</td>
+                  <td class="font-mono" style="color: #38bdf8;">uint32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">vi0</td>
+                  <td style="color: var(--text-muted);">Index of vertex 0 in submesh vertex buffer</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x08</td>
+                  <td class="font-mono" style="color: #38bdf8;">uint32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">vi1</td>
+                  <td style="color: var(--text-muted);">Index of vertex 1 in submesh vertex buffer</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x0C</td>
+                  <td class="font-mono" style="color: #38bdf8;">uint32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">vi2</td>
+                  <td style="color: var(--text-muted);">Index of vertex 2 in submesh vertex buffer</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x10</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">tu0</td>
+                  <td style="color: var(--text-muted);">Vertex 0 U texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x14</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">tv0</td>
+                  <td style="color: var(--text-muted);">Vertex 0 V texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x18</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">tu1</td>
+                  <td style="color: var(--text-muted);">Vertex 1 U texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x1C</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">tv1</td>
+                  <td style="color: var(--text-muted);">Vertex 1 V texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x20</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">tu2</td>
+                  <td style="color: var(--text-muted);">Vertex 2 U texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x24</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">tv2</td>
+                  <td style="color: var(--text-muted);">Vertex 2 V texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x28</td>
+                  <td class="font-mono" style="color: #38bdf8;">uint32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">extra</td>
+                  <td style="color: var(--text-muted);">Texture page byte offset within .TEX file (page_index * 65536)</td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="struct-card open" data-name="plcobject">
+          <div class="struct-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="struct-name">struct PlcObject</div>
+            <div class="struct-meta">
+              <span>Size: <strong>20 bytes</strong></span>
+              <span>Fields: <strong>5</strong></span>
+              <span>Module: <strong>-</strong></span>
+            </div>
+          </div>
+          <div class="struct-body">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Offset</th>
+                  <th style="width: 140px;">Type</th>
+                  <th style="width: 180px;">Name</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x00</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">submesh_offset</td>
+                  <td style="color: var(--text-muted);">Offset in 4-byte dwords into .MSH geometry</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x04</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">model_type</td>
+                  <td style="color: var(--text-muted);">Scenery / collision model archetype (e.g. 300, 2, 3)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x08</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">pos_x</td>
+                  <td style="color: var(--text-muted);">World X position</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x0C</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">pos_y</td>
+                  <td style="color: var(--text-muted);">World Y elevation</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x10</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">pos_z</td>
+                  <td style="color: var(--text-muted);">World Z position</td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="struct-card open" data-name="poskeyframe">
+          <div class="struct-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="struct-name">struct PosKeyframe</div>
+            <div class="struct-meta">
+              <span>Size: <strong>24 bytes</strong></span>
+              <span>Fields: <strong>6</strong></span>
+              <span>Module: <strong>-</strong></span>
+            </div>
+          </div>
+          <div class="struct-body">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Offset</th>
+                  <th style="width: 140px;">Type</th>
+                  <th style="width: 180px;">Name</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x00</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">pos_x</td>
+                  <td style="color: var(--text-muted);">X position delta</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x04</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">pos_y</td>
+                  <td style="color: var(--text-muted);">Y elevation delta</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x08</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">pos_z</td>
+                  <td style="color: var(--text-muted);">Z position delta</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x0C</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">rot_x</td>
+                  <td style="color: var(--text-muted);">Pitch angle (tenths of degree)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x10</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">rot_y</td>
+                  <td style="color: var(--text-muted);">Yaw angle (tenths of degree)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x14</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">rot_z</td>
+                  <td style="color: var(--text-muted);">Roll angle (tenths of degree)</td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="struct-card open" data-name="srfcell">
+          <div class="struct-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="struct-name">struct SrfCell</div>
+            <div class="struct-meta">
+              <span>Size: <strong>12 bytes</strong></span>
+              <span>Fields: <strong>4</strong></span>
+              <span>Module: <strong>-</strong></span>
+            </div>
+          </div>
+          <div class="struct-body">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Offset</th>
+                  <th style="width: 140px;">Type</th>
+                  <th style="width: 180px;">Name</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x00</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">table2_offset</td>
+                  <td style="color: var(--text-muted);">Byte offset into table2 (divide by 4)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x04</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">table1_offset</td>
+                  <td style="color: var(--text-muted);">Byte offset into table1 (divide by 4)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x08</td>
+                  <td class="font-mono" style="color: #38bdf8;">uint16_t</td>
+                  <td class="font-mono" style="font-weight: 600;">table1_count</td>
+                  <td style="color: var(--text-muted);">Number of triangles intersecting cell</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x0A</td>
+                  <td class="font-mono" style="color: #38bdf8;">uint16_t</td>
+                  <td class="font-mono" style="font-weight: 600;">table2_count</td>
+                  <td style="color: var(--text-muted);">Number of secondary entities</td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="struct-card open" data-name="srfheader">
+          <div class="struct-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="struct-name">struct SrfHeader</div>
+            <div class="struct-meta">
+              <span>Size: <strong>36 bytes</strong></span>
+              <span>Fields: <strong>9</strong></span>
+              <span>Module: <strong>-</strong></span>
+            </div>
+          </div>
+          <div class="struct-body">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Offset</th>
+                  <th style="width: 140px;">Type</th>
+                  <th style="width: 180px;">Name</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x00</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">grid_cells_x</td>
+                  <td style="color: var(--text-muted);">Grid cells along X (200)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x04</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">grid_cells_z</td>
+                  <td style="color: var(--text-muted);">Grid cells along Z (200)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x08</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">cell_size_z</td>
+                  <td style="color: var(--text-muted);">World dimension of cell Z (512)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x0C</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">cell_size_x</td>
+                  <td style="color: var(--text-muted);">World dimension of cell X (512)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x10</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">grid_stride_x</td>
+                  <td style="color: var(--text-muted);">Spatial index stride X (101)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x14</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">grid_stride_z</td>
+                  <td style="color: var(--text-muted);">Spatial index stride Z (101)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x18</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">triangle_count</td>
+                  <td style="color: var(--text-muted);">Total surface collision triangles</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x1C</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">table1_count</td>
+                  <td style="color: var(--text-muted);">Primary index buffer integer count</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x20</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">table2_count</td>
+                  <td style="color: var(--text-muted);">Secondary index buffer integer count</td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="struct-card open" data-name="srftriangle">
+          <div class="struct-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="struct-name">struct SrfTriangle</div>
+            <div class="struct-meta">
+              <span>Size: <strong>24 bytes</strong></span>
+              <span>Fields: <strong>6</strong></span>
+              <span>Module: <strong>-</strong></span>
+            </div>
+          </div>
+          <div class="struct-body">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Offset</th>
+                  <th style="width: 140px;">Type</th>
+                  <th style="width: 180px;">Name</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x00</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">x_base</td>
+                  <td style="color: var(--text-muted);">Base apex X coordinate</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x04</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">z_base</td>
+                  <td style="color: var(--text-muted);">Base apex Z coordinate</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x08</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">slope1</td>
+                  <td style="color: var(--text-muted);">16.16 fixed-point slope dx1/dz</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x0C</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">slope2</td>
+                  <td style="color: var(--text-muted);">16.16 fixed-point slope dx2/dz</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x10</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">flags_and_dz</td>
+                  <td style="color: var(--text-muted);">Low 16 bits = dz (int16_t), High 16 bits = submesh polygon dword offset</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x14</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">v_ptr</td>
+                  <td style="color: var(--text-muted);">Byte offset into .PLC placed object array (obj_idx = v_ptr / 42)</td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="struct-card open" data-name="tracksplinenode">
+          <div class="struct-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="struct-name">struct TrackSplineNode</div>
+            <div class="struct-meta">
+              <span>Size: <strong>75 bytes</strong></span>
+              <span>Fields: <strong>10</strong></span>
+              <span>Module: <strong>-</strong></span>
+            </div>
+          </div>
+          <div class="struct-body">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Offset</th>
+                  <th style="width: 140px;">Type</th>
+                  <th style="width: 180px;">Name</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x00</td>
+                  <td class="font-mono" style="color: #38bdf8;">uint8_t</td>
+                  <td class="font-mono" style="font-weight: 600;">type</td>
+                  <td style="color: var(--text-muted);">Node type identifier</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x01</td>
+                  <td class="font-mono" style="color: #38bdf8;">uint8_t</td>
+                  <td class="font-mono" style="font-weight: 600;">code</td>
+                  <td style="color: var(--text-muted);">Road code passed from .TRI</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x02</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">left_x</td>
+                  <td style="color: var(--text-muted);">Left rail coordinate X (+ 0x6400)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x06</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">left_y</td>
+                  <td style="color: var(--text-muted);">Left rail coordinate Y</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x0A</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">left_z</td>
+                  <td style="color: var(--text-muted);">Left rail coordinate Z (+ 0x6400)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x0E</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">right_x</td>
+                  <td style="color: var(--text-muted);">Right rail coordinate X (+ 0x6400)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x12</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">right_y</td>
+                  <td style="color: var(--text-muted);">Right rail coordinate Y</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x16</td>
+                  <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+                  <td class="font-mono" style="font-weight: 600;">right_z</td>
+                  <td style="color: var(--text-muted);">Right rail coordinate Z (+ 0x6400)</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x2A</td>
+                  <td class="font-mono" style="color: #38bdf8;">boundary padding
+    float</td>
+                  <td class="font-mono" style="font-weight: 600;">heading</td>
+                  <td style="color: var(--text-muted);">Tangent heading angle in radians</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x4A</td>
+                  <td class="font-mono" style="color: #38bdf8;">Secondary attributes
+    uint8_t</td>
+                  <td class="font-mono" style="font-weight: 600;">fork_flag</td>
+                  <td style="color: var(--text-muted);">Branching directive (0 = mainline, 1 = left, 2 = right)</td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="struct-card open" data-name="trichunk">
+          <div class="struct-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="struct-name">struct TriChunk</div>
+            <div class="struct-meta">
+              <span>Size: <strong>500 bytes</strong></span>
+              <span>Fields: <strong>4</strong></span>
+              <span>Module: <strong>-</strong></span>
+            </div>
+          </div>
+          <div class="struct-body">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Offset</th>
+                  <th style="width: 140px;">Type</th>
+                  <th style="width: 180px;">Name</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x00</td>
+                  <td class="font-mono" style="color: #38bdf8;">uint8_t</td>
+                  <td class="font-mono" style="font-weight: 600;">road_code</td>
+                  <td style="color: var(--text-muted);">Surface material code</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x01</td>
+                  <td class="font-mono" style="color: #38bdf8;">int16_t</td>
+                  <td class="font-mono" style="font-weight: 600;">left_vertex</td>
+                  <td style="color: var(--text-muted);">Submesh vertex index for left boundary</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x17</td>
+                  <td class="font-mono" style="color: #38bdf8;">Secondary surface attributes
+    int16_t</td>
+                  <td class="font-mono" style="font-weight: 600;">right_vertex</td>
+                  <td style="color: var(--text-muted);">Submesh vertex index for right boundary</td>
+                </tr>
+                
+                <tr>
+                  <td class="font-mono" style="color: var(--text-dim);">0x6D</td>
+                  <td class="font-mono" style="color: #38bdf8;">Internal friction parameters
+    uint8_t</td>
+                  <td class="font-mono" style="font-weight: 600;">fork_flag</td>
+                  <td style="color: var(--text-muted);">Branching directive (0 = normal, 1 = left, 2 = right)</td>
+                </tr>
+                
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- TAB 4: GLOBALS VIEW -->
+    <div id="tab-globals" class="tab-view">
+      <div class="controls-bar">
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="globalSearch" class="search-input" placeholder="Search globals (address, type, name, purpose)..." oninput="filterGlobals()">
+        </div>
+        <div class="results-count" id="globalsCount">
+          Showing 62 of 62
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Win Addr</th>
+              <th>DOS Addr</th>
+              <th>Type</th>
+              <th>Symbol Name</th>
+              <th>Description &amp; Context</th>
+            </tr>
+          </thead>
+          <tbody id="globalsTableBody">
+            
+            <tr data-text="0x004792c8 - g_physicsgravity double gravitational acceleration constant (`9.81` $m/s^2$).">
+              <td><span class="addr" onclick="copyText('0x004792c8')">0x004792c8</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">double</td>
+              <td class="symbol-name">g_PhysicsGravity</td>
+              <td class="purpose-text">Gravitational acceleration constant (`9.81` $m/s^2$).</td>
+            </tr>
+            
+            <tr data-text="0x004792f0 - g_physicstimestep double 72 hz physics integration timestep ($1/72\text{ s} \approx 0.013888889\text{ s}$).">
+              <td><span class="addr" onclick="copyText('0x004792f0')">0x004792f0</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">double</td>
+              <td class="symbol-name">g_PhysicsTimestep</td>
+              <td class="purpose-text">72 Hz physics integration timestep ($1/72\text{ s} \approx 0.013888889\text{ s}$).</td>
+            </tr>
+            
+            <tr data-text="0x00479af0 - g_physicsscalefactor double world velocity integration multiplier (`21.76`).">
+              <td><span class="addr" onclick="copyText('0x00479af0')">0x00479af0</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">double</td>
+              <td class="symbol-name">g_PhysicsScaleFactor</td>
+              <td class="purpose-text">World velocity integration multiplier (`21.76`).</td>
+            </tr>
+            
+            <tr data-text="0x00479b50 - g_physicsgravitytick double vertical downward velocity delta per tick (`0.2` units).">
+              <td><span class="addr" onclick="copyText('0x00479b50')">0x00479b50</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">double</td>
+              <td class="symbol-name">g_PhysicsGravityTick</td>
+              <td class="purpose-text">Vertical downward velocity delta per tick (`0.2` units).</td>
+            </tr>
+            
+            <tr data-text="0x00479b58 - g_physicsrideheight double ground clearance equilibrium offset (`5.0` units above surface).">
+              <td><span class="addr" onclick="copyText('0x00479b58')">0x00479b58</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">double</td>
+              <td class="symbol-name">g_PhysicsRideHeight</td>
+              <td class="purpose-text">Ground clearance equilibrium offset (`5.0` units above surface).</td>
+            </tr>
+            
+            <tr data-text="0x00479c48 - g_physicsworldoffset double spatial grid origin centering offset (`25600.0` units, $50 \times 512$).">
+              <td><span class="addr" onclick="copyText('0x00479c48')">0x00479c48</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">double</td>
+              <td class="symbol-name">g_PhysicsWorldOffset</td>
+              <td class="purpose-text">Spatial grid origin centering offset (`25600.0` units, $50 \times 512$).</td>
+            </tr>
+            
+            <tr data-text="0x00479ca0 - g_physicsmaxslopesin double arcsine clamping limit for pitch and roll calculation (`0.95`).">
+              <td><span class="addr" onclick="copyText('0x00479ca0')">0x00479ca0</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">double</td>
+              <td class="symbol-name">g_PhysicsMaxSlopeSin</td>
+              <td class="purpose-text">Arcsine clamping limit for pitch and roll calculation (`0.95`).</td>
+            </tr>
+            
+            <tr data-text="0x00479cb0 - g_physicsratelimitrad double maximum pitch and roll angular change rate (`0.1` rad/tick).">
+              <td><span class="addr" onclick="copyText('0x00479cb0')">0x00479cb0</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">double</td>
+              <td class="symbol-name">g_PhysicsRateLimitRad</td>
+              <td class="purpose-text">Maximum pitch and roll angular change rate (`0.1` rad/tick).</td>
+            </tr>
+            
+            <tr data-text="0x00493720 - g_hasperfcounter uint32_t flag: `1` if high-resolution timer (`queryperformancecounter`) is available.">
+              <td><span class="addr" onclick="copyText('0x00493720')">0x00493720</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint32_t</td>
+              <td class="symbol-name">g_HasPerfCounter</td>
+              <td class="purpose-text">Flag: `1` if high-resolution timer (`QueryPerformanceCounter`) is available.</td>
+            </tr>
+            
+            <tr data-text="0x00493734 - g_gamestage int32_t master state: `0` = init, `1` = active, `2` = shutdown.">
+              <td><span class="addr" onclick="copyText('0x00493734')">0x00493734</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_GameStage</td>
+              <td class="purpose-text">Master state: `0` = Init, `1` = Active, `2` = Shutdown.</td>
+            </tr>
+            
+            <tr data-text="0x004937bc - g_pactivesrf uint8_t* pointer to currently loaded `.srf` surface buffer.">
+              <td><span class="addr" onclick="copyText('0x004937bc')">0x004937bc</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pActiveSRF</td>
+              <td class="purpose-text">Pointer to currently loaded `.SRF` surface buffer.</td>
+            </tr>
+            
+            <tr data-text="0x00497eb8 - g_trackcdaudiomapping uint8_t[8] cd-da audio track mapping index per circuit (tracks 2..8).">
+              <td><span class="addr" onclick="copyText('0x00497eb8')">0x00497eb8</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t[8]</td>
+              <td class="symbol-name">g_TrackCDAudioMapping</td>
+              <td class="purpose-text">CD-DA audio track mapping index per circuit (Tracks 2..8).</td>
+            </tr>
+            
+            <tr data-text="0x0049c8e0 - g_lisaopcodetable void** opcode function jump table (0x00..0x17).">
+              <td><span class="addr" onclick="copyText('0x0049c8e0')">0x0049c8e0</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">void**</td>
+              <td class="symbol-name">g_LisaOpcodeTable</td>
+              <td class="purpose-text">Opcode function jump table (0x00..0x17).</td>
+            </tr>
+            
+            <tr data-text="0x0049c9f8 - g_plisaactiveshading uint8_t* active shading table pointer bound in lisa3d rasterizer.">
+              <td><span class="addr" onclick="copyText('0x0049c9f8')">0x0049c9f8</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pLisaActiveShading</td>
+              <td class="purpose-text">Active shading table pointer bound in Lisa3D rasterizer.</td>
+            </tr>
+            
+            <tr data-text="0x004b63c4 - g_plisaactivepage uint8_t* base pointer of active 64kb ($256 \times 256$) texture page in span rasterizer.">
+              <td><span class="addr" onclick="copyText('0x004b63c4')">0x004b63c4</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pLisaActivePage</td>
+              <td class="purpose-text">Base pointer of active 64KB ($256 \times 256$) texture page in span rasterizer.</td>
+            </tr>
+            
+            <tr data-text="0x004ba6e0 - g_screenwidth int32_t target screen resolution width (`640` or `320`).">
+              <td><span class="addr" onclick="copyText('0x004ba6e0')">0x004ba6e0</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_ScreenWidth</td>
+              <td class="purpose-text">Target screen resolution width (`640` or `320`).</td>
+            </tr>
+            
+            <tr data-text="0x004ba6e4 - g_screenheight int32_t target screen resolution height (`480` or `200`).">
+              <td><span class="addr" onclick="copyText('0x004ba6e4')">0x004ba6e4</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_ScreenHeight</td>
+              <td class="purpose-text">Target screen resolution height (`480` or `200`).</td>
+            </tr>
+            
+            <tr data-text="0x004ba6e8 - g_colordepth int32_t screen bit depth (`8` bits per pixel).">
+              <td><span class="addr" onclick="copyText('0x004ba6e8')">0x004ba6e8</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_ColorDepth</td>
+              <td class="purpose-text">Screen bit depth (`8` bits per pixel).</td>
+            </tr>
+            
+            <tr data-text="0x004c5348 - g_perffrequency int64_t performance counter frequency from `queryperformancefrequency`.">
+              <td><span class="addr" onclick="copyText('0x004c5348')">0x004c5348</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int64_t</td>
+              <td class="symbol-name">g_PerfFrequency</td>
+              <td class="purpose-text">Performance counter frequency from `QueryPerformanceFrequency`.</td>
+            </tr>
+            
+            <tr data-text="0x004c5360 - g_hcursor hcursor default application mouse cursor.">
+              <td><span class="addr" onclick="copyText('0x004c5360')">0x004c5360</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">HCURSOR</td>
+              <td class="symbol-name">g_hCursor</td>
+              <td class="purpose-text">Default application mouse cursor.</td>
+            </tr>
+            
+            <tr data-text="0x004c5368 - g_lastperfcount int64_t last measured performance counter timestamp.">
+              <td><span class="addr" onclick="copyText('0x004c5368')">0x004c5368</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int64_t</td>
+              <td class="symbol-name">g_LastPerfCount</td>
+              <td class="purpose-text">Last measured performance counter timestamp.</td>
+            </tr>
+            
+            <tr data-text="0x004c5398 - g_hinstance hinstance application instance handle passed from `winmain`.">
+              <td><span class="addr" onclick="copyText('0x004c5398')">0x004c5398</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">HINSTANCE</td>
+              <td class="symbol-name">g_hInstance</td>
+              <td class="purpose-text">Application instance handle passed from `WinMain`.</td>
+            </tr>
+            
+            <tr data-text="0x004c53a8 - g_psrf_triangles uint8_t* pointer to 24-byte surface collision triangle records in active `.srf`.">
+              <td><span class="addr" onclick="copyText('0x004c53a8')">0x004c53a8</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pSRF_Triangles</td>
+              <td class="purpose-text">Pointer to 24-byte surface collision triangle records in active `.SRF`.</td>
+            </tr>
+            
+            <tr data-text="0x004c53b4 - g_srf_gridcellsx int32_t active track surface grid dimension x.">
+              <td><span class="addr" onclick="copyText('0x004c53b4')">0x004c53b4</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_SRF_GridCellsX</td>
+              <td class="purpose-text">Active track surface grid dimension X.</td>
+            </tr>
+            
+            <tr data-text="0x004c53b8 - g_srf_cellsizex int32_t active track surface cell size x (512 units).">
+              <td><span class="addr" onclick="copyText('0x004c53b8')">0x004c53b8</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_SRF_CellSizeX</td>
+              <td class="purpose-text">Active track surface cell size X (512 units).</td>
+            </tr>
+            
+            <tr data-text="0x004c53c8 - g_srf_cellsizez int32_t active track surface cell size z (512 units).">
+              <td><span class="addr" onclick="copyText('0x004c53c8')">0x004c53c8</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_SRF_CellSizeZ</td>
+              <td class="purpose-text">Active track surface cell size Z (512 units).</td>
+            </tr>
+            
+            <tr data-text="0x004c53d0 - g_srf_gridcellsz int32_t active track surface grid dimension z.">
+              <td><span class="addr" onclick="copyText('0x004c53d0')">0x004c53d0</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_SRF_GridCellsZ</td>
+              <td class="purpose-text">Active track surface grid dimension Z.</td>
+            </tr>
+            
+            <tr data-text="0x004cdc28 - g_plisaactivemiptable uint8_t** pointer to active texture mip table bound during submesh dispatch.">
+              <td><span class="addr" onclick="copyText('0x004cdc28')">0x004cdc28</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t**</td>
+              <td class="symbol-name">g_pLisaActiveMipTable</td>
+              <td class="purpose-text">Pointer to active texture mip table bound during submesh dispatch.</td>
+            </tr>
+            
+            <tr data-text="0x00525e5c - g_inrace int32_t in-race simulation flag: `1` during active driving.">
+              <td><span class="addr" onclick="copyText('0x00525e5c')">0x00525e5c</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_InRace</td>
+              <td class="purpose-text">In-race simulation flag: `1` during active driving.</td>
+            </tr>
+            
+            <tr data-text="0x00525e60 - g_pactivemsh uint8_t* loaded `<track>.msh` geometry memory buffer.">
+              <td><span class="addr" onclick="copyText('0x00525e60')">0x00525e60</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pActiveMSH</td>
+              <td class="purpose-text">Loaded `<TRACK>.MSH` geometry memory buffer.</td>
+            </tr>
+            
+            <tr data-text="0x0054f904 - g_pcheckpoints uint8_t* checkpoint collision and trigger gate definitions.">
+              <td><span class="addr" onclick="copyText('0x0054f904')">0x0054f904</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pCheckpoints</td>
+              <td class="purpose-text">Checkpoint collision and trigger gate definitions.</td>
+            </tr>
+            
+            <tr data-text="0x0054f954 - g_checkpointcount int32_t count of active type 150..154 split-time checkpoint trigger gates.">
+              <td><span class="addr" onclick="copyText('0x0054f954')">0x0054f954</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_CheckpointCount</td>
+              <td class="purpose-text">Count of active type 150..154 split-time checkpoint trigger gates.</td>
+            </tr>
+            
+            <tr data-text="0x0054f998 - g_psysgfxpic uint8_t* pointer to loaded `n_sysgfx.pic` buffer.">
+              <td><span class="addr" onclick="copyText('0x0054f998')">0x0054f998</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pSysGfxPic</td>
+              <td class="purpose-text">Pointer to loaded `N_SYSGFX.PIC` buffer.</td>
+            </tr>
+            
+            <tr data-text="0x0054f9cc - g_pactiveplc uint32_t* loaded `<track>.plc` placed object table buffer.">
+              <td><span class="addr" onclick="copyText('0x0054f9cc')">0x0054f9cc</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint32_t*</td>
+              <td class="symbol-name">g_pActivePLC</td>
+              <td class="purpose-text">Loaded `<TRACK>.PLC` placed object table buffer.</td>
+            </tr>
+            
+            <tr data-text="0x00552f40 - g_paudiocontext audiocontext* master audio mixer device and state context.">
+              <td><span class="addr" onclick="copyText('0x00552f40')">0x00552f40</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">AudioContext*</td>
+              <td class="symbol-name">g_pAudioContext</td>
+              <td class="purpose-text">Master audio mixer device and state context.</td>
+            </tr>
+            
+            <tr data-text="0x00552f44 - g_audiochannels audiovoice[32] 32-channel software voice mixer table.">
+              <td><span class="addr" onclick="copyText('0x00552f44')">0x00552f44</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">AudioVoice[32]</td>
+              <td class="symbol-name">g_AudioChannels</td>
+              <td class="purpose-text">32-channel software voice mixer table.</td>
+            </tr>
+            
+            <tr data-text="0x00552f48 - g_mastersoundvolume int32_t master sfx attenuation level (0..128).">
+              <td><span class="addr" onclick="copyText('0x00552f48')">0x00552f48</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_MasterSoundVolume</td>
+              <td class="purpose-text">Master SFX attenuation level (0..128).</td>
+            </tr>
+            
+            <tr data-text="0x00552f4c - g_mastermusicvolume int32_t master cd-da music attenuation level (0..128).">
+              <td><span class="addr" onclick="copyText('0x00552f4c')">0x00552f4c</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_MasterMusicVolume</td>
+              <td class="purpose-text">Master CD-DA music attenuation level (0..128).</td>
+            </tr>
+            
+            <tr data-text="0x00552f60 - g_ptrackroadsequence int32_t* ordered sequence of road chunks (24 bytes per chunk).">
+              <td><span class="addr" onclick="copyText('0x00552f60')">0x00552f60</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t*</td>
+              <td class="symbol-name">g_pTrackRoadSequence</td>
+              <td class="purpose-text">Ordered sequence of road chunks (24 bytes per chunk).</td>
+            </tr>
+            
+            <tr data-text="0x00552fc8 - g_pcarsplc uint32_t* loaded `cars.plc` placed car object buffer.">
+              <td><span class="addr" onclick="copyText('0x00552fc8')">0x00552fc8</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint32_t*</td>
+              <td class="symbol-name">g_pCarsPLC</td>
+              <td class="purpose-text">Loaded `CARS.PLC` placed car object buffer.</td>
+            </tr>
+            
+            <tr data-text="0x00552fe0 - g_pplayervehicle vehiclestate* pointer to active player vehicle state struct.">
+              <td><span class="addr" onclick="copyText('0x00552fe0')">0x00552fe0</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">VehicleState*</td>
+              <td class="symbol-name">g_pPlayerVehicle</td>
+              <td class="purpose-text">Pointer to active player vehicle state struct.</td>
+            </tr>
+            
+            <tr data-text="0x00553000 - g_paivehicles vehiclestate* array of 5 opponent ai vehicle states.">
+              <td><span class="addr" onclick="copyText('0x00553000')">0x00553000</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">VehicleState*</td>
+              <td class="symbol-name">g_pAIVehicles</td>
+              <td class="purpose-text">Array of 5 opponent AI vehicle states.</td>
+            </tr>
+            
+            <tr data-text="0x00553064 - g_pactivepos uint8_t* loaded `<track>.pos` scenery object keyframe animation buffer.">
+              <td><span class="addr" onclick="copyText('0x00553064')">0x00553064</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pActivePOS</td>
+              <td class="purpose-text">Loaded `<TRACK>.POS` scenery object keyframe animation buffer.</td>
+            </tr>
+            
+            <tr data-text="0x00553088 - g_psysg2pic uint8_t* pointer to loaded `n_sysg_2.pic` buffer.">
+              <td><span class="addr" onclick="copyText('0x00553088')">0x00553088</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pSysG2Pic</td>
+              <td class="purpose-text">Pointer to loaded `N_SYSG_2.PIC` buffer.</td>
+            </tr>
+            
+            <tr data-text="0x005530f0 - g_pactivetex uint8_t* loaded `<track>.tex` raw texture buffer (64kb aligned).">
+              <td><span class="addr" onclick="copyText('0x005530f0')">0x005530f0</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pActiveTEX</td>
+              <td class="purpose-text">Loaded `<TRACK>.TEX` raw texture buffer (64KB aligned).</td>
+            </tr>
+            
+            <tr data-text="0x00553290 - g_raceloadstage int32_t track/race loading stage (`1`, `2`, `3`).">
+              <td><span class="addr" onclick="copyText('0x00553290')">0x00553290</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_RaceLoadStage</td>
+              <td class="purpose-text">Track/race loading stage (`1`, `2`, `3`).</td>
+            </tr>
+            
+            <tr data-text="0x00563be4 - g_pactivetab uint8_t* loaded `<track>.tab` 64kb shading lookup matrix.">
+              <td><span class="addr" onclick="copyText('0x00563be4')">0x00563be4</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pActiveTAB</td>
+              <td class="purpose-text">Loaded `<TRACK>.TAB` 64KB shading lookup matrix.</td>
+            </tr>
+            
+            <tr data-text="0x00563bfc - g_psyscol uint8_t* pointer to loaded `sys.col` buffer (`+ 8` is the 256-color palette).">
+              <td><span class="addr" onclick="copyText('0x00563bfc')">0x00563bfc</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pSysCol</td>
+              <td class="purpose-text">Pointer to loaded `SYS.COL` buffer (`+ 8` is the 256-color palette).</td>
+            </tr>
+            
+            <tr data-text="0x00563c3c - g_menustate int32_t menu state: `1` when interactive menu is rendering.">
+              <td><span class="addr" onclick="copyText('0x00563c3c')">0x00563c3c</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_MenuState</td>
+              <td class="purpose-text">Menu state: `1` when interactive menu is rendering.</td>
+            </tr>
+            
+            <tr data-text="0x00563d9c - g_menuselection int32_t menu selection processed flag.">
+              <td><span class="addr" onclick="copyText('0x00563d9c')">0x00563d9c</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_MenuSelection</td>
+              <td class="purpose-text">Menu selection processed flag.</td>
+            </tr>
+            
+            <tr data-text="0x00639394 - g_introstate int32_t intro sequence: `2` = publisher logos, `1` = init menus, `0` = done.">
+              <td><span class="addr" onclick="copyText('0x00639394')">0x00639394</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int32_t</td>
+              <td class="symbol-name">g_IntroState</td>
+              <td class="purpose-text">Intro sequence: `2` = Publisher logos, `1` = Init menus, `0` = Done.</td>
+            </tr>
+            
+            <tr data-text="0x00639c0c - g_pactivetri uint8_t* loaded `<track>.tri` 500-byte road chunk index buffer.">
+              <td><span class="addr" onclick="copyText('0x00639c0c')">0x00639c0c</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pActiveTRI</td>
+              <td class="purpose-text">Loaded `<TRACK>.TRI` 500-byte road chunk index buffer.</td>
+            </tr>
+            
+            <tr data-text="0x0063a01c - g_ptracksplinenodes uint8_t* array of 75-byte road spline nodes (left/right rails, center, heading).">
+              <td><span class="addr" onclick="copyText('0x0063a01c')">0x0063a01c</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pTrackSplineNodes</td>
+              <td class="purpose-text">Array of 75-byte road spline nodes (left/right rails, center, heading).</td>
+            </tr>
+            
+            <tr data-text="0x0063a024 - g_ptracksplinepointers void** pointers to active spline nodes indexed by chunk sequence.">
+              <td><span class="addr" onclick="copyText('0x0063a024')">0x0063a024</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">void**</td>
+              <td class="symbol-name">g_pTrackSplinePointers</td>
+              <td class="purpose-text">Pointers to active spline nodes indexed by chunk sequence.</td>
+            </tr>
+            
+            <tr data-text="0x0063b5e8 - g_plisadepthbuckets void** 6,000-entry depth bucket pointer array for polygon ordering.">
+              <td><span class="addr" onclick="copyText('0x0063b5e8')">0x0063b5e8</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">void**</td>
+              <td class="symbol-name">g_pLisaDepthBuckets</td>
+              <td class="purpose-text">6,000-entry depth bucket pointer array for polygon ordering.</td>
+            </tr>
+            
+            <tr data-text="0x0063b5f0 - g_pactiveshd uint8_t* loaded `<track>.shd` 64kb shadow / alpha lookup table buffer.">
+              <td><span class="addr" onclick="copyText('0x0063b5f0')">0x0063b5f0</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pActiveSHD</td>
+              <td class="purpose-text">Loaded `<TRACK>.SHD` 64KB shadow / alpha lookup table buffer.</td>
+            </tr>
+            
+            <tr data-text="0x0063c5b4 - g_plisatransparencylut uint8_t* 64kb color-key transparency lookup table (generated by `fun_00402940`).">
+              <td><span class="addr" onclick="copyText('0x0063c5b4')">0x0063c5b4</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t*</td>
+              <td class="symbol-name">g_pLisaTransparencyLUT</td>
+              <td class="purpose-text">64KB color-key transparency lookup table (generated by `FUN_00402940`).</td>
+            </tr>
+            
+            <tr data-text="0x0063c5bc - g_lisadrawcommands void** depth-bucket sorted linked list of rasterizer polygon draw commands.">
+              <td><span class="addr" onclick="copyText('0x0063c5bc')">0x0063c5bc</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">void**</td>
+              <td class="symbol-name">g_LisaDrawCommands</td>
+              <td class="purpose-text">Depth-bucket sorted linked list of rasterizer polygon draw commands.</td>
+            </tr>
+            
+            <tr data-text="0x0063c5c8 - g_plisatexturesheets uint8_t** table of loaded texture base pointers (track, cars, lights, smoke).">
+              <td><span class="addr" onclick="copyText('0x0063c5c8')">0x0063c5c8</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">uint8_t**</td>
+              <td class="symbol-name">g_pLisaTextureSheets</td>
+              <td class="purpose-text">Table of loaded texture base pointers (Track, Cars, Lights, Smoke).</td>
+            </tr>
+            
+            <tr data-text="0x0063c5cc - g_lisavisibleobjects int** array of pointers to visible objects from frustum culling.">
+              <td><span class="addr" onclick="copyText('0x0063c5cc')">0x0063c5cc</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int**</td>
+              <td class="symbol-name">g_LisaVisibleObjects</td>
+              <td class="purpose-text">Array of pointers to visible objects from frustum culling.</td>
+            </tr>
+            
+            <tr data-text="0x0063c5f0 - g_lisacamera lisacamera* lisa 3d camera state, matrices, and viewport parameters.">
+              <td><span class="addr" onclick="copyText('0x0063c5f0')">0x0063c5f0</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">LisaCamera*</td>
+              <td class="symbol-name">g_LisaCamera</td>
+              <td class="purpose-text">Lisa 3D camera state, matrices, and viewport parameters.</td>
+            </tr>
+            
+            <tr data-text="0x0063c5fc - g_lisavisiblesubmeshes int** array of visible submeshes and projected screen vertices.">
+              <td><span class="addr" onclick="copyText('0x0063c5fc')">0x0063c5fc</span></td>
+              <td><span class="addr" onclick="copyText('-')">-</span></td>
+              <td class="font-mono" style="color: #38bdf8;">int**</td>
+              <td class="symbol-name">g_LisaVisibleSubmeshes</td>
+              <td class="purpose-text">Array of visible submeshes and projected screen vertices.</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 5: DEVIATIONS VIEW -->
+    <div id="tab-deviations" class="tab-view">
+      <div class="info-card">
+        <h3>🛡️ Fidelity &amp; Change Tracking System (FCTS)</h3>
+        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+          Racing Dynamite implements strict fidelity tracking: every authentic 1997 engine bug fix, crash prevention,
+          and coordinate safety workaround is catalogued with a unique <code>DEV-XXX</code> identifier.
+          Every deviation is wrapped in a runtime preservation toggle under <code>Options &gt; Gameplay &gt; Game Fixes</code>,
+          allowing players and testers to run in <strong>1997 AUTHENTIC</strong> mode with original behaviors preserved.
+        </p>
+      </div>
+
+      <div id="deviationsList">
+        
+        <div class="deviation-card">
+          <div class="dev-top-row">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="dev-id">DEV-001</span>
+              <span class="dev-cat">FIX_CAT_NOCLIP</span>
+            </div>
+            <span class="addr" onclick="copyText('0x00412fc0')">0x00412fc0</span>
+          </div>
+          <div class="dev-desc">Surface raycast out-of-bounds cell crash & fall-through</div>
+          <div class="dev-toggle">Toggle: <code>fixes->fix_noclip</code></div>
+        </div>
+        
+        <div class="deviation-card">
+          <div class="dev-top-row">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="dev-id">DEV-002</span>
+              <span class="dev-cat">FIX_CAT_ELEVATION</span>
+            </div>
+            <span class="addr" onclick="copyText('0x0041d190')">0x0041d190</span>
+          </div>
+          <div class="dev-desc">Vehicle tire ground alignment offset (prevents floating/sinking)</div>
+          <div class="dev-toggle">Toggle: <code>fixes->fix_elevation</code></div>
+        </div>
+        
+        <div class="deviation-card">
+          <div class="dev-top-row">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="dev-id">DEV-003</span>
+              <span class="dev-cat">FIX_CAT_NOCLIP</span>
+            </div>
+            <span class="addr" onclick="copyText('0x00424570')">0x00424570</span>
+          </div>
+          <div class="dev-desc">Mountain wall climbing & steep gradient adhesion clamp</div>
+          <div class="dev-toggle">Toggle: <code>fixes->fix_noclip</code></div>
+        </div>
+        
+        <div class="deviation-card">
+          <div class="dev-top-row">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="dev-id">DEV-004</span>
+              <span class="dev-cat">FIX_CAT_CAMERA</span>
+            </div>
+            <span class="addr" onclick="copyText('0x00436990')">0x00436990</span>
+          </div>
+          <div class="dev-desc">Right-handed camera basis vector normalization</div>
+          <div class="dev-toggle">Toggle: <code>fixes->fix_camera</code></div>
+        </div>
+        
+        <div class="deviation-card">
+          <div class="dev-top-row">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="dev-id">DEV-005</span>
+              <span class="dev-cat">FIX_CAT_RENDERER</span>
+            </div>
+            <span class="addr" onclick="copyText('0x004466d0')">0x004466d0</span>
+          </div>
+          <div class="dev-desc">1/Z depth buffering precision vs 6,000 depth buckets</div>
+          <div class="dev-toggle">Toggle: <code>renderer->options.authentic_depth_buckets</code></div>
+        </div>
+        
+        <div class="deviation-card">
+          <div class="dev-top-row">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="dev-id">DEV-006</span>
+              <span class="dev-cat">FIX_CAT_AUDIO</span>
+            </div>
+            <span class="addr" onclick="copyText('0x0041f9b0')">0x0041f9b0</span>
+          </div>
+          <div class="dev-desc">High-RPM engine pitch modulation overflow protection</div>
+          <div class="dev-toggle">Toggle: <code>fixes->fix_audio</code></div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- TAB 6: WATCOM TOOLCHAIN -->
+    <div id="tab-watcom" class="tab-view">
+      <div class="info-card">
+        <h3>⚙️ Open Watcom 386 C/C++ 10.6 Decompilation Toolchain</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">
+          Authentic source files under <code>decomp/src/</code> are compiled against original headers
+          using portable Open Watcom V2 targeting DOS/4GW flat 32-bit protected mode.
+        </p>
+        <div class="code-block">
+Compiler: Open Watcom C32 Optimizing Compiler (wcc386.exe)
+Flags:    -3r       Watcom register calling convention (EAX, EDX, EBX, ECX)
+          -s        Omit stack check runtime calls (__CHK)
+          -omaxet   Maximum speed optimization, loop unrolling, frame pointers
+          -eoc      Standard COFF object format for binary diffing
+          -zq       Quiet mode
+        </div>
+      </div>
+
+      <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <div class="metric-card">
+          <div class="metric-label">Decomp Source Units</div>
+          <div class="metric-value-row">
+            <span class="metric-val">1</span>
+          </div>
+          <div class="metric-sub">
+            <code>getsurf.c</code> (3392 B)
+          </div>
+        </div>
+
+        <div class="metric-card matching">
+          <div class="metric-label">Compiled Watcom Objects</div>
+          <div class="metric-value-row">
+            <span class="metric-val">2</span>
+          </div>
+          <div class="metric-sub">
+            <code>getsurf.obj</code> (2002 B) <code>getsurf_coff.obj</code> (1440 B)
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>🚀 Essential RE &amp; Decompilation CLI Commands</h3>
+        <div class="code-block">
+# 1. Check decompilation status &amp; metrics
+uv run python tools/db.py status
+
+# 2. Compile authentic C code with Watcom
+uv run python tools/build_decomp.py
+
+# 3. Verify fidelity annotations against source port &amp; documentation
+uv run python tools/verify_fidelity.py
+
+# 4. Regenerate this HTML dashboard
+uv run python tools/generate_dashboard.py
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <div>Racing Dynamite &bull; Ignition (1997) Reverse Engineering Project</div>
+      <div>Source Port: C11 / SDL2 &bull; Decompilation: Open Watcom 10.6 &bull; Ghidra MCP Bridge</div>
+    </footer>
+  </div>
+
+  <div id="toast">Copied to clipboard!</div>
+
+  <!-- Embedded Project Dataset -->
+  <script>
+    const PROJECT_DATA = {"metadata": {"target_exe": "MAINDOS.EXE", "reference_exe": "IGN_WIN.EXE", "compiler": "Watcom C/C++ 10.6", "project_name": "Racing Dynamite Decompilation"}, "summary": {"total_functions": 74, "matching_functions": 0, "decompiled_functions": 55, "analyzed_functions": 19, "unidentified_functions": 0, "completed_functions": 55, "completion_percent": 74.3, "matching_percent": 0.0, "total_modules": 8, "total_globals": 62, "total_structs": 9, "total_struct_fields": 69, "total_deviations": 6, "fidelity_counts": {"EXACT": 13, "ADAPTED": 35, "EXTENDED": 7, "INFRASTRUCTURE": 0, "-": 19}, "generated_at": "2026-09-07 10:44:27"}, "modules": [{"id": 5, "name": "main.c", "original_path": "main.c", "decomp_path": "decomp/main.c", "description": "Main game loop, vehicle state, physics integration, AI navigation", "total": 31, "matching": 0, "decompiled": 21, "analyzed": 10, "unidentified": 0, "percent": 67.7}, {"id": 2, "name": "lisa3d.c", "original_path": "lisa3d.c", "decomp_path": "decomp/lisa3d.c", "description": "Lisa 2 3D rasterizer, polygon opcodes, and scene transformation", "total": 25, "matching": 0, "decompiled": 20, "analyzed": 5, "unidentified": 0, "percent": 80.0}, {"id": 1, "name": "getsurf.c", "original_path": "d:\\projects\\ignition\\getsurf\\getsurf.c", "decomp_path": "decomp/getsurf.c", "description": "Track surface raycasting and collision grid", "total": 7, "matching": 0, "decompiled": 7, "analyzed": 0, "unidentified": 0, "percent": 100.0}, {"id": 3, "name": "geputget.c", "original_path": "geputget.c", "decomp_path": "decomp/geputget.c", "description": "2D graphics blitting, font loading, and palette management", "total": 5, "matching": 0, "decompiled": 2, "analyzed": 3, "unidentified": 0, "percent": 40.0}, {"id": 8, "name": "vehicle.c", "original_path": "", "decomp_path": "", "description": "", "total": 4, "matching": 0, "decompiled": 4, "analyzed": 0, "unidentified": 0, "percent": 100.0}, {"id": 7, "name": "MSVC CRT", "original_path": "", "decomp_path": "", "description": "", "total": 1, "matching": 0, "decompiled": 0, "analyzed": 1, "unidentified": 0, "percent": 0.0}, {"id": 4, "name": "mem.c", "original_path": "mem.c", "decomp_path": "decomp/mem.c", "description": "Memory management, buffer allocation, and file I/O", "total": 1, "matching": 0, "decompiled": 1, "analyzed": 0, "unidentified": 0, "percent": 100.0}, {"id": 6, "name": "sound.c", "original_path": "sound.c", "decomp_path": "decomp/sound.c", "description": "Sound effects pools, engine RPM audio synthesis, and mixer", "total": 0, "matching": 0, "decompiled": 0, "analyzed": 0, "unidentified": 0, "percent": 0.0}], "functions": [{"id": 76, "dos_address": "-", "win_address": "0x00402c00", "symbol_name": "Menu_Tick", "original_ghidra_name": "FUN_00402c00", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Handles menu input navigation (arrows, Enter, Esc), item highlight, and transitions.", "notes": ""}, {"id": 77, "dos_address": "-", "win_address": "0x0040e6b0", "symbol_name": "Car_IntegratePosition", "original_ghidra_name": "FUN_0040e6b0", "module_id": 8, "module_name": "vehicle.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "World coordinate velocity integrator with 21.76 scale factor and 72 Hz timestep.", "notes": ""}, {"id": 78, "dos_address": "-", "win_address": "0x004120a0", "symbol_name": "WinMain", "original_ghidra_name": "FUN_004120a0", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Main entry point; registers window class, queries timer, runs message/tick loop.", "notes": ""}, {"id": 84, "dos_address": "0x0001fee0", "win_address": "0x00412670", "symbol_name": "Surface_LoadSRF", "original_ghidra_name": "FUN_00412670", "module_id": 1, "module_name": "getsurf.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Loads .SRF track surface heightfield and collision grid.", "notes": ""}, {"id": 85, "dos_address": "0x0002002c", "win_address": "0x004127a0", "symbol_name": "Surface_FreeSRF", "original_ghidra_name": "FUN_004127a0", "module_id": 1, "module_name": "getsurf.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Frees active .SRF surface memory buffer.", "notes": ""}, {"id": 86, "dos_address": "0x00020814", "win_address": "0x00412fc0", "symbol_name": "Surface_GetCell", "original_ghidra_name": "FUN_00412fc0", "module_id": 1, "module_name": "getsurf.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXTENDED", "port_location": "-", "purpose": "Computes grid cell index ((z/512)+50)*stride + ((x/512)+50) with origin offset 50.0.", "notes": ""}, {"id": 87, "dos_address": "0x00020bbc", "win_address": "0x00413380", "symbol_name": "Surface_GetTriangleHeight", "original_ghidra_name": "FUN_00413380", "module_id": 1, "module_name": "getsurf.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Computes average elevation (y0 + y1 + y2) / -3 using vertex buffer indices from triangle.", "notes": ""}, {"id": 88, "dos_address": "-", "win_address": "0x004133d0", "symbol_name": "Font_DrawText", "original_ghidra_name": "FUN_004133d0", "module_id": 3, "module_name": "geputget.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "2D bitmap font rasterizer blitting characters to 8bpp buffer.", "notes": ""}, {"id": 90, "dos_address": "-", "win_address": "0x00414e40", "symbol_name": "Track_LoadSplines", "original_ghidra_name": "FUN_00414e40", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Loads .TRI chunk indices, constructs left/right road boundary splines and AI waypoints.", "notes": ""}, {"id": 91, "dos_address": "-", "win_address": "0x00416250", "symbol_name": "Mesh_InstantiatePlacedObjects", "original_ghidra_name": "FUN_00416250", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Applies .PLC world translation offsets to .MSH submesh vertices.", "notes": ""}, {"id": 93, "dos_address": "-", "win_address": "0x004172b0", "symbol_name": "Game_StateDispatcher", "original_ghidra_name": "FUN_004172b0", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Top-level game loop state machine dispatcher (Intro -> Menus -> Race).", "notes": ""}, {"id": 96, "dos_address": "-", "win_address": "0x00419a90", "symbol_name": "Track_LoadPlacements", "original_ghidra_name": "FUN_00419a90", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Loads .PLC scenery object placement tables for level and cars.", "notes": ""}, {"id": 97, "dos_address": "-", "win_address": "0x00419bd0", "symbol_name": "Mesh_LoadTrackAndCars", "original_ghidra_name": "FUN_00419bd0", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Loads LEVELS/<TRACK>/<TRACK>.MSH and CARS/CARS.MSH into geometry memory.", "notes": ""}, {"id": 98, "dos_address": "-", "win_address": "0x00419d10", "symbol_name": "Texture_LoadAllPages", "original_ghidra_name": "FUN_00419d10", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Loads 1MB track .TEX, car .TEX, and 64KB aligned sprite pages.", "notes": ""}, {"id": 101, "dos_address": "-", "win_address": "0x0041b360", "symbol_name": "Track_PreprocessPlacements", "original_ghidra_name": "FUN_0041b360", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Unpacks model_type bitfields (& 0xFFF) and extracts animation and flag channels.", "notes": ""}, {"id": 103, "dos_address": "-", "win_address": "0x0041d190", "symbol_name": "Car_UnpackMeshGeometry", "original_ghidra_name": "FUN_0041d190", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXTENDED", "port_location": "-", "purpose": "Extracts CARS.MSH submesh vertices, finds bottom tire vertex $\\max(v_y)$ for ground alignment, and scales by $21.76$.", "notes": ""}, {"id": 104, "dos_address": "-", "win_address": "0x0041f9b0", "symbol_name": "Sound_InitAndLoadPools", "original_ghidra_name": "Sound_InitAndLoadPools", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Initializes 32 DirectSound-compatible audio channels; loads SFX pools (ROLL, SKID, COLL, BOOST, DIV, KLICK, OK); loads track sounds; reads per-vehicle ENGINE.INF 800-byte curves into uint8_t[200] vol/pitch arrays at +0x658, +0x720, +0x7e8, +0x8b0.", "notes": ""}, {"id": 106, "dos_address": "-", "win_address": "0x00423aa0", "symbol_name": "Car_VerticalDynamics", "original_ghidra_name": "FUN_00423aa0", "module_id": 8, "module_name": "vehicle.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "Gravity acceleration (-0.2/tick), rebound bounce on impact, and ride height equilibrium (+5.0).", "notes": ""}, {"id": 107, "dos_address": "-", "win_address": "0x00424570", "symbol_name": "Car_PhysicsTick", "original_ghidra_name": "Car_PhysicsTick", "module_id": 1, "module_name": "getsurf.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXTENDED", "port_location": "-", "purpose": "Master 72 Hz vehicle dynamics: 4-wheel independent raycast suspension, pitch/roll tilt, bicycle lateral slip, turbo boost.", "notes": ""}, {"id": 108, "dos_address": "-", "win_address": "0x00427d70", "symbol_name": "Car_UpdateAxleSpeeds", "original_ghidra_name": "FUN_00427d70", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "Averages left and right wheel velocities for front and rear axles with factor 0.5.", "notes": ""}, {"id": 110, "dos_address": "-", "win_address": "0x004356d0", "symbol_name": "Pos_InitAnimatedObjects", "original_ghidra_name": "FUN_004356d0", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Converts keyframe coordinates in .POS to relative displacement deltas.", "notes": ""}, {"id": 111, "dos_address": "-", "win_address": "0x004357a0", "symbol_name": "Pos_UpdateAnimatedObjects", "original_ghidra_name": "FUN_004357a0", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Advances keyframe playheads and translates moving scenery objects via Lisa_MoveObject.", "notes": ""}, {"id": 112, "dos_address": "-", "win_address": "0x00436990", "symbol_name": "Race_RenderViewport", "original_ghidra_name": "FUN_00436990", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXTENDED", "port_location": "-", "purpose": "Calculates camera transform, invokes scene renderer, draws HUD.", "notes": ""}, {"id": 114, "dos_address": "-", "win_address": "0x0043c910", "symbol_name": "Camera_UpdateChase", "original_ghidra_name": "FUN_0043c910", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXTENDED", "port_location": "-", "purpose": "Multi-mode chase camera with velocity lookahead, 0.125 azimuth lag, slope adaptation (DEV-004).", "notes": ""}, {"id": 115, "dos_address": "-", "win_address": "0x0043e2a0", "symbol_name": "Lisa_Init", "original_ghidra_name": "FUN_0043e2a0", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Initializes Lisa 2 rasterizer viewport, Z-buffer, and focal lengths.", "notes": ""}, {"id": 116, "dos_address": "-", "win_address": "0x00442030", "symbol_name": "Car_ApplySteering", "original_ghidra_name": "FUN_00442030", "module_id": 8, "module_name": "vehicle.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "Speed-attenuated front wheel steering lock and smoothing filter.", "notes": ""}, {"id": 117, "dos_address": "-", "win_address": "0x00442670", "symbol_name": "Car_PowertrainUpdate", "original_ghidra_name": "FUN_00442670", "module_id": 8, "module_name": "vehicle.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "Engine propulsion, rolling and aerodynamic drag, transmission forward/reverse gear shifting.", "notes": ""}, {"id": 118, "dos_address": "-", "win_address": "0x004452c0", "symbol_name": "Sound_SynthesizeEngineRPM", "original_ghidra_name": "FUN_004452c0", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXTENDED", "port_location": "-", "purpose": "Computes RPM pitch modulation from 800-byte ENGINE.INF curve with DEV-006 protection.", "notes": ""}, {"id": 119, "dos_address": "0x00020c18", "win_address": "0x00446578", "symbol_name": "Surface_TestTrianglePositiveDZ", "original_ghidra_name": "FUN_00446578", "module_id": 1, "module_name": "getsurf.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "2D trapezoidal slope span test for table2 triangles ($dz \\ge 0$).", "notes": ""}, {"id": 120, "dos_address": "0x00020c81", "win_address": "0x004465e1", "symbol_name": "Surface_TestTriangleNegativeDZ", "original_ghidra_name": "FUN_004465e1", "module_id": 1, "module_name": "getsurf.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "2D trapezoidal slope span test for table1 triangles ($dz < 0$).", "notes": ""}, {"id": 121, "dos_address": "-", "win_address": "0x004466d0", "symbol_name": "Lisa_RenderScene", "original_ghidra_name": "FUN_004466d0", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXTENDED", "port_location": "-", "purpose": "Master 3D frame render: culls objects, transforms vertices, rasterizes spans.", "notes": ""}, {"id": 122, "dos_address": "-", "win_address": "0x004468d0", "symbol_name": "Lisa_InitEngineMemory", "original_ghidra_name": "FUN_004468d0", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Allocates internal rasterizer buffers, vertex streams, and matrices.", "notes": ""}, {"id": 123, "dos_address": "-", "win_address": "0x00448e70", "symbol_name": "Lisa_FrustumCullObjects", "original_ghidra_name": "FUN_00448e70", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Spatial grid frustum culler populating visible object list.", "notes": ""}, {"id": 124, "dos_address": "-", "win_address": "0x00449e70", "symbol_name": "Lisa_TransformVertices", "original_ghidra_name": "FUN_00449e70", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Camera matrix rotation, perspective projection, and backface culling.", "notes": ""}, {"id": 125, "dos_address": "-", "win_address": "0x0044b480", "symbol_name": "Lisa_InitOpcodeTable", "original_ghidra_name": "FUN_0044b480", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Binds polygon opcode rasterization dispatch table (PTR_LAB_0049c8e0).", "notes": ""}, {"id": 126, "dos_address": "-", "win_address": "0x0044c1f0", "symbol_name": "Lisa_RenderSubmeshes", "original_ghidra_name": "FUN_0044c1f0", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Dispatches polygon opcodes across all visible transformed submeshes.", "notes": ""}, {"id": 127, "dos_address": "-", "win_address": "0x0044caa0", "symbol_name": "Lisa_DrawPolygon_Op12", "original_ghidra_name": "LAB_0044caa0", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "Opcode 0x12: 1-bit transparent cutout triangle (pushes g_pLisaTransparencyLUT).", "notes": ""}, {"id": 128, "dos_address": "-", "win_address": "0x0044cac0", "symbol_name": "Lisa_DrawPolygon_Op13", "original_ghidra_name": "LAB_0044cac0", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "Opcode 0x13: shadow / foliage alpha blend triangle (pushes g_pActiveSHD).", "notes": ""}, {"id": 129, "dos_address": "-", "win_address": "0x0044cae0", "symbol_name": "Lisa_DrawPolygon_Op16", "original_ghidra_name": "LAB_0044cae0", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "Opcode 0x16: transparent cutout variant.", "notes": ""}, {"id": 130, "dos_address": "-", "win_address": "0x0044cb00", "symbol_name": "Lisa_DrawPolygon_Op17", "original_ghidra_name": "LAB_0044cb00", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "Opcode 0x17: shadow / alpha blend Gouraud triangle (pushes g_pActiveSHD).", "notes": ""}, {"id": 131, "dos_address": "-", "win_address": "0x0044cb20", "symbol_name": "Lisa_DrawTriangle_OpcodeHelper", "original_ghidra_name": "FUN_0044cb20", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Common backface test, attribute pack, and span bucketer for opcodes 0x12, 0x13, 0x16, 0x17.", "notes": ""}, {"id": 132, "dos_address": "-", "win_address": "0x0044d550", "symbol_name": "Lisa_DrawTexturedTriangle_Op15", "original_ghidra_name": "FUN_0044d550", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Opcode 0x15: perspective-correct textured triangle with 16.16 UV interpolation.", "notes": ""}, {"id": 133, "dos_address": "-", "win_address": "0x0044f0e9", "symbol_name": "Lisa_ExecuteRasterizerCommands", "original_ghidra_name": "FUN_0044f0e9", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Traverses depth-bucket sorted polygon command list and executes rasterizers.", "notes": ""}, {"id": 134, "dos_address": "-", "win_address": "0x00452800", "symbol_name": "Lisa_RenderTexturedTriangle_Op11", "original_ghidra_name": "FUN_00452800", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "Opcode 0x11 triangle edge walker and span setup for unshaded texture mapping.", "notes": ""}, {"id": 135, "dos_address": "-", "win_address": "0x004537dc", "symbol_name": "Lisa_DrawTexturedSpan_Op11", "original_ghidra_name": "FUN_004537dc", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "EXACT", "port_location": "-", "purpose": "Low-level perspective/affine textured span blitter reading texels directly with stride 256 and alpha test.", "notes": ""}, {"id": 136, "dos_address": "-", "win_address": "0x00456270", "symbol_name": "Font_Load", "original_ghidra_name": "FUN_00456270", "module_id": 3, "module_name": "geputget.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Loads and parses .LFT font header, offset tables, widths, and glyph raster data.", "notes": ""}, {"id": 137, "dos_address": "-", "win_address": "0x00456c40", "symbol_name": "Video_SetPalette", "original_ghidra_name": "FUN_00456c40", "module_id": 2, "module_name": "lisa3d.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Uploads 256-color RGB palette to DirectDraw / hardware DAC.", "notes": ""}, {"id": 138, "dos_address": "-", "win_address": "0x004574a0", "symbol_name": "File_LoadToMemory", "original_ghidra_name": "FUN_004574a0", "module_id": 4, "module_name": "mem.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Generic binary loader (fopen, fread into allocated buffer).", "notes": ""}, {"id": 139, "dos_address": "-", "win_address": "0x00457890", "symbol_name": "Audio_MixCallback", "original_ghidra_name": "FUN_00457890", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "32-channel software voice mixer with 16.16 fixed-point linear pitch resampling and stereo panning.", "notes": ""}, {"id": 140, "dos_address": "-", "win_address": "0x00457980", "symbol_name": "Audio_StopVoice", "original_ghidra_name": "FUN_00457980", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Immediately stops voice playback and releases mixer channel allocation.", "notes": ""}, {"id": 141, "dos_address": "-", "win_address": "0x004579b0", "symbol_name": "Audio_PlayVoice", "original_ghidra_name": "FUN_004579b0", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Allocates mixer channel voice, configures volume, pan, loop flag, and starts playback.", "notes": ""}, {"id": 142, "dos_address": "-", "win_address": "0x00457aa0", "symbol_name": "Audio_SetVoiceParams", "original_ghidra_name": "FUN_00457aa0", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Real-time modulation of voice pitch frequency and stereo pan position.", "notes": ""}, {"id": 143, "dos_address": "-", "win_address": "0x00457ed0", "symbol_name": "Music_PlayTrack", "original_ghidra_name": "FUN_00457ed0", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "CD-DA track streamer using stb_vorbis mapped to circuits via DAT_00497eb8.", "notes": ""}, {"id": 144, "dos_address": "-", "win_address": "0x004582b0", "symbol_name": "Sound_LoadPAT", "original_ghidra_name": "FUN_004582b0", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Loads Gravis UltraSound GF1 .PAT patch audio files and converts 8-bit/16-bit linear PCM to S16SYS format.", "notes": ""}, {"id": 145, "dos_address": "-", "win_address": "0x00458e00", "symbol_name": "Sound_LoadWAV", "original_ghidra_name": "FUN_00458e00", "module_id": 5, "module_name": "main.c", "status": "decompiled", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "ADAPTED", "port_location": "-", "purpose": "Loads RIFF/WAVE PCM 8-bit/16-bit audio file and converts to S16SYS format.", "notes": ""}, {"id": 75, "dos_address": "-", "win_address": "0x004029a0", "symbol_name": "Menu_Init", "original_ghidra_name": "FUN_004029a0", "module_id": 5, "module_name": "main.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Loads MENU.COL, MENU.TAB, .LFT fonts, and initializes menu options.", "notes": ""}, {"id": 79, "dos_address": "-", "win_address": "0x00412230", "symbol_name": "App_FrameTick", "original_ghidra_name": "FUN_00412230", "module_id": 5, "module_name": "main.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Main engine tick; dispatches Init (0), Main Loop (1), and Shutdown (2).", "notes": ""}, {"id": 80, "dos_address": "-", "win_address": "0x00412500", "symbol_name": "App_Init", "original_ghidra_name": "FUN_00412500", "module_id": 5, "module_name": "main.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Creates game window, initializes DirectDraw and DirectInput subsystems.", "notes": ""}, {"id": 81, "dos_address": "-", "win_address": "0x00412530", "symbol_name": "App_Shutdown", "original_ghidra_name": "FUN_00412530", "module_id": 5, "module_name": "main.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Releases DirectDraw surfaces, DirectSound, and window handles.", "notes": ""}, {"id": 82, "dos_address": "-", "win_address": "0x00412580", "symbol_name": "Cdp_OpenFile", "original_ghidra_name": "FUN_00412580", "module_id": 2, "module_name": "lisa3d.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Validates \"CDP\\0\" header, dimensions, frame count, and embedded palette.", "notes": ""}, {"id": 83, "dos_address": "-", "win_address": "0x00412610", "symbol_name": "Cdp_DecodeFrame", "original_ghidra_name": "FUN_00412610", "module_id": 2, "module_name": "lisa3d.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Advances animation stream and triggers inter-frame delta decompression.", "notes": ""}, {"id": 89, "dos_address": "-", "win_address": "0x004134e0", "symbol_name": "AI_FollowTrackSplines", "original_ghidra_name": "FUN_004134e0", "module_id": 5, "module_name": "main.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Steering simulation updating car heading, track chunk position, distance to centerline.", "notes": ""}, {"id": 92, "dos_address": "-", "win_address": "0x00417270", "symbol_name": "Game_Init", "original_ghidra_name": "FUN_00417270", "module_id": 5, "module_name": "main.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Sets initial game state flags, resets timers, initiates intro sequence.", "notes": ""}, {"id": 94, "dos_address": "-", "win_address": "0x00418130", "symbol_name": "Load_SystemGraphicsAndFonts", "original_ghidra_name": "FUN_00418130", "module_id": 3, "module_name": "geputget.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Loads SYS.COL, N_SYSGFX.PIC, N_SYSG_2.PIC, and .LFT fonts.", "notes": ""}, {"id": 95, "dos_address": "-", "win_address": "0x00418dd0", "symbol_name": "Track_LoadAllAssets", "original_ghidra_name": "FUN_00418dd0", "module_id": 5, "module_name": "main.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Master track loader: loads .COL, .PAN, .PIC, .SHD, .TAB, .MSH, .TEX, .POS.", "notes": ""}, {"id": 99, "dos_address": "-", "win_address": "0x0041ac40", "symbol_name": "Font_LoadHUDFonts", "original_ghidra_name": "FUN_0041ac40", "module_id": 3, "module_name": "geputget.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Loads HUD lettering glyphs (IGNITION.FNT, yellow.lft, speed.lft, etc.).", "notes": ""}, {"id": 100, "dos_address": "-", "win_address": "0x0041af70", "symbol_name": "Track_LoadOverlayGfx", "original_ghidra_name": "FUN_0041af70", "module_id": 3, "module_name": "geputget.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Loads track sign textures and winner trophy bitmap (POKAL.PIC).", "notes": ""}, {"id": 102, "dos_address": "-", "win_address": "0x0041b470", "symbol_name": "Race_InitSceneAndCars", "original_ghidra_name": "FUN_0041b470", "module_id": 5, "module_name": "main.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Instantiates player/AI cars on starting grid and binds scenery collision.", "notes": ""}, {"id": 105, "dos_address": "-", "win_address": "0x00422680", "symbol_name": "Race_ResolveVehicleCollisions", "original_ghidra_name": "FUN_00422680", "module_id": 5, "module_name": "main.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Inter-vehicle and scenery obstacle collision detection and impulse response.", "notes": ""}, {"id": 109, "dos_address": "-", "win_address": "0x00429a40", "symbol_name": "Race_CheckCheckpointTriggers", "original_ghidra_name": "FUN_00429a40", "module_id": 5, "module_name": "main.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Tests vehicle collision against type 150..154 split-time checkpoint gates.", "notes": ""}, {"id": 113, "dos_address": "-", "win_address": "0x00438210", "symbol_name": "Lisa_RenderPanorama", "original_ghidra_name": "FUN_00438210", "module_id": 2, "module_name": "lisa3d.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Cylindrical horizon background blitter sampling 64KB .PAN texture using camera yaw and pitch angles.", "notes": ""}, {"id": 146, "dos_address": "-", "win_address": "0x0045b4f0", "symbol_name": "Lisa_PrintVersion", "original_ghidra_name": "FUN_0045b4f0", "module_id": 2, "module_name": "lisa3d.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Prints \"Lisa 2 Development System\" banner and build timestamp.", "notes": ""}, {"id": 147, "dos_address": "-", "win_address": "0x00469950", "symbol_name": "CRT_Entry", "original_ghidra_name": "entry", "module_id": 7, "module_name": "MSVC CRT", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "C Runtime startup entry point, parses command line, calls WinMain.", "notes": ""}, {"id": 148, "dos_address": "-", "win_address": "0x00499abc", "symbol_name": "Cdp_DecompressRLE", "original_ghidra_name": "FUN_00499abc", "module_id": 2, "module_name": "lisa3d.c", "status": "analyzed", "calling_convention": "watcom_reg", "return_type": "void", "parameters": "", "byte_size": null, "line_count": null, "fidelity": "-", "port_location": "-", "purpose": "Delta-skip RLE decompression modifying active frame buffer with opcode skip codes.", "notes": ""}], "globals": [{"id": 112, "dos_address": "-", "win_address": "0x004792c8", "name": "g_PhysicsGravity", "type": "double", "size": null, "description": "Gravitational acceleration constant (`9.81` $m/s^2$).", "module_name": "-"}, {"id": 110, "dos_address": "-", "win_address": "0x004792f0", "name": "g_PhysicsTimestep", "type": "double", "size": null, "description": "72 Hz physics integration timestep ($1/72\\text{ s} \\approx 0.013888889\\text{ s}$).", "module_name": "-"}, {"id": 111, "dos_address": "-", "win_address": "0x00479af0", "name": "g_PhysicsScaleFactor", "type": "double", "size": null, "description": "World velocity integration multiplier (`21.76`).", "module_name": "-"}, {"id": 113, "dos_address": "-", "win_address": "0x00479b50", "name": "g_PhysicsGravityTick", "type": "double", "size": null, "description": "Vertical downward velocity delta per tick (`0.2` units).", "module_name": "-"}, {"id": 114, "dos_address": "-", "win_address": "0x00479b58", "name": "g_PhysicsRideHeight", "type": "double", "size": null, "description": "Ground clearance equilibrium offset (`5.0` units above surface).", "module_name": "-"}, {"id": 117, "dos_address": "-", "win_address": "0x00479c48", "name": "g_PhysicsWorldOffset", "type": "double", "size": null, "description": "Spatial grid origin centering offset (`25600.0` units, $50 \\times 512$).", "module_name": "-"}, {"id": 115, "dos_address": "-", "win_address": "0x00479ca0", "name": "g_PhysicsMaxSlopeSin", "type": "double", "size": null, "description": "Arcsine clamping limit for pitch and roll calculation (`0.95`).", "module_name": "-"}, {"id": 116, "dos_address": "-", "win_address": "0x00479cb0", "name": "g_PhysicsRateLimitRad", "type": "double", "size": null, "description": "Maximum pitch and roll angular change rate (`0.1` rad/tick).", "module_name": "-"}, {"id": 65, "dos_address": "-", "win_address": "0x00493720", "name": "g_HasPerfCounter", "type": "uint32_t", "size": null, "description": "Flag: `1` if high-resolution timer (`QueryPerformanceCounter`) is available.", "module_name": "-"}, {"id": 68, "dos_address": "-", "win_address": "0x00493734", "name": "g_GameStage", "type": "int32_t", "size": null, "description": "Master state: `0` = Init, `1` = Active, `2` = Shutdown.", "module_name": "-"}, {"id": 80, "dos_address": "-", "win_address": "0x004937bc", "name": "g_pActiveSRF", "type": "uint8_t*", "size": null, "description": "Pointer to currently loaded `.SRF` surface buffer.", "module_name": "-"}, {"id": 120, "dos_address": "-", "win_address": "0x00497eb8", "name": "g_TrackCDAudioMapping", "type": "uint8_t[8]", "size": null, "description": "CD-DA audio track mapping index per circuit (Tracks 2..8).", "module_name": "-"}, {"id": 93, "dos_address": "-", "win_address": "0x0049c8e0", "name": "g_LisaOpcodeTable", "type": "void**", "size": null, "description": "Opcode function jump table (0x00..0x17).", "module_name": "-"}, {"id": 90, "dos_address": "-", "win_address": "0x0049c9f8", "name": "g_pLisaActiveShading", "type": "uint8_t*", "size": null, "description": "Active shading table pointer bound in Lisa3D rasterizer.", "module_name": "-"}, {"id": 109, "dos_address": "-", "win_address": "0x004b63c4", "name": "g_pLisaActivePage", "type": "uint8_t*", "size": null, "description": "Base pointer of active 64KB ($256 \\times 256$) texture page in span rasterizer.", "module_name": "-"}, {"id": 74, "dos_address": "-", "win_address": "0x004ba6e0", "name": "g_ScreenWidth", "type": "int32_t", "size": null, "description": "Target screen resolution width (`640` or `320`).", "module_name": "-"}, {"id": 75, "dos_address": "-", "win_address": "0x004ba6e4", "name": "g_ScreenHeight", "type": "int32_t", "size": null, "description": "Target screen resolution height (`480` or `200`).", "module_name": "-"}, {"id": 76, "dos_address": "-", "win_address": "0x004ba6e8", "name": "g_ColorDepth", "type": "int32_t", "size": null, "description": "Screen bit depth (`8` bits per pixel).", "module_name": "-"}, {"id": 66, "dos_address": "-", "win_address": "0x004c5348", "name": "g_PerfFrequency", "type": "int64_t", "size": null, "description": "Performance counter frequency from `QueryPerformanceFrequency`.", "module_name": "-"}, {"id": 64, "dos_address": "-", "win_address": "0x004c5360", "name": "g_hCursor", "type": "HCURSOR", "size": null, "description": "Default application mouse cursor.", "module_name": "-"}, {"id": 67, "dos_address": "-", "win_address": "0x004c5368", "name": "g_LastPerfCount", "type": "int64_t", "size": null, "description": "Last measured performance counter timestamp.", "module_name": "-"}, {"id": 63, "dos_address": "-", "win_address": "0x004c5398", "name": "g_hInstance", "type": "HINSTANCE", "size": null, "description": "Application instance handle passed from `WinMain`.", "module_name": "-"}, {"id": 85, "dos_address": "-", "win_address": "0x004c53a8", "name": "g_pSRF_Triangles", "type": "uint8_t*", "size": null, "description": "Pointer to 24-byte surface collision triangle records in active `.SRF`.", "module_name": "-"}, {"id": 81, "dos_address": "-", "win_address": "0x004c53b4", "name": "g_SRF_GridCellsX", "type": "int32_t", "size": null, "description": "Active track surface grid dimension X.", "module_name": "-"}, {"id": 83, "dos_address": "-", "win_address": "0x004c53b8", "name": "g_SRF_CellSizeX", "type": "int32_t", "size": null, "description": "Active track surface cell size X (512 units).", "module_name": "-"}, {"id": 84, "dos_address": "-", "win_address": "0x004c53c8", "name": "g_SRF_CellSizeZ", "type": "int32_t", "size": null, "description": "Active track surface cell size Z (512 units).", "module_name": "-"}, {"id": 82, "dos_address": "-", "win_address": "0x004c53d0", "name": "g_SRF_GridCellsZ", "type": "int32_t", "size": null, "description": "Active track surface grid dimension Z.", "module_name": "-"}, {"id": 108, "dos_address": "-", "win_address": "0x004cdc28", "name": "g_pLisaActiveMipTable", "type": "uint8_t**", "size": null, "description": "Pointer to active texture mip table bound during submesh dispatch.", "module_name": "-"}, {"id": 73, "dos_address": "-", "win_address": "0x00525e5c", "name": "g_InRace", "type": "int32_t", "size": null, "description": "In-race simulation flag: `1` during active driving.", "module_name": "-"}, {"id": 86, "dos_address": "-", "win_address": "0x00525e60", "name": "g_pActiveMSH", "type": "uint8_t*", "size": null, "description": "Loaded `<TRACK>.MSH` geometry memory buffer.", "module_name": "-"}, {"id": 103, "dos_address": "-", "win_address": "0x0054f904", "name": "g_pCheckpoints", "type": "uint8_t*", "size": null, "description": "Checkpoint collision and trigger gate definitions.", "module_name": "-"}, {"id": 102, "dos_address": "-", "win_address": "0x0054f954", "name": "g_CheckpointCount", "type": "int32_t", "size": null, "description": "Count of active type 150..154 split-time checkpoint trigger gates.", "module_name": "-"}, {"id": 77, "dos_address": "-", "win_address": "0x0054f998", "name": "g_pSysGfxPic", "type": "uint8_t*", "size": null, "description": "Pointer to loaded `N_SYSGFX.PIC` buffer.", "module_name": "-"}, {"id": 87, "dos_address": "-", "win_address": "0x0054f9cc", "name": "g_pActivePLC", "type": "uint32_t*", "size": null, "description": "Loaded `<TRACK>.PLC` placed object table buffer.", "module_name": "-"}, {"id": 121, "dos_address": "-", "win_address": "0x00552f40", "name": "g_pAudioContext", "type": "AudioContext*", "size": null, "description": "Master audio mixer device and state context.", "module_name": "-"}, {"id": 122, "dos_address": "-", "win_address": "0x00552f44", "name": "g_AudioChannels", "type": "AudioVoice[32]", "size": null, "description": "32-channel software voice mixer table.", "module_name": "-"}, {"id": 123, "dos_address": "-", "win_address": "0x00552f48", "name": "g_MasterSoundVolume", "type": "int32_t", "size": null, "description": "Master SFX attenuation level (0..128).", "module_name": "-"}, {"id": 124, "dos_address": "-", "win_address": "0x00552f4c", "name": "g_MasterMusicVolume", "type": "int32_t", "size": null, "description": "Master CD-DA music attenuation level (0..128).", "module_name": "-"}, {"id": 99, "dos_address": "-", "win_address": "0x00552f60", "name": "g_pTrackRoadSequence", "type": "int32_t*", "size": null, "description": "Ordered sequence of road chunks (24 bytes per chunk).", "module_name": "-"}, {"id": 88, "dos_address": "-", "win_address": "0x00552fc8", "name": "g_pCarsPLC", "type": "uint32_t*", "size": null, "description": "Loaded `CARS.PLC` placed car object buffer.", "module_name": "-"}, {"id": 118, "dos_address": "-", "win_address": "0x00552fe0", "name": "g_pPlayerVehicle", "type": "VehicleState*", "size": null, "description": "Pointer to active player vehicle state struct.", "module_name": "-"}, {"id": 119, "dos_address": "-", "win_address": "0x00553000", "name": "g_pAIVehicles", "type": "VehicleState*", "size": null, "description": "Array of 5 opponent AI vehicle states.", "module_name": "-"}, {"id": 98, "dos_address": "-", "win_address": "0x00553064", "name": "g_pActivePOS", "type": "uint8_t*", "size": null, "description": "Loaded `<TRACK>.POS` scenery object keyframe animation buffer.", "module_name": "-"}, {"id": 78, "dos_address": "-", "win_address": "0x00553088", "name": "g_pSysG2Pic", "type": "uint8_t*", "size": null, "description": "Pointer to loaded `N_SYSG_2.PIC` buffer.", "module_name": "-"}, {"id": 97, "dos_address": "-", "win_address": "0x005530f0", "name": "g_pActiveTEX", "type": "uint8_t*", "size": null, "description": "Loaded `<TRACK>.TEX` raw texture buffer (64KB aligned).", "module_name": "-"}, {"id": 72, "dos_address": "-", "win_address": "0x00553290", "name": "g_RaceLoadStage", "type": "int32_t", "size": null, "description": "Track/race loading stage (`1`, `2`, `3`).", "module_name": "-"}, {"id": 89, "dos_address": "-", "win_address": "0x00563be4", "name": "g_pActiveTAB", "type": "uint8_t*", "size": null, "description": "Loaded `<TRACK>.TAB` 64KB shading lookup matrix.", "module_name": "-"}, {"id": 79, "dos_address": "-", "win_address": "0x00563bfc", "name": "g_pSysCol", "type": "uint8_t*", "size": null, "description": "Pointer to loaded `SYS.COL` buffer (`+ 8` is the 256-color palette).", "module_name": "-"}, {"id": 70, "dos_address": "-", "win_address": "0x00563c3c", "name": "g_MenuState", "type": "int32_t", "size": null, "description": "Menu state: `1` when interactive menu is rendering.", "module_name": "-"}, {"id": 71, "dos_address": "-", "win_address": "0x00563d9c", "name": "g_MenuSelection", "type": "int32_t", "size": null, "description": "Menu selection processed flag.", "module_name": "-"}, {"id": 69, "dos_address": "-", "win_address": "0x00639394", "name": "g_IntroState", "type": "int32_t", "size": null, "description": "Intro sequence: `2` = Publisher logos, `1` = Init menus, `0` = Done.", "module_name": "-"}, {"id": 91, "dos_address": "-", "win_address": "0x00639c0c", "name": "g_pActiveTRI", "type": "uint8_t*", "size": null, "description": "Loaded `<TRACK>.TRI` 500-byte road chunk index buffer.", "module_name": "-"}, {"id": 100, "dos_address": "-", "win_address": "0x0063a01c", "name": "g_pTrackSplineNodes", "type": "uint8_t*", "size": null, "description": "Array of 75-byte road spline nodes (left/right rails, center, heading).", "module_name": "-"}, {"id": 101, "dos_address": "-", "win_address": "0x0063a024", "name": "g_pTrackSplinePointers", "type": "void**", "size": null, "description": "Pointers to active spline nodes indexed by chunk sequence.", "module_name": "-"}, {"id": 105, "dos_address": "-", "win_address": "0x0063b5e8", "name": "g_pLisaDepthBuckets", "type": "void**", "size": null, "description": "6,000-entry depth bucket pointer array for polygon ordering.", "module_name": "-"}, {"id": 104, "dos_address": "-", "win_address": "0x0063b5f0", "name": "g_pActiveSHD", "type": "uint8_t*", "size": null, "description": "Loaded `<TRACK>.SHD` 64KB shadow / alpha lookup table buffer.", "module_name": "-"}, {"id": 106, "dos_address": "-", "win_address": "0x0063c5b4", "name": "g_pLisaTransparencyLUT", "type": "uint8_t*", "size": null, "description": "64KB color-key transparency lookup table (generated by `FUN_00402940`).", "module_name": "-"}, {"id": 96, "dos_address": "-", "win_address": "0x0063c5bc", "name": "g_LisaDrawCommands", "type": "void**", "size": null, "description": "Depth-bucket sorted linked list of rasterizer polygon draw commands.", "module_name": "-"}, {"id": 107, "dos_address": "-", "win_address": "0x0063c5c8", "name": "g_pLisaTextureSheets", "type": "uint8_t**", "size": null, "description": "Table of loaded texture base pointers (Track, Cars, Lights, Smoke).", "module_name": "-"}, {"id": 94, "dos_address": "-", "win_address": "0x0063c5cc", "name": "g_LisaVisibleObjects", "type": "int**", "size": null, "description": "Array of pointers to visible objects from frustum culling.", "module_name": "-"}, {"id": 92, "dos_address": "-", "win_address": "0x0063c5f0", "name": "g_LisaCamera", "type": "LisaCamera*", "size": null, "description": "Lisa 3D camera state, matrices, and viewport parameters.", "module_name": "-"}, {"id": 95, "dos_address": "-", "win_address": "0x0063c5fc", "name": "g_LisaVisibleSubmeshes", "type": "int**", "size": null, "description": "Array of visible submeshes and projected screen vertices.", "module_name": "-"}], "structs": [{"id": 15, "name": "CarPhysicsState", "size": 124, "description": "", "notes": "", "module_name": "-", "fields": [{"offset": 0, "offset_hex": "0x00", "type": "double", "name": "engine_power", "size": null, "description": "Mass / power scaled by difficulty mode"}, {"offset": 8, "offset_hex": "0x08", "type": "double", "name": "acceleration", "size": null, "description": "Forward traction acceleration"}, {"offset": 16, "offset_hex": "0x10", "type": "double", "name": "top_speed", "size": null, "description": "Terminal velocity clamp"}, {"offset": 24, "offset_hex": "0x18", "type": "double", "name": "steering_rate", "size": null, "description": "Turning responsiveness"}, {"offset": 32, "offset_hex": "0x20", "type": "double", "name": "brake_force", "size": null, "description": "Deceleration coefficient"}, {"offset": 40, "offset_hex": "0x28", "type": "double", "name": "turbo_boost", "size": null, "description": "Turbo propulsion multiplier"}, {"offset": 48, "offset_hex": "0x30", "type": "double", "name": "suspension_k", "size": null, "description": "Spring rate"}, {"offset": 56, "offset_hex": "0x38", "type": "double", "name": "damping_c", "size": null, "description": "Shock absorber damping"}, {"offset": 64, "offset_hex": "0x40", "type": "double", "name": "collision_radius", "size": null, "description": "Spherical bounding volume"}, {"offset": 72, "offset_hex": "0x48", "type": "int32_t", "name": "mass_integer", "size": null, "description": "Fixed-point mass value"}, {"offset": 96, "offset_hex": "0x60", "type": "int32_t", "name": "wheel_fl_y", "size": null, "description": "Front-left wheel elevation"}, {"offset": 104, "offset_hex": "0x68", "type": "int32_t", "name": "wheel_fr_y", "size": null, "description": "Front-right wheel elevation"}, {"offset": 112, "offset_hex": "0x70", "type": "int32_t", "name": "wheel_rl_y", "size": null, "description": "Rear-left wheel elevation"}, {"offset": 120, "offset_hex": "0x78", "type": "int32_t", "name": "wheel_rr_y", "size": null, "description": "Rear-right wheel elevation"}]}, {"id": 14, "name": "MshPolygon", "size": 44, "description": "", "notes": "", "module_name": "-", "fields": [{"offset": 0, "offset_hex": "0x00", "type": "uint32_t", "name": "header", "size": null, "description": "Opcode in low byte (0x11, 0x12, 0x13, 0x15, 0x16, 0x17), flags in high 24 bits"}, {"offset": 4, "offset_hex": "0x04", "type": "uint32_t", "name": "vi0", "size": null, "description": "Index of vertex 0 in submesh vertex buffer"}, {"offset": 8, "offset_hex": "0x08", "type": "uint32_t", "name": "vi1", "size": null, "description": "Index of vertex 1 in submesh vertex buffer"}, {"offset": 12, "offset_hex": "0x0C", "type": "uint32_t", "name": "vi2", "size": null, "description": "Index of vertex 2 in submesh vertex buffer"}, {"offset": 16, "offset_hex": "0x10", "type": "int32_t", "name": "tu0", "size": null, "description": "Vertex 0 U texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)"}, {"offset": 20, "offset_hex": "0x14", "type": "int32_t", "name": "tv0", "size": null, "description": "Vertex 0 V texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)"}, {"offset": 24, "offset_hex": "0x18", "type": "int32_t", "name": "tu1", "size": null, "description": "Vertex 1 U texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)"}, {"offset": 28, "offset_hex": "0x1C", "type": "int32_t", "name": "tv1", "size": null, "description": "Vertex 1 V texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)"}, {"offset": 32, "offset_hex": "0x20", "type": "int32_t", "name": "tu2", "size": null, "description": "Vertex 2 U texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)"}, {"offset": 36, "offset_hex": "0x24", "type": "int32_t", "name": "tv2", "size": null, "description": "Vertex 2 V texture coordinate (8.8 fixed-point, divide by 65536.0f to normalize, or 256.0f for texels)"}, {"offset": 40, "offset_hex": "0x28", "type": "uint32_t", "name": "extra", "size": null, "description": "Texture page byte offset within .TEX file (page_index * 65536)"}]}, {"id": 13, "name": "PlcObject", "size": 20, "description": "", "notes": "", "module_name": "-", "fields": [{"offset": 0, "offset_hex": "0x00", "type": "int32_t", "name": "submesh_offset", "size": null, "description": "Offset in 4-byte dwords into .MSH geometry"}, {"offset": 4, "offset_hex": "0x04", "type": "int32_t", "name": "model_type", "size": null, "description": "Scenery / collision model archetype (e.g. 300, 2, 3)"}, {"offset": 8, "offset_hex": "0x08", "type": "int32_t", "name": "pos_x", "size": null, "description": "World X position"}, {"offset": 12, "offset_hex": "0x0C", "type": "int32_t", "name": "pos_y", "size": null, "description": "World Y elevation"}, {"offset": 16, "offset_hex": "0x10", "type": "int32_t", "name": "pos_z", "size": null, "description": "World Z position"}]}, {"id": 18, "name": "PosKeyframe", "size": 24, "description": "", "notes": "", "module_name": "-", "fields": [{"offset": 0, "offset_hex": "0x00", "type": "int32_t", "name": "pos_x", "size": null, "description": "X position delta"}, {"offset": 4, "offset_hex": "0x04", "type": "int32_t", "name": "pos_y", "size": null, "description": "Y elevation delta"}, {"offset": 8, "offset_hex": "0x08", "type": "int32_t", "name": "pos_z", "size": null, "description": "Z position delta"}, {"offset": 12, "offset_hex": "0x0C", "type": "int32_t", "name": "rot_x", "size": null, "description": "Pitch angle (tenths of degree)"}, {"offset": 16, "offset_hex": "0x10", "type": "int32_t", "name": "rot_y", "size": null, "description": "Yaw angle (tenths of degree)"}, {"offset": 20, "offset_hex": "0x14", "type": "int32_t", "name": "rot_z", "size": null, "description": "Roll angle (tenths of degree)"}]}, {"id": 11, "name": "SrfCell", "size": 12, "description": "", "notes": "", "module_name": "-", "fields": [{"offset": 0, "offset_hex": "0x00", "type": "int32_t", "name": "table2_offset", "size": null, "description": "Byte offset into table2 (divide by 4)"}, {"offset": 4, "offset_hex": "0x04", "type": "int32_t", "name": "table1_offset", "size": null, "description": "Byte offset into table1 (divide by 4)"}, {"offset": 8, "offset_hex": "0x08", "type": "uint16_t", "name": "table1_count", "size": null, "description": "Number of triangles intersecting cell"}, {"offset": 10, "offset_hex": "0x0A", "type": "uint16_t", "name": "table2_count", "size": null, "description": "Number of secondary entities"}]}, {"id": 10, "name": "SrfHeader", "size": 36, "description": "", "notes": "", "module_name": "-", "fields": [{"offset": 0, "offset_hex": "0x00", "type": "int32_t", "name": "grid_cells_x", "size": null, "description": "Grid cells along X (200)"}, {"offset": 4, "offset_hex": "0x04", "type": "int32_t", "name": "grid_cells_z", "size": null, "description": "Grid cells along Z (200)"}, {"offset": 8, "offset_hex": "0x08", "type": "int32_t", "name": "cell_size_z", "size": null, "description": "World dimension of cell Z (512)"}, {"offset": 12, "offset_hex": "0x0C", "type": "int32_t", "name": "cell_size_x", "size": null, "description": "World dimension of cell X (512)"}, {"offset": 16, "offset_hex": "0x10", "type": "int32_t", "name": "grid_stride_x", "size": null, "description": "Spatial index stride X (101)"}, {"offset": 20, "offset_hex": "0x14", "type": "int32_t", "name": "grid_stride_z", "size": null, "description": "Spatial index stride Z (101)"}, {"offset": 24, "offset_hex": "0x18", "type": "int32_t", "name": "triangle_count", "size": null, "description": "Total surface collision triangles"}, {"offset": 28, "offset_hex": "0x1C", "type": "int32_t", "name": "table1_count", "size": null, "description": "Primary index buffer integer count"}, {"offset": 32, "offset_hex": "0x20", "type": "int32_t", "name": "table2_count", "size": null, "description": "Secondary index buffer integer count"}]}, {"id": 12, "name": "SrfTriangle", "size": 24, "description": "", "notes": "", "module_name": "-", "fields": [{"offset": 0, "offset_hex": "0x00", "type": "int32_t", "name": "x_base", "size": null, "description": "Base apex X coordinate"}, {"offset": 4, "offset_hex": "0x04", "type": "int32_t", "name": "z_base", "size": null, "description": "Base apex Z coordinate"}, {"offset": 8, "offset_hex": "0x08", "type": "int32_t", "name": "slope1", "size": null, "description": "16.16 fixed-point slope dx1/dz"}, {"offset": 12, "offset_hex": "0x0C", "type": "int32_t", "name": "slope2", "size": null, "description": "16.16 fixed-point slope dx2/dz"}, {"offset": 16, "offset_hex": "0x10", "type": "int32_t", "name": "flags_and_dz", "size": null, "description": "Low 16 bits = dz (int16_t), High 16 bits = submesh polygon dword offset"}, {"offset": 20, "offset_hex": "0x14", "type": "int32_t", "name": "v_ptr", "size": null, "description": "Byte offset into .PLC placed object array (obj_idx = v_ptr / 42)"}]}, {"id": 16, "name": "TrackSplineNode", "size": 75, "description": "", "notes": "", "module_name": "-", "fields": [{"offset": 0, "offset_hex": "0x00", "type": "uint8_t", "name": "type", "size": null, "description": "Node type identifier"}, {"offset": 1, "offset_hex": "0x01", "type": "uint8_t", "name": "code", "size": null, "description": "Road code passed from .TRI"}, {"offset": 2, "offset_hex": "0x02", "type": "int32_t", "name": "left_x", "size": null, "description": "Left rail coordinate X (+ 0x6400)"}, {"offset": 6, "offset_hex": "0x06", "type": "int32_t", "name": "left_y", "size": null, "description": "Left rail coordinate Y"}, {"offset": 10, "offset_hex": "0x0A", "type": "int32_t", "name": "left_z", "size": null, "description": "Left rail coordinate Z (+ 0x6400)"}, {"offset": 14, "offset_hex": "0x0E", "type": "int32_t", "name": "right_x", "size": null, "description": "Right rail coordinate X (+ 0x6400)"}, {"offset": 18, "offset_hex": "0x12", "type": "int32_t", "name": "right_y", "size": null, "description": "Right rail coordinate Y"}, {"offset": 22, "offset_hex": "0x16", "type": "int32_t", "name": "right_z", "size": null, "description": "Right rail coordinate Z (+ 0x6400)"}, {"offset": 42, "offset_hex": "0x2A", "type": "boundary padding\n    float", "name": "heading", "size": null, "description": "Tangent heading angle in radians"}, {"offset": 74, "offset_hex": "0x4A", "type": "Secondary attributes\n    uint8_t", "name": "fork_flag", "size": null, "description": "Branching directive (0 = mainline, 1 = left, 2 = right)"}]}, {"id": 17, "name": "TriChunk", "size": 500, "description": "", "notes": "", "module_name": "-", "fields": [{"offset": 0, "offset_hex": "0x00", "type": "uint8_t", "name": "road_code", "size": null, "description": "Surface material code"}, {"offset": 1, "offset_hex": "0x01", "type": "int16_t", "name": "left_vertex", "size": null, "description": "Submesh vertex index for left boundary"}, {"offset": 23, "offset_hex": "0x17", "type": "Secondary surface attributes\n    int16_t", "name": "right_vertex", "size": null, "description": "Submesh vertex index for right boundary"}, {"offset": 109, "offset_hex": "0x6D", "type": "Internal friction parameters\n    uint8_t", "name": "fork_flag", "size": null, "description": "Branching directive (0 = normal, 1 = left, 2 = right)"}]}], "deviations": [{"id": "DEV-001", "category": "FIX_CAT_NOCLIP", "address": "0x00412fc0", "description": "Surface raycast out-of-bounds cell crash & fall-through", "toggle": "fixes->fix_noclip"}, {"id": "DEV-002", "category": "FIX_CAT_ELEVATION", "address": "0x0041d190", "description": "Vehicle tire ground alignment offset (prevents floating/sinking)", "toggle": "fixes->fix_elevation"}, {"id": "DEV-003", "category": "FIX_CAT_NOCLIP", "address": "0x00424570", "description": "Mountain wall climbing & steep gradient adhesion clamp", "toggle": "fixes->fix_noclip"}, {"id": "DEV-004", "category": "FIX_CAT_CAMERA", "address": "0x00436990", "description": "Right-handed camera basis vector normalization", "toggle": "fixes->fix_camera"}, {"id": "DEV-005", "category": "FIX_CAT_RENDERER", "address": "0x004466d0", "description": "1/Z depth buffering precision vs 6,000 depth buckets", "toggle": "renderer->options.authentic_depth_buckets"}, {"id": "DEV-006", "category": "FIX_CAT_AUDIO", "address": "0x0041f9b0", "description": "High-RPM engine pitch modulation overflow protection", "toggle": "fixes->fix_audio"}], "watcom": {"source_files": [{"name": "getsurf.c", "size": 3392}], "object_files": [{"name": "getsurf.obj", "size": 2002}, {"name": "getsurf_coff.obj", "size": 1440}]}};
+    let currentFunctions = [...PROJECT_DATA.functions];
+    let currentStatusFilter = 'all';
+    let currentSort = { column: 'status', asc: true };
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+      
+      const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (targetBtn) targetBtn.classList.add('active');
+      
+      const targetView = document.getElementById('tab-' + tabId);
+      if (targetView) targetView.classList.add('active');
+    }
+
+    function renderFunctionsTable() {
+      const tbody = document.getElementById('functionsTableBody');
+      if (!tbody) return;
+
+      if (currentFunctions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 32px; color: var(--text-dim);">No functions match current filters</td></tr>';
+        document.getElementById('resultsCount').innerText = 'Showing 0 of ' + PROJECT_DATA.functions.length;
+        return;
+      }
+
+      let html = '';
+      for (const fn of currentFunctions) {
+        const statusClass = 'status-' + fn.status;
+        const fidClass = fn.fidelity ? 'fidelity-' + fn.fidelity : '';
+        const fidText = fn.fidelity && fn.fidelity !== '-' ? '<span class="fidelity-tag ' + fidClass + '">' + fn.fidelity + '</span>' : '<span style="color: var(--text-dim);">-</span>';
+        
+        html += `
+          <tr>
+            <td><span class="status-badge ${statusClass}">${fn.status}</span></td>
+            <td>
+              <div class="symbol-name">${fn.symbol_name}</div>
+              <div class="ghidra-label">${fn.original_ghidra_name}</div>
+            </td>
+            <td><span class="addr" onclick="copyText('${fn.dos_address}')">${fn.dos_address}</span></td>
+            <td><span class="addr" onclick="copyText('${fn.win_address}')">${fn.win_address}</span></td>
+            <td class="font-mono" style="color: #cbd5e1;">${fn.module_name}</td>
+            <td>${fidText}</td>
+            <td><span class="port-loc">${fn.port_location}</span></td>
+            <td>
+              <div class="purpose-text">${fn.purpose || '<span style="color: var(--text-dim);">No description</span>'}</div>
+            </td>
+          </tr>
+        `;
+      }
+      tbody.innerHTML = html;
+      document.getElementById('resultsCount').innerText = `Showing ${currentFunctions.length} of ${PROJECT_DATA.functions.length}`;
+    }
+
+    function filterFunctions() {
+      const query = (document.getElementById('funcSearch').value || '').toLowerCase().trim();
+      const modFilter = document.getElementById('moduleFilter').value;
+      const fidFilter = document.getElementById('fidelityFilter').value;
+
+      currentFunctions = PROJECT_DATA.functions.filter(fn => {
+        // Status filter
+        if (currentStatusFilter !== 'all' && fn.status !== currentStatusFilter) {
+          return false;
+        }
+        // Module filter
+        if (modFilter !== 'all' && fn.module_name !== modFilter) {
+          return false;
+        }
+        // Fidelity filter
+        if (fidFilter !== 'all' && fn.fidelity !== fidFilter) {
+          return false;
+        }
+        // Search query
+        if (query) {
+          const match = 
+            fn.symbol_name.toLowerCase().includes(query) ||
+            fn.original_ghidra_name.toLowerCase().includes(query) ||
+            fn.dos_address.toLowerCase().includes(query) ||
+            fn.win_address.toLowerCase().includes(query) ||
+            fn.module_name.toLowerCase().includes(query) ||
+            fn.port_location.toLowerCase().includes(query) ||
+            fn.purpose.toLowerCase().includes(query) ||
+            fn.notes.toLowerCase().includes(query);
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      applySort();
+      renderFunctionsTable();
+    }
+
+    function setStatusFilter(status, btn) {
+      currentStatusFilter = status;
+      document.querySelectorAll('.filter-group .pill-btn').forEach(b => {
+        if (b.innerText.toLowerCase().includes('all') || 
+            b.innerText.toLowerCase().includes('matching') || 
+            b.innerText.toLowerCase().includes('decompiled') || 
+            b.innerText.toLowerCase().includes('analyzed')) {
+          b.classList.remove('active');
+        }
+      });
+      if (btn) btn.classList.add('active');
+      filterFunctions();
+    }
+
+    function filterByModule(moduleName) {
+      switchTab('functions');
+      document.getElementById('moduleFilter').value = moduleName;
+      filterFunctions();
+    }
+
+    function resetFilters() {
+      document.getElementById('funcSearch').value = '';
+      document.getElementById('moduleFilter').value = 'all';
+      document.getElementById('fidelityFilter').value = 'all';
+      currentStatusFilter = 'all';
+      document.querySelectorAll('.filter-group .pill-btn').forEach((b, idx) => {
+        b.classList.toggle('active', idx === 0);
+      });
+      filterFunctions();
+    }
+
+    function sortTable(column) {
+      if (currentSort.column === column) {
+        currentSort.asc = !currentSort.asc;
+      } else {
+        currentSort.column = column;
+        currentSort.asc = true;
+      }
+      applySort();
+      renderFunctionsTable();
+    }
+
+    function applySort() {
+      const col = currentSort.column;
+      const asc = currentSort.asc;
+
+      currentFunctions.sort((a, b) => {
+        let vA = a[col] || '';
+        let vB = b[col] || '';
+
+        if (col === 'status') {
+          const order = { 'matching': 1, 'decompiled': 2, 'analyzed': 3, 'unidentified': 4 };
+          vA = order[vA] || 99;
+          vB = order[vB] || 99;
+        }
+
+        if (vA < vB) return asc ? -1 : 1;
+        if (vA > vB) return asc ? 1 : -1;
+        return 0;
+      });
+    }
+
+    function filterGlobals() {
+      const q = (document.getElementById('globalSearch').value || '').toLowerCase().trim();
+      const rows = document.querySelectorAll('#globalsTableBody tr');
+      let visible = 0;
+      rows.forEach(r => {
+        const text = r.getAttribute('data-text') || '';
+        const match = !q || text.includes(q);
+        r.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      document.getElementById('globalsCount').innerText = `Showing ${visible} of ${rows.length}`;
+    }
+
+    function filterStructs() {
+      const q = (document.getElementById('structSearch').value || '').toLowerCase().trim();
+      const cards = document.querySelectorAll('.struct-card');
+      cards.forEach(c => {
+        const name = c.getAttribute('data-name') || '';
+        const inner = c.innerText.toLowerCase();
+        const match = !q || name.includes(q) || inner.includes(q);
+        c.style.display = match ? '' : 'none';
+      });
+    }
+
+    function toggleAllStructs(open) {
+      document.querySelectorAll('.struct-card').forEach(c => {
+        c.classList.toggle('open', open);
+      });
+    }
+
+    function copyText(text) {
+      if (!text || text === '-') return;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied ' + text + ' to clipboard!');
+      }).catch(() => {});
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => {
+        t.classList.remove('show');
+      }, 2000);
+    }
+
+    // Keyboard shortcut: '/' focuses search
+    window.addEventListener('keydown', e => {
+      if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        switchTab('functions');
+        const s = document.getElementById('funcSearch');
+        if (s) {
+          s.focus();
+          s.select();
+        }
+      } else if (e.key === 'Escape') {
+        const s = document.getElementById('funcSearch');
+        if (s && document.activeElement === s) {
+          s.value = '';
+          filterFunctions();
+          s.blur();
+        }
+      }
+    });
+
+    // Initial render
+    document.addEventListener('DOMContentLoaded', () => {
+      applySort();
+      renderFunctionsTable();
+    });
+  </script>
+</body>
+</html>

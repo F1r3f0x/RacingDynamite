@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Interactive Decompilation Progress Dashboard & Binary Diffing Tooling**:
+  - Implemented standalone, zero-dependency HTML progress dashboard (`dashboard.html`, `docs/dashboard.html`) tracking all 74 functions, 8 modules, 9 data structures (69 fields), 62 globals, and 6 FCTS deviations.
+  - Built `tools/generate_dashboard.py` and added `dashboard` subcommand to `tools/db.py` (`uv run python tools/db.py dashboard`).
+  - Added `tools/diff_func.py` for Capstone-powered bytecode and instruction-by-instruction diffing between `MAINDOS_32BIT.EXE` and Open Watcom compiled objects.
+  - Decompiled authentic Watcom C `Surface_Raycast` (`MAINDOS @ 0x00020814`, `IGN_WIN @ 0x00412fc0`) in `decomp/src/getsurf.c` targeting `build/decomp/getsurf.obj`.
+  - Updated `tools/README.md` with usage instructions and CLI workflows.
 - **Phase 5: Dynamic Chase Camera & Authentic Audio Subsystem**:
   - Multi-mode dynamic chase camera (`src/renderer/camera.c`) with 5 views (Classic Isometric, Close Chase, Far Chase, Bumper View, Free Orbit) supporting dynamic lookahead along velocity, 0.125 spring-damper azimuth lag, shortest-path angle wrapping, and terrain slope pitch adaptation (`0x0043c910`, `DEV-004`).
   - 32-channel software voice mixer (`src/audio/audio.c`) with 16.16 fixed-point linear resampling, equal-power stereo panning, master volume attenuation, and saturation clamping (`0x00459010`, `0x0041fad0`).
