@@ -46,6 +46,9 @@ docs/extracted_bitmaps/
 
 # 3. Third-party Libraries & Precompiled Binaries
 /third_party/sdl2/
+/tools/watcom/
+/tools/objdiff/
+/tools/bin/
 *.dll
 *.lib
 *.a
