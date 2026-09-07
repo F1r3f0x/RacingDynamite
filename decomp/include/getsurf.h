@@ -81,4 +81,10 @@ extern int g_SRF_GridStrideZ;
 void Surface_FreeSRF(void);
 int Surface_GetTriangleHeight(SurfaceHeightContext *ctx);
 
+void Surface_TestTrianglePositiveDZ(int count, int qx, int qz, SrfTriangle **table, int *out_hits);
+#pragma aux Surface_TestTrianglePositiveDZ parm [ecx] [edx] [ebx] [esi] [edi] modify [eax ebx edx esi edi];
+
+void Surface_TestTriangleNegativeDZ(int count, int qx, int qz, SrfTriangle **table, int *out_hits);
+#pragma aux Surface_TestTriangleNegativeDZ parm [ecx] [edx] [ebx] [esi] [edi] modify [eax ebx edx esi edi];
+
 #endif /* GETSURF_H */

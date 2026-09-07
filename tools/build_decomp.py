@@ -38,6 +38,7 @@ def compile_file(src_path: Path):
     # -3r : 386 register calling convention (eax, edx, ebx, ecx)
     # -s  : omit stack check calls (__CHK)
     # -omaxet : optimize for maximum execution time, loops, frame pointers
+    # -eoc : emit standard COFF object file for objdiff compatibility
     # -zq : quiet
     # -fo : output object path
     cmd = [
@@ -45,6 +46,7 @@ def compile_file(src_path: Path):
         "-3r",
         "-s",
         "-omaxet",
+        "-eoc",
         "-zq",
         f"-fo={obj_path}",
         str(src_path)
