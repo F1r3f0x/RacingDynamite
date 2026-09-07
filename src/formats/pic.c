@@ -1,6 +1,6 @@
 /*
  * Racing Dynamite - Modern open-source source port of Ignition (1997)
- * Copyright (C) 2026 Racing Dynamite Contributors
+ * Copyright (C) 2026 Patricio Labin Correa (@F1r3f0x)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

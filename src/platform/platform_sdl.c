@@ -1,6 +1,6 @@
 /*
  * Racing Dynamite - Modern open-source source port of Ignition (1997)
- * Copyright (C) 2026 Racing Dynamite Contributors
+ * Copyright (C) 2026 Patricio Labin Correa (@F1r3f0x)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,11 +123,70 @@ void Platform_Shutdown(void) {
 }
 
 bool Platform_PollEvents(PlatformInput *out_input) {
+    if (out_input) {
+        out_input->key_pressed = 0;
+        out_input->nav_up = false;
+        out_input->nav_down = false;
+        out_input->nav_left = false;
+        out_input->nav_right = false;
+        out_input->nav_confirm = false;
+        out_input->nav_cancel = false;
+        out_input->toggle_textures = false;
+        out_input->toggle_waypoints = false;
+        out_input->cycle_camera = false;
+        out_input->reset_camera = false;
+    }
     SDL_Event ev;
     while (SDL_PollEvent(&ev)) {
         if (ev.type == SDL_QUIT) {
             if (out_input) out_input->quit_requested = true;
             return false;
+        }
+        if (ev.type == SDL_KEYDOWN && out_input) {
+            out_input->key_pressed = ev.key.keysym.sym;
+            // Only trigger on initial press (not repeat)
+            if (ev.key.repeat == 0) {
+                switch (ev.key.keysym.sym) {
+                    case SDLK_UP:
+                    case SDLK_w:
+                        out_input->nav_up = true;
+                        break;
+                    case SDLK_DOWN:
+                    case SDLK_s:
+                        out_input->nav_down = true;
+                        break;
+                    case SDLK_LEFT:
+                    case SDLK_a:
+                        out_input->nav_left = true;
+                        break;
+                    case SDLK_RIGHT:
+                    case SDLK_d:
+                        out_input->nav_right = true;
+                        break;
+                    case SDLK_RETURN:
+                    case SDLK_KP_ENTER:
+                    case SDLK_SPACE:
+                        out_input->nav_confirm = true;
+                        break;
+                    case SDLK_ESCAPE:
+                        out_input->nav_cancel = true;
+                        break;
+                    case SDLK_t:
+                        out_input->toggle_textures = true;
+                        break;
+                    case SDLK_p:
+                    case SDLK_v:
+                        out_input->toggle_waypoints = true;
+                        break;
+                    case SDLK_c:
+                        out_input->cycle_camera = true;
+                        break;
+                    case SDLK_r:
+                    case SDLK_HOME:
+                        out_input->reset_camera = true;
+                        break;
+                }
+            }
         }
     }
 
@@ -142,6 +201,13 @@ bool Platform_PollEvents(PlatformInput *out_input) {
         out_input->key_turbo      = keys[SDL_SCANCODE_SPACE];
         out_input->key_menu       = keys[SDL_SCANCODE_ESCAPE];
         out_input->key_enter      = keys[SDL_SCANCODE_RETURN];
+
+        out_input->move_forward   = keys[SDL_SCANCODE_W];
+        out_input->move_backward  = keys[SDL_SCANCODE_S];
+        out_input->move_left      = keys[SDL_SCANCODE_A];
+        out_input->move_right     = keys[SDL_SCANCODE_D];
+        out_input->move_up        = keys[SDL_SCANCODE_Q] || keys[SDL_SCANCODE_R] || keys[SDL_SCANCODE_PAGEUP];
+        out_input->move_down      = keys[SDL_SCANCODE_E] || keys[SDL_SCANCODE_F] || keys[SDL_SCANCODE_PAGEDOWN];
     }
 
     return true;

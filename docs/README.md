@@ -19,7 +19,13 @@ Welcome to the central technical documentation and reverse engineering knowledge
 
 ---
 
-## 2. Documentation Directory
+## 2. Master Roadmap
+
+* 🎯 **[Master Implementation Roadmap](roadmap.md)**: Comprehensive 8-phase reverse engineering and implementation plan to complete the source port.
+
+---
+
+## 3. Documentation Directory
 
 ### 📂 File Formats ([`docs/formats/`](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats))
 Detailed binary structure tables, byte offsets, and parser specifications for all game assets:
@@ -28,9 +34,13 @@ Detailed binary structure tables, byte offsets, and parser specifications for al
 * **[`.PIC` (Images & Textures)](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats/pic.md)**: 846-byte header + embedded 256-color palette + uncompressed 8bpp pixel data.
 * **[`.SRF` (Surface & Physics)](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats/srf.md)**: Track road elevation, heightfields, and collision physics (`getsurf.c`).
 * **[`.MSH` & `.TRI` (3D Models & Meshes)](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats/msh_tri.md)**: Track & car vertex positions and triangle index lists.
-* **[`.POS` (Path Nodes & AI Waypoints)](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats/pos.md)**: Camera paths, checkpoint gates, and AI waypoint splines.
+* **[`.TRI` (Track Splines & Road Ribbons)](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats/tri.md)**: Road boundary vertex indices, road width, and circuit branch directives.
+* **[`.POS` (Scenery Object Keyframe Animations)](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats/pos.md)**: Delta keyframe streams for dynamic track scenery objects.
 * **[`.TEX` & `.TAB` (Textures & Shading Tables)](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats/tex_tab.md)**: 1024x1024 texture sheets, distance fog, lighting, and shadow tables.
 * **[`.LFT` (Font Glyphs)](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats/lft.md)**: 2D bitmap lettering fonts used across menus and HUD.
+* **[`.PAN` (Sky Panoramas)](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats/pan.md)**: 64KB raw 256x256 cylindrical horizon background textures.
+* **[`ENGINE.INF` (Engine Acoustic Curves)](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats/inf.md)**: 800-byte speed/RPM volume and pitch modulation tables.
+* **[`.CDP` (Cinematics & FMVs)](file:///c:/Stuff/Proyects/RacingDynamite/docs/formats/cdp.md)**: RLE delta-frame animation format for intro sequences.
 
 ### ⚙️ Engine Subsystems ([`docs/engine/`](file:///c:/Stuff/Proyects/RacingDynamite/docs/engine))
 Architectural breakdowns of the core engine modules:
@@ -38,8 +48,11 @@ Architectural breakdowns of the core engine modules:
 * **[Engine Architecture](file:///c:/Stuff/Proyects/RacingDynamite/docs/engine/architecture.md)**: Overall memory model, coordinates, fixed-point math, and subsystem overview.
 * **[Game Loop & State Machine](file:///c:/Stuff/Proyects/RacingDynamite/docs/engine/game_loop.md)**: State transitions (`Logos` $\rightarrow$ `Menus` $\rightarrow$ `Loading` $\rightarrow$ `Race`), frame tick dispatch.
 * **[Surface & Physics Engine](file:///c:/Stuff/Proyects/RacingDynamite/docs/engine/surface_physics.md)**: Vehicle suspension, ray-casting surface collision, friction, turbo mechanics.
+* **[Track Splines & AI Waypoints](file:///c:/Stuff/Proyects/RacingDynamite/docs/engine/ai_waypoints.md)**: Road chunk sequencing, spline extraction, and AI steering simulation.
 * **[Lisa3D Rendering Pipeline](file:///c:/Stuff/Proyects/RacingDynamite/docs/engine/renderer.md)**: 3D perspective projection, polygon clipping, and 8-bit span rasterization.
-* **[Audio Subsystem](file:///c:/Stuff/Proyects/RacingDynamite/docs/engine/audio.md)**: Sound effect pooling and CD-DA / OGG music track playback.
+* **[Dynamic Chase Camera](file:///c:/Stuff/Proyects/RacingDynamite/docs/engine/camera.md)**: Multi-mode follow chase camera, velocity lookahead, 0.125 lag damping, and hill pitch adaptation.
+* **[Audio Subsystem](file:///c:/Stuff/Proyects/RacingDynamite/docs/engine/audio.md)**: Sound effect pooling, 32-channel software voice mixer, and CD-DA / OGG music track playback.
+* **[Logging & Telemetry Subsystem](file:///c:/Stuff/Proyects/RacingDynamite/docs/engine/logging.md)**: Dual console/disk file logging, in-race telemetry capture, and runtime diagnostics.
 
 ### 🔍 Ghidra Reverse Engineering Maps ([`docs/ghidra/`](file:///c:/Stuff/Proyects/RacingDynamite/docs/ghidra))
 Tracking reverse engineered symbols and memory addresses:
@@ -48,9 +61,14 @@ Tracking reverse engineered symbols and memory addresses:
 * **[Global Variables](file:///c:/Stuff/Proyects/RacingDynamite/docs/ghidra/globals.md)**: Global state variables, pointers, and game flags.
 * **[Data Structures](file:///c:/Stuff/Proyects/RacingDynamite/docs/ghidra/structs.md)**: Reconstructed C structs with exact member byte offsets.
 
+### 📋 Fidelity & Change Tracking ([`docs/tracking/`](file:///c:/Stuff/Proyects/RacingDynamite/docs/tracking))
+Methodology, provenance standards, and divergence tracking:
+
+* **[FCTS Master Plan](file:///c:/Stuff/Proyects/RacingDynamite/docs/tracking/fidelity_system_plan.md)**: Master technical specification for Phase 4, covering tooling hygiene, Lisa3D software authenticity vs multi-backend, granular per-category game fixes, and automated parity audits.
+
 ---
 
-## 3. Original Binary Signatures
+## 4. Original Binary Signatures
 
 | Binary | Platform | Size | SHA-256 Checksum | Notes |
 | :--- | :--- | :--- | :--- | :--- |

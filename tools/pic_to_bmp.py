@@ -14,8 +14,8 @@ def pic_to_bmp(pic_path, bmp_path):
     width = struct.unpack("<H", data[6:8])[0]
     height = struct.unpack("<H", data[8:10])[0]
     
-    # Check if palette is present at offset 78 (78..846 = 768 bytes)
-    palette_data = data[78:846]
+    # Palette is present at offset 72..840 (768 bytes = 256 * 3)
+    palette_data = data[72:840]
     pixel_data = data[846:]
     
     expected_pixels = width * height

@@ -1,6 +1,6 @@
 /*
  * Racing Dynamite - Modern open-source source port of Ignition (1997)
- * Copyright (C) 2026 Racing Dynamite Contributors
+ * Copyright (C) 2026 Patricio Labin Correa (@F1r3f0x)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ extern "C" {
 
 typedef struct {
     bool quit_requested;
+
+    // Continuous button states (for in-race driving controls)
     bool key_up;
     bool key_down;
     bool key_left;
@@ -38,6 +40,28 @@ typedef struct {
     bool key_turbo;
     bool key_menu;
     bool key_enter;
+
+    // Camera translation controls (WASD + QE / RF)
+    bool move_forward;
+    bool move_backward;
+    bool move_left;
+    bool move_right;
+    bool move_up;
+    bool move_down;
+
+    // Single-frame impulses (for menus and toggles, fires once per keypress)
+    bool nav_up;
+    bool nav_down;
+    bool nav_left;
+    bool nav_right;
+    bool nav_confirm;
+    bool nav_cancel;
+    bool toggle_textures;     // 'T' key toggle
+    bool toggle_waypoints;    // 'P' or 'V' key toggle
+    bool cycle_camera;        // 'C' key cycle view modes
+    bool reset_camera;        // 'R' or Home key reset
+
+    int  key_pressed;         // Key pressed event (e.g. '1'-'7', '0', ' ')
 } PlatformInput;
 
 // Initialize platform window and rendering context

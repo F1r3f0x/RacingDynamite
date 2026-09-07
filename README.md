@@ -23,6 +23,7 @@ To run the game, you must supply game assets from a legally purchased copy of *I
 - **Accurate 1997 Simulation**: Complete reverse-engineering of vehicle physics, surface interaction (`getsurf`), AI waypoints (`.POS`), and track elevation (`.SRF`).
 - **Software Rendering Parity**: Authentic recreation of UDS's "Lisa3D" software rasterizer and 2D blitter.
 - **Thoroughly Documented**: Every binary structure and engine subsystem is documented under [`docs/`](docs/).
+- **Implementation Roadmap**: Track completion milestones in [`docs/roadmap.md`](docs/roadmap.md).
 
 ---
 
@@ -96,4 +97,5 @@ RacingDynamite/
 ## License
 
 This project is licensed under the **GNU General Public License v3.0 (GPL-3.0-or-later)**.  
+Copyright (C) 2026 Patricio Labin Correa (@F1r3f0x).  
 See the [`LICENSE`](LICENSE) file for the full license text.

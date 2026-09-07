@@ -1,6 +1,6 @@
 /*
  * Racing Dynamite - Modern open-source source port of Ignition (1997)
- * Copyright (C) 2026 Racing Dynamite Contributors
+ * Copyright (C) 2026 Patricio Labin Correa (@F1r3f0x)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * @brief Parses and unpacks 256-color palette from memory buffer.
+ * @original FUN_00456c40 (IGN_WIN.EXE @ 0x00456c40, lisa3d.c)
+ * @fidelity ADAPTED
+ */
 bool Col_LoadFromMemory(const uint8_t *data, size_t size, Palette256 *out_palette) {
     if (!data || !out_palette || size < sizeof(ColHeader)) {
         return false;
@@ -31,6 +36,11 @@ bool Col_LoadFromMemory(const uint8_t *data, size_t size, Palette256 *out_palett
     return true;
 }
 
+/**
+ * @brief Loads 256-color palette from .COL file.
+ * @original FUN_004574a0 (IGN_WIN.EXE @ 0x004574a0, mem.c)
+ * @fidelity ADAPTED
+ */
 bool Col_LoadFromFile(const char *filepath, Palette256 *out_palette) {
     if (!filepath || !out_palette) return false;
 

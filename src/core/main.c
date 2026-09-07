@@ -1,6 +1,6 @@
 /*
  * Racing Dynamite - Modern open-source source port of Ignition (1997)
- * Copyright (C) 2026 Racing Dynamite Contributors
+ * Copyright (C) 2026 Patricio Labin Correa (@F1r3f0x)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,76 +16,81 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ignition/types.h"
-#include "ignition/formats.h"
-#include "ignition/platform.h"
+#include "ignition/game.h"
+#include "ignition/log.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if !defined(_WIN32)
+#include <strings.h>
+#endif
 
 #define NATIVE_WIDTH  640
 #define NATIVE_HEIGHT 480
 #define WINDOW_SCALE  2
 
+static bool StrCaseEqual(const char *a, const char *b) {
+#if defined(_WIN32)
+    return _stricmp(a, b) == 0;
+#else
+    return strcasecmp(a, b) == 0;
+#endif
+}
+
+/**
+ * @brief Main entry point; parses command-line flags, initializes engine, and executes game loop.
+ * @original FUN_004120a0 (IGN_WIN.EXE @ 0x004120a0, main.c)
+ * @fidelity ADAPTED
+ */
 int main(int argc, char *argv[]) {
     int max_frames = 0;
+    const char *log_path = "racing_dynamite.log";
+    LogLevel min_log_level = LOG_LEVEL_DEBUG;
+
     for (int i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--frames") == 0 && i + 1 < argc) {
-            max_frames = atoi(argv[i + 1]);
+            max_frames = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "--log") == 0 && i + 1 < argc) {
+            log_path = argv[++i];
+        } else if (strcmp(argv[i], "--log-level") == 0 && i + 1 < argc) {
+            i++;
+            if (StrCaseEqual(argv[i], "debug")) min_log_level = LOG_LEVEL_DEBUG;
+            else if (StrCaseEqual(argv[i], "info"))  min_log_level = LOG_LEVEL_INFO;
+            else if (StrCaseEqual(argv[i], "warn"))  min_log_level = LOG_LEVEL_WARN;
+            else if (StrCaseEqual(argv[i], "error")) min_log_level = LOG_LEVEL_ERROR;
         }
     }
 
-    printf("========================================\n");
-    printf("   Ignition (1997) Source Port v0.1     \n");
-    printf("========================================\n");
+    Log_Init(log_path, min_log_level);
+
+    printf("====================================================\n");
+    printf("     Racing Dynamite - Ignition (1997) Source Port  \n");
+    printf("====================================================\n");
+    printf("Navigation:\n");
+    printf("  [ENTER / SPACE] : Start / Confirm Selection\n");
+    printf("  [UP / DOWN]     : Menu Navigation\n");
+    printf("  [LEFT / RIGHT]  : Car / Track Cycling\n");
+    printf("  [ESC]           : Back / Exit\n");
+    printf("====================================================\n\n");
+
+    LOG_INFO("ENGINE", "Starting Racing Dynamite (Log target: %s)", log_path ? log_path : "none");
 
     // Initialize SDL2 window and renderer
-    if (!Platform_Init("Ignition (1997) - Source Port", NATIVE_WIDTH, NATIVE_HEIGHT, WINDOW_SCALE)) {
-        fprintf(stderr, "Failed to initialize platform layer.\n");
+    if (!Platform_Init("Racing Dynamite - Ignition (1997)", NATIVE_WIDTH, NATIVE_HEIGHT, WINDOW_SCALE)) {
+        LOG_ERROR("PLATFORM", "Failed to initialize SDL2 platform layer.");
+        Log_Shutdown();
         return 1;
     }
-    printf("[Platform] SDL2 window initialized (640x480 @ %dx scale).\n", WINDOW_SCALE);
+    LOG_INFO("PLATFORM", "SDL2 window initialized (%dx%d @ %dx scale).", NATIVE_WIDTH, NATIVE_HEIGHT, WINDOW_SCALE);
 
-    // Load global palette
-    Palette256 sys_palette;
-    if (!Col_LoadFromFile("assets/SYS.COL", &sys_palette)) {
-        fprintf(stderr, "[Warning] Could not load assets/SYS.COL. Fallback to embedded palette.\n");
-    } else {
-        printf("[Asset] Loaded assets/SYS.COL successfully.\n");
-    }
-
-    // Load test image (INSTALL.PIC - 640x480 title/installer screen)
-    Image8bpp *splash = Pic_LoadFromFile("assets/INSTALL.PIC");
-    if (!splash) {
-        // Fallback to track preview if INSTALL.PIC isn't present
-        splash = Pic_LoadFromFile("assets/LEVELS/AUSTRIA/AUSTRIA.PIC");
-    }
-
-    if (splash) {
-        printf("[Asset] Loaded splash image: %ux%u.\n", splash->width, splash->height);
-    } else {
-        fprintf(stderr, "[Warning] No splash .PIC found in assets/\n");
-    }
-
-    // Allocate 640x480 8bpp framebuffer
-    uint8_t *framebuffer = (uint8_t *)calloc(NATIVE_WIDTH * NATIVE_HEIGHT, sizeof(uint8_t));
-    if (!framebuffer) {
+    GameContext game;
+    if (!Game_Init(&game)) {
+        LOG_ERROR("ENGINE", "Failed to initialize game context.");
         Platform_Shutdown();
+        Log_Shutdown();
         return 1;
     }
-
-    // Copy splash image to framebuffer if available
-    if (splash) {
-        uint32_t copy_w = splash->width < NATIVE_WIDTH ? splash->width : NATIVE_WIDTH;
-        uint32_t copy_h = splash->height < NATIVE_HEIGHT ? splash->height : NATIVE_HEIGHT;
-        for (uint32_t y = 0; y < copy_h; ++y) {
-            memcpy(framebuffer + y * NATIVE_WIDTH, splash->pixels + y * splash->width, copy_w);
-        }
-        // Use splash palette
-        sys_palette = splash->palette;
-    }
-
-    printf("[Engine] Entering main game loop. Press ESC to exit.\n");
 
     PlatformInput input = {0};
     bool running = true;
@@ -94,46 +99,49 @@ int main(int argc, char *argv[]) {
 
     while (running) {
         // Poll input events
-        if (!Platform_PollEvents(&input)) {
+        if (!Platform_PollEvents(&input) || input.quit_requested) {
             running = false;
             break;
         }
 
-        if (input.quit_requested || input.key_menu) {
+        uint32_t now = Platform_GetTicks();
+        uint32_t delta_ms = (now > last_time) ? (now - last_time) : 16;
+        if (delta_ms > 100) delta_ms = 100; // Clamp lag spike
+        last_time = now;
+
+        // Update game state
+        Game_Update(&game, &input, delta_ms);
+        if (game.current_state == GAME_STATE_QUIT) {
             running = false;
             break;
         }
 
-        // Present current frame
-        Platform_Present8bpp(framebuffer, &sys_palette);
+        // Render current game state
+        Game_Render(&game);
+
+        // Present framebuffer
+        Platform_Present8bpp(game.framebuffer, &game.active_palette);
 
         // Frame timing (~60 FPS)
-        uint32_t now = Platform_GetTicks();
-        uint32_t elapsed = now - last_time;
-        if (elapsed < 16) {
-            Platform_Delay(16 - elapsed);
+        uint32_t frame_end = Platform_GetTicks();
+        uint32_t frame_duration = frame_end - now;
+        if (frame_duration < 16) {
+            Platform_Delay(16 - frame_duration);
         }
-        last_time = Platform_GetTicks();
 
         frame_count++;
-        if (frame_count % 300 == 0) {
-            printf("[Engine] Frame %u rendered.\n", frame_count);
-        }
         if (max_frames > 0 && (int)frame_count >= max_frames) {
-            printf("[Engine] Reached target frame limit (%d frames). Exiting test mode.\n", max_frames);
+            LOG_INFO("ENGINE", "Reached target frame limit (%d frames). Exiting test mode.", max_frames);
             running = false;
             break;
         }
     }
 
-    printf("[Engine] Shutting down...\n");
-
-    if (splash) {
-        Pic_Free(splash);
-    }
-    free(framebuffer);
+    LOG_INFO("ENGINE", "Shutting down application...");
+    Game_Shutdown(&game);
     Platform_Shutdown();
 
-    printf("[Engine] Exited cleanly.\n");
+    LOG_INFO("ENGINE", "Exited cleanly.");
+    Log_Shutdown();
     return 0;
 }

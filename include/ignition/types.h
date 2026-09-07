@@ -1,6 +1,6 @@
 /*
  * Racing Dynamite - Modern open-source source port of Ignition (1997)
- * Copyright (C) 2026 Racing Dynamite Contributors
+ * Copyright (C) 2026 Patricio Labin Correa (@F1r3f0x)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,6 +74,26 @@ typedef struct {
 typedef struct {
     ColorRGB colors[256];
 } Palette256;
+
+// Discrete categories of authentic original bug workarounds
+typedef enum {
+    FIX_CAT_NOCLIP        = (1 << 0), // Mesh fall-through, wall clipping, mountain climbing (DEV-001, DEV-003)
+    FIX_CAT_ELEVATION     = (1 << 1), // Vehicle ground alignment & terrain floating/sinking (DEV-002)
+    FIX_CAT_CAMERA        = (1 << 2), // Right-handed camera basis & boundary clipping (DEV-004)
+    FIX_CAT_AI_PATHING    = (1 << 3), // AI spline transition traps
+    FIX_CAT_AUDIO         = (1 << 4), // High-RPM pitch curve cutoff (DEV-006)
+    FIX_CAT_RENDERER      = (1 << 5), // Polygon sorting & depth buffering (DEV-005)
+} GameFixCategory;
+
+// Granular game fix configuration toggles
+typedef struct {
+    bool fix_noclip;       // [FIXED] vs [AUTHENTIC BUGGY]
+    bool fix_elevation;    // [FIXED] vs [AUTHENTIC BUGGY]
+    bool fix_camera;       // [FIXED] vs [AUTHENTIC BUGGY]
+    bool fix_ai_pathing;   // [FIXED] vs [AUTHENTIC BUGGY]
+    bool fix_audio;        // [FIXED] vs [AUTHENTIC BUGGY]
+    bool fix_renderer;     // [FIXED] vs [AUTHENTIC BUGGY]
+} GameFixOptions;
 
 #ifdef __cplusplus
 }

@@ -32,6 +32,10 @@ All technical documentation resides in `docs/`:
 ```text
 docs/
 ├── README.md               # Master index and technical specification hub
+├── tracking/               # Fidelity & change tracking system (FCTS)
+│   ├── fidelity_strategy.md# Master guideline, header specs & workflow
+│   ├── deviations.md       # Registry of authentic divergences and bug fixes
+│   └── fidelity_system_plan.md # Master Phase 4 implementation specification
 ├── formats/                # Binary file format specifications
 │   ├── col.md              # 256-color palette format (.COL)
 │   ├── pic.md              # 8-bit paletted image format (.PIC)
@@ -62,4 +66,40 @@ docs/
 * **Ghidra MCP Server**: Use the active Ghidra MCP server (`localhost:8080`) to inspect disassembly, decompile, rename functions, add comments, and update symbol databases directly from the agent.
 * **Build System**: CMake with Ninja / GCC or MSVC.
 * **Dependencies**: Managed strictly via `uv` for Python (`pyproject.toml`, `uv.lock`) and CMake for C.
+* **Tooling Documentation**: All active tools in `tools/` must be documented in `tools/README.md`. Scratch scripts must be cleaned after exploration.
 * **No Git Bloat**: Binary game assets (`assets/`) and build artifacts (`build/`, `.venv/`) must remain excluded from Git.
+
+---
+
+## 4. Fidelity & Change Tracking Rules (FCTS)
+
+> [!IMPORTANT]
+> **Every change, port, bug fix, and deviation MUST follow the Fidelity & Change Tracking System.**
+
+1. **Standardized Inline Provenance Headers**:
+   Every function declared in `include/ignition/` and implemented in `src/` must be documented with:
+   - `@original <SymbolName> (IGN_WIN.EXE @ 0x<Address>, <SourceFileHint>)`
+   - `@fidelity EXACT | ADAPTED | EXTENDED | INFRASTRUCTURE`
+   - `@deviation DEV-XXX` (required if logic diverges from original 1997 binary or fixes a bug)
+   - `@fix_category FIX_CAT_XXX` (required if toggleable in options)
+   - `@notes <Details on registers, formulas, nuances>`
+
+2. **Mandatory Deviation Logging (`docs/tracking/deviations.md`)**:
+   Never fix an authentic 1997 bug (e.g. falling through meshes, car floating, camera clipping, audio cutoff) silently. Register it in `docs/tracking/deviations.md` with:
+   - Unique ID (`DEV-XXX`)
+   - Category (`FIX_CAT_NOCLIP`, `FIX_CAT_ELEVATION`, `FIX_CAT_CAMERA`, `FIX_CAT_AI_PATHING`, `FIX_CAT_AUDIO`, `FIX_CAT_RENDERER`)
+   - Original address & assembly breakdown
+   - Port solution
+   - Option toggle key (`GameFixOptions` or `RendererOptions`)
+
+3. **Granular Game Fix Controls**:
+   All original bug workarounds must be individually toggleable under `Options > Gameplay > Game Fixes` and `Options > GFX Options`. Always support `1997 AUTHENTIC` (all fixes off) to preserve original behavior.
+
+4. **Change Logging (`CHANGELOG.md`)**:
+   Log all milestone progress, features, fixes, and reverse-engineering discoveries under `CHANGELOG.md` adhering to Keep a Changelog.
+
+5. **Conventional Commits**:
+   Commits must follow Conventional Commits (`feat`, `port`, `fix`, `re`, `docs`, `test`) and cite function addresses (`FUN_00412fc0 @ 0x00412fc0`) and deviation IDs (`DEV-001`).
+
+6. **Automated Fidelity Verification**:
+   Before submitting changes, run `uv run python tools/verify_fidelity.py` and ensure 100% pass without unannotated or mismatched functions.

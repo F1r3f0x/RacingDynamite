@@ -5,7 +5,7 @@ description = "Modern open-source reverse engineering and source port tools for 
 readme = "README.md"
 license = { text = "GPL-3.0-or-later" }
 authors = [
-    { name = "F1r3f0x", email = "plabin@outlook.cl" }
+    { name = "Patricio Labin Correa (@F1r3f0x)", email = "plabin@outlook.cl" }
 ]
 requires-python = ">=3.13"
 dependencies = [
