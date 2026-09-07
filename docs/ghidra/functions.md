@@ -7,6 +7,11 @@
 | `0x00060f40` | - | - | `File_ReadToBuffer` | `mem.c` | Matching | EXACT | Reads binary file directly into preallocated buffer |
 | `0x00061100` | - | - | `File_GetSize` | `mem.c` | Matching | EXACT | Seeks to end and returns binary file size |
 | `0x0006117c` | - | - | `File_Exists` | `mem.c` | Matching | EXACT | Tests if file exists by attempting fopen |
+| `0x00061220` | - | `-` | `Font_InitSystem` | `geputget.c` | Decompiled | EXACT | Initializes font subsystem tables (30 slots) |
+| `0x00061319` | - | `-` | `Font_Shutdown` | `geputget.c` | Decompiled | EXACT | Unloads active fonts and shuts down font subsystem |
+| `0x00061399` | - | `-` | `Font_Parse` | `geputget.c` | Decompiled | EXACT | Parses LFT font header, initializes glyph handles and metrics |
+| `0x00061653` | - | `-` | `Font_Unload` | `geputget.c` | Decompiled | EXACT | Frees sprite handles for font glyphs and marks slot free |
+| `0x000616db` | - | `-` | `Font_GetTextWidth` | `geputget.c` | Decompiled | EXACT | Calculates string rendering width in pixels |
 | - | `0x004029a0` | `FUN_004029a0` | `Menu_Init` | `main.c` | Analyzed | - | Loads MENU.COL, MENU.TAB, .LFT fonts, and initializes menu options. |
 | - | `0x00402c00` | `FUN_00402c00` | `Menu_Tick` | `main.c` | Decompiled | ADAPTED | Handles menu input navigation (arrows, Enter, Esc), item highlight, and transitions. |
 | - | `0x0040e6b0` | `FUN_0040e6b0` | `Car_IntegratePosition` | `vehicle.c` | Decompiled | EXACT | World coordinate velocity integrator with 21.76 scale factor and 72 Hz timestep. |
@@ -20,19 +25,19 @@
 | `0x0002002c` | `0x004127a0` | `FUN_004127a0` | `Surface_FreeSRF` | `getsurf.c` | Matching | ADAPTED | Frees active .SRF surface memory buffer. |
 | `0x00020814` | `0x00412fc0` | `FUN_00412fc0` | `Surface_Raycast` | `getsurf.c` | Matching | EXTENDED | Spatial grid query, candidate selection, cross product normal, world vertex transform |
 | `0x00020bbc` | `0x00413380` | `FUN_00413380` | `Surface_GetTriangleHeight` | `getsurf.c` | Matching | ADAPTED | Computes average elevation (y0 + y1 + y2) / -3 using vertex buffer indices from triangle. |
-| - | `0x004133d0` | `FUN_004133d0` | `Font_DrawText` | `geputget.c` | Decompiled | ADAPTED | 2D bitmap font rasterizer blitting characters to 8bpp buffer. |
+| `0x00061959` | `0x004133d0` | `FUN_004133d0` | `Font_DrawText` | `geputget.c` | Decompiled | ADAPTED | 2D bitmap font rasterizer blitting characters to 8bpp buffer. |
 | - | `0x004134e0` | `FUN_004134e0` | `AI_FollowTrackSplines` | `main.c` | Analyzed | - | Steering simulation updating car heading, track chunk position, distance to centerline. |
 | - | `0x00414e40` | `FUN_00414e40` | `Track_LoadSplines` | `main.c` | Decompiled | ADAPTED | Loads .TRI chunk indices, constructs left/right road boundary splines and AI waypoints. |
 | - | `0x00416250` | `FUN_00416250` | `Mesh_InstantiatePlacedObjects` | `main.c` | Decompiled | ADAPTED | Applies .PLC world translation offsets to .MSH submesh vertices. |
 | - | `0x00417270` | `FUN_00417270` | `Game_Init` | `main.c` | Analyzed | - | Sets initial game state flags, resets timers, initiates intro sequence. |
 | - | `0x004172b0` | `FUN_004172b0` | `Game_StateDispatcher` | `main.c` | Decompiled | ADAPTED | Top-level game loop state machine dispatcher (Intro -> Menus -> Race). |
-| - | `0x00418130` | `FUN_00418130` | `Load_SystemGraphicsAndFonts` | `geputget.c` | Analyzed | - | Loads SYS.COL, N_SYSGFX.PIC, N_SYSG_2.PIC, and .LFT fonts. |
+| `0x00021860` | `0x00418130` | `FUN_00418130` | `Load_SystemGraphicsAndFonts` | `geputget.c` | Analyzed | - | Loads SYS.COL, N_SYSGFX.PIC, N_SYSG_2.PIC, and .LFT fonts. |
 | - | `0x00418dd0` | `FUN_00418dd0` | `Track_LoadAllAssets` | `main.c` | Analyzed | - | Master track loader: loads .COL, .PAN, .PIC, .SHD, .TAB, .MSH, .TEX, .POS. |
 | - | `0x00419a90` | `FUN_00419a90` | `Track_LoadPlacements` | `main.c` | Decompiled | ADAPTED | Loads .PLC scenery object placement tables for level and cars. |
 | - | `0x00419bd0` | `FUN_00419bd0` | `Mesh_LoadTrackAndCars` | `main.c` | Decompiled | ADAPTED | Loads LEVELS/<TRACK>/<TRACK>.MSH and CARS/CARS.MSH into geometry memory. |
 | - | `0x00419d10` | `FUN_00419d10` | `Texture_LoadAllPages` | `main.c` | Decompiled | ADAPTED | Loads 1MB track .TEX, car .TEX, and 64KB aligned sprite pages. |
-| - | `0x0041ac40` | `FUN_0041ac40` | `Font_LoadHUDFonts` | `geputget.c` | Analyzed | - | Loads HUD lettering glyphs (IGNITION.FNT, yellow.lft, speed.lft, etc.). |
-| - | `0x0041af70` | `FUN_0041af70` | `Track_LoadOverlayGfx` | `geputget.c` | Analyzed | - | Loads track sign textures and winner trophy bitmap (POKAL.PIC). |
+| `0x000240f4` | `0x0041ac40` | `FUN_0041ac40` | `Font_LoadHUDFonts` | `geputget.c` | Analyzed | - | Loads HUD lettering glyphs (IGNITION.FNT, yellow.lft, speed.lft, etc.). |
+| `0x000243e0` | `0x0041af70` | `FUN_0041af70` | `Track_LoadOverlayGfx` | `geputget.c` | Analyzed | - | Loads track sign textures and winner trophy bitmap (POKAL.PIC). |
 | - | `0x0041b360` | `FUN_0041b360` | `Track_PreprocessPlacements` | `main.c` | Decompiled | ADAPTED | Unpacks model_type bitfields (& 0xFFF) and extracts animation and flag channels. |
 | - | `0x0041b470` | `FUN_0041b470` | `Race_InitSceneAndCars` | `main.c` | Analyzed | - | Instantiates player/AI cars on starting grid and binds scenery collision. |
 | - | `0x0041d190` | `FUN_0041d190` | `Car_UnpackMeshGeometry` | `lisa3d.c` | Decompiled | EXTENDED | Extracts CARS.MSH submesh vertices, finds bottom tire vertex $\max(v_y)$ for ground alignment, and scales by $21.76$. |
@@ -68,7 +73,7 @@
 | - | `0x0044f0e9` | `FUN_0044f0e9` | `Lisa_ExecuteRasterizerCommands` | `lisa3d.c` | Decompiled | ADAPTED | Traverses depth-bucket sorted polygon command list and executes rasterizers. |
 | - | `0x00452800` | `FUN_00452800` | `Lisa_RenderTexturedTriangle_Op11` | `lisa3d.c` | Decompiled | EXACT | Opcode 0x11 triangle edge walker and span setup for unshaded texture mapping. |
 | - | `0x004537dc` | `FUN_004537dc` | `Lisa_DrawTexturedSpan_Op11` | `lisa3d.c` | Decompiled | EXACT | Low-level perspective/affine textured span blitter reading texels directly with stride 256 and alpha test. |
-| - | `0x00456270` | `FUN_00456270` | `Font_Load` | `geputget.c` | Decompiled | ADAPTED | Loads and parses .LFT font header, offset tables, widths, and glyph raster data. |
+| `0x000615eb` | `0x00456270` | `FUN_00456270` | `Font_Load` | `geputget.c` | Decompiled | ADAPTED | Loads and parses .LFT font header, offset tables, widths, and glyph raster data. |
 | - | `0x00456c40` | `FUN_00456c40` | `Video_SetPalette` | `lisa3d.c` | Decompiled | ADAPTED | Uploads 256-color RGB palette to DirectDraw / hardware DAC. |
 | `0x00060f9c` | `0x004574a0` | `FUN_004574a0` | `File_LoadToMemory` | `mem.c` | Matching | ADAPTED | Generic binary loader (fopen, fread into allocated buffer). |
 | - | `0x00457890` | `FUN_00457890` | `Audio_MixCallback` | `main.c` | Decompiled | ADAPTED | 32-channel software voice mixer with 16.16 fixed-point linear pitch resampling and stereo panning. |

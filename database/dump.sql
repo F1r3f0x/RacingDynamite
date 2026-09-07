@@ -49,19 +49,19 @@ INSERT INTO "functions" VALUES(84,'0x0001fee0','0x00412670','Surface_LoadSRF','F
 INSERT INTO "functions" VALUES(85,'0x0002002c','0x004127a0','Surface_FreeSRF','FUN_004127a0',1,'matching','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Frees active .SRF surface memory buffer.',NULL,NULL);
 INSERT INTO "functions" VALUES(86,'0x00020814','0x00412fc0','Surface_Raycast','FUN_00412fc0',1,'matching','watcom_reg','SurfaceRaycastResult*','(int qx, int qy, int qz)',932,135,'EXTENDED','-','Spatial grid query, candidate selection, cross product normal, world vertex transform',NULL,NULL);
 INSERT INTO "functions" VALUES(87,'0x00020bbc','0x00413380','Surface_GetTriangleHeight','FUN_00413380',1,'matching','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Computes average elevation (y0 + y1 + y2) / -3 using vertex buffer indices from triangle.',NULL,NULL);
-INSERT INTO "functions" VALUES(88,NULL,'0x004133d0','Font_DrawText','FUN_004133d0',3,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','2D bitmap font rasterizer blitting characters to 8bpp buffer.',NULL,NULL);
+INSERT INTO "functions" VALUES(88,'0x00061959','0x004133d0','Font_DrawText','FUN_004133d0',3,'decompiled','watcom_reg','void',NULL,1359,NULL,'ADAPTED','-','2D bitmap font rasterizer blitting characters to 8bpp buffer.',NULL,NULL);
 INSERT INTO "functions" VALUES(89,NULL,'0x004134e0','AI_FollowTrackSplines','FUN_004134e0',5,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','Steering simulation updating car heading, track chunk position, distance to centerline.',NULL,NULL);
 INSERT INTO "functions" VALUES(90,NULL,'0x00414e40','Track_LoadSplines','FUN_00414e40',5,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Loads .TRI chunk indices, constructs left/right road boundary splines and AI waypoints.',NULL,NULL);
 INSERT INTO "functions" VALUES(91,NULL,'0x00416250','Mesh_InstantiatePlacedObjects','FUN_00416250',5,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Applies .PLC world translation offsets to .MSH submesh vertices.',NULL,NULL);
 INSERT INTO "functions" VALUES(92,NULL,'0x00417270','Game_Init','FUN_00417270',5,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','Sets initial game state flags, resets timers, initiates intro sequence.',NULL,NULL);
 INSERT INTO "functions" VALUES(93,NULL,'0x004172b0','Game_StateDispatcher','FUN_004172b0',5,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Top-level game loop state machine dispatcher (Intro -> Menus -> Race).',NULL,NULL);
-INSERT INTO "functions" VALUES(94,NULL,'0x00418130','Load_SystemGraphicsAndFonts','FUN_00418130',3,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','Loads SYS.COL, N_SYSGFX.PIC, N_SYSG_2.PIC, and .LFT fonts.',NULL,NULL);
+INSERT INTO "functions" VALUES(94,'0x00021860','0x00418130','Load_SystemGraphicsAndFonts','FUN_00418130',3,'analyzed','watcom_reg','void',NULL,371,NULL,'-','-','Loads SYS.COL, N_SYSGFX.PIC, N_SYSG_2.PIC, and .LFT fonts.',NULL,NULL);
 INSERT INTO "functions" VALUES(95,NULL,'0x00418dd0','Track_LoadAllAssets','FUN_00418dd0',5,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','Master track loader: loads .COL, .PAN, .PIC, .SHD, .TAB, .MSH, .TEX, .POS.',NULL,NULL);
 INSERT INTO "functions" VALUES(96,NULL,'0x00419a90','Track_LoadPlacements','FUN_00419a90',5,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Loads .PLC scenery object placement tables for level and cars.',NULL,NULL);
 INSERT INTO "functions" VALUES(97,NULL,'0x00419bd0','Mesh_LoadTrackAndCars','FUN_00419bd0',5,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Loads LEVELS/<TRACK>/<TRACK>.MSH and CARS/CARS.MSH into geometry memory.',NULL,NULL);
 INSERT INTO "functions" VALUES(98,NULL,'0x00419d10','Texture_LoadAllPages','FUN_00419d10',5,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Loads 1MB track .TEX, car .TEX, and 64KB aligned sprite pages.',NULL,NULL);
-INSERT INTO "functions" VALUES(99,NULL,'0x0041ac40','Font_LoadHUDFonts','FUN_0041ac40',3,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','Loads HUD lettering glyphs (IGNITION.FNT, yellow.lft, speed.lft, etc.).',NULL,NULL);
-INSERT INTO "functions" VALUES(100,NULL,'0x0041af70','Track_LoadOverlayGfx','FUN_0041af70',3,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','Loads track sign textures and winner trophy bitmap (POKAL.PIC).',NULL,NULL);
+INSERT INTO "functions" VALUES(99,'0x000240f4','0x0041ac40','Font_LoadHUDFonts','FUN_0041ac40',3,'analyzed','watcom_reg','void',NULL,746,NULL,'-','-','Loads HUD lettering glyphs (IGNITION.FNT, yellow.lft, speed.lft, etc.).',NULL,NULL);
+INSERT INTO "functions" VALUES(100,'0x000243e0','0x0041af70','Track_LoadOverlayGfx','FUN_0041af70',3,'analyzed','watcom_reg','void',NULL,973,NULL,'-','-','Loads track sign textures and winner trophy bitmap (POKAL.PIC).',NULL,NULL);
 INSERT INTO "functions" VALUES(101,NULL,'0x0041b360','Track_PreprocessPlacements','FUN_0041b360',5,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Unpacks model_type bitfields (& 0xFFF) and extracts animation and flag channels.',NULL,NULL);
 INSERT INTO "functions" VALUES(102,NULL,'0x0041b470','Race_InitSceneAndCars','FUN_0041b470',5,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','Instantiates player/AI cars on starting grid and binds scenery collision.',NULL,NULL);
 INSERT INTO "functions" VALUES(103,NULL,'0x0041d190','Car_UnpackMeshGeometry','FUN_0041d190',2,'decompiled','watcom_reg','void',NULL,NULL,NULL,'EXTENDED','-','Extracts CARS.MSH submesh vertices, finds bottom tire vertex $\max(v_y)$ for ground alignment, and scales by $21.76$.',NULL,NULL);
@@ -97,7 +97,7 @@ INSERT INTO "functions" VALUES(132,NULL,'0x0044d550','Lisa_DrawTexturedTriangle_
 INSERT INTO "functions" VALUES(133,NULL,'0x0044f0e9','Lisa_ExecuteRasterizerCommands','FUN_0044f0e9',2,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Traverses depth-bucket sorted polygon command list and executes rasterizers.',NULL,NULL);
 INSERT INTO "functions" VALUES(134,NULL,'0x00452800','Lisa_RenderTexturedTriangle_Op11','FUN_00452800',2,'decompiled','watcom_reg','void',NULL,NULL,NULL,'EXACT','-','Opcode 0x11 triangle edge walker and span setup for unshaded texture mapping.',NULL,NULL);
 INSERT INTO "functions" VALUES(135,NULL,'0x004537dc','Lisa_DrawTexturedSpan_Op11','FUN_004537dc',2,'decompiled','watcom_reg','void',NULL,NULL,NULL,'EXACT','-','Low-level perspective/affine textured span blitter reading texels directly with stride 256 and alpha test.',NULL,NULL);
-INSERT INTO "functions" VALUES(136,NULL,'0x00456270','Font_Load','FUN_00456270',3,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Loads and parses .LFT font header, offset tables, widths, and glyph raster data.',NULL,NULL);
+INSERT INTO "functions" VALUES(136,'0x000615eb','0x00456270','Font_Load','FUN_00456270',3,'decompiled','watcom_reg','void',NULL,104,NULL,'ADAPTED','-','Loads and parses .LFT font header, offset tables, widths, and glyph raster data.',NULL,NULL);
 INSERT INTO "functions" VALUES(137,NULL,'0x00456c40','Video_SetPalette','FUN_00456c40',2,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Uploads 256-color RGB palette to DirectDraw / hardware DAC.',NULL,NULL);
 INSERT INTO "functions" VALUES(138,'0x00060f9c','0x004574a0','File_LoadToMemory','FUN_004574a0',4,'matching','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Generic binary loader (fopen, fread into allocated buffer).',NULL,NULL);
 INSERT INTO "functions" VALUES(139,NULL,'0x00457890','Audio_MixCallback','FUN_00457890',5,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','32-channel software voice mixer with 16.16 fixed-point linear pitch resampling and stereo panning.',NULL,NULL);
@@ -113,6 +113,11 @@ INSERT INTO "functions" VALUES(148,NULL,'0x00499abc','Cdp_DecompressRLE','FUN_00
 INSERT INTO "functions" VALUES(149,'0x00060f40',NULL,'File_ReadToBuffer',NULL,4,'matching','watcom_reg','void',NULL,NULL,NULL,'EXACT',NULL,'Reads binary file directly into preallocated buffer',NULL,NULL);
 INSERT INTO "functions" VALUES(150,'0x00061100',NULL,'File_GetSize',NULL,4,'matching','watcom_reg','void',NULL,NULL,NULL,'EXACT',NULL,'Seeks to end and returns binary file size',NULL,NULL);
 INSERT INTO "functions" VALUES(151,'0x0006117c',NULL,'File_Exists',NULL,4,'matching','watcom_reg','void',NULL,NULL,NULL,'EXACT',NULL,'Tests if file exists by attempting fopen',NULL,NULL);
+INSERT INTO "functions" VALUES(152,'0x00061220',NULL,'Font_InitSystem','-',3,'decompiled','watcom_reg','int','(void)',249,NULL,'EXACT',NULL,'Initializes font subsystem tables (30 slots)',NULL,NULL);
+INSERT INTO "functions" VALUES(153,'0x00061319',NULL,'Font_Shutdown','-',3,'decompiled','watcom_reg','int','(void)',128,NULL,'EXACT',NULL,'Unloads active fonts and shuts down font subsystem',NULL,NULL);
+INSERT INTO "functions" VALUES(154,'0x00061399',NULL,'Font_Parse','-',3,'decompiled','watcom_reg','int','(void *buffer, int font_id)',594,NULL,'EXACT',NULL,'Parses LFT font header, initializes glyph handles and metrics',NULL,NULL);
+INSERT INTO "functions" VALUES(155,'0x00061653',NULL,'Font_Unload','-',3,'decompiled','watcom_reg','int','(int font_id)',136,NULL,'EXACT',NULL,'Frees sprite handles for font glyphs and marks slot free',NULL,NULL);
+INSERT INTO "functions" VALUES(156,'0x000616db',NULL,'Font_GetTextWidth','-',3,'decompiled','watcom_reg','int','(const char *text, int font_id)',638,NULL,'EXACT',NULL,'Calculates string rendering width in pixels',NULL,NULL);
 CREATE TABLE globals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT,                      -- Address in MAINDOS.EXE
@@ -318,7 +323,7 @@ CREATE INDEX idx_globals_name ON globals(name);
 CREATE INDEX idx_struct_fields_struct ON struct_fields(struct_id);
 DELETE FROM "sqlite_sequence";
 INSERT INTO "sqlite_sequence" VALUES('modules',8);
-INSERT INTO "sqlite_sequence" VALUES('functions',151);
+INSERT INTO "sqlite_sequence" VALUES('functions',156);
 INSERT INTO "sqlite_sequence" VALUES('globals',124);
 INSERT INTO "sqlite_sequence" VALUES('structs',18);
 INSERT INTO "sqlite_sequence" VALUES('struct_fields',138);
