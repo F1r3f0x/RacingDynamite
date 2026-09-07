@@ -13,10 +13,10 @@
 | - | `0x00412530` | `FUN_00412530` | `App_Shutdown` | `main.c` | Analyzed | - | Releases DirectDraw surfaces, DirectSound, and window handles. |
 | - | `0x00412580` | `FUN_00412580` | `Cdp_OpenFile` | `lisa3d.c` | Analyzed | - | Validates `"CDP\0"` header, dimensions, frame count, and embedded palette. |
 | - | `0x00412610` | `FUN_00412610` | `Cdp_DecodeFrame` | `lisa3d.c` | Analyzed | - | Advances animation stream and triggers inter-frame delta decompression. |
-| - | `0x00412670` | `FUN_00412670` | `Surface_LoadSRF` | `getsurf.c` | Decompiled | ADAPTED | Loads `.SRF` track surface heightfield and collision grid. |
-| - | `0x004127a0` | `FUN_004127a0` | `Surface_FreeSRF` | `getsurf.c` | Decompiled | ADAPTED | Frees active `.SRF` surface memory buffer. |
-| - | `0x00412fc0` | `FUN_00412fc0` | `Surface_GetCell` | `getsurf.c` | Decompiled | EXTENDED | Computes grid cell index `((z/512)+50)*stride + ((x/512)+50)` with origin offset 50.0. |
-| - | `0x00413380` | `FUN_00413380` | `Surface_GetTriangleHeight` | `getsurf.c` | Decompiled | ADAPTED | Computes average elevation `(y0 + y1 + y2) / -3` using vertex buffer indices from triangle. |
+| `0x0001fee0` | `0x00412670` | `FUN_00412670` | `Surface_LoadSRF` | `getsurf.c` | Decompiled | ADAPTED | Loads `.SRF` track surface heightfield and collision grid. |
+| `0x0002002c` | `0x004127a0` | `FUN_004127a0` | `Surface_FreeSRF` | `getsurf.c` | Decompiled | ADAPTED | Frees active `.SRF` surface memory buffer. |
+| `0x00020814` | `0x00412fc0` | `FUN_00412fc0` | `Surface_GetCell` | `getsurf.c` | Decompiled | EXTENDED | Computes grid cell index `((z/512)+50)*stride + ((x/512)+50)` with origin offset 50.0. |
+| `0x00020bbc` | `0x00413380` | `FUN_00413380` | `Surface_GetTriangleHeight` | `getsurf.c` | Decompiled | ADAPTED | Computes average elevation `(y0 + y1 + y2) / -3` using vertex buffer indices from triangle. |
 | - | `0x004133d0` | `FUN_004133d0` | `Font_DrawText` | `geputget.c` | Decompiled | ADAPTED | 2D bitmap font rasterizer blitting characters to 8bpp buffer. |
 | - | `0x004134e0` | `FUN_004134e0` | `AI_FollowTrackSplines` | `main.c` | Analyzed | - | Steering simulation updating car heading, track chunk position, distance to centerline. |
 | - | `0x00414e40` | `FUN_00414e40` | `Track_LoadSplines` | `main.c` | Decompiled | ADAPTED | Loads `.TRI` chunk indices, constructs left/right road boundary splines and AI waypoints. |
@@ -48,8 +48,8 @@
 | - | `0x00442030` | `FUN_00442030` | `Car_ApplySteering` | `vehicle.c` | Decompiled | EXACT | Speed-attenuated front wheel steering lock and smoothing filter. |
 | - | `0x00442670` | `FUN_00442670` | `Car_PowertrainUpdate` | `vehicle.c` | Decompiled | EXACT | Engine propulsion, rolling and aerodynamic drag, transmission forward/reverse gear shifting. |
 | - | `0x004452c0` | `FUN_004452c0` | `Sound_SynthesizeEngineRPM` | `main.c` | Decompiled | EXTENDED | Computes RPM pitch modulation from 800-byte ENGINE.INF curve with DEV-006 protection. |
-| - | `0x00446578` | `FUN_00446578` | `Surface_TestTrianglePositiveDZ` | `getsurf.c` | Decompiled | EXACT | 2D trapezoidal slope span test for table2 triangles ($dz \ge 0$). |
-| - | `0x004465e1` | `FUN_004465e1` | `Surface_TestTriangleNegativeDZ` | `getsurf.c` | Decompiled | EXACT | 2D trapezoidal slope span test for table1 triangles ($dz < 0$). |
+| `0x00020c18` | `0x00446578` | `FUN_00446578` | `Surface_TestTrianglePositiveDZ` | `getsurf.c` | Decompiled | EXACT | 2D trapezoidal slope span test for table2 triangles ($dz \ge 0$). |
+| `0x00020c81` | `0x004465e1` | `FUN_004465e1` | `Surface_TestTriangleNegativeDZ` | `getsurf.c` | Decompiled | EXACT | 2D trapezoidal slope span test for table1 triangles ($dz < 0$). |
 | - | `0x004466d0` | `FUN_004466d0` | `Lisa_RenderScene` | `lisa3d.c` | Decompiled | EXTENDED | Master 3D frame render: culls objects, transforms vertices, rasterizes spans. |
 | - | `0x004468d0` | `FUN_004468d0` | `Lisa_InitEngineMemory` | `lisa3d.c` | Decompiled | ADAPTED | Allocates internal rasterizer buffers, vertex streams, and matrices. |
 | - | `0x00448e70` | `FUN_00448e70` | `Lisa_FrustumCullObjects` | `lisa3d.c` | Decompiled | ADAPTED | Spatial grid frustum culler populating visible object list. |
