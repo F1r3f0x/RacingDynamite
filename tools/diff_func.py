@@ -78,12 +78,30 @@ def get_orig_func(dos_addr: int, size: int):
     file_off = 0x400 + (dos_addr - 0x10000)
     return data[file_off : file_off + size]
 
-def normalize_asm(mnemonic: str, op_str: str):
-    # Normalize hex addresses and jump offsets for fair comparison
-    op = op_str
-    # Replace absolute 32-bit addresses in 0x000eb... or 0x20...
+def normalize_asm(mnemonic: str, op_str: str, ins_addr: int = 0, base_addr: int = 0):
     import re
-    # Relocations in data or code
+    op = op_str
+    
+    # Calls to external or linked functions
+    if mnemonic == "call":
+        return f"{mnemonic:<8} <FUNC>"
+        
+    # Relative jumps (normalize target to relative offset from start of function)
+    if mnemonic.startswith("j"):
+        m = re.search(r'0x[0-9a-f]+|\d+', op)
+        if m:
+            try:
+                target = int(m.group(0), 16 if '0x' in m.group(0) else 10)
+                rel = target - base_addr
+                return f"{mnemonic:<8} <TARGET_+{rel}>"
+            except Exception:
+                return f"{mnemonic:<8} <TARGET>"
+        return f"{mnemonic:<8} <TARGET>"
+        
+    # Relocations in data references: 0x000... or 0xaae... or 0x0 in unlinked COFF
+    # e.g. "edx, 0xaae64" vs "edx, 0"
+    op = re.sub(r'(edx|eax|ecx|esi|edi|ebx),\s*(0x[0-9a-f]{5,8}|0)\b', r'\1, <ADDR>', op)
+    op = re.sub(r'\[(0x[0-9a-f]{5,8}|0)\]', '[<ADDR>]', op)
     op = re.sub(r'0x[0-9a-f]{5,8}', '<ADDR>', op)
     return f"{mnemonic:<8} {op}"
 
@@ -127,12 +145,12 @@ def diff_func(symbol_name: str, dos_addr: int, size: int, obj_file: Path):
         if i < len(orig_ins):
             o = orig_ins[i]
             o_str = f"{hex(o.address)}: {o.mnemonic} {o.op_str}"
-            o_norm = normalize_asm(o.mnemonic, o.op_str)
+            o_norm = normalize_asm(o.mnemonic, o.op_str, o.address, dos_addr)
             
         if i < len(comp_ins):
             c = comp_ins[i]
             c_str = f"+{hex(c.address)}: {c.mnemonic} {c.op_str}"
-            c_norm = normalize_asm(c.mnemonic, c.op_str)
+            c_norm = normalize_asm(c.mnemonic, c.op_str, c.address, target_sym["value"])
             
         matched = (o_norm == c_norm) and (o_norm != "")
         marker = " " if matched else "!"
@@ -151,10 +169,24 @@ def diff_func(symbol_name: str, dos_addr: int, size: int, obj_file: Path):
 
 if __name__ == "__main__":
     if len(sys.argv) < 4:
-        print("Usage: python diff_func.py <symbol> <dos_addr_hex> <size>")
+        print("Usage: python diff_func.py <symbol> <dos_addr_hex> <size> [obj_filename]")
         sys.exit(1)
     sym = sys.argv[1]
     addr = int(sys.argv[2], 16)
     sz = int(sys.argv[3])
-    obj = ROOT / "build" / "decomp" / "getsurf.obj"
+    
+    if len(sys.argv) >= 5:
+        obj = ROOT / "build" / "decomp" / sys.argv[4]
+    else:
+        # Search all obj files in build/decomp
+        obj = None
+        for cand in (ROOT / "build" / "decomp").glob("*.obj"):
+            sections, symbols = load_coff_symbols(cand)
+            if any(name in symbols for name in [sym, f"{sym}_", f"_{sym}"]):
+                obj = cand
+                break
+        if not obj:
+            obj = ROOT / "build" / "decomp" / "getsurf.obj"
+            
     diff_func(sym, addr, sz, obj)
+

@@ -99,7 +99,7 @@ INSERT INTO "functions" VALUES(134,NULL,'0x00452800','Lisa_RenderTexturedTriangl
 INSERT INTO "functions" VALUES(135,NULL,'0x004537dc','Lisa_DrawTexturedSpan_Op11','FUN_004537dc',2,'decompiled','watcom_reg','void',NULL,NULL,NULL,'EXACT','-','Low-level perspective/affine textured span blitter reading texels directly with stride 256 and alpha test.',NULL,NULL);
 INSERT INTO "functions" VALUES(136,NULL,'0x00456270','Font_Load','FUN_00456270',3,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Loads and parses .LFT font header, offset tables, widths, and glyph raster data.',NULL,NULL);
 INSERT INTO "functions" VALUES(137,NULL,'0x00456c40','Video_SetPalette','FUN_00456c40',2,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Uploads 256-color RGB palette to DirectDraw / hardware DAC.',NULL,NULL);
-INSERT INTO "functions" VALUES(138,NULL,'0x004574a0','File_LoadToMemory','FUN_004574a0',4,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Generic binary loader (fopen, fread into allocated buffer).',NULL,NULL);
+INSERT INTO "functions" VALUES(138,'0x00060f9c','0x004574a0','File_LoadToMemory','FUN_004574a0',4,'matching','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Generic binary loader (fopen, fread into allocated buffer).',NULL,NULL);
 INSERT INTO "functions" VALUES(139,NULL,'0x00457890','Audio_MixCallback','FUN_00457890',5,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','32-channel software voice mixer with 16.16 fixed-point linear pitch resampling and stereo panning.',NULL,NULL);
 INSERT INTO "functions" VALUES(140,NULL,'0x00457980','Audio_StopVoice','FUN_00457980',5,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Immediately stops voice playback and releases mixer channel allocation.',NULL,NULL);
 INSERT INTO "functions" VALUES(141,NULL,'0x004579b0','Audio_PlayVoice','FUN_004579b0',5,'decompiled','watcom_reg','void',NULL,NULL,NULL,'ADAPTED','-','Allocates mixer channel voice, configures volume, pan, loop flag, and starts playback.',NULL,NULL);
@@ -110,6 +110,9 @@ INSERT INTO "functions" VALUES(145,NULL,'0x00458e00','Sound_LoadWAV','FUN_00458e
 INSERT INTO "functions" VALUES(146,NULL,'0x0045b4f0','Lisa_PrintVersion','FUN_0045b4f0',2,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','Prints "Lisa 2 Development System" banner and build timestamp.',NULL,NULL);
 INSERT INTO "functions" VALUES(147,NULL,'0x00469950','CRT_Entry','entry',7,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','C Runtime startup entry point, parses command line, calls WinMain.',NULL,NULL);
 INSERT INTO "functions" VALUES(148,NULL,'0x00499abc','Cdp_DecompressRLE','FUN_00499abc',2,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','Delta-skip RLE decompression modifying active frame buffer with opcode skip codes.',NULL,NULL);
+INSERT INTO "functions" VALUES(149,'0x00060f40',NULL,'File_ReadToBuffer',NULL,4,'matching','watcom_reg','void',NULL,NULL,NULL,'EXACT',NULL,'Reads binary file directly into preallocated buffer',NULL,NULL);
+INSERT INTO "functions" VALUES(150,'0x00061100',NULL,'File_GetSize',NULL,4,'matching','watcom_reg','void',NULL,NULL,NULL,'EXACT',NULL,'Seeks to end and returns binary file size',NULL,NULL);
+INSERT INTO "functions" VALUES(151,'0x0006117c',NULL,'File_Exists',NULL,4,'matching','watcom_reg','void',NULL,NULL,NULL,'EXACT',NULL,'Tests if file exists by attempting fopen',NULL,NULL);
 CREATE TABLE globals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT,                      -- Address in MAINDOS.EXE
@@ -315,7 +318,7 @@ CREATE INDEX idx_globals_name ON globals(name);
 CREATE INDEX idx_struct_fields_struct ON struct_fields(struct_id);
 DELETE FROM "sqlite_sequence";
 INSERT INTO "sqlite_sequence" VALUES('modules',8);
-INSERT INTO "sqlite_sequence" VALUES('functions',148);
+INSERT INTO "sqlite_sequence" VALUES('functions',151);
 INSERT INTO "sqlite_sequence" VALUES('globals',124);
 INSERT INTO "sqlite_sequence" VALUES('structs',18);
 INSERT INTO "sqlite_sequence" VALUES('struct_fields',138);

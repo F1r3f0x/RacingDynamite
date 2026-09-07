@@ -4,6 +4,9 @@
 
 | DOS Addr | Win Addr | Ghidra Label | Symbol Name | Module | Status | Fidelity | Purpose |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `0x00060f40` | - | - | `File_ReadToBuffer` | `mem.c` | Matching | EXACT | Reads binary file directly into preallocated buffer |
+| `0x00061100` | - | - | `File_GetSize` | `mem.c` | Matching | EXACT | Seeks to end and returns binary file size |
+| `0x0006117c` | - | - | `File_Exists` | `mem.c` | Matching | EXACT | Tests if file exists by attempting fopen |
 | - | `0x004029a0` | `FUN_004029a0` | `Menu_Init` | `main.c` | Analyzed | - | Loads MENU.COL, MENU.TAB, .LFT fonts, and initializes menu options. |
 | - | `0x00402c00` | `FUN_00402c00` | `Menu_Tick` | `main.c` | Decompiled | ADAPTED | Handles menu input navigation (arrows, Enter, Esc), item highlight, and transitions. |
 | - | `0x0040e6b0` | `FUN_0040e6b0` | `Car_IntegratePosition` | `vehicle.c` | Decompiled | EXACT | World coordinate velocity integrator with 21.76 scale factor and 72 Hz timestep. |
@@ -67,7 +70,7 @@
 | - | `0x004537dc` | `FUN_004537dc` | `Lisa_DrawTexturedSpan_Op11` | `lisa3d.c` | Decompiled | EXACT | Low-level perspective/affine textured span blitter reading texels directly with stride 256 and alpha test. |
 | - | `0x00456270` | `FUN_00456270` | `Font_Load` | `geputget.c` | Decompiled | ADAPTED | Loads and parses .LFT font header, offset tables, widths, and glyph raster data. |
 | - | `0x00456c40` | `FUN_00456c40` | `Video_SetPalette` | `lisa3d.c` | Decompiled | ADAPTED | Uploads 256-color RGB palette to DirectDraw / hardware DAC. |
-| - | `0x004574a0` | `FUN_004574a0` | `File_LoadToMemory` | `mem.c` | Decompiled | ADAPTED | Generic binary loader (fopen, fread into allocated buffer). |
+| `0x00060f9c` | `0x004574a0` | `FUN_004574a0` | `File_LoadToMemory` | `mem.c` | Matching | ADAPTED | Generic binary loader (fopen, fread into allocated buffer). |
 | - | `0x00457890` | `FUN_00457890` | `Audio_MixCallback` | `main.c` | Decompiled | ADAPTED | 32-channel software voice mixer with 16.16 fixed-point linear pitch resampling and stereo panning. |
 | - | `0x00457980` | `FUN_00457980` | `Audio_StopVoice` | `main.c` | Decompiled | ADAPTED | Immediately stops voice playback and releases mixer channel allocation. |
 | - | `0x004579b0` | `FUN_004579b0` | `Audio_PlayVoice` | `main.c` | Decompiled | ADAPTED | Allocates mixer channel voice, configures volume, pan, loop flag, and starts playback. |
