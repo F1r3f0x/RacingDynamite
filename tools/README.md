@@ -75,3 +75,17 @@ uv run python tools/<script_name>.py [args]
 Provides live bidirectional synchronization between the Antigravity agent and the Ghidra reverse-engineering environment:
 * **`bridge_mcp_ghidra.py`**: MCP JSON-RPC server connecting the agent to Ghidra's API.
 * Allows inspecting disassembly, renaming functions, adding decompiler comments, and syncing memory maps directly with `RacingDynamite.gpr`.
+
+---
+
+## 6. Decompilation Tracking Database (`tools/db.py`)
+
+Central tracking interface for decompiling **`MAINDOS.EXE`**:
+* **`tools/db.py`**: SQLite database manager (`database/decomp.db` backed by `database/schema.sql` and `database/dump.sql`).
+* **Commands**:
+  * `uv run python tools/db.py init`: Initializes clean SQLite database from `database/schema.sql`.
+  * `uv run python tools/db.py status`: Prints high-level progress report (functions, globals, modules, completion percentages).
+  * `uv run python tools/db.py import-markdown`: Ingests legacy markdown documentation into the database.
+  * `uv run python tools/db.py export-markdown`: Generates `docs/ghidra/functions.md` from the database.
+  * `uv run python tools/db.py dump-sql`: Dumps database to version-controlled `database/dump.sql`.
+  * `uv run python tools/db.py query "<SQL>"`: Runs ad-hoc SQL queries.
