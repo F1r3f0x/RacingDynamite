@@ -310,6 +310,50 @@ def query(sql: str):
     finally:
         conn.close()
 
+def link_func(win_addr: str, dos_addr: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE functions SET dos_address = ? WHERE win_address = ?", (dos_addr, win_addr))
+    if cur.rowcount > 0:
+        print(f"Linked Win {win_addr} -> DOS {dos_addr} (updated {cur.rowcount} row)")
+        conn.commit()
+    else:
+        print(f"Warning: No function found with win_address '{win_addr}'", file=sys.stderr)
+    conn.close()
+
+def set_status(addr: str, status: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        UPDATE functions 
+        SET status = ? 
+        WHERE dos_address = ? OR win_address = ?
+    """, (status, addr, addr))
+    if cur.rowcount > 0:
+        print(f"Updated status of {addr} -> {status}")
+        conn.commit()
+    else:
+        print(f"Warning: No function found matching address '{addr}'", file=sys.stderr)
+    conn.close()
+
+def add_func(dos_addr: str, name: str, module_name: str, purpose: str = ""):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM modules WHERE name = ?", (module_name,))
+    row = cur.fetchone()
+    mod_id = row[0] if row else None
+    if not mod_id and module_name:
+        cur.execute("INSERT INTO modules (name) VALUES (?)", (module_name,))
+        mod_id = cur.lastrowid
+    
+    cur.execute("""
+        INSERT OR REPLACE INTO functions (dos_address, symbol_name, module_id, status, purpose)
+        VALUES (?, ?, ?, 'analyzed', ?)
+    """, (dos_addr, name, mod_id, purpose))
+    conn.commit()
+    print(f"Added function {name} at DOS {dos_addr} in {module_name}")
+    conn.close()
+
 def main():
     parser = argparse.ArgumentParser(description="Decompilation Database CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -322,6 +366,20 @@ def main():
     
     q_parser = subparsers.add_parser("query", help="Execute an arbitrary SQL query")
     q_parser.add_argument("sql", type=str, help="SQL string to execute")
+
+    link_p = subparsers.add_parser("link", help="Link Windows address to DOS address")
+    link_p.add_argument("win_addr", type=str, help="Address in IGN_WIN.EXE (e.g. 0x00412fc0)")
+    link_p.add_argument("dos_addr", type=str, help="Address in MAINDOS.EXE (e.g. 0x00012340)")
+
+    stat_p = subparsers.add_parser("set-status", help="Update function status")
+    stat_p.add_argument("addr", type=str, help="Function address (DOS or Win)")
+    stat_p.add_argument("status", choices=["unidentified", "analyzed", "decompiled", "matching"])
+
+    add_p = subparsers.add_parser("add-func", help="Add newly identified DOS function")
+    add_p.add_argument("dos_addr", type=str, help="DOS address (e.g. 0x00010a20)")
+    add_p.add_argument("name", type=str, help="Function symbol name")
+    add_p.add_argument("module", type=str, help="Module name (e.g. getsurf.c)")
+    add_p.add_argument("--purpose", type=str, default="", help="Function purpose")
     
     args = parser.parse_args()
     if args.command == "init":
@@ -336,6 +394,13 @@ def main():
         show_status()
     elif args.command == "query":
         query(args.sql)
+    elif args.command == "link":
+        link_func(args.win_addr, args.dos_addr)
+    elif args.command == "set-status":
+        set_status(args.addr, args.status)
+    elif args.command == "add-func":
+        add_func(args.dos_addr, args.name, args.module, args.purpose)
 
 if __name__ == "__main__":
     main()
+
