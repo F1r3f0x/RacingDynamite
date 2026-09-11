@@ -22,6 +22,17 @@ def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bo
     print("            MAINDOS_32BIT.EXE MATCHING VERIFICATION                    ")
     print("=======================================================================")
     
+    # 0. Lint check for inline assembly in .c files
+    print("[0/2] Linting C sources for pure C compliance...")
+    decomp_src_dir = ROOT_DIR / "decomp" / "src"
+    for c_file in decomp_src_dir.glob("*.c"):
+        with open(c_file, "r", encoding="utf-8") as f:
+            content = f.read()
+            if "__asm" in content:
+                print(f"[ERROR] Inline assembly (__asm) found in {c_file.name}!", file=sys.stderr)
+                print("[ERROR] Project rule violation: Pure C Only. Move handwritten asm to separate .asm files.", file=sys.stderr)
+                return False
+
     # 1. Compile decompiled code
     print("[1/2] Compiling authentic C sources with Watcom (wcc386)...")
     if not compile_all():

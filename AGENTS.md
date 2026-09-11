@@ -5,6 +5,7 @@
 ## 1. Decompilation Pipeline (MAINDOS_32BIT.EXE)
 - **Target:** Exclusively byte-match `MAINDOS_32BIT.EXE`. Use `IGN_WIN.EXE` only as a source port reference.
 - **Clean-Room:** Never commit original executables or assets. `tools/extract_assets.py` MUST validate SHA-1 checksums of user-provided game files.
+- **Pure C Only:** Never use inline assembly (`__asm`) in `.c` files to force a byte match. Functions that are genuinely handwritten in assembly must be placed in separate `.asm` files and compiled with `wasm`.
 - **Assembly Slicing:** `tools/unpack_dos_le.py` disassembles sections into `wasm` stubs. These are linked with matching `.c` code via `wlink` for a continuous bootable replacement.
 - **Verification:** Run `uv run python tools/verify_matching.py` to prevent regressions. Maintain `objdiff.json` for GUI diffing.
 
