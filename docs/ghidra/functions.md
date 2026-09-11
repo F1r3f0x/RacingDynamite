@@ -4,7 +4,7 @@
 
 | DOS Addr | Win Addr | Ghidra Label | Symbol Name | Module | Status | Fidelity | Purpose |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `0x00060f40` | - | - | `File_ReadToBuffer` | `mem.c` | Decompiled | EXACT | Reads binary file directly into preallocated buffer |
+| `0x00060f40` | - | - | `File_ReadToBuffer` | `mem.c` | Matching | EXACT | Reads binary file directly into preallocated buffer |
 | `0x00061100` | - | - | `File_GetSize` | `mem.c` | Matching | EXACT | Seeks to end and returns binary file size |
 | `0x0006117c` | - | - | `File_Exists` | `mem.c` | Matching | EXACT | Tests if file exists by attempting fopen |
 | - | `0x004029a0` | `FUN_004029a0` | `Menu_Init` | `main.c` | Analyzed | - | Loads MENU.COL, MENU.TAB, .LFT fonts, and initializes menu options. |

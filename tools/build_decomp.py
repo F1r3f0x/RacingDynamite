@@ -45,11 +45,14 @@ def compile_file(src_path: Path):
     # -eoc : emit standard COFF object file for objdiff compatibility
     # -zq : quiet
     # -fo : output object path
+    MODULE_FLAGS = {
+        "mem": ["-3r", "-s", "-ort"],
+    }
+    flags = MODULE_FLAGS.get(src_path.stem, ["-3r", "-s", "-omaxet"])
+
     cmd = [
         str(WCC386),
-        "-3r",
-        "-s",
-        "-omaxet",
+        *flags,
         "-eoc",
         "-zq",
         f"-fo={obj_path}",

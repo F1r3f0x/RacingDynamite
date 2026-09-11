@@ -47,21 +47,22 @@ int File_GetSize(const char *filename) {
 int File_ReadToBuffer(const char *filename, void *buffer, int size, int offset) {
     FILE *fp;
     fpos_t pos;
-    int status;
+    int res;
 
     fp = fopen(filename, "rb");
     if (fp == NULL) {
-        status = 2000;
-    } else {
-        pos = offset;
-        fsetpos(fp, &pos);
-        if ((int)fread(buffer, 1, size, fp) != size) {
-            return 2010;
-        }
-        fclose(fp);
-        status = 1;
+        res = 2000;
+        goto done;
     }
-    return status;
+    pos = offset;
+    fsetpos(fp, &pos);
+    if ((int)fread(buffer, 1, size, fp) != size) {
+        return 2010;
+    }
+    fclose(fp);
+    res = 1;
+done:
+    return res;
 }
 
 /**

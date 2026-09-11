@@ -110,7 +110,7 @@ INSERT INTO "functions" VALUES(145,NULL,'0x00458e00','Sound_LoadWAV','FUN_00458e
 INSERT INTO "functions" VALUES(146,NULL,'0x0045b4f0','Lisa_PrintVersion','FUN_0045b4f0',2,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','Prints "Lisa 2 Development System" banner and build timestamp.',NULL,NULL);
 INSERT INTO "functions" VALUES(147,NULL,'0x00469950','CRT_Entry','entry',7,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','C Runtime startup entry point, parses command line, calls WinMain.',NULL,NULL);
 INSERT INTO "functions" VALUES(148,NULL,'0x00499abc','Cdp_DecompressRLE','FUN_00499abc',2,'analyzed','watcom_reg','void',NULL,NULL,NULL,'-','-','Delta-skip RLE decompression modifying active frame buffer with opcode skip codes.',NULL,NULL);
-INSERT INTO "functions" VALUES(149,'0x00060f40',NULL,'File_ReadToBuffer',NULL,4,'decompiled','watcom_reg','void',NULL,92,NULL,'EXACT',NULL,'Reads binary file directly into preallocated buffer',NULL,NULL);
+INSERT INTO "functions" VALUES(149,'0x00060f40',NULL,'File_ReadToBuffer',NULL,4,'matching','watcom_reg','void',NULL,92,NULL,'EXACT',NULL,'Reads binary file directly into preallocated buffer',NULL,NULL);
 INSERT INTO "functions" VALUES(150,'0x00061100',NULL,'File_GetSize',NULL,4,'matching','watcom_reg','void',NULL,76,NULL,'EXACT',NULL,'Seeks to end and returns binary file size',NULL,NULL);
 INSERT INTO "functions" VALUES(151,'0x0006117c',NULL,'File_Exists',NULL,4,'matching','watcom_reg','void',NULL,34,NULL,'EXACT',NULL,'Tests if file exists by attempting fopen',NULL,NULL);
 INSERT INTO "functions" VALUES(152,'0x00061220','0x00455580','Font_InitSystem','-',3,'decompiled','watcom_reg','int','(void)',249,NULL,'EXACT',NULL,'Initializes font subsystem tables (30 slots)',NULL,NULL);
