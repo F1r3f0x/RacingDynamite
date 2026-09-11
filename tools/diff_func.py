@@ -105,8 +105,28 @@ def normalize_asm(mnemonic: str, op_str: str, ins_addr: int = 0, base_addr: int 
     op = re.sub(r'0x[0-9a-f]{5,8}', '<ADDR>', op)
     return f"{mnemonic:<8} {op}"
 
-def diff_func(symbol_name: str, dos_addr: int, size: int, obj_file: Path):
-    sections, symbols = load_coff_symbols(obj_file)
+def get_symbol_size(symbols, target_sym, sec_size):
+    target_val = target_sym["value"]
+    sec_idx = target_sym["section"]
+    next_vals = [s["value"] for s in symbols.values() if s["section"] == sec_idx and s["value"] > target_val]
+    if next_vals:
+        return min(next_vals) - target_val
+    return sec_size - target_val
+
+def diff_func(symbol_name: str, dos_addr: int, size: int = 0, obj_file: Path = None, verbose: bool = True):
+    if obj_file is None:
+        # Search all obj files in build/decomp
+        for cand in (ROOT / "build" / "decomp").glob("*.obj"):
+            sections, symbols = load_coff_symbols(cand)
+            if any(name in symbols for name in [symbol_name, f"{symbol_name}_", f"_{symbol_name}"]):
+                obj_file = cand
+                break
+        if not obj_file:
+            if verbose:
+                print(f"Error: Symbol {symbol_name} not found in any object file under build/decomp/")
+            return False, 0.0, 0, 0
+    else:
+        sections, symbols = load_coff_symbols(obj_file)
     
     # Watcom symbol naming: foo_ or _foo
     target_sym = None
@@ -116,11 +136,15 @@ def diff_func(symbol_name: str, dos_addr: int, size: int, obj_file: Path):
             break
             
     if not target_sym:
-        print(f"Error: Symbol {symbol_name} not found in {obj_file.name}")
-        print("Available symbols:", list(symbols.keys()))
-        return False
+        if verbose:
+            print(f"Error: Symbol {symbol_name} not found in {obj_file.name}")
+            print("Available symbols:", list(symbols.keys()))
+        return False, 0.0, 0, 0
         
     sec = sections[target_sym["section"]]
+    if not size or size <= 0:
+        size = get_symbol_size(symbols, target_sym, sec["size"])
+
     compiled_code = sec["data"][target_sym["value"] : target_sym["value"] + size]
     orig_code = get_orig_func(dos_addr, size)
     
@@ -128,9 +152,10 @@ def diff_func(symbol_name: str, dos_addr: int, size: int, obj_file: Path):
     orig_ins = list(md.disasm(orig_code, dos_addr))
     comp_ins = list(md.disasm(compiled_code, target_sym["value"]))
     
-    print(f"=== Diffing {symbol_name} (DOS: {hex(dos_addr)}, Size: {size} bytes) ===")
-    print(f"{'ORIGINAL (MAINDOS)':<45} | {'COMPILED (Watcom)':<45}")
-    print("-" * 93)
+    if verbose:
+        print(f"=== Diffing {symbol_name} (DOS: {hex(dos_addr)}, Size: {size} bytes) ===")
+        print(f"{'ORIGINAL (MAINDOS)':<45} | {'COMPILED (Watcom)':<45}")
+        print("-" * 93)
     
     max_len = max(len(orig_ins), len(comp_ins))
     matches = 0
@@ -159,34 +184,31 @@ def diff_func(symbol_name: str, dos_addr: int, size: int, obj_file: Path):
         else:
             mismatches += 1
             
-        print(f"{marker} {o_str:<43} | {c_str:<45}")
+        if verbose:
+            print(f"{marker} {o_str:<43} | {c_str:<45}")
         
     total = matches + mismatches
     pct = (matches / total * 100.0) if total > 0 else 0.0
-    print("-" * 93)
-    print(f"Result: {matches}/{total} instructions matched ({pct:.1f}%)\n")
-    return pct == 100.0
+    if verbose:
+        print("-" * 93)
+        print(f"Result: {matches}/{total} instructions matched ({pct:.1f}%)\n")
+    return pct == 100.0, pct, matches, total
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        print("Usage: python diff_func.py <symbol> <dos_addr_hex> <size> [obj_filename]")
+    if len(sys.argv) < 3:
+        print("Usage: python diff_func.py <symbol> <dos_addr_hex> [size] [obj_filename]")
         sys.exit(1)
     sym = sys.argv[1]
     addr = int(sys.argv[2], 16)
-    sz = int(sys.argv[3])
+    sz = int(sys.argv[3]) if len(sys.argv) >= 4 and sys.argv[3].isdigit() else 0
     
+    obj = None
     if len(sys.argv) >= 5:
         obj = ROOT / "build" / "decomp" / sys.argv[4]
-    else:
-        # Search all obj files in build/decomp
-        obj = None
-        for cand in (ROOT / "build" / "decomp").glob("*.obj"):
-            sections, symbols = load_coff_symbols(cand)
-            if any(name in symbols for name in [sym, f"{sym}_", f"_{sym}"]):
-                obj = cand
-                break
-        if not obj:
-            obj = ROOT / "build" / "decomp" / "getsurf.obj"
+    elif len(sys.argv) == 4 and not sys.argv[3].isdigit():
+        obj = ROOT / "build" / "decomp" / sys.argv[3]
+        sz = 0
             
-    diff_func(sym, addr, sz, obj)
+    matched, pct, m, t = diff_func(sym, addr, sz, obj, verbose=True)
+    sys.exit(0 if matched else 1)
 

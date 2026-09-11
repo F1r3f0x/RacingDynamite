@@ -16,6 +16,10 @@ WCC386 = WATCOM_DIR / "binnt64" / "wcc386.exe"
 if not WCC386.exists():
     WCC386 = WATCOM_DIR / "binnt" / "wcc386.exe"
 
+WLINK = WATCOM_DIR / "binnt64" / "wlink.exe"
+if not WLINK.exists():
+    WLINK = WATCOM_DIR / "binnt" / "wlink.exe"
+
 DECOMP_SRC = ROOT_DIR / "decomp" / "src"
 DECOMP_INC = ROOT_DIR / "decomp" / "include"
 BUILD_DIR = ROOT_DIR / "build" / "decomp"
@@ -61,25 +65,67 @@ def compile_file(src_path: Path):
     print(f"Compilation SUCCESS: {obj_path} ({obj_path.stat().st_size} bytes)")
     return True
 
-def main():
-    if len(sys.argv) > 1:
-        sources = [Path(p) for p in sys.argv[1:]]
-    else:
+def compile_all(sources=None):
+    if sources is None:
         sources = list(DECOMP_SRC.glob("*.c"))
-        
     if not sources:
         print("No C source files found in decomp/src/.")
-        return
-        
+        return False
     success = True
     for s in sources:
         if not compile_file(s):
             success = False
-            
-    if success:
-        print("\nAll files compiled successfully.")
-    else:
+    return success
+
+def link_rebuilt_binary():
+    """Links compiled decompiled objects using Watcom WLINK into a DOS executable."""
+    wlink_script = BUILD_DIR / "wlink.lnk"
+    if not wlink_script.exists():
+        sys.path.insert(0, str(ROOT_DIR / "tools"))
+        try:
+            from unpack_dos_le import slice_all_modules
+            slice_all_modules()
+        except Exception as e:
+            print(f"Warning: Could not auto-generate wlink script: {e}")
+
+    if not WLINK.exists():
+        print(f"Error: Watcom linker not found at {WLINK}.", file=sys.stderr)
+        return False
+        
+    env = os.environ.copy()
+    env["WATCOM"] = str(WATCOM_DIR)
+    env["PATH"] = f"{WLINK.parent};{env.get('PATH', '')}"
+    
+    cmd = [str(WLINK), f"@{wlink_script}"]
+    print(f"Linking objects with wlink ({wlink_script.name})...")
+    res = subprocess.run(cmd, env=env, capture_output=True, text=True)
+    if res.returncode != 0:
+        print(f"Link step note (partial binary links may report undefined symbols until all modules are linked):\n{res.stdout}\n{res.stderr}")
+        return False
+    print(f"Linking SUCCESS: {BUILD_DIR / 'MAINDOS_REBUILT.EXE'} generated successfully.")
+    return True
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Build and link decompiled Watcom C files")
+    parser.add_argument("sources", nargs="*", type=str, help="Specific source files to compile")
+    parser.add_argument("--link", action="store_true", help="Link compiled objects with wlink")
+    parser.add_argument("--slice", action="store_true", help="Re-generate assembly stubs and objdiff.json")
+    args = parser.parse_args()
+
+    if args.slice:
+        sys.path.insert(0, str(ROOT_DIR / "tools"))
+        from unpack_dos_le import slice_all_modules
+        slice_all_modules()
+
+    sources = [Path(p) for p in args.sources] if args.sources else None
+    if not compile_all(sources):
         sys.exit(1)
+        
+    print("\nAll files compiled successfully.")
+
+    if args.link:
+        link_rebuilt_binary()
 
 if __name__ == "__main__":
     main()

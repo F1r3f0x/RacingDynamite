@@ -4,14 +4,9 @@
 
 | DOS Addr | Win Addr | Ghidra Label | Symbol Name | Module | Status | Fidelity | Purpose |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `0x00060f40` | - | - | `File_ReadToBuffer` | `mem.c` | Matching | EXACT | Reads binary file directly into preallocated buffer |
+| `0x00060f40` | - | - | `File_ReadToBuffer` | `mem.c` | Decompiled | EXACT | Reads binary file directly into preallocated buffer |
 | `0x00061100` | - | - | `File_GetSize` | `mem.c` | Matching | EXACT | Seeks to end and returns binary file size |
 | `0x0006117c` | - | - | `File_Exists` | `mem.c` | Matching | EXACT | Tests if file exists by attempting fopen |
-| `0x00061220` | - | `-` | `Font_InitSystem` | `geputget.c` | Decompiled | EXACT | Initializes font subsystem tables (30 slots) |
-| `0x00061319` | - | `-` | `Font_Shutdown` | `geputget.c` | Decompiled | EXACT | Unloads active fonts and shuts down font subsystem |
-| `0x00061399` | - | `-` | `Font_Parse` | `geputget.c` | Decompiled | EXACT | Parses LFT font header, initializes glyph handles and metrics |
-| `0x00061653` | - | `-` | `Font_Unload` | `geputget.c` | Decompiled | EXACT | Frees sprite handles for font glyphs and marks slot free |
-| `0x000616db` | - | `-` | `Font_GetTextWidth` | `geputget.c` | Decompiled | EXACT | Calculates string rendering width in pixels |
 | - | `0x004029a0` | `FUN_004029a0` | `Menu_Init` | `main.c` | Analyzed | - | Loads MENU.COL, MENU.TAB, .LFT fonts, and initializes menu options. |
 | - | `0x00402c00` | `FUN_00402c00` | `Menu_Tick` | `main.c` | Decompiled | ADAPTED | Handles menu input navigation (arrows, Enter, Esc), item highlight, and transitions. |
 | - | `0x0040e6b0` | `FUN_0040e6b0` | `Car_IntegratePosition` | `vehicle.c` | Decompiled | EXACT | World coordinate velocity integrator with 21.76 scale factor and 72 Hz timestep. |
@@ -21,11 +16,10 @@
 | - | `0x00412530` | `FUN_00412530` | `App_Shutdown` | `main.c` | Analyzed | - | Releases DirectDraw surfaces, DirectSound, and window handles. |
 | - | `0x00412580` | `FUN_00412580` | `Cdp_OpenFile` | `lisa3d.c` | Analyzed | - | Validates "CDP\0" header, dimensions, frame count, and embedded palette. |
 | - | `0x00412610` | `FUN_00412610` | `Cdp_DecodeFrame` | `lisa3d.c` | Analyzed | - | Advances animation stream and triggers inter-frame delta decompression. |
-| `0x0001fee0` | `0x00412670` | `FUN_00412670` | `Surface_LoadSRF` | `getsurf.c` | Matching | ADAPTED | Loads .SRF track collision surface, converts relative offsets to pointers |
-| `0x0002002c` | `0x004127a0` | `FUN_004127a0` | `Surface_FreeSRF` | `getsurf.c` | Matching | ADAPTED | Frees active .SRF surface memory buffer. |
-| `0x00020814` | `0x00412fc0` | `FUN_00412fc0` | `Surface_Raycast` | `getsurf.c` | Matching | EXTENDED | Spatial grid query, candidate selection, cross product normal, world vertex transform |
-| `0x00020bbc` | `0x00413380` | `FUN_00413380` | `Surface_GetTriangleHeight` | `getsurf.c` | Matching | ADAPTED | Computes average elevation (y0 + y1 + y2) / -3 using vertex buffer indices from triangle. |
-| `0x00061959` | `0x004133d0` | `FUN_004133d0` | `Font_DrawText` | `geputget.c` | Decompiled | ADAPTED | 2D bitmap font rasterizer blitting characters to 8bpp buffer. |
+| `0x0001fee0` | `0x00412670` | `FUN_00412670` | `Surface_LoadSRF` | `getsurf.c` | Decompiled | ADAPTED | Loads .SRF track collision surface, converts relative offsets to pointers |
+| `0x0002002c` | `0x004127a0` | `FUN_004127a0` | `Surface_FreeSRF` | `getsurf.c` | Decompiled | ADAPTED | Frees active .SRF surface memory buffer. |
+| `0x00020814` | `0x00412fc0` | `FUN_00412fc0` | `Surface_Raycast` | `getsurf.c` | Decompiled | EXTENDED | Spatial grid query, candidate selection, cross product normal, world vertex transform |
+| `0x00020bbc` | `0x00413380` | `FUN_00413380` | `Surface_GetTriangleHeight` | `getsurf.c` | Decompiled | ADAPTED | Computes average elevation (y0 + y1 + y2) / -3 using vertex buffer indices from triangle. |
 | - | `0x004134e0` | `FUN_004134e0` | `AI_FollowTrackSplines` | `main.c` | Analyzed | - | Steering simulation updating car heading, track chunk position, distance to centerline. |
 | - | `0x00414e40` | `FUN_00414e40` | `Track_LoadSplines` | `main.c` | Decompiled | ADAPTED | Loads .TRI chunk indices, constructs left/right road boundary splines and AI waypoints. |
 | - | `0x00416250` | `FUN_00416250` | `Mesh_InstantiatePlacedObjects` | `main.c` | Decompiled | ADAPTED | Applies .PLC world translation offsets to .MSH submesh vertices. |
@@ -56,8 +50,8 @@
 | - | `0x00442030` | `FUN_00442030` | `Car_ApplySteering` | `vehicle.c` | Decompiled | EXACT | Speed-attenuated front wheel steering lock and smoothing filter. |
 | - | `0x00442670` | `FUN_00442670` | `Car_PowertrainUpdate` | `vehicle.c` | Decompiled | EXACT | Engine propulsion, rolling and aerodynamic drag, transmission forward/reverse gear shifting. |
 | - | `0x004452c0` | `FUN_004452c0` | `Sound_SynthesizeEngineRPM` | `main.c` | Decompiled | EXTENDED | Computes RPM pitch modulation from 800-byte ENGINE.INF curve with DEV-006 protection. |
-| `0x00020c18` | `0x00446578` | `FUN_00446578` | `Surface_TestTrianglePositiveDZ` | `getsurf.c` | Matching | EXACT | 2D trapezoidal slope span test for table2 triangles ($dz \ge 0$). |
-| `0x00020c81` | `0x004465e1` | `FUN_004465e1` | `Surface_TestTriangleNegativeDZ` | `getsurf.c` | Matching | EXACT | 2D trapezoidal slope span test for table1 triangles ($dz < 0$). |
+| `0x00020c18` | `0x00446578` | `FUN_00446578` | `Surface_TestTrianglePositiveDZ` | `getsurf.c` | Decompiled | EXACT | 2D trapezoidal slope span test for table2 triangles ($dz \ge 0$). |
+| `0x00020c81` | `0x004465e1` | `FUN_004465e1` | `Surface_TestTriangleNegativeDZ` | `getsurf.c` | Decompiled | EXACT | 2D trapezoidal slope span test for table1 triangles ($dz < 0$). |
 | - | `0x004466d0` | `FUN_004466d0` | `Lisa_RenderScene` | `lisa3d.c` | Decompiled | EXTENDED | Master 3D frame render: culls objects, transforms vertices, rasterizes spans. |
 | - | `0x004468d0` | `FUN_004468d0` | `Lisa_InitEngineMemory` | `lisa3d.c` | Decompiled | ADAPTED | Allocates internal rasterizer buffers, vertex streams, and matrices. |
 | - | `0x00448e70` | `FUN_00448e70` | `Lisa_FrustumCullObjects` | `lisa3d.c` | Decompiled | ADAPTED | Spatial grid frustum culler populating visible object list. |
@@ -73,9 +67,15 @@
 | - | `0x0044f0e9` | `FUN_0044f0e9` | `Lisa_ExecuteRasterizerCommands` | `lisa3d.c` | Decompiled | ADAPTED | Traverses depth-bucket sorted polygon command list and executes rasterizers. |
 | - | `0x00452800` | `FUN_00452800` | `Lisa_RenderTexturedTriangle_Op11` | `lisa3d.c` | Decompiled | EXACT | Opcode 0x11 triangle edge walker and span setup for unshaded texture mapping. |
 | - | `0x004537dc` | `FUN_004537dc` | `Lisa_DrawTexturedSpan_Op11` | `lisa3d.c` | Decompiled | EXACT | Low-level perspective/affine textured span blitter reading texels directly with stride 256 and alpha test. |
-| `0x000615eb` | `0x00456270` | `FUN_00456270` | `Font_Load` | `geputget.c` | Decompiled | ADAPTED | Loads and parses .LFT font header, offset tables, widths, and glyph raster data. |
+| `0x00061220` | `0x00455580` | `-` | `Font_InitSystem` | `geputget.c` | Decompiled | EXACT | Initializes font subsystem tables (30 slots) |
+| `0x00061319` | `0x00455610` | `-` | `Font_Shutdown` | `geputget.c` | Decompiled | EXACT | Unloads active fonts and shuts down font subsystem |
+| `0x00061399` | `0x00455670` | `-` | `Font_Parse` | `geputget.c` | Decompiled | EXACT | Parses LFT font header, initializes glyph handles and metrics |
+| `0x000615eb` | `0x00455820` | `FUN_00456270` | `Font_Load` | `geputget.c` | Decompiled | ADAPTED | Loads and parses .LFT font header, offset tables, widths, and glyph raster data. |
+| `0x00061653` | `0x00455870` | `-` | `Font_Unload` | `geputget.c` | Decompiled | EXACT | Frees sprite handles for font glyphs and marks slot free |
+| `0x000616db` | `0x004558d0` | `-` | `Font_GetTextWidth` | `geputget.c` | Decompiled | EXACT | Calculates string rendering width in pixels |
+| `0x00061959` | `0x00455a60` | `FUN_004133d0` | `Font_DrawText` | `geputget.c` | Decompiled | ADAPTED | 2D bitmap font rasterizer blitting characters to 8bpp buffer. |
 | - | `0x00456c40` | `FUN_00456c40` | `Video_SetPalette` | `lisa3d.c` | Decompiled | ADAPTED | Uploads 256-color RGB palette to DirectDraw / hardware DAC. |
-| `0x00060f9c` | `0x004574a0` | `FUN_004574a0` | `File_LoadToMemory` | `mem.c` | Matching | ADAPTED | Generic binary loader (fopen, fread into allocated buffer). |
+| `0x00060f9c` | `0x004574a0` | `FUN_004574a0` | `File_LoadToMemory` | `mem.c` | Decompiled | ADAPTED | Generic binary loader (fopen, fread into allocated buffer). |
 | - | `0x00457890` | `FUN_00457890` | `Audio_MixCallback` | `main.c` | Decompiled | ADAPTED | 32-channel software voice mixer with 16.16 fixed-point linear pitch resampling and stereo panning. |
 | - | `0x00457980` | `FUN_00457980` | `Audio_StopVoice` | `main.c` | Decompiled | ADAPTED | Immediately stops voice playback and releases mixer channel allocation. |
 | - | `0x004579b0` | `FUN_004579b0` | `Audio_PlayVoice` | `main.c` | Decompiled | ADAPTED | Allocates mixer channel voice, configures volume, pan, loop flag, and starts playback. |

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/encounter/objdiff/main/config.schema.json",
+  "min_version": "2.0.0",
+  "custom_make": "uv run python tools/build_decomp.py",
+  "build_base": true,
+  "units": [
+    {
+      "name": "geputget",
+      "target_path": "build/decomp/asm/geputget.obj",
+      "base_path": "build/decomp/geputget.obj",
+      "metadata": {
+        "complete": false
+      }
+    },
+    {
+      "name": "getsurf",
+      "target_path": "build/decomp/asm/getsurf.obj",
+      "base_path": "build/decomp/getsurf.obj",
+      "metadata": {
+        "complete": false
+      }
+    },
+    {
+      "name": "mem",
+      "target_path": "build/decomp/asm/mem.obj",
+      "base_path": "build/decomp/mem.obj",
+      "metadata": {
+        "complete": false
+      }
+    }
+  ]
+}
