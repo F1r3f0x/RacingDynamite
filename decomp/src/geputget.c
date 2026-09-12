@@ -15,6 +15,31 @@ FontSlot g_fonts[MAX_FONTS];
 int g_fontSystemInitialized = 0; /* MAINDOS @ 0x000D7C60, IGN_WIN @ 0x004BA6C4 */
 int g_fontSubsystemHandle = 0;   /* MAINDOS @ 0x0024C210, IGN_WIN @ 0x0050E680 */
 
+uint8_t *g_pSysGfxPic;
+uint8_t *g_pSysG2Pic;
+uint8_t *g_pSysCol;
+int g_SystemFonts[8];
+
+uint8_t *g_pHUDFonts;
+int g_hudFontYellowSmall;
+int g_hudFontPosSmall;
+int g_hudFontSpeedSmall;
+int g_hudFontYellow;
+int g_hudFontPos;
+int g_hudFontSpeed;
+int g_hudFontYellowHuge;
+int g_hudFontPosHuge;
+int g_hudFontSpeedHuge;
+
+uint8_t *g_pSPangfxPic;
+uint8_t *g_pNPangfxPic;
+uint8_t *g_pHPan1Pic;
+uint8_t *g_pHPan2Pic;
+uint8_t *g_pSSignsPic;
+uint8_t *g_pNSignsPic;
+uint8_t *g_pHSignsPic;
+uint8_t *g_pPokalPic;
+
 /* External subsystem helpers */
 extern int Subsystem_Register(void);
 extern void Subsystem_AddCallback(int handle);
@@ -371,4 +396,117 @@ int Font_DrawText(const char *text, int font_id, int x, int y) {
     }
 
     return 1;
+}
+
+/**
+ * @original Load_SystemGraphicsAndFonts (IGN_WIN.EXE @ 0x00418130)
+ * @fidelity ADAPTED
+ */
+void Load_SystemGraphicsAndFonts(void) {
+    int i;
+    
+    g_pSysGfxPic = (uint8_t *)File_LoadToMemory("n_sysgfx.pic");
+    if (!g_pSysGfxPic) exit(1);
+    
+    g_pSysG2Pic = (uint8_t *)File_LoadToMemory("n_sysg_2.pic");
+    if (!g_pSysG2Pic) exit(1);
+    
+    g_pSysCol = (uint8_t *)File_LoadToMemory("sys.col");
+    if (!g_pSysCol) exit(1);
+    
+    g_SystemFonts[0] = Font_Load("baltazar\\data\\red_dark.lft", 0);
+    g_SystemFonts[1] = Font_Load("baltazar\\data\\red_lite.lft", 0);
+    g_SystemFonts[2] = Font_Load("baltazar\\data\\bluedark.lft", 0);
+    g_SystemFonts[3] = Font_Load("baltazar\\data\\bluelite.lft", 0);
+    g_SystemFonts[4] = Font_Load("baltazar\\data\\red_grey.lft", 0);
+    g_SystemFonts[5] = Font_Load("baltazar\\data\\bluegrey.lft", 0);
+    g_SystemFonts[6] = Font_Load("fonts\\mini.lft", 0);
+    g_SystemFonts[7] = Font_Load("fonts\\small.lft", 0);
+    
+    for (i = 0; i < 8; i++) {
+        int font_id = g_SystemFonts[i];
+        if (font_id == -1) {
+            exit(-1);
+        }
+        g_fonts[font_id].field_08 = 1;
+        g_fonts[font_id].extra_spacing = 1;
+    }
+}
+
+/**
+ * @original Font_LoadHUDFonts (IGN_WIN.EXE @ 0x0041ac40)
+ * @fidelity ADAPTED
+ */
+void Font_LoadHUDFonts(void) {
+    char path[64];
+    
+    sprintf(path, "%sIGNITION.FNT", "FONTS\\");
+    g_pHUDFonts = (uint8_t *)File_LoadToMemory(path);
+    if (!g_pHUDFonts) exit(1);
+    
+    sprintf(path, "%syellow_s.lft", "FONTS\\");
+    g_hudFontYellowSmall = Font_Load(path, 0);
+    if (g_hudFontYellowSmall == -1) exit(-1);
+    
+    sprintf(path, "%spos_s.lft", "FONTS\\");
+    g_hudFontPosSmall = Font_Load(path, 0);
+    if (g_hudFontPosSmall == -1) exit(-1);
+    
+    sprintf(path, "%sspeed_s.lft", "FONTS\\");
+    g_hudFontSpeedSmall = Font_Load(path, 0);
+    if (g_hudFontSpeedSmall == -1) exit(-1);
+    
+    sprintf(path, "%syellow.lft", "FONTS\\");
+    g_hudFontYellow = Font_Load(path, 0);
+    if (g_hudFontYellow == -1) exit(-1);
+    
+    sprintf(path, "%spos.lft", "FONTS\\");
+    g_hudFontPos = Font_Load(path, 0);
+    if (g_hudFontPos == -1) exit(-1);
+    
+    sprintf(path, "%sspeed.lft", "FONTS\\");
+    g_hudFontSpeed = Font_Load(path, 0);
+    if (g_hudFontSpeed == -1) exit(-1);
+    
+    sprintf(path, "%syellow_h.lft", "FONTS\\");
+    g_hudFontYellowHuge = Font_Load(path, 0);
+    if (g_hudFontYellowHuge == -1) exit(-1);
+    
+    sprintf(path, "%spos_h.lft", "FONTS\\");
+    g_hudFontPosHuge = Font_Load(path, 0);
+    if (g_hudFontPosHuge == -1) exit(-1);
+    
+    sprintf(path, "%sspeed_h.lft", "FONTS\\");
+    g_hudFontSpeedHuge = Font_Load(path, 0);
+    if (g_hudFontSpeedHuge == -1) exit(-1);
+}
+
+/**
+ * @original Track_LoadOverlayGfx (IGN_WIN.EXE @ 0x0041af70)
+ * @fidelity ADAPTED
+ */
+void Track_LoadOverlayGfx(void) {
+    g_pSPangfxPic = (uint8_t *)File_LoadToMemory("s_pangfx.pic");
+    if (!g_pSPangfxPic) exit(1);
+    
+    g_pNPangfxPic = (uint8_t *)File_LoadToMemory("n_pangfx.pic");
+    if (!g_pNPangfxPic) exit(1);
+    
+    g_pHPan1Pic = (uint8_t *)File_LoadToMemory("h_pan1.pic");
+    if (!g_pHPan1Pic) exit(1);
+    
+    g_pHPan2Pic = (uint8_t *)File_LoadToMemory("h_pan2.pic");
+    if (!g_pHPan2Pic) exit(1);
+    
+    g_pSSignsPic = (uint8_t *)File_LoadToMemory("s_signs.pic");
+    if (!g_pSSignsPic) exit(1);
+    
+    g_pNSignsPic = (uint8_t *)File_LoadToMemory("n_signs.pic");
+    if (!g_pNSignsPic) exit(1);
+    
+    g_pHSignsPic = (uint8_t *)File_LoadToMemory("h_signs.pic");
+    if (!g_pHSignsPic) exit(1);
+    
+    g_pPokalPic = (uint8_t *)File_LoadToMemory("pokal.pic");
+    if (!g_pPokalPic) exit(1);
 }

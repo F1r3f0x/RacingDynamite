@@ -1,13 +1,15 @@
 # Ignition (1997) Reverse Engineering & Porting Rules
 
-**Goal:** 100% matching decompilation of `MAINDOS_32BIT.EXE` (Watcom C) and a modern C11/SDL2 source port.
+**Goal:** Phase 1: Functional decompilation of `MAINDOS_32BIT.EXE` to pure C. Phase 2: 100% byte-matching decompilation. Phase 3: Modern C11/SDL2 source port.
 
 ## 1. Decompilation Pipeline (MAINDOS_32BIT.EXE)
-- **Target:** Exclusively byte-match `MAINDOS_32BIT.EXE`. Use `IGN_WIN.EXE` only as a source port reference.
+- **Target:** Exclusively reverse-engineer `MAINDOS_32BIT.EXE`. Use `IGN_WIN.EXE` only as a source port reference.
+- **Phase 1 (Functional):** Decompile functions into pure, functionally identical C code using Open Watcom V2. A 100% byte-match is NOT required in this phase due to compiler differences. ASM Fallbacks should ONLY be used for genuinely handwritten assembly, not for C compiler mismatches.
+- **Phase 2 (Byte-Matching):** (Future) Procure Watcom C/C++ 10.6 to resolve compiler idiosyncrasies and shift functional C code to 100% bit-for-bit matching.
 - **Clean-Room:** Never commit original executables or assets. `tools/extract_assets.py` MUST validate SHA-1 checksums of user-provided game files.
-- **Pure C Only:** Never use inline assembly (`__asm`) in `.c` files to force a byte match. Functions that are genuinely handwritten in assembly must be placed in separate `.asm` files and compiled with `wasm`.
+- **Pure C Only:** Never use inline assembly (`__asm`) in `.c` files.
 - **Assembly Slicing:** `tools/unpack_dos_le.py` disassembles sections into `wasm` stubs. These are linked with matching `.c` code via `wlink` for a continuous bootable replacement.
-- **Verification:** Run `uv run python tools/verify_matching.py` to prevent regressions. Maintain `objdiff.json` for GUI diffing.
+- **Verification:** Run `uv run python tools/verify_matching.py` to track progress. Maintain `objdiff.json` for GUI diffing.
 
 ## 2. Source Port & Fidelity Tracking (FCTS)
 - **Tech Stack:** Engine in C11/SDL2. Tools in Python (managed via `uv`). Build via CMake.

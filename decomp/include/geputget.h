@@ -51,6 +51,32 @@ extern FontSlot g_fonts[MAX_FONTS];
 /* Global font system initialized flag (MAINDOS @ 0x000D7C60, IGN_WIN @ 0x004BA6C4) */
 extern int g_fontSystemInitialized;
 
+/* Global Graphics and Font Pointers */
+extern uint8_t *g_pSysGfxPic;
+extern uint8_t *g_pSysG2Pic;
+extern uint8_t *g_pSysCol;
+extern int g_SystemFonts[8];
+
+extern uint8_t *g_pHUDFonts;
+extern int g_hudFontYellowSmall;
+extern int g_hudFontPosSmall;
+extern int g_hudFontSpeedSmall;
+extern int g_hudFontYellow;
+extern int g_hudFontPos;
+extern int g_hudFontSpeed;
+extern int g_hudFontYellowHuge;
+extern int g_hudFontPosHuge;
+extern int g_hudFontSpeedHuge;
+
+extern uint8_t *g_pSPangfxPic;
+extern uint8_t *g_pNPangfxPic;
+extern uint8_t *g_pHPan1Pic;
+extern uint8_t *g_pHPan2Pic;
+extern uint8_t *g_pSSignsPic;
+extern uint8_t *g_pNSignsPic;
+extern uint8_t *g_pHSignsPic;
+extern uint8_t *g_pPokalPic;
+
 /* Function prototypes */
 int Font_InitSystem(void);
 int Font_Shutdown(void);
@@ -59,5 +85,8 @@ int Font_Load(const char *filename, int unused);
 int Font_Unload(int font_id);
 int Font_GetTextWidth(const char *text, int font_id);
 int Font_DrawText(const char *text, int font_id, int x, int y);
+void Load_SystemGraphicsAndFonts(void);
+void Font_LoadHUDFonts(void);
+void Track_LoadOverlayGfx(void);
 
 #endif /* GEPUTGET_H */

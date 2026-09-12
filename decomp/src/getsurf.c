@@ -111,7 +111,7 @@ int Surface_GetTriangleHeight(SurfaceHeightContext *ctx) {
     return avg_neg_y + obj->pos_y;
 }
 
-#if 0
+/* #if 0 */
 /**
  * [ASM Fallback Active]
  * These functions are currently assembled and linked via decomp/src/asm/getsurf.asm
@@ -176,7 +176,7 @@ void *Surface_TestTriangleNegativeDZ(int count, int qx, int qz, SrfTriangle **ta
     }
     return out_hits;
 }
-#endif
+/* #endif */
 
 /* Static hit buffer and scratch variables for raycasting (0x000eb900 - 0x000ebb54) */
 static SurfaceHeightContext s_hits[56];
