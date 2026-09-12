@@ -24,3 +24,8 @@
 - **Ghidra MCP:** Use the active MCP server (`localhost:8080`) to inspect disassembly, decompile, and sync the symbol database directly.
 - **Commits:** Use Conventional Commits (`feat`, `port`, `fix`, `re`, `docs`). Cite function addresses and deviation IDs.
 - **No Git Bloat:** Keep binary assets (`assets/`) and build outputs out of version control.
+
+## 4. Agent Environment Constraints
+- **OS & Shell:** Windows 11 with PowerShell.
+- **Tooling:** `w64devkit` is on PATH (provides standard UNIX/GNU tools like `make`, `gcc`, `grep`, `sed`, `awk`). Git and `uv` (Python) are installed.
+- **Restrictions:** Do NOT attempt to run Linux package managers (`apt`, `brew`) or assume a native Linux environment.
