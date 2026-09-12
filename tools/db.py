@@ -282,6 +282,20 @@ def show_status():
     """)
     for row in cur.fetchall():
         print(f"{row['name']:<16} {row['total']:<6} {row['analyzed']:<10} {row['decompiled']:<12} {row['matching']:<8}")
+    print("--------------------------------------------------")
+    cur.execute("""
+        SELECT symbol_name, dos_address, notes
+        FROM functions
+        WHERE notes LIKE '%ASM fallback%'
+        ORDER BY symbol_name
+    """)
+    asm_rows = cur.fetchall()
+    if asm_rows:
+        print("Active ASM Fallbacks (Pending C matching):")
+        for r in asm_rows:
+            print(f"  * {r['symbol_name']:<30} {r['dos_address']:<12} - {r['notes']}")
+    else:
+        print("Active ASM Fallbacks: None")
     print("==================================================")
     conn.close()
 

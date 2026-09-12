@@ -111,19 +111,72 @@ int Surface_GetTriangleHeight(SurfaceHeightContext *ctx) {
     return avg_neg_y + obj->pos_y;
 }
 
+#if 0
 /**
+ * [ASM Fallback Active]
+ * These functions are currently assembled and linked via decomp/src/asm/getsurf.asm
+ * to provide byte-matching binaries. The reconstructed pure C versions below are preserved
+ * for ongoing / future attempts to achieve a 100% byte match using Watcom C.
+ *
  * Surface_TestTrianglePositiveDZ (MAINDOS @ 0x00020C18, IGN_WIN @ 0x00446578)
  * 2D trapezoidal slope span test for table2 triangles (dz >= 0).
  */
-/*
 void *Surface_TestTrianglePositiveDZ(int count, int qx, int qz, SrfTriangle **table, void *out_hits) {
-...
+    if (count != 0) {
+        int *hits = (int *)out_hits;
+        do {
+            SrfTriangle *tri = *table;
+            int z_base = tri->z_base;
+            if (qz >= z_base && qz <= z_base + (short)tri->flags_dz) {
+                int delta_z = qz - z_base;
+                int x_left = tri->x_base + ((delta_z * tri->slope1) >> 16);
+                if (qx >= x_left) {
+                    int x_right = tri->x_base + ((delta_z * tri->slope2) >> 16);
+                    if (qx <= x_right) {
+                        hits[0] = tri->v_ptr;
+                        hits[1] = ((unsigned short)tri->poly_offset * 4) + *(int *)(tri->v_ptr + 4);
+                        hits += 2;
+                    }
+                }
+            }
+            table++;
+            count--;
+        } while (count != 0);
+        out_hits = hits;
+    }
+    return out_hits;
 }
 
+/**
+ * Surface_TestTriangleNegativeDZ (MAINDOS @ 0x00020C81, IGN_WIN @ 0x004465E1)
+ * 2D trapezoidal slope span test for table1 triangles (dz < 0).
+ */
 void *Surface_TestTriangleNegativeDZ(int count, int qx, int qz, SrfTriangle **table, void *out_hits) {
-...
+    if (count != 0) {
+        int *hits = (int *)out_hits;
+        do {
+            SrfTriangle *tri = *table;
+            int z_base = tri->z_base;
+            if (qz <= z_base && qz >= z_base + (short)tri->flags_dz) {
+                int delta_z = qz - z_base;
+                int x_left = tri->x_base + ((delta_z * tri->slope1) >> 16);
+                if (qx >= x_left) {
+                    int x_right = tri->x_base + ((delta_z * tri->slope2) >> 16);
+                    if (qx <= x_right) {
+                        hits[0] = tri->v_ptr;
+                        hits[1] = ((unsigned short)tri->poly_offset * 4) + *(int *)(tri->v_ptr + 4);
+                        hits += 2;
+                    }
+                }
+            }
+            table++;
+            count--;
+        } while (count != 0);
+        out_hits = hits;
+    }
+    return out_hits;
 }
-*/
+#endif
 
 /* Static hit buffer and scratch variables for raycasting (0x000eb900 - 0x000ebb54) */
 static SurfaceHeightContext s_hits[56];
