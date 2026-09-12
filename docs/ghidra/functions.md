@@ -14,8 +14,8 @@
 | - | `0x00412230` | `FUN_00412230` | `App_FrameTick` | `main.c` | Analyzed | - | Main engine tick; dispatches Init (0), Main Loop (1), and Shutdown (2). |
 | - | `0x00412500` | `FUN_00412500` | `App_Init` | `main.c` | Analyzed | - | Creates game window, initializes DirectDraw and DirectInput subsystems. |
 | - | `0x00412530` | `FUN_00412530` | `App_Shutdown` | `main.c` | Analyzed | - | Releases DirectDraw surfaces, DirectSound, and window handles. |
-| - | `0x00412580` | `FUN_00412580` | `Cdp_OpenFile` | `lisa3d.c` | Analyzed | - | Validates "CDP\0" header, dimensions, frame count, and embedded palette. |
-| - | `0x00412610` | `FUN_00412610` | `Cdp_DecodeFrame` | `lisa3d.c` | Analyzed | - | Advances animation stream and triggers inter-frame delta decompression. |
+| - | `0x00412580` | `FUN_00412580` | `Cdp_OpenFile` | `lisa3d.c` | Decompiled | EXACT | Validates "CDP\0" header, dimensions, frame count, and embedded palette. |
+| - | `0x00412610` | `FUN_00412610` | `Cdp_DecodeFrame` | `lisa3d.c` | Decompiled | EXACT | Advances animation stream and triggers inter-frame delta decompression. |
 | `0x0001fee0` | `0x00412670` | `FUN_00412670` | `Surface_LoadSRF` | `getsurf.c` | Decompiled | ADAPTED | Loads .SRF track collision surface, converts relative offsets to pointers |
 | `0x0002002c` | `0x004127a0` | `FUN_004127a0` | `Surface_FreeSRF` | `getsurf.c` | Decompiled | ADAPTED | Frees active .SRF surface memory buffer. |
 | `0x00020814` | `0x00412fc0` | `FUN_00412fc0` | `Surface_Raycast` | `getsurf.c` | Decompiled | EXTENDED | Spatial grid query, candidate selection, cross product normal, world vertex transform |
@@ -25,13 +25,13 @@
 | - | `0x00416250` | `FUN_00416250` | `Mesh_InstantiatePlacedObjects` | `main.c` | Decompiled | ADAPTED | Applies .PLC world translation offsets to .MSH submesh vertices. |
 | - | `0x00417270` | `FUN_00417270` | `Game_Init` | `main.c` | Analyzed | - | Sets initial game state flags, resets timers, initiates intro sequence. |
 | - | `0x004172b0` | `FUN_004172b0` | `Game_StateDispatcher` | `main.c` | Decompiled | ADAPTED | Top-level game loop state machine dispatcher (Intro -> Menus -> Race). |
-| `0x00021860` | `0x00418130` | `FUN_00418130` | `Load_SystemGraphicsAndFonts` | `geputget.c` | Analyzed | - | Loads SYS.COL, N_SYSGFX.PIC, N_SYSG_2.PIC, and .LFT fonts. |
+| `0x00021860` | `0x00418130` | `FUN_00418130` | `Load_SystemGraphicsAndFonts` | `geputget.c` | Decompiled | - | Loads SYS.COL, N_SYSGFX.PIC, N_SYSG_2.PIC, and .LFT fonts. |
 | - | `0x00418dd0` | `FUN_00418dd0` | `Track_LoadAllAssets` | `main.c` | Analyzed | - | Master track loader: loads .COL, .PAN, .PIC, .SHD, .TAB, .MSH, .TEX, .POS. |
 | - | `0x00419a90` | `FUN_00419a90` | `Track_LoadPlacements` | `main.c` | Decompiled | ADAPTED | Loads .PLC scenery object placement tables for level and cars. |
 | - | `0x00419bd0` | `FUN_00419bd0` | `Mesh_LoadTrackAndCars` | `main.c` | Decompiled | ADAPTED | Loads LEVELS/<TRACK>/<TRACK>.MSH and CARS/CARS.MSH into geometry memory. |
 | - | `0x00419d10` | `FUN_00419d10` | `Texture_LoadAllPages` | `main.c` | Decompiled | ADAPTED | Loads 1MB track .TEX, car .TEX, and 64KB aligned sprite pages. |
-| `0x000240f4` | `0x0041ac40` | `FUN_0041ac40` | `Font_LoadHUDFonts` | `geputget.c` | Analyzed | - | Loads HUD lettering glyphs (IGNITION.FNT, yellow.lft, speed.lft, etc.). |
-| `0x000243e0` | `0x0041af70` | `FUN_0041af70` | `Track_LoadOverlayGfx` | `geputget.c` | Analyzed | - | Loads track sign textures and winner trophy bitmap (POKAL.PIC). |
+| `0x000240f4` | `0x0041ac40` | `FUN_0041ac40` | `Font_LoadHUDFonts` | `geputget.c` | Decompiled | - | Loads HUD lettering glyphs (IGNITION.FNT, yellow.lft, speed.lft, etc.). |
+| `0x000243e0` | `0x0041af70` | `FUN_0041af70` | `Track_LoadOverlayGfx` | `geputget.c` | Decompiled | - | Loads track sign textures and winner trophy bitmap (POKAL.PIC). |
 | - | `0x0041b360` | `FUN_0041b360` | `Track_PreprocessPlacements` | `main.c` | Decompiled | ADAPTED | Unpacks model_type bitfields (& 0xFFF) and extracts animation and flag channels. |
 | - | `0x0041b470` | `FUN_0041b470` | `Race_InitSceneAndCars` | `main.c` | Analyzed | - | Instantiates player/AI cars on starting grid and binds scenery collision. |
 | - | `0x0041d190` | `FUN_0041d190` | `Car_UnpackMeshGeometry` | `lisa3d.c` | Decompiled | EXTENDED | Extracts CARS.MSH submesh vertices, finds bottom tire vertex $\max(v_y)$ for ground alignment, and scales by $21.76$. |
@@ -44,7 +44,7 @@
 | - | `0x004356d0` | `FUN_004356d0` | `Pos_InitAnimatedObjects` | `lisa3d.c` | Decompiled | ADAPTED | Converts keyframe coordinates in .POS to relative displacement deltas. |
 | - | `0x004357a0` | `FUN_004357a0` | `Pos_UpdateAnimatedObjects` | `lisa3d.c` | Decompiled | ADAPTED | Advances keyframe playheads and translates moving scenery objects via Lisa_MoveObject. |
 | - | `0x00436990` | `FUN_00436990` | `Race_RenderViewport` | `main.c` | Decompiled | EXTENDED | Calculates camera transform, invokes scene renderer, draws HUD. |
-| - | `0x00438210` | `FUN_00438210` | `Lisa_RenderPanorama` | `lisa3d.c` | Analyzed | - | Cylindrical horizon background blitter sampling 64KB .PAN texture using camera yaw and pitch angles. |
+| - | `0x00438210` | `FUN_00438210` | `Lisa_RenderPanorama` | `lisa3d.c` | Decompiled | ADAPTED | Cylindrical horizon background blitter sampling 64KB .PAN texture using camera yaw and pitch angles. |
 | - | `0x0043c910` | `FUN_0043c910` | `Camera_UpdateChase` | `main.c` | Decompiled | EXTENDED | Multi-mode chase camera with velocity lookahead, 0.125 azimuth lag, slope adaptation (DEV-004). |
 | - | `0x0043e2a0` | `FUN_0043e2a0` | `Lisa_Init` | `lisa3d.c` | Decompiled | ADAPTED | Initializes Lisa 2 rasterizer viewport, Z-buffer, and focal lengths. |
 | - | `0x00442030` | `FUN_00442030` | `Car_ApplySteering` | `vehicle.c` | Decompiled | EXACT | Speed-attenuated front wheel steering lock and smoothing filter. |
@@ -83,6 +83,6 @@
 | - | `0x00457ed0` | `FUN_00457ed0` | `Music_PlayTrack` | `main.c` | Decompiled | ADAPTED | CD-DA track streamer using stb_vorbis mapped to circuits via DAT_00497eb8. |
 | - | `0x004582b0` | `FUN_004582b0` | `Sound_LoadPAT` | `main.c` | Decompiled | ADAPTED | Loads Gravis UltraSound GF1 .PAT patch audio files and converts 8-bit/16-bit linear PCM to S16SYS format. |
 | - | `0x00458e00` | `FUN_00458e00` | `Sound_LoadWAV` | `main.c` | Decompiled | ADAPTED | Loads RIFF/WAVE PCM 8-bit/16-bit audio file and converts to S16SYS format. |
-| - | `0x0045b4f0` | `FUN_0045b4f0` | `Lisa_PrintVersion` | `lisa3d.c` | Analyzed | - | Prints "Lisa 2 Development System" banner and build timestamp. |
+| - | `0x0045b4f0` | `FUN_0045b4f0` | `Lisa_PrintVersion` | `lisa3d.c` | Decompiled | EXACT | Prints "Lisa 2 Development System" banner and build timestamp. |
 | - | `0x00469950` | `entry` | `CRT_Entry` | `MSVC CRT` | Analyzed | - | C Runtime startup entry point, parses command line, calls WinMain. |
-| - | `0x00499abc` | `FUN_00499abc` | `Cdp_DecompressRLE` | `lisa3d.c` | Analyzed | - | Delta-skip RLE decompression modifying active frame buffer with opcode skip codes. |
+| - | `0x00499abc` | `FUN_00499abc` | `Cdp_DecompressRLE` | `lisa3d.c` | Decompiled | EXACT | Delta-skip RLE decompression modifying active frame buffer with opcode skip codes. |

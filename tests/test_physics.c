@@ -284,6 +284,8 @@ static void Test_InRaceRenderAndChaseCam(void) {
     snprintf(shd_p, sizeof(shd_p), "assets/LEVELS/%s/%s.SHD", name, name);
     snprintf(col_p, sizeof(col_p), "assets/LEVELS/%s/%s.COL", name, name);
     snprintf(trk_dir, sizeof(trk_dir), "assets/LEVELS/%s", name);
+    char pos_p[128];
+    snprintf(pos_p, sizeof(pos_p), "assets/LEVELS/%s/%s.POS", name, name);
 
     ctx.active_srf = Srf_LoadFromFile(srf_p);
     ctx.active_plc = Plc_LoadFromFile(plc_p);
@@ -292,6 +294,7 @@ static void Test_InRaceRenderAndChaseCam(void) {
     ctx.active_tab = Tab_LoadFromFile(tab_p);
     ctx.active_shd = Shd_LoadFromFile(shd_p);
     Col_LoadFromFile(col_p, &ctx.active_palette);
+    ctx.active_pos = Pos_LoadFromFile(pos_p, ctx.active_plc ? ctx.active_plc->count : 0);
     ctx.active_waypoints = Track_BuildWaypoints(trk_dir, name, ctx.active_plc, ctx.active_msh);
 
     assert(ctx.active_srf && ctx.active_plc && ctx.active_msh && ctx.active_waypoints);
@@ -325,7 +328,7 @@ static void Test_InRaceRenderAndChaseCam(void) {
     Game_Render(&ctx);
 
     // Save screenshot of in-race chase camera
-    SaveBMP24("C:/Users/Patricio/.gemini/antigravity/brain/2b5d164d-6934-430b-9f87-32444f8c3b63/scratch/test_in_race_chase_cam.bmp",
+    SaveBMP24("scratch/test_in_race_chase_cam.bmp",
               ctx.framebuffer, &ctx.active_palette, NATIVE_WIDTH, NATIVE_HEIGHT);
 
     printf("  [PASS] In-race chase camera rendering verified. Screenshot saved.\n\n");

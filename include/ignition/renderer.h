@@ -250,6 +250,20 @@ typedef struct VehicleState VehicleState;
  */
 void Renderer_DrawCar(Renderer3D *r, const Camera3D *cam, const MshData *cars_msh, const TexData *cars_tex, const VehicleState *veh);
 
+/**
+ * @brief Prints Lisa 2 Development System build banner and timestamp.
+ * @original FUN_0045b4f0 (IGN_WIN.EXE @ 0x0045b4f0, lisa3d.c)
+ * @fidelity EXACT
+ */
+void Renderer_PrintVersion(void);
+
+/**
+ * @brief Renders 360-degree cylindrical horizon backdrop sampling 64KB (256x256) .PAN texture.
+ * @original FUN_00438210 (IGN_WIN.EXE @ 0x00438210, lisa3d.c)
+ * @fidelity ADAPTED
+ */
+void Renderer_RenderPanorama(Renderer3D *r, const Camera3D *cam, const uint8_t *pan_pixels);
+
 #ifdef __cplusplus
 }
 #endif

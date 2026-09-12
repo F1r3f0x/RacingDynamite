@@ -771,4 +771,47 @@ void Renderer_DrawCar(Renderer3D *r, const Camera3D *cam, const MshData *cars_ms
     }
 }
 
+/**
+ * @brief Prints Lisa 2 Development System build banner and timestamp.
+ * @original FUN_0045b4f0 (IGN_WIN.EXE @ 0x0045b4f0, lisa3d.c)
+ * @fidelity EXACT
+ */
+void Renderer_PrintVersion(void) {
+    printf("Lisa 2 Development System: %s\n", "Compilation 0.91.0");
+    printf("Copyright (c) UDS, 1995-1996\n");
+}
+
+/**
+ * @brief Renders 360-degree cylindrical horizon backdrop sampling 64KB (256x256) .PAN texture.
+ * @original FUN_00438210 (IGN_WIN.EXE @ 0x00438210, lisa3d.c)
+ * @fidelity ADAPTED
+ */
+void Renderer_RenderPanorama(Renderer3D *r, const Camera3D *cam, const uint8_t *pan_pixels) {
+    if (!r || !cam || !pan_pixels || !r->framebuffer) return;
+    if (!r->options.render_panoramas) return;
+
+    int half_h = r->height / 2;
+    int base_u = (int)((cam->yaw / (2.0f * (float)M_PI)) * 256.0f) % 256;
+    if (base_u < 0) base_u += 256;
+
+    int horizon_y = half_h + (int)((cam->pitch / 90.0f) * 64.0f);
+    if (horizon_y < 0) horizon_y = 0;
+    if (horizon_y > r->height) horizon_y = r->height;
+
+    for (int y = 0; y < horizon_y; y++) {
+        int v = 128 - (horizon_y - y);
+        if (v < 0) v = 0;
+        if (v > 255) v = 255;
+
+        const uint8_t *pan_row = &pan_pixels[v * 256];
+        uint8_t *fb_row = &r->framebuffer[y * r->width];
+
+        for (int x = 0; x < r->width; x++) {
+            int u = (base_u + (x * 256) / r->width) % 256;
+            fb_row[x] = pan_row[u];
+        }
+    }
+}
+
+
 

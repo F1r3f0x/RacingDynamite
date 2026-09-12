@@ -33,6 +33,7 @@ set(SOURCES
     src/formats/lft.c
     src/formats/tri.c
     src/formats/pos.c
+    src/formats/cdp.c
     src/renderer/camera.c
     src/renderer/rasterizer.c
     src/physics/getsurf.c

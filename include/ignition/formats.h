@@ -267,6 +267,29 @@ void     Pos_Update(PosData *pos, PlcData *plc);
 
 #include "ignition/tri.h"
 
+#pragma pack(push, 1)
+
+// Ignition .CDP Animation Video Stream (Header + Frames)
+// @original Cdp_OpenFile (IGN_WIN.EXE @ 0x00412580, lisa3d.c)
+typedef struct {
+    uint8_t *file_data;         // +0x00: Pointer to raw file data
+    uint8_t *pixel_buffer;      // +0x04: 8bpp destination pixel buffer
+    int16_t frame_count;        // +0x08: Total animation frames
+    int16_t loop_flag;          // +0x0A: 1 = loop continuously, 0 = play once
+    int16_t width;              // +0x0C: Video frame width in pixels
+    int16_t height;             // +0x0E: Video frame height in pixels
+    uint8_t *palette;           // +0x10: 768-byte embedded RGB palette
+    int16_t current_frame;      // +0x14: Active frame index (0..frame_count-1)
+    int32_t is_open;            // +0x16: 1 if stream open and active
+    uint8_t *frame_data_start;  // +0x1A: Pointer to start of frame streams
+    uint8_t *cur_frame_ptr;     // +0x1E: Playhead pointer in byte stream
+} CdpStream;
+
+#pragma pack(pop)
+
+bool Cdp_OpenFile(CdpStream *cdp, const uint8_t *data, size_t size);
+int  Cdp_DecodeFrame(CdpStream *cdp);
+int  Cdp_DecompressRLE(CdpStream *cdp);
 
 #ifdef __cplusplus
 }
