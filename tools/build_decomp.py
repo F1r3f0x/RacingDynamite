@@ -24,7 +24,44 @@ DECOMP_SRC = ROOT_DIR / "decomp" / "src"
 DECOMP_INC = ROOT_DIR / "decomp" / "include"
 BUILD_DIR = ROOT_DIR / "build" / "decomp"
 
+WASM = WATCOM_DIR / "binnt64" / "wasm.exe"
+if not WASM.exists():
+    WASM = WATCOM_DIR / "binnt" / "wasm.exe"
+
 def compile_file(src_path: Path):
+    if src_path.suffix == ".asm":
+        if not WASM.exists():
+            print(f"Error: Watcom assembler not found at {WASM}.", file=sys.stderr)
+            return False
+            
+        BUILD_DIR.mkdir(parents=True, exist_ok=True)
+        obj_path = BUILD_DIR / f"{src_path.stem}_asm.obj"
+        
+        env = os.environ.copy()
+        env["WATCOM"] = str(WATCOM_DIR)
+        env["PATH"] = f"{WASM.parent};{env.get('PATH', '')}"
+        
+        # -3 : 386 instructions
+        # -mf : flat memory model
+        # -zq : quiet
+        cmd = [
+            str(WASM),
+            "-3",
+            "-mf",
+            "-zq",
+            f"-fo={obj_path}",
+            str(src_path)
+        ]
+        
+        print(f"Assembling {src_path.name} -> {obj_path.name}...")
+        res = subprocess.run(cmd, env=env, capture_output=True, text=True)
+        if res.returncode != 0:
+            print(f"Assembly FAILED:\n{res.stdout}\n{res.stderr}", file=sys.stderr)
+            return False
+            
+        print(f"Assembly SUCCESS: {obj_path} ({obj_path.stat().st_size} bytes)")
+        return True
+
     if not WCC386.exists():
         print(f"Error: Watcom compiler not found at {WCC386}. Run tools/setup_decomp_tools.py first.", file=sys.stderr)
         return False
@@ -70,9 +107,9 @@ def compile_file(src_path: Path):
 
 def compile_all(sources=None):
     if sources is None:
-        sources = list(DECOMP_SRC.glob("*.c"))
+        sources = list(DECOMP_SRC.glob("*.c")) + list((DECOMP_SRC / "asm").glob("*.asm"))
     if not sources:
-        print("No C source files found in decomp/src/.")
+        print("No C/ASM source files found in decomp/src/.")
         return False
     success = True
     for s in sources:

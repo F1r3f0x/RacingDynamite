@@ -15,6 +15,9 @@ def load_coff_symbols(obj_path: Path):
     with open(obj_path, "rb") as f:
         data = f.read()
     
+    if len(data) < 20 or data[0:2] != b'\x4c\x01':
+        return [], {}  # Not a COFF file (likely OMF from wasm), skip it.
+        
     num_sections = int.from_bytes(data[2:4], "little")
     sym_table_ptr = int.from_bytes(data[8:12], "little")
     num_symbols = int.from_bytes(data[12:16], "little")

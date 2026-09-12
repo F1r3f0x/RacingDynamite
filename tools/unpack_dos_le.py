@@ -328,6 +328,12 @@ def generate_wlink_script(modules: list):
     for m in sorted(modules):
         lines.append(f"file build/decomp/{m}.obj")
         
+    # Check for custom asm objects
+    asm_src_dir = ROOT_DIR / "decomp" / "src" / "asm"
+    if asm_src_dir.exists():
+        for f in asm_src_dir.glob("*.asm"):
+            lines.append(f"file build/decomp/{f.stem}_asm.obj")
+            
     with open(wlink_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
     print(f"[wlink] Generated linker script: {wlink_path}")
