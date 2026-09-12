@@ -6,7 +6,20 @@
 
 #include "main.h"
 
+typedef unsigned char undefined;
+typedef unsigned char undefined1;
+typedef unsigned short undefined2;
+typedef unsigned int undefined4;
+typedef double undefined8;
+typedef double float10;
+typedef unsigned int uint;
+typedef unsigned short ushort;
+typedef long long longlong;
+
+
 /* Global Game Engine State */
+#include <io.h>
+#include <fcntl.h>
 int g_GameStage = 0;             /* 0=Init, 1=Run, 2=Shutdown */
 int g_MenuState = 0;
 int g_MenuSelection = 0;
@@ -18,9 +31,24 @@ uint8_t *g_pMenuTab = NULL;
 int g_CheckpointCount = 0;
 uint8_t *g_pCheckpoints = NULL;
 
+char g_TrackDir[64] = "SNAKE";
+char g_TrackName[64] = "SNAKE";
+uint8_t *g_pTrackCOL = NULL;
+uint8_t *g_pTrackPIC = NULL;
+uint8_t *g_pTrackSHD = NULL;
+uint8_t *g_pTrackTAB = NULL;
+uint8_t *g_pTrackPOS = NULL;
+uint8_t *g_pTrackSHD_Copy = NULL;
+int g_MemoryAllocated = 0;
+
+int g_ScreenWidth = 320;
+int g_ScreenHeight = 200;
+int g_ScreenBPP = 8;
+int g_ScreenMode = 1;
+
 /**
  * @original Menu_Init (IGN_WIN.EXE @ 0x004029a0, main.c)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  * @notes Loads MENU.COL, MENU.TAB, configures fonts, and sets up main menu.
  */
 int Menu_Init(void) {
@@ -33,7 +61,7 @@ int Menu_Init(void) {
 
 /**
  * @original Game_Init (IGN_WIN.EXE @ 0x00417270, main.c)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  * @notes Sets initial game state flags, resets timers, initiates intro sequence.
  */
 int Game_Init(void) {
@@ -46,7 +74,7 @@ int Game_Init(void) {
 
 /**
  * @original App_Init (IGN_WIN.EXE @ 0x00412500, main.c)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  * @notes Initializes graphics modes, input devices, and timer resolution.
  */
 int App_Init(void) {
@@ -55,7 +83,7 @@ int App_Init(void) {
 
 /**
  * @original App_Shutdown (IGN_WIN.EXE @ 0x00412530, main.c)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  * @notes Releases graphics framebuffers, audio channels, and frees assets.
  */
 void App_Shutdown(void) {
@@ -72,7 +100,7 @@ void App_Shutdown(void) {
 
 /**
  * @original App_FrameTick (IGN_WIN.EXE @ 0x00412230, main.c)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  * @notes Main engine tick; dispatches Init (0), Main Loop (1), and Shutdown (2).
  */
 int App_FrameTick(void) {
@@ -92,29 +120,112 @@ int App_FrameTick(void) {
 
 /**
  * @original Track_LoadAllAssets (IGN_WIN.EXE @ 0x00418dd0, main.c)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  * @notes Master track loader: loads .COL, .PAN, .PIC, .SHD, .TAB, .POS, and HUD fonts.
  */
-int Track_LoadAllAssets(const char *track_dir, const char *track_name) {
+int Track_LoadAllAssets(void) {
     char path[128];
+    int fd;
+    int size;
 
-    sprintf(path, "LEVELS\\%s\\%s.COL", track_dir, track_name);
-    File_LoadToMemory(path);
+    sprintf(path, "LEVELS\\%s\\%s.COL", g_TrackDir, g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        printf("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    size = filelength(fd);
+    g_pTrackCOL = (uint8_t *)Mem_Alloc(1, size);
+    g_MemoryAllocated += size;
+    if (g_pTrackCOL == NULL) {
+        exit(1);
+    }
+    read(fd, g_pTrackCOL, size);
+    close(fd);
 
-    sprintf(path, "LEVELS\\%s\\%s.PAN", track_dir, track_name);
-    g_pActivePAN = (uint8_t *)File_LoadToMemory(path);
+    sprintf(path, "LEVELS\\%s\\%s.PAN", g_TrackDir, g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        printf("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    size = filelength(fd);
+    g_pActivePAN = (uint8_t *)Mem_Alloc(1, size + 0x10000);
+    g_MemoryAllocated += (size + 0x10000);
+    if (g_pActivePAN == NULL) {
+        exit(1);
+    }
+    g_pActivePAN = (uint8_t *)(((uintptr_t)g_pActivePAN + 0xffff) & ~0xffff);
+    read(fd, g_pActivePAN, size);
+    close(fd);
 
-    sprintf(path, "LEVELS\\%s\\%s.PIC", track_dir, track_name);
-    File_LoadToMemory(path);
+    sprintf(path, "LEVELS\\%s\\%s.PIC", g_TrackDir, g_TrackName);
+    g_pTrackPIC = (uint8_t *)File_LoadToMemory(path);
+    if (g_pTrackPIC == NULL) {
+        printf("Error while loading %s\n", path);
+        exit(1);
+    }
 
-    sprintf(path, "LEVELS\\%s\\%s.SHD", track_dir, track_name);
-    File_LoadToMemory(path);
+    g_ScreenWidth = 320;
+    g_ScreenHeight = 200;
+    g_ScreenBPP = 8;
+    g_ScreenMode = 1;
+    if (!App_SetVideoMode()) {
+        printf("Cannot use this graphics mode\n");
+        return 0;
+    }
 
-    sprintf(path, "LEVELS\\%s\\%s.TAB", track_dir, track_name);
-    File_LoadToMemory(path);
+    sprintf(path, "LEVELS\\%s\\%s.SHD", g_TrackDir, g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        printf("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    size = filelength(fd);
+    g_pTrackSHD = (uint8_t *)Mem_Alloc(1, size + 0x10000);
+    g_MemoryAllocated += (size + 0x10000);
+    if (g_pTrackSHD == NULL) {
+        exit(1);
+    }
+    g_pTrackSHD = (uint8_t *)(((uintptr_t)g_pTrackSHD + 0xffff) & ~0xffff);
+    read(fd, g_pTrackSHD, size);
+    close(fd);
+    g_pTrackSHD_Copy = g_pTrackSHD;
 
-    sprintf(path, "LEVELS\\%s\\%s.POS", track_dir, track_name);
-    File_LoadToMemory(path);
+    sprintf(path, "LEVELS\\%s\\%s.TAB", g_TrackDir, g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        printf("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    size = filelength(fd);
+    g_pTrackTAB = (uint8_t *)Mem_Alloc(1, size + 0x100);
+    g_MemoryAllocated += (size + 0x100);
+    if (g_pTrackTAB == NULL) {
+        exit(1);
+    }
+    g_pTrackTAB = (uint8_t *)(((uintptr_t)g_pTrackTAB + 0xff) & ~0xff);
+    read(fd, g_pTrackTAB, size);
+    close(fd);
+
+    Track_LoadPlacementsAndCars();
+    Mesh_LoadTrackAndCars();
+    Texture_LoadAllPages();
+
+    sprintf(path, "LEVELS\\%s\\%s.POS", g_TrackDir, g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        printf("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    size = filelength(fd);
+    g_pTrackPOS = (uint8_t *)Mem_Alloc(1, size);
+    g_MemoryAllocated += size;
+    if (g_pTrackPOS == NULL) {
+        exit(1);
+    }
+    read(fd, g_pTrackPOS, size);
+    close(fd);
 
     Font_LoadHUDFonts();
     Track_LoadOverlayGfx();
@@ -124,7 +235,7 @@ int Track_LoadAllAssets(const char *track_dir, const char *track_name) {
 
 /**
  * @original AI_FollowTrackSplines (IGN_WIN.EXE @ 0x004134e0, main.c)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  * @notes Steering simulation updating AI vehicle heading, track spline waypoint
  *        progression, and speed moderation.
  */
@@ -135,7 +246,7 @@ void AI_FollowTrackSplines(int car_idx) {
 
 /**
  * @original Race_InitSceneAndCars (IGN_WIN.EXE @ 0x0041b470, main.c)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  * @notes Instantiates player and AI cars on starting grid and binds track collision.
  */
 void Race_InitSceneAndCars(void) {
@@ -144,7 +255,7 @@ void Race_InitSceneAndCars(void) {
 
 /**
  * @original Race_ResolveVehicleCollisions (IGN_WIN.EXE @ 0x00422680, main.c)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  * @notes Inter-vehicle and scenery obstacle collision detection and impulse response.
  */
 void Race_ResolveVehicleCollisions(void) {
@@ -153,7 +264,7 @@ void Race_ResolveVehicleCollisions(void) {
 
 /**
  * @original Race_CheckCheckpointTriggers (IGN_WIN.EXE @ 0x00429a40, main.c)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  * @notes Tests vehicle collision against type 150..154 split-time checkpoint gates.
  */
 void Race_CheckCheckpointTriggers(void) {

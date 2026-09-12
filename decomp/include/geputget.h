@@ -25,7 +25,8 @@ typedef struct {
     uint16_t spacing;                   /* 0x1C: default character spacing */
     uint8_t glyph_present[FONT_GLYPH_COUNT];  /* 0x1E: 1 if glyph exists, 0 if missing */
     void *glyph_handles[FONT_GLYPH_COUNT];    /* 0xFE: pointer / sprite handle */
-    uint16_t widths[FONT_GLYPH_COUNT];        /* 0x47E: proportional glyph widths */
+    uint16_t widths[FONT_GLYPH_COUNT];
+    uint16_t padding;
 } FontSlot;
 #pragma pack(pop)
 

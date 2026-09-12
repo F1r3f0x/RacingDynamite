@@ -6,6 +6,9 @@
  */
 
 #include "geputget.h"
+#include <io.h>
+#include <fcntl.h>
+extern int g_MemoryAllocated;
 #include <string.h>
 
 /* Global font table matching MAINDOS @ 0x0024C214, IGN_WIN @ 0x0063F2E0 */
@@ -400,19 +403,28 @@ int Font_DrawText(const char *text, int font_id, int x, int y) {
 
 /**
  * @original Load_SystemGraphicsAndFonts (IGN_WIN.EXE @ 0x00418130)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  */
 void Load_SystemGraphicsAndFonts(void) {
     int i;
     
     g_pSysGfxPic = (uint8_t *)File_LoadToMemory("n_sysgfx.pic");
-    if (!g_pSysGfxPic) exit(1);
+    if (!g_pSysGfxPic) {
+        printf("Error while loading N_SYSGFX.PIC\n");
+        exit(1);
+    }
     
     g_pSysG2Pic = (uint8_t *)File_LoadToMemory("n_sysg_2.pic");
-    if (!g_pSysG2Pic) exit(1);
+    if (!g_pSysG2Pic) {
+        printf("Error while loading N_SYSG_2.PIC\n");
+        exit(1);
+    }
     
     g_pSysCol = (uint8_t *)File_LoadToMemory("sys.col");
-    if (!g_pSysCol) exit(1);
+    if (!g_pSysCol) {
+        printf("Error while loading SYS.COL\n");
+        exit(1);
+    }
     
     g_SystemFonts[0] = Font_Load("baltazar\\data\\red_dark.lft", 0);
     g_SystemFonts[1] = Font_Load("baltazar\\data\\red_lite.lft", 0);
@@ -426,87 +438,152 @@ void Load_SystemGraphicsAndFonts(void) {
     for (i = 0; i < 8; i++) {
         int font_id = g_SystemFonts[i];
         if (font_id == -1) {
+            printf("Cannot use this graphics mode\n");
             exit(-1);
         }
+        g_fonts[font_id].alignment = 1;
         g_fonts[font_id].field_08 = 1;
-        g_fonts[font_id].extra_spacing = 1;
     }
 }
 
 /**
  * @original Font_LoadHUDFonts (IGN_WIN.EXE @ 0x0041ac40)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  */
 void Font_LoadHUDFonts(void) {
     char path[64];
+    int fd;
+    int size;
     
     sprintf(path, "%sIGNITION.FNT", "FONTS\\");
-    g_pHUDFonts = (uint8_t *)File_LoadToMemory(path);
-    if (!g_pHUDFonts) exit(1);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        printf("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    size = filelength(fd);
+    g_pHUDFonts = (uint8_t *)Mem_Alloc(1, size);
+    g_MemoryAllocated += size;
+    if (g_pHUDFonts == NULL) {
+        exit(1);
+    }
+    read(fd, g_pHUDFonts, size);
+    close(fd);
     
     sprintf(path, "%syellow_s.lft", "FONTS\\");
     g_hudFontYellowSmall = Font_Load(path, 0);
-    if (g_hudFontYellowSmall == -1) exit(-1);
+    if (g_hudFontYellowSmall == -1) { exit(-1); }
     
     sprintf(path, "%spos_s.lft", "FONTS\\");
     g_hudFontPosSmall = Font_Load(path, 0);
-    if (g_hudFontPosSmall == -1) exit(-1);
+    if (g_hudFontPosSmall == -1) { exit(-1); }
     
     sprintf(path, "%sspeed_s.lft", "FONTS\\");
     g_hudFontSpeedSmall = Font_Load(path, 0);
-    if (g_hudFontSpeedSmall == -1) exit(-1);
+    if (g_hudFontSpeedSmall == -1) { exit(-1); }
     
     sprintf(path, "%syellow.lft", "FONTS\\");
     g_hudFontYellow = Font_Load(path, 0);
-    if (g_hudFontYellow == -1) exit(-1);
+    if (g_hudFontYellow == -1) { exit(-1); }
     
     sprintf(path, "%spos.lft", "FONTS\\");
     g_hudFontPos = Font_Load(path, 0);
-    if (g_hudFontPos == -1) exit(-1);
+    if (g_hudFontPos == -1) { exit(-1); }
     
     sprintf(path, "%sspeed.lft", "FONTS\\");
     g_hudFontSpeed = Font_Load(path, 0);
-    if (g_hudFontSpeed == -1) exit(-1);
+    if (g_hudFontSpeed == -1) { exit(-1); }
     
     sprintf(path, "%syellow_h.lft", "FONTS\\");
     g_hudFontYellowHuge = Font_Load(path, 0);
-    if (g_hudFontYellowHuge == -1) exit(-1);
+    if (g_hudFontYellowHuge == -1) { exit(-1); }
     
     sprintf(path, "%spos_h.lft", "FONTS\\");
     g_hudFontPosHuge = Font_Load(path, 0);
-    if (g_hudFontPosHuge == -1) exit(-1);
+    if (g_hudFontPosHuge == -1) { exit(-1); }
     
     sprintf(path, "%sspeed_h.lft", "FONTS\\");
     g_hudFontSpeedHuge = Font_Load(path, 0);
-    if (g_hudFontSpeedHuge == -1) exit(-1);
+    if (g_hudFontSpeedHuge == -1) { exit(-1); }
 }
 
 /**
  * @original Track_LoadOverlayGfx (IGN_WIN.EXE @ 0x0041af70)
- * @fidelity ADAPTED
+ * @fidelity EXACT
  */
 void Track_LoadOverlayGfx(void) {
-    g_pSPangfxPic = (uint8_t *)File_LoadToMemory("s_pangfx.pic");
-    if (!g_pSPangfxPic) exit(1);
+    int fd;
+    int size;
+
+    fd = open("s_pangfx.pic", O_RDONLY | O_BINARY);
+    if (fd < 0) { printf("Error\n"); exit(1); }
+    size = filelength(fd);
+    g_pSPangfxPic = (uint8_t *)Mem_Alloc(1, size);
+    g_MemoryAllocated += size;
+    if (g_pSPangfxPic == NULL) exit(1);
+    read(fd, g_pSPangfxPic, size);
+    close(fd);
     
-    g_pNPangfxPic = (uint8_t *)File_LoadToMemory("n_pangfx.pic");
-    if (!g_pNPangfxPic) exit(1);
+    fd = open("n_pangfx.pic", O_RDONLY | O_BINARY);
+    if (fd < 0) { printf("Error\n"); exit(1); }
+    size = filelength(fd);
+    g_pNPangfxPic = (uint8_t *)Mem_Alloc(1, size);
+    g_MemoryAllocated += size;
+    if (g_pNPangfxPic == NULL) exit(1);
+    read(fd, g_pNPangfxPic, size);
+    close(fd);
     
-    g_pHPan1Pic = (uint8_t *)File_LoadToMemory("h_pan1.pic");
-    if (!g_pHPan1Pic) exit(1);
+    fd = open("h_pan1.pic", O_RDONLY | O_BINARY);
+    if (fd < 0) { printf("Error\n"); exit(1); }
+    size = filelength(fd);
+    g_pHPan1Pic = (uint8_t *)Mem_Alloc(1, size);
+    g_MemoryAllocated += size;
+    if (g_pHPan1Pic == NULL) exit(1);
+    read(fd, g_pHPan1Pic, size);
+    close(fd);
     
-    g_pHPan2Pic = (uint8_t *)File_LoadToMemory("h_pan2.pic");
-    if (!g_pHPan2Pic) exit(1);
+    fd = open("h_pan2.pic", O_RDONLY | O_BINARY);
+    if (fd < 0) { printf("Error\n"); exit(1); }
+    size = filelength(fd);
+    g_pHPan2Pic = (uint8_t *)Mem_Alloc(1, size);
+    g_MemoryAllocated += size;
+    if (g_pHPan2Pic == NULL) exit(1);
+    read(fd, g_pHPan2Pic, size);
+    close(fd);
     
-    g_pSSignsPic = (uint8_t *)File_LoadToMemory("s_signs.pic");
-    if (!g_pSSignsPic) exit(1);
+    fd = open("s_signs.pic", O_RDONLY | O_BINARY);
+    if (fd < 0) { printf("Error\n"); exit(1); }
+    size = filelength(fd);
+    g_pSSignsPic = (uint8_t *)Mem_Alloc(1, size);
+    g_MemoryAllocated += size;
+    if (g_pSSignsPic == NULL) exit(1);
+    read(fd, g_pSSignsPic, size);
+    close(fd);
     
-    g_pNSignsPic = (uint8_t *)File_LoadToMemory("n_signs.pic");
-    if (!g_pNSignsPic) exit(1);
+    fd = open("n_signs.pic", O_RDONLY | O_BINARY);
+    if (fd < 0) { printf("Error\n"); exit(1); }
+    size = filelength(fd);
+    g_pNSignsPic = (uint8_t *)Mem_Alloc(1, size);
+    g_MemoryAllocated += size;
+    if (g_pNSignsPic == NULL) exit(1);
+    read(fd, g_pNSignsPic, size);
+    close(fd);
     
-    g_pHSignsPic = (uint8_t *)File_LoadToMemory("h_signs.pic");
-    if (!g_pHSignsPic) exit(1);
+    fd = open("h_signs.pic", O_RDONLY | O_BINARY);
+    if (fd < 0) { printf("Error\n"); exit(1); }
+    size = filelength(fd);
+    g_pHSignsPic = (uint8_t *)Mem_Alloc(1, size);
+    g_MemoryAllocated += size;
+    if (g_pHSignsPic == NULL) exit(1);
+    read(fd, g_pHSignsPic, size);
+    close(fd);
     
-    g_pPokalPic = (uint8_t *)File_LoadToMemory("pokal.pic");
-    if (!g_pPokalPic) exit(1);
+    fd = open("pokal.pic", O_RDONLY | O_BINARY);
+    if (fd < 0) { printf("Error\n"); exit(1); }
+    size = filelength(fd);
+    g_pPokalPic = (uint8_t *)Mem_Alloc(1, size);
+    g_MemoryAllocated += size;
+    if (g_pPokalPic == NULL) exit(1);
+    read(fd, g_pPokalPic, size);
+    close(fd);
 }

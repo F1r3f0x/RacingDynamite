@@ -23,6 +23,20 @@ extern uint8_t *g_pMenuCol;
 extern uint8_t *g_pMenuTab;
 extern int g_CheckpointCount;
 extern uint8_t *g_pCheckpoints;
+extern char g_TrackDir[64];
+extern char g_TrackName[64];
+extern uint8_t *g_pTrackCOL;
+extern uint8_t *g_pTrackPIC;
+extern uint8_t *g_pTrackSHD;
+extern uint8_t *g_pTrackTAB;
+extern uint8_t *g_pTrackPOS;
+extern uint8_t *g_pTrackSHD_Copy;
+extern int g_MemoryAllocated;
+
+extern int g_ScreenWidth;
+extern int g_ScreenHeight;
+extern int g_ScreenBPP;
+extern int g_ScreenMode;
 
 /* Function prototypes */
 int  Menu_Init(void);
@@ -31,7 +45,11 @@ int  App_Init(void);
 void App_Shutdown(void);
 void AI_FollowTrackSplines(int car_idx);
 int  Game_Init(void);
-int  Track_LoadAllAssets(const char *track_dir, const char *track_name);
+int Track_LoadAllAssets(void);
+int App_SetVideoMode(void);
+void Track_LoadPlacementsAndCars(void);
+void Mesh_LoadTrackAndCars(void);
+void Texture_LoadAllPages(void);
 void Race_InitSceneAndCars(void);
 void Race_ResolveVehicleCollisions(void);
 void Race_CheckCheckpointTriggers(void);
