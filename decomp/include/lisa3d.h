@@ -23,6 +23,20 @@ typedef struct {
 } CdpFile;
 #pragma pack(pop)
 
+/* Lisa 3D Geometry & Pipeline structures */
+typedef struct {
+    int32_t x;
+    int32_t y;
+    int32_t z;
+} LisaVertex;
+
+typedef struct {
+    int32_t min_x;
+    int32_t min_y;
+    int32_t max_x;
+    int32_t max_y;
+} LisaViewportClip;
+
 /* Global active panorama backdrop buffer (64KB, 256x256 8bpp) */
 extern uint8_t *g_pActivePAN;
 extern uint8_t *g_pLisaTransparencyLUT;
@@ -32,11 +46,23 @@ extern int g_ScreenHeight;
 extern float g_CameraYaw;
 extern float g_CameraPitch;
 
+/* Global state for Lisa 3D triangle rasterizer pipeline */
+extern const LisaVertex *g_pLisaVertices;
+extern uint8_t *g_pLisaDisplayList;
+extern int g_LisaDisplayListCount;
+extern uint32_t **g_pLisaDrawQueue;
+extern uint32_t *g_pLisaDepthBuckets[6000];
+extern LisaViewportClip g_LisaViewport;
+extern int32_t g_LisaCullFlag;
+extern int32_t g_LisaMipmapTable[16];
+
 /* Function prototypes */
 int Lisa_PrintVersion(void);
 int Cdp_OpenFile(CdpFile *cdp);
 int Cdp_DecodeFrame(CdpFile *cdp);
 int Cdp_DecompressRLE(CdpFile *cdp, unsigned int unused);
 void Lisa_RenderPanorama(void);
+void Lisa_DrawTexturedTriangle_Op11_Unshaded(void);
+void Lisa_DrawTexturedTriangle_Op11_Shaded(void);
 
 #endif /* LISA3D_H */

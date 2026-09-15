@@ -65,6 +65,8 @@
 | - | `0x0044cb00` | `LAB_0044cb00` | `Lisa_DrawPolygon_Op17` | `lisa3d.c` | Decompiled | EXACT | Opcode 0x17: shadow / alpha blend Gouraud triangle (pushes g_pActiveSHD). |
 | - | `0x0044cb20` | `FUN_0044cb20` | `Lisa_DrawTriangle_OpcodeHelper` | `lisa3d.c` | Decompiled | ADAPTED | Common backface test, attribute pack, and span bucketer for opcodes 0x12, 0x13, 0x16, 0x17. |
 | - | `0x0044d550` | `FUN_0044d550` | `Lisa_DrawTexturedTriangle_Op15` | `lisa3d.c` | Decompiled | ADAPTED | Opcode 0x15: perspective-correct textured triangle with 16.16 UV interpolation. |
+| `0x0004d718` | `0x0044dc60` | `Lisa_DrawTexturedTriangle_Op11_Unshaded` | `Lisa_DrawTexturedTriangle_Op11_Unshaded` | `lisa3d.c` | Decompiled | EXACT | Lisa 3D textured triangle span preprocessor, backface cull, and depth bucket dispatcher (Opcode 0x11, unshaded). |
+| `0x0004cc58` | `0x0044e1b0` | `Lisa_DrawTexturedTriangle_Op11_Shaded` | `Lisa_DrawTexturedTriangle_Op11_Shaded` | `lisa3d.c` | Decompiled | EXACT | Lisa 3D textured triangle Gouraud-shaded preprocessor and depth bucket dispatcher (Opcode 0x11, shaded). |
 | - | `0x0044f0e9` | `FUN_0044f0e9` | `Lisa_ExecuteRasterizerCommands` | `lisa3d.c` | Decompiled | ADAPTED | Traverses depth-bucket sorted polygon command list and executes rasterizers. |
 | - | `0x00452800` | `FUN_00452800` | `Lisa_RenderTexturedTriangle_Op11` | `lisa3d.c` | Decompiled | EXACT | Opcode 0x11 triangle edge walker and span setup for unshaded texture mapping. |
 | - | `0x004537dc` | `FUN_004537dc` | `Lisa_DrawTexturedSpan_Op11` | `lisa3d.c` | Decompiled | EXACT | Low-level perspective/affine textured span blitter reading texels directly with stride 256 and alpha test. |

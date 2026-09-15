@@ -119,6 +119,8 @@ INSERT INTO "functions" VALUES(154,'0x00061399','0x00455670','Font_Parse','-',3,
 INSERT INTO "functions" VALUES(155,'0x00061653','0x00455870','Font_Unload','-',3,'decompiled','watcom_reg','int','(int font_id)',136,NULL,'EXACT',NULL,'Frees sprite handles for font glyphs and marks slot free',NULL,NULL);
 INSERT INTO "functions" VALUES(156,'0x000616db','0x004558d0','Font_GetTextWidth','-',3,'decompiled','watcom_reg','int','(const char *text, int font_id)',638,NULL,'EXACT',NULL,'Calculates string rendering width in pixels',NULL,NULL);
 INSERT INTO "functions" VALUES(157,'0x00043d60','0x004133d0','Font_DrawHUDText','FUN_004133d0',3,'decompiled','watcom_reg','void','int x, int y, const char *text, uint8_t *framebuffer, int stride, const uint8_t *font_data, uint8_t color_offset',262,NULL,'EXACT','src/formats/lft.c','2D bitmap font rasterizer blitting characters from IGNITION.FNT directly to 8bpp framebuffer.',NULL,NULL);
+INSERT INTO "functions" VALUES(158,'0x0004d718','0x0044dc60','Lisa_DrawTexturedTriangle_Op11_Unshaded','Lisa_DrawTexturedTriangle_Op11_Unshaded',2,'decompiled','watcom_reg','void','void',1358,NULL,'EXACT','decomp/src/lisa3d.c','Lisa 3D textured triangle span preprocessor, backface cull, and depth bucket dispatcher (Opcode 0x11, unshaded).',NULL,NULL);
+INSERT INTO "functions" VALUES(159,'0x0004cc58','0x0044e1b0','Lisa_DrawTexturedTriangle_Op11_Shaded','Lisa_DrawTexturedTriangle_Op11_Shaded',2,'decompiled','watcom_reg','void','void',1700,NULL,'EXACT','decomp/src/lisa3d.c','Lisa 3D textured triangle Gouraud-shaded preprocessor and depth bucket dispatcher (Opcode 0x11, shaded).',NULL,NULL);
 CREATE TABLE globals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT,                      -- Address in MAINDOS.EXE
@@ -324,7 +326,7 @@ CREATE INDEX idx_globals_name ON globals(name);
 CREATE INDEX idx_struct_fields_struct ON struct_fields(struct_id);
 DELETE FROM "sqlite_sequence";
 INSERT INTO "sqlite_sequence" VALUES('modules',8);
-INSERT INTO "sqlite_sequence" VALUES('functions',157);
+INSERT INTO "sqlite_sequence" VALUES('functions',159);
 INSERT INTO "sqlite_sequence" VALUES('globals',124);
 INSERT INTO "sqlite_sequence" VALUES('structs',18);
 INSERT INTO "sqlite_sequence" VALUES('struct_fields',138);
