@@ -278,7 +278,7 @@ int Font_GetTextWidth(const char *text, int font_id) {
 }
 
 /**
- * @original Font_DrawText (IGN_WIN.EXE @ 0x00455a60, geputget.c)
+ * @original Font_DrawText (IGN_WIN.EXE @ 0x00456660, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00061959. Renders string to screen via Gfx_DrawSprite, taking into account
  *        text alignment (0=left, 1=center, 2=right), proportionality, and fixed-point coordinates.
@@ -399,6 +399,66 @@ int Font_DrawText(const char *text, int font_id, int x, int y) {
     }
 
     return 1;
+}
+
+/**
+ * @original Font_DrawHUDText (IGN_WIN.EXE @ 0x004133d0, geputget.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00043d60. Direct 8bpp bitmap font rasterizer blitting characters from IGNITION.FNT
+ *        directly into the target framebuffer with stride, height, spacing, and color offset.
+ */
+void Font_DrawHUDText(int x, int y, const char *text, uint8_t *framebuffer, int stride, const uint8_t *font_data, uint8_t color_offset) {
+    int cur_y_stride;
+    int max_y_stride;
+    short height;
+    short spacing;
+    const char *p;
+    char c;
+
+    if (!text || !framebuffer || !font_data) {
+        return;
+    }
+
+    cur_y_stride = y * stride;
+    spacing = *(const int16_t *)(font_data + 4);
+    height = *(const int16_t *)(font_data + 2);
+    p = text;
+    c = *p;
+
+    if (c == '\0') {
+        return;
+    }
+
+    max_y_stride = cur_y_stride + (int)height * stride;
+
+    do {
+        uint8_t glyph_idx = font_data[0xC6 + (uint8_t)c];
+        uint8_t width = font_data[6 + glyph_idx];
+        int glyph_off = *(const int32_t *)(font_data + 0x1C6 + (int)glyph_idx * 4);
+
+        if (cur_y_stride < max_y_stride) {
+            int row_stride = cur_y_stride;
+            int pixel_row_off = 0;
+
+            do {
+                if (width > 0) {
+                    int col;
+                    for (col = 0; col < (int)width; col++) {
+                        uint8_t pix = font_data[0x546 + glyph_off + pixel_row_off + col];
+                        if (pix != 0) {
+                            framebuffer[row_stride + x + col] = (uint8_t)(color_offset + pix);
+                        }
+                    }
+                }
+                row_stride += stride;
+                pixel_row_off += (int)width;
+            } while (row_stride < max_y_stride);
+        }
+
+        x += (int)width + (int)spacing;
+        p++;
+        c = *p;
+    } while (c != '\0');
 }
 
 /**

@@ -86,6 +86,7 @@ int Font_Load(const char *filename, int unused);
 int Font_Unload(int font_id);
 int Font_GetTextWidth(const char *text, int font_id);
 int Font_DrawText(const char *text, int font_id, int x, int y);
+void Font_DrawHUDText(int x, int y, const char *text, uint8_t *framebuffer, int stride, const uint8_t *font_data, uint8_t color_offset);
 void Load_SystemGraphicsAndFonts(void);
 void Font_LoadHUDFonts(void);
 void Track_LoadOverlayGfx(void);
