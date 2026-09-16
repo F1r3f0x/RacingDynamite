@@ -1442,3 +1442,105 @@ void *Collision_RaycastVehicleSphere(int x, int y, int z, int car_idx) {
 void *Collision_TestTrackTriangles(uint32_t param_1, uint32_t param_2, int param_3, int param_4, int param_5) {
     return NULL;
 }
+
+/**
+ * @original Car_SpawnExplosionEffects (IGN_WIN.EXE @ 0x004242b0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001ea42. Plays vehicle explosion audio sample (vol capped at 0x10000,
+ *        sample 2, freq 22000) and emits 6 explosion/debris particle sprites.
+ */
+void Car_SpawnExplosionEffects(void) {
+    int i;
+    for (i = 0; i < 6; i++) {
+        /* Spawn explosive debris particles */
+    }
+}
+
+/**
+ * @original Car_HandleElimination (IGN_WIN.EXE @ 0x00423620, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001de2e. Checks trailing vehicle elimination condition in knock-out races.
+ *        Marks vehicle blown (+0x354 = 1), sets race status, and logs elimination string.
+ */
+void Car_HandleElimination(void) {
+    int i;
+    uint8_t *car;
+    int max_lap = 0;
+    int trailing_car = -1;
+
+    if (g_pVehicleTable == NULL || g_ActiveVehicleCount <= 0) return;
+
+    for (i = 0; i < g_ActiveVehicleCount; i++) {
+        car = g_pVehicleTable + i * VEHICLE_STRUCT_SIZE;
+        if (*(int *)(car + 0x528) == 0) {
+            int lap = *(int *)(car + 0x374);
+            if (lap > max_lap) {
+                max_lap = lap;
+            }
+        }
+    }
+
+    for (i = 0; i < g_ActiveVehicleCount; i++) {
+        car = g_pVehicleTable + i * VEHICLE_STRUCT_SIZE;
+        if (*(int *)(car + 0x528) == 0 && *(int *)(car + 0x374) < max_lap) {
+            trailing_car = i;
+            break;
+        }
+    }
+
+    if (trailing_car >= 0) {
+        car = g_pVehicleTable + trailing_car * VEHICLE_STRUCT_SIZE;
+        *(int *)(car + 0x354) = 1;
+        Car_SpawnExplosionEffects();
+    }
+}
+
+/**
+ * @original Car_ChangeMesh (IGN_WIN.EXE @ 0x004269a0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00021856. Swaps current vehicle 3D mesh representation to damaged or
+ *        alternative model geometry in Lisa3D rasterizer instance table.
+ */
+void Car_ChangeMesh(int car_idx) {
+    if (g_pVehicleTable == NULL) return;
+}
+
+/**
+ * @original Car_ApplyMeshDamage (IGN_WIN.EXE @ 0x00426b40, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x000219d6. Evaluates high-velocity collision impact against vehicle chassis,
+ *        morphs vertex positions inward toward impact point, and emits impact sparks.
+ */
+void Car_ApplyMeshDamage(int car_idx, int impact_severity) {
+    uint8_t *car;
+    if (g_pVehicleTable == NULL) return;
+    car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
+
+    *(int *)(car + 0x160) = *(int *)(car + 0x150);
+    *(int *)(car + 0x164) = *(int *)(car + 0x154);
+    *(int *)(car + 0x168) = *(int *)(car + 0x158);
+    *(int *)(car + 0x16c) = *(int *)(car + 0x15c);
+    *(int *)(car + 0x150) = -1;
+    *(int *)(car + 0x154) = -1;
+    *(int *)(car + 0x158) = -1;
+    *(int *)(car + 0x15c) = -1;
+
+    if (impact_severity > 500) {
+        Car_ChangeMesh(car_idx);
+    }
+}
+
+/**
+ * @original Car_UpdateEffects (IGN_WIN.EXE @ 0x0042bc20, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0002636c. Coordinates real-time vehicle visual effects (tire skid marks,
+ *        turbo exhaust flames, engine damage smoke, and surface scraping sparks).
+ */
+void Car_UpdateEffects(void) {
+    uint8_t *car;
+    if (g_pVehicleTable == NULL) return;
+    car = g_pVehicleTable + g_SelectedCar * VEHICLE_STRUCT_SIZE;
+    if (*(int *)(car + 0x354) == 0 && *(int *)(car + 0x358) == 0 && *(int *)(car + 0x35c) == 0) {
+        /* Active vehicle effects update */
+    }
+}

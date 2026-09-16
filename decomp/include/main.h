@@ -116,5 +116,10 @@ int  Collision_TestPolygonOverlap(float *poly1_x, float *poly1, int count1, floa
 int  Collision_FilterTrackClearance(int param_1, int param_2, int param_3, int param_4, int is_wall);
 void *Collision_RaycastVehicleSphere(int x, int y, int z, int car_idx);
 void *Collision_TestTrackTriangles(uint32_t param_1, uint32_t param_2, int param_3, int param_4, int param_5);
+void Car_SpawnExplosionEffects(void);
+void Car_HandleElimination(void);
+void Car_ChangeMesh(int car_idx);
+void Car_ApplyMeshDamage(int car_idx, int impact_severity);
+void Car_UpdateEffects(void);
 
 #endif /* MAIN_H */

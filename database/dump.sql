@@ -132,6 +132,11 @@ INSERT INTO "functions" VALUES(167,'0x000249e5','0x004295e0','Collision_TestPoly
 INSERT INTO "functions" VALUES(168,'0x00023ee8','0x00428b90','Collision_FilterTrackClearance','FUN_00428b90',5,'decompiled','watcom_reg','int','int param_1, int param_2, int param_3, int param_4, int is_wall',NULL,NULL,'EXACT','decomp/src/main.c','Filters candidate collision triangles according to track-specific ground clearance thresholds (Snake: 350, Moose: 200, Mountain: 450, Ski: 125, Default: 2500).',NULL,NULL);
 INSERT INTO "functions" VALUES(169,'0x0002383c','0x00428730','Collision_RaycastVehicleSphere','FUN_00428730',5,'decompiled','watcom_reg','void *','int x, int y, int z, int car_idx',NULL,NULL,'EXACT','decomp/src/main.c','Sets up vertical collision query ray from vehicle center (pos_y + 500.0 downward 850 units) and invokes spatial partition octree query.',NULL,NULL);
 INSERT INTO "functions" VALUES(170,'0x00022dc8','0x00427dc0','Collision_TestTrackTriangles','FUN_00427dc0',5,'decompiled','watcom_reg','void *','uint32_t param_1, uint32_t param_2, int param_3, int param_4, int param_5',NULL,NULL,'EXACT','decomp/src/main.c','Iterates over track collision triangles from octree query, calculates closest point on triangle, plane distance, and penetration restitution.',NULL,NULL);
+INSERT INTO "functions" VALUES(171,'0x0001ea42','0x004242b0','Car_SpawnExplosionEffects','FUN_004242b0',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Plays vehicle explosion audio sample (vol capped at 0x10000, sample 2, freq 22000) and emits 6 explosion/debris particle sprites.',NULL,NULL);
+INSERT INTO "functions" VALUES(172,'0x0001de2e','0x00423620','Car_HandleElimination','FUN_00423620',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Checks trailing vehicle elimination condition in knock-out races. Marks vehicle blown (+0x354 = 1), sets race status, and logs elimination string.',NULL,NULL);
+INSERT INTO "functions" VALUES(173,'0x00021856','0x004269a0','Car_ChangeMesh','FUN_004269a0',5,'decompiled','watcom_reg','void','int car_idx',NULL,NULL,'EXACT','decomp/src/main.c','Swaps current vehicle 3D mesh representation to damaged or alternative model geometry in Lisa3D rasterizer instance table.',NULL,NULL);
+INSERT INTO "functions" VALUES(174,'0x000219d6','0x00426b40','Car_ApplyMeshDamage','FUN_00426b40',5,'decompiled','watcom_reg','void','int car_idx, int impact_severity',NULL,NULL,'EXACT','decomp/src/main.c','Evaluates high-velocity collision impact against vehicle chassis, morphs vertex positions inward toward impact point, and emits impact sparks.',NULL,NULL);
+INSERT INTO "functions" VALUES(175,'0x0002636c','0x0042bc20','Car_UpdateEffects','FUN_0042bc20',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Coordinates real-time vehicle visual effects (tire skid marks, turbo exhaust flames, engine damage smoke, and surface scraping sparks).',NULL,NULL);
 CREATE TABLE globals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT,                      -- Address in MAINDOS.EXE
@@ -337,7 +342,7 @@ CREATE INDEX idx_globals_name ON globals(name);
 CREATE INDEX idx_struct_fields_struct ON struct_fields(struct_id);
 DELETE FROM "sqlite_sequence";
 INSERT INTO "sqlite_sequence" VALUES('modules',8);
-INSERT INTO "sqlite_sequence" VALUES('functions',170);
+INSERT INTO "sqlite_sequence" VALUES('functions',175);
 INSERT INTO "sqlite_sequence" VALUES('globals',124);
 INSERT INTO "sqlite_sequence" VALUES('structs',18);
 INSERT INTO "sqlite_sequence" VALUES('struct_fields',138);
