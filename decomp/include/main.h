@@ -86,6 +86,163 @@ extern double g_CollisionContactX;
 extern double g_CollisionContactZ;
 extern double g_CollisionNormalAngle;
 
+#pragma pack(push, 4)
+typedef struct SceneryParticle {
+    int type;                /* 0x00 */
+    int pos_x;               /* 0x04 (scaled by 1024) */
+    int pos_y;               /* 0x08 (scaled by 1024) */
+    int pos_z;               /* 0x0C (scaled by 1024) */
+    int vel_x;               /* 0x10 */
+    int vel_y;               /* 0x14 */
+    int vel_z;               /* 0x18 */
+    int drag;                /* 0x1C */
+    int gravity;             /* 0x20 */
+    int field_24;            /* 0x24 */
+    int field_28;            /* 0x28 */
+    int field_2c;            /* 0x2C */
+    int rot_x;               /* 0x30 */
+    int rot_y;               /* 0x34 */
+    int rot_z;               /* 0x38 */
+    int field_3c;            /* 0x3C */
+    int field_40;            /* 0x40 */
+    int field_44;            /* 0x44 */
+    int field_48;            /* 0x48 */
+    int field_4c;            /* 0x4C */
+    int life;                /* 0x50 */
+} SceneryParticle;
+
+typedef struct CameraEffect {
+    int type;                /* 0x00 */
+    int pos_x;               /* 0x04 */
+    int pos_y;               /* 0x08 */
+    int pos_z;               /* 0x0C */
+    int target_car;          /* 0x10 */
+    int duration;            /* 0x14 */
+    int active;              /* 0x18 */
+} CameraEffect;
+
+typedef struct DynamicObject {
+    int field_0;             /* 0x00 */
+    int pos_x;               /* 0x04 */
+    int pos_y;               /* 0x08 */
+    int pos_z;               /* 0x0C */
+    int rot_x;               /* 0x10 */
+    int rot_y;               /* 0x14 */
+    int rot_z;               /* 0x18 */
+    int field_1c;            /* 0x1C */
+} DynamicObject;
+
+typedef struct SoundChannel {
+    int id;                  /* 0x00 */
+    int sample_idx;          /* 0x04 */
+    int pitch;               /* 0x08 */
+    int volume;              /* 0x0C */
+    int active;              /* 0x10 */
+} SoundChannel;
+
+typedef struct AmbientSoundEmitter {
+    int sound_id;            /* 0x00 */
+    int channel_id;          /* 0x04 */
+    int pos_x;               /* 0x08 */
+    int pos_y;               /* 0x0C */
+    int pos_z;               /* 0x10 */
+} AmbientSoundEmitter;
+
+typedef struct TrackParticleEmitter {
+    int particle_type;       /* 0x00 */
+    int pos_x;               /* 0x04 */
+    int pos_y;               /* 0x08 */
+    int pos_z;               /* 0x0C */
+    int interval;            /* 0x10 */
+    int timer;               /* 0x14 */
+    int lifetime;            /* 0x18 */
+} TrackParticleEmitter;
+
+typedef struct WeatherEmitter {
+    int type;                /* 0x00 */
+    int spawn_y;             /* 0x04 */
+    int timer;               /* 0x08 */
+} WeatherEmitter;
+
+typedef struct TrackObject {
+    int field_0;             /* 0x00 */
+    void *mesh_data;         /* 0x04 */
+    int dummy8;              /* 0x08 */
+    int pos_x;               /* 0x0C */
+    int pos_y;               /* 0x10 */
+    int pos_z;               /* 0x14 */
+    short dummy18;           /* 0x18 */
+    short dummy1a;           /* 0x1A */
+    short dummy1c;           /* 0x1C */
+    short field_1e;          /* 0x1E */
+    short field_20;          /* 0x20 */
+} TrackObject;
+#pragma pack(pop)
+
+/* Additional engine global variables */
+extern uint8_t *g_pTrackCollisions;
+extern uint8_t *g_CarConfigs;
+extern uint8_t *g_CarMeshes;
+extern uint8_t *g_DynamicMeshBuffer;
+extern void *g_DynamicObjectPointers;
+extern DynamicObject *g_pDynamicObjects;
+extern int g_ActiveVehicleCount;
+extern int g_EliminationFlag;
+extern int g_EliminationTargetCar;
+extern int g_LanguageId;
+extern int g_SplitScreenMode;
+extern int g_EliminatedCarCount;
+extern int g_RemainingCarCount;
+extern int *g_pObstacleTriggerTable;
+extern int *g_pObstacleStateTable;
+extern double g_CountdownTimer;
+extern int g_CurrentTick;
+extern int g_StartTick;
+extern int g_RacePhase;
+extern int g_TotalRaceFrames;
+extern int g_DemoMode;
+extern int g_SelectedCameraView;
+extern int g_ParticleEffectsEnabled;
+extern uint8_t *g_pAIThreatTable;
+extern CameraEffect g_CameraEffect;
+extern int g_AmbientEmitterCount;
+extern AmbientSoundEmitter *g_pAmbientEmitters;
+extern int g_SoundMuted;
+extern int g_SoundStateTable[32];
+extern int g_TrackEmitterCount;
+extern TrackParticleEmitter *g_pTrackEmitters;
+extern int g_WeatherParticleCount;
+extern WeatherEmitter *g_pWeatherEmitters;
+extern int g_TrackCandidateCount;
+extern TrackObject **g_pTrackCandidates;
+extern void *g_pSRF_RaycastTable;
+extern uint8_t g_GhostDataBuffer[0x49d4c];
+extern int g_GhostCarLoaded;
+extern uint8_t g_TrackBinaryCache[0x597];
+
+/* Engine helper declarations */
+double Math_RandomFloat(void);
+void   Audio_PlaySample(int ch, int sample, int pan, int unk, int volume, int freq, int loop);
+SoundChannel *Audio_GetChannel(int ch);
+int    Lisa_CreateDynamicObject(int id, int type, int *ptr, int *mesh, int unk1, short unk2, int unk3, int unk4, int unk5);
+int    Lisa_MoveDynamicObject(void *obj);
+int    Lisa_DeleteDynamicObject(void *obj);
+void  *Surface_GetHeightAtPoint(int x, int y, int z);
+void   Surface_FreeSRF(void);
+void   FX_SpawnParticle(SceneryParticle *p);
+void   FX_SpawnCameraParticle(CameraEffect *c);
+void   FX_UpdateEngineSmoke(void);
+void   FX_UpdateTurboFlames(void);
+void   FX_UpdateSparks(void);
+void   HUD_ShowAnnouncementBanner(const char *msg, int param2, int param3, int param4);
+void   HUD_DrawPlayerSplitTimer(int param1, int *param2);
+void   HUD_DrawDemoWatermark(int a, int b, int c, int d);
+void   HUD_UpdateLapCounters(void);
+int    Input_IsKeyPressed(uint8_t scancode);
+void   Obstacle_ResetActions(void);
+void   Obstacle_SetTriggerState(int *state, int val);
+void   Sound_FreeSample(int idx);
+
 /* Function prototypes */
 int  Menu_Init(void);
 int  App_FrameTick(void);
@@ -93,8 +250,8 @@ int  App_Init(void);
 void App_Shutdown(void);
 void AI_FollowTrackSplines(int car_idx);
 int  Game_Init(void);
-int Track_LoadAllAssets(void);
-int App_SetVideoMode(void);
+int  Track_LoadAllAssets(void);
+int  App_SetVideoMode(void);
 void Track_LoadPlacementsAndCars(void);
 void Mesh_LoadTrackAndCars(void);
 void Texture_LoadAllPages(void);
@@ -116,7 +273,7 @@ int  Collision_TestPolygonOverlap(float *poly1_x, float *poly1, int count1, floa
 int  Collision_FilterTrackClearance(int param_1, int param_2, int param_3, int param_4, int is_wall);
 void *Collision_RaycastVehicleSphere(int x, int y, int z, int car_idx);
 void *Collision_TestTrackTriangles(uint32_t param_1, uint32_t param_2, int param_3, int param_4, int param_5);
-void Car_SpawnExplosionEffects(void);
+void Car_SpawnExplosionEffects(int car1_idx, int car2_idx);
 void Car_HandleElimination(void);
 void Car_ChangeMesh(int car_idx);
 void Car_ApplyMeshDamage(int car_idx, int impact_severity);

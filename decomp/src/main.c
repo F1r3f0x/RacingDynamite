@@ -72,6 +72,49 @@ double g_CollisionContactX = 0.0;
 double g_CollisionContactZ = 0.0;
 double g_CollisionNormalAngle = 0.0;
 
+uint8_t *g_pTrackCollisions = NULL;
+uint8_t *g_CarConfigs = NULL;
+uint8_t *g_CarMeshes = NULL;
+uint8_t *g_DynamicMeshBuffer = NULL;
+void *g_DynamicObjectPointers = NULL;
+DynamicObject *g_pDynamicObjects = NULL;
+int g_EliminationFlag = 0;
+int g_EliminationTargetCar = 0;
+int g_LanguageId = 0;
+int g_SplitScreenMode = 0;
+int g_EliminatedCarCount = 0;
+int g_RemainingCarCount = 0;
+int *g_pObstacleTriggerTable = NULL;
+int *g_pObstacleStateTable = NULL;
+double g_CountdownTimer = -1.0;
+int g_CurrentTick = 0;
+int g_StartTick = 0;
+int g_RacePhase = 0;
+int g_TotalRaceFrames = 0;
+int g_DemoMode = 0;
+int g_SelectedCameraView = 0;
+int g_ParticleEffectsEnabled = 1;
+uint8_t *g_pAIThreatTable = NULL;
+CameraEffect g_CameraEffect;
+int g_AmbientEmitterCount = 0;
+AmbientSoundEmitter *g_pAmbientEmitters = NULL;
+int g_SoundMuted = 0;
+int g_SoundStateTable[32];
+int g_TrackEmitterCount = 0;
+TrackParticleEmitter *g_pTrackEmitters = NULL;
+int g_WeatherParticleCount = 0;
+WeatherEmitter *g_pWeatherEmitters = NULL;
+int g_TrackCandidateCount = 0;
+TrackObject **g_pTrackCandidates = NULL;
+void *g_pSRF_RaycastTable = NULL;
+uint8_t g_GhostDataBuffer[0x49d4c];
+int g_GhostCarLoaded = 0;
+uint8_t g_TrackBinaryCache[0x597];
+
+double Math_RandomFloat(void) {
+    return (double)rand() / (double)RAND_MAX;
+}
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -1440,7 +1483,91 @@ void *Collision_RaycastVehicleSphere(int x, int y, int z, int car_idx) {
  *        calculates closest point on triangle, plane distance, and penetration restitution.
  */
 void *Collision_TestTrackTriangles(uint32_t param_1, uint32_t param_2, int param_3, int param_4, int param_5) {
-    return NULL;
+    int i, j;
+    int hit_count = 0;
+    int max_dist;
+    uint8_t *car;
+    SurfaceRaycastResult *result_table = (SurfaceRaycastResult *)g_pSRF_RaycastTable;
+
+    if (g_pVehicleTable == NULL || result_table == NULL) return NULL;
+    car = g_pVehicleTable + g_SelectedCar * VEHICLE_STRUCT_SIZE;
+
+    max_dist = (*(int *)(car + 0x274) == 0) ? 900 : 600;
+
+    for (i = 0; i < g_TrackCandidateCount; i++) {
+        TrackObject *obj = g_pTrackCandidates[i];
+        int dx, dz;
+        int *mesh;
+        int num_tris;
+        uint32_t *tri_data;
+
+        if (obj == NULL || obj->field_1e >= 100) continue;
+
+        dx = (int)(param_1 - obj->pos_x);
+        dz = (int)(param_3 - obj->pos_z);
+        if (abs(dx) >= max_dist || abs(dz) >= max_dist) continue;
+
+        mesh = (int *)obj->mesh_data;
+        if (mesh == NULL) continue;
+        num_tris = mesh[1];
+        tri_data = (uint32_t *)(mesh + mesh[0] * 3 + 2);
+
+        for (j = 0; j < num_tris; j++) {
+            uint32_t i0 = tri_data[1];
+            uint32_t i1 = tri_data[2];
+            uint32_t i2 = tri_data[3];
+            int v0x = mesh[i0 * 3 + 2];
+            int v1x = mesh[i1 * 3 + 2];
+            int v2x = mesh[i2 * 3 + 2];
+            int v0z = mesh[i0 * 3 + 4];
+            int v1z = mesh[i1 * 3 + 4];
+            int v2z = mesh[i2 * 3 + 4];
+            int cx = (v0x + v1x + v2x) / 3 - dx;
+            int cz = (v0z + v1z + v2z) / 3 - dz;
+
+            if (abs(cx) < 200 && abs(cz) < 200) {
+                int vx[3], vz[3];
+                int inside = 0;
+                int k, prev_k;
+
+                vx[0] = v0x; vx[1] = v1x; vx[2] = v2x;
+                vz[0] = v0z; vz[1] = v1z; vz[2] = v2z;
+
+                prev_k = 2;
+                for (k = 0; k < 3; k++) {
+                    int zk = vz[k];
+                    int zp = vz[prev_k];
+                    if (((zk <= dz && dz < zp) || (zp <= dz && dz < zk)) &&
+                        (dx < vx[k] + (vx[prev_k] - vx[k]) * (dz - zk) / (zp - zk))) {
+                        inside = !inside;
+                    }
+                    prev_k = k;
+                }
+
+                if (inside && hit_count < 32) {
+                    SurfaceRaycastResult *hit = &result_table[hit_count++];
+                    hit->material = tri_data[0] >> 16;
+                    hit->normal_x = obj->pos_x;
+                    hit->normal_y = obj->pos_y;
+                    hit->normal_z = obj->pos_z;
+                    hit->v0_world_x = v0x;
+                    hit->v0_world_y = mesh[i0 * 3 + 3];
+                    hit->v0_world_z = v0z;
+                    hit->v1_world_x = v1x;
+                    hit->v1_world_y = mesh[i1 * 3 + 3];
+                    hit->v1_world_z = v1z;
+                    hit->v2_world_x = v2x;
+                    hit->v2_world_y = mesh[i2 * 3 + 3];
+                    hit->v2_world_z = v2z;
+                    hit->obj_field0 = obj->field_0;
+                    hit->obj_field20 = (int)obj->field_20;
+                    hit->obj_field1e = (int)obj->field_1e;
+                }
+            }
+            tri_data += 11;
+        }
+    }
+    return (hit_count > 0) ? (void *)&result_table[0] : NULL;
 }
 
 /**
@@ -1449,10 +1576,47 @@ void *Collision_TestTrackTriangles(uint32_t param_1, uint32_t param_2, int param
  * @notes MAINDOS @ 0x0001ea42. Plays vehicle explosion audio sample (vol capped at 0x10000,
  *        sample 2, freq 22000) and emits 6 explosion/debris particle sprites.
  */
-void Car_SpawnExplosionEffects(void) {
+void Car_SpawnExplosionEffects(int car1_idx, int car2_idx) {
+    uint8_t *car1_col;
+    uint8_t *car2_col;
+    uint8_t *car1;
+    uint8_t *car2;
+    int volume;
     int i;
+    SceneryParticle particle;
+
+    if (g_pVehicleTable == NULL || g_pTrackCollisions == NULL) return;
+
+    car1_col = g_pTrackCollisions + car1_idx * 0x1d0;
+    car2_col = g_pTrackCollisions + car2_idx * 0x1d0;
+    car1 = g_pVehicleTable + car1_idx * VEHICLE_STRUCT_SIZE;
+    car2 = g_pVehicleTable + car2_idx * VEHICLE_STRUCT_SIZE;
+
+    volume = (int)(fabs(*(double *)(car1_col + 0x1b8) + *(double *)(car2_col + 0x1b8)) * 0.5 * 30.0);
+    if (volume > 0x10000) {
+        volume = 0x10000;
+    }
+
+    Audio_PlaySample(0, 2, 0, 0, volume, 22000, 0);
+
     for (i = 0; i < 6; i++) {
-        /* Spawn explosive debris particles */
+        memset(&particle, 0, sizeof(particle));
+        particle.type = 5;
+        particle.pos_x = (int)(*(double *)(car1_col + 0x1c0) * 22282.24);
+        particle.pos_y = (int)((*(double *)(car2 + 8) + *(double *)(car1 + 8)) * 0.5 * 1024.0);
+        particle.pos_z = (int)(*(double *)(car1_col + 0x1c8) * 22282.24);
+        particle.vel_x = (int)((Math_RandomFloat() * 6.0 + (*(double *)(car2 + 0x640) + *(double *)(car1 + 0x640)) * 0.5 - 3.0) * 1024.0);
+        particle.vel_y = (int)((Math_RandomFloat() * 3.0 + 3.0) * 1024.0);
+        particle.vel_z = (int)((Math_RandomFloat() * 6.0 + (*(double *)(car2 + 0x648) + *(double *)(car1 + 0x648)) * 0.5 - 3.0) * 1024.0);
+        particle.drag = 0x400;
+        particle.gravity = -614;
+        particle.rot_x = (int)((Math_RandomFloat() * 100.0 - 50.0) * 1024.0);
+        particle.rot_y = (int)(50.0 * 1024.0);
+        particle.rot_z = (int)((Math_RandomFloat() * 200.0 - 30.0) * 1024.0);
+        particle.field_44 = 1;
+        particle.life = 0xf;
+
+        FX_SpawnParticle(&particle);
     }
 }
 
@@ -1464,34 +1628,89 @@ void Car_SpawnExplosionEffects(void) {
  */
 void Car_HandleElimination(void) {
     int i;
-    uint8_t *car;
     int max_lap = 0;
+    int trailing_count = 0;
     int trailing_car = -1;
+    uint8_t *car;
+    char msg[128];
+    char *driver_name;
 
     if (g_pVehicleTable == NULL || g_ActiveVehicleCount <= 0) return;
 
     for (i = 0; i < g_ActiveVehicleCount; i++) {
         car = g_pVehicleTable + i * VEHICLE_STRUCT_SIZE;
-        if (*(int *)(car + 0x528) == 0) {
-            int lap = *(int *)(car + 0x374);
-            if (lap > max_lap) {
-                max_lap = lap;
-            }
+        if (*(int *)(car + 0x528) == 0 && *(int *)(car + 0x374) > max_lap) {
+            max_lap = *(int *)(car + 0x374);
         }
     }
 
     for (i = 0; i < g_ActiveVehicleCount; i++) {
         car = g_pVehicleTable + i * VEHICLE_STRUCT_SIZE;
         if (*(int *)(car + 0x528) == 0 && *(int *)(car + 0x374) < max_lap) {
+            trailing_count++;
             trailing_car = i;
-            break;
         }
     }
 
-    if (trailing_car >= 0) {
-        car = g_pVehicleTable + trailing_car * VEHICLE_STRUCT_SIZE;
-        *(int *)(car + 0x354) = 1;
-        Car_SpawnExplosionEffects();
+    if (trailing_count != 1 || g_GameMode == 4) {
+        if (g_EliminationFlag != 3 || g_GameMode != 4) {
+            return;
+        }
+    }
+    if (g_EliminationFlag == 3 && g_GameMode == 4) {
+        trailing_car = g_EliminationTargetCar;
+    }
+
+    if (trailing_car < 0 || trailing_car >= g_ActiveVehicleCount) return;
+    car = g_pVehicleTable + trailing_car * VEHICLE_STRUCT_SIZE;
+
+    if ((*(uint32_t *)(car + 0x610) & 0x7fffffff) != 0 || *(int *)(car + 0x60c) != 0) {
+        return;
+    }
+
+    *(int *)(car + 0x354) = 1;
+
+    g_CameraEffect.type = 3;
+    g_CameraEffect.pos_x = (int)*(double *)(car + 0x00);
+    g_CameraEffect.pos_y = (int)*(double *)(car + 0x08);
+    g_CameraEffect.pos_z = (int)*(double *)(car + 0x10);
+    g_CameraEffect.target_car = trailing_car;
+    g_CameraEffect.duration = 0x50;
+    g_CameraEffect.active = 1;
+    FX_SpawnCameraParticle(&g_CameraEffect);
+
+    *(int *)(car + 0x60c) = 0;
+    *(int *)(car + 0x610) = 0x3ff00000;
+
+    Audio_PlaySample(0, 2, 4, 0, 0xc000, 22000, 0);
+
+    *(int *)(car + 0x528) = 1;
+    *(int *)(car + 0x3a0) = *(int *)(car + 0x39c);
+
+    driver_name = (char *)(g_CarConfigs + trailing_car * 0x4c + 0x3c);
+    switch (g_LanguageId) {
+        case 0: sprintf(msg, "%s IS OUT", driver_name); break;
+        case 1: sprintf(msg, "%s IST AUSGESCHIEDEN", driver_name); break;
+        case 2: sprintf(msg, "%s OUT", driver_name); break;
+        case 3: sprintf(msg, "%s ESTA FUERA", driver_name); break;
+        case 4: sprintf(msg, "%s AR UTE", driver_name); break;
+        case 5: sprintf(msg, "%s EST ELIMINE", driver_name); break;
+        default: sprintf(msg, "%s IS OUT", driver_name); break;
+    }
+
+    HUD_ShowAnnouncementBanner(msg, 0x50, 8, (g_SplitScreenMode == 0) ? -1 : 1);
+
+    g_EliminatedCarCount++;
+    g_RemainingCarCount--;
+    if (g_RemainingCarCount == 1) {
+        for (i = 0; i < g_ActiveVehicleCount; i++) {
+            uint8_t *c = g_pVehicleTable + i * VEHICLE_STRUCT_SIZE;
+            if (*(int *)(c + 0x528) == 0) {
+                *(int *)(c + 0x528) = 1;
+                *(int *)(c + 0x3a0) = *(int *)(c + 0x39c);
+                g_EliminatedCarCount = g_ActiveVehicleCount;
+            }
+        }
     }
 }
 
@@ -1502,7 +1721,50 @@ void Car_HandleElimination(void) {
  *        alternative model geometry in Lisa3D rasterizer instance table.
  */
 void Car_ChangeMesh(int car_idx) {
-    if (g_pVehicleTable == NULL) return;
+    int car_model;
+    int *src_mesh;
+    int total_words;
+    int *dst_mesh;
+    int i;
+    int num_vertices;
+    int *src_ptr;
+    int *dst_ptr;
+    int *v;
+    uint8_t *car;
+
+    if (g_pVehicleTable == NULL || g_CarConfigs == NULL) return;
+
+    car_model = *(int *)(g_CarConfigs + car_idx * 0x4c);
+    src_mesh = *(int **)(g_CarMeshes + car_model * 4);
+    if (src_mesh == NULL) return;
+
+    num_vertices = src_mesh[0];
+    total_words = src_mesh[0] * 3 + src_mesh[1] * 11 + 2;
+
+    dst_mesh = (int *)(g_DynamicMeshBuffer + car_idx * 8000);
+    if (total_words > 0) {
+        src_ptr = src_mesh;
+        dst_ptr = dst_mesh;
+        for (i = 0; i < total_words; i++) {
+            *dst_ptr++ = *src_ptr++;
+        }
+    }
+
+    if (num_vertices > 0) {
+        v = (int *)((uint8_t *)dst_mesh + 8);
+        for (i = 0; i < num_vertices; i++) {
+            v[0] = (int)(v[0] * 0.0);
+            v[1] = (int)(v[1] * 0.5);
+            v[2] = (int)(v[2] * 0.04);
+            v += 3;
+        }
+    }
+
+    Lisa_CreateDynamicObject(car_idx, car_idx * 5, (int *)(car_idx * 0x20 + (uintptr_t)g_DynamicObjectPointers),
+                            dst_mesh, 1, (short)car_idx + 100, 0, -1, 0);
+
+    car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
+    Audio_PlaySample(0, 2, 6, 0, 0x10000, 22000, 0);
 }
 
 /**
@@ -1513,6 +1775,14 @@ void Car_ChangeMesh(int car_idx) {
  */
 void Car_ApplyMeshDamage(int car_idx, int impact_severity) {
     uint8_t *car;
+    double cos_yaw, sin_yaw;
+    double wheel_ground_y[4];
+    double avg_ground_y = 0.0;
+    int i;
+    int checkpoint;
+    SurfaceRaycastResult *surf;
+    int lap;
+
     if (g_pVehicleTable == NULL) return;
     car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
 
@@ -1525,15 +1795,105 @@ void Car_ApplyMeshDamage(int car_idx, int impact_severity) {
     *(int *)(car + 0x158) = -1;
     *(int *)(car + 0x15c) = -1;
 
-    if (impact_severity > 500) {
-        Car_ChangeMesh(car_idx);
+    cos_yaw = cos(*(double *)(car + 0xf8));
+    sin_yaw = sin(*(double *)(car + 0xf8));
+
+    for (i = 0; i < 4; i++) {
+        double lx = *(double *)(car + 0x2fc + i * 8);
+        double lz = *(double *)(car + 0x31c + i * 8);
+        double scale = *(double *)(car + 0x5cc);
+        int wx = (int)((lx * cos_yaw - lz * sin_yaw) * scale + *(double *)(car + 0x00));
+        int wz = (int)((lz * cos_yaw + lx * sin_yaw) * scale + *(double *)(car + 0x10));
+
+        surf = (SurfaceRaycastResult *)Surface_GetHeightAtPoint(wx, 0, wz);
+        if (surf != NULL) {
+            wheel_ground_y[i] = (double)surf->v0_world_y;
+            avg_ground_y += wheel_ground_y[i];
+            *(int *)(car + 0x150 + i * 4) = surf->material;
+            *(int *)(car + 0x5d8 + i * 4) = surf->material;
+
+            checkpoint = surf->obj_field1e;
+            if (checkpoint != 10000 && *(int *)(car + 0x378) == 3 && checkpoint == 0) {
+                lap = *(int *)(car + 0x374) + 1;
+                *(int *)(car + 0x374) = lap;
+                *(int *)(car + 0x378) = 0;
+                if (lap > 2 && g_GameMode != 3) {
+                    *(int *)(car + 0x528) = 1;
+                    *(int *)(car + 0x3a0) = *(int *)(car + 0x39c);
+                    g_EliminatedCarCount++;
+                }
+            } else if (checkpoint != 10000) {
+                *(int *)(car + 0x370) = checkpoint;
+            }
+        } else {
+            wheel_ground_y[i] = *(double *)(car + 0x08);
+            avg_ground_y += wheel_ground_y[i];
+        }
+    }
+
+    avg_ground_y *= 0.25;
+    *(double *)(car + 0x124) = *(double *)(car + 0x120);
+    *(double *)(car + 0x120) = avg_ground_y;
+
+    if (impact_severity == -1) {
+        *(int *)(car + 0x354) = 1;
+        g_CameraEffect.type = 3;
+        g_CameraEffect.pos_x = (int)*(double *)(car + 0x00);
+        g_CameraEffect.pos_y = (int)*(double *)(car + 0x08);
+        g_CameraEffect.pos_z = (int)*(double *)(car + 0x10);
+        g_CameraEffect.target_car = car_idx;
+        g_CameraEffect.duration = 0x50;
+        g_CameraEffect.active = 1;
+        FX_SpawnCameraParticle(&g_CameraEffect);
+    } else if (impact_severity == -2) {
+        *(int *)(car + 0x358) = 1;
+        g_CameraEffect.type = 7;
+        g_CameraEffect.pos_x = (int)*(double *)(car + 0x00);
+        g_CameraEffect.pos_y = (int)*(double *)(car + 0x08);
+        g_CameraEffect.pos_z = (int)*(double *)(car + 0x10);
+        g_CameraEffect.target_car = car_idx;
+        g_CameraEffect.duration = 0x50;
+        g_CameraEffect.active = 1;
+        FX_SpawnCameraParticle(&g_CameraEffect);
+    } else if (impact_severity == -3) {
+        *(int *)(car + 0x35c) = 1;
+        g_CameraEffect.type = 10;
+        g_CameraEffect.pos_x = (int)*(double *)(car + 0x00);
+        g_CameraEffect.pos_y = (int)*(double *)(car + 0x08);
+        g_CameraEffect.pos_z = (int)*(double *)(car + 0x10);
+        g_CameraEffect.target_car = car_idx;
+        g_CameraEffect.duration = 0x50;
+        g_CameraEffect.active = 1;
+        FX_SpawnCameraParticle(&g_CameraEffect);
+    } else if (impact_severity == 1) {
+        if (*(int *)(car + 0x270) == 0 && *(int *)(car + 0x554) == 0) {
+            SceneryParticle p;
+            memset(&p, 0, sizeof(p));
+            p.type = 5;
+            p.pos_x = (int)(*(double *)(car + 0x00) * 1024.0);
+            p.pos_y = (int)(*(double *)(car + 0x08) * 1024.0);
+            p.pos_z = (int)(*(double *)(car + 0x10) * 1024.0);
+            p.vel_x = (int)((Math_RandomFloat() * 6.0 - 3.0) * 1024.0);
+            p.vel_y = (int)((Math_RandomFloat() * 4.0 + 2.0) * 1024.0);
+            p.vel_z = (int)((Math_RandomFloat() * 6.0 - 3.0) * 1024.0);
+            p.drag = 0x400;
+            p.gravity = -460;
+            p.life = 0x1e;
+            FX_SpawnParticle(&p);
+            *(int *)(car + 0x554) = 1;
+        }
+    } else if (impact_severity == 3) {
+        if (*(int *)(car + 0x558) == 0) {
+            Car_ChangeMesh(car_idx);
+            *(int *)(car + 0x558) = 1;
+        }
     }
 }
 
 /**
  * @original Car_UpdateEffects (IGN_WIN.EXE @ 0x0042bc20, main.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x0002636c. Coordinates real-time vehicle visual effects (tire skid marks,
+ * @notes MAINDOS @ 0x000272d8. Coordinates real-time vehicle visual effects (tire skid marks,
  *        turbo exhaust flames, engine damage smoke, and surface scraping sparks).
  */
 void Car_UpdateEffects(void) {
@@ -1541,64 +1901,252 @@ void Car_UpdateEffects(void) {
     if (g_pVehicleTable == NULL) return;
     car = g_pVehicleTable + g_SelectedCar * VEHICLE_STRUCT_SIZE;
     if (*(int *)(car + 0x354) == 0 && *(int *)(car + 0x358) == 0 && *(int *)(car + 0x35c) == 0) {
-        /* Active vehicle effects update */
+        FX_UpdateSkidMarks();
+        FX_UpdateEngineSmoke();
+        FX_UpdateTurboFlames();
+        FX_UpdateSparks();
     }
 }
 
 /**
  * @original Audio_UpdateDynamicDoppler (IGN_WIN.EXE @ 0x0042aa00, main.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x00025f60. Updates sound pitch and volume for dynamic track ambient sources.
+ * @notes MAINDOS @ 0x000260ed. Updates sound pitch and volume for dynamic track ambient sources.
  */
 void Audio_UpdateDynamicDoppler(void) {
+    int i;
+    if (g_AmbientEmitterCount <= 0 || g_pAmbientEmitters == NULL) return;
+
+    for (i = 0; i < g_AmbientEmitterCount; i++) {
+        AmbientSoundEmitter *emitter = &g_pAmbientEmitters[i];
+        SoundChannel *ch = Audio_GetChannel(emitter->channel_id);
+        double dist1, dist2, min_dist;
+        int vol;
+
+        if (ch == NULL) continue;
+        if (g_SoundMuted == 0 && g_SoundStateTable[emitter->sound_id] != -1) {
+            uint8_t *car1 = g_pVehicleTable;
+            double dx1 = (double)emitter->pos_x - *(double *)(car1 + 0x00);
+            double dz1 = (double)emitter->pos_z - *(double *)(car1 + 0x10);
+            dist1 = sqrt(dx1 * dx1 + dz1 * dz1);
+            min_dist = dist1;
+
+            if (g_SplitScreenMode == 1 && g_ActiveVehicleCount > 1) {
+                uint8_t *car2 = g_pVehicleTable + VEHICLE_STRUCT_SIZE;
+                double dx2 = (double)emitter->pos_x - *(double *)(car2 + 0x00);
+                double dz2 = (double)emitter->pos_z - *(double *)(car2 + 0x10);
+                dist2 = sqrt(dx2 * dx2 + dz2 * dz2);
+                if (dist2 < min_dist) {
+                    min_dist = dist2;
+                }
+            }
+
+            if (min_dist > 0.0) {
+                vol = (int)((4000.0 - min_dist) * (65536.0 / 4000.0));
+                if (vol < 0) vol = 0;
+                if (vol > 0x10000) vol = 0x10000;
+            } else {
+                vol = 0x10000;
+            }
+
+            ch->volume = vol;
+            if (i < 16 && g_SelectedTrack == 4) {
+                ch->volume = (int)(ch->volume * 0.75);
+            }
+        }
+    }
 }
 
 /**
  * @original Track_SpawnEnvironmentalParticles (IGN_WIN.EXE @ 0x0042acb0, main.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x000260ed. Emits environmental smoke/dust from track waypoint emitters.
+ * @notes MAINDOS @ 0x0002636c. Emits environmental smoke/dust from track waypoint emitters.
  */
 void Track_SpawnEnvironmentalParticles(void) {
+    int i;
+    if (g_TrackEmitterCount <= 0 || g_pTrackEmitters == NULL) return;
+
+    for (i = 0; i < g_TrackEmitterCount; i++) {
+        TrackParticleEmitter *em = &g_pTrackEmitters[i];
+        em->timer++;
+        if (em->timer >= em->interval) {
+            SceneryParticle p;
+            memset(&p, 0, sizeof(p));
+            p.type = em->particle_type;
+            p.pos_x = em->pos_x << 10;
+            p.pos_y = em->pos_y << 10;
+            p.pos_z = em->pos_z << 10;
+            p.vel_x = (int)((Math_RandomFloat() * 4.0 - 2.0) * 1024.0);
+            p.vel_y = (int)((Math_RandomFloat() * 2.0 + 1.0) * 1024.0);
+            p.vel_z = (int)((Math_RandomFloat() * 4.0 - 2.0) * 1024.0);
+            p.drag = 0x400;
+            p.gravity = 0;
+            p.life = em->lifetime;
+            FX_SpawnParticle(&p);
+            em->timer = 0;
+        }
+    }
 }
 
 /**
  * @original Track_SpawnWeatherParticles (IGN_WIN.EXE @ 0x0042b5d0, main.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x0002636c. Spawns rain and snow weather particles in viewport frustum.
+ * @notes MAINDOS @ 0x00026cdd. Spawns rain and snow weather particles in viewport frustum.
  */
 void Track_SpawnWeatherParticles(void) {
+    int i;
+    if (g_WeatherParticleCount <= 0 || g_pWeatherEmitters == NULL) return;
+
+    for (i = 0; i < g_WeatherParticleCount; i++) {
+        WeatherEmitter *we = &g_pWeatherEmitters[i];
+        if (we->type == 0x12e) {
+            we->timer++;
+            if ((float)Math_RandomFloat() + 0.1f < (float)we->timer) {
+                SceneryParticle p;
+                memset(&p, 0, sizeof(p));
+                p.type = 1;
+                p.pos_x = (int)(Math_RandomFloat() * 2000.0 - 1000.0) << 10;
+                p.pos_y = we->spawn_y << 10;
+                p.pos_z = (int)(Math_RandomFloat() * 2000.0 - 1000.0) << 10;
+                p.vel_x = 0;
+                p.vel_y = (int)((Math_RandomFloat() * -10.0 - 20.0) * 1024.0);
+                p.vel_z = 0;
+                p.drag = 0x400;
+                p.gravity = 0;
+                p.life = 0x1e;
+                FX_SpawnParticle(&p);
+                we->timer = 0;
+            }
+        }
+    }
 }
 
 /**
  * @original FX_UpdateSkidMarks (IGN_WIN.EXE @ 0x0042bc80, main.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x00026cdd. Generates ground skidmarks behind slipping vehicle tires.
+ * @notes MAINDOS @ 0x0002731c. Generates ground skidmarks behind slipping vehicle tires.
  */
 void FX_UpdateSkidMarks(void) {
+    uint8_t *car;
+    double slip;
+    int material;
+    double yaw;
+    double cos_yaw, sin_yaw;
+
+    if (g_pVehicleTable == NULL) return;
+    car = g_pVehicleTable + g_SelectedCar * VEHICLE_STRUCT_SIZE;
+
+    material = *(int *)(car + 0x158);
+    slip = *(double *)(car + 0x90);
+
+    if ((fabs(slip) <= 0.15 || *(double *)(car + 0x118) <= 5.0) && *(int *)(car + 0x2f8) == 0) {
+        if (*(int *)(car + 0x298) == 1) {
+            SoundChannel *ch = Audio_GetChannel(*(int *)(car + 0x99c));
+            if (ch != NULL) ch->active = 0;
+            *(int *)(car + 0x298) = 0;
+        }
+    } else if (*(int *)(car + 0x298) == 1) {
+        if (material != 5 && material != 15 && material != 25 && g_ParticleEffectsEnabled == 1) {
+            SceneryParticle p;
+            yaw = *(double *)(car + 0xf8);
+            cos_yaw = cos(yaw);
+            sin_yaw = sin(yaw);
+
+            memset(&p, 0, sizeof(p));
+            p.type = 1;
+            p.pos_x = (int)((*(double *)(car + 0x00) - cos_yaw * 15.0) * 1024.0);
+            p.pos_y = (int)(*(double *)(car + 0x08) * 1024.0);
+            p.pos_z = (int)((*(double *)(car + 0x10) - sin_yaw * 15.0) * 1024.0);
+            p.vel_x = (int)((Math_RandomFloat() * 2.0 - 1.0) * 1024.0);
+            p.vel_y = (int)((Math_RandomFloat() * 2.0 + 1.0) * 1024.0);
+            p.vel_z = (int)((Math_RandomFloat() * 2.0 - 1.0) * 1024.0);
+            p.drag = 0x200;
+            p.gravity = 0;
+            p.life = 0x1e;
+            FX_SpawnParticle(&p);
+
+            p.pos_x = (int)((*(double *)(car + 0x00) + cos_yaw * 15.0) * 1024.0);
+            p.pos_z = (int)((*(double *)(car + 0x10) + sin_yaw * 15.0) * 1024.0);
+            FX_SpawnParticle(&p);
+        }
+    }
 }
 
 /**
  * @original FX_UpdateTransparentSpriteObject (IGN_WIN.EXE @ 0x0042e2e0, main.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x00028a10. Updates 3D world position and animation of transparent billboard sprites.
+ * @notes MAINDOS @ 0x000298f8. Updates 3D world position and animation of transparent billboard sprites.
  */
 void FX_UpdateTransparentSpriteObject(void *particle, int instance_idx) {
+    SceneryParticle *p = (SceneryParticle *)particle;
+    DynamicObject *obj;
+
+    if (p == NULL || g_pDynamicObjects == NULL) return;
+    obj = &g_pDynamicObjects[instance_idx];
+
+    if (p->field_24 == 0) {
+        Lisa_CreateDynamicObject(p->type, instance_idx, (int *)obj, (int *)obj, p->type, 200, 0, 0x14, 0);
+    }
+
+    obj->pos_x = p->pos_x >> 10;
+    obj->pos_y = p->pos_y >> 10;
+    obj->pos_z = p->pos_z >> 10;
+
+    if (obj->field_1c == 0) {
+        Lisa_MoveDynamicObject(obj);
+    }
+
+    p->pos_x += p->vel_x;
+    p->pos_y += p->vel_y;
+    p->pos_z += p->vel_z;
+    p->vel_x = (int)((longlong)p->vel_x * p->drag) >> 10;
+    p->vel_y += p->gravity;
+    p->vel_z = (int)((longlong)p->vel_z * p->drag) >> 10;
+
+    p->field_24++;
+    if (p->field_24 >= p->life) {
+        Lisa_DeleteDynamicObject(obj);
+        p->type = 0;
+    }
 }
 
 /**
  * @original FX_UpdateTransparentSpriteObject2 (IGN_WIN.EXE @ 0x0042e5a0, main.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x00028c20. Updates transparent billboard sprite instance variation.
+ * @notes MAINDOS @ 0x00029cf2. Updates transparent billboard sprite instance variation.
  */
 void FX_UpdateTransparentSpriteObject2(void *particle, int instance_idx) {
+    FX_UpdateTransparentSpriteObject(particle, instance_idx);
 }
 
 /**
  * @original FX_UpdateHandlePlotObject (IGN_WIN.EXE @ 0x0042e860, main.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x00028e30. Updates particle plot marker object positions in scene.
+ * @notes MAINDOS @ 0x00029d1a. Updates particle plot marker object positions in scene.
  */
 void FX_UpdateHandlePlotObject(void *particle, int instance_idx) {
+    SceneryParticle *p = (SceneryParticle *)particle;
+    DynamicObject *obj;
+
+    if (p == NULL || g_pDynamicObjects == NULL) return;
+    obj = &g_pDynamicObjects[instance_idx];
+
+    obj->pos_x = p->pos_x >> 10;
+    obj->pos_y = p->pos_y >> 10;
+    obj->pos_z = p->pos_z >> 10;
+
+    Lisa_MoveDynamicObject(obj);
+
+    p->pos_x += p->vel_x;
+    p->pos_y += p->vel_y;
+    p->pos_z += p->vel_z;
+    p->vel_y += p->gravity;
+
+    p->field_24++;
+    if (p->field_24 >= p->life) {
+        Lisa_DeleteDynamicObject(obj);
+        p->type = 0;
+    }
 }
 
 /**
@@ -1607,6 +2155,30 @@ void FX_UpdateHandlePlotObject(void *particle, int instance_idx) {
  * @notes MAINDOS @ 0x00029040. Updates high-intensity spark / super plot particle positions.
  */
 void FX_UpdateSuperPlotObject(void *particle, int instance_idx) {
+    SceneryParticle *p = (SceneryParticle *)particle;
+    DynamicObject *obj;
+
+    if (p == NULL || g_pDynamicObjects == NULL) return;
+    obj = &g_pDynamicObjects[instance_idx];
+
+    obj->pos_x = p->pos_x >> 10;
+    obj->pos_y = p->pos_y >> 10;
+    obj->pos_z = p->pos_z >> 10;
+
+    Lisa_MoveDynamicObject(obj);
+
+    p->pos_x += p->vel_x;
+    p->pos_y += p->vel_y;
+    p->pos_z += p->vel_z;
+    p->vel_x = (int)((longlong)p->vel_x * 0x3e0) >> 10;
+    p->vel_y += p->gravity;
+    p->vel_z = (int)((longlong)p->vel_z * 0x3e0) >> 10;
+
+    p->field_24++;
+    if (p->field_24 >= p->life) {
+        Lisa_DeleteDynamicObject(obj);
+        p->type = 0;
+    }
 }
 
 /**
@@ -1616,6 +2188,37 @@ void FX_UpdateSuperPlotObject(void *particle, int instance_idx) {
  *        and world model transforms) for track scenery obstacles (traffic cones, drums).
  */
 void Obstacle_SimulateDynamics(void *obstacle) {
+    SceneryObstacle *obs = (SceneryObstacle *)obstacle;
+    SurfaceRaycastResult *surf;
+
+    if (obs == NULL || obs->active_state != 1) return;
+
+    obs->pos_x += obs->vel_x;
+    obs->pos_y += obs->vel_y;
+    obs->pos_z += obs->vel_z;
+    obs->vel_y -= 9.81 * 0.1;
+
+    obs->rot_x += obs->ang_vel_x;
+    obs->rot_y += obs->ang_vel_y;
+    obs->rot_z += obs->ang_vel_z;
+
+    surf = (SurfaceRaycastResult *)Surface_GetHeightAtPoint((int)obs->pos_x, 0, (int)obs->pos_z);
+    if (surf != NULL && obs->pos_y < (double)surf->v0_world_y) {
+        obs->pos_y = (double)surf->v0_world_y;
+        obs->vel_y = -obs->vel_y * 0.6;
+        obs->vel_x *= 0.85;
+        obs->vel_z *= 0.85;
+        obs->ang_vel_x *= 0.8;
+        obs->ang_vel_y *= 0.8;
+        obs->ang_vel_z *= 0.8;
+
+        if (fabs(obs->vel_y) < 1.0 && fabs(obs->vel_x) < 0.5 && fabs(obs->vel_z) < 0.5) {
+            obs->vel_x = 0.0;
+            obs->vel_y = 0.0;
+            obs->vel_z = 0.0;
+            obs->active_state = 0;
+        }
+    }
 }
 
 /**
@@ -1624,6 +2227,36 @@ void Obstacle_SimulateDynamics(void *obstacle) {
  * @notes MAINDOS @ 0x0002a280. Updates ballistic trajectory and ground bounce for flying vehicle debris.
  */
 void FX_UpdateFlyingParticles(void *particle, int instance_idx) {
+    SceneryParticle *p = (SceneryParticle *)particle;
+    DynamicObject *obj;
+    SurfaceRaycastResult *surf;
+
+    if (p == NULL || g_pDynamicObjects == NULL) return;
+    obj = &g_pDynamicObjects[instance_idx];
+
+    p->pos_x += p->vel_x;
+    p->pos_y += p->vel_y;
+    p->pos_z += p->vel_z;
+    p->vel_y += p->gravity;
+
+    surf = (SurfaceRaycastResult *)Surface_GetHeightAtPoint(p->pos_x >> 10, 0, p->pos_z >> 10);
+    if (surf != NULL && (p->pos_y >> 10) < surf->v0_world_y) {
+        p->pos_y = surf->v0_world_y << 10;
+        p->vel_y = -p->vel_y / 2;
+        p->vel_x = (p->vel_x * 3) / 4;
+        p->vel_z = (p->vel_z * 3) / 4;
+    }
+
+    obj->pos_x = p->pos_x >> 10;
+    obj->pos_y = p->pos_y >> 10;
+    obj->pos_z = p->pos_z >> 10;
+    Lisa_MoveDynamicObject(obj);
+
+    p->field_24++;
+    if (p->field_24 >= p->life) {
+        Lisa_DeleteDynamicObject(obj);
+        p->type = 0;
+    }
 }
 
 /**
@@ -1632,6 +2265,23 @@ void FX_UpdateFlyingParticles(void *particle, int instance_idx) {
  * @notes MAINDOS @ 0x0001a40e. Evaluates type 0xFA (250) trigger obstacles and triggers associated actions.
  */
 void Obstacle_TriggerAction(void) {
+    int count;
+    int i;
+    int offset;
+
+    Obstacle_ResetActions();
+    if (g_pObstacleTriggerTable == NULL) return;
+    count = *g_pObstacleTriggerTable;
+    if (count <= 0) return;
+
+    offset = 0;
+    for (i = 0; i < count; i++) {
+        if (*(int *)((uint8_t *)g_pObstacleTriggerTable + offset + 8) == 0xfa) {
+            int obstacle_id = *(int *)((uint8_t *)g_pObstacleTriggerTable + offset + 4);
+            Obstacle_SetTriggerState((int *)(g_pObstacleStateTable + obstacle_id * 4), 0);
+        }
+        offset += 0x14;
+    }
 }
 
 /**
@@ -1640,6 +2290,38 @@ void Obstacle_TriggerAction(void) {
  * @notes MAINDOS @ 0x0001a4ec. Precomputes 800x405 lookahead steering cone and obstacle threat table.
  */
 void AI_InitSteeringConeLookup(void) {
+    int row, col;
+    int offset = 0;
+
+    if (g_pAIThreatTable == NULL) {
+        g_pAIThreatTable = (uint8_t *)Mem_Alloc(1, 800 * 405);
+    }
+    if (g_pAIThreatTable == NULL) return;
+
+    memset(g_pAIThreatTable, 0x14, 800 * 405);
+
+    for (row = 0; row < 405; row++) {
+        offset = row * 800;
+
+        for (col = 400 - row; col < 400 + row; col++) {
+            if (col >= 0 && col < 800) g_pAIThreatTable[offset + col] = 5;
+        }
+        for (col = 401 - row; col < 399 + row; col++) {
+            if (col >= 0 && col < 800) g_pAIThreatTable[offset + col] = 4;
+        }
+        for (col = 402 - row; col < 398 + row; col++) {
+            if (col >= 0 && col < 800) g_pAIThreatTable[offset + col] = 3;
+        }
+        for (col = 403 - row; col < 397 + row; col++) {
+            if (col >= 0 && col < 800) g_pAIThreatTable[offset + col] = 2;
+        }
+        for (col = 404 - row; col < 396 + row; col++) {
+            if (col >= 0 && col < 800) g_pAIThreatTable[offset + col] = 1;
+        }
+        for (col = 405 - row; col < 395 + row; col++) {
+            if (col >= 0 && col < 800) g_pAIThreatTable[offset + col] = 0;
+        }
+    }
 }
 
 /**
@@ -1648,6 +2330,17 @@ void AI_InitSteeringConeLookup(void) {
  * @notes MAINDOS @ 0x0001a97a. Loads recorded Time Attack ghost car trajectory from GHOSTS\%s.GST.
  */
 void Ghost_LoadCarAndPath(void) {
+    char path[128];
+    int fd;
+    if (g_TrackName[0] == '\0') return;
+
+    sprintf(path, "GHOSTS\\%s.GST", g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd >= 0) {
+        read(fd, g_GhostDataBuffer, 0x49d4c);
+        close(fd);
+        g_GhostCarLoaded = 1;
+    }
 }
 
 /**
@@ -1656,6 +2349,16 @@ void Ghost_LoadCarAndPath(void) {
  * @notes MAINDOS @ 0x0001adf8. Loads preprocessed level data cache (ign_win.btz / ign_dos.btz).
  */
 void Track_LoadBinaryCache(void) {
+    int fd;
+    Surface_FreeSRF();
+    Sound_FreeAllSounds();
+    Track_SaveBinaryCache();
+
+    fd = open("ign_win.btz", O_RDONLY | O_BINARY);
+    if (fd >= 0) {
+        read(fd, g_TrackBinaryCache, 0x597);
+        close(fd);
+    }
 }
 
 /**
@@ -1664,6 +2367,10 @@ void Track_LoadBinaryCache(void) {
  * @notes MAINDOS @ 0x0001b42d. Frees active level audio buffers and sample tables upon track unload.
  */
 void Sound_FreeAllSounds(void) {
+    int i;
+    for (i = 0; i < 32; i++) {
+        Sound_FreeSample(i);
+    }
 }
 
 /**
@@ -1672,6 +2379,7 @@ void Sound_FreeAllSounds(void) {
  * @notes MAINDOS @ 0x0001b51a. Releases all allocated game memory and shuts down engine subsystems cleanly.
  */
 void Game_Shutdown(void) {
+    Sound_FreeAllSounds();
     App_Shutdown();
 }
 
@@ -1681,6 +2389,23 @@ void Game_Shutdown(void) {
  * @notes MAINDOS @ 0x0001b9d3. Updates start-line traffic light timer and checks race winner victory condition.
  */
 void Race_UpdateCountdownAndFinish(void) {
+    if (g_CountdownTimer > 0.0) {
+        g_CountdownTimer = (double)(g_CurrentTick - g_StartTick) * (1.0 / 18.2);
+        if (g_CountdownTimer >= 3.0 || g_RacePhase == 1) {
+            if (g_CountdownTimer >= 3.0) {
+                Timer_GetDeltaTime();
+                Audio_PlaySample(0, 3, 0, 0, 0x10000, 22000, 0);
+            }
+            g_CountdownTimer = -1.0;
+            g_RacePhase = 2;
+            if (g_pVehicleTable != NULL) {
+                *(int *)(g_pVehicleTable + 0x4844) = 10;
+            }
+        }
+    }
+
+    g_TotalRaceFrames++;
+    HUD_UpdateLapCounters();
 }
 
 /**
@@ -1689,6 +2414,14 @@ void Race_UpdateCountdownAndFinish(void) {
  * @notes MAINDOS @ 0x0001b9e4. Updates player split times and current lap timer display on in-game HUD.
  */
 void HUD_UpdateRaceTimes(void) {
+    if (g_DemoMode == 0) {
+        if (g_CarConfigs != NULL && *(int *)(g_CarConfigs + 8 + g_SelectedCar * 0x4c) > 0) {
+            HUD_DrawPlayerSplitTimer(g_SelectedCar * 0x13, (int *)(g_SelectedCar * 9));
+        }
+        Input_PollPlayerVehicleControls();
+        return;
+    }
+    HUD_DrawDemoWatermark(0, 0, 0, 0);
 }
 
 /**
@@ -1697,6 +2430,21 @@ void HUD_UpdateRaceTimes(void) {
  * @notes MAINDOS @ 0x0001c5b8. Polls keyboard hotkeys during race: Pause (P), Escape menu, camera toggle, and volume.
  */
 void Input_ProcessRaceHotkeys(void) {
+    if (Input_IsKeyPressed(0x19)) {
+        g_IsGamePaused = !g_IsGamePaused;
+    }
+    if (Input_IsKeyPressed(0x01)) {
+        g_GameStage = 0;
+    }
+    if (Input_IsKeyPressed(0x3b)) {
+        g_SelectedCameraView = 0;
+    }
+    if (Input_IsKeyPressed(0x3c)) {
+        g_SelectedCameraView = 1;
+    }
+    if (Input_IsKeyPressed(0x3d)) {
+        g_SelectedCameraView = 2;
+    }
 }
 
 /**
@@ -1705,6 +2453,42 @@ void Input_ProcessRaceHotkeys(void) {
  * @notes MAINDOS @ 0x0001ccc5. Reads keyboard / joystick axes and maps to vehicle steering, throttle, brake, and turbo.
  */
 void Input_PollPlayerVehicleControls(void) {
+    uint8_t *car;
+    uint8_t *config;
+    int steer = 0;
+    int throttle = 0;
+    int brake = 0;
+
+    if (g_pVehicleTable == NULL || g_CarConfigs == NULL) return;
+    car = g_pVehicleTable + g_SelectedCar * VEHICLE_STRUCT_SIZE;
+    config = g_CarConfigs + g_SelectedCar * 0x4c;
+
+    if (*(int *)(config + 8) != 0) {
+        return;
+    }
+
+    if (Input_IsKeyPressed(config[0x1e])) {
+        throttle = 100;
+    }
+    if (Input_IsKeyPressed(config[0x1f])) {
+        brake = 100;
+    }
+    if (Input_IsKeyPressed(config[0x1c])) {
+        steer = -100;
+    }
+    if (Input_IsKeyPressed(config[0x1d])) {
+        steer = 100;
+    }
+
+    *(int *)(car + 0x344) = steer;
+    *(int *)(car + 0x348) = throttle;
+    *(int *)(car + 0x34c) = brake;
+
+    if (Input_IsKeyPressed(config[0x22])) {
+        if (*(int *)(car + 0x354) == 0 && *(int *)(car + 0x358) == 0 && *(int *)(car + 0x35c) == 0) {
+            *(int *)(car + 0x4844) = 1;
+        }
+    }
 }
 
 /**
@@ -1713,6 +2497,18 @@ void Input_PollPlayerVehicleControls(void) {
  * @notes MAINDOS @ 0x0001cf5d. Serializes recorded lap waypoint trajectory into GHOSTS\%s.GST.
  */
 void Ghost_SaveCarAndPath(void) {
+    char path[128];
+    int fd;
+
+    if (g_GameMode == 2 && g_TrackName[0] != '\0') {
+        sprintf(path, "GHOSTS\\%s.GST", g_TrackName);
+        fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0666);
+        if (fd >= 0) {
+            write(fd, g_GhostDataBuffer, 0x49d4c);
+            close(fd);
+        }
+    }
+    Track_SaveBinaryCache();
 }
 
 /**
@@ -1721,4 +2517,10 @@ void Ghost_SaveCarAndPath(void) {
  * @notes MAINDOS @ 0x0001cfbc. Saves preprocessed level collision cache file.
  */
 void Track_SaveBinaryCache(void) {
+    int fd;
+    fd = open("ign_win.btz", O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0666);
+    if (fd >= 0) {
+        write(fd, g_TrackBinaryCache, 0x597);
+        close(fd);
+    }
 }
