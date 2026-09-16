@@ -53,5 +53,8 @@ void Texture_LoadAllPages(void);
 void Race_InitSceneAndCars(void);
 void Race_ResolveVehicleCollisions(void);
 void Race_CheckCheckpointTriggers(void);
+void Car_UpdateAxleSpeeds(int car_idx);
+void Car_VerticalDynamics(int car_idx);
+void Car_PhysicsTick(int car_idx);
 
 #endif /* MAIN_H */

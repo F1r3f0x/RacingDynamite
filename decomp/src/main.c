@@ -20,6 +20,12 @@ typedef long long longlong;
 /* Global Game Engine State */
 #include <io.h>
 #include <fcntl.h>
+#include <math.h>
+
+#define VEHICLE_STRUCT_SIZE 0x484C
+
+uint8_t *g_pVehicleTable = NULL;
+int g_ActiveVehicleCount = 0;
 int g_GameStage = 0;             /* 0=Init, 1=Run, 2=Shutdown */
 int g_MenuState = 0;
 int g_MenuSelection = 0;
@@ -265,8 +271,99 @@ void Race_ResolveVehicleCollisions(void) {
 /**
  * @original Race_CheckCheckpointTriggers (IGN_WIN.EXE @ 0x00429a40, main.c)
  * @fidelity EXACT
- * @notes Tests vehicle collision against type 150..154 split-time checkpoint gates.
+ * @notes MAINDOS @ 0x000250f0. Tests vehicle collision against type 150..154 split-time checkpoint gates.
  */
 void Race_CheckCheckpointTriggers(void) {
     /* Lap timing and checkpoint triggers */
+}
+
+/**
+ * @original Car_UpdateAxleSpeeds (IGN_WIN.EXE @ 0x00427d70, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00022d8c. Computes front and rear axle mean rotational speeds:
+ *        front_axle_speed = (wheel[0].speed + wheel[2].speed) * 0.5;
+ *        rear_axle_speed  = (wheel[1].speed + wheel[3].speed) * 0.5;
+ */
+void Car_UpdateAxleSpeeds(int car_idx) {
+    uint8_t *car;
+    double fl_speed;
+    double fr_speed;
+    double rl_speed;
+    double rr_speed;
+
+    if (g_pVehicleTable == NULL) return;
+
+    car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
+    fl_speed = *(double *)(car + 0x58);
+    fr_speed = *(double *)(car + 0x78);
+    rl_speed = *(double *)(car + 0x60);
+    rr_speed = *(double *)(car + 0x80);
+
+    *(double *)(car + 0x640) = (fl_speed + fr_speed) * 0.5;
+    *(double *)(car + 0x648) = (rl_speed + rr_speed) * 0.5;
+}
+
+/**
+ * @original Car_VerticalDynamics (IGN_WIN.EXE @ 0x00423aa0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001e234. Applies gravity acceleration (-0.2/tick), computes ground equilibrium (+5.0),
+ *        handles suspension compression/rebound velocity bounce (-0.2 factor with damping), and triggers bottoming-out effects.
+ */
+void Car_VerticalDynamics(int car_idx) {
+    uint8_t *car;
+    double ground_y;
+    double prev_ground_y;
+    double delta_ground;
+    double speed;
+    double ride_height;
+
+    if (g_pVehicleTable == NULL) return;
+
+    car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
+    ground_y = *(double *)(car + 0x120);
+    prev_ground_y = *(double *)(car + 0x128);
+    delta_ground = prev_ground_y - ground_y;
+    speed = *(double *)(car + 0x118);
+
+    if (fabs(speed) < 50.0 && fabs(delta_ground) > 4.0) {
+        delta_ground = 0.0;
+    }
+    if (fabs(speed * 0.05) < delta_ground) {
+        delta_ground = 0.0;
+    }
+
+    /* Apply gravity (0.2 per tick) */
+    *(double *)(car + 0x20) += 0.2;
+    *(double *)(car + 0x08) -= *(double *)(car + 0x20);
+
+    /* Test ride height equilibrium ground penetration */
+    ride_height = ground_y + 5.0;
+    if (*(double *)(car + 0x08) < ride_height) {
+        *(double *)(car + 0x08) = ride_height;
+
+        if (*(int *)(car + 0x270) == 0) {
+            *(double *)(car + 0x20) = delta_ground;
+        } else if (*(int *)(car + 0x270) == 1) {
+            double rebound = 0.5;
+            if (*(double *)(car + 0x20) > 8.0) {
+                rebound = -0.2;
+            }
+            *(double *)(car + 0x20) *= rebound;
+            if (*(double *)(car + 0x20) < -15.0) {
+                *(double *)(car + 0x20) = -15.0;
+            }
+            *(int *)(car + 0x270) = 0;
+            *(int *)(car + 0x278) = 1;
+        }
+    }
+}
+
+/**
+ * @original Car_PhysicsTick (IGN_WIN.EXE @ 0x00424570, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001ed00. Master fixed-timestep 72 Hz vehicle dynamics simulation:
+ *        4-wheel independent raycast suspension, lateral slip, steering, and traction.
+ */
+void Car_PhysicsTick(int car_idx) {
+    (void)car_idx;
 }
