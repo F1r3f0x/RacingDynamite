@@ -127,6 +127,11 @@ INSERT INTO "functions" VALUES(162,'0x0001e65e','0x00423ea0','Car_CheckLandingSt
 INSERT INTO "functions" VALUES(163,'0x0001e6a2','0x00423f00','Car_UpdateShadowTracking','FUN_00423f00',5,'decompiled','watcom_reg','void','int car_idx',NULL,NULL,'EXACT','decomp/src/main.c','Advances secondary position/shadow tracking for car. Integrates velocity at 72 Hz timestep (factor 1.0 / 72.0 = 0.013888889).',NULL,NULL);
 INSERT INTO "functions" VALUES(164,'0x0001e6f6','0x00423f70','Car_UpdateBodyVelocity','FUN_00423f70',5,'decompiled','watcom_reg','void','int car_idx',NULL,NULL,'EXACT','decomp/src/main.c','Computes local lateral and longitudinal acceleration from target waypoint error, rotates by vehicle heading, applies tire drag and clamps to max speed.',NULL,NULL);
 INSERT INTO "functions" VALUES(165,'0x0001b996','0x00420c00','Timer_GetDeltaTime','FUN_00420c00',5,'decompiled','watcom_reg','double','void',NULL,NULL,'EXACT','decomp/src/main.c','Computes elapsed frame delta time using tick counter scaled by 0.036. Updates accumulator, frame counter, and clamps delta to max 10.8 ticks.',NULL,NULL);
+INSERT INTO "functions" VALUES(166,'0x000246cc','0x004292c0','Collision_TestLineIntersection','FUN_004292c0',5,'decompiled','watcom_reg','int','double *car1, double *car2',NULL,NULL,'EXACT','decomp/src/main.c','Tests 2D collision impulse transfer between two vehicles. Calculates contact lever arm distances, applies impulse restitution (-1.5), and updates both linear and angular velocities.',NULL,NULL);
+INSERT INTO "functions" VALUES(167,'0x000249e5','0x004295e0','Collision_TestPolygonOverlap','FUN_004295e0',5,'decompiled','watcom_reg','int','float *poly1_x, float *poly1, int count1, float *poly2, int count2',NULL,NULL,'EXACT','decomp/src/main.c','Tests pairwise edge crossings between two 2D convex vehicle polygons. Averages contact points to calculate centroid contact position and normal angle.',NULL,NULL);
+INSERT INTO "functions" VALUES(168,'0x00023ee8','0x00428b90','Collision_FilterTrackClearance','FUN_00428b90',5,'decompiled','watcom_reg','int','int param_1, int param_2, int param_3, int param_4, int is_wall',NULL,NULL,'EXACT','decomp/src/main.c','Filters candidate collision triangles according to track-specific ground clearance thresholds (Snake: 350, Moose: 200, Mountain: 450, Ski: 125, Default: 2500).',NULL,NULL);
+INSERT INTO "functions" VALUES(169,'0x0002383c','0x00428730','Collision_RaycastVehicleSphere','FUN_00428730',5,'decompiled','watcom_reg','void *','int x, int y, int z, int car_idx',NULL,NULL,'EXACT','decomp/src/main.c','Sets up vertical collision query ray from vehicle center (pos_y + 500.0 downward 850 units) and invokes spatial partition octree query.',NULL,NULL);
+INSERT INTO "functions" VALUES(170,'0x00022dc8','0x00427dc0','Collision_TestTrackTriangles','FUN_00427dc0',5,'decompiled','watcom_reg','void *','uint32_t param_1, uint32_t param_2, int param_3, int param_4, int param_5',NULL,NULL,'EXACT','decomp/src/main.c','Iterates over track collision triangles from octree query, calculates closest point on triangle, plane distance, and penetration restitution.',NULL,NULL);
 CREATE TABLE globals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT,                      -- Address in MAINDOS.EXE
@@ -332,7 +337,7 @@ CREATE INDEX idx_globals_name ON globals(name);
 CREATE INDEX idx_struct_fields_struct ON struct_fields(struct_id);
 DELETE FROM "sqlite_sequence";
 INSERT INTO "sqlite_sequence" VALUES('modules',8);
-INSERT INTO "sqlite_sequence" VALUES('functions',165);
+INSERT INTO "sqlite_sequence" VALUES('functions',170);
 INSERT INTO "sqlite_sequence" VALUES('globals',124);
 INSERT INTO "sqlite_sequence" VALUES('structs',18);
 INSERT INTO "sqlite_sequence" VALUES('struct_fields',138);

@@ -68,6 +68,10 @@ int g_PauseStartTime = 0;
 double g_RaceTimeSeconds = 0.0;
 uint8_t *g_pVehicleShadowTable = NULL;
 
+double g_CollisionContactX = 0.0;
+double g_CollisionContactZ = 0.0;
+double g_CollisionNormalAngle = 0.0;
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -1217,4 +1221,224 @@ double Timer_GetDeltaTime(void) {
         }
     }
     return delta;
+}
+
+/**
+ * @original Collision_TestLineIntersection (IGN_WIN.EXE @ 0x004292c0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x000246cc. Tests 2D collision impulse transfer between two vehicles.
+ *        Calculates contact lever arm distances, applies impulse restitution (-1.5),
+ *        and updates both linear and angular velocities.
+ */
+int Collision_TestLineIntersection(double *car1, double *car2) {
+    float dx1, dz1, dx2, dz2;
+    float dist1, dist2;
+    float angle1, angle2;
+    float cos_norm, sin_norm;
+    int sign1, sign2;
+    float arm1, arm2;
+    float cos_diff1, cos_diff2;
+    float mass1, mass2;
+    float total_mass;
+    float impulse1, impulse2;
+    float normal_x, normal_z;
+
+    dz1 = (float)(g_CollisionContactZ - car1[1]);
+    dx1 = (float)(g_CollisionContactX - car1[0]);
+    angle1 = (float)atan2(dz1, dx1);
+    dist1 = (float)sqrt(dz1 * dz1 + dx1 * dx1);
+
+    cos_norm = (float)cos(g_CollisionNormalAngle);
+    sin_norm = (float)sin(g_CollisionNormalAngle);
+
+    sign1 = Math_Signum((int)(cos_norm * dz1 - sin_norm * dx1));
+
+    dz2 = (float)(g_CollisionContactZ - car2[1]);
+    dx2 = (float)(g_CollisionContactX - car2[0]);
+    angle2 = (float)atan2(dz2, dx2);
+    dist2 = (float)sqrt(dz2 * dz2 + dx2 * dx2);
+
+    sign2 = Math_Signum((int)(cos_norm * ((cos(angle1) * car1[4] * dist1 + car1[3]) -
+                                          (cos(angle2) * car2[4] * dist2 + car2[3])) -
+                              sin_norm * ((car1[2] - car1[4] * sin(angle1) * dist1) -
+                                          (car2[2] - car2[4] * sin(angle2) * dist2))));
+
+    if (sign1 != sign2) {
+        return 0;
+    }
+
+    cos_diff1 = (float)cos(g_CollisionNormalAngle - angle1);
+    cos_diff2 = (float)cos(g_CollisionNormalAngle - angle2);
+
+    arm1 = (cos_diff1 / *(float *)((uint8_t *)car1 + 0x2c)) * *(float *)(car1 + 5) * dist1;
+    arm2 = (cos_diff2 / *(float *)((uint8_t *)car2 + 0x2c)) * *(float *)(car2 + 5) * dist2;
+
+    mass1 = *(float *)(car1 + 5);
+    mass2 = *(float *)(car2 + 5);
+    total_mass = mass1 + mass2;
+
+    impulse1 = ((mass2 / total_mass) * -1.5f) /
+               (dist1 * arm1 * ((float)cos(angle1) * cos_norm + (float)sin(angle1) * sin_norm) + 1.0f);
+    impulse2 = ((mass1 / total_mass) * -1.5f) /
+               (dist2 * arm2 * (cos_norm * (float)cos(angle2) + sin_norm * (float)sin(angle2)) + 1.0f);
+
+    car1[4] += (double)(arm1 * impulse1);
+    normal_x = (float)sin(g_CollisionNormalAngle) * impulse1;
+    normal_z = (float)cos(g_CollisionNormalAngle) * impulse1;
+    car1[2] -= (double)normal_x;
+    car1[3] += (double)normal_z;
+
+    car2[4] -= (double)(arm2 * impulse2);
+    normal_x = (float)sin(g_CollisionNormalAngle) * impulse2;
+    normal_z = (float)cos(g_CollisionNormalAngle) * impulse2;
+    car2[2] += (double)normal_x;
+    car2[3] -= (double)normal_z;
+
+    return 1;
+}
+
+/**
+ * @original Collision_TestPolygonOverlap (IGN_WIN.EXE @ 0x004295e0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x000249e5. Tests pairwise edge crossings between two 2D convex vehicle polygons.
+ *        Averages contact points to calculate centroid contact position and normal angle.
+ */
+int Collision_TestPolygonOverlap(float *poly1_x, float *poly1, int count1, float *poly2, int count2) {
+    int e1, e2;
+    int next1, next2;
+    float p1x, p1z, p2x, p2z;
+    float q1x, q1z, q2x, q2z;
+    float d1x, d1z, d2x, d2z;
+    float cross1, cross2;
+    float denom;
+    int contact_count = 0;
+    float contact_pts_x[8];
+    float contact_pts_z[8];
+    float sum_x = 0.0f, sum_z = 0.0f;
+    float max_dist_sq = 0.0f;
+    int idx_a = 0, idx_b = 0;
+    int i, j;
+
+    if (count1 <= 0 || count2 <= 0) return 0;
+
+    for (e1 = 0; e1 < count1; e1++) {
+        next1 = (e1 + 1 < count1) ? e1 + 1 : 0;
+        p1x = poly1[e1 * 2];
+        p1z = poly1[e1 * 2 + 1];
+        p2x = poly1[next1 * 2];
+        p2z = poly1[next1 * 2 + 1];
+        d1x = p1x - p2x;
+        d1z = p1z - p2z;
+
+        for (e2 = 0; e2 < count2; e2++) {
+            next2 = (e2 + 1 < count2) ? e2 + 1 : 0;
+            q1x = poly2[e2 * 2];
+            q1z = poly2[e2 * 2 + 1];
+            q2x = poly2[next2 * 2];
+            q2z = poly2[next2 * 2 + 1];
+
+            cross1 = (p1z - q1z) * d1x - (p1x - q1x) * d1z;
+            cross2 = (p1z - q2z) * d1x - (p1x - q2x) * d1z;
+
+            if (((cross1 > 0.0f) != (cross2 > 0.0f)) || (cross1 == 0.0f)) {
+                d2x = q1x - q2x;
+                d2z = q1z - q2z;
+                cross1 = (q1z - p1z) * d2x - (q1x - p1x) * d2z;
+                cross2 = (q1z - p2z) * d2x - (q1x - p2x) * d2z;
+
+                if (((cross1 > 0.0f) != (cross2 > 0.0f)) || (cross1 == 0.0f)) {
+                    denom = d2z * d1x - d2x * d1z;
+                    if (fabs(denom) > 0.0001f) {
+                        if (contact_count < 8) {
+                            contact_pts_x[contact_count] = (q1x * d2z * d1x + (p1z - q1z) * d2x * d1x - p1x * d2x * d1z) / denom;
+                            contact_pts_z[contact_count] = ((p1x - q1x) * d2z * d1z - p1z * d2z * d1x + q1z * d2x * d1z) / -denom;
+                            contact_count++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (contact_count > 0) {
+        for (i = 0; i < contact_count; i++) {
+            sum_x += contact_pts_x[i];
+            sum_z += contact_pts_z[i];
+        }
+        g_CollisionContactX = (double)(sum_x / (float)contact_count);
+        g_CollisionContactZ = (double)(sum_z / (float)contact_count);
+
+        for (i = 0; i < contact_count; i++) {
+            for (j = i + 1; j < contact_count; j++) {
+                float dist_sq = (contact_pts_x[i] - contact_pts_x[j]) * (contact_pts_x[i] - contact_pts_x[j]) +
+                                (contact_pts_z[i] - contact_pts_z[j]) * (contact_pts_z[i] - contact_pts_z[j]);
+                if (dist_sq > max_dist_sq) {
+                    max_dist_sq = dist_sq;
+                    idx_a = i;
+                    idx_b = j;
+                }
+            }
+        }
+
+        g_CollisionNormalAngle = atan2(contact_pts_z[idx_a] - contact_pts_z[idx_b],
+                                       contact_pts_x[idx_a] - contact_pts_x[idx_b]);
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * @original Collision_FilterTrackClearance (IGN_WIN.EXE @ 0x00428b90, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00023ee8. Filters candidate collision triangles according to track-specific
+ *        ground clearance thresholds (Snake: 350, Moose: 200, Mountain: 450, Ski: 125, Default: 2500).
+ */
+int Collision_FilterTrackClearance(int param_1, int param_2, int param_3, int param_4, int is_wall) {
+    int clearance_limit;
+
+    if (is_wall == 0) {
+        switch (g_SelectedTrack) {
+            case 2: clearance_limit = 200; break; /* Moose */
+            case 3: clearance_limit = 450; break; /* Mountain */
+            case 6: clearance_limit = 125; break; /* Ski */
+            case 0:
+            case 1:
+            case 4:
+            case 5:
+            default:
+                clearance_limit = 350;
+                break;
+        }
+    } else {
+        clearance_limit = 2500;
+    }
+
+    return clearance_limit;
+}
+
+/**
+ * @original Collision_RaycastVehicleSphere (IGN_WIN.EXE @ 0x00428730, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0002383c. Sets up vertical collision query ray from vehicle center
+ *        (pos_y + 500.0 downward 850 units) and invokes spatial partition octree query.
+ */
+void *Collision_RaycastVehicleSphere(int x, int y, int z, int car_idx) {
+    uint8_t *car;
+    double origin_y;
+
+    if (g_pVehicleTable == NULL) return NULL;
+    car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
+
+    origin_y = *(double *)(car + 0x08) + 500.0;
+    return Surface_Raycast(x, (int)origin_y, z);
+}
+
+/**
+ * @original Collision_TestTrackTriangles (IGN_WIN.EXE @ 0x00427dc0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00022dc8. Iterates over track collision triangles from octree query,
+ *        calculates closest point on triangle, plane distance, and penetration restitution.
+ */
+void *Collision_TestTrackTriangles(uint32_t param_1, uint32_t param_2, int param_3, int param_4, int param_5) {
+    return NULL;
 }

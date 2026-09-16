@@ -82,6 +82,10 @@ extern int g_PauseStartTime;
 extern double g_RaceTimeSeconds;
 extern uint8_t *g_pVehicleShadowTable;
 
+extern double g_CollisionContactX;
+extern double g_CollisionContactZ;
+extern double g_CollisionNormalAngle;
+
 /* Function prototypes */
 int  Menu_Init(void);
 int  App_FrameTick(void);
@@ -107,5 +111,10 @@ void Car_CheckLandingStatus(int car_idx);
 void Car_UpdateShadowTracking(int car_idx);
 void Car_UpdateBodyVelocity(int car_idx);
 double Timer_GetDeltaTime(void);
+int  Collision_TestLineIntersection(double *car1, double *car2);
+int  Collision_TestPolygonOverlap(float *poly1_x, float *poly1, int count1, float *poly2, int count2);
+int  Collision_FilterTrackClearance(int param_1, int param_2, int param_3, int param_4, int is_wall);
+void *Collision_RaycastVehicleSphere(int x, int y, int z, int car_idx);
+void *Collision_TestTrackTriangles(uint32_t param_1, uint32_t param_2, int param_3, int param_4, int param_5);
 
 #endif /* MAIN_H */
