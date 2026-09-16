@@ -131,5 +131,17 @@ void FX_UpdateHandlePlotObject(void *particle, int instance_idx);
 void FX_UpdateSuperPlotObject(void *particle, int instance_idx);
 void Obstacle_SimulateDynamics(void *obstacle);
 void FX_UpdateFlyingParticles(void *particle, int instance_idx);
+void Obstacle_TriggerAction(void);
+void AI_InitSteeringConeLookup(void);
+void Ghost_LoadCarAndPath(void);
+void Track_LoadBinaryCache(void);
+void Sound_FreeAllSounds(void);
+void Game_Shutdown(void);
+void Race_UpdateCountdownAndFinish(void);
+void HUD_UpdateRaceTimes(void);
+void Input_ProcessRaceHotkeys(void);
+void Input_PollPlayerVehicleControls(void);
+void Ghost_SaveCarAndPath(void);
+void Track_SaveBinaryCache(void);
 
 #endif /* MAIN_H */

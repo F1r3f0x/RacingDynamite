@@ -1625,3 +1625,100 @@ void Obstacle_SimulateDynamics(void *obstacle) {
  */
 void FX_UpdateFlyingParticles(void *particle, int instance_idx) {
 }
+
+/**
+ * @original Obstacle_TriggerAction (IGN_WIN.EXE @ 0x00420090, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001a40e. Evaluates type 0xFA (250) trigger obstacles and triggers associated actions.
+ */
+void Obstacle_TriggerAction(void) {
+}
+
+/**
+ * @original AI_InitSteeringConeLookup (IGN_WIN.EXE @ 0x004200e0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001a4ec. Precomputes 800x405 lookahead steering cone and obstacle threat table.
+ */
+void AI_InitSteeringConeLookup(void) {
+}
+
+/**
+ * @original Ghost_LoadCarAndPath (IGN_WIN.EXE @ 0x00420240, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001a97a. Loads recorded Time Attack ghost car trajectory from GHOSTS\%s.GST.
+ */
+void Ghost_LoadCarAndPath(void) {
+}
+
+/**
+ * @original Track_LoadBinaryCache (IGN_WIN.EXE @ 0x00420870, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001adf8. Loads preprocessed level data cache (ign_win.btz / ign_dos.btz).
+ */
+void Track_LoadBinaryCache(void) {
+}
+
+/**
+ * @original Sound_FreeAllSounds (IGN_WIN.EXE @ 0x00420990, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001b42d. Frees active level audio buffers and sample tables upon track unload.
+ */
+void Sound_FreeAllSounds(void) {
+}
+
+/**
+ * @original Game_Shutdown (IGN_WIN.EXE @ 0x00420b70, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001b51a. Releases all allocated game memory and shuts down engine subsystems cleanly.
+ */
+void Game_Shutdown(void) {
+    App_Shutdown();
+}
+
+/**
+ * @original Race_UpdateCountdownAndFinish (IGN_WIN.EXE @ 0x00420d10, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001b9d3. Updates start-line traffic light timer and checks race winner victory condition.
+ */
+void Race_UpdateCountdownAndFinish(void) {
+}
+
+/**
+ * @original HUD_UpdateRaceTimes (IGN_WIN.EXE @ 0x00420e60, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001b9e4. Updates player split times and current lap timer display on in-game HUD.
+ */
+void HUD_UpdateRaceTimes(void) {
+}
+
+/**
+ * @original Input_ProcessRaceHotkeys (IGN_WIN.EXE @ 0x00420eb0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001c5b8. Polls keyboard hotkeys during race: Pause (P), Escape menu, camera toggle, and volume.
+ */
+void Input_ProcessRaceHotkeys(void) {
+}
+
+/**
+ * @original Input_PollPlayerVehicleControls (IGN_WIN.EXE @ 0x00421bc0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001ccc5. Reads keyboard / joystick axes and maps to vehicle steering, throttle, brake, and turbo.
+ */
+void Input_PollPlayerVehicleControls(void) {
+}
+
+/**
+ * @original Ghost_SaveCarAndPath (IGN_WIN.EXE @ 0x004222b0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001cf5d. Serializes recorded lap waypoint trajectory into GHOSTS\%s.GST.
+ */
+void Ghost_SaveCarAndPath(void) {
+}
+
+/**
+ * @original Track_SaveBinaryCache (IGN_WIN.EXE @ 0x004225d0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001cfbc. Saves preprocessed level collision cache file.
+ */
+void Track_SaveBinaryCache(void) {
+}

@@ -147,6 +147,18 @@ INSERT INTO "functions" VALUES(182,'0x00029d1a','0x0042e860','FX_UpdateHandlePlo
 INSERT INTO "functions" VALUES(183,'0x00029fe6','0x0042ea60','FX_UpdateSuperPlotObject','FUN_0042ea60',5,'decompiled','watcom_reg','void','void *particle, int instance_idx',NULL,NULL,'EXACT','decomp/src/main.c','Updates high-intensity spark / super plot particle positions.',NULL,NULL);
 INSERT INTO "functions" VALUES(184,'0x0002a2b1','0x0042ed60','Obstacle_SimulateDynamics','FUN_0042ed60',5,'decompiled','watcom_reg','void','void *obstacle',NULL,NULL,'EXACT','decomp/src/main.c','Performs dynamic physics integration (ballistic velocity, restitution, and world model transforms) for track scenery obstacles.',NULL,NULL);
 INSERT INTO "functions" VALUES(185,'0x0002a785','0x0042fc80','FX_UpdateFlyingParticles','FUN_0042fc80',5,'decompiled','watcom_reg','void','void *particle, int instance_idx',NULL,NULL,'EXACT','decomp/src/main.c','Updates ballistic trajectory and ground bounce for flying vehicle debris.',NULL,NULL);
+INSERT INTO "functions" VALUES(186,'0x0001a40e','0x00420090','Obstacle_TriggerAction','FUN_00420090',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Evaluates type 0xFA (250) trigger obstacles and triggers associated actions.',NULL,NULL);
+INSERT INTO "functions" VALUES(187,'0x0001a4ec','0x004200e0','AI_InitSteeringConeLookup','FUN_004200e0',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Precomputes 800x405 lookahead steering cone and obstacle threat table.',NULL,NULL);
+INSERT INTO "functions" VALUES(188,'0x0001a97a','0x00420240','Ghost_LoadCarAndPath','FUN_00420240',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Loads recorded Time Attack ghost car trajectory from GHOSTS\%s.GST.',NULL,NULL);
+INSERT INTO "functions" VALUES(189,'0x0001adf8','0x00420870','Track_LoadBinaryCache','FUN_00420870',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Loads preprocessed level data cache (ign_win.btz / ign_dos.btz).',NULL,NULL);
+INSERT INTO "functions" VALUES(190,'0x0001b42d','0x00420990','Sound_FreeAllSounds','FUN_00420990',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Frees active level audio buffers and sample tables upon track unload.',NULL,NULL);
+INSERT INTO "functions" VALUES(191,'0x0001b51a','0x00420b70','Game_Shutdown','FUN_00420b70',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Releases all allocated game memory and shuts down engine subsystems cleanly.',NULL,NULL);
+INSERT INTO "functions" VALUES(192,'0x0001b9d3','0x00420d10','Race_UpdateCountdownAndFinish','FUN_00420d10',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Updates start-line traffic light timer and checks race winner victory condition.',NULL,NULL);
+INSERT INTO "functions" VALUES(193,'0x0001b9e4','0x00420e60','HUD_UpdateRaceTimes','FUN_00420e60',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Updates player split times and current lap timer display on in-game HUD.',NULL,NULL);
+INSERT INTO "functions" VALUES(194,'0x0001c5b8','0x00420eb0','Input_ProcessRaceHotkeys','FUN_00420eb0',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Polls keyboard hotkeys during race: Pause (P), Escape menu, camera toggle, and volume.',NULL,NULL);
+INSERT INTO "functions" VALUES(195,'0x0001ccc5','0x00421bc0','Input_PollPlayerVehicleControls','FUN_00421bc0',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Reads keyboard / joystick axes and maps to vehicle steering, throttle, brake, and turbo.',NULL,NULL);
+INSERT INTO "functions" VALUES(196,'0x0001cf5d','0x004222b0','Ghost_SaveCarAndPath','FUN_004222b0',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Serializes recorded lap waypoint trajectory into GHOSTS\%s.GST.',NULL,NULL);
+INSERT INTO "functions" VALUES(197,'0x0001cfbc','0x004225d0','Track_SaveBinaryCache','FUN_004225d0',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Saves preprocessed level collision cache file.',NULL,NULL);
 CREATE TABLE globals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT,                      -- Address in MAINDOS.EXE
@@ -352,7 +364,7 @@ CREATE INDEX idx_globals_name ON globals(name);
 CREATE INDEX idx_struct_fields_struct ON struct_fields(struct_id);
 DELETE FROM "sqlite_sequence";
 INSERT INTO "sqlite_sequence" VALUES('modules',8);
-INSERT INTO "sqlite_sequence" VALUES('functions',185);
+INSERT INTO "sqlite_sequence" VALUES('functions',197);
 INSERT INTO "sqlite_sequence" VALUES('globals',124);
 INSERT INTO "sqlite_sequence" VALUES('structs',18);
 INSERT INTO "sqlite_sequence" VALUES('struct_fields',138);

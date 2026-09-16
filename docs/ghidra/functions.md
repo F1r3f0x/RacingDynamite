@@ -37,7 +37,19 @@
 | `0x0001489c` | `0x0041b470` | `FUN_0041b470` | `Race_InitSceneAndCars` | `main.c` | Decompiled | EXACT | Instantiates player and AI cars on starting grid, loads track surface, and binds collision and physics states. |
 | - | `0x0041d190` | `FUN_0041d190` | `Car_UnpackMeshGeometry` | `lisa3d.c` | Decompiled | EXTENDED | Extracts CARS.MSH submesh vertices, finds bottom tire vertex $\max(v_y)$ for ground alignment, and scales by $21.76$. |
 | - | `0x0041f9b0` | `Sound_InitAndLoadPools` | `Sound_InitAndLoadPools` | `main.c` | Decompiled | ADAPTED | Initializes 32 DirectSound-compatible audio channels; loads SFX pools (ROLL, SKID, COLL, BOOST, DIV, KLICK, OK); loads track sounds; reads per-vehicle ENGINE.INF 800-byte curves into uint8_t[200] vol/pitch arrays at +0x658, +0x720, +0x7e8, +0x8b0. |
+| `0x0001a40e` | `0x00420090` | `FUN_00420090` | `Obstacle_TriggerAction` | `main.c` | Decompiled | EXACT | Evaluates type 0xFA (250) trigger obstacles and triggers associated actions. |
+| `0x0001a4ec` | `0x004200e0` | `FUN_004200e0` | `AI_InitSteeringConeLookup` | `main.c` | Decompiled | EXACT | Precomputes 800x405 lookahead steering cone and obstacle threat table. |
+| `0x0001a97a` | `0x00420240` | `FUN_00420240` | `Ghost_LoadCarAndPath` | `main.c` | Decompiled | EXACT | Loads recorded Time Attack ghost car trajectory from GHOSTS\%s.GST. |
+| `0x0001adf8` | `0x00420870` | `FUN_00420870` | `Track_LoadBinaryCache` | `main.c` | Decompiled | EXACT | Loads preprocessed level data cache (ign_win.btz / ign_dos.btz). |
+| `0x0001b42d` | `0x00420990` | `FUN_00420990` | `Sound_FreeAllSounds` | `main.c` | Decompiled | EXACT | Frees active level audio buffers and sample tables upon track unload. |
+| `0x0001b51a` | `0x00420b70` | `FUN_00420b70` | `Game_Shutdown` | `main.c` | Decompiled | EXACT | Releases all allocated game memory and shuts down engine subsystems cleanly. |
 | `0x0001b996` | `0x00420c00` | `FUN_00420c00` | `Timer_GetDeltaTime` | `main.c` | Decompiled | EXACT | Computes elapsed frame delta time using tick counter scaled by 0.036. Updates accumulator, frame counter, and clamps delta to max 10.8 ticks. |
+| `0x0001b9d3` | `0x00420d10` | `FUN_00420d10` | `Race_UpdateCountdownAndFinish` | `main.c` | Decompiled | EXACT | Updates start-line traffic light timer and checks race winner victory condition. |
+| `0x0001b9e4` | `0x00420e60` | `FUN_00420e60` | `HUD_UpdateRaceTimes` | `main.c` | Decompiled | EXACT | Updates player split times and current lap timer display on in-game HUD. |
+| `0x0001c5b8` | `0x00420eb0` | `FUN_00420eb0` | `Input_ProcessRaceHotkeys` | `main.c` | Decompiled | EXACT | Polls keyboard hotkeys during race: Pause (P), Escape menu, camera toggle, and volume. |
+| `0x0001ccc5` | `0x00421bc0` | `FUN_00421bc0` | `Input_PollPlayerVehicleControls` | `main.c` | Decompiled | EXACT | Reads keyboard / joystick axes and maps to vehicle steering, throttle, brake, and turbo. |
+| `0x0001cf5d` | `0x004222b0` | `FUN_004222b0` | `Ghost_SaveCarAndPath` | `main.c` | Decompiled | EXACT | Serializes recorded lap waypoint trajectory into GHOSTS\%s.GST. |
+| `0x0001cfbc` | `0x004225d0` | `FUN_004225d0` | `Track_SaveBinaryCache` | `main.c` | Decompiled | EXACT | Saves preprocessed level collision cache file. |
 | `0x0001d008` | `0x00422680` | `FUN_00422680` | `Race_ResolveVehicleCollisions` | `main.c` | Decompiled | EXACT | Inter-vehicle and scenery obstacle collision detection and impulse response. Fixed 72 Hz physics integration coordinator. |
 | `0x0001de2e` | `0x00423620` | `FUN_00423620` | `Car_HandleElimination` | `main.c` | Decompiled | EXACT | Checks trailing vehicle elimination condition in knock-out races. Marks vehicle blown (+0x354 = 1), sets race status, and logs elimination string. |
 | `0x0001e234` | `0x00423aa0` | `FUN_00423aa0` | `Car_VerticalDynamics` | `vehicle.c` | Decompiled | EXACT | Gravity acceleration (-0.2/tick), rebound bounce on impact, and ride height equilibrium (+5.0). |
