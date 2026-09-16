@@ -21,7 +21,7 @@
 | `0x00020814` | `0x00412fc0` | `FUN_00412fc0` | `Surface_Raycast` | `getsurf.c` | Decompiled | EXTENDED | Spatial grid query, candidate selection, cross product normal, world vertex transform |
 | `0x00020bbc` | `0x00413380` | `FUN_00413380` | `Surface_GetTriangleHeight` | `getsurf.c` | Decompiled | ADAPTED | Computes average elevation (y0 + y1 + y2) / -3 using vertex buffer indices from triangle. |
 | `0x00043d60` | `0x004133d0` | `FUN_004133d0` | `Font_DrawHUDText` | `geputget.c` | Decompiled | EXACT | 2D bitmap font rasterizer blitting characters from IGNITION.FNT directly to 8bpp framebuffer. |
-| `0x0000aea0` | `0x004134e0` | `FUN_004134e0` | `AI_FollowTrackSplines` | `main.c` | Decompiled | EXACT | Steering simulation updating car heading, track chunk position, distance to centerline. |
+| `0x0000aea0` | `0x004134e0` | `FUN_004134e0` | `AI_FollowTrackSplines` | `main.c` | Decompiled | EXACT | Steering simulation updating AI vehicle heading, track spline waypoint progression, speed moderation, and obstacle evasion. |
 | `0x0000ce1c` | `0x00414e40` | `FUN_00414e40` | `Track_LoadSplines` | `main.c` | Decompiled | EXACT | Loads .TRI chunk indices, constructs left/right road boundary splines and AI waypoints. |
 | - | `0x00416250` | `FUN_00416250` | `Mesh_InstantiatePlacedObjects` | `main.c` | Decompiled | ADAPTED | Applies .PLC world translation offsets to .MSH submesh vertices. |
 | - | `0x00417270` | `FUN_00417270` | `Game_Init` | `main.c` | Decompiled | EXACT | Sets initial game state flags, resets timers, initiates intro sequence. |
@@ -34,14 +34,14 @@
 | `0x000240f4` | `0x0041ac40` | `FUN_0041ac40` | `Font_LoadHUDFonts` | `geputget.c` | Decompiled | EXACT | Loads HUD lettering glyphs (IGNITION.FNT, yellow.lft, speed.lft, etc.). |
 | `0x000243e0` | `0x0041af70` | `FUN_0041af70` | `Track_LoadOverlayGfx` | `geputget.c` | Decompiled | EXACT | Loads track sign textures and winner trophy bitmap (POKAL.PIC). |
 | - | `0x0041b360` | `FUN_0041b360` | `Track_PreprocessPlacements` | `main.c` | Decompiled | ADAPTED | Unpacks model_type bitfields (& 0xFFF) and extracts animation and flag channels. |
-| `0x0001489c` | `0x0041b470` | `FUN_0041b470` | `Race_InitSceneAndCars` | `main.c` | Decompiled | EXACT | Instantiates player/AI cars on starting grid and binds scenery collision. |
+| `0x0001489c` | `0x0041b470` | `FUN_0041b470` | `Race_InitSceneAndCars` | `main.c` | Decompiled | EXACT | Instantiates player and AI cars on starting grid, loads track surface, and binds collision and physics states. |
 | - | `0x0041d190` | `FUN_0041d190` | `Car_UnpackMeshGeometry` | `lisa3d.c` | Decompiled | EXTENDED | Extracts CARS.MSH submesh vertices, finds bottom tire vertex $\max(v_y)$ for ground alignment, and scales by $21.76$. |
 | - | `0x0041f9b0` | `Sound_InitAndLoadPools` | `Sound_InitAndLoadPools` | `main.c` | Decompiled | ADAPTED | Initializes 32 DirectSound-compatible audio channels; loads SFX pools (ROLL, SKID, COLL, BOOST, DIV, KLICK, OK); loads track sounds; reads per-vehicle ENGINE.INF 800-byte curves into uint8_t[200] vol/pitch arrays at +0x658, +0x720, +0x7e8, +0x8b0. |
-| `0x0001d008` | `0x00422680` | `FUN_00422680` | `Race_ResolveVehicleCollisions` | `main.c` | Decompiled | EXACT | Inter-vehicle and scenery obstacle collision detection and impulse response. |
+| `0x0001d008` | `0x00422680` | `FUN_00422680` | `Race_ResolveVehicleCollisions` | `main.c` | Decompiled | EXACT | Inter-vehicle and scenery obstacle collision detection and impulse response. Fixed 72 Hz physics integration coordinator. |
 | `0x0001e234` | `0x00423aa0` | `FUN_00423aa0` | `Car_VerticalDynamics` | `vehicle.c` | Decompiled | EXACT | Gravity acceleration (-0.2/tick), rebound bounce on impact, and ride height equilibrium (+5.0). |
-| `0x0001ed00` | `0x00424570` | `Car_PhysicsTick` | `Car_PhysicsTick` | `vehicle.c` | Decompiled | EXACT | Master 72 Hz vehicle dynamics: 4-wheel independent raycast suspension, pitch/roll tilt, bicycle lateral slip, turbo boost. |
+| `0x0001ed00` | `0x00424570` | `Car_PhysicsTick` | `Car_PhysicsTick` | `vehicle.c` | Decompiled | EXACT | Master fixed-timestep 72 Hz vehicle dynamics simulation: 4-wheel independent raycast suspension, lateral slip, steering, and traction. |
 | `0x00022d8c` | `0x00427d70` | `FUN_00427d70` | `Car_UpdateAxleSpeeds` | `main.c` | Decompiled | EXACT | Averages left and right wheel velocities for front and rear axles with factor 0.5. |
-| `0x000250f0` | `0x00429a40` | `FUN_00429a40` | `Race_CheckCheckpointTriggers` | `main.c` | Decompiled | EXACT | Tests vehicle collision against type 150..154 split-time checkpoint gates. |
+| `0x000250f0` | `0x00429a40` | `FUN_00429a40` | `Race_CheckCheckpointTriggers` | `main.c` | Decompiled | EXACT | Tests vehicle collision against type 150..154 split-time checkpoint gates and dynamic track scenery obstacles with 3D ballistic trajectory and ground bounce. |
 | - | `0x004356d0` | `FUN_004356d0` | `Pos_InitAnimatedObjects` | `lisa3d.c` | Decompiled | ADAPTED | Converts keyframe coordinates in .POS to relative displacement deltas. |
 | - | `0x004357a0` | `FUN_004357a0` | `Pos_UpdateAnimatedObjects` | `lisa3d.c` | Decompiled | ADAPTED | Advances keyframe playheads and translates moving scenery objects via Lisa_MoveObject. |
 | - | `0x00436990` | `FUN_00436990` | `Race_RenderViewport` | `main.c` | Decompiled | EXTENDED | Calculates camera transform, invokes scene renderer, draws HUD. |
