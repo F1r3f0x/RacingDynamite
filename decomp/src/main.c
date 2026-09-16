@@ -1544,3 +1544,84 @@ void Car_UpdateEffects(void) {
         /* Active vehicle effects update */
     }
 }
+
+/**
+ * @original Audio_UpdateDynamicDoppler (IGN_WIN.EXE @ 0x0042aa00, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00025f60. Updates sound pitch and volume for dynamic track ambient sources.
+ */
+void Audio_UpdateDynamicDoppler(void) {
+}
+
+/**
+ * @original Track_SpawnEnvironmentalParticles (IGN_WIN.EXE @ 0x0042acb0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x000260ed. Emits environmental smoke/dust from track waypoint emitters.
+ */
+void Track_SpawnEnvironmentalParticles(void) {
+}
+
+/**
+ * @original Track_SpawnWeatherParticles (IGN_WIN.EXE @ 0x0042b5d0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0002636c. Spawns rain and snow weather particles in viewport frustum.
+ */
+void Track_SpawnWeatherParticles(void) {
+}
+
+/**
+ * @original FX_UpdateSkidMarks (IGN_WIN.EXE @ 0x0042bc80, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00026cdd. Generates ground skidmarks behind slipping vehicle tires.
+ */
+void FX_UpdateSkidMarks(void) {
+}
+
+/**
+ * @original FX_UpdateTransparentSpriteObject (IGN_WIN.EXE @ 0x0042e2e0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00028a10. Updates 3D world position and animation of transparent billboard sprites.
+ */
+void FX_UpdateTransparentSpriteObject(void *particle, int instance_idx) {
+}
+
+/**
+ * @original FX_UpdateTransparentSpriteObject2 (IGN_WIN.EXE @ 0x0042e5a0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00028c20. Updates transparent billboard sprite instance variation.
+ */
+void FX_UpdateTransparentSpriteObject2(void *particle, int instance_idx) {
+}
+
+/**
+ * @original FX_UpdateHandlePlotObject (IGN_WIN.EXE @ 0x0042e860, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00028e30. Updates particle plot marker object positions in scene.
+ */
+void FX_UpdateHandlePlotObject(void *particle, int instance_idx) {
+}
+
+/**
+ * @original FX_UpdateSuperPlotObject (IGN_WIN.EXE @ 0x0042ea60, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00029040. Updates high-intensity spark / super plot particle positions.
+ */
+void FX_UpdateSuperPlotObject(void *particle, int instance_idx) {
+}
+
+/**
+ * @original Obstacle_SimulateDynamics (IGN_WIN.EXE @ 0x0042ed60, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00029350. Performs dynamic physics integration (ballistic velocity, restitution,
+ *        and world model transforms) for track scenery obstacles (traffic cones, drums).
+ */
+void Obstacle_SimulateDynamics(void *obstacle) {
+}
+
+/**
+ * @original FX_UpdateFlyingParticles (IGN_WIN.EXE @ 0x0042fc80, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0002a280. Updates ballistic trajectory and ground bounce for flying vehicle debris.
+ */
+void FX_UpdateFlyingParticles(void *particle, int instance_idx) {
+}

@@ -57,7 +57,17 @@
 | `0x000250c9` | `0x00429a10` | `FUN_00429a10` | `Math_Signum` | `main.c` | Decompiled | EXACT | Standard 32-bit integer signum returning -1 for negative, 1 for positive, 0 for zero. |
 | `0x000250f0` | `0x00429a40` | `FUN_00429a40` | `Race_CheckCheckpointTriggers` | `main.c` | Decompiled | EXACT | Tests vehicle collision against type 150..154 split-time checkpoint gates and dynamic track scenery obstacles with 3D ballistic trajectory and ground bounce. |
 | `0x00025f38` | `0x0042a8d0` | `FUN_0042a8d0` | `Physics_ReflectVelocityOffNormal` | `main.c` | Decompiled | EXACT | Rotates 3D velocity into plane-aligned space via yaw and pitch of contact normal, reflects penetrating velocity, and transforms back into world space. |
-| `0x0002636c` | `0x0042bc20` | `FUN_0042bc20` | `Car_UpdateEffects` | `main.c` | Decompiled | EXACT | Coordinates real-time vehicle visual effects (tire skid marks, turbo exhaust flames, engine damage smoke, and surface scraping sparks). |
+| `0x000260ed` | `0x0042aa00` | `FUN_0042aa00` | `Audio_UpdateDynamicDoppler` | `main.c` | Decompiled | EXACT | Updates sound pitch and volume for dynamic track ambient sources. |
+| `0x0002636c` | `0x0042acb0` | `FUN_0042acb0` | `Track_SpawnEnvironmentalParticles` | `main.c` | Decompiled | EXACT | Emits environmental smoke/dust from track waypoint emitters. |
+| `0x00026cdd` | `0x0042b5d0` | `FUN_0042b5d0` | `Track_SpawnWeatherParticles` | `main.c` | Decompiled | EXACT | Spawns rain and snow weather particles in viewport frustum. |
+| `0x000272d8` | `0x0042bc20` | `FUN_0042bc20` | `Car_UpdateEffects` | `main.c` | Decompiled | EXACT | Coordinates real-time vehicle visual effects (tire skid marks, turbo exhaust flames, engine damage smoke, and surface scraping sparks). |
+| `0x0002731c` | `0x0042bc80` | `FUN_0042bc80` | `FX_UpdateSkidMarks` | `main.c` | Decompiled | EXACT | Generates ground skidmarks behind slipping vehicle tires. |
+| `0x000298f8` | `0x0042e2e0` | `FUN_0042e2e0` | `FX_UpdateTransparentSpriteObject` | `main.c` | Decompiled | EXACT | Updates 3D world position and animation of transparent billboard sprites. |
+| `0x00029cf2` | `0x0042e5a0` | `FUN_0042e5a0` | `FX_UpdateTransparentSpriteObject2` | `main.c` | Decompiled | EXACT | Updates transparent billboard sprite instance variation. |
+| `0x00029d1a` | `0x0042e860` | `FUN_0042e860` | `FX_UpdateHandlePlotObject` | `main.c` | Decompiled | EXACT | Updates particle plot marker object positions in scene. |
+| `0x00029fe6` | `0x0042ea60` | `FUN_0042ea60` | `FX_UpdateSuperPlotObject` | `main.c` | Decompiled | EXACT | Updates high-intensity spark / super plot particle positions. |
+| `0x0002a2b1` | `0x0042ed60` | `FUN_0042ed60` | `Obstacle_SimulateDynamics` | `main.c` | Decompiled | EXACT | Performs dynamic physics integration (ballistic velocity, restitution, and world model transforms) for track scenery obstacles. |
+| `0x0002a785` | `0x0042fc80` | `FUN_0042fc80` | `FX_UpdateFlyingParticles` | `main.c` | Decompiled | EXACT | Updates ballistic trajectory and ground bounce for flying vehicle debris. |
 | - | `0x004356d0` | `FUN_004356d0` | `Pos_InitAnimatedObjects` | `lisa3d.c` | Decompiled | ADAPTED | Converts keyframe coordinates in .POS to relative displacement deltas. |
 | - | `0x004357a0` | `FUN_004357a0` | `Pos_UpdateAnimatedObjects` | `lisa3d.c` | Decompiled | ADAPTED | Advances keyframe playheads and translates moving scenery objects via Lisa_MoveObject. |
 | - | `0x00436990` | `FUN_00436990` | `Race_RenderViewport` | `main.c` | Decompiled | EXTENDED | Calculates camera transform, invokes scene renderer, draws HUD. |

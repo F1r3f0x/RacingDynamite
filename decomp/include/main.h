@@ -121,5 +121,15 @@ void Car_HandleElimination(void);
 void Car_ChangeMesh(int car_idx);
 void Car_ApplyMeshDamage(int car_idx, int impact_severity);
 void Car_UpdateEffects(void);
+void Audio_UpdateDynamicDoppler(void);
+void Track_SpawnEnvironmentalParticles(void);
+void Track_SpawnWeatherParticles(void);
+void FX_UpdateSkidMarks(void);
+void FX_UpdateTransparentSpriteObject(void *particle, int instance_idx);
+void FX_UpdateTransparentSpriteObject2(void *particle, int instance_idx);
+void FX_UpdateHandlePlotObject(void *particle, int instance_idx);
+void FX_UpdateSuperPlotObject(void *particle, int instance_idx);
+void Obstacle_SimulateDynamics(void *obstacle);
+void FX_UpdateFlyingParticles(void *particle, int instance_idx);
 
 #endif /* MAIN_H */

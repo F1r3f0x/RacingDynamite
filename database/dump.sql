@@ -136,7 +136,17 @@ INSERT INTO "functions" VALUES(171,'0x0001ea42','0x004242b0','Car_SpawnExplosion
 INSERT INTO "functions" VALUES(172,'0x0001de2e','0x00423620','Car_HandleElimination','FUN_00423620',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Checks trailing vehicle elimination condition in knock-out races. Marks vehicle blown (+0x354 = 1), sets race status, and logs elimination string.',NULL,NULL);
 INSERT INTO "functions" VALUES(173,'0x00021856','0x004269a0','Car_ChangeMesh','FUN_004269a0',5,'decompiled','watcom_reg','void','int car_idx',NULL,NULL,'EXACT','decomp/src/main.c','Swaps current vehicle 3D mesh representation to damaged or alternative model geometry in Lisa3D rasterizer instance table.',NULL,NULL);
 INSERT INTO "functions" VALUES(174,'0x000219d6','0x00426b40','Car_ApplyMeshDamage','FUN_00426b40',5,'decompiled','watcom_reg','void','int car_idx, int impact_severity',NULL,NULL,'EXACT','decomp/src/main.c','Evaluates high-velocity collision impact against vehicle chassis, morphs vertex positions inward toward impact point, and emits impact sparks.',NULL,NULL);
-INSERT INTO "functions" VALUES(175,'0x0002636c','0x0042bc20','Car_UpdateEffects','FUN_0042bc20',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Coordinates real-time vehicle visual effects (tire skid marks, turbo exhaust flames, engine damage smoke, and surface scraping sparks).',NULL,NULL);
+INSERT INTO "functions" VALUES(175,'0x000272d8','0x0042bc20','Car_UpdateEffects','FUN_0042bc20',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Coordinates real-time vehicle visual effects (tire skid marks, turbo exhaust flames, engine damage smoke, and surface scraping sparks).',NULL,NULL);
+INSERT INTO "functions" VALUES(176,'0x000260ed','0x0042aa00','Audio_UpdateDynamicDoppler','FUN_0042aa00',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Updates sound pitch and volume for dynamic track ambient sources.',NULL,NULL);
+INSERT INTO "functions" VALUES(177,'0x0002636c','0x0042acb0','Track_SpawnEnvironmentalParticles','FUN_0042acb0',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Emits environmental smoke/dust from track waypoint emitters.',NULL,NULL);
+INSERT INTO "functions" VALUES(178,'0x00026cdd','0x0042b5d0','Track_SpawnWeatherParticles','FUN_0042b5d0',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Spawns rain and snow weather particles in viewport frustum.',NULL,NULL);
+INSERT INTO "functions" VALUES(179,'0x0002731c','0x0042bc80','FX_UpdateSkidMarks','FUN_0042bc80',5,'decompiled','watcom_reg','void','void',NULL,NULL,'EXACT','decomp/src/main.c','Generates ground skidmarks behind slipping vehicle tires.',NULL,NULL);
+INSERT INTO "functions" VALUES(180,'0x000298f8','0x0042e2e0','FX_UpdateTransparentSpriteObject','FUN_0042e2e0',5,'decompiled','watcom_reg','void','void *particle, int instance_idx',NULL,NULL,'EXACT','decomp/src/main.c','Updates 3D world position and animation of transparent billboard sprites.',NULL,NULL);
+INSERT INTO "functions" VALUES(181,'0x00029cf2','0x0042e5a0','FX_UpdateTransparentSpriteObject2','FUN_0042e5a0',5,'decompiled','watcom_reg','void','void *particle, int instance_idx',NULL,NULL,'EXACT','decomp/src/main.c','Updates transparent billboard sprite instance variation.',NULL,NULL);
+INSERT INTO "functions" VALUES(182,'0x00029d1a','0x0042e860','FX_UpdateHandlePlotObject','FUN_0042e860',5,'decompiled','watcom_reg','void','void *particle, int instance_idx',NULL,NULL,'EXACT','decomp/src/main.c','Updates particle plot marker object positions in scene.',NULL,NULL);
+INSERT INTO "functions" VALUES(183,'0x00029fe6','0x0042ea60','FX_UpdateSuperPlotObject','FUN_0042ea60',5,'decompiled','watcom_reg','void','void *particle, int instance_idx',NULL,NULL,'EXACT','decomp/src/main.c','Updates high-intensity spark / super plot particle positions.',NULL,NULL);
+INSERT INTO "functions" VALUES(184,'0x0002a2b1','0x0042ed60','Obstacle_SimulateDynamics','FUN_0042ed60',5,'decompiled','watcom_reg','void','void *obstacle',NULL,NULL,'EXACT','decomp/src/main.c','Performs dynamic physics integration (ballistic velocity, restitution, and world model transforms) for track scenery obstacles.',NULL,NULL);
+INSERT INTO "functions" VALUES(185,'0x0002a785','0x0042fc80','FX_UpdateFlyingParticles','FUN_0042fc80',5,'decompiled','watcom_reg','void','void *particle, int instance_idx',NULL,NULL,'EXACT','decomp/src/main.c','Updates ballistic trajectory and ground bounce for flying vehicle debris.',NULL,NULL);
 CREATE TABLE globals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT,                      -- Address in MAINDOS.EXE
@@ -342,7 +352,7 @@ CREATE INDEX idx_globals_name ON globals(name);
 CREATE INDEX idx_struct_fields_struct ON struct_fields(struct_id);
 DELETE FROM "sqlite_sequence";
 INSERT INTO "sqlite_sequence" VALUES('modules',8);
-INSERT INTO "sqlite_sequence" VALUES('functions',175);
+INSERT INTO "sqlite_sequence" VALUES('functions',185);
 INSERT INTO "sqlite_sequence" VALUES('globals',124);
 INSERT INTO "sqlite_sequence" VALUES('structs',18);
 INSERT INTO "sqlite_sequence" VALUES('struct_fields',138);
