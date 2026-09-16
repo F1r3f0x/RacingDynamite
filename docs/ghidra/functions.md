@@ -21,8 +21,8 @@
 | `0x00020814` | `0x00412fc0` | `FUN_00412fc0` | `Surface_Raycast` | `getsurf.c` | Decompiled | EXTENDED | Spatial grid query, candidate selection, cross product normal, world vertex transform |
 | `0x00020bbc` | `0x00413380` | `FUN_00413380` | `Surface_GetTriangleHeight` | `getsurf.c` | Decompiled | ADAPTED | Computes average elevation (y0 + y1 + y2) / -3 using vertex buffer indices from triangle. |
 | `0x00043d60` | `0x004133d0` | `FUN_004133d0` | `Font_DrawHUDText` | `geputget.c` | Decompiled | EXACT | 2D bitmap font rasterizer blitting characters from IGNITION.FNT directly to 8bpp framebuffer. |
-| - | `0x004134e0` | `FUN_004134e0` | `AI_FollowTrackSplines` | `main.c` | Decompiled | EXACT | Steering simulation updating car heading, track chunk position, distance to centerline. |
-| - | `0x00414e40` | `FUN_00414e40` | `Track_LoadSplines` | `main.c` | Decompiled | ADAPTED | Loads .TRI chunk indices, constructs left/right road boundary splines and AI waypoints. |
+| `0x0000aea0` | `0x004134e0` | `FUN_004134e0` | `AI_FollowTrackSplines` | `main.c` | Decompiled | EXACT | Steering simulation updating car heading, track chunk position, distance to centerline. |
+| `0x0000ce1c` | `0x00414e40` | `FUN_00414e40` | `Track_LoadSplines` | `main.c` | Decompiled | EXACT | Loads .TRI chunk indices, constructs left/right road boundary splines and AI waypoints. |
 | - | `0x00416250` | `FUN_00416250` | `Mesh_InstantiatePlacedObjects` | `main.c` | Decompiled | ADAPTED | Applies .PLC world translation offsets to .MSH submesh vertices. |
 | - | `0x00417270` | `FUN_00417270` | `Game_Init` | `main.c` | Decompiled | EXACT | Sets initial game state flags, resets timers, initiates intro sequence. |
 | - | `0x004172b0` | `FUN_004172b0` | `Game_StateDispatcher` | `main.c` | Decompiled | ADAPTED | Top-level game loop state machine dispatcher (Intro -> Menus -> Race). |

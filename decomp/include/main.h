@@ -50,6 +50,7 @@ int App_SetVideoMode(void);
 void Track_LoadPlacementsAndCars(void);
 void Mesh_LoadTrackAndCars(void);
 void Texture_LoadAllPages(void);
+int  Track_LoadSplines(void);
 void Race_InitSceneAndCars(void);
 void Race_ResolveVehicleCollisions(void);
 void Race_CheckCheckpointTriggers(void);

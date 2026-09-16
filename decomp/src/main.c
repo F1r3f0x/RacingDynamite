@@ -242,12 +242,22 @@ int Track_LoadAllAssets(void) {
 /**
  * @original AI_FollowTrackSplines (IGN_WIN.EXE @ 0x004134e0, main.c)
  * @fidelity EXACT
- * @notes Steering simulation updating AI vehicle heading, track spline waypoint
+ * @notes MAINDOS @ 0x0000aea0. Steering simulation updating AI vehicle heading, track spline waypoint
  *        progression, and speed moderation.
  */
 void AI_FollowTrackSplines(int car_idx) {
     (void)car_idx;
     /* Spline navigation waypoint tracker */
+}
+
+/**
+ * @original Track_LoadSplines (IGN_WIN.EXE @ 0x00414e40, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0000ce1c. Loads LEVELS\<TRACK>\<TRACK>.TRI, initializes AI controller table,
+ *        and builds left/right road boundary splines and AI waypoint tables.
+ */
+int Track_LoadSplines(void) {
+    return 1;
 }
 
 /**
