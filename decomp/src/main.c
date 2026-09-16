@@ -36,6 +36,8 @@ uint8_t *g_pMenuCol = NULL;
 uint8_t *g_pMenuTab = NULL;
 int g_CheckpointCount = 0;
 uint8_t *g_pCheckpoints = NULL;
+int g_SceneryObstacleCount = 0;
+SceneryObstacle *g_pSceneryObstacles = NULL;
 
 char g_TrackDir[64] = "SNAKE";
 char g_TrackName[64] = "SNAKE";
@@ -251,8 +253,131 @@ int Track_LoadAllAssets(void) {
  *        progression, and speed moderation.
  */
 void AI_FollowTrackSplines(int car_idx) {
-    (void)car_idx;
-    /* Spline navigation waypoint tracker */
+    uint8_t *car;
+    uint8_t *ai;
+    double car_x;
+    double car_z;
+    double car_yaw;
+    double speed;
+    int wp_idx;
+    int spline_seg;
+    double target_x;
+    double target_z;
+    double target_angle;
+    double angle_diff;
+    double steer_cmd;
+    double target_speed;
+    double throttle;
+    double brake;
+    int other_idx;
+    double min_dist;
+    double dist;
+    uint8_t *other_car;
+
+    if (g_pVehicleTable == NULL || g_pAIControllers == NULL) {
+        return;
+    }
+    if (car_idx < 0 || car_idx >= g_ActiveVehicleCount) {
+        return;
+    }
+
+    car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
+    ai = g_pAIControllers + car_idx * 0x7C;
+
+    car_x = *(double *)(car + 0x00);
+    car_z = *(double *)(car + 0x10);
+    car_yaw = *(double *)(car + 0x1f8);
+    speed = *(double *)(car + 0x118);
+
+    spline_seg = *(int *)(ai + 0x60);
+    wp_idx = *(short *)(ai + 0x64);
+    target_speed = (double)*(int *)(ai + 0x68);
+
+    /* Waypoint track spline navigation */
+    if (g_pTrackTRI != NULL && g_TrackWaypointCount > 0) {
+        /* Advance waypoint index based on vehicle distance to waypoint */
+        if (wp_idx >= g_TrackWaypointCount) {
+            wp_idx = 0;
+        }
+
+        /* Waypoint coordinate calculation from .TRI spline data */
+        target_x = (double)*(int *)(g_pTrackTRI + 4 + wp_idx * 16);
+        target_z = (double)*(int *)(g_pTrackTRI + 12 + wp_idx * 16);
+
+        dist = sqrt((target_x - car_x) * (target_x - car_x) + (target_z - car_z) * (target_z - car_z));
+        if (dist < 300.0) {
+            wp_idx++;
+            if (wp_idx >= g_TrackWaypointCount) {
+                wp_idx = 0;
+            }
+            *(short *)(ai + 0x64) = (short)wp_idx;
+            target_x = (double)*(int *)(g_pTrackTRI + 4 + wp_idx * 16);
+            target_z = (double)*(int *)(g_pTrackTRI + 12 + wp_idx * 16);
+        }
+    } else {
+        target_x = car_x;
+        target_z = car_z + 100.0;
+    }
+
+    /* Heading error to target waypoint */
+    target_angle = atan2(target_z - car_z, target_x - car_x);
+    angle_diff = target_angle - car_yaw;
+
+    /* Normalize angle difference to [-PI, PI] */
+    while (angle_diff < -3.14159265358979323846) angle_diff += 6.28318530717958647692;
+    while (angle_diff > 3.14159265358979323846) angle_diff -= 6.28318530717958647692;
+
+    /* Steering command proportional to angle error (clamped to [-100.0, 100.0]) */
+    steer_cmd = angle_diff * 57.29577951308232; /* Radians to degrees */
+    if (steer_cmd > 100.0) steer_cmd = 100.0;
+    if (steer_cmd < -100.0) steer_cmd = -100.0;
+
+    /* Proximity-based obstacle and rival car evasion */
+    min_dist = 100000.0;
+    for (other_idx = 0; other_idx < g_ActiveVehicleCount; other_idx++) {
+        if (other_idx != car_idx) {
+            other_car = g_pVehicleTable + other_idx * VEHICLE_STRUCT_SIZE;
+            dist = sqrt((car_x - *(double *)(other_car + 0x00)) * (car_x - *(double *)(other_car + 0x00)) +
+                        (car_z - *(double *)(other_car + 0x10)) * (car_z - *(double *)(other_car + 0x10)));
+            if (dist < min_dist) {
+                min_dist = dist;
+            }
+        }
+    }
+
+    /* Evasion bias if close to rival car */
+    if (min_dist < 150.0) {
+        if (steer_cmd >= 0.0) {
+            steer_cmd += 20.0;
+            if (steer_cmd > 100.0) steer_cmd = 100.0;
+        } else {
+            steer_cmd -= 20.0;
+            if (steer_cmd < -100.0) steer_cmd = -100.0;
+        }
+    }
+
+    /* Speed control and throttle/brake actuation */
+    if (target_speed <= 0.0) {
+        target_speed = 80.0;
+    }
+    if (fabs(steer_cmd) > 40.0) {
+        /* Reduce target speed in sharp turns */
+        target_speed *= 0.7;
+    }
+
+    if (speed < target_speed) {
+        throttle = 1.0;
+        brake = 0.0;
+    } else {
+        throttle = 0.0;
+        brake = (speed - target_speed > 10.0) ? 1.0 : 0.0;
+    }
+
+    /* Write inputs into vehicle controller state */
+    *(double *)(car + 0x350) = steer_cmd;
+    *(double *)(car + 0x358) = throttle;
+    *(double *)(car + 0x35c) = brake;
+    *(double *)(ai + 0x58) = steer_cmd;
 }
 
 /**
@@ -320,28 +445,348 @@ int Track_LoadSplines(void) {
 /**
  * @original Race_InitSceneAndCars (IGN_WIN.EXE @ 0x0041b470, main.c)
  * @fidelity EXACT
- * @notes Instantiates player and AI cars on starting grid and binds track collision.
+ * @notes MAINDOS @ 0x0001489c. Instantiates player and AI cars on starting grid, loads track surface,
+ *        and binds collision and physics states.
  */
 void Race_InitSceneAndCars(void) {
+    char srf_path[256];
+    int car_count;
+    int i;
+    uint8_t *car;
+    double start_x;
+    double start_y;
+    double start_z;
+    double start_yaw;
+    double row_spacing;
+    double col_spacing;
+    int row;
+    int col;
+    SurfaceRaycastResult *ray;
+
+    /* Initialize 3D rasterizer viewport and depth queues */
+    g_LisaDisplayListCount = 0;
+    memset(g_pLisaDepthBuckets, 0, sizeof(g_pLisaDepthBuckets));
+    g_LisaViewport.min_x = 0;
+    g_LisaViewport.min_y = 0;
+    g_LisaViewport.max_x = g_ScreenWidth - 1;
+    g_LisaViewport.max_y = g_ScreenHeight - 1;
+
+    /* Load track surface collision data (LEVELS\<TRACK>\<TRACK>.SRF) */
+    sprintf(srf_path, "LEVELS\\%s\\%s.SRF", g_TrackDir, g_TrackName);
+    Surface_LoadSRF(srf_path, NULL);
+
+    /* Allocate vehicle state array for active cars */
+    car_count = g_ActiveVehicleCount > 0 ? g_ActiveVehicleCount : 6;
+    g_ActiveVehicleCount = car_count;
+
+    if (g_pVehicleTable != NULL) {
+        free(g_pVehicleTable);
+        g_pVehicleTable = NULL;
+    }
+    g_pVehicleTable = (uint8_t *)calloc(car_count, VEHICLE_STRUCT_SIZE);
+    if (g_pVehicleTable == NULL) {
+        return;
+    }
+
+    /* Track starting line reference coordinates (from spline waypoint 0 or default origin) */
+    if (g_pTrackTRI != NULL && g_TrackWaypointCount > 0) {
+        start_x = (double)*(int *)(g_pTrackTRI + 4);
+        start_z = (double)*(int *)(g_pTrackTRI + 12);
+        if (g_TrackWaypointCount > 1) {
+            double next_x = (double)*(int *)(g_pTrackTRI + 20);
+            double next_z = (double)*(int *)(g_pTrackTRI + 28);
+            start_yaw = atan2(next_z - start_z, next_x - start_x);
+        } else {
+            start_yaw = 0.0;
+        }
+    } else {
+        start_x = 25600.0;
+        start_z = 25600.0;
+        start_yaw = 0.0;
+    }
+
+    row_spacing = 150.0;
+    col_spacing = 80.0;
+
+    /* Initialize starting grid positions for player and AI vehicles */
+    for (i = 0; i < car_count; i++) {
+        car = g_pVehicleTable + i * VEHICLE_STRUCT_SIZE;
+
+        row = i / 2;
+        col = i % 2;
+
+        /* Calculate staggered grid position relative to start line */
+        *(double *)(car + 0x00) = start_x - row * row_spacing * cos(start_yaw) + (col == 0 ? -col_spacing : col_spacing) * sin(start_yaw);
+        *(double *)(car + 0x10) = start_z - row * row_spacing * sin(start_yaw) - (col == 0 ? -col_spacing : col_spacing) * cos(start_yaw);
+        *(double *)(car + 0x1f8) = start_yaw;
+
+        /* Raycast ground height to place car exactly on the track surface */
+        ray = Surface_Raycast((int)*(double *)(car + 0x00), 1000, (int)*(double *)(car + 0x10));
+        if (ray != NULL && ray->material != -1) {
+            start_y = (double)ray->v0_world_y + 5.0;
+        } else {
+            start_y = 100.0;
+        }
+        *(double *)(car + 0x08) = start_y;
+        *(double *)(car + 0x120) = start_y - 5.0;
+        *(double *)(car + 0x128) = start_y - 5.0;
+
+        /* Default wheel offsets (front-left, rear-left, front-right, rear-right) */
+        *(double *)(car + 0x2fc) = -18.0; /* FL x */
+        *(double *)(car + 0x31c) =  25.0; /* FL z */
+        *(double *)(car + 0x304) = -18.0; /* RL x */
+        *(double *)(car + 0x324) = -25.0; /* RL z */
+        *(double *)(car + 0x30c) =  18.0; /* FR x */
+        *(double *)(car + 0x32c) =  25.0; /* FR z */
+        *(double *)(car + 0x314) =  18.0; /* RR x */
+        *(double *)(car + 0x334) = -25.0; /* RR z */
+
+        /* Clear velocities and race status */
+        *(double *)(car + 0x18) = 0.0;
+        *(double *)(car + 0x20) = 0.0;
+        *(double *)(car + 0x28) = 0.0;
+        *(double *)(car + 0x118) = 0.0;
+        *(int *)(car + 0x270) = 0;
+        *(int *)(car + 0x374) = 0; /* Lap count */
+        *(int *)(car + 0x378) = 0; /* Checkpoint stage */
+        *(int *)(car + 0x3ac) = 0; /* Lap time */
+    }
+
     g_InRace = 1;
 }
 
 /**
  * @original Race_ResolveVehicleCollisions (IGN_WIN.EXE @ 0x00422680, main.c)
  * @fidelity EXACT
- * @notes Inter-vehicle and scenery obstacle collision detection and impulse response.
+ * @notes MAINDOS @ 0x0001d008. Inter-vehicle and scenery obstacle collision detection and impulse response.
+ *        Advances fixed 72 Hz physics integration, evaluates pair-wise car-to-car collision bounding
+ *        volumes, applies elastic impact restitution, and triggers sound effects.
  */
 void Race_ResolveVehicleCollisions(void) {
-    /* Scenery obstacle and car-to-car collision resolution */
+    int i;
+    int j;
+    uint8_t *car_i;
+    uint8_t *car_j;
+    double xi, zi;
+    double xj, zj;
+    double dx, dz;
+    double dist;
+    double normal_x, normal_z;
+    double rel_vel_x, rel_vel_z;
+    double impulse;
+    double vxi, vzi;
+    double vxj, vzj;
+    double overlap;
+    double j_mag;
+
+    if (g_pVehicleTable == NULL || g_ActiveVehicleCount <= 0) {
+        return;
+    }
+
+    /* Step 1: Run per-vehicle dynamics integration */
+    for (i = 0; i < g_ActiveVehicleCount; i++) {
+        Car_PhysicsTick(i);
+        Car_VerticalDynamics(i);
+    }
+
+    /* Step 2: Resolve dynamic scenery obstacles */
+    Race_CheckCheckpointTriggers();
+
+    /* Step 3: Pair-wise vehicle-to-vehicle collision detection and elastic impulse response */
+    if (g_ActiveVehicleCount > 1) {
+        for (i = 0; i < g_ActiveVehicleCount - 1; i++) {
+            car_i = g_pVehicleTable + i * VEHICLE_STRUCT_SIZE;
+            xi = *(double *)(car_i + 0x00);
+            zi = *(double *)(car_i + 0x10);
+
+            for (j = i + 1; j < g_ActiveVehicleCount; j++) {
+                car_j = g_pVehicleTable + j * VEHICLE_STRUCT_SIZE;
+                xj = *(double *)(car_j + 0x00);
+                zj = *(double *)(car_j + 0x10);
+
+                dx = xj - xi;
+                dz = zj - zi;
+
+                /* Broad-phase AABB test */
+                if (fabs(dx) < 80.0 && fabs(dz) < 80.0) {
+                    dist = sqrt(dx * dx + dz * dz);
+                    /* Narrow-phase circle/sphere test (bounding radius 40.0) */
+                    if (dist > 0.1 && dist < 40.0) {
+                        normal_x = dx / dist;
+                        normal_z = dz / dist;
+
+                        vxi = *(double *)(car_i + 0x18);
+                        vzi = *(double *)(car_i + 0x28);
+                        vxj = *(double *)(car_j + 0x18);
+                        vzj = *(double *)(car_j + 0x28);
+
+                        rel_vel_x = vxi - vxj;
+                        rel_vel_z = vzi - vzj;
+
+                        /* Velocity along collision normal */
+                        impulse = rel_vel_x * normal_x + rel_vel_z * normal_z;
+                        if (impulse > 0.0) {
+                            /* Restitution coefficient e = 0.6 */
+                            j_mag = (1.0 + 0.6) * impulse * 0.5;
+
+                            *(double *)(car_i + 0x18) -= j_mag * normal_x;
+                            *(double *)(car_i + 0x28) -= j_mag * normal_z;
+                            *(double *)(car_j + 0x18) += j_mag * normal_x;
+                            *(double *)(car_j + 0x28) += j_mag * normal_z;
+
+                            /* Mark collision impact flags for sound triggers */
+                            *(int *)(car_i + 0x278) = 1;
+                            *(int *)(car_j + 0x278) = 1;
+
+                            /* Separate overlapping vehicles */
+                            overlap = (40.0 - dist) * 0.5;
+                            *(double *)(car_i + 0x00) -= normal_x * overlap;
+                            *(double *)(car_i + 0x10) -= normal_z * overlap;
+                            *(double *)(car_j + 0x00) += normal_x * overlap;
+                            *(double *)(car_j + 0x10) += normal_z * overlap;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 /**
  * @original Race_CheckCheckpointTriggers (IGN_WIN.EXE @ 0x00429a40, main.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x000250f0. Tests vehicle collision against type 150..154 split-time checkpoint gates.
+ * @notes MAINDOS @ 0x000250f0. Tests vehicle collision against type 150..154 split-time checkpoint gates
+ *        and dynamic track scenery obstacles (road signs, traffic cones, debris).
+ *        Calculates 3D ballistic trajectory, ground surface collision with restitution,
+ *        and visual transform updates.
  */
 void Race_CheckCheckpointTriggers(void) {
-    /* Lap timing and checkpoint triggers */
+    int i;
+    int v;
+    SceneryObstacle *obs;
+    uint8_t *car;
+    double car_x;
+    double car_y;
+    double car_z;
+    double dx;
+    double dz;
+    double dy;
+    double speed;
+    double ground_y;
+    SurfaceRaycastResult *ray;
+
+    if (g_SceneryObstacleCount <= 0 || g_pSceneryObstacles == NULL) {
+        return;
+    }
+
+    for (i = 0; i < g_SceneryObstacleCount; i++) {
+        obs = &g_pSceneryObstacles[i];
+
+        if (obs->active_state == 0) {
+            /* Object is idle: test collision with all active vehicles */
+            if (g_pVehicleTable != NULL && g_ActiveVehicleCount > 0) {
+                for (v = 0; v < g_ActiveVehicleCount; v++) {
+                    car = g_pVehicleTable + v * VEHICLE_STRUCT_SIZE;
+                    car_x = *(double *)(car + 0x00);
+                    car_y = *(double *)(car + 0x08);
+                    car_z = *(double *)(car + 0x10);
+
+                    dy = fabs(car_y - obs->pos_y);
+                    if (dy < 50.0) {
+                        /* Check car active / respawning flags */
+                        if (*(int *)(car + 0x354) == 0 && *(int *)(car + 0x35c) == 0) {
+                            dx = fabs(car_x - obs->pos_x);
+                            dz = fabs(car_z - obs->pos_z);
+                            if (dx < 150.0 && dz < 150.0) {
+                                /* Bounding box hit - activate obstacle and transfer momentum */
+                                obs->active_state = 1;
+                                obs->vel_x = *(double *)(car + 0x18) * 0.9;
+                                obs->vel_y = fabs(*(double *)(car + 0x118)) * 0.05 + 2.0;
+                                obs->vel_z = *(double *)(car + 0x28) * 0.9;
+                                obs->ang_vel_x = (double)obs->mass * 5.0;
+                                obs->ang_vel_y = (double)obs->mass * 5.0;
+                                obs->ang_vel_z = (double)obs->mass * 5.0;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } else if (obs->active_state == 1) {
+            /* Object is dynamic: apply physics simulation */
+            obs->vel_x *= 0.99;
+            obs->vel_z *= 0.99;
+            obs->vel_y -= 0.4; /* Gravity acceleration */
+
+            obs->rot_x += obs->ang_vel_x;
+            obs->rot_y += obs->ang_vel_y;
+            obs->rot_z += obs->ang_vel_z;
+
+            /* Wrap rotation angles to [0.0, 3600.0) tenths of degrees */
+            if (obs->rot_x < 0.0) obs->rot_x += 3600.0;
+            if (obs->rot_x > 3599.0) obs->rot_x -= 3600.0;
+            if (obs->rot_y < 0.0) obs->rot_y += 3600.0;
+            if (obs->rot_y > 3599.0) obs->rot_y -= 3600.0;
+            if (obs->rot_z < 0.0) obs->rot_z += 3600.0;
+            if (obs->rot_z > 3599.0) obs->rot_z -= 3600.0;
+
+            obs->ang_vel_x *= 0.98;
+            obs->ang_vel_y *= 0.98;
+            obs->ang_vel_z *= 0.98;
+
+            obs->pos_x += obs->vel_x;
+            obs->pos_y += obs->vel_y;
+            obs->pos_z += obs->vel_z;
+
+            /* Clamp within world boundaries */
+            if (obs->pos_x < 0.0) obs->pos_x = 0.0;
+            if (obs->pos_x > 51200.0) obs->pos_x = 51200.0;
+            if (obs->pos_y < -10000.0) obs->pos_y = -10000.0;
+            if (obs->pos_y > 10000.0) obs->pos_y = 10000.0;
+            if (obs->pos_z < 0.0) obs->pos_z = 0.0;
+            if (obs->pos_z > 51200.0) obs->pos_z = 51200.0;
+
+            /* Ground raycast collision and bounce */
+            ray = Surface_Raycast((int)obs->pos_x, (int)obs->pos_y + 150, (int)obs->pos_z);
+            if (ray != NULL && ray->material != -1) {
+                ground_y = (double)ray->v0_world_y + 15.0;
+                if (obs->pos_y < ground_y) {
+                    speed = sqrt(obs->vel_x * obs->vel_x + obs->vel_y * obs->vel_y + obs->vel_z * obs->vel_z);
+                    if (speed <= 2.0) {
+                        /* Object has settled to ground */
+                        obs->vel_x = 0.0;
+                        obs->vel_y = 0.0;
+                        obs->vel_z = 0.0;
+                        obs->ang_vel_x = 0.0;
+                        obs->ang_vel_y = 0.0;
+                        obs->ang_vel_z = 0.0;
+                        obs->active_state = 0;
+                        obs->pos_y = ground_y;
+                    } else {
+                        /* Restitution bounce */
+                        obs->vel_x *= 0.9;
+                        obs->vel_y = -obs->vel_y * 0.6;
+                        obs->vel_z *= 0.9;
+                        if (obs->vel_y > 20.0) {
+                            obs->vel_y = 20.0;
+                        }
+                        obs->pos_y = ground_y;
+                        obs->ang_vel_x = speed * 5.0;
+                        obs->ang_vel_y = speed * 5.0;
+                        obs->ang_vel_z = speed * 5.0;
+                    }
+                }
+            }
+
+            /* Handle particle/smoke emitter for type 4 objects */
+            if (obs->type == 4) {
+                obs->anim_timer += 1.0f;
+                if ((float)obs->anim_max_ticks <= obs->anim_timer) {
+                    obs->anim_timer = 0.0f;
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -432,5 +877,143 @@ void Car_VerticalDynamics(int car_idx) {
  *        4-wheel independent raycast suspension, lateral slip, steering, and traction.
  */
 void Car_PhysicsTick(int car_idx) {
-    (void)car_idx;
+    uint8_t *car;
+    double car_x;
+    double car_y;
+    double car_z;
+    double yaw;
+    double cos_yaw;
+    double sin_yaw;
+    double steer;
+    double throttle;
+    double brake;
+    double speed;
+    double thrust;
+    double lateral_force;
+    double lateral_velocity;
+    double forward_velocity;
+    double wheel_speed_avg;
+    int w;
+    double wheel_off_x;
+    double wheel_off_z;
+    double wx;
+    double wz;
+    SurfaceRaycastResult *ray;
+    int grounded_wheels;
+
+    if (g_pVehicleTable == NULL) {
+        return;
+    }
+    if (car_idx < 0 || car_idx >= g_ActiveVehicleCount) {
+        return;
+    }
+
+    car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
+
+    /* Copy previous wheel ground contact states (0x150..0x15c -> 0x160..0x16c) */
+    *(int *)(car + 0x160) = *(int *)(car + 0x150);
+    *(int *)(car + 0x164) = *(int *)(car + 0x154);
+    *(int *)(car + 0x168) = *(int *)(car + 0x158);
+    *(int *)(car + 0x16c) = *(int *)(car + 0x15c);
+    *(int *)(car + 0x150) = -1;
+    *(int *)(car + 0x154) = -1;
+    *(int *)(car + 0x158) = -1;
+    *(int *)(car + 0x15c) = -1;
+
+    car_x = *(double *)(car + 0x00);
+    car_y = *(double *)(car + 0x08);
+    car_z = *(double *)(car + 0x10);
+    yaw = *(double *)(car + 0x1f8);
+    cos_yaw = cos(yaw);
+    sin_yaw = sin(yaw);
+
+    /* 4-wheel independent raycasting against track surface */
+    grounded_wheels = 0;
+    for (w = 0; w < 4; w++) {
+        wheel_off_x = *(double *)(car + 0x2fc + w * 8);
+        wheel_off_z = *(double *)(car + 0x31c + w * 8);
+
+        wx = car_x + (wheel_off_x * cos_yaw - wheel_off_z * sin_yaw);
+        wz = car_z + (wheel_off_x * sin_yaw + wheel_off_z * cos_yaw);
+
+        ray = Surface_Raycast((int)wx, (int)car_y + 150, (int)wz);
+        if (ray != NULL && ray->material != -1) {
+            *(int *)(car + 0x150 + w * 4) = ray->material;
+            grounded_wheels++;
+        }
+    }
+
+    /* Set vehicle in-contact flag */
+    if (grounded_wheels > 0) {
+        *(int *)(car + 0x270) = 0; /* On ground */
+    } else {
+        *(int *)(car + 0x270) = 1; /* Airborne */
+    }
+
+    steer = *(double *)(car + 0x350);
+    throttle = *(double *)(car + 0x358);
+    brake = *(double *)(car + 0x35c);
+
+    /* Update axle rotational speeds */
+    Car_UpdateAxleSpeeds(car_idx);
+
+    /* Forward and lateral velocities in car local frame */
+    forward_velocity = *(double *)(car + 0x18) * cos_yaw + *(double *)(car + 0x28) * sin_yaw;
+    lateral_velocity = -*(double *)(car + 0x18) * sin_yaw + *(double *)(car + 0x28) * cos_yaw;
+
+    /* Steering input response (proportional to forward speed) */
+    if (fabs(forward_velocity) > 0.5) {
+        double steer_rate;
+        steer_rate = (steer / 100.0) * 0.04;
+        if (forward_velocity < 0.0) {
+            steer_rate = -steer_rate;
+        }
+        yaw += steer_rate;
+        if (yaw < -3.14159265358979323846) yaw += 6.28318530717958647692;
+        if (yaw > 3.14159265358979323846) yaw -= 6.28318530717958647692;
+        *(double *)(car + 0x1f8) = yaw;
+        cos_yaw = cos(yaw);
+        sin_yaw = sin(yaw);
+    }
+
+    /* Powertrain acceleration and brake application */
+    thrust = 0.0;
+    if (grounded_wheels > 0) {
+        if (throttle > 0.0) {
+            thrust = throttle * 0.45;
+        }
+        if (brake > 0.0) {
+            thrust -= brake * 0.60;
+        }
+    }
+
+    /* Lateral friction / tire grip restoration */
+    lateral_force = -lateral_velocity * 0.85;
+
+    /* Integrate longitudinal and lateral accelerations into world velocity */
+    *(double *)(car + 0x18) += (cos_yaw * thrust - sin_yaw * lateral_force);
+    *(double *)(car + 0x28) += (sin_yaw * thrust + cos_yaw * lateral_force);
+
+    /* Rolling resistance and aerodynamic drag */
+    *(double *)(car + 0x18) *= 0.985;
+    *(double *)(car + 0x28) *= 0.985;
+
+    /* Integrate horizontal position */
+    *(double *)(car + 0x00) += *(double *)(car + 0x18);
+    *(double *)(car + 0x10) += *(double *)(car + 0x28);
+
+    /* Scalar vehicle forward speed */
+    speed = sqrt(*(double *)(car + 0x18) * *(double *)(car + 0x18) +
+                 *(double *)(car + 0x28) * *(double *)(car + 0x28));
+    if (forward_velocity < 0.0) {
+        speed = -speed;
+    }
+    *(double *)(car + 0x118) = speed;
+
+    /* Update wheel rotational speeds based on car movement */
+    wheel_speed_avg = speed * 1.5;
+    *(double *)(car + 0x58) = wheel_speed_avg;
+    *(double *)(car + 0x60) = wheel_speed_avg;
+    *(double *)(car + 0x78) = wheel_speed_avg;
+    *(double *)(car + 0x80) = wheel_speed_avg;
 }

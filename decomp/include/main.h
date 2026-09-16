@@ -36,6 +36,36 @@ extern int g_TrackWaypointCount;
 extern uint8_t *g_pTrackSHD_Copy;
 extern int g_MemoryAllocated;
 
+#pragma pack(push, 4)
+typedef struct SceneryObstacle {
+    int type;                /* 0x00 */
+    int model_index;         /* 0x04 */
+    int active_state;        /* 0x08: 0=idle/checkpoint, 1=dynamic/flying, -1=disabled */
+    double pos_x;            /* 0x0C */
+    double pos_y;            /* 0x14 */
+    double pos_z;            /* 0x1C */
+    double vel_x;            /* 0x24 */
+    double vel_y;            /* 0x2C */
+    double vel_z;            /* 0x34 */
+    double rot_x;            /* 0x3C */
+    double rot_y;            /* 0x44 */
+    double rot_z;            /* 0x4C */
+    double ang_vel_x;        /* 0x54 */
+    double ang_vel_y;        /* 0x5C */
+    double ang_vel_z;        /* 0x64 */
+    double bbox_min_x;       /* 0x6C */
+    double bbox_max_x;       /* 0x74 */
+    double bbox_min_z;       /* 0x7C */
+    double bbox_max_z;       /* 0x84 */
+    float mass;              /* 0x8C */
+    float anim_timer;        /* 0x90 */
+    int anim_max_ticks;      /* 0x94 */
+} SceneryObstacle;
+#pragma pack(pop)
+
+extern int g_SceneryObstacleCount;
+extern SceneryObstacle *g_pSceneryObstacles;
+
 extern int g_ScreenWidth;
 extern int g_ScreenHeight;
 extern int g_ScreenBPP;
