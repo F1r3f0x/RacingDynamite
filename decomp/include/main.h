@@ -109,6 +109,10 @@ typedef struct SceneryParticle {
     int field_48;            /* 0x48 */
     int field_4c;            /* 0x4C */
     int life;                /* 0x50 */
+    int field_54;            /* 0x54 */
+    int field_58;            /* 0x58 */
+    int field_5c;            /* 0x5C */
+    int field_60;            /* 0x60 */
 } SceneryParticle;
 
 typedef struct CameraEffect {

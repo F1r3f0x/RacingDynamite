@@ -21,6 +21,22 @@
       }
     },
     {
+      "name": "lisa3d",
+      "target_path": "build/decomp/asm/lisa3d.obj",
+      "base_path": "build/decomp/lisa3d.obj",
+      "metadata": {
+        "complete": false
+      }
+    },
+    {
+      "name": "main",
+      "target_path": "build/decomp/asm/main.obj",
+      "base_path": "build/decomp/main.obj",
+      "metadata": {
+        "complete": false
+      }
+    },
+    {
       "name": "mem",
       "target_path": "build/decomp/asm/mem.obj",
       "base_path": "build/decomp/mem.obj",
