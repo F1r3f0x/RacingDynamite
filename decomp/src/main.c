@@ -44,6 +44,9 @@ uint8_t *g_pTrackPIC = NULL;
 uint8_t *g_pTrackSHD = NULL;
 uint8_t *g_pTrackTAB = NULL;
 uint8_t *g_pTrackPOS = NULL;
+uint8_t *g_pTrackTRI = NULL;
+uint8_t *g_pAIControllers = NULL;
+int g_TrackWaypointCount = 0;
 uint8_t *g_pTrackSHD_Copy = NULL;
 int g_MemoryAllocated = 0;
 
@@ -233,6 +236,8 @@ int Track_LoadAllAssets(void) {
     read(fd, g_pTrackPOS, size);
     close(fd);
 
+    Track_LoadSplines();
+
     Font_LoadHUDFonts();
     Track_LoadOverlayGfx();
 
@@ -257,6 +262,58 @@ void AI_FollowTrackSplines(int car_idx) {
  *        and builds left/right road boundary splines and AI waypoint tables.
  */
 int Track_LoadSplines(void) {
+    char path[256];
+    int fd;
+    int size;
+    int car_count;
+    int i;
+    uint8_t *ai;
+
+    car_count = g_ActiveVehicleCount > 0 ? g_ActiveVehicleCount : 6;
+    if (g_pAIControllers != NULL) {
+        free(g_pAIControllers);
+        g_pAIControllers = NULL;
+    }
+    g_pAIControllers = (uint8_t *)calloc(car_count, 0x7C);
+    if (g_pAIControllers == NULL) {
+        return 0;
+    }
+
+    /* Initialize AI difficulty profiles and waypoint tracking state */
+    for (i = 0; i < car_count; i++) {
+        ai = g_pAIControllers + i * 0x7C;
+        *(int *)(ai + 0x60) = 0;   /* Current spline segment */
+        *(short *)(ai + 0x64) = 0; /* Waypoint index */
+        *(int *)(ai + 0x68) = 0;   /* Target speed */
+    }
+
+    sprintf(path, "LEVELS\\%s\\%s.TRI", g_TrackDir, g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        printf("Error while trying to read %s\n", path);
+        return 0;
+    }
+
+    size = filelength(fd);
+    if (size < 4) {
+        close(fd);
+        return 0;
+    }
+
+    if (g_pTrackTRI != NULL) {
+        free(g_pTrackTRI);
+        g_pTrackTRI = NULL;
+    }
+    g_pTrackTRI = (uint8_t *)malloc(size);
+    if (g_pTrackTRI == NULL) {
+        close(fd);
+        return 0;
+    }
+
+    read(fd, g_pTrackTRI, size);
+    close(fd);
+
+    g_TrackWaypointCount = *(int *)g_pTrackTRI;
     return 1;
 }
 

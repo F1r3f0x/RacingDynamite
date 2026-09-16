@@ -30,6 +30,9 @@ extern uint8_t *g_pTrackPIC;
 extern uint8_t *g_pTrackSHD;
 extern uint8_t *g_pTrackTAB;
 extern uint8_t *g_pTrackPOS;
+extern uint8_t *g_pTrackTRI;
+extern uint8_t *g_pAIControllers;
+extern int g_TrackWaypointCount;
 extern uint8_t *g_pTrackSHD_Copy;
 extern int g_MemoryAllocated;
 
