@@ -17,6 +17,34 @@ extern int g_AudioEventParam5;
 extern int g_AudioEventParam6;
 extern int g_AudioEventParam7;
 extern void FUN_004579b0(int *ptr);
+extern void FUN_00456b70(int a, int b, char *c, void *d, int e, int f, int g);
+
+extern long long FUN_0044f070(int a, unsigned int b);
+extern int *DAT_0063c5bc;
+extern int *DAT_0063c600;
+extern unsigned long long FUN_00438030(int a, unsigned int b);
+
+extern int DAT_004949bc;
+extern double DAT_005532c0;
+extern double DAT_005532c4;
+extern double DAT_005532b8;
+extern double DAT_005532bc;
+extern double DAT_00553288;
+extern double DAT_0055328c;
+extern double DAT_006192f8;
+extern double DAT_006192fc;
+extern double DAT_00619318;
+extern double DAT_0061931c;
+extern int DAT_00553000;
+extern int DAT_00525e58;
+
+extern double DAT_0063c5f0[];
+extern double DAT_0063c64c[];
+extern int DAT_005532b0;
+extern int DAT_0055306c;
+extern int DAT_0054f980;
+extern int DAT_0047a440;
+extern int DAT_004986e0[];
 
 /**
  * @original Audio_PlaySampleVol (IGN_WIN.EXE @ 0x0043e710, fx.c)
@@ -27,7 +55,7 @@ void Audio_PlaySampleVol(int param_1, int param_2, int param_3, int param_4, int
     g_AudioEventParam2 = param_2;
     g_AudioEventParam3 = param_3;
     g_AudioEventParam4 = param_4;
-    g_AudioEventParam5 = (int)Math_RandomFloat(); // actually __ftol() without FLD, probably just random or passing float cast
+    g_AudioEventParam5 = (int)Math_RandomFloat();
     g_AudioEventParam6 = param_6;
     g_AudioEventParam7 = param_7;
     FUN_004579b0(&g_AudioEventParam1);
@@ -91,7 +119,7 @@ void FX_UpdateExplosionNode(SceneryParticle *p, int instance_idx) {
             sp.field_2c = 0x99;
             sp.rot_x = 0x19000;
             sp.rot_y = 0x1000;
-            sp.rot_z = 0x00498118; // generic field
+            sp.rot_z = 0x00498118;
             sp.field_3c = 0x32;
             FX_SpawnParticle(&sp);
         }
@@ -121,8 +149,6 @@ void FX_UpdateExplosionNode(SceneryParticle *p, int instance_idx) {
     p->vel_y = timer + 1;
 }
 
-extern long long FUN_0044f070(int a, unsigned int b);
-
 /**
  * @original Audio_LoadAssets (IGN_WIN.EXE @ 0x0043e6a0, fx.c)
  * @fidelity ADAPTED
@@ -132,10 +158,6 @@ long long Audio_LoadAssets(int param_1, unsigned int param_2) {
     lVar1 = FUN_0044f070(param_1, param_2);
     return (((long long)(lVar1 >> 32)) << 32) | 1;
 }
-
-extern int *DAT_0063c5bc;
-extern int *DAT_0063c600;
-extern unsigned long long FUN_00438030(int a, unsigned int b);
 
 /**
  * @original Audio_StopSample (IGN_WIN.EXE @ 0x0043e6d0, fx.c)
@@ -153,20 +175,6 @@ unsigned long long Audio_StopSample(void) {
     uVar2 = FUN_00438030(0, (unsigned int)puVar1);
     return uVar2;
 }
-
-extern int DAT_004949bc;
-extern double DAT_005532c0;
-extern double DAT_005532c4;
-extern double DAT_005532b8;
-extern double DAT_005532bc;
-extern double DAT_00553288;
-extern double DAT_0055328c;
-extern double DAT_006192f8;
-extern double DAT_006192fc;
-extern double DAT_00619318;
-extern double DAT_0061931c;
-extern int DAT_00553000;
-extern int DAT_00525e58;
 
 /**
  * @original FX_SpawnWeather (IGN_WIN.EXE @ 0x0043ec70, fx.c)
@@ -188,4 +196,81 @@ void FX_SpawnWeather(void) {
     }
 }
 
-extern void FUN_00456b70(int a, int b, char *c, void *d, int e, int f, int g);
+/**
+ * @original FX_SpawnParticle (IGN_WIN.EXE @ 0x00434380, fx.c)
+ * @fidelity ADAPTED
+ */
+unsigned int FX_SpawnParticle(SceneryParticle *p) {
+    int should_spawn = 1;
+    int type = p->type;
+    int pos_x, pos_z;
+    int diff_x, diff_z;
+    SceneryParticle *slot;
+    unsigned int index = 0;
+    int min_prio;
+    unsigned int best_idx;
+    unsigned int i;
+
+    if (type == 1 || type == 2 || type == 8) {
+        should_spawn = 0;
+        pos_x = p->pos_x / 1024;
+        diff_x = pos_x - (int)DAT_0063c5f0[0];
+        if (abs(diff_x) < 3500) {
+            pos_z = p->pos_z / 1024;
+            diff_z = pos_z - (int)DAT_0063c5f0[2];
+            if (abs(diff_z) <= 3500) {
+                should_spawn = 1;
+            } else if (DAT_0047a440 <= DAT_0054f980 || DAT_005532b0 == 1) {
+                should_spawn = 1;
+            }
+        } else if (DAT_0047a440 <= DAT_0054f980 || DAT_005532b0 == 1) {
+            should_spawn = 1;
+        }
+
+        if (DAT_0055306c == 1) {
+            diff_x = pos_x - (int)DAT_0063c64c[0];
+            if (abs(diff_x) < 2500) {
+                pos_z = p->pos_z / 1024;
+                diff_z = pos_z - (int)DAT_0063c64c[2];
+                if (abs(diff_z) <= 2500) {
+                    should_spawn = 1;
+                } else if (DAT_0054f980 >= DAT_0047a440) {
+                    should_spawn = 1;
+                }
+            } else if (DAT_0054f980 >= DAT_0047a440) {
+                should_spawn = 1;
+            }
+        }
+    }
+
+    if (!should_spawn) return 0xffffffff;
+
+    slot = (SceneryParticle *)0x5db040;
+    index = 0;
+    while (slot < (SceneryParticle *)0x5dfe60) {
+        if (slot->type == 0) break;
+        slot++;
+        index++;
+    }
+
+    if (index > 199) {
+        min_prio = 100;
+        best_idx = 0;
+        slot = (SceneryParticle *)0x5db040;
+        for (i = 0; i < 200; i++) {
+            if (DAT_004986e0[slot->type] < min_prio) {
+                best_idx = i;
+                min_prio = DAT_004986e0[slot->type];
+            }
+            slot++;
+        }
+        if (min_prio < DAT_004986e0[p->type]) {
+            index = best_idx;
+        }
+        if (index > 199) return 0xffffffff;
+    }
+
+    slot = (SceneryParticle *)(0x5db040 + index * 0x64);
+    *slot = *p;
+    return index;
+}

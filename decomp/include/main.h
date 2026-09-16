@@ -233,7 +233,7 @@ int    Lisa_MoveDynamicObject(void *obj);
 int    Lisa_DeleteDynamicObject(void *obj);
 void  *Surface_GetHeightAtPoint(int x, int y, int z);
 void   Surface_FreeSRF(void);
-void   FX_SpawnParticle(SceneryParticle *p);
+unsigned int FX_SpawnParticle(SceneryParticle *p);
 void   FX_SpawnCameraParticle(CameraEffect *c);
 void   FX_UpdateEngineSmoke(void);
 void   FX_UpdateTurboFlames(void);
