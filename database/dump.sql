@@ -121,6 +121,12 @@ INSERT INTO "functions" VALUES(156,'0x000616db','0x004558d0','Font_GetTextWidth'
 INSERT INTO "functions" VALUES(157,'0x00043d60','0x004133d0','Font_DrawHUDText','FUN_004133d0',3,'decompiled','watcom_reg','void','int x, int y, const char *text, uint8_t *framebuffer, int stride, const uint8_t *font_data, uint8_t color_offset',262,NULL,'EXACT','src/formats/lft.c','2D bitmap font rasterizer blitting characters from IGNITION.FNT directly to 8bpp framebuffer.',NULL,NULL);
 INSERT INTO "functions" VALUES(158,'0x0004d718','0x0044dc60','Lisa_DrawTexturedTriangle_Op11_Unshaded','Lisa_DrawTexturedTriangle_Op11_Unshaded',2,'decompiled','watcom_reg','void','void',1358,NULL,'EXACT','decomp/src/lisa3d.c','Lisa 3D textured triangle span preprocessor, backface cull, and depth bucket dispatcher (Opcode 0x11, unshaded).',NULL,NULL);
 INSERT INTO "functions" VALUES(159,'0x0004cc58','0x0044e1b0','Lisa_DrawTexturedTriangle_Op11_Shaded','Lisa_DrawTexturedTriangle_Op11_Shaded',2,'decompiled','watcom_reg','void','void',1700,NULL,'EXACT','decomp/src/lisa3d.c','Lisa 3D textured triangle Gouraud-shaded preprocessor and depth bucket dispatcher (Opcode 0x11, shaded).',NULL,NULL);
+INSERT INTO "functions" VALUES(160,'0x000250c9','0x00429a10','Math_Signum','FUN_00429a10',5,'decompiled','watcom_reg','int','int val',NULL,NULL,'EXACT','decomp/src/main.c','Standard 32-bit integer signum returning -1 for negative, 1 for positive, 0 for zero.',NULL,NULL);
+INSERT INTO "functions" VALUES(161,'0x00025f38','0x0042a8d0','Physics_ReflectVelocityOffNormal','FUN_0042a8d0',5,'decompiled','watcom_reg','void','double *pVec',NULL,NULL,'EXACT','decomp/src/main.c','Rotates 3D velocity into plane-aligned space via yaw and pitch of contact normal, reflects penetrating velocity, and transforms back into world space.',NULL,NULL);
+INSERT INTO "functions" VALUES(162,'0x0001e65e','0x00423ea0','Car_CheckLandingStatus','FUN_00423ea0',5,'decompiled','watcom_reg','void','int car_idx',NULL,NULL,'EXACT','decomp/src/main.c','Checks if airborne car has touched ground (pos_y < ground_y + 5.0), clears airborne flag (+0x270) and asserts landing impact trigger (+0x278).',NULL,NULL);
+INSERT INTO "functions" VALUES(163,'0x0001e6a2','0x00423f00','Car_UpdateShadowTracking','FUN_00423f00',5,'decompiled','watcom_reg','void','int car_idx',NULL,NULL,'EXACT','decomp/src/main.c','Advances secondary position/shadow tracking for car. Integrates velocity at 72 Hz timestep (factor 1.0 / 72.0 = 0.013888889).',NULL,NULL);
+INSERT INTO "functions" VALUES(164,'0x0001e6f6','0x00423f70','Car_UpdateBodyVelocity','FUN_00423f70',5,'decompiled','watcom_reg','void','int car_idx',NULL,NULL,'EXACT','decomp/src/main.c','Computes local lateral and longitudinal acceleration from target waypoint error, rotates by vehicle heading, applies tire drag and clamps to max speed.',NULL,NULL);
+INSERT INTO "functions" VALUES(165,'0x0001b996','0x00420c00','Timer_GetDeltaTime','FUN_00420c00',5,'decompiled','watcom_reg','double','void',NULL,NULL,'EXACT','decomp/src/main.c','Computes elapsed frame delta time using tick counter scaled by 0.036. Updates accumulator, frame counter, and clamps delta to max 10.8 ticks.',NULL,NULL);
 CREATE TABLE globals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT,                      -- Address in MAINDOS.EXE
@@ -326,7 +332,7 @@ CREATE INDEX idx_globals_name ON globals(name);
 CREATE INDEX idx_struct_fields_struct ON struct_fields(struct_id);
 DELETE FROM "sqlite_sequence";
 INSERT INTO "sqlite_sequence" VALUES('modules',8);
-INSERT INTO "sqlite_sequence" VALUES('functions',159);
+INSERT INTO "sqlite_sequence" VALUES('functions',165);
 INSERT INTO "sqlite_sequence" VALUES('globals',124);
 INSERT INTO "sqlite_sequence" VALUES('structs',18);
 INSERT INTO "sqlite_sequence" VALUES('struct_fields',138);

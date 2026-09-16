@@ -57,6 +57,21 @@ int g_ScreenHeight = 200;
 int g_ScreenBPP = 8;
 int g_ScreenMode = 1;
 
+int g_TimerTickCount = 0;
+double g_LastFrameTime = 0.0;
+int g_FrameStep = 0;
+int g_AccumulatedFrames = 0;
+int g_TotalFrameCount = 0;
+int g_IsGamePaused = 0;
+int g_GameMode = 0;
+int g_PauseStartTime = 0;
+double g_RaceTimeSeconds = 0.0;
+uint8_t *g_pVehicleShadowTable = NULL;
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 /**
  * @original Menu_Init (IGN_WIN.EXE @ 0x004029a0, main.c)
  * @fidelity EXACT
@@ -1016,4 +1031,190 @@ void Car_PhysicsTick(int car_idx) {
     *(double *)(car + 0x60) = wheel_speed_avg;
     *(double *)(car + 0x78) = wheel_speed_avg;
     *(double *)(car + 0x80) = wheel_speed_avg;
+}
+
+/**
+ * @original Math_Signum (IGN_WIN.EXE @ 0x00429a10, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x000250c9. Standard 32-bit integer signum returning -1 for negative, 1 for positive, 0 for zero.
+ */
+int Math_Signum(int val) {
+    if (val < 0) return -1;
+    if (val > 0) return 1;
+    return 0;
+}
+
+/**
+ * @original Physics_ReflectVelocityOffNormal (IGN_WIN.EXE @ 0x0042a8d0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x00025f38. Rotates 3D velocity into plane-aligned space via yaw and pitch of
+ *        contact normal, reflects penetrating velocity, and transforms back into world space.
+ */
+void Physics_ReflectVelocityOffNormal(double *pVec) {
+    double yaw, pitch;
+    double cos_yaw, sin_yaw;
+    double cos_pitch, sin_pitch;
+    double rotated_nx;
+    double vx_rot1, vz_rot1;
+    double vx_rot2, vy_rot2;
+    double new_vx, new_vy, new_vz;
+
+    yaw = atan2(pVec[2], pVec[0]);
+    cos_yaw = cos(-yaw);
+    sin_yaw = sin(-yaw);
+
+    rotated_nx = pVec[0] * cos_yaw - pVec[2] * sin_yaw;
+    pitch = atan2(pVec[1], rotated_nx);
+
+    cos_pitch = cos(-pitch);
+    sin_pitch = sin(-pitch);
+
+    vx_rot1 = cos_yaw * pVec[3] - sin_yaw * pVec[5];
+    vz_rot1 = sin_yaw * pVec[3] + cos_yaw * pVec[5];
+
+    vx_rot2 = vx_rot1 * cos_pitch - sin_pitch * pVec[4];
+    vy_rot2 = vx_rot1 * sin_pitch + cos_pitch * pVec[4];
+
+    if (vx_rot2 <= 0.0) {
+        double inv_vx = -vx_rot2;
+        double unpitch_x = cos(pitch) * inv_vx - vy_rot2 * sin(pitch);
+        double unpitch_y = vy_rot2 * cos(pitch) + sin(pitch) * inv_vx;
+
+        new_vx = unpitch_x * cos(yaw) - sin(yaw) * vz_rot1;
+        new_vy = unpitch_y;
+        new_vz = vz_rot1 * cos(yaw) + unpitch_x * sin(yaw);
+
+        pVec[3] = new_vx;
+        pVec[4] = new_vy;
+        pVec[5] = new_vz;
+    }
+}
+
+/**
+ * @original Car_CheckLandingStatus (IGN_WIN.EXE @ 0x00423ea0, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001e65e. Checks if airborne car has touched ground (pos_y < ground_y + 5.0),
+ *        clears airborne flag (+0x270) and asserts landing impact trigger (+0x278).
+ */
+void Car_CheckLandingStatus(int car_idx) {
+    uint8_t *car;
+    if (g_pVehicleTable == NULL) return;
+    car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
+
+    if (*(double *)(car + 0x08) < *(double *)(car + 0x120) + 5.0 && *(int *)(car + 0x270) == 1) {
+        *(int *)(car + 0x270) = 0;
+        *(int *)(car + 0x278) = 1;
+    }
+}
+
+/**
+ * @original Car_UpdateShadowTracking (IGN_WIN.EXE @ 0x00423f00, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001e6a2. Advances secondary position/shadow tracking for car.
+ *        Integrates velocity at 72 Hz timestep (factor 1.0 / 72.0 = 0.013888889).
+ */
+void Car_UpdateShadowTracking(int car_idx) {
+    uint8_t *car;
+    uint8_t *sub;
+
+    if (g_pVehicleTable == NULL) return;
+    car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
+
+    if (*(int *)(car + 0x4848) == 0) {
+        if (g_pVehicleShadowTable != NULL) {
+            sub = g_pVehicleShadowTable + car_idx * 0x1d0;
+            *(double *)(sub + 0x68) += *(double *)(sub + 0x78) * (1.0 / 72.0);
+            *(double *)(sub + 0x70) += *(double *)(sub + 0x80) * (1.0 / 72.0);
+        }
+    }
+}
+
+/**
+ * @original Car_UpdateBodyVelocity (IGN_WIN.EXE @ 0x00423f70, main.c)
+ * @fidelity EXACT
+ * @notes MAINDOS @ 0x0001e6f6. Computes local lateral and longitudinal acceleration from target
+ *        waypoint error, rotates by vehicle heading, applies tire drag and clamps to max speed.
+ */
+void Car_UpdateBodyVelocity(int car_idx) {
+    uint8_t *car;
+    double delta_x, delta_z;
+    double angle_rad;
+    double sin_a, cos_a;
+    double max_speed, max_lat_speed;
+
+    if (g_pVehicleTable == NULL) return;
+    car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
+
+    delta_x = *(double *)(car + 0x18) - *(double *)(car + 0x30);
+    delta_z = *(double *)(car + 0x28) - *(double *)(car + 0x40);
+
+    if (delta_x > 0.5) delta_x = 0.5;
+    if (delta_x < -0.5) delta_x = -0.5;
+    if (delta_z > 0.5) delta_z = 0.5;
+    if (delta_z < -0.5) delta_z = -0.5;
+
+    angle_rad = (2.0 * M_PI) - *(double *)(car + 0xf8);
+    sin_a = sin(angle_rad);
+    cos_a = cos(angle_rad);
+
+    /* Local lateral velocity adjustment */
+    *(double *)(car + 0xb8) += (cos_a * delta_z + sin_a * delta_x) * -3.0;
+
+    /* Local longitudinal velocity adjustment */
+    *(double *)(car + 0xc0) += (sin_a * delta_z - cos_a * delta_x) * 3.0;
+
+    /* Apply drag / traction decay */
+    *(double *)(car + 0xc0) *= *(double *)(car + 0xd0);
+    *(double *)(car + 0xb8) *= *(double *)(car + 0xc8);
+
+    /* Clamp forward / reverse speed */
+    max_speed = *(double *)(car + 0xe0);
+    if (*(double *)(car + 0xc0) > max_speed) {
+        *(double *)(car + 0xc0) = max_speed;
+    }
+    if (*(double *)(car + 0xc0) < -max_speed) {
+        *(double *)(car + 0xc0) = -max_speed;
+    }
+
+    /* Clamp lateral slip speed */
+    max_lat_speed = *(double *)(car + 0xd8);
+    if (*(double *)(car + 0xb8) > max_lat_speed) {
+        *(double *)(car + 0xb8) = max_lat_speed;
+    }
+    if (*(double *)(car + 0xb8) < -max_lat_speed) {
+        *(double *)(car + 0xb8) = -max_lat_speed;
+    }
+}
+
+/**
+ * @original Timer_GetDeltaTime (IGN_WIN.EXE @ 0x00420c00, main.c)
+ * @fidelity EXACT
+ * @notes Computes elapsed frame delta time using tick counter scaled by 0.036.
+ *        Updates accumulator, frame counter, and clamps delta to max 10.8 ticks.
+ */
+double Timer_GetDeltaTime(void) {
+    double delta;
+    double current_time = (double)g_TimerTickCount * 0.036;
+    delta = current_time - g_LastFrameTime;
+
+    if (delta >= 1.0) {
+        g_LastFrameTime = current_time;
+        g_FrameStep = (int)delta;
+        g_AccumulatedFrames += g_FrameStep;
+        g_TotalFrameCount++;
+
+        if (g_IsGamePaused == 1 && g_GameMode == 2) {
+            g_PauseStartTime = (int)delta;
+        }
+
+        g_RaceTimeSeconds = (double)(g_TimerTickCount - g_PauseStartTime) * 0.001;
+
+        if (delta == 0.0) {
+            return 0.01;
+        }
+        if (delta > 10.8) {
+            delta = 10.8;
+        }
+    }
+    return delta;
 }

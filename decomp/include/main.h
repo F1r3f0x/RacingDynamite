@@ -71,6 +71,17 @@ extern int g_ScreenHeight;
 extern int g_ScreenBPP;
 extern int g_ScreenMode;
 
+extern int g_TimerTickCount;
+extern double g_LastFrameTime;
+extern int g_FrameStep;
+extern int g_AccumulatedFrames;
+extern int g_TotalFrameCount;
+extern int g_IsGamePaused;
+extern int g_GameMode;
+extern int g_PauseStartTime;
+extern double g_RaceTimeSeconds;
+extern uint8_t *g_pVehicleShadowTable;
+
 /* Function prototypes */
 int  Menu_Init(void);
 int  App_FrameTick(void);
@@ -90,5 +101,11 @@ void Race_CheckCheckpointTriggers(void);
 void Car_UpdateAxleSpeeds(int car_idx);
 void Car_VerticalDynamics(int car_idx);
 void Car_PhysicsTick(int car_idx);
+int  Math_Signum(int val);
+void Physics_ReflectVelocityOffNormal(double *pVec);
+void Car_CheckLandingStatus(int car_idx);
+void Car_UpdateShadowTracking(int car_idx);
+void Car_UpdateBodyVelocity(int car_idx);
+double Timer_GetDeltaTime(void);
 
 #endif /* MAIN_H */
