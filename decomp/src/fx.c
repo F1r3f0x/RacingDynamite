@@ -153,6 +153,19 @@ extern int DAT_00498738;
 extern int DAT_0047a598;
 extern int _DAT_00563c50;
 extern int DAT_0047a5d8;
+extern int DAT_00498480;
+extern int DAT_005db040;
+extern int DAT_00563d78;
+extern int DAT_00563d64;
+extern int DAT_0047a430;
+extern int DAT_00527f6c;
+extern int DAT_0054f954;
+extern int DAT_00552f78;
+extern int DAT_005dfe60;
+extern int DAT_00527f24;
+extern int DAT_00563cf0;
+extern int _DAT_0047a430;
+extern int _DAT_00563d64;
 extern double DAT_0063c5f0[];
 extern double DAT_0063c64c[];
 extern int DAT_005532b0;
@@ -982,5 +995,97 @@ LAB_00436c9c:
       iVar8 = DAT_00563c10;
     }
   }
+  return;
+}
+/**
+ * @original FX_UpdateAllParticles (IGN_WIN.EXE @ 0x00434190, fx.c)
+ * @fidelity ADAPTED
+ */
+void FX_UpdateAllParticles(void)
+{
+  float fVar1;
+  int iVar2;
+  int *piVar3;
+  int iVar4;
+  int iVar5;
+  piVar3 = &DAT_005db040;
+  iVar5 = 0;
+  do {
+    if (*piVar3 != 0) {
+      switch(*piVar3) {
+      case 1:
+        FX_UpdateTransparentSpriteObject((SceneryParticle *)piVar3,iVar5);
+        break;
+      case 2:
+        FX_UpdateHandlePlotObject((SceneryParticle *)piVar3,iVar5);
+        break;
+      case 3:
+        Obstacle_SimulateDynamics((SceneryParticle *)piVar3);
+        break;
+      case 4:
+        FX_UpdateTransparentSpriteObject2((SceneryParticle *)piVar3,iVar5);
+        break;
+      case 5:
+        FX_UpdateFlyingParticles((SceneryParticle *)piVar3,iVar5);
+        break;
+      case 6:
+        FX_UpdateExplosionNode((SceneryParticle *)piVar3,iVar5);
+        break;
+      case 7:
+        FUN_004307b0(piVar3);
+        break;
+      case 8:
+        FX_UpdateSuperPlotObject((SceneryParticle *)piVar3,iVar5);
+        break;
+      case 9:
+        FUN_00431d00(piVar3,iVar5);
+        break;
+      case 10:
+        FUN_00432040(piVar3);
+        break;
+      case 0xb:
+        FUN_00432bb0(piVar3,iVar5);
+      }
+    }
+    piVar3 = piVar3 + 0x19;
+    iVar5 = iVar5 + 1;
+  } while (piVar3 < &DAT_005dfe60);
+  _DAT_00563d64 = _DAT_00563d64 + _DAT_0047a430;
+  if ((float)*(int *)(&DAT_00498480 + DAT_00552fc4 * 4) <= _DAT_00563d64) {
+    FUN_00401f00();
+    fVar1 = (float)*(int *)(&DAT_00498480 + DAT_00552fc4 * 4);
+    if ((float)*(int *)(&DAT_00498480 + DAT_00552fc4 * 4) <= _DAT_00563d64) {
+      do {
+        _DAT_00563d64 = _DAT_00563d64 - fVar1;
+      } while (fVar1 <= _DAT_00563d64);
+    }
+  }
+  if (0 < DAT_0054f954) {
+    FUN_00429a40();
+  }
+  if (0 < DAT_00563cf0) {
+    FUN_0042aa00();
+  }
+  if (0 < DAT_00563d78) {
+    FUN_0042acb0();
+  }
+  if (0 < DAT_00552f78) {
+    FUN_0042b5d0();
+  }
+  if ((DAT_00527f6c == 3) && (iVar5 = 0, 0 < DAT_006192f0)) {
+    iVar4 = 0;
+    do {
+      iVar2 = DAT_005daffc + iVar4;
+      if ((((*(int *)(iVar2 + 0x39c) == DAT_00527f24) && (_DAT_00552e48 < 0.0)) &&
+          (*(int *)(iVar2 + 0x354) == 0)) &&
+         (((*(int *)(iVar2 + 0x358) == 0 && (*(int *)(iVar2 + 0x35c) == 0)) &&
+          (*(int *)(iVar2 + 0x528) == 0)))) {
+        FUN_00444890();
+      }
+      iVar4 = iVar4 + 0x484c;
+      iVar5 = iVar5 + 1;
+    } while (iVar5 < DAT_006192f0);
+  }
+  FUN_00441210();
   return;
 }
