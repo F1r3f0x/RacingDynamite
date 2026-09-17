@@ -31,6 +31,7 @@ extern uint8_t *g_pLisaTextureSheets;
 uint8_t *g_pActivePAN = NULL;
 uint8_t *g_pLisaTransparencyLUT = NULL;
 uint8_t *g_pVirtualFramebuffer = NULL;
+LisaCamera *g_LisaCamera = NULL;
 int g_ScreenWidth = 640;
 int g_ScreenHeight = 480;
 float g_CameraYaw = 0.0f;
@@ -554,10 +555,10 @@ extern void *g_LisaOpcodeTable[];
 extern void *PTR_LAB_0049c924;
 extern void *PTR_Lisa_DrawTexturedTriangle_Op15_0049c934;
 extern int DAT_0047c040;
-extern int DAT_00498740;
-extern int DAT_00498744;
-extern int DAT_00498748;
-extern int DAT_0049874c;
+extern int g_ViewportMinX;
+extern int g_ViewportMinY;
+extern int g_ViewportMaxX;
+extern int g_ViewportMaxY;
 extern int DAT_00499fa4;
 extern int DAT_00499fa8;
 extern int DAT_00499fac;
@@ -572,10 +573,10 @@ extern int DAT_0049c9c4;
 extern int DAT_0049c9c8;
 extern int DAT_0049c9d0;
 extern int DAT_0049c9d8;
-extern int DAT_0049ca2c;
-extern int DAT_0049ca30;
-extern int DAT_0049ca34;
-extern int DAT_0049ca38;
+extern int g_SubpixelMinX;
+extern int g_SubpixelMinY;
+extern int g_SubpixelMaxX;
+extern int g_SubpixelMaxY;
 extern int DAT_0049ca3c;
 extern int DAT_0049ca44;
 extern int DAT_0049d3a8;
@@ -640,7 +641,6 @@ extern int DAT_0063c5d4;
 extern int DAT_0063c5d8;
 extern int DAT_0063c5dc;
 extern int DAT_0063c5ec;
-extern int g_LisaCamera;
 extern int DAT_0063c5f4;
 extern int g_LisaVisibleSubmeshes;
 extern int DAT_0063c600;
@@ -724,30 +724,30 @@ int Lisa_RenderScene(void) {
 
   
 
-  DAT_0049ca2c = DAT_00498740 << 8;
-  DAT_0049ca30 = DAT_00498744 << 8;
-  DAT_0049ca34 = (DAT_00498748 + 1) * 0x100;
-  DAT_0049ca38 = (DAT_0049874c + 1) * 0x100;
+  g_SubpixelMinX = g_ViewportMinX << 8;
+  g_SubpixelMinY = g_ViewportMinY << 8;
+  g_SubpixelMaxX = (g_ViewportMaxX + 1) * 0x100;
+  g_SubpixelMaxY = (g_ViewportMaxY + 1) * 0x100;
 
-  if (*(int *)(g_LisaCamera + 0x38) != 0) {
+  if (g_LisaCamera->enable_sky != 0) {
     FUN_00448990();
   }
 
-  if (*(int *)(g_LisaCamera + 0x3c) != 0) {
+  if (g_LisaCamera->enable_frustum_cull != 0) {
     Lisa_FrustumCullObjects();
   }
 
-  if (*(int *)(g_LisaCamera + 0x40) != 0) {
+  if (g_LisaCamera->enable_transform != 0) {
     Lisa_TransformVertices();
   }
 
-  if (*(int *)(g_LisaCamera + 0x50) != 0) {
+  if (g_LisaCamera->enable_submeshes != 0) {
     Lisa_RenderSubmeshes();
   }
 
   iVar8 = 0;
 
-  if (*(int *)(g_LisaCamera + 0x54) != 0) {
+  if (g_LisaCamera->enable_depth_sort != 0) {
     iVar5 = 5999;
     piVar6 = (int *)(g_pLisaDepthBuckets + 0x5dbc);
 
@@ -868,7 +868,7 @@ int * Lisa_InitEngineMemory(void) {
     puVar5 = puVar5 + 1;
   }
 
-  g_LisaCamera = calloc(1,0xa8);
+  g_LisaCamera = (LisaCamera *)calloc(1, sizeof(LisaCamera));
   DAT_0063c5ec = calloc(20000,0xc);
   DAT_0063b600 = calloc(14000,8);
   g_pLisaTextureSheets = calloc(1000,4);
@@ -1393,7 +1393,7 @@ unsigned long long FUN_004471e0(void) {
 
   lVar2 = __ftol();
   iVar1 = g_LisaCamera;
-  *(int *)(g_LisaCamera + 0x80) = (int)lVar2;
+  g_LisaCamera->viewport_x = (int)lVar2;
   lVar2 = __ftol();
   *(int *)(iVar1 + 0x84) = (int)lVar2;
   lVar2 = __ftol();
@@ -2753,7 +2753,7 @@ int FUN_00448c30(void) {
   
 
   iVar3 = g_LisaCamera;
-  *(int *)(g_LisaCamera + 0x60) = 0;
+  g_LisaCamera->visible_obj_count = 0;
   lVar9 = __ftol();
   lVar10 = __ftol();
   lVar11 = __ftol();
@@ -2918,7 +2918,7 @@ int Lisa_FrustumCullObjects(void) {
   
 
   iVar2 = g_LisaCamera;
-  *(int *)(g_LisaCamera + 0x60) = 0;
+  g_LisaCamera->visible_obj_count = 0;
 
   if (*(int *)(iVar2 + 0xa4) == 0) {
     lVar23 = __ftol();
@@ -3160,14 +3160,14 @@ int Lisa_FrustumCullObjects(void) {
   iVar17 = *(int *)(iVar2 + 0x9c);
   iVar1 = *(int *)(iVar2 + 0x84);
   iVar2 = *(int *)(iVar2 + 0xa0);
-  iVar8 = DAT_0049ca2c >> 8;
-  iVar9 = DAT_0049ca34 >> 8;
-  iVar10 = DAT_0049ca30 >> 8;
-  iVar11 = DAT_0049ca38 >> 8;
+  iVar8 = g_SubpixelMinX >> 8;
+  iVar9 = g_SubpixelMaxX >> 8;
+  iVar10 = g_SubpixelMinY >> 8;
+  iVar11 = g_SubpixelMaxY >> 8;
   FUN_0044b340(&local_24);
   iVar18 = g_LisaCamera;
-  local_38 = *(int *)(g_LisaCamera + 0x60);
-  *(int *)(g_LisaCamera + 100) = local_38;
+  local_38 = g_LisaCamera->visible_obj_count;
+  g_LisaCamera->submesh_count = local_38;
   *(int *)(iVar18 + 0x60) = 0;
 
   if (0 < local_38) {
@@ -3268,12 +3268,12 @@ int FUN_00449470(void) {
   
 
   iVar22 = g_LisaCamera;
-  iVar19 = *(int *)(g_LisaCamera + 0xa4);
+  iVar19 = g_LisaCamera->projection_type;
 
   if (iVar19 == 0) {
-    *(int *)(g_LisaCamera + 0x60) = 0;
+    g_LisaCamera->visible_obj_count = 0;
     piVar15 = (int *)(iVar22 + 0x60);
-    local_58 = (double *)(g_LisaCamera + 0x20);
+    local_58 = &g_LisaCamera->rot_y;
     lVar30 = __ftol();
     lVar31 = __ftol();
     iVar19 = ((int)lVar30 * 0x24 + (int)lVar31) * 8;
@@ -3390,9 +3390,9 @@ int FUN_00449470(void) {
   }
 
   else {
-    *(int *)(g_LisaCamera + 0x60) = 0;
+    g_LisaCamera->visible_obj_count = 0;
     piVar14 = (int *)(iVar22 + 0x60);
-    local_58 = (double *)(g_LisaCamera + 0x20);
+    local_58 = &g_LisaCamera->rot_y;
     local_50[0] = (float)(iVar19 / 3);
     fcos((double)*local_58 * (double)_DAT_0047ae48);
     lVar30 = __ftol();
@@ -3509,40 +3509,40 @@ int FUN_00449470(void) {
   }
 
   local_6c = (int *)(iVar22 + 0x60);
-  iVar19 = *(int *)(g_LisaCamera + 0x9c);
-  iVar22 = DAT_0049ca2c + iVar19 * -0x100;
+  iVar19 = g_LisaCamera->fov_x;
+  iVar22 = g_SubpixelMinX + iVar19 * -0x100;
 
-  if ((((DAT_0050dd88 != iVar22) || (DAT_0049ca34 + iVar19 * -0x100 != DAT_0050dd68)) ||
+  if ((((DAT_0050dd88 != iVar22) || (g_SubpixelMaxX + iVar19 * -0x100 != DAT_0050dd68)) ||
 
-      (DAT_0049ca30 + *(int *)(g_LisaCamera + 0xa0) * -0x100 != DAT_0050dd2c)) ||
+      (g_SubpixelMinY + g_LisaCamera->fov_y * -0x100 != DAT_0050dd2c)) ||
 
-     (((DAT_0049ca38 + *(int *)(g_LisaCamera + 0xa0) * -0x100 != DAT_004cdc24 ||
+     (((g_SubpixelMaxY + g_LisaCamera->fov_y * -0x100 != DAT_004cdc24 ||
 
-       (*(int *)(g_LisaCamera + 0x80) != DAT_0050dda4)) ||
+       (g_LisaCamera->viewport_x != DAT_0050dda4)) ||
 
-      ((*(int *)(g_LisaCamera + 0x84) != DAT_004cdc20 || (DAT_0049c9c0 == 1)))))) {
+      ((g_LisaCamera->viewport_y != DAT_004cdc20 || (DAT_0049c9c0 == 1)))))) {
     uVar13 = 0;
     DAT_0049c9c0 = 0;
-    DAT_0050dd68 = DAT_0049ca34 + iVar19 * -0x100;
-    iVar9 = *(int *)(g_LisaCamera + 0xa0);
-    DAT_0050dd2c = DAT_0049ca30 + iVar9 * -0x100;
-    DAT_004cdc24 = DAT_0049ca38 + iVar9 * -0x100;
-    DAT_0050dda4 = *(int *)(g_LisaCamera + 0x80);
-    DAT_004cdc20 = *(int *)(g_LisaCamera + 0x84);
+    DAT_0050dd68 = g_SubpixelMaxX + iVar19 * -0x100;
+    iVar9 = g_LisaCamera->fov_y;
+    DAT_0050dd2c = g_SubpixelMinY + iVar9 * -0x100;
+    DAT_004cdc24 = g_SubpixelMaxY + iVar9 * -0x100;
+    DAT_0050dda4 = g_LisaCamera->viewport_x;
+    DAT_004cdc20 = g_LisaCamera->viewport_y;
 
-    local_50[0] = ((float)((-1 - iVar19) * 0x100 + DAT_0049ca2c) * (float)_DAT_0047ae58) /
-
-                  ((float)DAT_0050dda4 * (float)_DAT_0047ae50);
-
-    local_50[3] = ((float)((1 - iVar19) * 0x100 + DAT_0049ca34) * (float)_DAT_0047ae58) /
+    local_50[0] = ((float)((-1 - iVar19) * 0x100 + g_SubpixelMinX) * (float)_DAT_0047ae58) /
 
                   ((float)DAT_0050dda4 * (float)_DAT_0047ae50);
 
-    local_50[1] = ((float)((-1 - iVar9) * 0x100 + DAT_0049ca30) * (float)_DAT_0047ae58) /
+    local_50[3] = ((float)((1 - iVar19) * 0x100 + g_SubpixelMaxX) * (float)_DAT_0047ae58) /
+
+                  ((float)DAT_0050dda4 * (float)_DAT_0047ae50);
+
+    local_50[1] = ((float)((-1 - iVar9) * 0x100 + g_SubpixelMinY) * (float)_DAT_0047ae58) /
 
                   ((float)DAT_004cdc20 * (float)_DAT_0047ae50);
 
-    local_50[7] = ((float)((1 - iVar9) * 0x100 + DAT_0049ca38) * (float)_DAT_0047ae58) /
+    local_50[7] = ((float)((1 - iVar9) * 0x100 + g_SubpixelMaxY) * (float)_DAT_0047ae58) /
 
                   ((float)DAT_004cdc20 * (float)_DAT_0047ae50);
     local_50[2] = 1000.0;
@@ -3602,11 +3602,11 @@ int FUN_00449470(void) {
     *(float *)((int)&DAT_004cdca8 + iVar19) = fVar1;
   }
 
-  fVar24 = (double)*(double *)(g_LisaCamera + 0x18) * (double)_DAT_0047ae48;
+  fVar24 = (double)g_LisaCamera->rot_x * (double)_DAT_0047ae48;
   fVar25 = (double)fcos(fVar24);
   fVar26 = (double)fcos((double)*local_58 * (double)_DAT_0047ae48);
   fVar24 = (double)fsin(fVar24);
-  fVar27 = (double)*(double *)(g_LisaCamera + 0x28) * (double)_DAT_0047ae48;
+  fVar27 = (double)g_LisaCamera->rot_z * (double)_DAT_0047ae48;
   fVar28 = (double)fsin((double)*local_58 * (double)_DAT_0047ae48);
   fVar29 = (double)fcos(fVar27);
   local_50[0] = (float)fVar29;
@@ -3640,7 +3640,7 @@ int FUN_00449470(void) {
   lVar31 = __ftol();
   lVar32 = __ftol();
   local_70 = *local_6c;
-  *(int *)(g_LisaCamera + 100) = local_70;
+  g_LisaCamera->submesh_count = local_70;
   *local_6c = 0;
   pfVar17 = local_50 + 3;
 
@@ -3726,22 +3726,22 @@ void Lisa_TransformVertices(void) {
                     
 
   iVar6 = g_LisaCamera;
-  pdVar10 = (double *)(g_LisaCamera + 0x30);
+  pdVar10 = &g_LisaCamera->zoom;
   DAT_0049c9a8 = 0;
 
-  if (*(double *)(g_LisaCamera + 0x30) <= 0.0) {
+  if (g_LisaCamera->zoom <= 0.0) {
     DAT_0049c9a8 = 0xffffffff;
   }
 
-  piVar11 = (int *)(g_LisaCamera + 0x80);
+  piVar11 = &g_LisaCamera->viewport_x;
 
   if (300 < *piVar11) {
     FUN_0044a3d0();
     return;
   }
 
-  piVar1 = (int *)(g_LisaCamera + 0x88);
-  *(int *)(g_LisaCamera + 0x5c) = 0;
+  piVar1 = &g_LisaCamera->viewport_width;
+  g_LisaCamera->vertex_counter = 0;
   DAT_0050ddfc = *piVar1 << 2;
   fVar16 = (double)*(double *)(iVar6 + 0x18) * (double)_DAT_0047ae68;
   DAT_004cdbbc = *(int *)(iVar6 + 0x9c) << 8;
@@ -3816,7 +3816,7 @@ void Lisa_TransformVertices(void) {
   local_c = 0;
   DAT_0050de04 = (int)(iVar6 + (iVar6 >> 0x1f & 0xfffU)) >> 0xc;
 
-  if (0 < *(int *)(g_LisaCamera + 0x60)) {
+  if (0 < g_LisaCamera->visible_obj_count) {
     local_18 = 0;
     local_10 = 0;
 
@@ -3825,7 +3825,7 @@ void Lisa_TransformVertices(void) {
       iVar7 = DAT_0063c5ec;
       iVar6 = *(int *)(g_LisaVisibleObjects + local_10);
       piVar1 = *(int **)(iVar6 + 4);
-      iVar15 = *(int *)(g_LisaCamera + 0x5c);
+      iVar15 = g_LisaCamera->vertex_counter;
       *(int **)(g_LisaVisibleSubmeshes + local_18) = piVar1;
       piVar11 = (int *)(iVar7 + iVar15 * 0xc);
       iVar7 = *(int *)(iVar6 + 0xc) - (int)lVar22;
@@ -3840,7 +3840,7 @@ void Lisa_TransformVertices(void) {
         local_1c = *piVar1;
 
         if (0 < local_1c) {
-          *(int *)(g_LisaCamera + 0x5c) = iVar15 + local_1c;
+          g_LisaCamera->vertex_counter = iVar15 + local_1c;
 
           do {
             iVar12 = piVar1[iVar6] + iVar7;
@@ -3885,7 +3885,7 @@ void Lisa_TransformVertices(void) {
       local_18 = local_18 + 8;
       local_10 = local_10 + 4;
       local_c = local_c + 1;
-    } while (local_c < *(int *)(g_LisaCamera + 0x60));
+    } while (local_c < g_LisaCamera->visible_obj_count);
   }
 
   return;
@@ -3928,8 +3928,8 @@ int FUN_0044a3d0(void) {
   
 
   iVar6 = g_LisaCamera;
-  DAT_0050ddfc = *(int *)(g_LisaCamera + 0x88) << 2;
-  *(int *)(g_LisaCamera + 0x5c) = 0;
+  DAT_0050ddfc = g_LisaCamera->viewport_width << 2;
+  g_LisaCamera->vertex_counter = 0;
   fVar15 = (double)*(double *)(iVar6 + 0x18) * (double)_DAT_0047ae68;
   DAT_004cdbbc = *(int *)(iVar6 + 0x9c) << 8;
   fVar16 = (double)fcos(fVar15);
@@ -4008,7 +4008,7 @@ int FUN_0044a3d0(void) {
   local_c = 0;
   DAT_0050de04 = (int)(iVar6 + (iVar6 >> 0x1f & 0xfffU)) >> 0xc;
 
-  if (0 < *(int *)(g_LisaCamera + 0x60)) {
+  if (0 < g_LisaCamera->visible_obj_count) {
     local_1c = 0;
     local_10 = 0;
 
@@ -4030,7 +4030,7 @@ int FUN_0044a3d0(void) {
         local_20 = *piVar2;
 
         if (0 < local_20) {
-          *(int *)(g_LisaCamera + 0x5c) = iVar14 + local_20;
+          g_LisaCamera->vertex_counter = iVar14 + local_20;
           iVar6 = 2;
 
           do {
@@ -4072,7 +4072,7 @@ int FUN_0044a3d0(void) {
       local_1c = local_1c + 8;
       local_10 = local_10 + 4;
       local_c = local_c + 1;
-    } while (local_c < *(int *)(g_LisaCamera + 0x60));
+    } while (local_c < g_LisaCamera->visible_obj_count);
   }
 
   return 0;
@@ -4172,8 +4172,8 @@ int FUN_0044a900(int param_1,int param_2,int param_3,int param_4,int *param_5) {
   local_58 = *param_5;
 
   if (0 < local_58) {
-    iVar5 = *(int *)(g_LisaCamera + 0x5c);
-    *(int *)(g_LisaCamera + 0x5c) = iVar5 + local_58;
+    iVar5 = g_LisaCamera->vertex_counter;
+    g_LisaCamera->vertex_counter = iVar5 + local_58;
     piVar10 = (int *)(iVar6 + iVar5 * 0xc);
 
     do {
@@ -4301,8 +4301,8 @@ int FUN_0044ae20(int param_1,int param_2,int param_3,int param_4,int *param_5) {
   local_58 = *param_5;
 
   if (0 < local_58) {
-    iVar5 = *(int *)(g_LisaCamera + 0x5c);
-    *(int *)(g_LisaCamera + 0x5c) = iVar5 + local_58;
+    iVar5 = g_LisaCamera->vertex_counter;
+    g_LisaCamera->vertex_counter = iVar5 + local_58;
     iVar8 = 2;
     piVar10 = (int *)(iVar6 + iVar5 * 0xc);
 
@@ -4351,12 +4351,12 @@ void FUN_0044b340(int *param_1) {
 
   
 
-  fVar1 = (double)*(double *)(g_LisaCamera + 0x18) * (double)_DAT_0047ae68;
+  fVar1 = (double)g_LisaCamera->rot_x * (double)_DAT_0047ae68;
   fcos(fVar1);
-  fVar2 = (double)*(double *)(g_LisaCamera + 0x20) * (double)_DAT_0047ae68;
+  fVar2 = (double)g_LisaCamera->rot_y * (double)_DAT_0047ae68;
   fcos(fVar2);
   fsin(fVar1);
-  fVar1 = (double)*(double *)(g_LisaCamera + 0x28) * (double)_DAT_0047ae68;
+  fVar1 = (double)g_LisaCamera->rot_z * (double)_DAT_0047ae68;
   fsin(fVar2);
   fcos(fVar1);
   fsin(fVar1);
@@ -4391,11 +4391,11 @@ void Lisa_InitOpcodeTable(void) {
   
 
   iVar1 = g_LisaCamera;
-  _DAT_0063b5e4 = (*(int *)(g_LisaCamera + 0x88) >> 2) + 1;
-  _DAT_0063c5f8 = *(int *)(g_LisaCamera + 0x88) - _DAT_0063b5e4;
+  _DAT_0063b5e4 = (g_LisaCamera->viewport_width >> 2) + 1;
+  _DAT_0063c5f8 = g_LisaCamera->viewport_width - _DAT_0063b5e4;
 
   if (DAT_0049c9b4 != 0) {
-    if (*(int *)(g_LisaCamera + 0x58) == 0) {
+    if (g_LisaCamera->shading_mode == 0) {
       if (DAT_0049c9ac == 0) {
         PTR_LAB_0049c924 = ((void *)0x0044c2e0);
       }
@@ -4411,12 +4411,12 @@ void Lisa_InitOpcodeTable(void) {
     }
 
     PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15;
-    *(int *)(g_LisaCamera + 0x68) = 0;
+    g_LisaCamera->active_draw_cmd = 0;
     *(int *)(iVar1 + 0x6c) = 0;
     return;
   }
 
-  if (*(int *)(g_LisaCamera + 0x58) == 0) {
+  if (g_LisaCamera->shading_mode == 0) {
     if (DAT_0049c9ac == 0) {
       PTR_LAB_0049c924 = ((void *)0x0044c2e0);
     }
@@ -4438,13 +4438,13 @@ void Lisa_InitOpcodeTable(void) {
 
   if (DAT_0049c9ac == 0) {
     PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15;
-    *(int *)(g_LisaCamera + 0x68) = 0;
+    g_LisaCamera->active_draw_cmd = 0;
     *(int *)(iVar1 + 0x6c) = 0;
     return;
   }
 
   PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = FUN_0044e900;
-  *(int *)(g_LisaCamera + 0x68) = 0;
+  g_LisaCamera->active_draw_cmd = 0;
   *(int *)(iVar1 + 0x6c) = 0;
   return;
 }
@@ -4541,7 +4541,7 @@ void FUN_0044b770(void) {
     uVar13 = uVar14;
   }
 
-  if (DAT_0049ca2c <= (int)uVar13) {
+  if (g_SubpixelMinX <= (int)uVar13) {
     uVar13 = uVar7;
 
     if ((int)uVar6 <= (int)uVar7) {
@@ -4554,7 +4554,7 @@ void FUN_0044b770(void) {
       uVar14 = uVar13;
     }
 
-    if ((int)uVar14 <= DAT_0049ca34) {
+    if ((int)uVar14 <= g_SubpixelMaxX) {
       uVar13 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar4 * 0xc);
       uVar14 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar3 * 0xc);
       uVar15 = uVar13;
@@ -4569,7 +4569,7 @@ void FUN_0044b770(void) {
         uVar15 = uVar17;
       }
 
-      if (DAT_0049ca30 <= (int)uVar15) {
+      if (g_SubpixelMinY <= (int)uVar15) {
         uVar15 = uVar13;
 
         if ((int)uVar14 <= (int)uVar13) {
@@ -4582,7 +4582,7 @@ void FUN_0044b770(void) {
           uVar17 = uVar15;
         }
 
-        if ((int)uVar17 <= DAT_0049ca38) {
+        if ((int)uVar17 <= g_SubpixelMaxY) {
           iVar16 = *(int *)(DAT_0050dd8c + 8 + uVar5 * 0xc) +
 
                    *(int *)(DAT_0050dd8c + 8 + uVar4 * 0xc) +
@@ -4689,7 +4689,7 @@ void FUN_0044b980(void) {
     uVar13 = uVar14;
   }
 
-  if (DAT_0049ca2c <= (int)uVar13) {
+  if (g_SubpixelMinX <= (int)uVar13) {
     uVar13 = uVar7;
 
     if ((int)uVar6 <= (int)uVar7) {
@@ -4702,7 +4702,7 @@ void FUN_0044b980(void) {
       uVar14 = uVar13;
     }
 
-    if ((int)uVar14 <= DAT_0049ca34) {
+    if ((int)uVar14 <= g_SubpixelMaxX) {
       uVar13 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar4 * 0xc);
       uVar14 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar3 * 0xc);
       uVar15 = uVar13;
@@ -4717,7 +4717,7 @@ void FUN_0044b980(void) {
         uVar15 = uVar17;
       }
 
-      if (DAT_0049ca30 <= (int)uVar15) {
+      if (g_SubpixelMinY <= (int)uVar15) {
         uVar15 = uVar13;
 
         if ((int)uVar14 <= (int)uVar13) {
@@ -4730,7 +4730,7 @@ void FUN_0044b980(void) {
           uVar17 = uVar15;
         }
 
-        if ((int)uVar17 <= DAT_0049ca38) {
+        if ((int)uVar17 <= g_SubpixelMaxY) {
           iVar16 = *(int *)(DAT_0050dd8c + 8 + uVar5 * 0xc) +
 
                    *(int *)(DAT_0050dd8c + 8 + uVar4 * 0xc) +
@@ -4817,7 +4817,7 @@ int Lisa_RenderSubmeshes(void) {
   DAT_004cdc84 = DAT_0063b600;
   *DAT_0063b600 = DAT_0063c600;
 
-  if (0 < *(int *)(g_LisaCamera + 0x60)) {
+  if (0 < g_LisaCamera->visible_obj_count) {
     iVar4 = 0;
     iVar3 = 0;
 
@@ -4835,10 +4835,10 @@ int Lisa_RenderSubmeshes(void) {
       iVar2 = iVar2 + 1;
       iVar4 = iVar4 + 8;
       iVar3 = iVar3 + 4;
-    } while (iVar2 < *(int *)(g_LisaCamera + 0x60));
+    } while (iVar2 < g_LisaCamera->visible_obj_count);
   }
 
-  *(int *)(g_LisaCamera + 0x68) =
+  g_LisaCamera->active_draw_cmd =
 
        (int)(((int)DAT_004cdc84 - (int)DAT_0063b600) +
 
@@ -4895,7 +4895,7 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
     iVar13 = iVar7;
   }
 
-  if (DAT_0049ca2c <= iVar13) {
+  if (g_SubpixelMinX <= iVar13) {
     iVar13 = *(int *)(DAT_0050dd8c + uVar3 * 0xc);
 
     if (iVar6 <= iVar13) {
@@ -4908,7 +4908,7 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
       iVar14 = iVar13;
     }
 
-    if (iVar14 <= DAT_0049ca34) {
+    if (iVar14 <= g_SubpixelMaxX) {
       iVar13 = *(int *)(DAT_0050dd8c + 4 + uVar4 * 0xc);
       iVar14 = *(int *)(DAT_0050dd8c + 4 + uVar3 * 0xc);
 
@@ -4922,7 +4922,7 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
         iVar14 = iVar8;
       }
 
-      if (DAT_0049ca30 <= iVar14) {
+      if (g_SubpixelMinY <= iVar14) {
         iVar14 = *(int *)(DAT_0050dd8c + 4 + uVar3 * 0xc);
 
         if (iVar13 <= iVar14) {
@@ -4935,7 +4935,7 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
           iVar17 = iVar14;
         }
 
-        if (iVar17 <= DAT_0049ca38) {
+        if (iVar17 <= g_SubpixelMaxY) {
           iVar18 = *(int *)(DAT_0050dd8c + 4 + uVar3 * 0xc) >> 4;
           iVar15 = *(int *)(DAT_0050dd8c + uVar3 * 0xc) >> 4;
           iVar14 = *(int *)(DAT_0050dd8c + 8 + uVar5 * 0xc);
@@ -4955,7 +4955,7 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
 
                ((((sVar2 < 100 || (sVar2 == 200)) || ((299 < sVar2 && (sVar2 < 0x12f)))) &&
 
-                ((*(int *)(g_LisaCamera + 0x58) != 0 &&
+                ((g_LisaCamera->shading_mode != 0 &&
 
                  ((char *)(*DAT_0050dddc & 0xffff0000) != &DAT_004d0000)))))) {
               if (local_24 < 0x1e1) {
@@ -5099,7 +5099,7 @@ void FUN_0044cf00(void) {
     iVar10 = iVar12;
   }
 
-  if (DAT_0049ca2c <= iVar10) {
+  if (g_SubpixelMinX <= iVar10) {
     iVar10 = *(int *)(DAT_0050dd8c + iVar2 * 0xc);
 
     if (iVar3 <= iVar10) {
@@ -5112,7 +5112,7 @@ void FUN_0044cf00(void) {
       iVar12 = iVar10;
     }
 
-    if (iVar12 <= DAT_0049ca34) {
+    if (iVar12 <= g_SubpixelMaxX) {
       iVar10 = *(int *)(DAT_0050dd8c + 4 + iVar2 * 0xc);
       iVar12 = *(int *)(DAT_0050dd8c + 4 + iVar11 * 0xc);
 
@@ -5126,7 +5126,7 @@ void FUN_0044cf00(void) {
         iVar10 = iVar13;
       }
 
-      if (DAT_0049ca30 <= iVar10) {
+      if (g_SubpixelMinY <= iVar10) {
         iVar10 = *(int *)(DAT_0050dd8c + 4 + iVar2 * 0xc);
 
         if (iVar12 <= iVar10) {
@@ -5139,7 +5139,7 @@ void FUN_0044cf00(void) {
           iVar13 = iVar10;
         }
 
-        if (iVar13 <= DAT_0049ca38) {
+        if (iVar13 <= g_SubpixelMaxY) {
           iVar11 = *(int *)(DAT_0050dd8c + 8 + iVar4 * 0xc) +
 
                    *(int *)(DAT_0050dd8c + 8 + iVar2 * 0xc) +
@@ -5401,7 +5401,7 @@ void Lisa_DrawTexturedTriangle_Op15(void) {
     iVar1 = *(int *)(iVar9 + 4 + iVar24 * 0xc);
     iVar24 = *(int *)(iVar9 + iVar24 * 0xc);
 
-    if ((DAT_0049ca38 - iVar1 | DAT_0049ca34 - iVar24 | iVar1 - DAT_0049ca30 | iVar24 - DAT_0049ca2c
+    if ((g_SubpixelMaxY - iVar1 | g_SubpixelMaxX - iVar24 | iVar1 - g_SubpixelMinY | iVar24 - g_SubpixelMinX
 
         ) < 0) {
       do {
@@ -5420,7 +5420,7 @@ void Lisa_DrawTexturedTriangle_Op15(void) {
           iVar11 = iVar2;
         }
 
-        if (DAT_0049ca2c <= iVar11) {
+        if (g_SubpixelMinX <= iVar11) {
           _DAT_004cdc4c = iVar24;
 
           if (iVar1 <= iVar24) {
@@ -5433,7 +5433,7 @@ void Lisa_DrawTexturedTriangle_Op15(void) {
             iVar24 = iVar2;
           }
 
-          if (iVar24 <= DAT_0049ca34) {
+          if (iVar24 <= g_SubpixelMaxX) {
             iVar24 = *(int *)(iVar9 + 4 + iVar22 * 4);
             iVar1 = *(int *)(iVar9 + 4 + DAT_0050dd9c * 4);
             _DAT_004cdc4c = iVar24;
@@ -5449,7 +5449,7 @@ void Lisa_DrawTexturedTriangle_Op15(void) {
               iVar11 = iVar2;
             }
 
-            if (DAT_0049ca30 <= iVar11) {
+            if (g_SubpixelMinY <= iVar11) {
               _DAT_004cdc4c = iVar24;
 
               if (iVar1 <= iVar24) {
@@ -5462,7 +5462,7 @@ void Lisa_DrawTexturedTriangle_Op15(void) {
                 iVar24 = iVar2;
               }
 
-              if (iVar24 <= DAT_0049ca38) break;
+              if (iVar24 <= g_SubpixelMaxY) break;
             }
 
           }
@@ -5546,7 +5546,7 @@ LAB_0044d8ef:
         DAT_0050ddac = -5;
       }
 
-      if (((*(int *)(g_LisaCamera + 0x58) == 0) ||
+      if (((g_LisaCamera->shading_mode == 0) ||
 
           (_DAT_004cdc98 = (int)*(short *)(DAT_0050dd28 + 0x1e), 0x2d0 < DAT_004cdc44)) ||
 
@@ -5709,9 +5709,9 @@ void FUN_0044e900(void) {
     iVar23 = *(int *)(iVar11 + 4 + iVar19 * 0xc);
     iVar19 = *(int *)(iVar11 + iVar19 * 0xc);
 
-    if ((DAT_0049ca38 - iVar23 | DAT_0049ca34 - iVar19 | iVar23 - DAT_0049ca30 |
+    if ((g_SubpixelMaxY - iVar23 | g_SubpixelMaxX - iVar19 | iVar23 - g_SubpixelMinY |
 
-        iVar19 - DAT_0049ca2c) < 0) {
+        iVar19 - g_SubpixelMinX) < 0) {
       do {
         iVar4 = DAT_0050dddc;
         iVar19 = *(int *)(iVar11 + iVar25 * 4);
@@ -5729,7 +5729,7 @@ void FUN_0044e900(void) {
           iVar26 = iVar3;
         }
 
-        if (DAT_0049ca2c <= iVar26) {
+        if (g_SubpixelMinX <= iVar26) {
           _DAT_004cdc9c = iVar23;
 
           if (iVar19 <= iVar23) {
@@ -5742,7 +5742,7 @@ void FUN_0044e900(void) {
             iVar19 = iVar3;
           }
 
-          if (iVar19 <= DAT_0049ca34) {
+          if (iVar19 <= g_SubpixelMaxX) {
             iVar19 = *(int *)(iVar11 + 4 + DAT_004cdce0 * 4);
             iVar23 = *(int *)(iVar11 + 4 + iVar25 * 4);
             _DAT_004cdc9c = iVar19;
@@ -5758,7 +5758,7 @@ void FUN_0044e900(void) {
               iVar26 = iVar3;
             }
 
-            if (DAT_0049ca30 <= iVar26) {
+            if (g_SubpixelMinY <= iVar26) {
               _DAT_004cdc9c = iVar19;
 
               if (iVar23 <= iVar19) {
@@ -5771,7 +5771,7 @@ void FUN_0044e900(void) {
                 iVar19 = iVar3;
               }
 
-              if (iVar19 <= DAT_0049ca38) break;
+              if (iVar19 <= g_SubpixelMaxY) break;
             }
 
           }
@@ -6078,16 +6078,16 @@ long long Lisa_ExecuteRasterizerCommands(int param_1,unsigned int param_2) {
   _DAT_0049ca1c = _DAT_0049c9fc << 8;
   _DAT_0049ca10 = _DAT_0049ca00;
   _DAT_0049ca20 = _DAT_0049ca00 << 8;
-  DAT_0049ca2c = _DAT_0049ca1c;
-  DAT_0049ca30 = _DAT_0049ca20;
+  g_SubpixelMinX = _DAT_0049ca1c;
+  g_SubpixelMinY = _DAT_0049ca20;
   _DAT_0049ca04 = unaff_ESI[6];
   _DAT_0049ca08 = unaff_ESI[7];
   _DAT_0049ca14 = _DAT_0049ca04 + 1;
   _DAT_0049ca18 = _DAT_0049ca08 + 1;
-  DAT_0049ca34 = _DAT_0049ca14 * 0x100;
-  _DAT_0049ca24 = DAT_0049ca34 + -1;
-  DAT_0049ca38 = _DAT_0049ca18 * 0x100;
-  _DAT_0049ca28 = DAT_0049ca38 + -1;
+  g_SubpixelMaxX = _DAT_0049ca14 * 0x100;
+  _DAT_0049ca24 = g_SubpixelMaxX + -1;
+  g_SubpixelMaxY = _DAT_0049ca18 * 0x100;
+  _DAT_0049ca28 = g_SubpixelMaxY + -1;
   _DAT_0049c9ec = (int *)*_DAT_0049c9e8;
 
   if (_DAT_0049c9ec != (int *)0x0) {

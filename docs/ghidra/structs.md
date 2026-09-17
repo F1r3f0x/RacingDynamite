@@ -90,6 +90,38 @@ typedef struct {
 } MshSubmesh;
 ```
 
+### `LisaCamera` (168 bytes / `0xA8` allocated in `Lisa_InitEngineMemory`)
+```c
+#pragma pack(push, 1)
+typedef struct LisaCamera {
+    int32_t pad00[6];              // 0x00: 24 bytes internal transformation state
+    double  rot_x;                 // 0x18: Camera rotation pitch
+    double  rot_y;                 // 0x20: Camera rotation yaw
+    double  rot_z;                 // 0x28: Camera rotation roll
+    double  zoom;                  // 0x30: Focal length / zoom factor
+    int32_t enable_sky;            // 0x38: Sky backdrop enable flag
+    int32_t enable_frustum_cull;   // 0x3C: Spatial grid frustum cull flag
+    int32_t enable_transform;      // 0x40: Vertex transformation flag
+    int32_t pad44[3];              // 0x44: 12 bytes
+    int32_t enable_submeshes;      // 0x50: Submesh processing flag
+    int32_t enable_depth_sort;     // 0x54: Depth bucket sorting flag
+    int32_t shading_mode;          // 0x58: 0 = unshaded, 1 = shaded/alpha
+    int32_t vertex_counter;        // 0x5C: Transformed vertex counter
+    int32_t visible_obj_count;     // 0x60: Count of visible objects passed culling
+    int32_t submesh_count;         // 0x64: Count of visible submeshes
+    int32_t active_draw_cmd;       // 0x68: Active draw command index
+    int32_t pad6c[5];              // 0x6C: 20 bytes
+    int32_t viewport_x;            // 0x80: Viewport center X
+    int32_t viewport_y;            // 0x84: Viewport center Y
+    int32_t viewport_width;        // 0x88: Viewport screen width
+    int32_t pad8c[4];              // 0x8C: 16 bytes
+    int32_t fov_x;                 // 0x9C: Horizontal FOV scale (8.8 fixed-point)
+    int32_t fov_y;                 // 0xA0: Vertical FOV scale (8.8 fixed-point)
+    int32_t projection_type;       // 0xA4: 0 = perspective 3D, 1 = panorama/ortho
+} LisaCamera;
+#pragma pack(pop)
+```
+
 ---
 
 ## 3. Vehicle Physics & Simulation (`main.c`)

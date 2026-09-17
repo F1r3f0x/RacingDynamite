@@ -51,6 +51,15 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x0063c5c8` | `uint8_t**`| `g_pLisaTextureSheets`| Table of loaded texture base pointers (Track, Cars, Lights, Smoke). |
 | `0x004cdc28` | `uint8_t**`| `g_pLisaActiveMipTable`| Pointer to active texture mip table bound during submesh dispatch. |
 | `0x004b63c4` | `uint8_t*` | `g_pLisaActivePage`| Base pointer of active 64KB ($256 \times 256$) texture page in span rasterizer. |
+| `0x00498740` | `int32_t`  | `g_ViewportMinX`   | Left screen pixel boundary for viewport clipping. |
+| `0x00498744` | `int32_t`  | `g_ViewportMinY`   | Top screen pixel boundary for viewport clipping. |
+| `0x00498748` | `int32_t`  | `g_ViewportMaxX`   | Right screen pixel boundary for viewport clipping. |
+| `0x0049874c` | `int32_t`  | `g_ViewportMaxY`   | Bottom screen pixel boundary for viewport clipping. |
+| `0x0049ca2c` | `int32_t`  | `g_SubpixelMinX`   | Fixed-point 8.8 subpixel left clipping bound (`g_ViewportMinX << 8`). |
+| `0x0049ca30` | `int32_t`  | `g_SubpixelMinY`   | Fixed-point 8.8 subpixel top clipping bound (`g_ViewportMinY << 8`). |
+| `0x0049ca34` | `int32_t`  | `g_SubpixelMaxX`   | Fixed-point 8.8 subpixel right clipping bound (`(g_ViewportMaxX + 1) * 256`). |
+| `0x0049ca38` | `int32_t`  | `g_SubpixelMaxY`   | Fixed-point 8.8 subpixel bottom clipping bound (`(g_ViewportMaxY + 1) * 256`). |
+| `0x005db040` | `SceneryParticle[]`| `g_SceneryParticles`| Global active particle and dynamic scenery simulation pool. |
 | `0x004792f0` | `double`   | `g_PhysicsTimestep`| 72 Hz physics integration timestep ($1/72\text{ s} \approx 0.013888889\text{ s}$). |
 | `0x00479af0` | `double`   | `g_PhysicsScaleFactor`| World velocity integration multiplier (`21.76`). |
 | `0x004792c8` | `double`   | `g_PhysicsGravity` | Gravitational acceleration constant (`9.81` $m/s^2$). |

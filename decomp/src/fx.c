@@ -214,7 +214,7 @@ extern int DAT_0047a598;
 extern int _DAT_00563c50;
 extern int DAT_0047a5d8;
 extern int DAT_00498480;
-extern int DAT_005db040;
+extern int g_SceneryParticles;
 extern int DAT_00563d78;
 extern int DAT_00563d64;
 extern int DAT_0047a430;
@@ -1443,7 +1443,7 @@ LAB_00436c9c:
       FUN_0043ef30(1);
     }
   }
-  FUN_0043ec70();
+  FX_SpawnWeather();
   if ((0.0 <= _DAT_00552e48) && (_DAT_00552e48 < _DAT_0047a588)) {
     __ftol();
     Lisa_RenderPanorama();
@@ -1507,7 +1507,7 @@ void FX_UpdateAllParticles(void) {
   int *piVar3;
   int iVar4;
   int iVar5;
-  piVar3 = &DAT_005db040;
+  piVar3 = &g_SceneryParticles;
   iVar5 = 0;
   do {
     if (*piVar3 != 0) {
@@ -1798,7 +1798,7 @@ void FUN_004307b0(int *param_1) {
     _DAT_00639380 = 0;
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
-    FUN_00434380((int *)&DAT_00639330);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     _DAT_00639334 = 0x3c;
     _DAT_00639338 = 0;
     _DAT_00639340 = 0x3c;
@@ -1824,7 +1824,7 @@ void FUN_004307b0(int *param_1) {
     _DAT_00639380 = 0;
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
-    FUN_00434380((int *)&DAT_00639330);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     _DAT_00639338 = 0;
     _DAT_0063933c = 0x3c;
     _DAT_00639340 = 0;
@@ -1850,7 +1850,7 @@ void FUN_004307b0(int *param_1) {
     _DAT_00639380 = 0;
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
-    FUN_00434380((int *)&DAT_00639330);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     _DAT_00639338 = 0;
     _DAT_0063933c = 0xffffffc4;
     _DAT_00639340 = 0;
@@ -1876,7 +1876,7 @@ void FUN_004307b0(int *param_1) {
     _DAT_00639380 = 0;
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
-    FUN_00434380((int *)&DAT_00639330);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     _DAT_00639334 = 0xffffffc4;
     _DAT_00639338 = 0;
     _DAT_00639340 = 0xffffffc4;
@@ -1902,7 +1902,7 @@ void FUN_004307b0(int *param_1) {
     _DAT_00639380 = 0;
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
-    FUN_00434380((int *)&DAT_00639330);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     _DAT_00639334 = 0x3c;
     _DAT_00639330 = 9;
     _DAT_00639338 = 0;
@@ -1928,7 +1928,7 @@ void FUN_004307b0(int *param_1) {
     _DAT_00639380 = 0;
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
-    FUN_00434380((int *)&DAT_00639330);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     _DAT_00639338 = 0;
     _DAT_0063933c = 0x3c;
     _DAT_00639340 = 0;
@@ -1954,7 +1954,7 @@ void FUN_004307b0(int *param_1) {
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
     _DAT_00639380 = 0;
-    FUN_00434380((int *)&DAT_00639330);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     _DAT_00639338 = 0;
     _DAT_0063933c = 0xffffffc4;
     _DAT_00639340 = 0;
@@ -1980,7 +1980,7 @@ void FUN_004307b0(int *param_1) {
     _DAT_00639380 = 0;
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
-    FUN_00434380((int *)&DAT_00639330);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     _DAT_00639334 = 0xffffffc4;
     _DAT_0063933c = 0;
     _DAT_00639340 = 0xffffffc4;
@@ -2006,7 +2006,7 @@ void FUN_004307b0(int *param_1) {
     _DAT_00639380 = 0;
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
-    FUN_00434380((int *)&DAT_00639330);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     _DAT_00639334 = 0x3c;
     _DAT_0063933c = 0;
     _DAT_00639340 = 0x3c;
@@ -2032,7 +2032,7 @@ void FUN_004307b0(int *param_1) {
     _DAT_00639380 = 0;
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
-    FUN_00434380((int *)&DAT_00639330);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     _DAT_00639334 = 0xffffffc4;
     _DAT_0063933c = 0xffffffc4;
     _DAT_00639340 = 0xffffffc4;
@@ -2058,7 +2058,7 @@ void FUN_004307b0(int *param_1) {
     _DAT_00639380 = 0;
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
-    FUN_00434380((int *)&DAT_00639330);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     _DAT_00639334 = 0x3c;
     _DAT_0063933c = 0xffffffc4;
     _DAT_00639340 = 0x3c;
@@ -2084,8 +2084,8 @@ void FUN_004307b0(int *param_1) {
     _DAT_00639380 = 0;
     _DAT_0063937c = 0x166;
     _DAT_00639384 = 0x1f;
-    FUN_00434380((int *)&DAT_00639330);
-    FUN_0043e710(0,2,5,0,0x10000,22000,0);
+    FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
+    Audio_PlaySampleVol(0,2,5,0,0x10000,22000,0);
   }
   if (iVar22 - iVar23 == 0x14) {
     iVar20 = 10;
@@ -2104,12 +2104,12 @@ void FUN_004307b0(int *param_1) {
       _DAT_0063934c = 0x2800;
       _DAT_00639350 = 0;
       _DAT_00639354 = 0x3c;
-      FUN_00434380((int *)&DAT_00639330);
+      FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
       iVar20 = iVar20 + -1;
     } while (iVar20 != 0);
     __ftol();
     __ftol();
-    FUN_0043e710(0,4,3,0,0xe000,0,0);
+    Audio_PlaySampleVol(0,4,3,0,0xe000,0,0);
   }
   if (iVar23 <= iVar22 + -0x28) goto LAB_00431ab6;
   pdVar13 = (double *)((int)DAT_005daffc + iVar18);
@@ -2514,7 +2514,7 @@ void FUN_00432040(int *param_1) {
     if (fVar26 == (double)_DAT_0047a2e8) {
       __ftol();
       __ftol();
-      FUN_0043e710(0,2,1,0,0x10000,22000,0);
+      Audio_PlaySampleVol(0,2,1,0,0x10000,22000,0);
     }
     if (iVar25 == 0x1e) {
       iVar19 = iVar6 * 0x20;
@@ -2560,12 +2560,12 @@ void FUN_00432040(int *param_1) {
       _DAT_0063934c = 0x2800;
       _DAT_00639354 = 0x3c;
       _DAT_00639350 = 0;
-      FUN_00434380((int *)&DAT_00639330);
+      FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
       iVar19 = iVar19 + -1;
     } while (iVar19 != 0);
     __ftol();
     __ftol();
-    FUN_0043e710(0,4,3,0,0xe000,0,0);
+    Audio_PlaySampleVol(0,4,3,0,0xe000,0,0);
   }
   if (iVar25 <= iVar23 + -0x28) goto LAB_00432970;
   pdVar13 = (double *)((int)DAT_005daffc + iVar15);
@@ -2912,7 +2912,7 @@ void FUN_00432f20(void) {
         _DAT_0063935c = 1;
         _DAT_00639360 = 0;
         _DAT_00639364 = 0xf;
-        FUN_00434380((int *)&DAT_00639330);
+        FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
         iVar1 = iVar1 + -1;
       } while (iVar1 != 0);
     }
@@ -3008,7 +3008,7 @@ void FUN_004333e0(void) {
           _DAT_00639374 = (int)lVar4;
           _DAT_00639378 = 0;
           _DAT_0063937c = 0x3c;
-          FUN_00434380((int *)&DAT_00639330);
+          FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
           iVar2 = iVar2 + -1;
         } while (iVar2 != 0);
       }
@@ -3072,7 +3072,7 @@ void FUN_004338d0(void) {
       _DAT_00639384 = 0;
       _DAT_00639368 = &DAT_00497ff8;
       _DAT_00639388 = 0x28;
-      FUN_00434380((int *)&DAT_00639330);
+      FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
       fVar3 = (double)*(double *)(DAT_005daffc + 0xf8 + DAT_005285c0 * 0x484c) +
               (double)_DAT_0047a3c0;
       fcos(fVar3);
@@ -3111,7 +3111,7 @@ void FUN_004338d0(void) {
       _DAT_00639368 = &DAT_00497ff8;
       _DAT_00639388 = 0x28;
       _DAT_00639384 = 0;
-      FUN_00434380((int *)&DAT_00639330);
+      FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
       fVar3 = (double)*(double *)(DAT_005daffc + 0xf8 + DAT_005285c0 * 0x484c) +
               (double)_DAT_0047a3c0;
       fcos(fVar3);
@@ -3150,7 +3150,7 @@ void FUN_004338d0(void) {
       _DAT_00639368 = &DAT_00497ff8;
       _DAT_00639388 = 0x28;
       _DAT_00639384 = 0;
-      FUN_00434380((int *)&DAT_00639330);
+      FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
       fVar3 = (double)*(double *)(DAT_005daffc + 0xf8 + DAT_005285c0 * 0x484c) +
               (double)_DAT_0047a3c0;
       fcos(fVar3);
@@ -3189,7 +3189,7 @@ void FUN_004338d0(void) {
       _DAT_00639368 = &DAT_00497ff8;
       _DAT_00639388 = 0x28;
       _DAT_00639384 = 0;
-      FUN_00434380((int *)&DAT_00639330);
+      FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     }
   }
   return;
@@ -3248,7 +3248,7 @@ void FUN_00433f90(void) {
       _DAT_00639368 = &DAT_00497ff8;
       _DAT_00639388 = 100;
       _DAT_00639384 = 0;
-      FUN_00434380((int *)&DAT_00639330);
+      FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
     }
   }
   return;
@@ -3423,7 +3423,7 @@ LAB_00434c38:
             if (((int)lVar12 == 0) && (_DAT_0054f980 < 0.0)) {
               __ftol();
               __ftol();
-              FUN_0043e710(1,0,1,0,0x10000,0,0);
+              Audio_PlaySampleVol(1,0,1,0,0x10000,0,0);
             }
           }
           else if ((DAT_00553774 == 2) && (0 < *piVar4)) {
@@ -3519,10 +3519,10 @@ LAB_00434c38:
               _DAT_00639348 = 6;
               _DAT_00639344 = 0;
               _DAT_00639340 = local_10;
-              FUN_00434380((int *)&DAT_00639330);
+              FX_SpawnParticle((SceneryParticle *)&DAT_00639330);
               __ftol();
               __ftol();
-              FUN_0043e710(1,0,2,0,0x10000,0,0);
+              Audio_PlaySampleVol(1,0,2,0,0x10000,0,0);
             }
           }
           local_18 = local_18 + 1;
@@ -3652,10 +3652,10 @@ LAB_00435673:
 }
 
 /**
- * @original FUN_004356d0 (IGN_WIN.EXE @ 0x004356d0, fx.c)
+ * @original Pos_InitAnimatedObjects (IGN_WIN.EXE @ 0x004356d0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004356d0(void) {
+void Pos_InitAnimatedObjects(void) {
   int *piVar1;
   int *piVar2;
   int iVar3;
@@ -3700,10 +3700,10 @@ void FUN_004356d0(void) {
 }
 
 /**
- * @original FUN_004357a0 (IGN_WIN.EXE @ 0x004357a0, fx.c)
+ * @original Pos_UpdateAnimatedObjects (IGN_WIN.EXE @ 0x004357a0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004357a0(void) {
+void Pos_UpdateAnimatedObjects(void) {
   int iVar1;
   int *piVar2;
   int iVar3;
@@ -4237,7 +4237,7 @@ int FUN_00438050(void) {
 }
 
 /**
- * @original FUN_00438210 (IGN_WIN.EXE @ 0x00438210, fx.c)
+ * @original Lisa_RenderPanorama (IGN_WIN.EXE @ 0x00438210, fx.c)
  * @fidelity ADAPTED
  */
 
@@ -5945,10 +5945,10 @@ LAB_0043c897:
 }
 
 /**
- * @original FUN_0043c910 (IGN_WIN.EXE @ 0x0043c910, fx.c)
+ * @original Camera_UpdateChase (IGN_WIN.EXE @ 0x0043c910, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043c910(void) {
+void Camera_UpdateChase(void) {
   int iVar1;
   unsigned int uVar2;
   double dVar3;
@@ -6518,16 +6518,16 @@ int FUN_0043dea0(void) {
       puVar6 = (int *)((int)puVar6 + 1);
     }
   }
-  FUN_0043e2a0();
+  Lisa_Init();
   FUN_00420c00();
   return 0;
 }
 
 /**
- * @original FUN_0043e2a0 (IGN_WIN.EXE @ 0x0043e2a0, fx.c)
+ * @original Lisa_Init (IGN_WIN.EXE @ 0x0043e2a0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043e2a0(void) {
+void Lisa_Init(void) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -6592,14 +6592,14 @@ void FUN_0043e2a0(void) {
   DAT_00498748 = DAT_00553000 - 1;
   DAT_00498744 = 0;
   DAT_0049874c = DAT_00563c10 + -1;
-  uVar7 = FUN_0043e6a0(DAT_00553000,(unsigned int)(uVar6 >> 0x20));
+  uVar7 = Audio_LoadAssets(DAT_00553000,(unsigned int)(uVar6 >> 0x20));
   if (-1 < (int)uVar7) {
     _DAT_00498730 = DAT_0063c5bc;
     _DAT_0049873c = DAT_00563be4;
     _DAT_00498734 = &DAT_00563db0;
     _DAT_00498738 = &DAT_00563db0;
-    FUN_0043e6d0();
-    uVar7 = FUN_0043e6a0(DAT_00563c10,DAT_00553000);
+    Audio_StopSample();
+    uVar7 = Audio_LoadAssets(DAT_00563c10,DAT_00553000);
     if (-1 < (int)uVar7) {
       _DAT_00498478 = DAT_00552d80 * 500;
       _DAT_0049847c = DAT_00552f5c * 500;
@@ -7170,7 +7170,7 @@ LAB_0043fe07:
         ((int*)&(local_60[0]))[0] = (int)lVar11;
         lVar11 = __ftol();
         ((int*)&(local_60[0]))[0] = (int)lVar11;
-        FUN_0043e710(0,4,0,0,0x10000,22000,0);
+        Audio_PlaySampleVol(0,4,0,0,0x10000,22000,0);
         DAT_00563c38 = 1;
       }
       iVar6 = *(int *)(local_68 + DAT_00552ffc + 0x2c);
@@ -7186,7 +7186,7 @@ LAB_0043fe07:
         ((int*)&(local_60[0]))[0] = (int)lVar11;
         lVar11 = __ftol();
         ((int*)&(local_60[0]))[0] = (int)lVar11;
-        FUN_0043e710(0,4,0,0,0x10000,22000,0);
+        Audio_PlaySampleVol(0,4,0,0,0x10000,22000,0);
         DAT_00563c38 = 2;
       }
       iVar6 = *(int *)(local_68 + DAT_00552ffc + 0x2c);
@@ -7202,7 +7202,7 @@ LAB_0043fe07:
         ((int*)&(local_60[0]))[0] = (int)lVar11;
         lVar11 = __ftol();
         ((int*)&(local_60[0]))[0] = (int)lVar11;
-        FUN_0043e710(0,4,1,0,0x10000,22000,0);
+        Audio_PlaySampleVol(0,4,1,0,0x10000,22000,0);
         DAT_00563c38 = 3;
       }
       iVar6 = *(int *)(local_68 + DAT_00552ffc + 0x2c);
@@ -7255,7 +7255,7 @@ LAB_00440508:
         ((int*)&(local_60[0]))[0] = (int)lVar11;
         lVar11 = __ftol();
         ((int*)&(local_60[0]))[0] = (int)lVar11;
-        FUN_0043e710(0,4,5,0,0x10000,22000,0);
+        Audio_PlaySampleVol(0,4,5,0,0x10000,22000,0);
         *(int *)(&DAT_005531c0 + param_1 * 4) = 1;
       }
     }

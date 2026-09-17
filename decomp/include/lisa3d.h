@@ -37,6 +37,49 @@ typedef struct {
     int32_t max_y;
 } LisaViewportClip;
 
+#pragma pack(push, 1)
+typedef struct LisaCamera {
+    int32_t pad00[6];              /* 0x00: 24 bytes */
+    double  rot_x;                 /* 0x18: Camera rotation pitch */
+    double  rot_y;                 /* 0x20: Camera rotation yaw */
+    double  rot_z;                 /* 0x28: Camera rotation roll */
+    double  zoom;                  /* 0x30: Focal length / zoom factor */
+    int32_t enable_sky;            /* 0x38: Sky backdrop enable flag */
+    int32_t enable_frustum_cull;   /* 0x3C: Spatial grid frustum cull flag */
+    int32_t enable_transform;      /* 0x40: Vertex transformation flag */
+    int32_t pad44[3];              /* 0x44: 12 bytes */
+    int32_t enable_submeshes;      /* 0x50: Submesh processing flag */
+    int32_t enable_depth_sort;     /* 0x54: Depth bucket sorting flag */
+    int32_t shading_mode;          /* 0x58: 0 = unshaded, 1 = shaded/alpha */
+    int32_t vertex_counter;        /* 0x5C: Transformed vertex counter */
+    int32_t visible_obj_count;     /* 0x60: Count of visible objects passed culling */
+    int32_t submesh_count;         /* 0x64: Count of visible submeshes */
+    int32_t active_draw_cmd;       /* 0x68: Active draw command index */
+    int32_t pad6c[5];              /* 0x6C: 20 bytes */
+    int32_t viewport_x;            /* 0x80: Viewport center X */
+    int32_t viewport_y;            /* 0x84: Viewport center Y */
+    int32_t viewport_width;        /* 0x88: Viewport screen width */
+    int32_t pad8c[4];              /* 0x8C: 16 bytes */
+    int32_t fov_x;                 /* 0x9C: Horizontal FOV scale (8.8 fixed) */
+    int32_t fov_y;                 /* 0xA0: Vertical FOV scale (8.8 fixed) */
+    int32_t projection_type;       /* 0xA4: 0 = perspective 3D, 1 = panorama/ortho */
+} LisaCamera;
+
+typedef struct MshPolygon {
+    uint32_t header;               /* 0x00: Opcode in low byte (0x11..0x17), flags in high 24 bits */
+    uint32_t vi0;                  /* 0x04: Index of vertex 0 in submesh vertex buffer */
+    uint32_t vi1;                  /* 0x08: Index of vertex 1 in submesh vertex buffer */
+    uint32_t vi2;                  /* 0x0C: Index of vertex 2 in submesh vertex buffer */
+    int32_t  tu0;                  /* 0x10: Vertex 0 U (8.8 fixed) */
+    int32_t  tv0;                  /* 0x14: Vertex 0 V (8.8 fixed) */
+    int32_t  tu1;                  /* 0x18: Vertex 1 U (8.8 fixed) */
+    int32_t  tv1;                  /* 0x1C: Vertex 1 V (8.8 fixed) */
+    int32_t  tu2;                  /* 0x20: Vertex 2 U (8.8 fixed) */
+    int32_t  tv2;                  /* 0x24: Vertex 2 V (8.8 fixed) */
+    uint32_t extra;                /* 0x28: Texture page byte offset within .TEX */
+} MshPolygon;
+#pragma pack(pop)
+
 /* Global active panorama backdrop buffer (64KB, 256x256 8bpp) */
 extern uint8_t *g_pActivePAN;
 extern uint8_t *g_pLisaTransparencyLUT;
@@ -55,6 +98,8 @@ extern uint32_t **g_pLisaDepthBuckets;
 extern LisaViewportClip g_LisaViewport;
 extern int32_t g_LisaCullFlag;
 extern int32_t g_LisaMipmapTable[16];
+extern LisaCamera *g_LisaCamera;
+extern const MshPolygon *g_pLisaActivePolygon;
 
 /* Function prototypes */
 int Lisa_PrintVersion(void);
