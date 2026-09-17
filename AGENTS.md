@@ -4,7 +4,13 @@
 
 ## 1. Decompilation Pipeline (MAINDOS_32BIT.EXE)
 - **Target:** Exclusively reverse-engineer `MAINDOS_32BIT.EXE`. Use `IGN_WIN.EXE` only as a source port reference.
-- **Phase 1 (Functional):** Decompile functions into pure, functionally identical C code using Open Watcom V2. A 100% byte-match is NOT required in this phase due to compiler differences. ASM Fallbacks should ONLY be used for genuinely handwritten assembly, not for C compiler mismatches.
+- **Phase 1 (Functional & Semantic Reverse Engineering):** Decompile functions into pure, functionally identical, human-readable C code using Open Watcom V2. A 100% byte-match is NOT required in this phase due to compiler differences. ASM Fallbacks should ONLY be used for genuinely handwritten assembly, not for C compiler mismatches.
+- **Full Reverse Engineering Standard (No Raw Ghidra Dumps):** Raw decompiler pseudocode must NEVER be committed. Every decompiled function must undergo a full reverse engineering pass:
+  - **Struct Recovery:** Replace raw pointer offsets (`*(int *)(ptr + 0x38)`) with proper C struct definitions and field accesses (`camera->enable_sky`).
+  - **Semantic Variables:** Rename all decompiler register artifacts (`iVar1`, `uVar2`, `puVar3`, `param_1`, `local_400`) to meaningful, human-readable variable names reflecting game logic.
+  - **Global Identification:** Identify and replace raw `DAT_XXXXXXXX` memory addresses with authentic, descriptive global symbols (`g_ViewportMinX`, `g_LisaCamera`) and register them in `docs/ghidra/globals.md`.
+  - **Symbol Identification:** Determine the authentic role of unnamed `FUN_XXXXXXXX` routines, assigning meaningful names in code, `docs/ghidra/functions.md`, and `database/decomp.db`.
+  - **Clean Code Style:** Use clean, idiomatic C89 formatting (4-space indentation, no redundant blank lines, standard control flow).
 - **Phase 2 (Byte-Matching):** (Future) Procure Watcom C/C++ 10.6 to resolve compiler idiosyncrasies and shift functional C code to 100% bit-for-bit matching.
 - **Clean-Room:** Never commit original executables or assets. `tools/extract_assets.py` MUST validate SHA-1 checksums of user-provided game files.
 - **Pure C Only:** Never use inline assembly (`__asm`) in `.c` files.
