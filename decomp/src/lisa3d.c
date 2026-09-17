@@ -500,29 +500,29 @@ void Lisa_DrawTexturedTriangle_Op11_Shaded(void) {
 /* Forward prototypes for Lisa 3D rendering pipeline */
 int Lisa_RenderScene(void);
 int * Lisa_InitEngineMemory(void);
-void FUN_00446c30(void);
-int FUN_00446ca0(int param_1,int param_2,size_t param_3);
-long long FUN_00446d90(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9);
-int FUN_00446eb0(int *param_1);
-int FUN_00446f30(int *param_1);
-long long FUN_00447070(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9);
-int FUN_00447150(int *param_1);
-unsigned long long FUN_004471e0(void);
+void Lisa_FreeEngineMemory(void);
+int Lisa_InitSpatialGrid(int param_1,int param_2,size_t param_3);
+long long Lisa_CreateDynamicObject(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9);
+int Lisa_MoveDynamicObject(int *param_1);
+int Lisa_UpdateObjectSpatialGrid(int *param_1);
+long long Lisa_SetDynamicObjectMesh(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9);
+int Lisa_DeleteDynamicObject(int *param_1);
+unsigned long long Lisa_SetCameraViewport(void);
 int FUN_00447280(unsigned int *param_1,int param_2,int param_3,int param_4,int param_5,int param_6 ,int param_7,int param_8,char *param_9);
-void FUN_004475c0(int param_1,int param_2,int param_3,int param_4,int *param_5);
-void FUN_00447fb0(byte *param_1,byte *param_2,int param_3,int param_4,int param_5,int param_6);
-void FUN_004481f0(byte *param_1,int param_2,int param_3,int param_4,int param_5,int param_6, int param_7,int param_8);
-void FUN_00448620(int param_1,int param_2);
-unsigned int FUN_00448860(int *param_1,int param_2);
-unsigned long long FUN_00448990(void);
-int FUN_00448c30(void);
+void Lisa_GenerateTextureSpanTable(int param_1,int param_2,int param_3,int param_4,int *param_5);
+void Lisa_DownsampleTextureMipmap(byte *param_1,byte *param_2,int param_3,int param_4,int param_5,int param_6);
+void Lisa_FilterTextureBlock(byte *param_1,int param_2,int param_3,int param_4,int param_5,int param_6, int param_7,int param_8);
+void Lisa_LoadOrCreateShadingTable(int param_1,int param_2);
+unsigned int Lisa_FindClosestPaletteColor(int *param_1,int param_2);
+unsigned long long Lisa_RenderSkyBackdrop(void);
+int Lisa_CullObjectsOrthographic(void);
 int Lisa_FrustumCullObjects(void);
-int FUN_00449470(void);
+int Lisa_CullObjects(void);
 void Lisa_TransformVertices(void);
-int FUN_0044a3d0(void);
-int FUN_0044a900(int param_1,int param_2,int param_3,int param_4,int *param_5);
+int Lisa_TransformVerticesPanorama(void);
+int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int *param_5);
 int FUN_0044ae20(int param_1,int param_2,int param_3,int param_4,int *param_5);
-void FUN_0044b340(int *param_1);
+void Lisa_ComputeCameraRotationMatrix(int *param_1);
 void Lisa_InitOpcodeTable(void);
 int FUN_0044b570(void);
 void FUN_0044b770(void);
@@ -533,8 +533,8 @@ void FUN_0044cf00(void);
 void FUN_0044d0f0(void);
 void FUN_0044d230(void);
 void Lisa_DrawTexturedTriangle_Op15(void);
-void FUN_0044e900(void);
-long long FUN_0044f070(int param_1,unsigned int param_2);
+void Lisa_DrawTexturedTriangle_Op15_Sub(void);
+long long Lisa_InitRasterizerTables(int param_1,unsigned int param_2);
 long long Lisa_ExecuteRasterizerCommands(int param_1,unsigned int param_2);
 
 /* --- Automatically extracted globals for Lisa 3D rendering pipeline --- */
@@ -730,7 +730,7 @@ int Lisa_RenderScene(void) {
   g_SubpixelMaxY = (g_ViewportMaxY + 1) * 0x100;
 
   if (g_LisaCamera->enable_sky != 0) {
-    FUN_00448990();
+    Lisa_RenderSkyBackdrop();
   }
 
   if (g_LisaCamera->enable_frustum_cull != 0) {
@@ -985,10 +985,10 @@ int * Lisa_InitEngineMemory(void) {
 }
 
 /**
- * @original FUN_00446c30 (IGN_WIN.EXE @ 0x00446c30, lisa3d.c)
+ * @original Lisa_FreeEngineMemory (IGN_WIN.EXE @ 0x00446c30, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_00446c30(void) {
+void Lisa_FreeEngineMemory(void) {
   void *_Memory;
   int iVar1;
   int iVar2;
@@ -1029,10 +1029,10 @@ void FUN_00446c30(void) {
 }
 
 /**
- * @original FUN_00446ca0 (IGN_WIN.EXE @ 0x00446ca0, lisa3d.c)
+ * @original Lisa_InitSpatialGrid (IGN_WIN.EXE @ 0x00446ca0, lisa3d.c)
  * @fidelity ADAPTED
  */
-int FUN_00446ca0(int param_1,int param_2,size_t param_3) {
+int Lisa_InitSpatialGrid(int param_1,int param_2,size_t param_3) {
   int *puVar1;
   int iVar2;
   void *pvVar3;
@@ -1084,10 +1084,10 @@ int FUN_00446ca0(int param_1,int param_2,size_t param_3) {
 }
 
 /**
- * @original FUN_00446d90 (IGN_WIN.EXE @ 0x00446d90, lisa3d.c)
+ * @original Lisa_CreateDynamicObject (IGN_WIN.EXE @ 0x00446d90, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long FUN_00446d90(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9) {
+long long Lisa_CreateDynamicObject(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -1167,10 +1167,10 @@ long long FUN_00446d90(int param_1,int param_2,int *param_3,int *param_4,int par
 }
 
 /**
- * @original FUN_00446eb0 (IGN_WIN.EXE @ 0x00446eb0, lisa3d.c)
+ * @original Lisa_MoveDynamicObject (IGN_WIN.EXE @ 0x00446eb0, lisa3d.c)
  * @fidelity ADAPTED
  */
-int FUN_00446eb0(int *param_1) {
+int Lisa_MoveDynamicObject(int *param_1) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -1203,10 +1203,10 @@ int FUN_00446eb0(int *param_1) {
 }
 
 /**
- * @original FUN_00446f30 (IGN_WIN.EXE @ 0x00446f30, lisa3d.c)
+ * @original Lisa_UpdateObjectSpatialGrid (IGN_WIN.EXE @ 0x00446f30, lisa3d.c)
  * @fidelity ADAPTED
  */
-int FUN_00446f30(int *param_1) {
+int Lisa_UpdateObjectSpatialGrid(int *param_1) {
   int *piVar1;
   int iVar2;
   int iVar3;
@@ -1279,10 +1279,10 @@ int FUN_00446f30(int *param_1) {
 }
 
 /**
- * @original FUN_00447070 (IGN_WIN.EXE @ 0x00447070, lisa3d.c)
+ * @original Lisa_SetDynamicObjectMesh (IGN_WIN.EXE @ 0x00447070, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long FUN_00447070(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9) {
+long long Lisa_SetDynamicObjectMesh(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9) {
   int iVar1;
   unsigned int uVar2;
   unsigned int uVar3;
@@ -1339,10 +1339,10 @@ long long FUN_00447070(int param_1,int param_2,int *param_3,int *param_4,int par
 }
 
 /**
- * @original FUN_00447150 (IGN_WIN.EXE @ 0x00447150, lisa3d.c)
+ * @original Lisa_DeleteDynamicObject (IGN_WIN.EXE @ 0x00447150, lisa3d.c)
  * @fidelity ADAPTED
  */
-int FUN_00447150(int *param_1) {
+int Lisa_DeleteDynamicObject(int *param_1) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -1381,10 +1381,10 @@ int FUN_00447150(int *param_1) {
 }
 
 /**
- * @original FUN_004471e0 (IGN_WIN.EXE @ 0x004471e0, lisa3d.c)
+ * @original Lisa_SetCameraViewport (IGN_WIN.EXE @ 0x004471e0, lisa3d.c)
  * @fidelity ADAPTED
  */
-unsigned long long FUN_004471e0(void) {
+unsigned long long Lisa_SetCameraViewport(void) {
   int iVar1;
   long long lVar2;
   unsigned long long uVar3;
@@ -1516,11 +1516,11 @@ int FUN_00447280(unsigned int *param_1,int param_2,int param_3,int param_4,int p
           if (0 < iVar9) {
             do {
               if (iVar11 == 0) {
-                FUN_00447fb0(pbVar13,pbVar12,param_5,param_6,0x100,(int)local_400);
+                Lisa_DownsampleTextureMipmap(pbVar13,pbVar12,param_5,param_6,0x100,(int)local_400);
               }
 
               else {
-                FUN_004481f0(pbVar13,(int)pbVar12,param_5,param_6,0x100,(int)local_400,param_8,
+                Lisa_FilterTextureBlock(pbVar13,(int)pbVar12,param_5,param_6,0x100,(int)local_400,param_8,
 
                              iVar11);
               }
@@ -1558,17 +1558,17 @@ int FUN_00447280(unsigned int *param_1,int param_2,int param_3,int param_4,int p
   *param_1 = (unsigned int)puVar5;
 
   if ((bVar15) && (1 < param_4)) {
-    FUN_004475c0(*puVar4,(int)local_400,param_8,param_7,puVar5);
+    Lisa_GenerateTextureSpanTable(*puVar4,(int)local_400,param_8,param_7,puVar5);
   }
 
   return 0;
 }
 
 /**
- * @original FUN_004475c0 (IGN_WIN.EXE @ 0x004475c0, lisa3d.c)
+ * @original Lisa_GenerateTextureSpanTable (IGN_WIN.EXE @ 0x004475c0, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_004475c0(int param_1,int param_2,int param_3,int param_4,int *param_5) {
+void Lisa_GenerateTextureSpanTable(int param_1,int param_2,int param_3,int param_4,int *param_5) {
   unsigned int uVar1;
   int iVar2;
   byte bVar3;
@@ -1956,10 +1956,10 @@ LAB_00447785:
 }
 
 /**
- * @original FUN_00447fb0 (IGN_WIN.EXE @ 0x00447fb0, lisa3d.c)
+ * @original Lisa_DownsampleTextureMipmap (IGN_WIN.EXE @ 0x00447fb0, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_00447fb0(byte *param_1,byte *param_2,int param_3,int param_4,int param_5,int param_6) {
+void Lisa_DownsampleTextureMipmap(byte *param_1,byte *param_2,int param_3,int param_4,int param_5,int param_6) {
   int iVar1;
   byte bVar2;
   int iVar3;
@@ -2091,10 +2091,10 @@ void FUN_00447fb0(byte *param_1,byte *param_2,int param_3,int param_4,int param_
 }
 
 /**
- * @original FUN_004481f0 (IGN_WIN.EXE @ 0x004481f0, lisa3d.c)
+ * @original Lisa_FilterTextureBlock (IGN_WIN.EXE @ 0x004481f0, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_004481f0(byte *param_1,int param_2,int param_3,int param_4,int param_5,int param_6, int param_7,int param_8) {
+void Lisa_FilterTextureBlock(byte *param_1,int param_2,int param_3,int param_4,int param_5,int param_6, int param_7,int param_8) {
   byte bVar1;
   unsigned int uVar2;
   int iVar3;
@@ -2291,10 +2291,10 @@ LAB_004484c0:
 }
 
 /**
- * @original FUN_00448620 (IGN_WIN.EXE @ 0x00448620, lisa3d.c)
+ * @original Lisa_LoadOrCreateShadingTable (IGN_WIN.EXE @ 0x00448620, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_00448620(int param_1,int param_2) {
+void Lisa_LoadOrCreateShadingTable(int param_1,int param_2) {
   byte *pbVar1;
   char cVar2;
   unsigned int uVar3;
@@ -2537,10 +2537,10 @@ void FUN_00448620(int param_1,int param_2) {
 }
 
 /**
- * @original FUN_00448860 (IGN_WIN.EXE @ 0x00448860, lisa3d.c)
+ * @original Lisa_FindClosestPaletteColor (IGN_WIN.EXE @ 0x00448860, lisa3d.c)
  * @fidelity ADAPTED
  */
-unsigned int FUN_00448860(int *param_1,int param_2) {
+unsigned int Lisa_FindClosestPaletteColor(int *param_1,int param_2) {
   unsigned int uVar1;
   int iVar2;
   int iVar3;
@@ -2583,10 +2583,10 @@ unsigned int FUN_00448860(int *param_1,int param_2) {
 }
 
 /**
- * @original FUN_00448990 (IGN_WIN.EXE @ 0x00448990, lisa3d.c)
+ * @original Lisa_RenderSkyBackdrop (IGN_WIN.EXE @ 0x00448990, lisa3d.c)
  * @fidelity ADAPTED
  */
-unsigned long long FUN_00448990(void) {
+unsigned long long Lisa_RenderSkyBackdrop(void) {
   float fVar1;
   int iVar2;
   int iVar3;
@@ -2732,10 +2732,10 @@ LAB_00448c11:
 }
 
 /**
- * @original FUN_00448c30 (IGN_WIN.EXE @ 0x00448c30, lisa3d.c)
+ * @original Lisa_CullObjectsOrthographic (IGN_WIN.EXE @ 0x00448c30, lisa3d.c)
  * @fidelity ADAPTED
  */
-int FUN_00448c30(void) {
+int Lisa_CullObjectsOrthographic(void) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -3164,7 +3164,7 @@ int Lisa_FrustumCullObjects(void) {
   iVar9 = g_SubpixelMaxX >> 8;
   iVar10 = g_SubpixelMinY >> 8;
   iVar11 = g_SubpixelMaxY >> 8;
-  FUN_0044b340(&local_24);
+  Lisa_ComputeCameraRotationMatrix(&local_24);
   iVar18 = g_LisaCamera;
   local_38 = g_LisaCamera->visible_obj_count;
   g_LisaCamera->submesh_count = local_38;
@@ -3220,10 +3220,10 @@ int Lisa_FrustumCullObjects(void) {
 }
 
 /**
- * @original FUN_00449470 (IGN_WIN.EXE @ 0x00449470, lisa3d.c)
+ * @original Lisa_CullObjects (IGN_WIN.EXE @ 0x00449470, lisa3d.c)
  * @fidelity ADAPTED
  */
-int FUN_00449470(void) {
+int Lisa_CullObjects(void) {
   float fVar1;
   float fVar2;
   float fVar3;
@@ -3736,7 +3736,7 @@ void Lisa_TransformVertices(void) {
   piVar11 = &g_LisaCamera->viewport_x;
 
   if (300 < *piVar11) {
-    FUN_0044a3d0();
+    Lisa_TransformVerticesPanorama();
     return;
   }
 
@@ -3879,7 +3879,7 @@ void Lisa_TransformVertices(void) {
       }
 
       else {
-        FUN_0044a900(iVar7,iVar5,iVar8,iVar6,piVar1);
+        Lisa_ComputeObjectMatrix(iVar7,iVar5,iVar8,iVar6,piVar1);
       }
 
       local_18 = local_18 + 8;
@@ -3892,10 +3892,10 @@ void Lisa_TransformVertices(void) {
 }
 
 /**
- * @original FUN_0044a3d0 (IGN_WIN.EXE @ 0x0044a3d0, lisa3d.c)
+ * @original Lisa_TransformVerticesPanorama (IGN_WIN.EXE @ 0x0044a3d0, lisa3d.c)
  * @fidelity ADAPTED
  */
-int FUN_0044a3d0(void) {
+int Lisa_TransformVerticesPanorama(void) {
   float fVar1;
   int *piVar2;
   float fVar3;
@@ -4079,10 +4079,10 @@ int FUN_0044a3d0(void) {
 }
 
 /**
- * @original FUN_0044a900 (IGN_WIN.EXE @ 0x0044a900, lisa3d.c)
+ * @original Lisa_ComputeObjectMatrix (IGN_WIN.EXE @ 0x0044a900, lisa3d.c)
  * @fidelity ADAPTED
  */
-int FUN_0044a900(int param_1,int param_2,int param_3,int param_4,int *param_5) {
+int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int *param_5) {
   ushort uVar1;
   ushort uVar2;
   ushort uVar3;
@@ -4341,10 +4341,10 @@ int FUN_0044ae20(int param_1,int param_2,int param_3,int param_4,int *param_5) {
 }
 
 /**
- * @original FUN_0044b340 (IGN_WIN.EXE @ 0x0044b340, lisa3d.c)
+ * @original Lisa_ComputeCameraRotationMatrix (IGN_WIN.EXE @ 0x0044b340, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_0044b340(int *param_1) {
+void Lisa_ComputeCameraRotationMatrix(int *param_1) {
   double fVar1;
   double fVar2;
   long long lVar3;
@@ -4443,7 +4443,7 @@ void Lisa_InitOpcodeTable(void) {
     return;
   }
 
-  PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = FUN_0044e900;
+  PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15_Sub;
   g_LisaCamera->active_draw_cmd = 0;
   *(int *)(iVar1 + 0x6c) = 0;
   return;
@@ -5661,10 +5661,10 @@ LAB_0044d8ef:
 }
 
 /**
- * @original FUN_0044e900 (IGN_WIN.EXE @ 0x0044e900, lisa3d.c)
+ * @original Lisa_DrawTexturedTriangle_Op15_Sub (IGN_WIN.EXE @ 0x0044e900, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_0044e900(void) {
+void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
   char *pcVar1;
   short sVar2;
   int iVar3;
@@ -6011,10 +6011,10 @@ LAB_0044ecb6:
 }
 
 /**
- * @original FUN_0044f070 (IGN_WIN.EXE @ 0x0044f070, lisa3d.c)
+ * @original Lisa_InitRasterizerTables (IGN_WIN.EXE @ 0x0044f070, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long FUN_0044f070(int param_1,unsigned int param_2) {
+long long Lisa_InitRasterizerTables(int param_1,unsigned int param_2) {
   int in_EAX;
   short sVar1;
   int unaff_EBX;

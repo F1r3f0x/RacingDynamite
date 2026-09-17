@@ -93,8 +93,27 @@
 | `0x00020c81` | `0x004465e1` | `FUN_004465e1` | `Surface_TestTriangleNegativeDZ` | `getsurf.c` | Decompiled | EXACT | 2D trapezoidal slope span test for table1 triangles ($dz < 0$). |
 | - | `0x004466d0` | `FUN_004466d0` | `Lisa_RenderScene` | `lisa3d.c` | Decompiled | EXTENDED | Master 3D frame render: culls objects, transforms vertices, rasterizes spans. |
 | - | `0x004468d0` | `FUN_004468d0` | `Lisa_InitEngineMemory` | `lisa3d.c` | Decompiled | ADAPTED | Allocates internal rasterizer buffers, vertex streams, and matrices. |
+| - | `0x00446c30` | `FUN_00446c30` | `Lisa_FreeEngineMemory` | `lisa3d.c` | Decompiled | ADAPTED | Deallocates all tracked memory pools, display lists, and engine buffers. |
+| - | `0x00446ca0` | `FUN_00446ca0` | `Lisa_InitSpatialGrid` | `lisa3d.c` | Decompiled | ADAPTED | Initializes 2D spatial grid cell buckets and dynamic object node pools. |
+| - | `0x00446d90` | `FUN_00446d90` | `Lisa_CreateDynamicObject` | `lisa3d.c` | Decompiled | ADAPTED | Instantiates a dynamic 3D object node, links mesh, and computes bounding sphere. |
+| - | `0x00446eb0` | `FUN_00446eb0` | `Lisa_MoveDynamicObject` | `lisa3d.c` | Decompiled | ADAPTED | Updates position, orientation, and bounding box of a dynamic object. |
+| - | `0x00446f30` | `FUN_00446f30` | `Lisa_UpdateObjectSpatialGrid` | `lisa3d.c` | Decompiled | ADAPTED | Migrates object between spatial grid cell buckets across boundary transitions. |
+| - | `0x00447070` | `FUN_00447070` | `Lisa_SetDynamicObjectMesh` | `lisa3d.c` | Decompiled | ADAPTED | Rebinds submesh geometry pointer and recalculates bounding sphere radius. |
+| - | `0x00447150` | `FUN_00447150` | `Lisa_DeleteDynamicObject` | `lisa3d.c` | Decompiled | ADAPTED | Unlinks object from spatial grid cell bucket and returns node to free list. |
+| - | `0x004471e0` | `FUN_004471e0` | `Lisa_SetCameraViewport` | `lisa3d.c` | Decompiled | ADAPTED | Updates camera viewport offsets, width, and FOV scaling constants. |
+| - | `0x004475c0` | `FUN_004475c0` | `Lisa_GenerateTextureSpanTable` | `lisa3d.c` | Decompiled | ADAPTED | Computes 64KB perspective span texture mapping and scanline stepping tables. |
+| - | `0x00447fb0` | `FUN_00447fb0` | `Lisa_DownsampleTextureMipmap` | `lisa3d.c` | Decompiled | ADAPTED | Bilinear 2x2 box-filter texture downsampler for mipmap generation. |
+| - | `0x004481f0` | `FUN_004481f0` | `Lisa_FilterTextureBlock` | `lisa3d.c` | Decompiled | ADAPTED | Filtered texture block generator for LOD surface transitions. |
+| - | `0x00448620` | `FUN_00448620` | `Lisa_LoadOrCreateShadingTable` | `lisa3d.c` | Decompiled | ADAPTED | Calculates palette checksum and loads/generates 64KB .TAB lighting matrix. |
+| - | `0x00448860` | `FUN_00448860` | `Lisa_FindClosestPaletteColor` | `lisa3d.c` | Decompiled | ADAPTED | Euclidean distance RGB nearest-match in 256-color palette. |
+| - | `0x00448990` | `FUN_00448990` | `Lisa_RenderSkyBackdrop` | `lisa3d.c` | Decompiled | ADAPTED | Renders cylindrical panoramic sky backdrop with camera pitch/yaw tracking. |
+| - | `0x00448c30` | `FUN_00448c30` | `Lisa_CullObjectsOrthographic` | `lisa3d.c` | Decompiled | ADAPTED | Traverses spatial grid for orthographic / panorama projection mode. |
 | - | `0x00448e70` | `FUN_00448e70` | `Lisa_FrustumCullObjects` | `lisa3d.c` | Decompiled | ADAPTED | Spatial grid frustum culler populating visible object list. |
+| - | `0x00449470` | `FUN_00449470` | `Lisa_CullObjects` | `lisa3d.c` | Decompiled | ADAPTED | Master culling dispatcher selecting perspective vs orthographic frustum. |
 | - | `0x00449e70` | `FUN_00449e70` | `Lisa_TransformVertices` | `lisa3d.c` | Decompiled | ADAPTED | Camera matrix rotation, perspective projection, and backface culling. |
+| - | `0x0044a3d0` | `FUN_0044a3d0` | `Lisa_TransformVerticesPanorama` | `lisa3d.c` | Decompiled | ADAPTED | Cylindrical vertex transformation for panorama / wide-angle camera modes. |
+| - | `0x0044a900` | `FUN_0044a900` | `Lisa_ComputeObjectMatrix` | `lisa3d.c` | Decompiled | ADAPTED | Computes 3D orientation matrix from 0.1-degree Euler angles (0..3600). |
+| - | `0x0044b340` | `FUN_0044b340` | `Lisa_ComputeCameraRotationMatrix` | `lisa3d.c` | Decompiled | ADAPTED | Evaluates camera pitch/yaw/roll sines and cosines into 3x3 rotation matrix. |
 | - | `0x0044b480` | `FUN_0044b480` | `Lisa_InitOpcodeTable` | `lisa3d.c` | Decompiled | ADAPTED | Binds polygon opcode rasterization dispatch table (PTR_LAB_0049c8e0). |
 | - | `0x0044c1f0` | `FUN_0044c1f0` | `Lisa_RenderSubmeshes` | `lisa3d.c` | Decompiled | ADAPTED | Dispatches polygon opcodes across all visible transformed submeshes. |
 | - | `0x0044caa0` | `LAB_0044caa0` | `Lisa_DrawPolygon_Op12` | `lisa3d.c` | Decompiled | EXACT | Opcode 0x12: 1-bit transparent cutout triangle (pushes g_pLisaTransparencyLUT). |

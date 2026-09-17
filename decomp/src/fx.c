@@ -74,7 +74,6 @@ extern int Lisa_MoveDynamicObject(void *obj);
 extern void FatalError(const char *msg);
 extern void *FUN_00445f20(int a, int b, int c);
 extern void FUN_00456c40(int ptr);
-extern void FUN_00447150(void *obj);
 extern void Lisa_InitDynamicObjectNode(int a, int b, void *c, void *d, int e, int f, int g, int h, int i);
 
 extern int g_AudioEventParam1; // DAT_005532d0
@@ -86,7 +85,7 @@ extern int g_AudioEventParam6;
 extern int g_AudioEventParam7;
 extern void FUN_004579b0(int *ptr);
 extern void FUN_00456b70(int a, int b, char *c, void *d, int e, int f, int g);
-extern long long FUN_0044f070(int a, unsigned int b);
+extern long long Lisa_InitRasterizerTables(int a, unsigned int b);
 extern int *DAT_0063c5bc;
 extern int *DAT_0063c600;
 extern unsigned long long FUN_00438030(int a, unsigned int b);
@@ -772,7 +771,7 @@ void FX_UpdateExplosionNode(SceneryParticle *p, int instance_idx) {
     }
 
     if (count <= timer + 1) {
-        FUN_00447150(obj);
+        Lisa_DeleteDynamicObject(obj);
         p->type = 0;
         g_EliminationFlag = 0;
     }
@@ -785,7 +784,7 @@ void FX_UpdateExplosionNode(SceneryParticle *p, int instance_idx) {
  */
 long long Audio_LoadAssets(int param_1, unsigned int param_2) {
     long long lVar1;
-    lVar1 = FUN_0044f070(param_1, param_2);
+    lVar1 = Lisa_InitRasterizerTables(param_1, param_2);
     return (((long long)(lVar1 >> 32)) << 32) | 1;
 }
 
@@ -1346,7 +1345,7 @@ LAB_00436c9c:
     uVar11 = (int)(unsigned int)lVar20 >> 0x1f;
     if (((((unsigned int)lVar20 ^ uVar11) - uVar11 & 1 ^ uVar11) == uVar11) &&
        (piVar6 = (int *)(DAT_006192f0 * 0x20 + DAT_00553788), piVar6[7] == 0)) {
-      FUN_00446eb0(piVar6);
+      Lisa_MoveDynamicObject(piVar6);
     }
   }
   _DAT_00498730 = DAT_0063c5bc;
@@ -1376,7 +1375,7 @@ LAB_00436c9c:
   FUN_00438030(extraout_ECX,extraout_EDX);
   piVar6 = (int *)(DAT_006192f0 * 0x20 + DAT_00553788);
   if (piVar6[7] == 1) {
-    FUN_00447150(piVar6);
+    Lisa_DeleteDynamicObject(piVar6);
   }
   if (((*(int *)(DAT_005daffc + 0x528) == 0) || (_DAT_0054f980 <= _DAT_0047a5c0)) &&
      (DAT_005532b0 == 0)) {
@@ -1421,7 +1420,7 @@ LAB_00436c9c:
       uVar11 = (int)(unsigned int)lVar20 >> 0x1f;
       if (((((unsigned int)lVar20 ^ uVar11) - uVar11 & 1 ^ uVar11) == uVar11) &&
          (iVar14 = DAT_006192f0 * 0x20 + DAT_00553788, *(int *)(iVar14 + 0x3c) == 0)) {
-        FUN_00446eb0((int *)(iVar14 + 0x20));
+        Lisa_MoveDynamicObject((int *)(iVar14 + 0x20));
       }
     }
     uVar11 = *(unsigned int *)(DAT_005daffc + 0x4bb0);
@@ -1437,7 +1436,7 @@ LAB_00436c9c:
     FUN_00438030(extraout_ECX_00,extraout_EDX_00);
     iVar14 = DAT_006192f0 * 0x20 + DAT_00553788;
     if (*(int *)(iVar14 + 0x3c) == 1) {
-      FUN_00447150((int *)(iVar14 + 0x20));
+      Lisa_DeleteDynamicObject((int *)(iVar14 + 0x20));
     }
     if ((*(int *)(DAT_005daffc + 0x4d74) == 0) || (_DAT_0054f980 <= _DAT_0047a5c0)) {
       FUN_0043ef30(1);
@@ -1721,27 +1720,27 @@ void FUN_004307b0(int *param_1) {
   if (iVar23 == 0) {
     iVar20 = iVar6 * 0x20;
     if ((((int *)(DAT_005db02c + iVar20))[7] != 0) && (DAT_0054f930 == 0)) {
-      FUN_00447150((int *)(DAT_005db02c + iVar20));
+      Lisa_DeleteDynamicObject((int *)(DAT_005db02c + iVar20));
     }
     iVar24 = iVar6 * 0x80;
     if (((int *)(DAT_00552fbc + iVar24))[7] != 0) {
-      FUN_00447150((int *)(DAT_00552fbc + iVar24));
+      Lisa_DeleteDynamicObject((int *)(DAT_00552fbc + iVar24));
     }
     if (*(int *)(DAT_00552fbc + iVar24 + 0x3c) != 0) {
-      FUN_00447150((int *)(DAT_00552fbc + iVar24 + 0x20));
+      Lisa_DeleteDynamicObject((int *)(DAT_00552fbc + iVar24 + 0x20));
     }
     if (*(int *)(DAT_00552fbc + iVar24 + 0x5c) != 0) {
-      FUN_00447150((int *)(DAT_00552fbc + iVar24 + 0x40));
+      Lisa_DeleteDynamicObject((int *)(DAT_00552fbc + iVar24 + 0x40));
     }
     if (*(int *)(DAT_00552fbc + iVar24 + 0x7c) != 0) {
-      FUN_00447150((int *)(DAT_00552fbc + iVar24 + 0x60));
+      Lisa_DeleteDynamicObject((int *)(DAT_00552fbc + iVar24 + 0x60));
     }
     if ((((int *)(DAT_00552f20 + iVar20))[7] != 0) && (DAT_0054f930 == 0)) {
-      FUN_00447150((int *)(DAT_00552f20 + iVar20));
+      Lisa_DeleteDynamicObject((int *)(DAT_00552f20 + iVar20));
     }
     if (((*(int *)(DAT_00552ffc + iVar6 * 0x4c) == 7) && (DAT_0054f930 == 0)) &&
        (((int *)(iVar20 + DAT_00552f70))[7] != 0)) {
-      FUN_00447150((int *)(iVar20 + DAT_00552f70));
+      Lisa_DeleteDynamicObject((int *)(iVar20 + DAT_00552f70));
     }
     puVar15 = (int *)((int)DAT_005daffc + iVar18);
     puVar15[0xe2] = puVar15[1];
@@ -2248,27 +2247,27 @@ LAB_00431ab6:
       *(int *)((int)DAT_005daffc + iVar18 + 0x534) = 0;
       *(int *)((int)pdVar13 + iVar18 + 0x538) = 0x40590000;
       if ((((int *)(DAT_005db02c + iVar23))[7] == 0) && (DAT_0054f930 == 0)) {
-        FUN_00446eb0((int *)(DAT_005db02c + iVar23));
+        Lisa_MoveDynamicObject((int *)(DAT_005db02c + iVar23));
       }
       iVar22 = iVar6 * 0x80;
       if (((int *)(DAT_00552fbc + iVar22))[7] == 0) {
-        FUN_00446eb0((int *)(DAT_00552fbc + iVar22));
+        Lisa_MoveDynamicObject((int *)(DAT_00552fbc + iVar22));
       }
       if (*(int *)(DAT_00552fbc + iVar22 + 0x3c) == 0) {
-        FUN_00446eb0((int *)(DAT_00552fbc + iVar22 + 0x20));
+        Lisa_MoveDynamicObject((int *)(DAT_00552fbc + iVar22 + 0x20));
       }
       if (*(int *)(DAT_00552fbc + iVar22 + 0x5c) == 0) {
-        FUN_00446eb0((int *)(DAT_00552fbc + iVar22 + 0x40));
+        Lisa_MoveDynamicObject((int *)(DAT_00552fbc + iVar22 + 0x40));
       }
       if (*(int *)(DAT_00552fbc + iVar22 + 0x7c) == 0) {
-        FUN_00446eb0((int *)(DAT_00552fbc + iVar22 + 0x60));
+        Lisa_MoveDynamicObject((int *)(DAT_00552fbc + iVar22 + 0x60));
       }
       if ((((int *)(DAT_00552f20 + iVar23))[7] == 0) && (DAT_0054f930 == 0)) {
-        FUN_00446eb0((int *)(DAT_00552f20 + iVar23));
+        Lisa_MoveDynamicObject((int *)(DAT_00552f20 + iVar23));
       }
       if (((*(int *)(DAT_00552ffc + iVar6 * 0x4c) == 7) && (DAT_0054f930 == 0)) &&
          (((int *)(iVar23 + DAT_00552f70))[7] == 0)) {
-        FUN_00446eb0((int *)(iVar23 + DAT_00552f70));
+        Lisa_MoveDynamicObject((int *)(iVar23 + DAT_00552f70));
       }
       FUN_0043d540(iVar6);
       local_3c = iVar20;
@@ -2356,7 +2355,7 @@ void FUN_00431d00(int *param_1,int param_2) {
     *(int *)(&DAT_0052886c + iVar23) = 2;
     *(int *)(&DAT_00528870 + iVar23) = 3;
     *(int *)(&DAT_0052888c + iVar23) = uVar16;
-    FUN_00447070(DAT_0054f994,uVar13,(int *)(param_2 * 0x20 + DAT_0054f994),
+    Lisa_SetDynamicObjectMesh(DAT_0054f994,uVar13,(int *)(param_2 * 0x20 + DAT_0054f994),
                  (int *)(&DAT_00528800 + iVar23),uVar16,200,0,0x14,0);
   }
   iVar23 = param_2 * 0x20;
@@ -2368,10 +2367,10 @@ void FUN_00431d00(int *param_1,int param_2) {
   *(int *)(iVar23 + 0x18 + DAT_0054f994) = 0;
   piVar19 = (int *)(DAT_0054f994 + iVar23);
   if (piVar19[7] == 0) {
-    FUN_00446eb0(piVar19);
+    Lisa_MoveDynamicObject(piVar19);
   }
   else {
-    iVar21 = FUN_00446f30(piVar19);
+    iVar21 = Lisa_UpdateObjectSpatialGrid(piVar19);
     if (iVar21 != 0) {
       FUN_0045b5c0(s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468);
     }
@@ -2393,7 +2392,7 @@ void FUN_00431d00(int *param_1,int param_2) {
   *(int *)(&DAT_00528884 + iVar21) = piVar19[2] << 8;
   *(int *)(&DAT_00528888 + iVar21) = piVar19[3] << 8;
   if (iVar18 <= iVar22) {
-    FUN_00447150((int *)(iVar23 + DAT_0054f994));
+    Lisa_DeleteDynamicObject((int *)(iVar23 + DAT_0054f994));
     *param_1 = 0;
   }
   param_1[0x14] = iVar22;
@@ -2519,27 +2518,27 @@ void FUN_00432040(int *param_1) {
     if (iVar25 == 0x1e) {
       iVar19 = iVar6 * 0x20;
       if ((((int *)(DAT_005db02c + iVar19))[7] != 0) && (DAT_0054f930 == 0)) {
-        FUN_00447150((int *)(DAT_005db02c + iVar19));
+        Lisa_DeleteDynamicObject((int *)(DAT_005db02c + iVar19));
       }
       iVar21 = iVar6 * 0x80;
       if (((int *)(DAT_00552fbc + iVar21))[7] != 0) {
-        FUN_00447150((int *)(DAT_00552fbc + iVar21));
+        Lisa_DeleteDynamicObject((int *)(DAT_00552fbc + iVar21));
       }
       if (*(int *)(DAT_00552fbc + iVar21 + 0x3c) != 0) {
-        FUN_00447150((int *)(DAT_00552fbc + iVar21 + 0x20));
+        Lisa_DeleteDynamicObject((int *)(DAT_00552fbc + iVar21 + 0x20));
       }
       if (*(int *)(DAT_00552fbc + iVar21 + 0x5c) != 0) {
-        FUN_00447150((int *)(DAT_00552fbc + iVar21 + 0x40));
+        Lisa_DeleteDynamicObject((int *)(DAT_00552fbc + iVar21 + 0x40));
       }
       if (*(int *)(DAT_00552fbc + iVar21 + 0x7c) != 0) {
-        FUN_00447150((int *)(DAT_00552fbc + iVar21 + 0x60));
+        Lisa_DeleteDynamicObject((int *)(DAT_00552fbc + iVar21 + 0x60));
       }
       if ((((int *)(DAT_00552f20 + iVar19))[7] != 0) && (DAT_0054f930 == 0)) {
-        FUN_00447150((int *)(DAT_00552f20 + iVar19));
+        Lisa_DeleteDynamicObject((int *)(DAT_00552f20 + iVar19));
       }
       if (((*(int *)(DAT_00552ffc + iVar6 * 0x4c) == 7) && (DAT_0054f930 == 0)) &&
          (((int *)(iVar19 + DAT_00552f70))[7] != 0)) {
-        FUN_00447150((int *)(iVar19 + DAT_00552f70));
+        Lisa_DeleteDynamicObject((int *)(iVar19 + DAT_00552f70));
       }
     }
   }
@@ -2704,27 +2703,27 @@ LAB_00432970:
       *(int *)((int)DAT_005daffc + iVar15 + 0x534) = 0;
       *(int *)((int)pdVar13 + iVar15 + 0x538) = 0x40590000;
       if ((((int *)(DAT_005db02c + iVar25))[7] == 0) && (DAT_0054f930 == 0)) {
-        FUN_00446eb0((int *)(DAT_005db02c + iVar25));
+        Lisa_MoveDynamicObject((int *)(DAT_005db02c + iVar25));
       }
       iVar23 = iVar6 * 0x80;
       if (((int *)(DAT_00552fbc + iVar23))[7] == 0) {
-        FUN_00446eb0((int *)(DAT_00552fbc + iVar23));
+        Lisa_MoveDynamicObject((int *)(DAT_00552fbc + iVar23));
       }
       if (*(int *)(DAT_00552fbc + iVar23 + 0x3c) == 0) {
-        FUN_00446eb0((int *)(DAT_00552fbc + iVar23 + 0x20));
+        Lisa_MoveDynamicObject((int *)(DAT_00552fbc + iVar23 + 0x20));
       }
       if (*(int *)(DAT_00552fbc + iVar23 + 0x5c) == 0) {
-        FUN_00446eb0((int *)(DAT_00552fbc + iVar23 + 0x40));
+        Lisa_MoveDynamicObject((int *)(DAT_00552fbc + iVar23 + 0x40));
       }
       if (*(int *)(DAT_00552fbc + iVar23 + 0x7c) == 0) {
-        FUN_00446eb0((int *)(DAT_00552fbc + iVar23 + 0x60));
+        Lisa_MoveDynamicObject((int *)(DAT_00552fbc + iVar23 + 0x60));
       }
       if ((((int *)(DAT_00552f20 + iVar25))[7] == 0) && (DAT_0054f930 == 0)) {
-        FUN_00446eb0((int *)(DAT_00552f20 + iVar25));
+        Lisa_MoveDynamicObject((int *)(DAT_00552f20 + iVar25));
       }
       if (((*(int *)(DAT_00552ffc + iVar6 * 0x4c) == 7) && (DAT_0054f930 == 0)) &&
          (((int *)(iVar25 + DAT_00552f70))[7] == 0)) {
-        FUN_00446eb0((int *)(iVar25 + DAT_00552f70));
+        Lisa_MoveDynamicObject((int *)(iVar25 + DAT_00552f70));
       }
       FUN_0043d540(iVar6);
       local_3c = iVar24;
@@ -2782,7 +2781,7 @@ void FUN_00432bb0(int *param_1,int param_2) {
     iVar9 = DAT_0054f994;
     iVar7 = DAT_00552f5c * 0x96;
     *(int *)(&DAT_00528834 + iVar6) = iVar7;
-    FUN_00447070(iVar9,iVar7,(int *)(param_2 * 0x20 + iVar9),(int *)(&DAT_00528800 + iVar6),2,200,0,
+    Lisa_SetDynamicObjectMesh(iVar9,iVar7,(int *)(param_2 * 0x20 + iVar9),(int *)(&DAT_00528800 + iVar6),2,200,0,
                  0x14,0);
   }
   iVar7 = iVar4 * -8 + 0xfa;
@@ -2821,16 +2820,16 @@ void FUN_00432bb0(int *param_1,int param_2) {
   *(int *)(iVar7 + 0x18 + DAT_0054f994) = (int)(iVar10 * 10 + (iVar10 * 10 >> 0x1f & 0x3ffU)) >> 10;
   piVar8 = (int *)(DAT_0054f994 + iVar7);
   if (piVar8[7] == 0) {
-    FUN_00446eb0(piVar8);
+    Lisa_MoveDynamicObject(piVar8);
   }
   else {
-    iVar9 = FUN_00446f30(piVar8);
+    iVar9 = Lisa_UpdateObjectSpatialGrid(piVar8);
     if (iVar9 != 0) {
       FUN_0045b5c0(s_FEL_VID_LI_MOVEOBJECT_TRAN_SPRIT_004993b4);
     }
   }
   if (iVar5 <= iVar4 + 1) {
-    FUN_00447150((int *)(iVar7 + DAT_0054f994));
+    Lisa_DeleteDynamicObject((int *)(iVar7 + DAT_0054f994));
     *param_1 = 0;
   }
   param_1[2] = local_1c + iVar2;
@@ -3477,7 +3476,7 @@ LAB_00434c38:
               *(int *)(DAT_00553030 + 0x10 + iVar9) = 0;
               *(int *)(DAT_00553030 + 0x14 + iVar9) = 0;
               *(int *)(DAT_00553030 + 0x18 + iVar9) = 0;
-              iVar6 = FUN_00446f30((int *)(DAT_00553030 + iVar9));
+              iVar6 = Lisa_UpdateObjectSpatialGrid((int *)(DAT_00553030 + iVar9));
               if (iVar6 != 0) {
                 FUN_0045b5c0(s_FEL_VID_LI_MOVEOBJECT_WEATHER_0049948c);
               }
@@ -3743,7 +3742,7 @@ void Pos_UpdateAnimatedObjects(void) {
         if (0xe0f < iVar3) {
           *(int *)(DAT_0054f908 + 0x18 + iVar4) = iVar3 + -0xe10;
         }
-        iVar3 = FUN_00446f30((int *)(DAT_0054f908 + iVar4));
+        iVar3 = Lisa_UpdateObjectSpatialGrid((int *)(DAT_0054f908 + iVar4));
         if (iVar3 != 0) {
           FUN_0045b5c0(s_FEL_VID_LI_MOVEOBJECT_ANIM_OBJ_004994ac);
         }
@@ -3897,7 +3896,7 @@ LAB_00435a9e:
        *(int *)(DAT_005daff4 + 0x5c + DAT_005285c0 * 200);
   lVar24 = __ftol();
   *(int *)(DAT_0063c5f0 + 0x11) = (int)lVar24;
-  FUN_00448c30();
+  Lisa_CullObjectsOrthographic();
   piVar15 = FUN_00427dc0(local_2c,uVar14,local_10,-1,0x32);
   if (*piVar15 == -1) {
     local_2c = local_2c - 0x14;
@@ -3933,7 +3932,7 @@ LAB_00435a9e:
     if ((*(int *)(DAT_00552ffc + 4 + DAT_005285c0 * 0x4c) != 2) || (DAT_005285c0 == 0)) {
       *(int *)(DAT_005daffc + 0x560 + DAT_005285c0 * 0x484c) = 0;
     }
-    lVar24 = FUN_00447070(*(int *)
+    lVar24 = Lisa_SetDynamicObjectMesh(*(int *)
                            (&DAT_005db000 + *(int *)(DAT_00552ffc + DAT_005285c0 * 0x4c) * 4),
                           DAT_00552ffc,(int *)(DAT_005285c0 * 0x20 + DAT_005db02c),
                           (int *)*(int *)
@@ -6233,7 +6232,7 @@ void FUN_0043d540(int param_1) {
   *(int *)(DAT_005db02c + 0x14 + iVar3) = (int)lVar8;
   lVar8 = __ftol();
   *(int *)(DAT_005db02c + 0x18 + iVar3) = (int)lVar8;
-  if ((DAT_0054f930 == 0) && (iVar1 = FUN_00446f30((int *)(DAT_005db02c + iVar3)), iVar1 != 0)) {
+  if ((DAT_0054f930 == 0) && (iVar1 = Lisa_UpdateObjectSpatialGrid((int *)(DAT_005db02c + iVar3)), iVar1 != 0)) {
     FUN_0045b5c0(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4);
   }
   iVar1 = DAT_005daffc + param_1 * 0x484c;
@@ -6308,7 +6307,7 @@ void FUN_0043d540(int param_1) {
     *(int *)(DAT_00552fbc + 0x14 + iVar5) = (int)lVar8;
     lVar8 = __ftol();
     *(int *)(DAT_00552fbc + 0x18 + iVar5) = (int)lVar8;
-    iVar2 = FUN_00446f30((int *)(DAT_00552fbc + iVar5));
+    iVar2 = Lisa_UpdateObjectSpatialGrid((int *)(DAT_00552fbc + iVar5));
     if (iVar2 != 0) {
       FUN_0045b5c0(s_FEL_VID_LI_MOVEOBJECT_HANDLE_WHE_00499580);
     }
@@ -6328,7 +6327,7 @@ void FUN_0043d540(int param_1) {
     *(int *)(iVar3 + 0x14 + DAT_00552f70) = (int)lVar8;
     lVar8 = __ftol();
     *(int *)(iVar3 + 0x18 + DAT_00552f70) = (int)lVar8;
-    if ((DAT_0054f930 == 0) && (iVar1 = FUN_00446f30((int *)(DAT_00552f70 + iVar3)), iVar1 != 0)) {
+    if ((DAT_0054f930 == 0) && (iVar1 = Lisa_UpdateObjectSpatialGrid((int *)(DAT_00552f70 + iVar3)), iVar1 != 0)) {
       FUN_0045b5c0(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4);
     }
   }
@@ -6360,7 +6359,7 @@ void FUN_0043d540(int param_1) {
   *(int *)(DAT_00552f20 + 0x14 + iVar3) = (int)lVar8;
   lVar8 = __ftol();
   *(int *)(DAT_00552f20 + 0x18 + iVar3) = (int)lVar8;
-  if ((DAT_0054f930 == 0) && (iVar1 = FUN_00446f30((int *)(DAT_00552f20 + iVar3)), iVar1 != 0)) {
+  if ((DAT_0054f930 == 0) && (iVar1 = Lisa_UpdateObjectSpatialGrid((int *)(DAT_00552f20 + iVar3)), iVar1 != 0)) {
     FUN_0045b5c0(s_FEL_VID_LI_MOVEOBJECT_HANDLE_SHA_00499558);
   }
   if ((*(int *)(DAT_00552ffc + 4 + local_c) == 2) && (param_1 != 0)) {
@@ -6375,14 +6374,14 @@ void FUN_0043d540(int param_1) {
     *(int *)(DAT_00553788 + 0x18 + iVar3) = 0;
     piVar6 = (int *)(DAT_00553788 + iVar3);
     if (piVar6[7] == 1) {
-      iVar3 = FUN_00446f30(piVar6);
+      iVar3 = Lisa_UpdateObjectSpatialGrid(piVar6);
       if (iVar3 != 0) {
         FUN_0045b5c0(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_00499530);
         return;
       }
     }
     else {
-      iVar3 = FUN_00446eb0(piVar6);
+      iVar3 = Lisa_MoveDynamicObject(piVar6);
       if (iVar3 != 0) {
         FUN_0045b5c0(s_FEL_VID_LI_PLACEOBJECT_HANDLE_CA_00499508);
       }
@@ -6587,7 +6586,7 @@ void Lisa_Init(void) {
          DAT_005285c4 / 2 + ((int)(DAT_00553000 + ((int)DAT_00553000 >> 0x1f & 3U)) >> 2) + -1;
     *(int *)(DAT_00552ffc + 0x84) = DAT_00552f50 / 2 + DAT_00563c10 / 2;
   }
-  uVar6 = FUN_004471e0();
+  uVar6 = Lisa_SetCameraViewport();
   DAT_00498740 = 0;
   DAT_00498748 = DAT_00553000 - 1;
   DAT_00498744 = 0;
