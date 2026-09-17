@@ -86,12 +86,10 @@ extern int g_AudioEventParam6;
 extern int g_AudioEventParam7;
 extern void FUN_004579b0(int *ptr);
 extern void FUN_00456b70(int a, int b, char *c, void *d, int e, int f, int g);
-
 extern long long FUN_0044f070(int a, unsigned int b);
 extern int *DAT_0063c5bc;
 extern int *DAT_0063c600;
 extern unsigned long long FUN_00438030(int a, unsigned int b);
-
 extern int DAT_004949bc;
 extern double DAT_005532c0;
 extern double DAT_005532c4;
@@ -105,7 +103,6 @@ extern double DAT_00619318;
 extern double DAT_0061931c;
 extern int DAT_00553000;
 extern int DAT_00525e58;
-
 extern int _DAT_0047a578;
 extern int DAT_0047a5f8;
 extern int DAT_00563c48;
@@ -703,7 +700,6 @@ void FX_UpdateExplosionNode(SceneryParticle *p, int instance_idx) {
     int count, timer, pos_x, pos_y, pos_z, i;
     DynamicObject *obj;
     SceneryParticle sp;
-
     pos_y = p->pos_y;
     pos_z = p->pos_z;
     pos_x = p->pos_x;
@@ -878,7 +874,6 @@ unsigned int FX_SpawnParticle(SceneryParticle *p) {
     }
 
     if (!should_spawn) return 0xffffffff;
-
     slot = (SceneryParticle *)0x5db040;
     index = 0;
     while (slot < (SceneryParticle *)0x5dfe60) {
@@ -913,8 +908,7 @@ unsigned int FX_SpawnParticle(SceneryParticle *p) {
  * @original Race_RenderViewport (IGN_WIN.EXE @ 0x00436990, fx.c)
  * @fidelity ADAPTED
  */
-void Race_RenderViewport(double param_1)
-{
+void Race_RenderViewport(double param_1) {
   double *pdVar1;
   char uVar2;
   int uVar3;
@@ -1507,8 +1501,7 @@ LAB_00436c9c:
  * @original FX_UpdateAllParticles (IGN_WIN.EXE @ 0x00434190, fx.c)
  * @fidelity ADAPTED
  */
-void FX_UpdateAllParticles(void)
-{
+void FX_UpdateAllParticles(void) {
   float fVar1;
   int iVar2;
   int *piVar3;
@@ -1599,8 +1592,7 @@ void FX_UpdateAllParticles(void)
  * @original FX_UpdateWeatherBounds (IGN_WIN.EXE @ 0x00434580, fx.c)
  * @fidelity ADAPTED
  */
-void FX_UpdateWeatherBounds(void)
-{
+void FX_UpdateWeatherBounds(void) {
   unsigned int uVar1;
   int iVar2;
   unsigned int uVar3;
@@ -1677,8 +1669,7 @@ void FX_UpdateWeatherBounds(void)
  * @original FUN_004307b0 (IGN_WIN.EXE @ 0x004307b0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004307b0(int *param_1)
-{
+void FUN_004307b0(int *param_1) {
   int *piVar1;
   double dVar2;
   int uVar3;
@@ -2294,8 +2285,7 @@ LAB_00431ab6:
  * @original FUN_00431d00 (IGN_WIN.EXE @ 0x00431d00, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00431d00(int *param_1,int param_2)
-{
+void FUN_00431d00(int *param_1,int param_2) {
   int uVar1;
   int uVar2;
   int uVar3;
@@ -2415,8 +2405,7 @@ void FUN_00431d00(int *param_1,int param_2)
  * @original FUN_00432040 (IGN_WIN.EXE @ 0x00432040, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00432040(int *param_1)
-{
+void FUN_00432040(int *param_1) {
   int *piVar1;
   double dVar2;
   int uVar3;
@@ -2752,8 +2741,7 @@ LAB_00432970:
  * @original FUN_00432bb0 (IGN_WIN.EXE @ 0x00432bb0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00432bb0(int *param_1,int param_2)
-{
+void FUN_00432bb0(int *param_1,int param_2) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -2856,8 +2844,7 @@ void FUN_00432bb0(int *param_1,int param_2)
  * @original FUN_00432f20 (IGN_WIN.EXE @ 0x00432f20, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00432f20(void)
-{
+void FUN_00432f20(void) {
   int iVar1;
   long long lVar2;
   long long lVar3;
@@ -2941,8 +2928,7 @@ void FUN_00432f20(void)
  * @original FUN_004333e0 (IGN_WIN.EXE @ 0x004333e0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004333e0(void)
-{
+void FUN_004333e0(void) {
   int iVar1;
   int iVar2;
   long long lVar3;
@@ -3036,8 +3022,7 @@ void FUN_004333e0(void)
  * @original FUN_004338d0 (IGN_WIN.EXE @ 0x004338d0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004338d0(void)
-{
+void FUN_004338d0(void) {
   int iVar1;
   int iVar2;
   double fVar3;
@@ -3214,8 +3199,7 @@ void FUN_004338d0(void)
  * @original FUN_00433f90 (IGN_WIN.EXE @ 0x00433f90, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00433f90(void)
-{
+void FUN_00433f90(void) {
   int iVar1;
   double dVar2;
   int iVar3;
@@ -3274,8 +3258,7 @@ void FUN_00433f90(void)
  * @original FUN_00434840 (IGN_WIN.EXE @ 0x00434840, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00434840(void)
-{
+void FUN_00434840(void) {
   unsigned int uVar1;
   int iVar2;
   char *puVar3;
@@ -3588,8 +3571,7 @@ LAB_00434c38:
  * @original FUN_00435350 (IGN_WIN.EXE @ 0x00435350, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00435350(void)
-{
+void FUN_00435350(void) {
   int iVar1;
   double *pdVar2;
   double dVar3;
@@ -3673,8 +3655,7 @@ LAB_00435673:
  * @original FUN_004356d0 (IGN_WIN.EXE @ 0x004356d0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004356d0(void)
-{
+void FUN_004356d0(void) {
   int *piVar1;
   int *piVar2;
   int iVar3;
@@ -3722,8 +3703,7 @@ void FUN_004356d0(void)
  * @original FUN_004357a0 (IGN_WIN.EXE @ 0x004357a0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004357a0(void)
-{
+void FUN_004357a0(void) {
   int iVar1;
   int *piVar2;
   int iVar3;
@@ -3782,13 +3762,11 @@ void FUN_004357a0(void)
  * @fidelity ADAPTED
  */
 
-
 /**
  * @original FUN_00435910 (IGN_WIN.EXE @ 0x00435910, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00435910(void)
-{
+void FUN_00435910(void) {
   int iVar1;
   double *pdVar2;
   int iVar3;
@@ -4194,13 +4172,11 @@ LAB_00435a9e:
  * @fidelity ADAPTED
  */
 
-
 /**
  * @original FUN_00438050 (IGN_WIN.EXE @ 0x00438050, fx.c)
  * @fidelity ADAPTED
  */
-int FUN_00438050(void)
-{
+int FUN_00438050(void) {
   int iVar1;
   int *piVar2;
   int iVar3;
@@ -4265,13 +4241,11 @@ int FUN_00438050(void)
  * @fidelity ADAPTED
  */
 
-
 /**
  * @original FUN_004383b0 (IGN_WIN.EXE @ 0x004383b0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004383b0(void)
-{
+void FUN_004383b0(void) {
   int iVar1;
   int iVar2;
   char *extraout_ECX;
@@ -4403,8 +4377,7 @@ void FUN_004383b0(void)
  * @original FUN_00438880 (IGN_WIN.EXE @ 0x00438880, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00438880(void)
-{
+void FUN_00438880(void) {
   int iVar1;
   char *pcVar2;
   int iVar3;
@@ -4462,8 +4435,7 @@ LAB_004389c0:
  * @original FUN_00438a60 (IGN_WIN.EXE @ 0x00438a60, fx.c)
  * @fidelity ADAPTED
  */
-int FUN_00438a60(void)
-{
+int FUN_00438a60(void) {
   int uVar1;
   int iVar2;
   int *piVar3;
@@ -5842,8 +5814,7 @@ LAB_0043c34d:
  * @original FUN_0043c3c0 (IGN_WIN.EXE @ 0x0043c3c0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043c3c0(void)
-{
+void FUN_0043c3c0(void) {
   int uVar1;
   int *piVar2;
   int iVar3;
@@ -5977,8 +5948,7 @@ LAB_0043c897:
  * @original FUN_0043c910 (IGN_WIN.EXE @ 0x0043c910, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043c910(void)
-{
+void FUN_0043c910(void) {
   int iVar1;
   unsigned int uVar2;
   double dVar3;
@@ -6239,8 +6209,7 @@ LAB_0043cd2c:
  * @original FUN_0043d540 (IGN_WIN.EXE @ 0x0043d540, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043d540(int param_1)
-{
+void FUN_0043d540(int param_1) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -6426,8 +6395,7 @@ void FUN_0043d540(int param_1)
  * @original FUN_0043dea0 (IGN_WIN.EXE @ 0x0043dea0, fx.c)
  * @fidelity ADAPTED
  */
-int FUN_0043dea0(void)
-{
+int FUN_0043dea0(void) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -6559,8 +6527,7 @@ int FUN_0043dea0(void)
  * @original FUN_0043e2a0 (IGN_WIN.EXE @ 0x0043e2a0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043e2a0(void)
-{
+void FUN_0043e2a0(void) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -6652,13 +6619,11 @@ void FUN_0043e2a0(void)
  * @fidelity ADAPTED
  */
 
-
 /**
  * @original FUN_0043e9c0 (IGN_WIN.EXE @ 0x0043e9c0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043e9c0(void)
-{
+void FUN_0043e9c0(void) {
   char local_24 [32];
   int local_4;
   if (DAT_004949b4 != 0) {
@@ -6695,8 +6660,7 @@ void FUN_0043e9c0(void)
  * @original FUN_0043edf0 (IGN_WIN.EXE @ 0x0043edf0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043edf0(int param_1)
-{
+void FUN_0043edf0(int param_1) {
   int iVar1;
   int iVar2;
   int *piVar3;
@@ -6742,8 +6706,7 @@ void FUN_0043edf0(int param_1)
  * @original FUN_0043ef30 (IGN_WIN.EXE @ 0x0043ef30, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043ef30(int param_1)
-{
+void FUN_0043ef30(int param_1) {
   int *puVar1;
   int iVar2;
   char *pcVar3;

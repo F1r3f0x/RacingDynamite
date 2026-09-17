@@ -51,7 +51,7 @@ extern const LisaVertex *g_pLisaVertices;
 extern uint8_t *g_pLisaDisplayList;
 extern int g_LisaDisplayListCount;
 extern uint32_t **g_pLisaDrawQueue;
-extern uint32_t *g_pLisaDepthBuckets[6000];
+extern uint32_t **g_pLisaDepthBuckets;
 extern LisaViewportClip g_LisaViewport;
 extern int32_t g_LisaCullFlag;
 extern int32_t g_LisaMipmapTable[16];
