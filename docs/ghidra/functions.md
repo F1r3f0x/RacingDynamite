@@ -9,7 +9,7 @@
 | `0x0006117c` | - | - | `File_Exists` | `mem.c` | Matching | EXACT | Tests if file exists by attempting fopen |
 | - | `0x004029a0` | `FUN_004029a0` | `Menu_Init` | `main.c` | Decompiled | EXACT | Loads MENU.COL, MENU.TAB, .LFT fonts, and initializes menu options. |
 | - | `0x00402c00` | `FUN_00402c00` | `Menu_Tick` | `main.c` | Decompiled | ADAPTED | Handles menu input navigation (arrows, Enter, Esc), item highlight, and transitions. |
-| - | `0x0040e6b0` | `FUN_0040e6b0` | `Car_IntegratePosition` | `vehicle.c` | Decompiled | EXACT | World coordinate velocity integrator with 21.76 scale factor and 72 Hz timestep. |
+| - | `0x0040e6b0` | `FUN_0040e6b0` | `Car_IntegratePosition` | `main.c` | Decompiled | EXACT | World coordinate velocity integrator with 21.76 scale factor and 72 Hz timestep. |
 | - | `0x004120a0` | `FUN_004120a0` | `WinMain` | `main.c` | Decompiled | ADAPTED | Main entry point; registers window class, queries timer, runs message/tick loop. |
 | - | `0x00412230` | `FUN_00412230` | `App_FrameTick` | `main.c` | Decompiled | EXACT | Main engine tick; dispatches Init (0), Main Loop (1), and Shutdown (2). |
 | - | `0x00412500` | `FUN_00412500` | `App_Init` | `main.c` | Decompiled | EXACT | Creates game window, initializes DirectDraw and DirectInput subsystems. |
@@ -52,12 +52,12 @@
 | `0x0001cfbc` | `0x004225d0` | `FUN_004225d0` | `Track_SaveBinaryCache` | `main.c` | Decompiled | EXACT | Saves preprocessed level collision cache file. |
 | `0x0001d008` | `0x00422680` | `FUN_00422680` | `Race_ResolveVehicleCollisions` | `main.c` | Decompiled | EXACT | Inter-vehicle and scenery obstacle collision detection and impulse response. Fixed 72 Hz physics integration coordinator. |
 | `0x0001de2e` | `0x00423620` | `FUN_00423620` | `Car_HandleElimination` | `main.c` | Decompiled | EXACT | Checks trailing vehicle elimination condition in knock-out races. Marks vehicle blown (+0x354 = 1), sets race status, and logs elimination string. |
-| `0x0001e234` | `0x00423aa0` | `FUN_00423aa0` | `Car_VerticalDynamics` | `vehicle.c` | Decompiled | EXACT | Gravity acceleration (-0.2/tick), rebound bounce on impact, and ride height equilibrium (+5.0). |
+| `0x0001e234` | `0x00423aa0` | `FUN_00423aa0` | `Car_VerticalDynamics` | `main.c` | Decompiled | EXACT | Gravity acceleration (-0.2/tick), rebound bounce on impact, and ride height equilibrium (+5.0). |
 | `0x0001e65e` | `0x00423ea0` | `FUN_00423ea0` | `Car_CheckLandingStatus` | `main.c` | Decompiled | EXACT | Checks if airborne car has touched ground (pos_y < ground_y + 5.0), clears airborne flag (+0x270) and asserts landing impact trigger (+0x278). |
 | `0x0001e6a2` | `0x00423f00` | `FUN_00423f00` | `Car_UpdateShadowTracking` | `main.c` | Decompiled | EXACT | Advances secondary position/shadow tracking for car. Integrates velocity at 72 Hz timestep (factor 1.0 / 72.0 = 0.013888889). |
 | `0x0001e6f6` | `0x00423f70` | `FUN_00423f70` | `Car_UpdateBodyVelocity` | `main.c` | Decompiled | EXACT | Computes local lateral and longitudinal acceleration from target waypoint error, rotates by vehicle heading, applies tire drag and clamps to max speed. |
 | `0x0001ea42` | `0x004242b0` | `FUN_004242b0` | `Car_SpawnExplosionEffects` | `main.c` | Decompiled | EXACT | Plays vehicle explosion audio sample (vol capped at 0x10000, sample 2, freq 22000) and emits 6 explosion/debris particle sprites. |
-| `0x0001ed00` | `0x00424570` | `Car_PhysicsTick` | `Car_PhysicsTick` | `vehicle.c` | Decompiled | EXACT | Master fixed-timestep 72 Hz vehicle dynamics simulation: 4-wheel independent raycast suspension, lateral slip, steering, and traction. |
+| `0x0001ed00` | `0x00424570` | `Car_PhysicsTick` | `Car_PhysicsTick` | `main.c` | Decompiled | EXACT | Master fixed-timestep 72 Hz vehicle dynamics simulation: 4-wheel independent raycast suspension, lateral slip, steering, and traction. |
 | `0x00021856` | `0x004269a0` | `FUN_004269a0` | `Car_ChangeMesh` | `main.c` | Decompiled | EXACT | Swaps current vehicle 3D mesh representation to damaged or alternative model geometry in Lisa3D rasterizer instance table. |
 | `0x000219d6` | `0x00426b40` | `FUN_00426b40` | `Car_ApplyMeshDamage` | `main.c` | Decompiled | EXACT | Evaluates high-velocity collision impact against vehicle chassis, morphs vertex positions inward toward impact point, and emits impact sparks. |
 | `0x00022d8c` | `0x00427d70` | `FUN_00427d70` | `Car_UpdateAxleSpeeds` | `main.c` | Decompiled | EXACT | Averages left and right wheel velocities for front and rear axles with factor 0.5. |
@@ -80,50 +80,92 @@
 | `0x00029fe6` | `0x0042ea60` | `FUN_0042ea60` | `FX_UpdateSuperPlotObject` | `main.c` | Decompiled | EXACT | Updates high-intensity spark / super plot particle positions. |
 | `0x0002a2b1` | `0x0042ed60` | `FUN_0042ed60` | `Obstacle_SimulateDynamics` | `main.c` | Decompiled | EXACT | Performs dynamic physics integration (ballistic velocity, restitution, and world model transforms) for track scenery obstacles. |
 | `0x0002a785` | `0x0042fc80` | `FUN_0042fc80` | `FX_UpdateFlyingParticles` | `main.c` | Decompiled | EXACT | Updates ballistic trajectory and ground bounce for flying vehicle debris. |
-| - | `0x004356d0` | `FUN_004356d0` | `Pos_InitAnimatedObjects` | `lisa3d.c` | Decompiled | ADAPTED | Converts keyframe coordinates in .POS to relative displacement deltas. |
-| - | `0x004357a0` | `FUN_004357a0` | `Pos_UpdateAnimatedObjects` | `lisa3d.c` | Decompiled | ADAPTED | Advances keyframe playheads and translates moving scenery objects via Lisa_MoveObject. |
-| - | `0x00436990` | `FUN_00436990` | `Race_RenderViewport` | `main.c` | Decompiled | EXTENDED | Calculates camera transform, invokes scene renderer, draws HUD. |
-| - | `0x00438210` | `FUN_00438210` | `Lisa_RenderPanorama` | `lisa3d.c` | Decompiled | ADAPTED | Cylindrical horizon background blitter sampling 64KB .PAN texture using camera yaw and pitch angles. |
-| - | `0x0043c910` | `FUN_0043c910` | `Camera_UpdateChase` | `main.c` | Decompiled | EXTENDED | Multi-mode chase camera with velocity lookahead, 0.125 azimuth lag, slope adaptation (DEV-004). |
-| - | `0x0043e2a0` | `FUN_0043e2a0` | `Lisa_Init` | `lisa3d.c` | Decompiled | ADAPTED | Initializes Lisa 2 rasterizer viewport, Z-buffer, and focal lengths. |
-| - | `0x00442030` | `FUN_00442030` | `Car_ApplySteering` | `vehicle.c` | Decompiled | EXACT | Speed-attenuated front wheel steering lock and smoothing filter. |
-| - | `0x00442670` | `FUN_00442670` | `Car_PowertrainUpdate` | `vehicle.c` | Decompiled | EXACT | Engine propulsion, rolling and aerodynamic drag, transmission forward/reverse gear shifting. |
+| - | `0x00430300` | - | `FX_UpdateExplosionNode` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x004307b0` | - | `FX_UpdateVehicleWreck` | `fx.c` | Decompiled | ADAPTED | Particle type 7 vehicle catastrophic wreck simulator (unlinks 4 wheels, sets airborne flag, spawns flying wheel debris). |
+| - | `0x00431d00` | - | `FX_UpdateDetachedWheel` | `fx.c` | Decompiled | ADAPTED | Particle type 9 flying detached car wheel simulation with track bounce. |
+| - | `0x00432040` | - | `FX_UpdateVehicleCrashSequence` | `fx.c` | Decompiled | ADAPTED | Particle type 10 vehicle spin/flip crash sequence, tumbling airborne dynamics, and shrapnel explosion trigger. |
+| - | `0x00432bb0` | - | `FX_UpdateCarDebris` | `fx.c` | Decompiled | ADAPTED | Particle type 11 vehicle shrapnel/debris particle bouncing on collision surface. |
+| - | `0x00432f20` | - | `FX_SpawnWaterSplashes` | `fx.c` | Decompiled | ADAPTED | Water surface (type 0x5a) wheel contact detector emitting type 2 water splash particles. |
+| - | `0x004333e0` | - | `FX_SpawnTireDirtDebris` | `fx.c` | Decompiled | ADAPTED | Dirt, gravel, and grass wheel contact detector emitting type 8 rooster tail particles. |
+| - | `0x004338d0` | - | `FX_SpawnLandingDustPuffs` | `fx.c` | Decompiled | ADAPTED | Hard landing impact detector (+0x278) emitting left and right type 1 dust puffs. |
+| - | `0x00433f90` | - | `FX_SpawnTireSkidSmoke` | `fx.c` | Decompiled | ADAPTED | High-speed asphalt drifting/braking detector emitting type 1 smoke puffs. |
+| - | `0x00434190` | - | `FX_UpdateAllParticles` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x00434380` | - | `FX_SpawnParticle` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x00434580` | - | `FX_UpdateWeatherBounds` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x00434840` | - | `FX_UpdateWeatherGeometry` | `fx.c` | Decompiled | ADAPTED | Dynamic 3D rain streak / snowflake geometry builder and lightning palette flasher. |
+| - | `0x00435350` | - | `FX_FrameTick` | `fx.c` | Decompiled | ADAPTED | Master visual effects coordinator updating body lean/pitch visuals, weather meshes, and skid timers. |
+| - | `0x004356d0` | `FUN_004356d0` | `Pos_InitAnimatedObjects` | `fx.c` | Decompiled | ADAPTED | Converts keyframe coordinates in .POS to relative displacement deltas. |
+| - | `0x004357a0` | `FUN_004357a0` | `Pos_UpdateAnimatedObjects` | `fx.c` | Decompiled | ADAPTED | Advances keyframe playheads and translates moving scenery objects via Lisa_MoveObject. |
+| - | `0x004358e0` | - | `Math_LookupTrigAngle` | `fx.c` | Decompiled | ADAPTED | Fixed-point trigonometric sine/cosine lookup in 1024-entry LUT (DAT_004944e0). |
+| - | `0x00435910` | - | `Camera_UpdateOverview` | `fx.c` | Decompiled | ADAPTED | Track aerial overview / flyby camera positioned relative to road sequence splines. |
+| - | `0x00436990` | `FUN_00436990` | `Race_RenderViewport` | `fx.c` | Decompiled | EXTENDED | Calculates camera transform, invokes scene renderer, draws HUD. |
+| - | `0x00438030` | - | `Lisa_FlushRasterizerCommands` | `fx.c` | Decompiled | ADAPTED | Direct dispatch wrapper invoking Lisa_ExecuteRasterizerCommands. |
+| - | `0x00438050` | - | `Race_FindFocusedVehicle` | `fx.c` | Decompiled | ADAPTED | Trailing/leading vehicle target selector for broadcast and chase cameras. |
+| - | `0x00438210` | `FUN_00438210` | `Lisa_RenderPanorama` | `fx.c` | Decompiled | ADAPTED | Cylindrical horizon background blitter sampling 64KB .PAN texture using camera yaw and pitch angles. |
+| - | `0x004383b0` | - | `HUD_RenderPauseMenu` | `fx.c` | Decompiled | ADAPTED | In-game pause menu renderer (Continue, Restart, Retire, CD Track selection). |
+| - | `0x00438880` | - | `HUD_RenderConfirmationPrompt` | `fx.c` | Decompiled | ADAPTED | In-game confirmation modal renderer (Restart Y/N, Quit Y/N). |
+| - | `0x00438a60` | - | `HUD_RenderTrackResults` | `fx.c` | Decompiled | ADAPTED | Post-race leaderboard, standings, split times, and multiplayer wait screen renderer. |
+| - | `0x0043c3c0` | - | `HUD_RenderPlayAgainPrompt` | `fx.c` | Decompiled | ADAPTED | Post-race Play Track Again? (Y/N) prompt dialog renderer. |
+| - | `0x0043c910` | `FUN_0043c910` | `Camera_UpdateChase` | `fx.c` | Decompiled | EXTENDED | Multi-mode chase camera with velocity lookahead, 0.125 azimuth lag, slope adaptation (DEV-004). |
+| - | `0x0043d540` | - | `Car_UpdateDynamicObjects` | `fx.c` | Decompiled | ADAPTED | Transforms car body and wheel dynamic objects in Lisa 3D spatial grid. |
+| - | `0x0043dea0` | - | `Video_SetGraphicsMode` | `fx.c` | Decompiled | ADAPTED | Mode switch handler for 320x200, 640x480, and 800x600 display modes and viewport setup. |
+| - | `0x0043e2a0` | `FUN_0043e2a0` | `Lisa_Init` | `fx.c` | Decompiled | ADAPTED | Initializes Lisa 2 rasterizer viewport, Z-buffer, and focal lengths. |
+| - | `0x0043e6a0` | - | `Audio_LoadAssets` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x0043e6c0` | - | `Video_FlipScreen` | `fx.c` | Decompiled | ADAPTED | Virtual framebuffer blitter presenting backbuffer to DirectDraw surface. |
+| - | `0x0043e6d0` | - | `Audio_StopSample` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x0043e710` | - | `Audio_PlaySampleVol` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x0043e9c0` | - | `HUD_RenderTelemetryOverlay` | `fx.c` | Decompiled | ADAPTED | On-screen debug telemetry overlay (FPS, speed, pitch/roll, road index, diff). |
+| - | `0x0043ec70` | - | `FX_SpawnWeather` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x0043edf0` | - | `HUD_CheckWrongWayHeading` | `fx.c` | Decompiled | ADAPTED | Evaluates car heading vs road chunk vector and manages the Wrong Way warning timer. |
+| - | `0x0043ef30` | - | `HUD_RenderPlayerElements` | `fx.c` | Decompiled | ADAPTED | In-race player HUD renderer (tachometer, turbo bar, position indicator, lap splits). |
+| - | `0x00442030` | `FUN_00442030` | `Car_ApplySteering` | `main.c` | Decompiled | EXACT | Speed-attenuated front wheel steering lock and smoothing filter. |
+| - | `0x00442670` | `FUN_00442670` | `Car_PowertrainUpdate` | `main.c` | Decompiled | EXACT | Engine propulsion, rolling and aerodynamic drag, transmission forward/reverse gear shifting. |
 | - | `0x004452c0` | `FUN_004452c0` | `Sound_SynthesizeEngineRPM` | `main.c` | Decompiled | EXTENDED | Computes RPM pitch modulation from 800-byte ENGINE.INF curve with DEV-006 protection. |
 | `0x00020c18` | `0x00446578` | `FUN_00446578` | `Surface_TestTrianglePositiveDZ` | `getsurf.c` | Decompiled | EXACT | 2D trapezoidal slope span test for table2 triangles ($dz \ge 0$). |
 | `0x00020c81` | `0x004465e1` | `FUN_004465e1` | `Surface_TestTriangleNegativeDZ` | `getsurf.c` | Decompiled | EXACT | 2D trapezoidal slope span test for table1 triangles ($dz < 0$). |
-| - | `0x004466d0` | `FUN_004466d0` | `Lisa_RenderScene` | `lisa3d.c` | Decompiled | EXTENDED | Master 3D frame render: culls objects, transforms vertices, rasterizes spans. |
+| - | `0x004466d0` | `FUN_004466d0` | `Lisa_RenderScene` | `lisa3d.c` | Decompiled | ADAPTED | Master 3D frame render: culls objects, transforms vertices, rasterizes spans. |
 | - | `0x004468d0` | `FUN_004468d0` | `Lisa_InitEngineMemory` | `lisa3d.c` | Decompiled | ADAPTED | Allocates internal rasterizer buffers, vertex streams, and matrices. |
-| - | `0x00446c30` | `FUN_00446c30` | `Lisa_FreeEngineMemory` | `lisa3d.c` | Decompiled | ADAPTED | Deallocates all tracked memory pools, display lists, and engine buffers. |
-| - | `0x00446ca0` | `FUN_00446ca0` | `Lisa_InitSpatialGrid` | `lisa3d.c` | Decompiled | ADAPTED | Initializes 2D spatial grid cell buckets and dynamic object node pools. |
-| - | `0x00446d90` | `FUN_00446d90` | `Lisa_CreateDynamicObject` | `lisa3d.c` | Decompiled | ADAPTED | Instantiates a dynamic 3D object node, links mesh, and computes bounding sphere. |
-| - | `0x00446eb0` | `FUN_00446eb0` | `Lisa_MoveDynamicObject` | `lisa3d.c` | Decompiled | ADAPTED | Updates position, orientation, and bounding box of a dynamic object. |
-| - | `0x00446f30` | `FUN_00446f30` | `Lisa_UpdateObjectSpatialGrid` | `lisa3d.c` | Decompiled | ADAPTED | Migrates object between spatial grid cell buckets across boundary transitions. |
-| - | `0x00447070` | `FUN_00447070` | `Lisa_SetDynamicObjectMesh` | `lisa3d.c` | Decompiled | ADAPTED | Rebinds submesh geometry pointer and recalculates bounding sphere radius. |
-| - | `0x00447150` | `FUN_00447150` | `Lisa_DeleteDynamicObject` | `lisa3d.c` | Decompiled | ADAPTED | Unlinks object from spatial grid cell bucket and returns node to free list. |
-| - | `0x004471e0` | `FUN_004471e0` | `Lisa_SetCameraViewport` | `lisa3d.c` | Decompiled | ADAPTED | Updates camera viewport offsets, width, and FOV scaling constants. |
-| - | `0x004475c0` | `FUN_004475c0` | `Lisa_GenerateTextureSpanTable` | `lisa3d.c` | Decompiled | ADAPTED | Computes 64KB perspective span texture mapping and scanline stepping tables. |
-| - | `0x00447fb0` | `FUN_00447fb0` | `Lisa_DownsampleTextureMipmap` | `lisa3d.c` | Decompiled | ADAPTED | Bilinear 2x2 box-filter texture downsampler for mipmap generation. |
-| - | `0x004481f0` | `FUN_004481f0` | `Lisa_FilterTextureBlock` | `lisa3d.c` | Decompiled | ADAPTED | Filtered texture block generator for LOD surface transitions. |
-| - | `0x00448620` | `FUN_00448620` | `Lisa_LoadOrCreateShadingTable` | `lisa3d.c` | Decompiled | ADAPTED | Calculates palette checksum and loads/generates 64KB .TAB lighting matrix. |
-| - | `0x00448860` | `FUN_00448860` | `Lisa_FindClosestPaletteColor` | `lisa3d.c` | Decompiled | ADAPTED | Euclidean distance RGB nearest-match in 256-color palette. |
-| - | `0x00448990` | `FUN_00448990` | `Lisa_RenderSkyBackdrop` | `lisa3d.c` | Decompiled | ADAPTED | Renders cylindrical panoramic sky backdrop with camera pitch/yaw tracking. |
-| - | `0x00448c30` | `FUN_00448c30` | `Lisa_CullObjectsOrthographic` | `lisa3d.c` | Decompiled | ADAPTED | Traverses spatial grid for orthographic / panorama projection mode. |
+| - | `0x00446c30` | `FUN_00446c30` | `Lisa_FreeEngineMemory` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00446ca0` | `FUN_00446ca0` | `Lisa_InitSpatialGrid` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00446d90` | `FUN_00446d90` | `Lisa_CreateDynamicObject` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00446eb0` | `FUN_00446eb0` | `Lisa_MoveDynamicObject` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00446f30` | `FUN_00446f30` | `Lisa_UpdateObjectSpatialGrid` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00447070` | `FUN_00447070` | `Lisa_SetDynamicObjectMesh` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00447150` | `FUN_00447150` | `Lisa_DeleteDynamicObject` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x004471e0` | `FUN_004471e0` | `Lisa_SetCameraViewport` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00447280` | `FUN_00447280` | `Lisa_GenerateMipmaps` | `lisa3d.c` | Decompiled | ADAPTED | Multi-level texture downsampler and mipmap chain generator (invokes Lisa_DownsampleTextureMipmap, Lisa_FilterTextureBlock, Lisa_GenerateTextureSpanTable). |
+| - | `0x004475c0` | `FUN_004475c0` | `Lisa_GenerateTextureSpanTable` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00447fb0` | `FUN_00447fb0` | `Lisa_DownsampleTextureMipmap` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x004481f0` | `FUN_004481f0` | `Lisa_FilterTextureBlock` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00448620` | `FUN_00448620` | `Lisa_LoadOrCreateShadingTable` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00448860` | `FUN_00448860` | `Lisa_FindClosestPaletteColor` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00448990` | `FUN_00448990` | `Lisa_RenderSkyBackdrop` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x00448c30` | `FUN_00448c30` | `Lisa_CullObjectsOrthographic` | `lisa3d.c` | Decompiled | ADAPTED |  |
 | - | `0x00448e70` | `FUN_00448e70` | `Lisa_FrustumCullObjects` | `lisa3d.c` | Decompiled | ADAPTED | Spatial grid frustum culler populating visible object list. |
-| - | `0x00449470` | `FUN_00449470` | `Lisa_CullObjects` | `lisa3d.c` | Decompiled | ADAPTED | Master culling dispatcher selecting perspective vs orthographic frustum. |
+| - | `0x00449470` | `FUN_00449470` | `Lisa_CullObjects` | `lisa3d.c` | Decompiled | ADAPTED |  |
 | - | `0x00449e70` | `FUN_00449e70` | `Lisa_TransformVertices` | `lisa3d.c` | Decompiled | ADAPTED | Camera matrix rotation, perspective projection, and backface culling. |
-| - | `0x0044a3d0` | `FUN_0044a3d0` | `Lisa_TransformVerticesPanorama` | `lisa3d.c` | Decompiled | ADAPTED | Cylindrical vertex transformation for panorama / wide-angle camera modes. |
-| - | `0x0044a900` | `FUN_0044a900` | `Lisa_ComputeObjectMatrix` | `lisa3d.c` | Decompiled | ADAPTED | Computes 3D orientation matrix from 0.1-degree Euler angles (0..3600). |
-| - | `0x0044b340` | `FUN_0044b340` | `Lisa_ComputeCameraRotationMatrix` | `lisa3d.c` | Decompiled | ADAPTED | Evaluates camera pitch/yaw/roll sines and cosines into 3x3 rotation matrix. |
+| - | `0x0044a3d0` | `FUN_0044a3d0` | `Lisa_TransformVerticesPanorama` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x0044a900` | `FUN_0044a900` | `Lisa_ComputeObjectMatrix` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x0044ae20` | `FUN_0044ae20` | `Lisa_TransformSubmeshVerticesPanorama` | `lisa3d.c` | Decompiled | ADAPTED | Cylindrical/panoramic submesh vertex transformer with 3D Euler rotation and perspective depth scaling. |
+| - | `0x0044b340` | `FUN_0044b340` | `Lisa_ComputeCameraRotationMatrix` | `lisa3d.c` | Decompiled | ADAPTED |  |
 | - | `0x0044b480` | `FUN_0044b480` | `Lisa_InitOpcodeTable` | `lisa3d.c` | Decompiled | ADAPTED | Binds polygon opcode rasterization dispatch table (PTR_LAB_0049c8e0). |
+| - | `0x0044b570` | `FUN_0044b570` | `Lisa_SortDepthBuckets` | `lisa3d.c` | Decompiled | ADAPTED | Back-to-front 6,000 depth bucket flattener populating g_LisaDrawCommands. |
+| - | `0x0044b770` | `FUN_0044b770` | `Lisa_DrawTriangle_Op0F` | `lisa3d.c` | Decompiled | ADAPTED | Opcode 0x0F flat-shaded triangle span preprocessor, backface cull, subpixel clipping, and depth bucket dispatcher. |
+| - | `0x0044b980` | `FUN_0044b980` | `Lisa_DrawTriangle_Op10` | `lisa3d.c` | Decompiled | ADAPTED | Opcode 0x10 Gouraud-shaded triangle span preprocessor with vertex lighting unpack. |
 | - | `0x0044c1f0` | `FUN_0044c1f0` | `Lisa_RenderSubmeshes` | `lisa3d.c` | Decompiled | ADAPTED | Dispatches polygon opcodes across all visible transformed submeshes. |
 | - | `0x0044caa0` | `LAB_0044caa0` | `Lisa_DrawPolygon_Op12` | `lisa3d.c` | Decompiled | EXACT | Opcode 0x12: 1-bit transparent cutout triangle (pushes g_pLisaTransparencyLUT). |
 | - | `0x0044cac0` | `LAB_0044cac0` | `Lisa_DrawPolygon_Op13` | `lisa3d.c` | Decompiled | EXACT | Opcode 0x13: shadow / foliage alpha blend triangle (pushes g_pActiveSHD). |
 | - | `0x0044cae0` | `LAB_0044cae0` | `Lisa_DrawPolygon_Op16` | `lisa3d.c` | Decompiled | EXACT | Opcode 0x16: transparent cutout variant. |
 | - | `0x0044cb00` | `LAB_0044cb00` | `Lisa_DrawPolygon_Op17` | `lisa3d.c` | Decompiled | EXACT | Opcode 0x17: shadow / alpha blend Gouraud triangle (pushes g_pActiveSHD). |
 | - | `0x0044cb20` | `FUN_0044cb20` | `Lisa_DrawTriangle_OpcodeHelper` | `lisa3d.c` | Decompiled | ADAPTED | Common backface test, attribute pack, and span bucketer for opcodes 0x12, 0x13, 0x16, 0x17. |
+| - | `0x0044cf00` | `FUN_0044cf00` | `Lisa_DrawTriangle_Op14` | `lisa3d.c` | Decompiled | ADAPTED | Opcode 0x14 shadow/alpha blend triangle preprocessor binding g_pActiveSHD. |
+| - | `0x0044d0f0` | `FUN_0044d0f0` | `Lisa_DrawBillboard_Op07` | `lisa3d.c` | Decompiled | ADAPTED | Opcode 0x07 shadow-blended camera-facing billboard/sprite dispatcher. |
+| - | `0x0044d230` | `FUN_0044d230` | `Lisa_DrawBillboard_Op08` | `lisa3d.c` | Decompiled | ADAPTED | Opcode 0x08 color-key cutout transparent billboard/sprite dispatcher. |
 | - | `0x0044d550` | `FUN_0044d550` | `Lisa_DrawTexturedTriangle_Op15` | `lisa3d.c` | Decompiled | ADAPTED | Opcode 0x15: perspective-correct textured triangle with 16.16 UV interpolation. |
 | `0x0004d718` | `0x0044dc60` | `Lisa_DrawTexturedTriangle_Op11_Unshaded` | `Lisa_DrawTexturedTriangle_Op11_Unshaded` | `lisa3d.c` | Decompiled | EXACT | Lisa 3D textured triangle span preprocessor, backface cull, and depth bucket dispatcher (Opcode 0x11, unshaded). |
 | `0x0004cc58` | `0x0044e1b0` | `Lisa_DrawTexturedTriangle_Op11_Shaded` | `Lisa_DrawTexturedTriangle_Op11_Shaded` | `lisa3d.c` | Decompiled | EXACT | Lisa 3D textured triangle Gouraud-shaded preprocessor and depth bucket dispatcher (Opcode 0x11, shaded). |
+| - | `0x0044e900` | `FUN_0044e900` | `Lisa_DrawTexturedTriangle_Op15_Sub` | `lisa3d.c` | Decompiled | ADAPTED |  |
+| - | `0x0044f070` | `FUN_0044f070` | `Lisa_InitRasterizerTables` | `lisa3d.c` | Decompiled | ADAPTED |  |
 | - | `0x0044f0e9` | `FUN_0044f0e9` | `Lisa_ExecuteRasterizerCommands` | `lisa3d.c` | Decompiled | ADAPTED | Traverses depth-bucket sorted polygon command list and executes rasterizers. |
 | - | `0x00452800` | `FUN_00452800` | `Lisa_RenderTexturedTriangle_Op11` | `lisa3d.c` | Decompiled | EXACT | Opcode 0x11 triangle edge walker and span setup for unshaded texture mapping. |
 | - | `0x004537dc` | `FUN_004537dc` | `Lisa_DrawTexturedSpan_Op11` | `lisa3d.c` | Decompiled | EXACT | Low-level perspective/affine textured span blitter reading texels directly with stride 256 and alpha test. |

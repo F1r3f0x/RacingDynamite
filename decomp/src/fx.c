@@ -88,7 +88,34 @@ extern void FUN_00456b70(int a, int b, char *c, void *d, int e, int f, int g);
 extern long long Lisa_InitRasterizerTables(int a, unsigned int b);
 extern int *DAT_0063c5bc;
 extern int *DAT_0063c600;
-extern unsigned long long FUN_00438030(int a, unsigned int b);
+extern unsigned long long Lisa_FlushRasterizerCommands(int a, unsigned int b);
+void FX_UpdateVehicleWreck(int *param_1);
+void FX_UpdateDetachedWheel(int *param_1, int param_2);
+void FX_UpdateVehicleCrashSequence(int *param_1);
+void FX_UpdateCarDebris(int *param_1, int param_2);
+void FX_SpawnWaterSplashes(void);
+void FX_SpawnTireDirtDebris(void);
+void FX_SpawnLandingDustPuffs(void);
+void FX_SpawnTireSkidSmoke(void);
+void FX_UpdateWeatherGeometry(void);
+void FX_FrameTick(void);
+double Math_LookupTrigAngle(double angle);
+void Camera_UpdateOverview(void);
+int Race_FindFocusedVehicle(void);
+void HUD_RenderPauseMenu(void);
+void HUD_RenderConfirmationPrompt(void);
+int HUD_RenderTrackResults(void);
+void HUD_RenderPlayAgainPrompt(void);
+void Car_UpdateDynamicObjects(int param_1);
+int Video_SetGraphicsMode(void);
+void Video_FlipScreen(void);
+void HUD_RenderTelemetryOverlay(void);
+void HUD_CheckWrongWayHeading(int param_1);
+void HUD_RenderPlayerElements(int param_1);
+
+extern double _DAT_0047a530;
+extern double _DAT_0047a538;
+extern int DAT_004944e0;
 extern int DAT_004949bc;
 extern double DAT_005532c0;
 extern double DAT_005532c4;
@@ -801,7 +828,7 @@ unsigned long long Audio_StopSample(void) {
     DAT_0063c600[0] = 0;
     DAT_0063c600[1] = 0;
     DAT_0063c600[2] = 0;
-    uVar2 = FUN_00438030(0, (unsigned int)puVar1);
+    uVar2 = Lisa_FlushRasterizerCommands(0, (unsigned int)puVar1);
     return uVar2;
 }
 
@@ -1183,7 +1210,7 @@ LAB_00436c9c:
            ((DAT_0055306c == 1 &&
             ((*(int *)(DAT_005daffc + 0x528) == 1 && (*(int *)(DAT_005daffc + 0x4d74) == 1)))))))) {
     if (DAT_00563d20 == 3) {
-      _DAT_00601664 = FUN_00438050();
+      _DAT_00601664 = Race_FindFocusedVehicle();
       if (DAT_006192f0 - _DAT_00601664 == -1) {
         DAT_00563d20 = 0;
         DAT_004949a4 = 0;
@@ -1372,14 +1399,14 @@ LAB_00436c9c:
     DAT_0063c5d8 = *(int *)(DAT_00552e40 + iVar14 * 0xc);
   }
   Lisa_RenderScene();
-  FUN_00438030(extraout_ECX,extraout_EDX);
+  Lisa_FlushRasterizerCommands(extraout_ECX,extraout_EDX);
   piVar6 = (int *)(DAT_006192f0 * 0x20 + DAT_00553788);
   if (piVar6[7] == 1) {
     Lisa_DeleteDynamicObject(piVar6);
   }
   if (((*(int *)(DAT_005daffc + 0x528) == 0) || (_DAT_0054f980 <= _DAT_0047a5c0)) &&
      (DAT_005532b0 == 0)) {
-    FUN_0043ef30(DAT_004949a4);
+    HUD_RenderPlayerElements(DAT_004949a4);
   }
   if ((DAT_0055306c == 1) && (DAT_00552f58 == 0)) {
     *(int *)(DAT_0063c5f0 + 7) = 0;
@@ -1433,13 +1460,13 @@ LAB_00436c9c:
     }
     DAT_0063c5d8 = *(int *)(DAT_00552e40 + iVar14 * 0xc);
     Lisa_RenderScene();
-    FUN_00438030(extraout_ECX_00,extraout_EDX_00);
+    Lisa_FlushRasterizerCommands(extraout_ECX_00,extraout_EDX_00);
     iVar14 = DAT_006192f0 * 0x20 + DAT_00553788;
     if (*(int *)(iVar14 + 0x3c) == 1) {
       Lisa_DeleteDynamicObject((int *)(iVar14 + 0x20));
     }
     if ((*(int *)(DAT_005daffc + 0x4d74) == 0) || (_DAT_0054f980 <= _DAT_0047a5c0)) {
-      FUN_0043ef30(1);
+      HUD_RenderPlayerElements(1);
     }
   }
   FX_SpawnWeather();
@@ -1451,7 +1478,7 @@ LAB_00436c9c:
        ((DAT_0055306c == 1 &&
         ((*(int *)(DAT_005daffc + 0x528) == 1 && (*(int *)(DAT_005daffc + 0x4d74) == 1)))))) &&
       (_DAT_0047a5c0 <= _DAT_0054f980)) && ((DAT_00563c60 == 0 && (DAT_005532b0 == 0)))) {
-    FUN_00438a60();
+    HUD_RenderTrackResults();
   }
   iVar14 = *(int *)(DAT_00552ffc + 0x38);
   iVar8 = *(int *)(DAT_00552ffc + 0x34);
@@ -1530,19 +1557,19 @@ void FX_UpdateAllParticles(void) {
         FX_UpdateExplosionNode((SceneryParticle *)piVar3,iVar5);
         break;
       case 7:
-        FUN_004307b0(piVar3);
+        FX_UpdateVehicleWreck(piVar3);
         break;
       case 8:
         FX_UpdateSuperPlotObject((SceneryParticle *)piVar3,iVar5);
         break;
       case 9:
-        FUN_00431d00(piVar3,iVar5);
+        FX_UpdateDetachedWheel(piVar3,iVar5);
         break;
       case 10:
-        FUN_00432040(piVar3);
+        FX_UpdateVehicleCrashSequence(piVar3);
         break;
       case 0xb:
-        FUN_00432bb0(piVar3,iVar5);
+        FX_UpdateCarDebris(piVar3,iVar5);
       }
     }
     piVar3 = piVar3 + 0x19;
@@ -1665,10 +1692,10 @@ void FX_UpdateWeatherBounds(void) {
   return;
 }
 /**
- * @original FUN_004307b0 (IGN_WIN.EXE @ 0x004307b0, fx.c)
+ * @original FX_UpdateVehicleWreck (IGN_WIN.EXE @ 0x004307b0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004307b0(int *param_1) {
+void FX_UpdateVehicleWreck(int *param_1) {
   int *piVar1;
   double dVar2;
   int uVar3;
@@ -2185,14 +2212,14 @@ joined_r0x004317bd:
     local_24 = local_48 + _DAT_0047a298;
   }
   dVar2 = (double)((iVar23 - iVar22) + 0x28);
-  fVar25 = FUN_004358e0();
+  fVar25 = Math_LookupTrigAngle(dVar2);
   *pdVar13 = (double)(((double)(local_18 / local_1c) - (double)*(double *)((int)pdVar13 + 900)) *
                       fVar25 + (double)*(double *)((int)pdVar13 + 900));
   *(double *)((int)DAT_005daffc + iVar18 + 8) =
        ((double)(local_34 / local_1c + 0xfa) - *(double *)((int)DAT_005daffc + iVar18 + 0x38c)) *
        dVar2 * _DAT_0047a2a0 + *(double *)((int)DAT_005daffc + iVar18 + 0x38c);
   pdVar13 = DAT_005daffc;
-  fVar25 = FUN_004358e0();
+  fVar25 = Math_LookupTrigAngle(dVar2);
   dVar10 = local_24 - _DAT_0047a298;
   *(double *)((int)pdVar13 + iVar18 + 0x10) =
        (double)(((double)(local_30 / local_1c) -
@@ -2269,7 +2296,7 @@ LAB_00431ab6:
          (((int *)(iVar23 + DAT_00552f70))[7] == 0)) {
         Lisa_MoveDynamicObject((int *)(iVar23 + DAT_00552f70));
       }
-      FUN_0043d540(iVar6);
+      Car_UpdateDynamicObjects(iVar6);
       local_3c = iVar20;
     }
   }
@@ -2281,10 +2308,10 @@ LAB_00431ab6:
 }
 
 /**
- * @original FUN_00431d00 (IGN_WIN.EXE @ 0x00431d00, fx.c)
+ * @original FX_UpdateDetachedWheel (IGN_WIN.EXE @ 0x00431d00, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00431d00(int *param_1,int param_2) {
+void FX_UpdateDetachedWheel(int *param_1,int param_2) {
   int uVar1;
   int uVar2;
   int uVar3;
@@ -2401,10 +2428,10 @@ void FUN_00431d00(int *param_1,int param_2) {
 }
 
 /**
- * @original FUN_00432040 (IGN_WIN.EXE @ 0x00432040, fx.c)
+ * @original FX_UpdateVehicleCrashSequence (IGN_WIN.EXE @ 0x00432040, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00432040(int *param_1) {
+void FX_UpdateVehicleCrashSequence(int *param_1) {
   int *piVar1;
   double dVar2;
   int uVar3;
@@ -2641,14 +2668,14 @@ joined_r0x00432683:
     local_28 = local_48 + _DAT_0047a310;
   }
   dVar2 = (double)((iVar25 - iVar23) + 0x28);
-  fVar26 = FUN_004358e0();
+  fVar26 = Math_LookupTrigAngle(dVar2);
   *pdVar13 = (double)(((double)(local_1c / local_20) - (double)*(double *)((int)pdVar13 + 900)) *
                       fVar26 + (double)*(double *)((int)pdVar13 + 900));
   *(double *)((int)DAT_005daffc + iVar15 + 8) =
        ((double)(iVar24 / local_20 + 0xfa) - *(double *)((int)DAT_005daffc + iVar15 + 0x38c)) *
        dVar2 * _DAT_0047a318 + *(double *)((int)DAT_005daffc + iVar15 + 0x38c);
   pdVar13 = DAT_005daffc;
-  fVar26 = FUN_004358e0();
+  fVar26 = Math_LookupTrigAngle(dVar2);
   dVar10 = local_28 - _DAT_0047a310;
   *(double *)((int)pdVar13 + iVar15 + 0x10) =
        (double)(((double)(local_34 / local_20) -
@@ -2725,7 +2752,7 @@ LAB_00432970:
          (((int *)(iVar25 + DAT_00552f70))[7] == 0)) {
         Lisa_MoveDynamicObject((int *)(iVar25 + DAT_00552f70));
       }
-      FUN_0043d540(iVar6);
+      Car_UpdateDynamicObjects(iVar6);
       local_3c = iVar24;
     }
   }
@@ -2737,10 +2764,10 @@ LAB_00432970:
 }
 
 /**
- * @original FUN_00432bb0 (IGN_WIN.EXE @ 0x00432bb0, fx.c)
+ * @original FX_UpdateCarDebris (IGN_WIN.EXE @ 0x00432bb0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00432bb0(int *param_1,int param_2) {
+void FX_UpdateCarDebris(int *param_1,int param_2) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -2840,10 +2867,10 @@ void FUN_00432bb0(int *param_1,int param_2) {
 }
 
 /**
- * @original FUN_00432f20 (IGN_WIN.EXE @ 0x00432f20, fx.c)
+ * @original FX_SpawnWaterSplashes (IGN_WIN.EXE @ 0x00432f20, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00432f20(void) {
+void FX_SpawnWaterSplashes(void) {
   int iVar1;
   long long lVar2;
   long long lVar3;
@@ -2924,10 +2951,10 @@ void FUN_00432f20(void) {
 }
 
 /**
- * @original FUN_004333e0 (IGN_WIN.EXE @ 0x004333e0, fx.c)
+ * @original FX_SpawnTireDirtDebris (IGN_WIN.EXE @ 0x004333e0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004333e0(void) {
+void FX_SpawnTireDirtDebris(void) {
   int iVar1;
   int iVar2;
   long long lVar3;
@@ -3018,10 +3045,10 @@ void FUN_004333e0(void) {
 }
 
 /**
- * @original FUN_004338d0 (IGN_WIN.EXE @ 0x004338d0, fx.c)
+ * @original FX_SpawnLandingDustPuffs (IGN_WIN.EXE @ 0x004338d0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004338d0(void) {
+void FX_SpawnLandingDustPuffs(void) {
   int iVar1;
   int iVar2;
   double fVar3;
@@ -3195,10 +3222,10 @@ void FUN_004338d0(void) {
 }
 
 /**
- * @original FUN_00433f90 (IGN_WIN.EXE @ 0x00433f90, fx.c)
+ * @original FX_SpawnTireSkidSmoke (IGN_WIN.EXE @ 0x00433f90, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00433f90(void) {
+void FX_SpawnTireSkidSmoke(void) {
   int iVar1;
   double dVar2;
   int iVar3;
@@ -3254,10 +3281,10 @@ void FUN_00433f90(void) {
 }
 
 /**
- * @original FUN_00434840 (IGN_WIN.EXE @ 0x00434840, fx.c)
+ * @original FX_UpdateWeatherGeometry (IGN_WIN.EXE @ 0x00434840, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00434840(void) {
+void FX_UpdateWeatherGeometry(void) {
   unsigned int uVar1;
   int iVar2;
   char *puVar3;
@@ -3567,10 +3594,10 @@ LAB_00434c38:
 }
 
 /**
- * @original FUN_00435350 (IGN_WIN.EXE @ 0x00435350, fx.c)
+ * @original FX_FrameTick (IGN_WIN.EXE @ 0x00435350, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00435350(void) {
+void FX_FrameTick(void) {
   int iVar1;
   double *pdVar2;
   double dVar3;
@@ -3604,7 +3631,7 @@ void FUN_00435350(void) {
              *(double *)(DAT_005daffc + 0x110 + DAT_005285c0 * 0x484c) * _DAT_0047a4d8 *
              _DAT_0047a4e0;
       }
-      FUN_00432f20();
+      FX_SpawnWaterSplashes();
       pdVar2 = (double *)(DAT_005daffc + 0x60c + DAT_005285c0 * 0x484c);
       if ((0.0 < *(double *)(DAT_005daffc + 0x60c + DAT_005285c0 * 0x484c)) &&
          (*pdVar2 < _DAT_0047a4e0)) {
@@ -3613,7 +3640,7 @@ void FUN_00435350(void) {
       DAT_005285c0 = DAT_005285c0 + 1;
     } while (DAT_005285c0 < DAT_006192f0);
   }
-  FUN_00434840();
+  FX_UpdateWeatherGeometry();
   if ((((DAT_0055306c == 0) && (*(int *)(DAT_005daffc + 0x528) == 1)) ||
       ((DAT_0055306c == 1 &&
        ((*(int *)(DAT_005daffc + 0x528) == 1 && (*(int *)(DAT_005daffc + 0x4d74) == 1)))))) &&
@@ -3757,15 +3784,19 @@ void Pos_UpdateAnimatedObjects(void) {
 }
 
 /**
- * @original FUN_004358e0 (IGN_WIN.EXE @ 0x004358e0, fx.c)
+ * @original Math_LookupTrigAngle (IGN_WIN.EXE @ 0x004358e0, fx.c)
  * @fidelity ADAPTED
  */
+double Math_LookupTrigAngle(double angle) {
+    int index = (int)(angle * _DAT_0047a530);
+    return (double)*(int *)(&DAT_004944e0 + index * 4) * _DAT_0047a538;
+}
 
 /**
- * @original FUN_00435910 (IGN_WIN.EXE @ 0x00435910, fx.c)
+ * @original Camera_UpdateOverview (IGN_WIN.EXE @ 0x00435910, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00435910(void) {
+void Camera_UpdateOverview(void) {
   int iVar1;
   double *pdVar2;
   int iVar3;
@@ -4162,20 +4193,20 @@ LAB_00435a9e:
   *(int *)(iVar16 + 0xac + DAT_00563d54) = 0;
   *(int *)(iVar16 + 0xb0 + iVar13) = 0;
   *(int *)(DAT_005285c0 * 0x1d0 + 0xd4 + DAT_00563d54) = 0;
-  FUN_0043d540(DAT_005285c0);
+  Car_UpdateDynamicObjects(DAT_005285c0);
   return;
 }
 
 /**
- * @original FUN_00438030 (IGN_WIN.EXE @ 0x00438030, fx.c)
+ * @original Lisa_FlushRasterizerCommands (IGN_WIN.EXE @ 0x00438030, fx.c)
  * @fidelity ADAPTED
  */
 
 /**
- * @original FUN_00438050 (IGN_WIN.EXE @ 0x00438050, fx.c)
+ * @original Race_FindFocusedVehicle (IGN_WIN.EXE @ 0x00438050, fx.c)
  * @fidelity ADAPTED
  */
-int FUN_00438050(void) {
+int Race_FindFocusedVehicle(void) {
   int iVar1;
   int *piVar2;
   int iVar3;
@@ -4241,10 +4272,10 @@ int FUN_00438050(void) {
  */
 
 /**
- * @original FUN_004383b0 (IGN_WIN.EXE @ 0x004383b0, fx.c)
+ * @original HUD_RenderPauseMenu (IGN_WIN.EXE @ 0x004383b0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_004383b0(void) {
+void HUD_RenderPauseMenu(void) {
   int iVar1;
   int iVar2;
   char *extraout_ECX;
@@ -4373,10 +4404,10 @@ void FUN_004383b0(void) {
 }
 
 /**
- * @original FUN_00438880 (IGN_WIN.EXE @ 0x00438880, fx.c)
+ * @original HUD_RenderConfirmationPrompt (IGN_WIN.EXE @ 0x00438880, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_00438880(void) {
+void HUD_RenderConfirmationPrompt(void) {
   int iVar1;
   char *pcVar2;
   int iVar3;
@@ -4431,10 +4462,10 @@ LAB_004389c0:
 }
 
 /**
- * @original FUN_00438a60 (IGN_WIN.EXE @ 0x00438a60, fx.c)
+ * @original HUD_RenderTrackResults (IGN_WIN.EXE @ 0x00438a60, fx.c)
  * @fidelity ADAPTED
  */
-int FUN_00438a60(void) {
+int HUD_RenderTrackResults(void) {
   int uVar1;
   int iVar2;
   int *piVar3;
@@ -4473,7 +4504,7 @@ int FUN_00438a60(void) {
   char local_28 [40];
   if (DAT_00527f28 != 0) {
     DAT_00527f28 = 0;
-    FUN_0043dea0();
+    Video_SetGraphicsMode();
   }
   iVar2 = 0;
   if (0 < DAT_006192f0) {
@@ -5796,7 +5827,7 @@ LAB_0043c34d:
     } while ((int)uVar10 < iVar12);
   }
   if (DAT_00552f10 != 2) {
-    FUN_0043c3c0();
+    HUD_RenderPlayAgainPrompt();
   }
   _DAT_00498730 = DAT_0063c5bc;
   _DAT_0049873c = DAT_00563be4;
@@ -5810,10 +5841,10 @@ LAB_0043c34d:
 }
 
 /**
- * @original FUN_0043c3c0 (IGN_WIN.EXE @ 0x0043c3c0, fx.c)
+ * @original HUD_RenderPlayAgainPrompt (IGN_WIN.EXE @ 0x0043c3c0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043c3c0(void) {
+void HUD_RenderPlayAgainPrompt(void) {
   int uVar1;
   int *piVar2;
   int iVar3;
@@ -6205,10 +6236,10 @@ LAB_0043cd2c:
 }
 
 /**
- * @original FUN_0043d540 (IGN_WIN.EXE @ 0x0043d540, fx.c)
+ * @original Car_UpdateDynamicObjects (IGN_WIN.EXE @ 0x0043d540, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043d540(int param_1) {
+void Car_UpdateDynamicObjects(int param_1) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -6391,10 +6422,10 @@ void FUN_0043d540(int param_1) {
 }
 
 /**
- * @original FUN_0043dea0 (IGN_WIN.EXE @ 0x0043dea0, fx.c)
+ * @original Video_SetGraphicsMode (IGN_WIN.EXE @ 0x0043dea0, fx.c)
  * @fidelity ADAPTED
  */
-int FUN_0043dea0(void) {
+int Video_SetGraphicsMode(void) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -6614,15 +6645,15 @@ void Lisa_Init(void) {
 }
 
 /**
- * @original FUN_0043e6c0 (IGN_WIN.EXE @ 0x0043e6c0, fx.c)
+ * @original Video_FlipScreen (IGN_WIN.EXE @ 0x0043e6c0, fx.c)
  * @fidelity ADAPTED
  */
 
 /**
- * @original FUN_0043e9c0 (IGN_WIN.EXE @ 0x0043e9c0, fx.c)
+ * @original HUD_RenderTelemetryOverlay (IGN_WIN.EXE @ 0x0043e9c0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043e9c0(void) {
+void HUD_RenderTelemetryOverlay(void) {
   char local_24 [32];
   int local_4;
   if (DAT_004949b4 != 0) {
@@ -6656,10 +6687,10 @@ void FUN_0043e9c0(void) {
 }
 
 /**
- * @original FUN_0043edf0 (IGN_WIN.EXE @ 0x0043edf0, fx.c)
+ * @original HUD_CheckWrongWayHeading (IGN_WIN.EXE @ 0x0043edf0, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043edf0(int param_1) {
+void HUD_CheckWrongWayHeading(int param_1) {
   int iVar1;
   int iVar2;
   int *piVar3;
@@ -6702,10 +6733,10 @@ void FUN_0043edf0(int param_1) {
 }
 
 /**
- * @original FUN_0043ef30 (IGN_WIN.EXE @ 0x0043ef30, fx.c)
+ * @original HUD_RenderPlayerElements (IGN_WIN.EXE @ 0x0043ef30, fx.c)
  * @fidelity ADAPTED
  */
-void FUN_0043ef30(int param_1) {
+void HUD_RenderPlayerElements(int param_1) {
   int *puVar1;
   int iVar2;
   char *pcVar3;
@@ -6946,7 +6977,7 @@ LAB_0043f498:
   DAT_0063c600[0x16] = 0xd7;
   puVar1 = DAT_0063c600;
   DAT_0063c600[0x17] = 0;
-  FUN_00438030(puVar1,(unsigned int)((unsigned long long)lVar11 >> 0x20));
+  Lisa_FlushRasterizerCommands(puVar1,(unsigned int)((unsigned long long)lVar11 >> 0x20));
   local_80 = (DAT_00553780[0xd] + iVar6) * 0x100;
   local_7c = (DAT_00553780[0xe] + local_6c) * 0x100;
   FUN_00456d20(DAT_00528618,&local_80,0);

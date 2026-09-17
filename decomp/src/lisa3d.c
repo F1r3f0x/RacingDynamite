@@ -508,7 +508,7 @@ int Lisa_UpdateObjectSpatialGrid(int *param_1);
 long long Lisa_SetDynamicObjectMesh(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9);
 int Lisa_DeleteDynamicObject(int *param_1);
 unsigned long long Lisa_SetCameraViewport(void);
-int FUN_00447280(unsigned int *param_1,int param_2,int param_3,int param_4,int param_5,int param_6 ,int param_7,int param_8,char *param_9);
+int Lisa_GenerateMipmaps(unsigned int *param_1,int param_2,int param_3,int param_4,int param_5,int param_6 ,int param_7,int param_8,char *param_9);
 void Lisa_GenerateTextureSpanTable(int param_1,int param_2,int param_3,int param_4,int *param_5);
 void Lisa_DownsampleTextureMipmap(byte *param_1,byte *param_2,int param_3,int param_4,int param_5,int param_6);
 void Lisa_FilterTextureBlock(byte *param_1,int param_2,int param_3,int param_4,int param_5,int param_6, int param_7,int param_8);
@@ -521,17 +521,17 @@ int Lisa_CullObjects(void);
 void Lisa_TransformVertices(void);
 int Lisa_TransformVerticesPanorama(void);
 int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int *param_5);
-int FUN_0044ae20(int param_1,int param_2,int param_3,int param_4,int *param_5);
+int Lisa_TransformSubmeshVerticesPanorama(int param_1,int param_2,int param_3,int param_4,int *param_5);
 void Lisa_ComputeCameraRotationMatrix(int *param_1);
 void Lisa_InitOpcodeTable(void);
-int FUN_0044b570(void);
-void FUN_0044b770(void);
-void FUN_0044b980(void);
+int Lisa_SortDepthBuckets(void);
+void Lisa_DrawTriangle_Op0F(void);
+void Lisa_DrawTriangle_Op10(void);
 int Lisa_RenderSubmeshes(void);
 void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2);
-void FUN_0044cf00(void);
-void FUN_0044d0f0(void);
-void FUN_0044d230(void);
+void Lisa_DrawTriangle_Op14(void);
+void Lisa_DrawBillboard_Op07(void);
+void Lisa_DrawBillboard_Op08(void);
 void Lisa_DrawTexturedTriangle_Op15(void);
 void Lisa_DrawTexturedTriangle_Op15_Sub(void);
 long long Lisa_InitRasterizerTables(int param_1,unsigned int param_2);
@@ -539,11 +539,11 @@ long long Lisa_ExecuteRasterizerCommands(int param_1,unsigned int param_2);
 
 /* --- Automatically extracted globals for Lisa 3D rendering pipeline --- */
 
-extern int *DAT_0050dddc;
-extern int *DAT_004cdc84;
+extern int *g_pLisaSubmeshPolygon;
+extern int *g_pLisaDrawCommandWritePtr;
 extern int *g_pLisaActiveMipTable;
-extern int *DAT_0063b600;
-extern int *DAT_0063c5e8;
+extern int *g_LisaDrawCommandBuffer;
+extern int *g_pLisaActiveDrawQueue;
 extern void *g_LisaOpcodeTable[];
 extern void *PTR_DAT_004abe10[];
 extern void *PTR_FUN_004abe6c[];
@@ -554,159 +554,158 @@ extern void *PTR_FUN_004abe6c[];
 extern void *g_LisaOpcodeTable[];
 extern void *PTR_LAB_0049c924;
 extern void *PTR_Lisa_DrawTexturedTriangle_Op15_0049c934;
-extern int DAT_0047c040;
+extern int s_rb;
 extern int g_ViewportMinX;
 extern int g_ViewportMinY;
 extern int g_ViewportMaxX;
 extern int g_ViewportMaxY;
-extern int DAT_00499fa4;
-extern int DAT_00499fa8;
-extern int DAT_00499fac;
-extern int DAT_0049a058;
-extern int DAT_0049a05c;
-extern int DAT_0049c9a8;
-extern int DAT_0049c9ac;
-extern int DAT_0049c9b4;
-extern int DAT_0049c9bc;
-extern int DAT_0049c9c0;
-extern int DAT_0049c9c4;
-extern int DAT_0049c9c8;
-extern int DAT_0049c9d0;
-extern int DAT_0049c9d8;
+extern int g_LisaDefaultOffset_X;
+extern int g_LisaDefaultOffset_Y;
+extern int g_LisaDefaultOffset_Z;
+extern int g_LisaDefaultScale_X;
+extern int g_LisaDefaultScale_Y;
+extern int g_LisaBackfaceSign;
+extern int g_LisaShadingEnabled;
+extern int g_LisaDisableFiltering;
+extern int g_LisaEnableMipmaps;
+extern int g_LisaMipmapQuality;
+extern int s_tab_tab;
+extern int s_pal_checksum_fmt;
+extern int s_pal_chk_str1;
+extern int s_pal_chk_str2;
 extern int g_SubpixelMinX;
 extern int g_SubpixelMinY;
 extern int g_SubpixelMaxX;
 extern int g_SubpixelMaxY;
-extern int DAT_0049ca3c;
-extern int DAT_0049ca44;
-extern int DAT_0049d3a8;
-extern int DAT_004cdbbc;
-extern int DAT_004cdbe8;
-extern int DAT_004cdc20;
-extern int DAT_004cdc24;
-extern int DAT_004cdc38;
-extern int DAT_004cdc44;
-extern int DAT_004cdc58;
-extern int DAT_004cdc60;
-extern int DAT_004cdc64;
-extern int DAT_004cdc68;
-extern int DAT_004cdc6c;
-extern int DAT_004cdc70;
-extern int DAT_004cdc74;
-extern int DAT_004cdc78;
-extern int DAT_004cdc7c;
-extern int DAT_004cdc80;
-extern int DAT_004cdc88;
-extern int DAT_004cdca0;
-extern int DAT_004cdca4;
-extern int DAT_004cdca8;
-extern int DAT_004cdce0;
-extern int DAT_004cdce4;
-extern int DAT_004cdd18;
-extern int DAT_004d0000;
-extern int DAT_0050dd28;
-extern int DAT_0050dd2c;
-extern int DAT_0050dd54;
-extern int DAT_0050dd64;
-extern int DAT_0050dd68;
-extern int DAT_0050dd6c;
-extern int DAT_0050dd84;
-extern int DAT_0050dd88;
-extern int DAT_0050dd8c;
-extern int DAT_0050dd9c;
-extern int DAT_0050dda4;
-extern int DAT_0050ddac;
-extern int DAT_0050ddb8;
-extern int DAT_0050ddc4;
-extern int DAT_0050ddc8;
-extern int DAT_0050ddcc;
-extern int DAT_0050dde0;
-extern int DAT_0050ddfc;
-extern int DAT_0050de04;
-extern int DAT_0063b5ec;
-extern int DAT_0063b5f0;
-extern int DAT_0063b5f4;
-extern int DAT_0063b5f8;
-extern int DAT_0063b608;
-extern int DAT_0063b60c;
-extern int DAT_0063b610;
-extern int DAT_0063b614;
-extern int DAT_0063c5b0;
-extern int DAT_0063c5b8;
+extern int g_LisaScanlinePitch;
+extern int g_LisaScreenPitch;
+extern int g_LisaActiveTextureID;
+extern int g_LisaCameraOffsetX;
+extern int g_LisaCameraOffsetY;
+extern int g_LisaCameraDistance;
+extern int g_LisaCameraPitch;
+extern int g_LisaCameraYaw;
+extern int g_LisaCameraMatrix_X;
+extern int g_LisaCameraRoll;
+extern int g_LisaCameraMatrix_00;
+extern int g_LisaCameraMatrix_01;
+extern int g_LisaCameraMatrix_02;
+extern int g_LisaCameraMatrix_10;
+extern int g_LisaCameraMatrix_11;
+extern int g_LisaCameraMatrix_12;
+extern int g_LisaCameraMatrix_20;
+extern int g_LisaCameraMatrix_21;
+extern int g_LisaCameraMatrix_22;
+extern int g_LisaCameraFocalScale;
+extern int g_LisaFrustumPlaneLeft;
+extern int g_LisaFrustumPlaneRight;
+extern int g_LisaFrustumPlaneTop;
+extern int g_LisaFrustumPlaneBottom;
+extern int g_LisaFrustumNear;
+extern int g_LisaObjectMatrix_22;
+extern int g_LisaPerspectiveDepthTable;
+extern int g_pLisaActiveSubmesh;
+extern int g_LisaActiveSubmeshFlags;
+extern int g_LisaCurrentVertexIndex;
+extern int g_LisaSubmeshFlags;
+extern int g_LisaSubmeshLodLevel;
+extern int g_LisaSubmeshPolyCount;
+extern int g_LisaActiveLightingMode;
+extern int g_LisaActiveMaterial;
+extern int g_LisaTransformedVertices;
+extern int g_LisaSubmeshVertexStride;
+extern int g_LisaSubmeshClipMask;
+extern int g_LisaSubmeshBoundRadius;
+extern int g_LisaSubmeshVertexCount;
+extern int g_LisaSubmeshPolyStride;
+extern int g_LisaSubmeshCenterWorldX;
+extern int g_LisaSubmeshCenterWorldY;
+extern int g_LisaSubmeshCenterWorldZ;
+extern int g_LisaCameraFocalLength;
+extern int g_LisaSubmeshDepthOffset;
+extern int g_LisaActiveSubmeshIndex;
+extern int g_pActiveSHD;
+extern int g_LisaActiveShdSize;
+extern int g_LisaActiveTabSize;
+extern int g_pLisaTexturePagePointers;
+extern int g_LisaTexturePageSizes;
+extern int g_pLisaTexturePageTable1;
+extern int g_pLisaTexturePageTable2;
+extern int g_LisaActivePageCount;
+extern int g_LisaActiveTextureCount;
 extern int g_LisaDrawCommands;
-extern int DAT_0063c5c0;
+extern int g_LisaActiveTextureBase;
 extern int g_LisaVisibleObjects;
-extern int DAT_0063c5d0;
-extern int DAT_0063c5d4;
-extern int DAT_0063c5d8;
-extern int DAT_0063c5dc;
-extern int DAT_0063c5ec;
-extern int DAT_0063c5f4;
+extern int g_pLisaAllocatedBuffers;
+extern int g_LisaAllocatedBufferCount;
+extern int g_pLisaAllocatedBuffersEnd;
+extern int g_LisaAllocatedBufferMax;
+extern int g_LisaTransformedVertices;
 extern int g_LisaVisibleSubmeshes;
-extern int DAT_0063c600;
-extern int DAT_0063c608;
-extern int DAT_0063c60c;
-extern double _DAT_0047adc0;
-extern double _DAT_0047adc8;
-extern double _DAT_0047ae48;
-extern double _DAT_0047ae50;
-extern double _DAT_0047ae58;
-extern double _DAT_0047ae64;
-extern double _DAT_0047ae68;
-extern double _DAT_0047ae70;
-extern double _DAT_0047ae78;
-extern double _DAT_0047ae88;
-extern double _DAT_0047aea0;
-extern int *_DAT_0049c9e4;
-extern int *_DAT_0049c9e8;
-extern int *_DAT_0049c9ec;
-extern double _DAT_0049c9f0;
-extern double _DAT_0049c9f8;
-extern int _DAT_0049c9fc;
-extern int _DAT_0049ca00;
-extern int _DAT_0049ca04;
-extern int _DAT_0049ca08;
-extern int _DAT_0049ca0c;
-extern int _DAT_0049ca10;
-extern int _DAT_0049ca14;
-extern int _DAT_0049ca18;
-extern int _DAT_0049ca1c;
-extern int _DAT_0049ca20;
-extern int _DAT_0049ca24;
-extern int _DAT_0049ca28;
-extern double _DAT_0049ca40;
-extern double _DAT_004cdbac;
-extern double _DAT_004cdbcc;
-extern int _DAT_004cdbdc;
-extern double _DAT_004cdbf0;
-extern double _DAT_004cdc3c;
-extern double _DAT_004cdc4c;
-extern double _DAT_004cdc50;
-extern double _DAT_004cdc98;
-extern double _DAT_004cdc9c;
-extern double _DAT_004cdcd0;
-extern double _DAT_004cdcd4;
-extern double _DAT_004cdcd8;
-extern double _DAT_004cdcdc;
-extern double _DAT_004cdce8;
-extern double _DAT_004cdcec;
-extern double _DAT_004cdcf0;
-extern double _DAT_004cdcf4;
-extern double _DAT_004cdcf8;
-extern double _DAT_004cdcfc;
-extern double _DAT_004cdd00;
-extern double _DAT_004cdd04;
-extern double _DAT_004cdd08;
-extern double _DAT_004cdd10;
-extern double _DAT_0050dd20;
-extern double _DAT_0050dd4c;
-extern int _DAT_0050dd60;
-extern double _DAT_0050dd98;
-extern double _DAT_0050dde8;
-extern int *_DAT_0050ddf0;
-extern int *_DAT_0050ddf4;
-extern double _DAT_0063b5e4;
-extern double _DAT_0063c5f8;
+extern int g_pLisaDrawCommandTail;
+extern int g_LisaTotalDrawCommands;
+extern int g_LisaDrawQueueOverflow;
+extern double g_Const_0_1;
+extern double g_Const_DegToRad;
+extern double g_Const_TenthDegToRad;
+extern double g_Const_Neg256;
+extern double g_Const_1000;
+extern double g_Const_TenthDegToRadFloat;
+extern double g_Const_NegTenthDegToRad;
+extern double g_Const_1024;
+extern double g_Const_262144;
+extern double g_Const_256;
+extern double g_Const_512;
+extern int *g_pLisaScanlineBuffer;
+extern int *g_pLisaSpanBuffer;
+extern int *g_pLisaEdgeBuffer;
+extern double g_LisaCameraZoom;
+extern double g_pLisaActiveShading;
+extern int g_LisaClipLeft;
+extern int g_LisaClipRight;
+extern int g_LisaClipTop;
+extern int g_LisaClipBottom;
+extern int g_LisaClipSubpixelLeft;
+extern int g_LisaClipSubpixelRight;
+extern int g_LisaClipSubpixelTop;
+extern int g_LisaClipSubpixelBottom;
+extern int g_LisaViewportCenterX;
+extern int g_LisaViewportCenterY;
+extern int g_LisaViewportWidth;
+extern int g_LisaViewportHeight;
+extern double g_LisaAspectScale;
+extern double g_LisaObjMat_00;
+extern double g_LisaObjMat_01;
+extern int g_LisaObjMat_02;
+extern double g_LisaObjMat_10;
+extern double g_LisaObjMat_11;
+extern double g_LisaCameraMatrix_Y;
+extern double g_LisaObjMat_12;
+extern double g_LisaObjMat_20;
+extern double g_LisaCameraMatrix_Z;
+extern double g_LisaObjMat_21;
+extern double g_LisaObjMat_Scale;
+extern double g_LisaObjMat_CosYaw;
+extern double g_LisaObjMat_SinYaw;
+extern double g_LisaObjMat_CosPitch;
+extern double g_LisaObjMat_SinPitch;
+extern double g_LisaObjMat_CosRoll;
+extern double g_LisaObjMat_SinRoll;
+extern double g_LisaObjMat_Tmp1;
+extern double g_LisaObjMat_Tmp2;
+extern double g_LisaObjMat_Tmp3;
+extern double g_LisaObjMat_Tmp4;
+extern double g_LisaObjMat_Tmp5;
+extern double g_LisaObjMat_Tmp6;
+extern double g_LisaSubmeshTmp1;
+extern double g_LisaRasterizerAccumulator;
+extern int g_LisaSubmeshTmp2;
+extern double g_LisaSubmeshTmp3;
+extern double g_LisaSubmeshTmp4;
+extern int *g_LisaSubmeshTmp5;
+extern int *g_LisaSubmeshTmp6;
+extern double g_LisaViewportQuarter;
+extern double g_LisaViewportRemaining;
 
 /**
  * @original Lisa_RenderScene (IGN_WIN.EXE @ 0x004466d0, lisa3d.c)
@@ -778,9 +777,9 @@ int Lisa_RenderScene(void) {
     *(int *)(g_LisaDrawCommands + iVar8 * 4) = 0;
   }
 
-  if (DAT_0049c9bc != 0) {
-    if (DAT_0049c9bc < 10) {
-      iVar8 = DAT_0063c5b0 / 2;
+  if (g_LisaEnableMipmaps != 0) {
+    if (g_LisaEnableMipmaps < 10) {
+      iVar8 = g_LisaActivePageCount / 2;
 
       if (0 < iVar8) {
         iVar5 = 0x28;
@@ -788,14 +787,14 @@ int Lisa_RenderScene(void) {
         do {
           iVar3 = rand();
           iVar3 = iVar3 % iVar8;
-          iVar1 = *(int *)(&DAT_0063b610 + iVar3 * 8);
-          iVar3 = *(int *)(&DAT_0063b614 + iVar3 * 8);
+          iVar1 = *(int *)(&g_pLisaTexturePageTable1 + iVar3 * 8);
+          iVar3 = *(int *)(&g_pLisaTexturePageTable2 + iVar3 * 8);
           iVar4 = rand();
-          _DAT_0050dd4c = _DAT_0050dd4c + *(char *)((iVar4 << 10) % iVar3 + iVar1);
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
           iVar4 = rand();
-          _DAT_0050dd4c = _DAT_0050dd4c + *(char *)((iVar4 << 10) % iVar3 + iVar1);
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
           iVar4 = rand();
-          _DAT_0050dd4c = _DAT_0050dd4c + *(char *)((iVar4 << 10) % iVar3 + iVar1);
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
           iVar5 = iVar5 + -1;
         } while (iVar5 != 0);
       }
@@ -803,7 +802,7 @@ int Lisa_RenderScene(void) {
     }
 
     else {
-      iVar8 = DAT_0063c5b0 / 2;
+      iVar8 = g_LisaActivePageCount / 2;
 
       if (0 < iVar8) {
         iVar5 = 2;
@@ -811,25 +810,25 @@ int Lisa_RenderScene(void) {
         do {
           iVar3 = rand();
           iVar3 = iVar3 % iVar8;
-          iVar1 = *(int *)(&DAT_0063b610 + iVar3 * 8);
-          iVar3 = *(int *)(&DAT_0063b614 + iVar3 * 8);
+          iVar1 = *(int *)(&g_pLisaTexturePageTable1 + iVar3 * 8);
+          iVar3 = *(int *)(&g_pLisaTexturePageTable2 + iVar3 * 8);
           iVar4 = rand();
-          _DAT_0050dd4c = _DAT_0050dd4c + *(char *)((iVar4 << 10) % iVar3 + iVar1);
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
           iVar4 = rand();
-          _DAT_0050dd4c = _DAT_0050dd4c + *(char *)((iVar4 << 10) % iVar3 + iVar1);
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
           iVar4 = rand();
-          _DAT_0050dd4c = _DAT_0050dd4c + *(char *)((iVar4 << 10) % iVar3 + iVar1);
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
           iVar5 = iVar5 + -1;
         } while (iVar5 != 0);
       }
 
     }
 
-    DAT_0049c9bc = DAT_0049c9bc + 1;
+    g_LisaEnableMipmaps = g_LisaEnableMipmaps + 1;
   }
 
-  if (DAT_0049c9bc == 100) {
-    DAT_0049c9bc = 0;
+  if (g_LisaEnableMipmaps == 100) {
+    g_LisaEnableMipmaps = 0;
   }
 
   return g_LisaDrawCommands;
@@ -852,16 +851,16 @@ int * Lisa_InitEngineMemory(void) {
 
   
 
-  DAT_0063c5d0 = calloc(5000,4);
-  DAT_0063c5d4 = 0;
+  g_pLisaAllocatedBuffers = calloc(5000,4);
+  g_LisaAllocatedBufferCount = 0;
   g_LisaVisibleObjects = calloc(0x5dc,4);
   g_LisaVisibleSubmeshes = calloc(3000,4);
   puVar5 = calloc(0x1838,4);
-  iVar7 = DAT_0063c5b0 + 2;
+  iVar7 = g_LisaActivePageCount + 2;
   g_pLisaDepthBuckets = puVar5;
-  DAT_0063c5b0 = iVar7;
-  *(int **)(&DAT_0063b608 + iVar7 * 4) = puVar5;
-  *(int *)(&DAT_0063b60c + iVar7 * 4) = 0x1a90;
+  g_LisaActivePageCount = iVar7;
+  *(int **)(&g_pLisaTexturePagePointers + iVar7 * 4) = puVar5;
+  *(int *)(&g_LisaTexturePageSizes + iVar7 * 4) = 0x1a90;
 
   for (iVar7 = 6000; iVar7 != 0; iVar7 = iVar7 + -1) {
     *puVar5 = 0;
@@ -869,32 +868,32 @@ int * Lisa_InitEngineMemory(void) {
   }
 
   g_LisaCamera = (LisaCamera *)calloc(1, sizeof(LisaCamera));
-  DAT_0063c5ec = calloc(20000,0xc);
-  DAT_0063b600 = calloc(14000,8);
+  g_LisaTransformedVertices = calloc(20000,0xc);
+  g_LisaDrawCommandBuffer = calloc(14000,8);
   g_pLisaTextureSheets = calloc(1000,4);
-  *(void **)(&DAT_0063b610 + DAT_0063c5b0 * 4) = g_pLisaTextureSheets;
-  *(int *)(&DAT_0063b610 + (DAT_0063c5b0 + 1) * 4) = 4000;
-  DAT_0063c5b0 = DAT_0063c5b0 + 2;
-  g_LisaDrawCommands = DAT_0063c5ec;
-  DAT_0063c600 = calloc(150000,4);
+  *(void **)(&g_pLisaTexturePageTable1 + g_LisaActivePageCount * 4) = g_pLisaTextureSheets;
+  *(int *)(&g_pLisaTexturePageTable1 + (g_LisaActivePageCount + 1) * 4) = 4000;
+  g_LisaActivePageCount = g_LisaActivePageCount + 2;
+  g_LisaDrawCommands = g_LisaTransformedVertices;
+  g_pLisaDrawCommandTail = calloc(150000,4);
   pvVar6 = calloc(0x1fa4,4);
   pvVar3 = g_LisaVisibleSubmeshes;
-  pvVar2 = DAT_0063c5d0;
-  DAT_0063c5b0 = DAT_0063c5b0 + 2;
-  DAT_0063b5f4 = pvVar6;
-  *(void **)(&DAT_0063b608 + DAT_0063c5b0 * 4) = pvVar6;
-  *(int *)(&DAT_0063b60c + DAT_0063c5b0 * 4) = 0x2a30;
-  *(void **)((int)pvVar2 + (DAT_0063c5d4 + 3) * 4 + -0xc) = g_LisaVisibleObjects;
-  pvVar1 = DAT_0063b600;
+  pvVar2 = g_pLisaAllocatedBuffers;
+  g_LisaActivePageCount = g_LisaActivePageCount + 2;
+  g_LisaActiveShdSize = pvVar6;
+  *(void **)(&g_pLisaTexturePagePointers + g_LisaActivePageCount * 4) = pvVar6;
+  *(int *)(&g_LisaTexturePageSizes + g_LisaActivePageCount * 4) = 0x2a30;
+  *(void **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 3) * 4 + -0xc) = g_LisaVisibleObjects;
+  pvVar1 = g_LisaDrawCommandBuffer;
   puVar5 = g_pLisaDepthBuckets;
-  *(void **)((int)pvVar2 + (DAT_0063c5d4 + 5) * 4 + -0x10) = pvVar3;
-  pvVar3 = DAT_0063c5ec;
-  *(int **)((int)pvVar2 + (DAT_0063c5d4 + 5) * 4 + -0xc) = puVar5;
-  pvVar4 = DAT_0063c600;
+  *(void **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 5) * 4 + -0x10) = pvVar3;
+  pvVar3 = g_LisaTransformedVertices;
+  *(int **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 5) * 4 + -0xc) = puVar5;
+  pvVar4 = g_pLisaDrawCommandTail;
   puVar5 = g_LisaCamera;
-  *(int **)((int)pvVar2 + (DAT_0063c5d4 + 7) * 4 + -0x10) = g_LisaCamera;
-  iVar7 = DAT_0063c5d4 + 9;
-  DAT_0063c5d4 = iVar7;
+  *(int **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 7) * 4 + -0x10) = g_LisaCamera;
+  iVar7 = g_LisaAllocatedBufferCount + 9;
+  g_LisaAllocatedBufferCount = iVar7;
   *(void **)((int)pvVar2 + iVar7 * 4 + -0x14) = pvVar3;
   *(void **)((int)pvVar2 + iVar7 * 4 + -0x10) = pvVar1;
   pvVar1 = g_pLisaTextureSheets;
@@ -906,13 +905,13 @@ int * Lisa_InitEngineMemory(void) {
     return (int *)0x0;
   }
 
-  DAT_0063b5f4 = pvVar6;
+  g_LisaActiveShdSize = pvVar6;
 
   if (pvVar3 == (void *)0x0) {
     return (int *)0x0;
   }
 
-  if (DAT_0063b600 == (void *)0x0) {
+  if (g_LisaDrawCommandBuffer == (void *)0x0) {
     return (int *)0x0;
   }
 
@@ -920,7 +919,7 @@ int * Lisa_InitEngineMemory(void) {
     return (int *)0x0;
   }
 
-  if (DAT_0063c600 == (void *)0x0) {
+  if (g_pLisaDrawCommandTail == (void *)0x0) {
     return (int *)0x0;
   }
 
@@ -973,14 +972,14 @@ int * Lisa_InitEngineMemory(void) {
 
   while( 1 ) {
     iVar8 = iVar7 + 1;
-    fVar9 = (double)fsin((double)iVar7 * (double)_DAT_0047adc0 * (double)_DAT_0047adc8);
+    fVar9 = (double)fsin((double)iVar7 * (double)g_Const_0_1 * (double)g_Const_DegToRad);
     if (0x189b < iVar8) break;
     *(float *)((int)pvVar6 + iVar8 * 4 + 0x1c1c) = (float)fVar9;
     iVar7 = iVar8;
   }
 
   *(float *)((int)pvVar6 + iVar8 * 4 + 0x1c1c) = (float)fVar9;
-  DAT_0063b5f8 = (int)pvVar6 + 0xe10;
+  g_LisaActiveTabSize = (int)pvVar6 + 0xe10;
   return puVar5;
 }
 
@@ -998,18 +997,18 @@ void Lisa_FreeEngineMemory(void) {
 
   iVar2 = 0;
 
-  if (DAT_0063c5d0 != (void *)0x0) {
-    _Memory = DAT_0063c5d0;
+  if (g_pLisaAllocatedBuffers != (void *)0x0) {
+    _Memory = g_pLisaAllocatedBuffers;
 
-    if (0 < DAT_0063c5d4) {
+    if (0 < g_LisaAllocatedBufferCount) {
       iVar3 = 0;
-      iVar1 = DAT_0063c5d4;
+      iVar1 = g_LisaAllocatedBufferCount;
 
       do {
         if (*(void **)(iVar3 + (int)_Memory) != (void *)0x0) {
           _free(*(void **)(iVar3 + (int)_Memory));
-          _Memory = DAT_0063c5d0;
-          iVar1 = DAT_0063c5d4;
+          _Memory = g_pLisaAllocatedBuffers;
+          iVar1 = g_LisaAllocatedBufferCount;
         }
 
         iVar3 = iVar3 + 4;
@@ -1020,11 +1019,11 @@ void Lisa_FreeEngineMemory(void) {
     _free(_Memory);
   }
 
-  DAT_0063c5d0 = (void *)0x0;
-  DAT_0063c5d4 = 0;
-  DAT_0063c5b0 = 0;
-  DAT_0049c9bc = 1;
-  DAT_0049c9ac = 0;
+  g_pLisaAllocatedBuffers = (void *)0x0;
+  g_LisaAllocatedBufferCount = 0;
+  g_LisaActivePageCount = 0;
+  g_LisaEnableMipmaps = 1;
+  g_LisaShadingEnabled = 0;
   return;
 }
 
@@ -1043,23 +1042,23 @@ int Lisa_InitSpatialGrid(int param_1,int param_2,size_t param_3) {
 
   
 
-  DAT_0063c608 = param_1;
-  DAT_0063c60c = param_2;
-  DAT_0063c5b8 = (int)(param_1 + 0xff + (param_1 + 0xff >> 0x1f & 0xffU)) >> 8;
+  g_LisaTotalDrawCommands = param_1;
+  g_LisaDrawQueueOverflow = param_2;
+  g_LisaActiveTextureCount = (int)(param_1 + 0xff + (param_1 + 0xff >> 0x1f & 0xffU)) >> 8;
 
-  DAT_0063b5ec = calloc(((int)(param_2 + 0xff + (param_2 + 0xff >> 0x1f & 0xffU)) >> 8) *
+  g_LisaActiveSubmeshIndex = calloc(((int)(param_2 + 0xff + (param_2 + 0xff >> 0x1f & 0xffU)) >> 8) *
 
-                         DAT_0063c5b8,4);
-  DAT_0063c5c0 = calloc(param_3 + 5,4);
+                         g_LisaActiveTextureCount,4);
+  g_LisaActiveTextureBase = calloc(param_3 + 5,4);
   pvVar3 = calloc(param_3,0x2a);
-  iVar2 = DAT_0063c5d0;
-  puVar1 = DAT_0063c5c0;
-  iVar5 = DAT_0063c5d4 + 3;
-  DAT_0063c5e8 = DAT_0063c5c0;
-  bVar7 = DAT_0063b5ec != (void *)0x0;
-  DAT_0063c5d4 = iVar5;
-  DAT_0063c5dc = pvVar3;
-  *(void **)(DAT_0063c5d0 + -0xc + iVar5 * 4) = DAT_0063b5ec;
+  iVar2 = g_pLisaAllocatedBuffers;
+  puVar1 = g_LisaActiveTextureBase;
+  iVar5 = g_LisaAllocatedBufferCount + 3;
+  g_pLisaActiveDrawQueue = g_LisaActiveTextureBase;
+  bVar7 = g_LisaActiveSubmeshIndex != (void *)0x0;
+  g_LisaAllocatedBufferCount = iVar5;
+  g_LisaAllocatedBufferMax = pvVar3;
+  *(void **)(g_pLisaAllocatedBuffers + -0xc + iVar5 * 4) = g_LisaActiveSubmeshIndex;
   *(int **)(iVar2 + -8 + iVar5 * 4) = puVar1;
   *(void **)(iVar2 + -4 + iVar5 * 4) = pvVar3;
 
@@ -1102,13 +1101,13 @@ long long Lisa_CreateDynamicObject(int param_1,int param_2,int *param_3,int *par
 
   
 
-  iVar1 = *DAT_0063c5e8;
+  iVar1 = *g_pLisaActiveDrawQueue;
 
   if (iVar1 == -1) {
     return (((long long)(param_2) << 32) | ((unsigned int)(0xffffffff)));
   }
 
-  DAT_0063c5e8 = DAT_0063c5e8 + 1;
+  g_pLisaActiveDrawQueue = g_pLisaActiveDrawQueue + 1;
   *(int *)(iVar1 + 8) = param_5;
   *(int *)iVar1 = iVar1;
   *(int **)(iVar1 + 4) = param_4;
@@ -1189,9 +1188,9 @@ int Lisa_MoveDynamicObject(int *param_1) {
     *(int *)(iVar1 + 0x10) = iVar2;
     iVar2 = param_1[3];
     *(int *)(iVar1 + 0x14) = iVar2;
-    iVar3 = DAT_0063b5ec;
+    iVar3 = g_LisaActiveSubmeshIndex;
 
-    iVar4 = ((int)(iVar2 + (iVar2 >> 0x1f & 0xffU)) >> 8) * DAT_0063c5b8 +
+    iVar4 = ((int)(iVar2 + (iVar2 >> 0x1f & 0xffU)) >> 8) * g_LisaActiveTextureCount +
 
             ((int)(iVar4 + (iVar4 >> 0x1f & 0xffU)) >> 8);
     param_1[7] = 1;
@@ -1223,9 +1222,9 @@ int Lisa_UpdateObjectSpatialGrid(int *param_1) {
   iVar8 = *(int *)(iVar2 + 0xc);
   iVar3 = *(int *)(iVar2 + 0x14);
 
-  if ((((-1 < iVar7) && (iVar4 = param_1[3], -1 < iVar4)) && (iVar7 <= DAT_0063c608)) &&
+  if ((((-1 < iVar7) && (iVar4 = param_1[3], -1 < iVar4)) && (iVar7 <= g_LisaTotalDrawCommands)) &&
 
-     (iVar4 <= DAT_0063c60c)) {
+     (iVar4 <= g_LisaDrawQueueOverflow)) {
     iVar5 = param_1[2];
     *(int *)(iVar2 + 0xc) = iVar7;
     *(int *)(iVar2 + 0x10) = iVar5;
@@ -1233,8 +1232,8 @@ int Lisa_UpdateObjectSpatialGrid(int *param_1) {
     *(short *)(iVar2 + 0x18) = (short)param_1[4];
     *(short *)(iVar2 + 0x1a) = (short)param_1[5];
     *(short *)(iVar2 + 0x1c) = (short)param_1[6];
-    iVar6 = DAT_0063c5b8;
-    iVar5 = DAT_0063b5ec;
+    iVar6 = g_LisaActiveTextureCount;
+    iVar5 = g_LisaActiveSubmeshIndex;
 
     if (param_1[7] == 1) {
       iVar7 = (int)(iVar7 + (iVar7 >> 0x1f & 0xffU)) >> 8;
@@ -1245,11 +1244,11 @@ int Lisa_UpdateObjectSpatialGrid(int *param_1) {
          ((int)(iVar4 + (iVar4 >> 0x1f & 0xffU)) >> 8 != (int)(iVar3 + (iVar3 >> 0x1f & 0xffU)) >> 8
 
          )) {
-        iVar8 = ((int)(iVar3 + (iVar3 >> 0x1f & 0xffU)) >> 8) * DAT_0063c5b8 + iVar8;
-        iVar3 = *(int *)(DAT_0063b5ec + iVar8 * 4);
+        iVar8 = ((int)(iVar3 + (iVar3 >> 0x1f & 0xffU)) >> 8) * g_LisaActiveTextureCount + iVar8;
+        iVar3 = *(int *)(g_LisaActiveSubmeshIndex + iVar8 * 4);
 
         if (iVar3 == iVar2) {
-          *(int *)(DAT_0063b5ec + iVar8 * 4) = *(int *)(iVar2 + 0x26);
+          *(int *)(g_LisaActiveSubmeshIndex + iVar8 * 4) = *(int *)(iVar2 + 0x26);
         }
 
         else {
@@ -1354,13 +1353,13 @@ int Lisa_DeleteDynamicObject(int *param_1) {
 
     iVar3 = ((int)(*(int *)(iVar1 + 0x14) + (*(int *)(iVar1 + 0x14) >> 0x1f & 0xffU)) >> 8) *
 
-            DAT_0063c5b8 +
+            g_LisaActiveTextureCount +
 
             ((int)(*(int *)(iVar1 + 0xc) + (*(int *)(iVar1 + 0xc) >> 0x1f & 0xffU)) >> 8);
-    iVar2 = *(int *)(DAT_0063b5ec + iVar3 * 4);
+    iVar2 = *(int *)(g_LisaActiveSubmeshIndex + iVar3 * 4);
 
     if (iVar1 == iVar2) {
-      *(int *)(DAT_0063b5ec + iVar3 * 4) = *(int *)(iVar1 + 0x26);
+      *(int *)(g_LisaActiveSubmeshIndex + iVar3 * 4) = *(int *)(iVar1 + 0x26);
     }
 
     else {
@@ -1406,10 +1405,10 @@ unsigned long long Lisa_SetCameraViewport(void) {
 }
 
 /**
- * @original FUN_00447280 (IGN_WIN.EXE @ 0x00447280, lisa3d.c)
+ * @original Lisa_GenerateMipmaps (IGN_WIN.EXE @ 0x00447280, lisa3d.c)
  * @fidelity ADAPTED
  */
-int FUN_00447280(unsigned int *param_1,int param_2,int param_3,int param_4,int param_5,int param_6 ,int param_7,int param_8,char *param_9) {
+int Lisa_GenerateMipmaps(unsigned int *param_1,int param_2,int param_3,int param_4,int param_5,int param_6 ,int param_7,int param_8,char *param_9) {
   char uVar1;
   char *puVar2;
   char *puVar3;
@@ -1448,8 +1447,8 @@ int FUN_00447280(unsigned int *param_1,int param_2,int param_3,int param_4,int p
     param_9 = param_9 + 3;
   } while (puVar3 < (unsigned int *)(local_400 + sizeof(local_400)));
   puVar4 = calloc(0x15,4);
-  DAT_0063c5d4 = DAT_0063c5d4 + 1;
-  *(unsigned int **)(DAT_0063c5d0 + -4 + DAT_0063c5d4 * 4) = puVar4;
+  g_LisaAllocatedBufferCount = g_LisaAllocatedBufferCount + 1;
+  *(unsigned int **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = puVar4;
   puVar5 = puVar4 + 5;
   lVar16 = __ftol();
   local_438 = 0;
@@ -1476,17 +1475,17 @@ int FUN_00447280(unsigned int *param_1,int param_2,int param_3,int param_4,int p
     iVar11 = iVar10;
 
     do {
-      DAT_0049c9bc = 1;
-      DAT_0049c9ac = 1;
+      g_LisaEnableMipmaps = 1;
+      g_LisaShadingEnabled = 1;
       pvVar6 = calloc(param_7 * 0x100 + 0xffff,1);
-      DAT_0063c5d4 = DAT_0063c5d4 + 1;
-      *(void **)(DAT_0063c5d0 + -4 + DAT_0063c5d4 * 4) = pvVar6;
+      g_LisaAllocatedBufferCount = g_LisaAllocatedBufferCount + 1;
+      *(void **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = pvVar6;
       pbVar7 = (byte *)((int)pvVar6 + 0xffffU & 0xffff0000);
-      iVar8 = DAT_0063c5b0 + 2;
-      DAT_0063c5b0 = iVar8;
-      *(byte **)(&DAT_0063b608 + iVar8 * 4) = pbVar7;
+      iVar8 = g_LisaActivePageCount + 2;
+      g_LisaActivePageCount = iVar8;
+      *(byte **)(&g_pLisaTexturePagePointers + iVar8 * 4) = pbVar7;
       iVar10 = iVar11 + 1;
-      *(int *)(&DAT_0063b60c + iVar8 * 4) = param_7 << 8;
+      *(int *)(&g_LisaTexturePageSizes + iVar8 * 4) = param_7 << 8;
 
       if (iVar10 < 5) {
         puVar4[iVar11 + 1] = (unsigned int)pbVar7;
@@ -1554,7 +1553,7 @@ int FUN_00447280(unsigned int *param_1,int param_2,int param_3,int param_4,int p
 
   }
 
-  bVar15 = DAT_0049c9b4 == 0;
+  bVar15 = g_LisaDisableFiltering == 0;
   *param_1 = (unsigned int)puVar5;
 
   if ((bVar15) && (1 < param_4)) {
@@ -1649,14 +1648,14 @@ void Lisa_GenerateTextureSpanTable(int param_1,int param_2,int param_3,int param
 
   do {
     pvVar7 = calloc(local_c,1);
-    DAT_0063c5d4 = DAT_0063c5d4 + 1;
-    *(void **)(DAT_0063c5d0 + -4 + DAT_0063c5d4 * 4) = pvVar7;
+    g_LisaAllocatedBufferCount = g_LisaAllocatedBufferCount + 1;
+    *(void **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = pvVar7;
     puVar8 = (unsigned int *)((int)pvVar7 + 0xffffU & 0xffff0000);
-    iVar6 = DAT_0063c5b0 + 2;
+    iVar6 = g_LisaActivePageCount + 2;
     puVar12 = local_98 + 4;
-    DAT_0063c5b0 = iVar6;
-    *(unsigned int **)(&DAT_0063b608 + iVar6 * 4) = puVar8;
-    *(int *)(&DAT_0063b60c + iVar6 * 4) = local_8;
+    g_LisaActivePageCount = iVar6;
+    *(unsigned int **)(&g_pLisaTexturePagePointers + iVar6 * 4) = puVar8;
+    *(int *)(&g_LisaTexturePageSizes + iVar6 * 4) = local_8;
     *local_98 = puVar8;
     local_8c = 0;
     local_98[1] = puVar8;
@@ -1782,7 +1781,7 @@ LAB_00447785:
                 iVar13 = iVar13 + 4;
               } while (iVar13 < 0xc);
 
-              bVar3 = (&DAT_004cdd18)
+              bVar3 = (&g_LisaObjectMatrix_22)
 
                       [(local_c4[1] & 0x3f0) * 4 +
 
@@ -1814,7 +1813,7 @@ LAB_00447785:
                 iVar13 = iVar13 + 4;
               } while (iVar13 < 0xc);
 
-              uVar14 = (unsigned int)(byte)(&DAT_004cdd18)
+              uVar14 = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
 
                                    [(local_c4[1] & 0x3f0) * 4 +
 
@@ -1822,7 +1821,7 @@ LAB_00447785:
 
               *(char *)((int)puVar8 + 5) =
 
-                   (&DAT_004cdd18)
+                   (&g_LisaObjectMatrix_22)
 
                    [(local_c4[1] & 0x3f0) * 4 +
 
@@ -1850,7 +1849,7 @@ LAB_00447785:
                 iVar13 = iVar13 + 4;
               } while (iVar13 < 0xc);
 
-              uVar14 = (unsigned int)(byte)(&DAT_004cdd18)
+              uVar14 = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
 
                                    [(local_c4[1] & 0x3f0) * 4 +
 
@@ -1858,7 +1857,7 @@ LAB_00447785:
 
               *(char *)((int)puVar8 + 6) =
 
-                   (&DAT_004cdd18)
+                   (&g_LisaObjectMatrix_22)
 
                    [(local_c4[1] & 0x3f0) * 4 +
 
@@ -1886,7 +1885,7 @@ LAB_00447785:
                 iVar6 = iVar6 + 4;
               } while (iVar6 < 0xc);
 
-              uVar14 = (unsigned int)(byte)(&DAT_004cdd18)
+              uVar14 = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
 
                                    [(local_c4[1] & 0x3f0) * 4 +
 
@@ -1894,7 +1893,7 @@ LAB_00447785:
 
               *(char *)((int)puVar8 + 7) =
 
-                   (&DAT_004cdd18)
+                   (&g_LisaObjectMatrix_22)
 
                    [(local_c4[1] & 0x3f0) * 4 +
 
@@ -2057,7 +2056,7 @@ void Lisa_DownsampleTextureMipmap(byte *param_1,byte *param_2,int param_3,int pa
           } while (iVar7 < 0xc);
           iVar9 = 0;
 
-          bVar2 = (&DAT_004cdd18)
+          bVar2 = (&g_LisaObjectMatrix_22)
 
                   [(local_1c[1] & 0x3f0) * 4 +
 
@@ -2251,7 +2250,7 @@ LAB_004484c0:
           } while (iVar3 < 0xc);
           local_48 = 0;
 
-          bVar1 = (&DAT_004cdd18)
+          bVar1 = (&g_LisaObjectMatrix_22)
 
                   [(local_24[0] & 0x3f0) * 0x100 +
 
@@ -2333,7 +2332,7 @@ void Lisa_LoadOrCreateShadingTable(int param_1,int param_2) {
   sVar10 = 0;
   local_34[0] = 0xffffffff;
   local_20[0] = '\0';
-  pcVar11 = &DAT_0049c9d8;
+  pcVar11 = &s_pal_chk_str2;
 
   do {
     pcVar16 = pcVar11;
@@ -2410,7 +2409,7 @@ void Lisa_LoadOrCreateShadingTable(int param_1,int param_2) {
   }
 
   uVar8 = 0xffffffff;
-  pcVar11 = (char *)&DAT_0049c9d0;
+  pcVar11 = (char *)&s_pal_chk_str1;
 
   do {
     pcVar16 = pcVar11;
@@ -2448,7 +2447,7 @@ void Lisa_LoadOrCreateShadingTable(int param_1,int param_2) {
   }
 
   uVar8 = 0xffffffff;
-  pcVar11 = (char *)&DAT_0049c9c8;
+  pcVar11 = (char *)&s_pal_checksum_fmt;
 
   do {
     pcVar16 = pcVar11;
@@ -2485,10 +2484,10 @@ void Lisa_LoadOrCreateShadingTable(int param_1,int param_2) {
     pcVar16 = pcVar16 + 1;
   }
 
-  pFVar5 = (FILE *)FUN_00469390(local_20,&DAT_0047c040);
+  pFVar5 = (FILE *)fopen(local_20,(const char *)&s_rb);
 
   if (pFVar5 != (FILE *)0x0) {
-    sVar10 = _fread(&DAT_004cdd18,1,0x40000,pFVar5);
+    sVar10 = _fread(&g_LisaObjectMatrix_22,1,0x40000,pFVar5);
     _fclose(pFVar5);
   }
 
@@ -2521,13 +2520,13 @@ void Lisa_LoadOrCreateShadingTable(int param_1,int param_2) {
         iVar9 = iVar9 + 1;
       } while (iVar9 < 0x100);
       uVar8 = local_48 + 1;
-      ((int*)&(DAT_004cdd18))[local_48] = (char)local_38;
+      ((int*)&(g_LisaObjectMatrix_22))[local_48] = (char)local_38;
       local_48 = uVar8;
     } while ((int)uVar8 < 0x40000);
-    pFVar5 = (FILE *)FUN_00469390(local_20,&DAT_0049c9c4);
+    pFVar5 = (FILE *)fopen(local_20,(const char *)&s_tab_tab);
 
     if (pFVar5 != (FILE *)0x0) {
-      _fwrite(&DAT_004cdd18,1,0x40000,pFVar5);
+      _fwrite(&g_LisaObjectMatrix_22,1,0x40000,pFVar5);
       _fclose(pFVar5);
     }
 
@@ -2759,21 +2758,21 @@ int Lisa_CullObjectsOrthographic(void) {
   lVar11 = __ftol();
   iVar7 = ((int)lVar9 * 0x24 + (int)lVar10) * 8;
 
-  iVar4 = (*(int *)(&DAT_0049a05c + iVar7) +
+  iVar4 = (*(int *)(&g_LisaDefaultScale_Y + iVar7) +
 
-           ((int)((int)lVar11 + ((int)lVar11 >> 0x1f & 0xffU)) >> 8) + DAT_00499fa4) * DAT_0063c5b8;
+           ((int)((int)lVar11 + ((int)lVar11 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) * g_LisaActiveTextureCount;
   lVar9 = __ftol();
   iVar2 = g_LisaVisibleObjects;
   local_c = 3;
 
-  iVar4 = DAT_0063b5ec +
+  iVar4 = g_LisaActiveSubmeshIndex +
 
           (iVar4 + ((int)((int)lVar9 + ((int)lVar9 >> 0x1f & 0xffU)) >> 8) +
 
-           *(int *)(&DAT_0049a058 + iVar7) + DAT_00499fa8) * 4;
-  iVar7 = DAT_00499fac;
+           *(int *)(&g_LisaDefaultScale_X + iVar7) + g_LisaDefaultOffset_Y) * 4;
+  iVar7 = g_LisaDefaultOffset_Z;
 
-  if (DAT_0063c5d8 == 0) {
+  if (g_pLisaAllocatedBuffersEnd == 0) {
     while (iVar7 != -5000) {
       iVar7 = *(int *)(local_c * 4 + 0x499fa0);
 
@@ -2811,7 +2810,7 @@ int Lisa_CullObjectsOrthographic(void) {
 
       iVar7 = local_c + 1;
       local_c = local_c + 2;
-      iVar4 = iVar4 + (*(int *)(iVar7 * 4 + 0x499fa0) + DAT_0063c5b8) * 4;
+      iVar4 = iVar4 + (*(int *)(iVar7 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
       iVar7 = *(int *)(local_c * 4 + 0x499fa0);
     }
 
@@ -2827,7 +2826,7 @@ int Lisa_CullObjectsOrthographic(void) {
           iVar4 = iVar4 + 4;
 
           if ((piVar5 != (int *)0x0) && ((int *)*piVar5 == piVar5)) {
-            if (((short)piVar5[9] == 0) || ((short)piVar5[9] == DAT_0063c5d8)) {
+            if (((short)piVar5[9] == 0) || ((short)piVar5[9] == g_pLisaAllocatedBuffersEnd)) {
               iVar7 = *(int *)(iVar3 + 0x60) + 1;
               *(int *)(iVar3 + 0x60) = iVar7;
               *(int **)(iVar2 + -4 + iVar7 * 4) = piVar5;
@@ -2841,7 +2840,7 @@ int Lisa_CullObjectsOrthographic(void) {
 
                 if (((int *)*piVar5 == piVar5) &&
 
-                   (((short)piVar5[9] == 0 || ((short)piVar5[9] == DAT_0063c5d8)))) {
+                   (((short)piVar5[9] == 0 || ((short)piVar5[9] == g_pLisaAllocatedBuffersEnd)))) {
                   *puVar6 = piVar5;
                   puVar6 = puVar6 + 1;
                   *(int *)(iVar3 + 0x60) = *(int *)(iVar3 + 0x60) + 1;
@@ -2858,7 +2857,7 @@ int Lisa_CullObjectsOrthographic(void) {
 
       iVar7 = local_c + 1;
       local_c = local_c + 2;
-      iVar4 = iVar4 + (*(int *)(iVar7 * 4 + 0x499fa0) + DAT_0063c5b8) * 4;
+      iVar4 = iVar4 + (*(int *)(iVar7 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
       iVar7 = *(int *)(local_c * 4 + 0x499fa0);
     }
 
@@ -2926,24 +2925,24 @@ int Lisa_FrustumCullObjects(void) {
     lVar25 = __ftol();
     iVar4 = ((int)lVar23 * 0x24 + (int)lVar24) * 8;
 
-    iVar5 = (*(int *)(&DAT_0049a05c + iVar4) +
+    iVar5 = (*(int *)(&g_LisaDefaultScale_Y + iVar4) +
 
-             ((int)((int)lVar25 + ((int)lVar25 >> 0x1f & 0xffU)) >> 8) + DAT_00499fa4) *
+             ((int)((int)lVar25 + ((int)lVar25 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) *
 
-            DAT_0063c5b8;
+            g_LisaActiveTextureCount;
     lVar23 = __ftol();
-    iVar17 = DAT_0063c5d8;
+    iVar17 = g_pLisaAllocatedBuffersEnd;
     piVar14 = g_LisaVisibleObjects;
     local_64 = 3;
 
-    iVar5 = DAT_0063b5ec +
+    iVar5 = g_LisaActiveSubmeshIndex +
 
             (iVar5 + ((int)((int)lVar23 + ((int)lVar23 >> 0x1f & 0xffU)) >> 8) +
 
-             *(int *)(&DAT_0049a058 + iVar4) + DAT_00499fa8) * 4;
-    iVar4 = DAT_00499fac;
+             *(int *)(&g_LisaDefaultScale_X + iVar4) + g_LisaDefaultOffset_Y) * 4;
+    iVar4 = g_LisaDefaultOffset_Z;
 
-    if (DAT_0063c5d8 == 0) {
+    if (g_pLisaAllocatedBuffersEnd == 0) {
       while (iVar4 != -5000) {
         iVar4 = *(int *)(local_64 * 4 + 0x499fa0);
 
@@ -2982,7 +2981,7 @@ int Lisa_FrustumCullObjects(void) {
 
         iVar4 = local_64 + 1;
         local_64 = local_64 + 2;
-        iVar5 = iVar5 + (*(int *)(iVar4 * 4 + 0x499fa0) + DAT_0063c5b8) * 4;
+        iVar5 = iVar5 + (*(int *)(iVar4 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
         iVar4 = *(int *)(local_64 * 4 + 0x499fa0);
       }
 
@@ -3029,7 +3028,7 @@ int Lisa_FrustumCullObjects(void) {
 
         iVar4 = local_64 + 1;
         local_64 = local_64 + 2;
-        iVar5 = iVar5 + (*(int *)(iVar4 * 4 + 0x499fa0) + DAT_0063c5b8) * 4;
+        iVar5 = iVar5 + (*(int *)(iVar4 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
         iVar4 = *(int *)(local_64 * 4 + 0x499fa0);
       }
 
@@ -3038,7 +3037,7 @@ int Lisa_FrustumCullObjects(void) {
   }
 
   else {
-    fcos((double)*(double *)(iVar2 + 0x20) * (double)_DAT_0047ae48);
+    fcos((double)*(double *)(iVar2 + 0x20) * (double)g_Const_TenthDegToRad);
     iVar4 = *(int *)(iVar2 + 0xa4) / 2;
     lVar23 = __ftol();
     lVar24 = __ftol();
@@ -3046,22 +3045,22 @@ int Lisa_FrustumCullObjects(void) {
 
     iVar17 = (((int)lVar23 + ((int)((int)lVar24 + ((int)lVar24 >> 0x1f & 0xffU)) >> 8)) - iVar4) *
 
-             DAT_0063c5b8;
+             g_LisaActiveTextureCount;
     lVar23 = __ftol();
     lVar24 = __ftol();
-    iVar5 = DAT_0063c5d8;
+    iVar5 = g_pLisaAllocatedBuffersEnd;
     piVar19 = g_LisaVisibleObjects;
 
-    piVar14 = (int *)(DAT_0063b5ec +
+    piVar14 = (int *)(g_LisaActiveSubmeshIndex +
 
                      ((iVar17 + (int)lVar23 +
 
                       ((int)((int)lVar24 + ((int)lVar24 >> 0x1f & 0xffU)) >> 8)) - iVar4) * 4);
 
-    if (DAT_0063c5d8 == 0) {
+    if (g_pLisaAllocatedBuffersEnd == 0) {
       if (0 < *(int *)(iVar2 + 0xa4)) {
         local_64 = *(int *)(iVar2 + 0xa4);
-        iVar5 = DAT_0063c5b8 - local_64;
+        iVar5 = g_LisaActiveTextureCount - local_64;
 
         do {
           iVar4 = *(int *)(iVar2 + 0xa4);
@@ -3108,7 +3107,7 @@ int Lisa_FrustumCullObjects(void) {
 
     else if (0 < *(int *)(iVar2 + 0xa4)) {
       local_5c = *(int *)(iVar2 + 0xa4);
-      iVar4 = DAT_0063c5b8 - local_5c;
+      iVar4 = g_LisaActiveTextureCount - local_5c;
 
       do {
         local_64 = *(int *)(iVar2 + 0xa4);
@@ -3279,24 +3278,24 @@ int Lisa_CullObjects(void) {
     iVar19 = ((int)lVar30 * 0x24 + (int)lVar31) * 8;
     lVar30 = __ftol();
 
-    iVar9 = (*(int *)(&DAT_0049a05c + iVar19) +
+    iVar9 = (*(int *)(&g_LisaDefaultScale_Y + iVar19) +
 
-             ((int)((int)lVar30 + ((int)lVar30 >> 0x1f & 0xffU)) >> 8) + DAT_00499fa4) *
+             ((int)((int)lVar30 + ((int)lVar30 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) *
 
-            DAT_0063c5b8;
+            g_LisaActiveTextureCount;
     lVar30 = __ftol();
-    iVar18 = DAT_0063c5d8;
+    iVar18 = g_pLisaAllocatedBuffersEnd;
     piVar20 = g_LisaVisibleObjects;
     local_70 = 3;
 
-    iVar19 = DAT_0063b5ec +
+    iVar19 = g_LisaActiveSubmeshIndex +
 
              (iVar9 + ((int)((int)lVar30 + ((int)lVar30 >> 0x1f & 0xffU)) >> 8) +
 
-              *(int *)(&DAT_0049a058 + iVar19) + DAT_00499fa8) * 4;
-    iVar9 = DAT_00499fac;
+              *(int *)(&g_LisaDefaultScale_X + iVar19) + g_LisaDefaultOffset_Y) * 4;
+    iVar9 = g_LisaDefaultOffset_Z;
 
-    if (DAT_0063c5d8 == 0) {
+    if (g_pLisaAllocatedBuffersEnd == 0) {
       while (iVar9 != -5000) {
         iVar9 = *(int *)(local_70 * 4 + 0x499fa0);
 
@@ -3334,7 +3333,7 @@ int Lisa_CullObjects(void) {
 
         iVar9 = local_70 + 1;
         local_70 = local_70 + 2;
-        iVar19 = iVar19 + (*(int *)(iVar9 * 4 + 0x499fa0) + DAT_0063c5b8) * 4;
+        iVar19 = iVar19 + (*(int *)(iVar9 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
         iVar9 = *(int *)(local_70 * 4 + 0x499fa0);
       }
 
@@ -3381,7 +3380,7 @@ int Lisa_CullObjects(void) {
 
         iVar9 = local_70 + 1;
         local_70 = local_70 + 2;
-        iVar19 = iVar19 + (*(int *)(iVar9 * 4 + 0x499fa0) + DAT_0063c5b8) * 4;
+        iVar19 = iVar19 + (*(int *)(iVar9 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
         iVar9 = *(int *)(local_70 * 4 + 0x499fa0);
       }
 
@@ -3394,29 +3393,29 @@ int Lisa_CullObjects(void) {
     piVar14 = (int *)(iVar22 + 0x60);
     local_58 = &g_LisaCamera->rot_y;
     local_50[0] = (float)(iVar19 / 3);
-    fcos((double)*local_58 * (double)_DAT_0047ae48);
+    fcos((double)*local_58 * (double)g_Const_TenthDegToRad);
     lVar30 = __ftol();
     lVar31 = __ftol();
     fsin(extraout_ST1);
 
     iVar18 = (((int)lVar30 + ((int)((int)lVar31 + ((int)lVar31 >> 0x1f & 0xffU)) >> 8)) - iVar19 / 2
 
-             ) * DAT_0063c5b8;
+             ) * g_LisaActiveTextureCount;
     lVar30 = __ftol();
     lVar31 = __ftol();
-    iVar9 = DAT_0063c5d8;
+    iVar9 = g_pLisaAllocatedBuffersEnd;
     piVar20 = g_LisaVisibleObjects;
 
-    piVar15 = (int *)(DAT_0063b5ec +
+    piVar15 = (int *)(g_LisaActiveSubmeshIndex +
 
                      ((iVar18 + (int)lVar30 +
 
                       ((int)((int)lVar31 + ((int)lVar31 >> 0x1f & 0xffU)) >> 8)) - iVar19 / 2) * 4);
     local_68 = iVar19;
 
-    if (DAT_0063c5d8 == 0) {
+    if (g_pLisaAllocatedBuffersEnd == 0) {
       if (0 < iVar19) {
-        iVar9 = DAT_0063c5b8 - iVar19;
+        iVar9 = g_LisaActiveTextureCount - iVar19;
 
         do {
           iVar18 = iVar19;
@@ -3461,7 +3460,7 @@ int Lisa_CullObjects(void) {
     }
 
     else if (0 < iVar19) {
-      iVar18 = DAT_0063c5b8 - iVar19;
+      iVar18 = g_LisaActiveTextureCount - iVar19;
 
       do {
         local_64 = (int *)iVar19;
@@ -3512,39 +3511,39 @@ int Lisa_CullObjects(void) {
   iVar19 = g_LisaCamera->fov_x;
   iVar22 = g_SubpixelMinX + iVar19 * -0x100;
 
-  if ((((DAT_0050dd88 != iVar22) || (g_SubpixelMaxX + iVar19 * -0x100 != DAT_0050dd68)) ||
+  if ((((g_LisaActiveMaterial != iVar22) || (g_SubpixelMaxX + iVar19 * -0x100 != g_LisaSubmeshLodLevel)) ||
 
-      (g_SubpixelMinY + g_LisaCamera->fov_y * -0x100 != DAT_0050dd2c)) ||
+      (g_SubpixelMinY + g_LisaCamera->fov_y * -0x100 != g_LisaActiveSubmeshFlags)) ||
 
-     (((g_SubpixelMaxY + g_LisaCamera->fov_y * -0x100 != DAT_004cdc24 ||
+     (((g_SubpixelMaxY + g_LisaCamera->fov_y * -0x100 != g_LisaCameraPitch ||
 
-       (g_LisaCamera->viewport_x != DAT_0050dda4)) ||
+       (g_LisaCamera->viewport_x != g_LisaSubmeshClipMask)) ||
 
-      ((g_LisaCamera->viewport_y != DAT_004cdc20 || (DAT_0049c9c0 == 1)))))) {
+      ((g_LisaCamera->viewport_y != g_LisaCameraDistance || (g_LisaMipmapQuality == 1)))))) {
     uVar13 = 0;
-    DAT_0049c9c0 = 0;
-    DAT_0050dd68 = g_SubpixelMaxX + iVar19 * -0x100;
+    g_LisaMipmapQuality = 0;
+    g_LisaSubmeshLodLevel = g_SubpixelMaxX + iVar19 * -0x100;
     iVar9 = g_LisaCamera->fov_y;
-    DAT_0050dd2c = g_SubpixelMinY + iVar9 * -0x100;
-    DAT_004cdc24 = g_SubpixelMaxY + iVar9 * -0x100;
-    DAT_0050dda4 = g_LisaCamera->viewport_x;
-    DAT_004cdc20 = g_LisaCamera->viewport_y;
+    g_LisaActiveSubmeshFlags = g_SubpixelMinY + iVar9 * -0x100;
+    g_LisaCameraPitch = g_SubpixelMaxY + iVar9 * -0x100;
+    g_LisaSubmeshClipMask = g_LisaCamera->viewport_x;
+    g_LisaCameraDistance = g_LisaCamera->viewport_y;
 
-    local_50[0] = ((float)((-1 - iVar19) * 0x100 + g_SubpixelMinX) * (float)_DAT_0047ae58) /
+    local_50[0] = ((float)((-1 - iVar19) * 0x100 + g_SubpixelMinX) * (float)g_Const_1000) /
 
-                  ((float)DAT_0050dda4 * (float)_DAT_0047ae50);
+                  ((float)g_LisaSubmeshClipMask * (float)g_Const_Neg256);
 
-    local_50[3] = ((float)((1 - iVar19) * 0x100 + g_SubpixelMaxX) * (float)_DAT_0047ae58) /
+    local_50[3] = ((float)((1 - iVar19) * 0x100 + g_SubpixelMaxX) * (float)g_Const_1000) /
 
-                  ((float)DAT_0050dda4 * (float)_DAT_0047ae50);
+                  ((float)g_LisaSubmeshClipMask * (float)g_Const_Neg256);
 
-    local_50[1] = ((float)((-1 - iVar9) * 0x100 + g_SubpixelMinY) * (float)_DAT_0047ae58) /
+    local_50[1] = ((float)((-1 - iVar9) * 0x100 + g_SubpixelMinY) * (float)g_Const_1000) /
 
-                  ((float)DAT_004cdc20 * (float)_DAT_0047ae50);
+                  ((float)g_LisaCameraDistance * (float)g_Const_Neg256);
 
-    local_50[7] = ((float)((1 - iVar9) * 0x100 + g_SubpixelMaxY) * (float)_DAT_0047ae58) /
+    local_50[7] = ((float)((1 - iVar9) * 0x100 + g_SubpixelMaxY) * (float)g_Const_1000) /
 
-                  ((float)DAT_004cdc20 * (float)_DAT_0047ae50);
+                  ((float)g_LisaCameraDistance * (float)g_Const_Neg256);
     local_50[2] = 1000.0;
     local_50[4] = local_50[1];
     local_50[5] = 1000.0;
@@ -3554,7 +3553,7 @@ int Lisa_CullObjects(void) {
     local_50[10] = local_50[7];
     local_50[0xb] = 1000.0;
     iVar19 = 0;
-    DAT_0050dd88 = iVar22;
+    g_LisaActiveMaterial = iVar22;
 
     while( 1 ) {
       uVar13 = uVar13 + 1;
@@ -3566,64 +3565,64 @@ int Lisa_CullObjects(void) {
       fVar5 = local_50[uVar12 * 3 + 1];
       fVar6 = *(float *)((int)local_50 + iVar19);
 
-      *(float *)((int)&DAT_004cdca0 + iVar19) =
+      *(float *)((int)&g_LisaFrustumPlaneLeft + iVar19) =
 
            local_50[uVar12 * 3 + 2] * *(float *)((int)local_50 + iVar19 + 4) -
 
            local_50[uVar12 * 3 + 1] * *(float *)((int)local_50 + iVar19 + 8);
       fVar7 = local_50[uVar12 * 3];
       fVar8 = *(float *)((int)local_50 + iVar19 + 4);
-      *(float *)((int)&DAT_004cdca4 + iVar19) = fVar1 * fVar2 - fVar3 * fVar4;
-      *(float *)((int)&DAT_004cdca8 + iVar19) = fVar5 * fVar6 - fVar7 * fVar8;
+      *(float *)((int)&g_LisaFrustumPlaneRight + iVar19) = fVar1 * fVar2 - fVar3 * fVar4;
+      *(float *)((int)&g_LisaFrustumPlaneTop + iVar19) = fVar5 * fVar6 - fVar7 * fVar8;
 
-      fVar1 = SQRT(*(float *)((int)&DAT_004cdca0 + iVar19) * *(float *)((int)&DAT_004cdca0 + iVar19)
+      fVar1 = SQRT(*(float *)((int)&g_LisaFrustumPlaneLeft + iVar19) * *(float *)((int)&g_LisaFrustumPlaneLeft + iVar19)
 
-                   + *(float *)((int)&DAT_004cdca4 + iVar19) *
+                   + *(float *)((int)&g_LisaFrustumPlaneRight + iVar19) *
 
-                     *(float *)((int)&DAT_004cdca4 + iVar19) +
+                     *(float *)((int)&g_LisaFrustumPlaneRight + iVar19) +
 
-                     *(float *)((int)&DAT_004cdca8 + iVar19) *
+                     *(float *)((int)&g_LisaFrustumPlaneTop + iVar19) *
 
-                     *(float *)((int)&DAT_004cdca8 + iVar19));
+                     *(float *)((int)&g_LisaFrustumPlaneTop + iVar19));
 
-      *(float *)((int)&DAT_004cdca0 + iVar19) =
+      *(float *)((int)&g_LisaFrustumPlaneLeft + iVar19) =
 
-           (*(float *)((int)&DAT_004cdca0 + iVar19) / fVar1) * _DAT_0047ae64;
+           (*(float *)((int)&g_LisaFrustumPlaneLeft + iVar19) / fVar1) * g_Const_TenthDegToRadFloat;
 
-      *(float *)((int)&DAT_004cdca4 + iVar19) =
+      *(float *)((int)&g_LisaFrustumPlaneRight + iVar19) =
 
-           (*(float *)((int)&DAT_004cdca4 + iVar19) / fVar1) * _DAT_0047ae64;
-      fVar1 = (*(float *)((int)&DAT_004cdca8 + iVar19) / fVar1) * _DAT_0047ae64;
+           (*(float *)((int)&g_LisaFrustumPlaneRight + iVar19) / fVar1) * g_Const_TenthDegToRadFloat;
+      fVar1 = (*(float *)((int)&g_LisaFrustumPlaneTop + iVar19) / fVar1) * g_Const_TenthDegToRadFloat;
       if (0x2f < iVar19 + 0xc) break;
-      *(float *)((int)&DAT_004cdca8 + iVar19) = fVar1;
+      *(float *)((int)&g_LisaFrustumPlaneTop + iVar19) = fVar1;
       iVar19 = iVar19 + 0xc;
     }
 
-    *(float *)((int)&DAT_004cdca8 + iVar19) = fVar1;
+    *(float *)((int)&g_LisaFrustumPlaneTop + iVar19) = fVar1;
   }
 
-  fVar24 = (double)g_LisaCamera->rot_x * (double)_DAT_0047ae48;
+  fVar24 = (double)g_LisaCamera->rot_x * (double)g_Const_TenthDegToRad;
   fVar25 = (double)fcos(fVar24);
-  fVar26 = (double)fcos((double)*local_58 * (double)_DAT_0047ae48);
+  fVar26 = (double)fcos((double)*local_58 * (double)g_Const_TenthDegToRad);
   fVar24 = (double)fsin(fVar24);
-  fVar27 = (double)g_LisaCamera->rot_z * (double)_DAT_0047ae48;
-  fVar28 = (double)fsin((double)*local_58 * (double)_DAT_0047ae48);
+  fVar27 = (double)g_LisaCamera->rot_z * (double)g_Const_TenthDegToRad;
+  fVar28 = (double)fsin((double)*local_58 * (double)g_Const_TenthDegToRad);
   fVar29 = (double)fcos(fVar27);
   local_50[0] = (float)fVar29;
   fVar27 = (double)fsin(fVar27);
-  _DAT_004cdcf0 = (float)(fVar24 * fVar28);
-  _DAT_004cdce8 = (float)((double)_DAT_004cdcf0 * fVar27 + (double)local_50[0] * fVar26);
-  _DAT_004cdcec = (float)((double)local_50[0] * (double)_DAT_004cdcf0 - fVar26 * fVar27);
-  _DAT_004cdcf4 = (float)(fVar25 * fVar27);
-  _DAT_004cdcf8 = (float)((double)local_50[0] * fVar25);
-  _DAT_004cdcfc = (float)-fVar24;
-  _DAT_004cdd00 = (float)(fVar27 * fVar24 * fVar26 - (double)local_50[0] * fVar28);
-  _DAT_004cdcd0 = 0;
-  _DAT_004cdcd4 = 0;
-  puVar23 = &DAT_004cdca8;
-  _DAT_004cdd04 = (float)((double)local_50[0] * fVar24 * fVar26 + fVar28 * fVar27);
-  _DAT_004cdcd8 = 0;
-  _DAT_004cdd08 = (float)(fVar25 * fVar26);
+  g_LisaObjMat_CosRoll = (float)(fVar24 * fVar28);
+  g_LisaObjMat_CosPitch = (float)((double)g_LisaObjMat_CosRoll * fVar27 + (double)local_50[0] * fVar26);
+  g_LisaObjMat_SinPitch = (float)((double)local_50[0] * (double)g_LisaObjMat_CosRoll - fVar26 * fVar27);
+  g_LisaObjMat_SinRoll = (float)(fVar25 * fVar27);
+  g_LisaObjMat_Tmp1 = (float)((double)local_50[0] * fVar25);
+  g_LisaObjMat_Tmp2 = (float)-fVar24;
+  g_LisaObjMat_Tmp3 = (float)(fVar27 * fVar24 * fVar26 - (double)local_50[0] * fVar28);
+  g_LisaObjMat_21 = 0;
+  g_LisaObjMat_Scale = 0;
+  puVar23 = &g_LisaFrustumPlaneTop;
+  g_LisaObjMat_Tmp4 = (float)((double)local_50[0] * fVar24 * fVar26 + fVar28 * fVar27);
+  g_LisaObjMat_CosYaw = 0;
+  g_LisaObjMat_Tmp5 = (float)(fVar25 * fVar26);
   pfVar17 = local_50;
 
   do {
@@ -3635,7 +3634,7 @@ int Lisa_CullObjects(void) {
     lVar30 = __ftol();
     pfVar17[2] = (float)lVar30;
     pfVar17 = pfVar17 + 4;
-  } while (puVar23 < &DAT_004cdce4);
+  } while (puVar23 < &g_LisaFrustumNear);
   lVar30 = __ftol();
   lVar31 = __ftol();
   lVar32 = __ftol();
@@ -3727,10 +3726,10 @@ void Lisa_TransformVertices(void) {
 
   iVar6 = g_LisaCamera;
   pdVar10 = &g_LisaCamera->zoom;
-  DAT_0049c9a8 = 0;
+  g_LisaBackfaceSign = 0;
 
   if (g_LisaCamera->zoom <= 0.0) {
-    DAT_0049c9a8 = 0xffffffff;
+    g_LisaBackfaceSign = 0xffffffff;
   }
 
   piVar11 = &g_LisaCamera->viewport_x;
@@ -3742,63 +3741,63 @@ void Lisa_TransformVertices(void) {
 
   piVar1 = &g_LisaCamera->viewport_width;
   g_LisaCamera->vertex_counter = 0;
-  DAT_0050ddfc = *piVar1 << 2;
-  fVar16 = (double)*(double *)(iVar6 + 0x18) * (double)_DAT_0047ae68;
-  DAT_004cdbbc = *(int *)(iVar6 + 0x9c) << 8;
+  g_LisaCameraFocalLength = *piVar1 << 2;
+  fVar16 = (double)*(double *)(iVar6 + 0x18) * (double)g_Const_NegTenthDegToRad;
+  g_LisaCameraOffsetX = *(int *)(iVar6 + 0x9c) << 8;
   fVar17 = (double)fcos(fVar16);
-  DAT_004cdbe8 = *(int *)(iVar6 + 0xa0) << 8;
-  fVar18 = (double)*(double *)(iVar6 + 0x20) * (double)_DAT_0047ae68;
+  g_LisaCameraOffsetY = *(int *)(iVar6 + 0xa0) << 8;
+  fVar18 = (double)*(double *)(iVar6 + 0x20) * (double)g_Const_NegTenthDegToRad;
   fVar19 = (double)fcos(fVar18);
   fVar16 = (double)fsin(fVar16);
-  fVar20 = (double)*(double *)(iVar6 + 0x28) * (double)_DAT_0047ae68;
+  fVar20 = (double)*(double *)(iVar6 + 0x28) * (double)g_Const_NegTenthDegToRad;
   fVar18 = (double)fsin(fVar18);
   fVar21 = (double)fcos(fVar20);
   fVar20 = (double)fsin(fVar20);
   fVar2 = (float)fVar21;
-  fVar3 = (float)-*piVar11 * (float)*pdVar10 * (float)_DAT_0047ae70;
-  fVar4 = (float)-*(int *)(iVar6 + 0x84) * (float)_DAT_0047ae70;
+  fVar3 = (float)-*piVar11 * (float)*pdVar10 * (float)g_Const_1024;
+  fVar4 = (float)-*(int *)(iVar6 + 0x84) * (float)g_Const_1024;
 
-  _DAT_004cdce8 =
+  g_LisaObjMat_CosPitch =
 
        (float)(((double)fVar2 * fVar19 - (double)(float)(fVar16 * fVar18) * fVar20) *
 
               (double)fVar3);
-  _DAT_004cdcec = (float)-((double)fVar3 * fVar17 * fVar20);
-  _DAT_004cdcf0 = (float)((fVar16 * fVar19 * fVar20 + (double)fVar2 * fVar18) * (double)fVar3);
+  g_LisaObjMat_SinPitch = (float)-((double)fVar3 * fVar17 * fVar20);
+  g_LisaObjMat_CosRoll = (float)((fVar16 * fVar19 * fVar20 + (double)fVar2 * fVar18) * (double)fVar3);
 
-  _DAT_004cdcf4 =
+  g_LisaObjMat_SinRoll =
 
        (float)(((double)(float)(fVar16 * fVar18) * (double)fVar2 + fVar19 * fVar20) *
 
               (double)fVar4);
-  _DAT_004cdcf8 = (float)((double)fVar4 * fVar17 * (double)fVar2);
-  _DAT_004cdd00 = (float)(-(fVar18 * fVar17) * (double)_DAT_0047ae78);
-  _DAT_004cdd04 = (float)(fVar16 * (double)_DAT_0047ae78);
+  g_LisaObjMat_Tmp1 = (float)((double)fVar4 * fVar17 * (double)fVar2);
+  g_LisaObjMat_Tmp3 = (float)(-(fVar18 * fVar17) * (double)g_Const_262144);
+  g_LisaObjMat_Tmp4 = (float)(fVar16 * (double)g_Const_262144);
 
-  _DAT_004cdcfc =
+  g_LisaObjMat_Tmp2 =
 
        (float)((fVar18 * fVar20 - (double)(float)(fVar16 * fVar19) * (double)fVar2) *
 
               (double)fVar4);
-  _DAT_004cdd08 = (float)(fVar17 * fVar19 * (double)_DAT_0047ae78);
+  g_LisaObjMat_Tmp5 = (float)(fVar17 * fVar19 * (double)g_Const_262144);
   lVar22 = __ftol();
-  DAT_004cdc60 = (int)lVar22;
+  g_LisaCameraMatrix_00 = (int)lVar22;
   lVar22 = __ftol();
-  DAT_004cdc64 = (int)lVar22;
+  g_LisaCameraMatrix_01 = (int)lVar22;
   lVar22 = __ftol();
-  DAT_004cdc68 = (int)lVar22;
+  g_LisaCameraMatrix_02 = (int)lVar22;
   lVar22 = __ftol();
-  DAT_004cdc6c = (int)lVar22;
+  g_LisaCameraMatrix_10 = (int)lVar22;
   lVar22 = __ftol();
-  DAT_004cdc70 = (int)lVar22;
+  g_LisaCameraMatrix_11 = (int)lVar22;
   lVar22 = __ftol();
-  DAT_004cdc74 = (int)lVar22;
+  g_LisaCameraMatrix_12 = (int)lVar22;
   lVar22 = __ftol();
-  DAT_004cdc78 = (int)lVar22;
+  g_LisaCameraMatrix_20 = (int)lVar22;
   lVar22 = __ftol();
-  DAT_004cdc7c = (int)lVar22;
+  g_LisaCameraMatrix_21 = (int)lVar22;
   lVar22 = __ftol();
-  DAT_004cdc80 = (int)lVar22;
+  g_LisaCameraMatrix_22 = (int)lVar22;
   lVar22 = __ftol();
   lVar23 = __ftol();
   iVar6 = (int)lVar23;
@@ -3808,13 +3807,13 @@ void Lisa_TransformVertices(void) {
   lVar24 = __ftol();
   lVar25 = __ftol();
   iVar7 = (int)lVar25;
-  iVar5 = DAT_004cdc64 * iVar15 + iVar6 * DAT_004cdc60 + DAT_004cdc68 * iVar7;
-  DAT_0050ddc8 = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
-  iVar5 = DAT_004cdc70 * iVar15 + iVar6 * DAT_004cdc6c + DAT_004cdc74 * iVar7;
-  DAT_0050dde0 = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
-  iVar6 = DAT_004cdc7c * iVar15 + iVar6 * DAT_004cdc78 + DAT_004cdc80 * iVar7;
+  iVar5 = g_LisaCameraMatrix_01 * iVar15 + iVar6 * g_LisaCameraMatrix_00 + g_LisaCameraMatrix_02 * iVar7;
+  g_LisaSubmeshCenterWorldX = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
+  iVar5 = g_LisaCameraMatrix_11 * iVar15 + iVar6 * g_LisaCameraMatrix_10 + g_LisaCameraMatrix_12 * iVar7;
+  g_LisaSubmeshCenterWorldZ = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
+  iVar6 = g_LisaCameraMatrix_21 * iVar15 + iVar6 * g_LisaCameraMatrix_20 + g_LisaCameraMatrix_22 * iVar7;
   local_c = 0;
-  DAT_0050de04 = (int)(iVar6 + (iVar6 >> 0x1f & 0xfffU)) >> 0xc;
+  g_LisaSubmeshDepthOffset = (int)(iVar6 + (iVar6 >> 0x1f & 0xfffU)) >> 0xc;
 
   if (0 < g_LisaCamera->visible_obj_count) {
     local_18 = 0;
@@ -3822,7 +3821,7 @@ void Lisa_TransformVertices(void) {
 
     do {
       iVar5 = g_LisaVisibleSubmeshes;
-      iVar7 = DAT_0063c5ec;
+      iVar7 = g_LisaTransformedVertices;
       iVar6 = *(int *)(g_LisaVisibleObjects + local_10);
       piVar1 = *(int **)(iVar6 + 4);
       iVar15 = g_LisaCamera->vertex_counter;
@@ -3849,26 +3848,26 @@ void Lisa_TransformVertices(void) {
             iVar6 = iVar6 + 3;
             iVar9 = iVar8 + piVar1[iVar15];
 
-            iVar13 = (iVar12 * DAT_004cdc6c + DAT_004cdc74 * iVar9 + DAT_004cdc70 * iVar14) -
+            iVar13 = (iVar12 * g_LisaCameraMatrix_10 + g_LisaCameraMatrix_12 * iVar9 + g_LisaCameraMatrix_11 * iVar14) -
 
-                     DAT_0050dde0;
+                     g_LisaSubmeshCenterWorldZ;
 
-            iVar15 = DAT_0050ddfc +
+            iVar15 = g_LisaCameraFocalLength +
 
-                     ((iVar12 * DAT_004cdc78 + DAT_004cdc80 * iVar9 + DAT_004cdc7c * iVar14) -
+                     ((iVar12 * g_LisaCameraMatrix_20 + g_LisaCameraMatrix_22 * iVar9 + g_LisaCameraMatrix_21 * iVar14) -
 
-                      DAT_0050de04 >> 0x10);
+                      g_LisaSubmeshDepthOffset >> 0x10);
 
-            if (iVar15 < DAT_0050ddfc) {
-              iVar15 = DAT_0050ddfc;
+            if (iVar15 < g_LisaCameraFocalLength) {
+              iVar15 = g_LisaCameraFocalLength;
             }
 
-            *piVar11 = DAT_004cdbbc +
+            *piVar11 = g_LisaCameraOffsetX +
 
-                       ((iVar12 * DAT_004cdc60 + DAT_004cdc68 * iVar9 + DAT_004cdc64 * iVar14) -
+                       ((iVar12 * g_LisaCameraMatrix_00 + g_LisaCameraMatrix_02 * iVar9 + g_LisaCameraMatrix_01 * iVar14) -
 
-                       DAT_0050ddc8) / iVar15;
-            iVar9 = DAT_004cdbe8;
+                       g_LisaSubmeshCenterWorldX) / iVar15;
+            iVar9 = g_LisaCameraOffsetY;
             piVar11[2] = iVar15;
             local_1c = local_1c + -1;
             piVar11[1] = iVar9 + iVar13 / iVar15;
@@ -3928,69 +3927,69 @@ int Lisa_TransformVerticesPanorama(void) {
   
 
   iVar6 = g_LisaCamera;
-  DAT_0050ddfc = g_LisaCamera->viewport_width << 2;
+  g_LisaCameraFocalLength = g_LisaCamera->viewport_width << 2;
   g_LisaCamera->vertex_counter = 0;
-  fVar15 = (double)*(double *)(iVar6 + 0x18) * (double)_DAT_0047ae68;
-  DAT_004cdbbc = *(int *)(iVar6 + 0x9c) << 8;
+  fVar15 = (double)*(double *)(iVar6 + 0x18) * (double)g_Const_NegTenthDegToRad;
+  g_LisaCameraOffsetX = *(int *)(iVar6 + 0x9c) << 8;
   fVar16 = (double)fcos(fVar15);
-  DAT_004cdbe8 = *(int *)(iVar6 + 0xa0) << 8;
-  fVar17 = (double)*(double *)(iVar6 + 0x20) * (double)_DAT_0047ae68;
+  g_LisaCameraOffsetY = *(int *)(iVar6 + 0xa0) << 8;
+  fVar17 = (double)*(double *)(iVar6 + 0x20) * (double)g_Const_NegTenthDegToRad;
   fVar18 = (double)fcos(fVar17);
   fVar15 = (double)fsin(fVar15);
-  fVar19 = (double)*(double *)(iVar6 + 0x28) * (double)_DAT_0047ae68;
+  fVar19 = (double)*(double *)(iVar6 + 0x28) * (double)g_Const_NegTenthDegToRad;
   fVar17 = (double)fsin(fVar17);
   fVar20 = (double)fcos(fVar19);
   fVar19 = (double)fsin(fVar19);
   fVar1 = (float)fVar20;
-  fVar3 = (float)-*(int *)(iVar6 + 0x80) * (float)*(double *)(iVar6 + 0x30) * (float)_DAT_0047ae88;
-  fVar4 = (float)-*(int *)(iVar6 + 0x84) * (float)_DAT_0047ae88;
+  fVar3 = (float)-*(int *)(iVar6 + 0x80) * (float)*(double *)(iVar6 + 0x30) * (float)g_Const_256;
+  fVar4 = (float)-*(int *)(iVar6 + 0x84) * (float)g_Const_256;
 
-  _DAT_004cdce8 =
+  g_LisaObjMat_CosPitch =
 
        (float)(((double)fVar1 * fVar18 - (double)(float)(fVar15 * fVar17) * fVar19) *
 
               (double)fVar3);
-  _DAT_004cdcec = (float)-((double)fVar3 * fVar16 * fVar19);
+  g_LisaObjMat_SinPitch = (float)-((double)fVar3 * fVar16 * fVar19);
 
-  _DAT_004cdcf0 =
+  g_LisaObjMat_CosRoll =
 
        (float)(((double)(float)(fVar15 * fVar18) * fVar19 + (double)fVar1 * fVar17) *
 
               (double)fVar3);
 
-  _DAT_004cdcf4 =
+  g_LisaObjMat_SinRoll =
 
        (float)(((double)fVar1 * (double)(float)(fVar15 * fVar17) + fVar18 * fVar19) *
 
               (double)fVar4);
-  _DAT_004cdcf8 = (float)((double)fVar4 * fVar16 * (double)fVar1);
-  _DAT_004cdd04 = (float)(fVar15 * (double)_DAT_0047ae78);
-  _DAT_004cdd00 = (float)(-(fVar16 * fVar17) * (double)_DAT_0047ae78);
+  g_LisaObjMat_Tmp1 = (float)((double)fVar4 * fVar16 * (double)fVar1);
+  g_LisaObjMat_Tmp4 = (float)(fVar15 * (double)g_Const_262144);
+  g_LisaObjMat_Tmp3 = (float)(-(fVar16 * fVar17) * (double)g_Const_262144);
 
-  _DAT_004cdcfc =
+  g_LisaObjMat_Tmp2 =
 
        (float)((fVar17 * fVar19 - (double)fVar1 * (double)(float)(fVar15 * fVar18)) *
 
               (double)fVar4);
-  _DAT_004cdd08 = (float)(fVar18 * fVar16 * (double)_DAT_0047ae78);
+  g_LisaObjMat_Tmp5 = (float)(fVar18 * fVar16 * (double)g_Const_262144);
   lVar21 = __ftol();
-  DAT_004cdc60 = (int)lVar21;
+  g_LisaCameraMatrix_00 = (int)lVar21;
   lVar21 = __ftol();
-  DAT_004cdc64 = (int)lVar21;
+  g_LisaCameraMatrix_01 = (int)lVar21;
   lVar21 = __ftol();
-  DAT_004cdc68 = (int)lVar21;
+  g_LisaCameraMatrix_02 = (int)lVar21;
   lVar21 = __ftol();
-  DAT_004cdc6c = (int)lVar21;
+  g_LisaCameraMatrix_10 = (int)lVar21;
   lVar21 = __ftol();
-  DAT_004cdc70 = (int)lVar21;
+  g_LisaCameraMatrix_11 = (int)lVar21;
   lVar21 = __ftol();
-  DAT_004cdc74 = (int)lVar21;
+  g_LisaCameraMatrix_12 = (int)lVar21;
   lVar21 = __ftol();
-  DAT_004cdc78 = (int)lVar21;
+  g_LisaCameraMatrix_20 = (int)lVar21;
   lVar21 = __ftol();
-  DAT_004cdc7c = (int)lVar21;
+  g_LisaCameraMatrix_21 = (int)lVar21;
   lVar21 = __ftol();
-  DAT_004cdc80 = (int)lVar21;
+  g_LisaCameraMatrix_22 = (int)lVar21;
   lVar21 = __ftol();
   lVar22 = __ftol();
   iVar6 = (int)lVar22;
@@ -4000,13 +3999,13 @@ int Lisa_TransformVerticesPanorama(void) {
   lVar23 = __ftol();
   lVar24 = __ftol();
   iVar7 = (int)lVar24;
-  iVar5 = DAT_004cdc60 * iVar6 + DAT_004cdc68 * iVar7 + DAT_004cdc64 * iVar14;
-  DAT_0050ddc8 = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
-  iVar5 = DAT_004cdc6c * iVar6 + DAT_004cdc74 * iVar7 + DAT_004cdc70 * iVar14;
-  DAT_0050dde0 = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
-  iVar6 = DAT_004cdc78 * iVar6 + DAT_004cdc80 * iVar7 + DAT_004cdc7c * iVar14;
+  iVar5 = g_LisaCameraMatrix_00 * iVar6 + g_LisaCameraMatrix_02 * iVar7 + g_LisaCameraMatrix_01 * iVar14;
+  g_LisaSubmeshCenterWorldX = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
+  iVar5 = g_LisaCameraMatrix_10 * iVar6 + g_LisaCameraMatrix_12 * iVar7 + g_LisaCameraMatrix_11 * iVar14;
+  g_LisaSubmeshCenterWorldZ = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
+  iVar6 = g_LisaCameraMatrix_20 * iVar6 + g_LisaCameraMatrix_22 * iVar7 + g_LisaCameraMatrix_21 * iVar14;
   local_c = 0;
-  DAT_0050de04 = (int)(iVar6 + (iVar6 >> 0x1f & 0xfffU)) >> 0xc;
+  g_LisaSubmeshDepthOffset = (int)(iVar6 + (iVar6 >> 0x1f & 0xfffU)) >> 0xc;
 
   if (0 < g_LisaCamera->visible_obj_count) {
     local_1c = 0;
@@ -4018,7 +4017,7 @@ int Lisa_TransformVerticesPanorama(void) {
       piVar2 = *(int **)(iVar6 + 4);
       *(int **)(g_LisaVisibleSubmeshes + local_1c) = piVar2;
       iVar14 = *(int *)(iVar14 + 0x5c);
-      piVar11 = (int *)(DAT_0063c5ec + iVar14 * 0xc);
+      piVar11 = (int *)(g_LisaTransformedVertices + iVar14 * 0xc);
       *(int **)(g_LisaVisibleSubmeshes + 4 + local_1c) = piVar11;
       iVar7 = *(int *)(iVar6 + 0xc) - (int)lVar21;
       iVar5 = *(int *)(iVar6 + 0x10) - (int)lVar22;
@@ -4038,26 +4037,26 @@ int Lisa_TransformVerticesPanorama(void) {
             iVar12 = iVar5 - piVar2[iVar6 + 1];
             iVar10 = iVar8 + piVar2[iVar6 + 2];
 
-            iVar13 = (DAT_004cdc74 * iVar10 + DAT_004cdc70 * iVar12 + DAT_004cdc6c * iVar9) -
+            iVar13 = (g_LisaCameraMatrix_12 * iVar10 + g_LisaCameraMatrix_11 * iVar12 + g_LisaCameraMatrix_10 * iVar9) -
 
-                     DAT_0050dde0;
+                     g_LisaSubmeshCenterWorldZ;
 
-            iVar14 = ((DAT_004cdc80 * iVar10 + DAT_004cdc7c * iVar12 + DAT_004cdc78 * iVar9) -
+            iVar14 = ((g_LisaCameraMatrix_22 * iVar10 + g_LisaCameraMatrix_21 * iVar12 + g_LisaCameraMatrix_20 * iVar9) -
 
-                      DAT_0050de04 >> 0x10) + DAT_0050ddfc;
+                      g_LisaSubmeshDepthOffset >> 0x10) + g_LisaCameraFocalLength;
 
-            if (iVar14 < DAT_0050ddfc) {
-              iVar14 = DAT_0050ddfc;
+            if (iVar14 < g_LisaCameraFocalLength) {
+              iVar14 = g_LisaCameraFocalLength;
             }
 
-            *piVar11 = DAT_004cdbbc +
+            *piVar11 = g_LisaCameraOffsetX +
 
-                       (((DAT_004cdc68 * iVar10 + DAT_004cdc64 * iVar12 + DAT_004cdc60 * iVar9) -
+                       (((g_LisaCameraMatrix_02 * iVar10 + g_LisaCameraMatrix_01 * iVar12 + g_LisaCameraMatrix_00 * iVar9) -
 
-                        DAT_0050ddc8) / iVar14) * 4;
+                        g_LisaSubmeshCenterWorldX) / iVar14) * 4;
             local_20 = local_20 + -1;
             piVar11[2] = iVar14;
-            piVar11[1] = DAT_004cdbe8 + (iVar13 / iVar14) * 4;
+            piVar11[1] = g_LisaCameraOffsetY + (iVar13 / iVar14) * 4;
             piVar11 = piVar11 + 3;
             iVar6 = iVar6 + 3;
           } while (local_20 != 0);
@@ -4066,7 +4065,7 @@ int Lisa_TransformVerticesPanorama(void) {
       }
 
       else {
-        FUN_0044ae20(iVar7,iVar5,iVar8,iVar6,piVar2);
+        Lisa_TransformSubmeshVerticesPanorama(iVar7,iVar5,iVar8,iVar6,piVar2);
       }
 
       local_1c = local_1c + 8;
@@ -4110,15 +4109,15 @@ int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int
 
   
 
-  iVar11 = (DAT_004cdc68 * param_3 + DAT_004cdc64 * param_2 + DAT_004cdc60 * param_1) - DAT_0050ddc8
+  iVar11 = (g_LisaCameraMatrix_02 * param_3 + g_LisaCameraMatrix_01 * param_2 + g_LisaCameraMatrix_00 * param_1) - g_LisaSubmeshCenterWorldX
 
   ;
 
-  iVar12 = (DAT_004cdc74 * param_3 + DAT_004cdc70 * param_2 + DAT_004cdc6c * param_1) - DAT_0050dde0
+  iVar12 = (g_LisaCameraMatrix_12 * param_3 + g_LisaCameraMatrix_11 * param_2 + g_LisaCameraMatrix_10 * param_1) - g_LisaSubmeshCenterWorldZ
 
   ;
 
-  iVar13 = (DAT_004cdc80 * param_3 + DAT_004cdc7c * param_2 + DAT_004cdc78 * param_1) - DAT_0050de04
+  iVar13 = (g_LisaCameraMatrix_22 * param_3 + g_LisaCameraMatrix_21 * param_2 + g_LisaCameraMatrix_20 * param_1) - g_LisaSubmeshDepthOffset
 
   ;
   uVar1 = *(ushort *)(param_4 + 0x1a);
@@ -4167,7 +4166,7 @@ int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int
   lVar21 = __ftol();
   lVar22 = __ftol();
   lVar23 = __ftol();
-  iVar6 = DAT_0063c5ec;
+  iVar6 = g_LisaTransformedVertices;
   iVar9 = 2;
   local_58 = *param_5;
 
@@ -4182,20 +4181,20 @@ int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int
       iVar7 = param_5[iVar9 + 2];
       iVar9 = iVar9 + 3;
 
-      iVar14 = DAT_0050ddfc +
+      iVar14 = g_LisaCameraFocalLength +
 
                (iVar7 * (int)lVar23 + iVar5 * (int)lVar22 + iVar6 * (int)lVar21 + iVar13 >> 0x10);
 
-      if (iVar14 < DAT_0050ddfc) {
-        iVar14 = DAT_0050ddfc;
+      if (iVar14 < g_LisaCameraFocalLength) {
+        iVar14 = g_LisaCameraFocalLength;
       }
 
-      *piVar10 = DAT_004cdbbc +
+      *piVar10 = g_LisaCameraOffsetX +
 
                  (iVar11 + iVar7 * (int)lVar17 + iVar5 * (int)lVar16 + iVar6 * (int)lVar15) / iVar14
 
       ;
-      iVar8 = DAT_004cdbe8;
+      iVar8 = g_LisaCameraOffsetY;
       piVar10[2] = iVar14;
       local_58 = local_58 + -1;
 
@@ -4210,10 +4209,10 @@ int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int
 }
 
 /**
- * @original FUN_0044ae20 (IGN_WIN.EXE @ 0x0044ae20, lisa3d.c)
+ * @original Lisa_TransformSubmeshVerticesPanorama (IGN_WIN.EXE @ 0x0044ae20, lisa3d.c)
  * @fidelity ADAPTED
  */
-int FUN_0044ae20(int param_1,int param_2,int param_3,int param_4,int *param_5) {
+int Lisa_TransformSubmeshVerticesPanorama(int param_1,int param_2,int param_3,int param_4,int *param_5) {
   ushort uVar1;
   ushort uVar2;
   ushort uVar3;
@@ -4240,15 +4239,15 @@ int FUN_0044ae20(int param_1,int param_2,int param_3,int param_4,int *param_5) {
 
   
 
-  iVar11 = (DAT_004cdc68 * param_3 + DAT_004cdc64 * param_2 + DAT_004cdc60 * param_1) - DAT_0050ddc8
+  iVar11 = (g_LisaCameraMatrix_02 * param_3 + g_LisaCameraMatrix_01 * param_2 + g_LisaCameraMatrix_00 * param_1) - g_LisaSubmeshCenterWorldX
 
   ;
 
-  iVar12 = (DAT_004cdc74 * param_3 + DAT_004cdc70 * param_2 + DAT_004cdc6c * param_1) - DAT_0050dde0
+  iVar12 = (g_LisaCameraMatrix_12 * param_3 + g_LisaCameraMatrix_11 * param_2 + g_LisaCameraMatrix_10 * param_1) - g_LisaSubmeshCenterWorldZ
 
   ;
 
-  iVar13 = (DAT_004cdc80 * param_3 + DAT_004cdc7c * param_2 + DAT_004cdc78 * param_1) - DAT_0050de04
+  iVar13 = (g_LisaCameraMatrix_22 * param_3 + g_LisaCameraMatrix_21 * param_2 + g_LisaCameraMatrix_20 * param_1) - g_LisaSubmeshDepthOffset
 
   ;
   uVar1 = *(ushort *)(param_4 + 0x1a);
@@ -4297,7 +4296,7 @@ int FUN_0044ae20(int param_1,int param_2,int param_3,int param_4,int *param_5) {
   lVar20 = __ftol();
   lVar21 = __ftol();
   lVar22 = __ftol();
-  iVar6 = DAT_0063c5ec;
+  iVar6 = g_LisaTransformedVertices;
   local_58 = *param_5;
 
   if (0 < local_58) {
@@ -4313,13 +4312,13 @@ int FUN_0044ae20(int param_1,int param_2,int param_3,int param_4,int *param_5) {
 
       iVar9 = (iVar5 * (int)lVar21 + iVar7 * (int)lVar22 + iVar6 * (int)lVar20 + iVar13 >> 0x10) +
 
-              DAT_0050ddfc;
+              g_LisaCameraFocalLength;
 
-      if (iVar9 < DAT_0050ddfc) {
-        iVar9 = DAT_0050ddfc;
+      if (iVar9 < g_LisaCameraFocalLength) {
+        iVar9 = g_LisaCameraFocalLength;
       }
 
-      *piVar10 = DAT_004cdbbc +
+      *piVar10 = g_LisaCameraOffsetX +
 
                  ((iVar11 + iVar5 * (int)lVar15 + iVar7 * (int)lVar16 + iVar6 * (int)lVar14) / iVar9
 
@@ -4327,7 +4326,7 @@ int FUN_0044ae20(int param_1,int param_2,int param_3,int param_4,int *param_5) {
       local_58 = local_58 + -1;
       piVar10[2] = iVar9;
 
-      piVar10[1] = DAT_004cdbe8 +
+      piVar10[1] = g_LisaCameraOffsetY +
 
                    ((iVar12 + iVar7 * (int)lVar19 + iVar5 * (int)lVar18 + iVar6 * (int)lVar17) /
 
@@ -4351,12 +4350,12 @@ void Lisa_ComputeCameraRotationMatrix(int *param_1) {
 
   
 
-  fVar1 = (double)g_LisaCamera->rot_x * (double)_DAT_0047ae68;
+  fVar1 = (double)g_LisaCamera->rot_x * (double)g_Const_NegTenthDegToRad;
   fcos(fVar1);
-  fVar2 = (double)g_LisaCamera->rot_y * (double)_DAT_0047ae68;
+  fVar2 = (double)g_LisaCamera->rot_y * (double)g_Const_NegTenthDegToRad;
   fcos(fVar2);
   fsin(fVar1);
-  fVar1 = (double)g_LisaCamera->rot_z * (double)_DAT_0047ae68;
+  fVar1 = (double)g_LisaCamera->rot_z * (double)g_Const_NegTenthDegToRad;
   fsin(fVar2);
   fcos(fVar1);
   fsin(fVar1);
@@ -4391,12 +4390,12 @@ void Lisa_InitOpcodeTable(void) {
   
 
   iVar1 = g_LisaCamera;
-  _DAT_0063b5e4 = (g_LisaCamera->viewport_width >> 2) + 1;
-  _DAT_0063c5f8 = g_LisaCamera->viewport_width - _DAT_0063b5e4;
+  g_LisaViewportQuarter = (g_LisaCamera->viewport_width >> 2) + 1;
+  g_LisaViewportRemaining = g_LisaCamera->viewport_width - g_LisaViewportQuarter;
 
-  if (DAT_0049c9b4 != 0) {
+  if (g_LisaDisableFiltering != 0) {
     if (g_LisaCamera->shading_mode == 0) {
-      if (DAT_0049c9ac == 0) {
+      if (g_LisaShadingEnabled == 0) {
         PTR_LAB_0049c924 = ((void *)0x0044c2e0);
       }
 
@@ -4417,7 +4416,7 @@ void Lisa_InitOpcodeTable(void) {
   }
 
   if (g_LisaCamera->shading_mode == 0) {
-    if (DAT_0049c9ac == 0) {
+    if (g_LisaShadingEnabled == 0) {
       PTR_LAB_0049c924 = ((void *)0x0044c2e0);
     }
 
@@ -4430,13 +4429,13 @@ void Lisa_InitOpcodeTable(void) {
   else {
     PTR_LAB_0049c924 = ((void *)0x0044bb90);
 
-    if (DAT_0049c9ac != 0) {
+    if (g_LisaShadingEnabled != 0) {
       PTR_LAB_0049c924 = Lisa_DrawTexturedTriangle_Op11_Shaded;
     }
 
   }
 
-  if (DAT_0049c9ac == 0) {
+  if (g_LisaShadingEnabled == 0) {
     PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15;
     g_LisaCamera->active_draw_cmd = 0;
     *(int *)(iVar1 + 0x6c) = 0;
@@ -4450,10 +4449,10 @@ void Lisa_InitOpcodeTable(void) {
 }
 
 /**
- * @original FUN_0044b570 (IGN_WIN.EXE @ 0x0044b570, lisa3d.c)
+ * @original Lisa_SortDepthBuckets (IGN_WIN.EXE @ 0x0044b570, lisa3d.c)
  * @fidelity ADAPTED
  */
-int FUN_0044b570(void) {
+int Lisa_SortDepthBuckets(void) {
   int iVar1;
   int iVar2;
   int *puVar3;
@@ -4499,10 +4498,10 @@ int FUN_0044b570(void) {
 }
 
 /**
- * @original FUN_0044b770 (IGN_WIN.EXE @ 0x0044b770, lisa3d.c)
+ * @original Lisa_DrawTriangle_Op0F (IGN_WIN.EXE @ 0x0044b770, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_0044b770(void) {
+void Lisa_DrawTriangle_Op0F(void) {
   int *piVar1;
   short sVar2;
   unsigned int uVar3;
@@ -4523,19 +4522,19 @@ void FUN_0044b770(void) {
 
   
 
-  iVar11 = DAT_0050dd8c;
-  uVar3 = DAT_0050dddc[1];
-  uVar4 = DAT_0050dddc[2];
-  uVar5 = DAT_0050dddc[3];
-  uVar6 = *(unsigned int *)(DAT_0050dd8c + uVar3 * 0xc);
-  uVar7 = *(unsigned int *)(DAT_0050dd8c + uVar4 * 0xc);
+  iVar11 = g_LisaTransformedVertices;
+  uVar3 = g_pLisaSubmeshPolygon[1];
+  uVar4 = g_pLisaSubmeshPolygon[2];
+  uVar5 = g_pLisaSubmeshPolygon[3];
+  uVar6 = *(unsigned int *)(g_LisaTransformedVertices + uVar3 * 0xc);
+  uVar7 = *(unsigned int *)(g_LisaTransformedVertices + uVar4 * 0xc);
   uVar13 = uVar7;
 
   if ((int)uVar7 <= (int)uVar6) {
     uVar13 = uVar6;
   }
 
-  uVar14 = *(unsigned int *)(DAT_0050dd8c + uVar5 * 0xc);
+  uVar14 = *(unsigned int *)(g_LisaTransformedVertices + uVar5 * 0xc);
 
   if ((int)uVar13 <= (int)uVar14) {
     uVar13 = uVar14;
@@ -4548,22 +4547,22 @@ void FUN_0044b770(void) {
       uVar13 = uVar6;
     }
 
-    uVar14 = *(unsigned int *)(DAT_0050dd8c + uVar5 * 0xc);
+    uVar14 = *(unsigned int *)(g_LisaTransformedVertices + uVar5 * 0xc);
 
     if ((int)uVar13 < (int)uVar14) {
       uVar14 = uVar13;
     }
 
     if ((int)uVar14 <= g_SubpixelMaxX) {
-      uVar13 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar4 * 0xc);
-      uVar14 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar3 * 0xc);
+      uVar13 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar4 * 0xc);
+      uVar14 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar3 * 0xc);
       uVar15 = uVar13;
 
       if ((int)uVar13 <= (int)uVar14) {
         uVar15 = uVar14;
       }
 
-      uVar17 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar5 * 0xc);
+      uVar17 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc);
 
       if ((int)uVar15 <= (int)uVar17) {
         uVar15 = uVar17;
@@ -4576,28 +4575,28 @@ void FUN_0044b770(void) {
           uVar15 = uVar14;
         }
 
-        uVar17 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar5 * 0xc);
+        uVar17 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc);
 
         if ((int)uVar15 < (int)uVar17) {
           uVar17 = uVar15;
         }
 
         if ((int)uVar17 <= g_SubpixelMaxY) {
-          iVar16 = *(int *)(DAT_0050dd8c + 8 + uVar5 * 0xc) +
+          iVar16 = *(int *)(g_LisaTransformedVertices + 8 + uVar5 * 0xc) +
 
-                   *(int *)(DAT_0050dd8c + 8 + uVar4 * 0xc) +
+                   *(int *)(g_LisaTransformedVertices + 8 + uVar4 * 0xc) +
 
-                   *(int *)(DAT_0050dd8c + 8 + uVar3 * 0xc);
+                   *(int *)(g_LisaTransformedVertices + 8 + uVar3 * 0xc);
 
           if ((600 < iVar16) &&
 
-             (0 < (int)((*(int *)(DAT_0050dd8c + 4 + uVar5 * 0xc) - uVar13) * (uVar6 - uVar7) +
+             (0 < (int)((*(int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc) - uVar13) * (uVar6 - uVar7) +
 
-                        (uVar13 - uVar14) * (*(int *)(DAT_0050dd8c + uVar5 * 0xc) - uVar7) ^
+                        (uVar13 - uVar14) * (*(int *)(g_LisaTransformedVertices + uVar5 * 0xc) - uVar7) ^
 
-                       DAT_0049c9a8))) {
-            puVar8 = (unsigned int *)*DAT_004cdc84;
-            uVar3 = *DAT_0050dddc;
+                       g_LisaBackfaceSign))) {
+            puVar8 = (unsigned int *)*g_pLisaDrawCommandWritePtr;
+            uVar3 = *g_pLisaSubmeshPolygon;
             puVar8[1] = uVar6;
             *puVar8 = uVar3 & 0xffff;
             puVar8[2] = uVar14;
@@ -4606,33 +4605,33 @@ void FUN_0044b770(void) {
             puVar8[5] = uVar13;
             uVar4 = *(unsigned int *)(iVar11 + 4 + uVar5 * 0xc);
             puVar8[7] = uVar3;
-            puVar12 = DAT_0050dddc;
+            puVar12 = g_pLisaSubmeshPolygon;
             puVar8[8] = uVar4;
             puVar8[0xb] = 0;
-            sVar2 = *(short *)(DAT_0050dd28 + 0x1e);
+            sVar2 = *(short *)(g_pLisaActiveSubmesh + 0x1e);
             puVar8[10] = puVar12[4];
-            piVar9 = DAT_004cdc84;
+            piVar9 = g_pLisaDrawCommandWritePtr;
             iVar16 = iVar16 >> 4;
 
             if ((99 < sVar2) && (iVar16 = iVar16 + -0x5c, iVar16 < 0)) {
               iVar16 = 0;
             }
 
-            DAT_004cdc84[2] = (int)(puVar8 + 0xc);
+            g_pLisaDrawCommandWritePtr[2] = (int)(puVar8 + 0xc);
             iVar11 = g_pLisaDepthBuckets;
-            piVar10 = DAT_004cdc84;
+            piVar10 = g_pLisaDrawCommandWritePtr;
 
             if (5999 < iVar16) {
               iVar16 = 5999;
             }
 
-            piVar1 = DAT_004cdc84 + 1;
-            DAT_004cdc84 = piVar9 + 2;
+            piVar1 = g_pLisaDrawCommandWritePtr + 1;
+            g_pLisaDrawCommandWritePtr = piVar9 + 2;
             *piVar1 = *(int *)(g_pLisaDepthBuckets + iVar16 * 4);
             *(int **)(iVar11 + iVar16 * 4) = piVar10;
           }
 
-          DAT_0050dddc = DAT_0050dddc + 5;
+          g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 5;
           return;
         }
 
@@ -4642,15 +4641,15 @@ void FUN_0044b770(void) {
 
   }
 
-  DAT_0050dddc = DAT_0050dddc + 5;
+  g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 5;
   return;
 }
 
 /**
- * @original FUN_0044b980 (IGN_WIN.EXE @ 0x0044b980, lisa3d.c)
+ * @original Lisa_DrawTriangle_Op10 (IGN_WIN.EXE @ 0x0044b980, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_0044b980(void) {
+void Lisa_DrawTriangle_Op10(void) {
   int *piVar1;
   short sVar2;
   unsigned int uVar3;
@@ -4671,19 +4670,19 @@ void FUN_0044b980(void) {
 
   
 
-  iVar11 = DAT_0050dd8c;
-  uVar3 = DAT_0050dddc[1];
-  uVar4 = DAT_0050dddc[2];
-  uVar5 = DAT_0050dddc[3];
-  uVar6 = *(unsigned int *)(DAT_0050dd8c + uVar3 * 0xc);
-  uVar7 = *(unsigned int *)(DAT_0050dd8c + uVar4 * 0xc);
+  iVar11 = g_LisaTransformedVertices;
+  uVar3 = g_pLisaSubmeshPolygon[1];
+  uVar4 = g_pLisaSubmeshPolygon[2];
+  uVar5 = g_pLisaSubmeshPolygon[3];
+  uVar6 = *(unsigned int *)(g_LisaTransformedVertices + uVar3 * 0xc);
+  uVar7 = *(unsigned int *)(g_LisaTransformedVertices + uVar4 * 0xc);
   uVar13 = uVar7;
 
   if ((int)uVar7 <= (int)uVar6) {
     uVar13 = uVar6;
   }
 
-  uVar14 = *(unsigned int *)(DAT_0050dd8c + uVar5 * 0xc);
+  uVar14 = *(unsigned int *)(g_LisaTransformedVertices + uVar5 * 0xc);
 
   if ((int)uVar13 <= (int)uVar14) {
     uVar13 = uVar14;
@@ -4696,22 +4695,22 @@ void FUN_0044b980(void) {
       uVar13 = uVar6;
     }
 
-    uVar14 = *(unsigned int *)(DAT_0050dd8c + uVar5 * 0xc);
+    uVar14 = *(unsigned int *)(g_LisaTransformedVertices + uVar5 * 0xc);
 
     if ((int)uVar13 < (int)uVar14) {
       uVar14 = uVar13;
     }
 
     if ((int)uVar14 <= g_SubpixelMaxX) {
-      uVar13 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar4 * 0xc);
-      uVar14 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar3 * 0xc);
+      uVar13 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar4 * 0xc);
+      uVar14 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar3 * 0xc);
       uVar15 = uVar13;
 
       if ((int)uVar13 <= (int)uVar14) {
         uVar15 = uVar14;
       }
 
-      uVar17 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar5 * 0xc);
+      uVar17 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc);
 
       if ((int)uVar15 <= (int)uVar17) {
         uVar15 = uVar17;
@@ -4724,28 +4723,28 @@ void FUN_0044b980(void) {
           uVar15 = uVar14;
         }
 
-        uVar17 = *(unsigned int *)(DAT_0050dd8c + 4 + uVar5 * 0xc);
+        uVar17 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc);
 
         if ((int)uVar15 < (int)uVar17) {
           uVar17 = uVar15;
         }
 
         if ((int)uVar17 <= g_SubpixelMaxY) {
-          iVar16 = *(int *)(DAT_0050dd8c + 8 + uVar5 * 0xc) +
+          iVar16 = *(int *)(g_LisaTransformedVertices + 8 + uVar5 * 0xc) +
 
-                   *(int *)(DAT_0050dd8c + 8 + uVar4 * 0xc) +
+                   *(int *)(g_LisaTransformedVertices + 8 + uVar4 * 0xc) +
 
-                   *(int *)(DAT_0050dd8c + 8 + uVar3 * 0xc);
+                   *(int *)(g_LisaTransformedVertices + 8 + uVar3 * 0xc);
 
           if ((600 < iVar16) &&
 
-             (0 < (int)((*(int *)(DAT_0050dd8c + 4 + uVar5 * 0xc) - uVar13) * (uVar6 - uVar7) +
+             (0 < (int)((*(int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc) - uVar13) * (uVar6 - uVar7) +
 
-                        (uVar13 - uVar14) * (*(int *)(DAT_0050dd8c + uVar5 * 0xc) - uVar7) ^
+                        (uVar13 - uVar14) * (*(int *)(g_LisaTransformedVertices + uVar5 * 0xc) - uVar7) ^
 
-                       DAT_0049c9a8))) {
-            puVar8 = (unsigned int *)*DAT_004cdc84;
-            uVar3 = *DAT_0050dddc;
+                       g_LisaBackfaceSign))) {
+            puVar8 = (unsigned int *)*g_pLisaDrawCommandWritePtr;
+            uVar3 = *g_pLisaSubmeshPolygon;
             puVar8[1] = uVar6;
             *puVar8 = uVar3 & 0xffff;
             puVar8[2] = uVar14;
@@ -4754,37 +4753,37 @@ void FUN_0044b980(void) {
             puVar8[6] = uVar13;
             uVar4 = *(unsigned int *)(iVar11 + 4 + uVar5 * 0xc);
             puVar8[9] = uVar3;
-            puVar12 = DAT_0050dddc;
+            puVar12 = g_pLisaSubmeshPolygon;
             puVar8[10] = uVar4;
             puVar8[4] = 0;
-            iVar11 = DAT_0050dd28;
+            iVar11 = g_pLisaActiveSubmesh;
             uVar3 = puVar12[4];
             puVar8[8] = 0;
             puVar8[0xc] = 0;
             sVar2 = *(short *)(iVar11 + 0x1e);
             puVar8[0xd] = uVar3;
-            piVar9 = DAT_004cdc84;
+            piVar9 = g_pLisaDrawCommandWritePtr;
             iVar16 = iVar16 >> 4;
 
             if ((99 < sVar2) && (iVar16 = iVar16 + -0x5c, iVar16 < 0)) {
               iVar16 = 0;
             }
 
-            DAT_004cdc84[2] = (int)(puVar8 + 0xe);
+            g_pLisaDrawCommandWritePtr[2] = (int)(puVar8 + 0xe);
             iVar11 = g_pLisaDepthBuckets;
-            piVar10 = DAT_004cdc84;
+            piVar10 = g_pLisaDrawCommandWritePtr;
 
             if (5999 < iVar16) {
               iVar16 = 5999;
             }
 
-            piVar1 = DAT_004cdc84 + 1;
-            DAT_004cdc84 = piVar9 + 2;
+            piVar1 = g_pLisaDrawCommandWritePtr + 1;
+            g_pLisaDrawCommandWritePtr = piVar9 + 2;
             *piVar1 = *(int *)(g_pLisaDepthBuckets + iVar16 * 4);
             *(int **)(iVar11 + iVar16 * 4) = piVar10;
           }
 
-          DAT_0050dddc = DAT_0050dddc + 5;
+          g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 5;
           return;
         }
 
@@ -4794,7 +4793,7 @@ void FUN_0044b980(void) {
 
   }
 
-  DAT_0050dddc = DAT_0050dddc + 5;
+  g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 5;
   return;
 }
 
@@ -4814,22 +4813,22 @@ int Lisa_RenderSubmeshes(void) {
 
   iVar2 = 0;
   Lisa_InitOpcodeTable();
-  DAT_004cdc84 = DAT_0063b600;
-  *DAT_0063b600 = DAT_0063c600;
+  g_pLisaDrawCommandWritePtr = g_LisaDrawCommandBuffer;
+  *g_LisaDrawCommandBuffer = g_pLisaDrawCommandTail;
 
   if (0 < g_LisaCamera->visible_obj_count) {
     iVar4 = 0;
     iVar3 = 0;
 
     do {
-      DAT_0050dd28 = *(int *)(g_LisaVisibleObjects + iVar3);
+      g_pLisaActiveSubmesh = *(int *)(g_LisaVisibleObjects + iVar3);
       piVar1 = *(int **)(g_LisaVisibleSubmeshes + iVar4);
-      g_pLisaActiveMipTable = *(int *)(g_pLisaTextureSheets + *(int *)(DAT_0050dd28 + 8) * 4);
-      DAT_0050dddc = piVar1 + *piVar1 * 3 + 2;
-      DAT_0050dd8c = ((int *)(g_LisaVisibleSubmeshes + iVar4))[1];
+      g_pLisaActiveMipTable = *(int *)(g_pLisaTextureSheets + *(int *)(g_pLisaActiveSubmesh + 8) * 4);
+      g_pLisaSubmeshPolygon = piVar1 + *piVar1 * 3 + 2;
+      g_LisaTransformedVertices = ((int *)(g_LisaVisibleSubmeshes + iVar4))[1];
 
-      for (DAT_0050dd6c = piVar1[1]; 0 < DAT_0050dd6c; DAT_0050dd6c = DAT_0050dd6c + -1) {
-        (*(void (*)(void))(&g_LisaOpcodeTable)[(char)*DAT_0050dddc])();
+      for (g_LisaSubmeshPolyCount = piVar1[1]; 0 < g_LisaSubmeshPolyCount; g_LisaSubmeshPolyCount = g_LisaSubmeshPolyCount + -1) {
+        (*(void (*)(void))(&g_LisaOpcodeTable)[(char)*g_pLisaSubmeshPolygon])();
       }
 
       iVar2 = iVar2 + 1;
@@ -4840,10 +4839,10 @@ int Lisa_RenderSubmeshes(void) {
 
   g_LisaCamera->active_draw_cmd =
 
-       (int)(((int)DAT_004cdc84 - (int)DAT_0063b600) +
+       (int)(((int)g_pLisaDrawCommandWritePtr - (int)g_LisaDrawCommandBuffer) +
 
-            ((int)DAT_004cdc84 - (int)DAT_0063b600 >> 0x1f & 7U)) >> 3;
-  *DAT_004cdc84 = 0;
+            ((int)g_pLisaDrawCommandWritePtr - (int)g_LisaDrawCommandBuffer >> 0x1f & 7U)) >> 3;
+  *g_pLisaDrawCommandWritePtr = 0;
   return 0;
 }
 
@@ -4877,26 +4876,26 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
 
   
 
-  puVar12 = DAT_0050dddc;
-  iVar11 = DAT_0050dd8c;
-  uVar3 = DAT_0050dddc[2];
-  uVar4 = DAT_0050dddc[1];
-  uVar5 = DAT_0050dddc[3];
-  iVar6 = *(int *)(DAT_0050dd8c + uVar4 * 0xc);
-  iVar13 = *(int *)(DAT_0050dd8c + uVar3 * 0xc);
+  puVar12 = g_pLisaSubmeshPolygon;
+  iVar11 = g_LisaTransformedVertices;
+  uVar3 = g_pLisaSubmeshPolygon[2];
+  uVar4 = g_pLisaSubmeshPolygon[1];
+  uVar5 = g_pLisaSubmeshPolygon[3];
+  iVar6 = *(int *)(g_LisaTransformedVertices + uVar4 * 0xc);
+  iVar13 = *(int *)(g_LisaTransformedVertices + uVar3 * 0xc);
 
   if (iVar13 <= iVar6) {
     iVar13 = iVar6;
   }
 
-  iVar7 = *(int *)(DAT_0050dd8c + uVar5 * 0xc);
+  iVar7 = *(int *)(g_LisaTransformedVertices + uVar5 * 0xc);
 
   if (iVar13 <= iVar7) {
     iVar13 = iVar7;
   }
 
   if (g_SubpixelMinX <= iVar13) {
-    iVar13 = *(int *)(DAT_0050dd8c + uVar3 * 0xc);
+    iVar13 = *(int *)(g_LisaTransformedVertices + uVar3 * 0xc);
 
     if (iVar6 <= iVar13) {
       iVar13 = iVar6;
@@ -4909,21 +4908,21 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
     }
 
     if (iVar14 <= g_SubpixelMaxX) {
-      iVar13 = *(int *)(DAT_0050dd8c + 4 + uVar4 * 0xc);
-      iVar14 = *(int *)(DAT_0050dd8c + 4 + uVar3 * 0xc);
+      iVar13 = *(int *)(g_LisaTransformedVertices + 4 + uVar4 * 0xc);
+      iVar14 = *(int *)(g_LisaTransformedVertices + 4 + uVar3 * 0xc);
 
       if (iVar14 <= iVar13) {
         iVar14 = iVar13;
       }
 
-      iVar8 = *(int *)(DAT_0050dd8c + 4 + uVar5 * 0xc);
+      iVar8 = *(int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc);
 
       if (iVar14 <= iVar8) {
         iVar14 = iVar8;
       }
 
       if (g_SubpixelMinY <= iVar14) {
-        iVar14 = *(int *)(DAT_0050dd8c + 4 + uVar3 * 0xc);
+        iVar14 = *(int *)(g_LisaTransformedVertices + 4 + uVar3 * 0xc);
 
         if (iVar13 <= iVar14) {
           iVar14 = iVar13;
@@ -4936,20 +4935,20 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
         }
 
         if (iVar17 <= g_SubpixelMaxY) {
-          iVar18 = *(int *)(DAT_0050dd8c + 4 + uVar3 * 0xc) >> 4;
-          iVar15 = *(int *)(DAT_0050dd8c + uVar3 * 0xc) >> 4;
-          iVar14 = *(int *)(DAT_0050dd8c + 8 + uVar5 * 0xc);
-          iVar17 = *(int *)(DAT_0050dd8c + 8 + uVar4 * 0xc);
-          iVar16 = *(int *)(DAT_0050dd8c + 8 + uVar3 * 0xc) + iVar14 + iVar17;
+          iVar18 = *(int *)(g_LisaTransformedVertices + 4 + uVar3 * 0xc) >> 4;
+          iVar15 = *(int *)(g_LisaTransformedVertices + uVar3 * 0xc) >> 4;
+          iVar14 = *(int *)(g_LisaTransformedVertices + 8 + uVar5 * 0xc);
+          iVar17 = *(int *)(g_LisaTransformedVertices + 8 + uVar4 * 0xc);
+          iVar16 = *(int *)(g_LisaTransformedVertices + 8 + uVar3 * 0xc) + iVar14 + iVar17;
 
           if ((600 < iVar16) &&
 
              (0 < (int)(((iVar8 >> 4) - iVar18) * ((iVar6 >> 4) - iVar15) +
 
-                        (iVar18 - (iVar13 >> 4)) * ((iVar7 >> 4) - iVar15) ^ DAT_0049c9a8))) {
-            puVar20 = (int *)*DAT_004cdc84;
+                        (iVar18 - (iVar13 >> 4)) * ((iVar7 >> 4) - iVar15) ^ g_LisaBackfaceSign))) {
+            puVar20 = (int *)*g_pLisaDrawCommandWritePtr;
             local_24 = iVar16 >> 4;
-            sVar2 = *(short *)(DAT_0050dd28 + 0x1e);
+            sVar2 = *(short *)(g_pLisaActiveSubmesh + 0x1e);
 
             if ((local_24 < 0x2d1) &&
 
@@ -4957,9 +4956,9 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
 
                 ((g_LisaCamera->shading_mode != 0 &&
 
-                 ((char *)(*DAT_0050dddc & 0xffff0000) != &DAT_004d0000)))))) {
+                 ((char *)(*g_pLisaSubmeshPolygon & 0xffff0000) != &g_LisaPerspectiveDepthTable)))))) {
               if (local_24 < 0x1e1) {
-                uVar9 = *(int *)(DAT_0050dd8c + 8 + uVar3 * 0xc);
+                uVar9 = *(int *)(g_LisaTransformedVertices + 8 + uVar3 * 0xc);
                 puVar20[4] = iVar17;
                 puVar20[7] = uVar9;
                 puVar20[10] = iVar14;
@@ -4999,13 +4998,13 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
               iVar6 = g_pLisaActiveMipTable;
               puVar20[0x10] = uVar3;
               puVar20[0x11] = param_1;
-              puVar19 = DAT_004cdc84;
+              puVar19 = g_pLisaDrawCommandWritePtr;
               puVar20[1] = *(int *)(iVar6 + -0x14) + uVar5;
               puVar20 = puVar20 + 0x12;
             }
 
             else {
-              uVar9 = *(int *)(DAT_0050dd8c + uVar3 * 0xc);
+              uVar9 = *(int *)(g_LisaTransformedVertices + uVar3 * 0xc);
               *puVar20 = 0x12;
               puVar20[1] = iVar6;
               puVar20[2] = iVar13;
@@ -5015,19 +5014,19 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
               puVar20[5] = iVar7;
               puVar20[6] = iVar8;
               iVar6 = g_pLisaActiveMipTable;
-              uVar3 = DAT_0050dddc[10];
-              puVar20[7] = DAT_0050dddc + 4;
+              uVar3 = g_pLisaSubmeshPolygon[10];
+              puVar20[7] = g_pLisaSubmeshPolygon + 4;
               puVar20[9] = param_1;
-              puVar19 = DAT_004cdc84;
+              puVar19 = g_pLisaDrawCommandWritePtr;
               puVar20[8] = *(int *)(iVar6 + -0x14) + uVar3;
               puVar20 = puVar20 + 10;
             }
 
-            iVar6 = DAT_0050dd28;
+            iVar6 = g_pLisaActiveSubmesh;
             local_24 = local_24 - param_2;
             puVar19[2] = puVar20;
             iVar13 = g_pLisaDepthBuckets;
-            puVar20 = DAT_004cdc84;
+            puVar20 = g_pLisaDrawCommandWritePtr;
 
             if (99 < *(short *)(iVar6 + 0x1e)) {
               local_24 = local_24 + -0x5c;
@@ -5041,13 +5040,13 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
               local_24 = 5999;
             }
 
-            puVar1 = DAT_004cdc84 + 1;
-            DAT_004cdc84 = puVar19 + 2;
+            puVar1 = g_pLisaDrawCommandWritePtr + 1;
+            g_pLisaDrawCommandWritePtr = puVar19 + 2;
             *puVar1 = *(int *)(g_pLisaDepthBuckets + local_24 * 4);
             *(int **)(iVar13 + local_24 * 4) = puVar20;
           }
 
-          DAT_0050dddc = puVar12 + 0xb;
+          g_pLisaSubmeshPolygon = puVar12 + 0xb;
           return;
         }
 
@@ -5057,15 +5056,15 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
 
   }
 
-  DAT_0050dddc = DAT_0050dddc + 0xb;
+  g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 0xb;
   return;
 }
 
 /**
- * @original FUN_0044cf00 (IGN_WIN.EXE @ 0x0044cf00, lisa3d.c)
+ * @original Lisa_DrawTriangle_Op14 (IGN_WIN.EXE @ 0x0044cf00, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_0044cf00(void) {
+void Lisa_DrawTriangle_Op14(void) {
   int *puVar1;
   int iVar2;
   int iVar3;
@@ -5082,119 +5081,119 @@ void FUN_0044cf00(void) {
 
   
 
-  iVar9 = DAT_0050dd8c;
-  iVar11 = *(int *)(DAT_0050dddc + 4);
-  iVar2 = *(int *)(DAT_0050dddc + 8);
-  iVar3 = *(int *)(DAT_0050dd8c + iVar11 * 0xc);
-  iVar4 = *(int *)(DAT_0050dddc + 0xc);
-  iVar10 = *(int *)(DAT_0050dd8c + iVar2 * 0xc);
+  iVar9 = g_LisaTransformedVertices;
+  iVar11 = *(int *)(g_pLisaSubmeshPolygon + 4);
+  iVar2 = *(int *)(g_pLisaSubmeshPolygon + 8);
+  iVar3 = *(int *)(g_LisaTransformedVertices + iVar11 * 0xc);
+  iVar4 = *(int *)(g_pLisaSubmeshPolygon + 0xc);
+  iVar10 = *(int *)(g_LisaTransformedVertices + iVar2 * 0xc);
 
   if (iVar10 <= iVar3) {
     iVar10 = iVar3;
   }
 
-  iVar12 = *(int *)(DAT_0050dd8c + iVar4 * 0xc);
+  iVar12 = *(int *)(g_LisaTransformedVertices + iVar4 * 0xc);
 
   if (iVar10 <= iVar12) {
     iVar10 = iVar12;
   }
 
   if (g_SubpixelMinX <= iVar10) {
-    iVar10 = *(int *)(DAT_0050dd8c + iVar2 * 0xc);
+    iVar10 = *(int *)(g_LisaTransformedVertices + iVar2 * 0xc);
 
     if (iVar3 <= iVar10) {
       iVar10 = iVar3;
     }
 
-    iVar12 = *(int *)(DAT_0050dd8c + iVar4 * 0xc);
+    iVar12 = *(int *)(g_LisaTransformedVertices + iVar4 * 0xc);
 
     if (iVar10 < iVar12) {
       iVar12 = iVar10;
     }
 
     if (iVar12 <= g_SubpixelMaxX) {
-      iVar10 = *(int *)(DAT_0050dd8c + 4 + iVar2 * 0xc);
-      iVar12 = *(int *)(DAT_0050dd8c + 4 + iVar11 * 0xc);
+      iVar10 = *(int *)(g_LisaTransformedVertices + 4 + iVar2 * 0xc);
+      iVar12 = *(int *)(g_LisaTransformedVertices + 4 + iVar11 * 0xc);
 
       if (iVar10 <= iVar12) {
         iVar10 = iVar12;
       }
 
-      iVar13 = *(int *)(DAT_0050dd8c + 4 + iVar4 * 0xc);
+      iVar13 = *(int *)(g_LisaTransformedVertices + 4 + iVar4 * 0xc);
 
       if (iVar10 <= iVar13) {
         iVar10 = iVar13;
       }
 
       if (g_SubpixelMinY <= iVar10) {
-        iVar10 = *(int *)(DAT_0050dd8c + 4 + iVar2 * 0xc);
+        iVar10 = *(int *)(g_LisaTransformedVertices + 4 + iVar2 * 0xc);
 
         if (iVar12 <= iVar10) {
           iVar10 = iVar12;
         }
 
-        iVar13 = *(int *)(DAT_0050dd8c + 4 + iVar4 * 0xc);
+        iVar13 = *(int *)(g_LisaTransformedVertices + 4 + iVar4 * 0xc);
 
         if (iVar10 < iVar13) {
           iVar13 = iVar10;
         }
 
         if (iVar13 <= g_SubpixelMaxY) {
-          iVar11 = *(int *)(DAT_0050dd8c + 8 + iVar4 * 0xc) +
+          iVar11 = *(int *)(g_LisaTransformedVertices + 8 + iVar4 * 0xc) +
 
-                   *(int *)(DAT_0050dd8c + 8 + iVar2 * 0xc) +
+                   *(int *)(g_LisaTransformedVertices + 8 + iVar2 * 0xc) +
 
-                   *(int *)(DAT_0050dd8c + 8 + iVar11 * 0xc);
+                   *(int *)(g_LisaTransformedVertices + 8 + iVar11 * 0xc);
 
           if ((600 < iVar11) &&
 
-             (0 < (int)((*(int *)(DAT_0050dd8c + 4 + iVar2 * 0xc) - iVar12) *
+             (0 < (int)((*(int *)(g_LisaTransformedVertices + 4 + iVar2 * 0xc) - iVar12) *
 
-                        (*(int *)(DAT_0050dd8c + iVar4 * 0xc) - *(int *)(DAT_0050dd8c + iVar2 * 0xc)
+                        (*(int *)(g_LisaTransformedVertices + iVar4 * 0xc) - *(int *)(g_LisaTransformedVertices + iVar2 * 0xc)
 
-                        ) + (*(int *)(DAT_0050dd8c + 4 + iVar4 * 0xc) -
+                        ) + (*(int *)(g_LisaTransformedVertices + 4 + iVar4 * 0xc) -
 
-                            *(int *)(DAT_0050dd8c + 4 + iVar2 * 0xc)) *
+                            *(int *)(g_LisaTransformedVertices + 4 + iVar2 * 0xc)) *
 
-                            (iVar3 - *(int *)(DAT_0050dd8c + iVar2 * 0xc)) ^ DAT_0049c9a8))) {
-            puVar5 = (int *)*DAT_004cdc84;
-            uVar6 = *(int *)(DAT_0050dd8c + iVar2 * 0xc);
-            uVar7 = *(int *)(DAT_0050dd8c + 4 + iVar2 * 0xc);
+                            (iVar3 - *(int *)(g_LisaTransformedVertices + iVar2 * 0xc)) ^ g_LisaBackfaceSign))) {
+            puVar5 = (int *)*g_pLisaDrawCommandWritePtr;
+            uVar6 = *(int *)(g_LisaTransformedVertices + iVar2 * 0xc);
+            uVar7 = *(int *)(g_LisaTransformedVertices + 4 + iVar2 * 0xc);
             puVar5[1] = iVar3;
             *puVar5 = 0x13;
             puVar5[3] = uVar6;
             puVar5[2] = iVar12;
             puVar5[4] = uVar7;
-            iVar2 = DAT_0050dddc;
+            iVar2 = g_pLisaSubmeshPolygon;
             uVar6 = *(int *)(iVar9 + 4 + iVar4 * 0xc);
             puVar5[5] = *(int *)(iVar9 + iVar4 * 0xc);
             puVar5[6] = uVar6;
             uVar6 = *(int *)(iVar2 + 0x10);
-            puVar5[8] = DAT_0063b5f0;
-            iVar2 = DAT_0050dd28;
+            puVar5[8] = g_pActiveSHD;
+            iVar2 = g_pLisaActiveSubmesh;
             puVar5[7] = uVar6;
-            puVar8 = DAT_004cdc84;
+            puVar8 = g_pLisaDrawCommandWritePtr;
             iVar11 = iVar11 >> 4;
 
             if ((99 < *(short *)(iVar2 + 0x1e)) && (iVar11 = iVar11 + -0x4c, iVar11 < 0)) {
               iVar11 = 0;
             }
 
-            DAT_004cdc84[2] = puVar5 + 9;
+            g_pLisaDrawCommandWritePtr[2] = puVar5 + 9;
             iVar2 = g_pLisaDepthBuckets;
-            puVar5 = DAT_004cdc84;
+            puVar5 = g_pLisaDrawCommandWritePtr;
 
             if (5999 < iVar11) {
               iVar11 = 5999;
             }
 
-            puVar1 = DAT_004cdc84 + 1;
-            DAT_004cdc84 = puVar8 + 2;
+            puVar1 = g_pLisaDrawCommandWritePtr + 1;
+            g_pLisaDrawCommandWritePtr = puVar8 + 2;
             *puVar1 = *(int *)(g_pLisaDepthBuckets + iVar11 * 4);
             *(int **)(iVar2 + iVar11 * 4) = puVar5;
           }
 
-          DAT_0050dddc = DAT_0050dddc + 0x14;
+          g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 0x14;
           return;
         }
 
@@ -5204,15 +5203,15 @@ void FUN_0044cf00(void) {
 
   }
 
-  DAT_0050dddc = DAT_0050dddc + 0x14;
+  g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 0x14;
   return;
 }
 
 /**
- * @original FUN_0044d0f0 (IGN_WIN.EXE @ 0x0044d0f0, lisa3d.c)
+ * @original Lisa_DrawBillboard_Op07 (IGN_WIN.EXE @ 0x0044d0f0, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_0044d0f0(void) {
+void Lisa_DrawBillboard_Op07(void) {
   int *puVar1;
   int uVar2;
   int uVar3;
@@ -5225,13 +5224,13 @@ void FUN_0044d0f0(void) {
 
   
 
-  iVar7 = DAT_0050dddc;
-  iVar4 = DAT_0050dd8c;
-  puVar6 = DAT_004cdc84;
-  iVar8 = *(int *)(DAT_0050dddc + 4);
+  iVar7 = g_pLisaSubmeshPolygon;
+  iVar4 = g_LisaTransformedVertices;
+  puVar6 = g_pLisaDrawCommandWritePtr;
+  iVar8 = *(int *)(g_pLisaSubmeshPolygon + 4);
 
-  if (200 < *(int *)(DAT_0050dd8c + 8 + iVar8 * 0xc)) {
-    puVar1 = (int *)*DAT_004cdc84;
+  if (200 < *(int *)(g_LisaTransformedVertices + 8 + iVar8 * 0xc)) {
+    puVar1 = (int *)*g_pLisaDrawCommandWritePtr;
     *puVar1 = 7;
     puVar1[1] = puVar1 + 5;
     uVar2 = *(int *)(iVar4 + iVar8 * 0xc);
@@ -5250,7 +5249,7 @@ void FUN_0044d0f0(void) {
     puVar1[10] = uVar2;
     puVar1[7] = *(int *)(iVar7 + 8);
     puVar1[9] = *(int *)(iVar7 + 0x10);
-    puVar1[0xc] = DAT_0063b5f0;
+    puVar1[0xc] = g_pActiveSHD;
     lVar9 = __ftol();
     puVar1[0xd] = (int)lVar9;
     puVar1[0xe] = 0;
@@ -5261,12 +5260,12 @@ void FUN_0044d0f0(void) {
     iVar8 = (int)lVar9 >> 4;
     puVar1[0xb] = *(int *)(g_pLisaActiveMipTable + -0x14) + *(int *)(iVar7 + 0x18);
 
-    if ((99 < *(short *)(DAT_0050dd28 + 0x1e)) && (iVar8 = iVar8 + -0x5c, iVar8 < 0)) {
+    if ((99 < *(short *)(g_pLisaActiveSubmesh + 0x1e)) && (iVar8 = iVar8 + -0x5c, iVar8 < 0)) {
       iVar8 = 0;
     }
 
-    DAT_004cdc84 = puVar6 + 2;
-    *DAT_004cdc84 = puVar1 + 0x11;
+    g_pLisaDrawCommandWritePtr = puVar6 + 2;
+    *g_pLisaDrawCommandWritePtr = puVar1 + 0x11;
     iVar4 = g_pLisaDepthBuckets;
 
     if (5999 < iVar8) {
@@ -5277,15 +5276,15 @@ void FUN_0044d0f0(void) {
     *(int **)(iVar4 + iVar8 * 4) = puVar6;
   }
 
-  DAT_0050dddc = iVar7 + 0x24;
+  g_pLisaSubmeshPolygon = iVar7 + 0x24;
   return;
 }
 
 /**
- * @original FUN_0044d230 (IGN_WIN.EXE @ 0x0044d230, lisa3d.c)
+ * @original Lisa_DrawBillboard_Op08 (IGN_WIN.EXE @ 0x0044d230, lisa3d.c)
  * @fidelity ADAPTED
  */
-void FUN_0044d230(void) {
+void Lisa_DrawBillboard_Op08(void) {
   int *puVar1;
   short sVar2;
   int *puVar3;
@@ -5300,12 +5299,12 @@ void FUN_0044d230(void) {
 
   
 
-  iVar8 = DAT_0050dddc;
-  iVar5 = DAT_0050dd8c;
-  iVar10 = *(int *)(DAT_0050dddc + 4);
+  iVar8 = g_pLisaSubmeshPolygon;
+  iVar5 = g_LisaTransformedVertices;
+  iVar10 = *(int *)(g_pLisaSubmeshPolygon + 4);
 
-  if (200 < *(int *)(DAT_0050dd8c + 8 + iVar10 * 0xc)) {
-    puVar3 = (int *)*DAT_004cdc84;
+  if (200 < *(int *)(g_LisaTransformedVertices + 8 + iVar10 * 0xc)) {
+    puVar3 = (int *)*g_pLisaDrawCommandWritePtr;
     *puVar3 = 7;
     puVar3[1] = puVar3 + 5;
     puVar3[2] = puVar3 + 0xd;
@@ -5317,7 +5316,7 @@ void FUN_0044d230(void) {
     iVar5 = *(int *)(iVar8 + 0x14);
     puVar3[8] = iVar10;
     puVar3[7] = *(int *)(iVar8 + 8);
-    uVar9 = DAT_0063c5f4;
+    uVar9 = g_pLisaTransparencyLUT;
     uVar6 = *(int *)(iVar8 + 0x10);
     puVar3[6] = (iVar5 + iVar10) / 2 - iVar10;
     puVar3[9] = uVar6;
@@ -5331,29 +5330,29 @@ void FUN_0044d230(void) {
     puVar3[0x10] = (int)lVar11;
     lVar11 = __ftol();
     iVar10 = (int)lVar11 >> 4;
-    sVar2 = *(short *)(DAT_0050dd28 + 0x1e);
+    sVar2 = *(short *)(g_pLisaActiveSubmesh + 0x1e);
     puVar3[0xb] = *(int *)(g_pLisaActiveMipTable + -0x14) + *(int *)(iVar8 + 0x18);
-    puVar7 = DAT_004cdc84;
+    puVar7 = g_pLisaDrawCommandWritePtr;
 
     if ((99 < sVar2) && (iVar10 = iVar10 + -0x5c, iVar10 < 0)) {
       iVar10 = 0;
     }
 
-    DAT_004cdc84[2] = puVar3 + 0x11;
+    g_pLisaDrawCommandWritePtr[2] = puVar3 + 0x11;
     iVar5 = g_pLisaDepthBuckets;
-    puVar3 = DAT_004cdc84;
+    puVar3 = g_pLisaDrawCommandWritePtr;
 
     if (5999 < iVar10) {
       iVar10 = 5999;
     }
 
-    puVar1 = DAT_004cdc84 + 1;
-    DAT_004cdc84 = puVar7 + 2;
+    puVar1 = g_pLisaDrawCommandWritePtr + 1;
+    g_pLisaDrawCommandWritePtr = puVar7 + 2;
     *puVar1 = *(int *)(g_pLisaDepthBuckets + iVar10 * 4);
     *(int **)(iVar5 + iVar10 * 4) = puVar3;
   }
 
-  DAT_0050dddc = iVar8 + 0x24;
+  g_pLisaSubmeshPolygon = iVar8 + 0x24;
   return;
 }
 
@@ -5390,14 +5389,14 @@ void Lisa_DrawTexturedTriangle_Op15(void) {
 
   
 
-  iVar9 = DAT_0050dd8c;
-  _DAT_004cdc3c = DAT_0050dd8c;
+  iVar9 = g_LisaTransformedVertices;
+  g_LisaObjMat_11 = g_LisaTransformedVertices;
 
   do {
-    iVar24 = *(int *)(DAT_0050dddc + 4);
+    iVar24 = *(int *)(g_pLisaSubmeshPolygon + 4);
     iVar22 = iVar24 * 3;
-    DAT_0050dd9c = *(int *)(DAT_0050dddc + 8) * 3;
-    DAT_004cdc88 = *(int *)(DAT_0050dddc + 0xc) * 3;
+    g_LisaSubmeshVertexStride = *(int *)(g_pLisaSubmeshPolygon + 8) * 3;
+    g_LisaCameraFocalScale = *(int *)(g_pLisaSubmeshPolygon + 0xc) * 3;
     iVar1 = *(int *)(iVar9 + 4 + iVar24 * 0xc);
     iVar24 = *(int *)(iVar9 + iVar24 * 0xc);
 
@@ -5406,59 +5405,59 @@ void Lisa_DrawTexturedTriangle_Op15(void) {
         ) < 0) {
       do {
         iVar24 = *(int *)(iVar9 + iVar22 * 4);
-        iVar1 = *(int *)(iVar9 + DAT_0050dd9c * 4);
-        _DAT_004cdc4c = iVar24;
+        iVar1 = *(int *)(iVar9 + g_LisaSubmeshVertexStride * 4);
+        g_LisaCameraMatrix_Y = iVar24;
 
         if (iVar24 <= iVar1) {
-          _DAT_004cdc4c = iVar1;
+          g_LisaCameraMatrix_Y = iVar1;
         }
 
-        iVar2 = *(int *)(iVar9 + DAT_004cdc88 * 4);
-        iVar11 = _DAT_004cdc4c;
+        iVar2 = *(int *)(iVar9 + g_LisaCameraFocalScale * 4);
+        iVar11 = g_LisaCameraMatrix_Y;
 
-        if (_DAT_004cdc4c <= iVar2) {
+        if (g_LisaCameraMatrix_Y <= iVar2) {
           iVar11 = iVar2;
         }
 
         if (g_SubpixelMinX <= iVar11) {
-          _DAT_004cdc4c = iVar24;
+          g_LisaCameraMatrix_Y = iVar24;
 
           if (iVar1 <= iVar24) {
-            _DAT_004cdc4c = iVar1;
+            g_LisaCameraMatrix_Y = iVar1;
           }
 
-          iVar24 = _DAT_004cdc4c;
+          iVar24 = g_LisaCameraMatrix_Y;
 
-          if (iVar2 <= _DAT_004cdc4c) {
+          if (iVar2 <= g_LisaCameraMatrix_Y) {
             iVar24 = iVar2;
           }
 
           if (iVar24 <= g_SubpixelMaxX) {
             iVar24 = *(int *)(iVar9 + 4 + iVar22 * 4);
-            iVar1 = *(int *)(iVar9 + 4 + DAT_0050dd9c * 4);
-            _DAT_004cdc4c = iVar24;
+            iVar1 = *(int *)(iVar9 + 4 + g_LisaSubmeshVertexStride * 4);
+            g_LisaCameraMatrix_Y = iVar24;
 
             if (iVar24 <= iVar1) {
-              _DAT_004cdc4c = iVar1;
+              g_LisaCameraMatrix_Y = iVar1;
             }
 
-            iVar2 = *(int *)(iVar9 + 4 + DAT_004cdc88 * 4);
-            iVar11 = _DAT_004cdc4c;
+            iVar2 = *(int *)(iVar9 + 4 + g_LisaCameraFocalScale * 4);
+            iVar11 = g_LisaCameraMatrix_Y;
 
-            if (_DAT_004cdc4c <= iVar2) {
+            if (g_LisaCameraMatrix_Y <= iVar2) {
               iVar11 = iVar2;
             }
 
             if (g_SubpixelMinY <= iVar11) {
-              _DAT_004cdc4c = iVar24;
+              g_LisaCameraMatrix_Y = iVar24;
 
               if (iVar1 <= iVar24) {
-                _DAT_004cdc4c = iVar1;
+                g_LisaCameraMatrix_Y = iVar1;
               }
 
-              iVar24 = _DAT_004cdc4c;
+              iVar24 = g_LisaCameraMatrix_Y;
 
-              if (iVar2 <= _DAT_004cdc4c) {
+              if (iVar2 <= g_LisaCameraMatrix_Y) {
                 iVar24 = iVar2;
               }
 
@@ -5469,51 +5468,51 @@ void Lisa_DrawTexturedTriangle_Op15(void) {
 
         }
 
-        iVar24 = DAT_0050dddc + 0x2c;
+        iVar24 = g_pLisaSubmeshPolygon + 0x2c;
 
-        if (*(char *)(DAT_0050dddc + 0x2c) != '\x15') {
-          _DAT_004cdd10 = iVar22;
-          DAT_0050dddc = iVar24;
+        if (*(char *)(g_pLisaSubmeshPolygon + 0x2c) != '\x15') {
+          g_LisaObjMat_Tmp6 = iVar22;
+          g_pLisaSubmeshPolygon = iVar24;
           return;
         }
 
-        if (DAT_0050dd6c < 3) {
-          _DAT_004cdd10 = iVar22;
-          DAT_0050dddc = iVar24;
+        if (g_LisaSubmeshPolyCount < 3) {
+          g_LisaObjMat_Tmp6 = iVar22;
+          g_pLisaSubmeshPolygon = iVar24;
           return;
         }
 
-        DAT_0050dd6c = DAT_0050dd6c + -1;
-        iVar22 = *(int *)(DAT_0050dddc + 0x30) * 3;
-        DAT_004cdc88 = *(int *)(DAT_0050dddc + 0x38) * 3;
-        DAT_0050dd9c = *(int *)(DAT_0050dddc + 0x34) * 3;
-        DAT_0050dddc = iVar24;
+        g_LisaSubmeshPolyCount = g_LisaSubmeshPolyCount + -1;
+        iVar22 = *(int *)(g_pLisaSubmeshPolygon + 0x30) * 3;
+        g_LisaCameraFocalScale = *(int *)(g_pLisaSubmeshPolygon + 0x38) * 3;
+        g_LisaSubmeshVertexStride = *(int *)(g_pLisaSubmeshPolygon + 0x34) * 3;
+        g_pLisaSubmeshPolygon = iVar24;
       } while( 1 );
     }
 
-    iVar10 = DAT_0050dddc;
-    iVar24 = *(int *)(iVar9 + 4 + DAT_0050dd9c * 4);
-    iVar1 = *(int *)(iVar9 + DAT_004cdc88 * 4);
-    iVar2 = *(int *)(iVar9 + DAT_0050dd9c * 4);
-    iVar11 = *(int *)(iVar9 + 4 + DAT_004cdc88 * 4);
+    iVar10 = g_pLisaSubmeshPolygon;
+    iVar24 = *(int *)(iVar9 + 4 + g_LisaSubmeshVertexStride * 4);
+    iVar1 = *(int *)(iVar9 + g_LisaCameraFocalScale * 4);
+    iVar2 = *(int *)(iVar9 + g_LisaSubmeshVertexStride * 4);
+    iVar11 = *(int *)(iVar9 + 4 + g_LisaCameraFocalScale * 4);
 
-    DAT_0050ddcc = ((iVar24 >> 4) - (*(int *)(iVar9 + 4 + iVar22 * 4) >> 4)) *
+    g_LisaSubmeshCenterWorldY = ((iVar24 >> 4) - (*(int *)(iVar9 + 4 + iVar22 * 4) >> 4)) *
 
                    ((iVar1 >> 4) - (iVar2 >> 4)) +
 
                    ((iVar11 >> 4) - (iVar24 >> 4)) *
 
-                   ((*(int *)(iVar9 + iVar22 * 4) >> 4) - (iVar2 >> 4)) ^ DAT_0049c9a8;
-    iVar3 = *(int *)(iVar9 + 8 + DAT_004cdc88 * 4);
-    iVar4 = *(int *)(iVar9 + 8 + DAT_0050dd9c * 4);
+                   ((*(int *)(iVar9 + iVar22 * 4) >> 4) - (iVar2 >> 4)) ^ g_LisaBackfaceSign;
+    iVar3 = *(int *)(iVar9 + 8 + g_LisaCameraFocalScale * 4);
+    iVar4 = *(int *)(iVar9 + 8 + g_LisaSubmeshVertexStride * 4);
     iVar12 = iVar3 + iVar4 + *(int *)(iVar9 + 8 + iVar22 * 4);
-    _DAT_004cdd10 = iVar22;
+    g_LisaObjMat_Tmp6 = iVar22;
 
-    if ((600 < iVar12) && (0 < (int)DAT_0050ddcc)) {
-      DAT_004cdc44 = iVar12 >> 4;
-      puVar5 = (int *)*DAT_004cdc84;
+    if ((600 < iVar12) && (0 < (int)g_LisaSubmeshCenterWorldY)) {
+      g_LisaCameraMatrix_X = iVar12 >> 4;
+      puVar5 = (int *)*g_pLisaDrawCommandWritePtr;
 
-      if (DAT_0049c9ac == 1) {
+      if (g_LisaShadingEnabled == 1) {
         iVar17 = *(int *)(iVar9 + iVar22 * 4) >> 8;
         iVar13 = *(int *)(iVar9 + 4 + iVar22 * 4) >> 8;
 
@@ -5523,39 +5522,39 @@ void Lisa_DrawTexturedTriangle_Op15(void) {
 
                  ((iVar24 >> 8) + (iVar11 >> 8)) * ((iVar1 >> 8) - (iVar2 >> 8))) * 3;
         uVar20 = iVar13 >> 0x1f;
-        DAT_0050dd84 = (iVar13 >> 1 ^ uVar20) - uVar20;
-        iVar13 = *(int *)(DAT_0050dddc + 0x24) >> 8;
-        iVar17 = *(int *)(DAT_0050dddc + 0x14) >> 8;
-        iVar18 = *(int *)(DAT_0050dddc + 0x20) >> 8;
-        iVar14 = *(int *)(DAT_0050dddc + 0x10) >> 8;
-        iVar15 = *(int *)(DAT_0050dddc + 0x1c) >> 8;
-        iVar16 = *(int *)(DAT_0050dddc + 0x18) >> 8;
+        g_LisaActiveLightingMode = (iVar13 >> 1 ^ uVar20) - uVar20;
+        iVar13 = *(int *)(g_pLisaSubmeshPolygon + 0x24) >> 8;
+        iVar17 = *(int *)(g_pLisaSubmeshPolygon + 0x14) >> 8;
+        iVar18 = *(int *)(g_pLisaSubmeshPolygon + 0x20) >> 8;
+        iVar14 = *(int *)(g_pLisaSubmeshPolygon + 0x10) >> 8;
+        iVar15 = *(int *)(g_pLisaSubmeshPolygon + 0x1c) >> 8;
+        iVar16 = *(int *)(g_pLisaSubmeshPolygon + 0x18) >> 8;
 
         uVar20 = (iVar15 + iVar17) * (iVar16 - iVar14) +
 
                  (iVar17 + iVar13) * (iVar14 - iVar18) + (iVar15 + iVar13) * (iVar18 - iVar16);
         uVar21 = (int)uVar20 >> 0x1f;
         iVar13 = (uVar20 ^ uVar21) - uVar21;
-        if (iVar13 < DAT_0050dd84) goto LAB_0044d8ef;
-        DAT_0050ddac = (DAT_0050dd84 * 4 <= iVar13) - 4;
+        if (iVar13 < g_LisaActiveLightingMode) goto LAB_0044d8ef;
+        g_LisaSubmeshBoundRadius = (g_LisaActiveLightingMode * 4 <= iVar13) - 4;
       }
 
       else {
 LAB_0044d8ef:
 
-        DAT_0050ddac = -5;
+        g_LisaSubmeshBoundRadius = -5;
       }
 
       if (((g_LisaCamera->shading_mode == 0) ||
 
-          (_DAT_004cdc98 = (int)*(short *)(DAT_0050dd28 + 0x1e), 0x2d0 < DAT_004cdc44)) ||
+          (g_LisaObjMat_20 = (int)*(short *)(g_pLisaActiveSubmesh + 0x1e), 0x2d0 < g_LisaCameraMatrix_X)) ||
 
-         (((99 < _DAT_004cdc98 && (_DAT_004cdc98 != 200)) &&
+         (((99 < g_LisaObjMat_20 && (g_LisaObjMat_20 != 200)) &&
 
-          ((_DAT_004cdc98 < 300 || (0x12e < _DAT_004cdc98)))))) {
+          ((g_LisaObjMat_20 < 300 || (0x12e < g_LisaObjMat_20)))))) {
         uVar6 = *(int *)(iVar9 + iVar22 * 4);
         uVar7 = *(int *)(iVar9 + 4 + iVar22 * 4);
-        _DAT_0050ddf0 = puVar5;
+        g_LisaSubmeshTmp5 = puVar5;
         *puVar5 = 0x11;
         puVar5[1] = uVar6;
         puVar5[2] = uVar7;
@@ -5563,36 +5562,36 @@ LAB_0044d8ef:
         iVar22 = g_pLisaActiveMipTable;
         puVar5[4] = iVar24;
         puVar5[5] = iVar1;
-        iVar24 = DAT_0050ddac;
+        iVar24 = g_LisaSubmeshBoundRadius;
         puVar5[6] = iVar11;
-        puVar5[7] = DAT_0050dddc + 0x10;
-        puVar19 = DAT_004cdc84;
+        puVar5[7] = g_pLisaSubmeshPolygon + 0x10;
+        puVar19 = g_pLisaDrawCommandWritePtr;
         puVar23 = puVar5 + 9;
-        puVar5[8] = *(int *)(iVar22 + iVar24 * 4) + *(int *)(DAT_0050dddc + 0x28);
+        puVar5[8] = *(int *)(iVar22 + iVar24 * 4) + *(int *)(g_pLisaSubmeshPolygon + 0x28);
       }
 
       else {
-        if (DAT_004cdc44 < 0x1e1) {
+        if (g_LisaCameraMatrix_X < 0x1e1) {
           puVar5[4] = *(int *)(iVar9 + 8 + iVar22 * 4);
           puVar5[7] = iVar4;
           puVar5[10] = iVar3;
         }
 
         else {
-          DAT_0050dd64 = iVar12 / 3;
-          _DAT_0050dde8 = (float)(0x2d0 - DAT_004cdc44) * _DAT_0047aea0;
+          g_LisaSubmeshFlags = iVar12 / 3;
+          g_LisaSubmeshTmp4 = (float)(0x2d0 - g_LisaCameraMatrix_X) * g_Const_512;
           lVar25 = __ftol();
-          puVar5[4] = (int)lVar25 + DAT_0050dd64;
+          puVar5[4] = (int)lVar25 + g_LisaSubmeshFlags;
           lVar25 = __ftol();
-          puVar5[7] = (int)lVar25 + DAT_0050dd64;
-          _DAT_0050dd20 = iVar3;
+          puVar5[7] = (int)lVar25 + g_LisaSubmeshFlags;
+          g_LisaSubmeshTmp1 = iVar3;
           lVar25 = __ftol();
-          puVar5[10] = (int)lVar25 + DAT_0050dd64;
+          puVar5[10] = (int)lVar25 + g_LisaSubmeshFlags;
         }
 
         uVar6 = *(int *)(iVar9 + iVar22 * 4);
         uVar7 = *(int *)(iVar9 + 4 + iVar22 * 4);
-        _DAT_0050ddf0 = puVar5;
+        g_LisaSubmeshTmp5 = puVar5;
         *puVar5 = 0x14;
         puVar5[2] = uVar6;
         puVar5[3] = uVar7;
@@ -5612,16 +5611,16 @@ LAB_0044d8ef:
         puVar5[0xe] = uVar6;
         puVar5[0xf] = uVar7;
         puVar5[0x10] = uVar8;
-        puVar19 = DAT_004cdc84;
+        puVar19 = g_pLisaDrawCommandWritePtr;
         puVar23 = puVar5 + 0x11;
-        puVar5[1] = *(int *)(g_pLisaActiveMipTable + DAT_0050ddac * 4) + *(int *)(iVar10 + 0x28);
+        puVar5[1] = *(int *)(g_pLisaActiveMipTable + g_LisaSubmeshBoundRadius * 4) + *(int *)(iVar10 + 0x28);
       }
 
-      iVar24 = DAT_0050dd28;
-      DAT_004cdc44 = DAT_004cdc44 + -0x50;
+      iVar24 = g_pLisaActiveSubmesh;
+      g_LisaCameraMatrix_X = g_LisaCameraMatrix_X + -0x50;
       puVar19[2] = puVar23;
       iVar1 = g_pLisaDepthBuckets;
-      puVar5 = DAT_004cdc84;
+      puVar5 = g_pLisaDrawCommandWritePtr;
 
       if (99 < *(short *)(iVar24 + 0x1e)) {
         if (*(short *)(iVar24 + 0x1e) == 0xd2) {
@@ -5632,31 +5631,31 @@ LAB_0044d8ef:
           iVar24 = -0x5c;
         }
 
-        DAT_004cdc44 = DAT_004cdc44 + iVar24;
+        g_LisaCameraMatrix_X = g_LisaCameraMatrix_X + iVar24;
       }
 
-      if (DAT_004cdc44 < 0) {
-        DAT_004cdc44 = 0;
+      if (g_LisaCameraMatrix_X < 0) {
+        g_LisaCameraMatrix_X = 0;
       }
 
-      if (5999 < DAT_004cdc44) {
-        DAT_004cdc44 = 5999;
+      if (5999 < g_LisaCameraMatrix_X) {
+        g_LisaCameraMatrix_X = 5999;
       }
 
-      iVar24 = DAT_004cdc44;
-      puVar23 = DAT_004cdc84 + 1;
-      DAT_004cdc84 = puVar19 + 2;
-      *puVar23 = *(int *)(g_pLisaDepthBuckets + DAT_004cdc44 * 4);
+      iVar24 = g_LisaCameraMatrix_X;
+      puVar23 = g_pLisaDrawCommandWritePtr + 1;
+      g_pLisaDrawCommandWritePtr = puVar19 + 2;
+      *puVar23 = *(int *)(g_pLisaDepthBuckets + g_LisaCameraMatrix_X * 4);
       *(int **)(iVar1 + iVar24 * 4) = puVar5;
     }
 
-    DAT_0050dddc = iVar10 + 0x2c;
+    g_pLisaSubmeshPolygon = iVar10 + 0x2c;
 
-    if ((*(char *)(iVar10 + 0x2c) != '\x15') || (DAT_0050dd6c < 3)) {
+    if ((*(char *)(iVar10 + 0x2c) != '\x15') || (g_LisaSubmeshPolyCount < 3)) {
       return;
     }
 
-    DAT_0050dd6c = DAT_0050dd6c + -1;
+    g_LisaSubmeshPolyCount = g_LisaSubmeshPolyCount + -1;
   } while( 1 );
 }
 
@@ -5696,16 +5695,16 @@ void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
 
   
 
-  iVar11 = DAT_0050dd8c;
-  _DAT_004cdbcc = DAT_0050dd8c;
-  iVar19 = DAT_0050dd6c;
+  iVar11 = g_LisaTransformedVertices;
+  g_LisaObjMat_01 = g_LisaTransformedVertices;
+  iVar19 = g_LisaSubmeshPolyCount;
 
   do {
-    DAT_0050dd6c = iVar19;
-    iVar19 = *(int *)(DAT_0050dddc + 4);
+    g_LisaSubmeshPolyCount = iVar19;
+    iVar19 = *(int *)(g_pLisaSubmeshPolygon + 4);
     iVar25 = iVar19 * 3;
-    DAT_004cdce0 = *(int *)(DAT_0050dddc + 8) * 3;
-    DAT_0050ddc4 = *(int *)(DAT_0050dddc + 0xc) * 3;
+    g_LisaFrustumPlaneBottom = *(int *)(g_pLisaSubmeshPolygon + 8) * 3;
+    g_LisaSubmeshPolyStride = *(int *)(g_pLisaSubmeshPolygon + 0xc) * 3;
     iVar23 = *(int *)(iVar11 + 4 + iVar19 * 0xc);
     iVar19 = *(int *)(iVar11 + iVar19 * 0xc);
 
@@ -5713,61 +5712,61 @@ void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
 
         iVar19 - g_SubpixelMinX) < 0) {
       do {
-        iVar4 = DAT_0050dddc;
+        iVar4 = g_pLisaSubmeshPolygon;
         iVar19 = *(int *)(iVar11 + iVar25 * 4);
-        iVar23 = *(int *)(iVar11 + DAT_004cdce0 * 4);
-        _DAT_004cdc9c = iVar23;
+        iVar23 = *(int *)(iVar11 + g_LisaFrustumPlaneBottom * 4);
+        g_LisaCameraMatrix_Z = iVar23;
 
         if (iVar23 <= iVar19) {
-          _DAT_004cdc9c = iVar19;
+          g_LisaCameraMatrix_Z = iVar19;
         }
 
-        iVar3 = *(int *)(iVar11 + DAT_0050ddc4 * 4);
-        iVar26 = _DAT_004cdc9c;
+        iVar3 = *(int *)(iVar11 + g_LisaSubmeshPolyStride * 4);
+        iVar26 = g_LisaCameraMatrix_Z;
 
-        if (_DAT_004cdc9c <= iVar3) {
+        if (g_LisaCameraMatrix_Z <= iVar3) {
           iVar26 = iVar3;
         }
 
         if (g_SubpixelMinX <= iVar26) {
-          _DAT_004cdc9c = iVar23;
+          g_LisaCameraMatrix_Z = iVar23;
 
           if (iVar19 <= iVar23) {
-            _DAT_004cdc9c = iVar19;
+            g_LisaCameraMatrix_Z = iVar19;
           }
 
-          iVar19 = _DAT_004cdc9c;
+          iVar19 = g_LisaCameraMatrix_Z;
 
-          if (iVar3 <= _DAT_004cdc9c) {
+          if (iVar3 <= g_LisaCameraMatrix_Z) {
             iVar19 = iVar3;
           }
 
           if (iVar19 <= g_SubpixelMaxX) {
-            iVar19 = *(int *)(iVar11 + 4 + DAT_004cdce0 * 4);
+            iVar19 = *(int *)(iVar11 + 4 + g_LisaFrustumPlaneBottom * 4);
             iVar23 = *(int *)(iVar11 + 4 + iVar25 * 4);
-            _DAT_004cdc9c = iVar19;
+            g_LisaCameraMatrix_Z = iVar19;
 
             if (iVar19 <= iVar23) {
-              _DAT_004cdc9c = iVar23;
+              g_LisaCameraMatrix_Z = iVar23;
             }
 
-            iVar3 = *(int *)(iVar11 + 4 + DAT_0050ddc4 * 4);
-            iVar26 = _DAT_004cdc9c;
+            iVar3 = *(int *)(iVar11 + 4 + g_LisaSubmeshPolyStride * 4);
+            iVar26 = g_LisaCameraMatrix_Z;
 
-            if (_DAT_004cdc9c <= iVar3) {
+            if (g_LisaCameraMatrix_Z <= iVar3) {
               iVar26 = iVar3;
             }
 
             if (g_SubpixelMinY <= iVar26) {
-              _DAT_004cdc9c = iVar19;
+              g_LisaCameraMatrix_Z = iVar19;
 
               if (iVar23 <= iVar19) {
-                _DAT_004cdc9c = iVar23;
+                g_LisaCameraMatrix_Z = iVar23;
               }
 
-              iVar19 = _DAT_004cdc9c;
+              iVar19 = g_LisaCameraMatrix_Z;
 
-              if (iVar3 <= _DAT_004cdc9c) {
+              if (iVar3 <= g_LisaCameraMatrix_Z) {
                 iVar19 = iVar3;
               }
 
@@ -5778,44 +5777,44 @@ void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
 
         }
 
-        _DAT_004cdc50 = iVar25;
-        pcVar1 = (char *)(DAT_0050dddc + 0x2c);
-        DAT_0050dddc = DAT_0050dddc + 0x2c;
+        g_LisaObjMat_12 = iVar25;
+        pcVar1 = (char *)(g_pLisaSubmeshPolygon + 0x2c);
+        g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 0x2c;
 
-        if ((*pcVar1 != '\x11') || (DAT_0050dd6c + -1 < 1)) {
+        if ((*pcVar1 != '\x11') || (g_LisaSubmeshPolyCount + -1 < 1)) {
           return;
         }
 
         iVar25 = *(int *)(iVar4 + 0x30) * 3;
-        DAT_004cdce0 = *(int *)(iVar4 + 0x34) * 3;
-        DAT_0050ddc4 = *(int *)(iVar4 + 0x38) * 3;
-        DAT_0050dd6c = DAT_0050dd6c + -1;
+        g_LisaFrustumPlaneBottom = *(int *)(iVar4 + 0x34) * 3;
+        g_LisaSubmeshPolyStride = *(int *)(iVar4 + 0x38) * 3;
+        g_LisaSubmeshPolyCount = g_LisaSubmeshPolyCount + -1;
       } while( 1 );
     }
 
-    iVar12 = DAT_0050dddc;
-    iVar19 = *(int *)(iVar11 + 4 + DAT_0050ddc4 * 4);
-    iVar23 = *(int *)(iVar11 + 4 + DAT_004cdce0 * 4);
-    iVar4 = *(int *)(iVar11 + DAT_004cdce0 * 4);
-    iVar3 = *(int *)(iVar11 + DAT_0050ddc4 * 4);
+    iVar12 = g_pLisaSubmeshPolygon;
+    iVar19 = *(int *)(iVar11 + 4 + g_LisaSubmeshPolyStride * 4);
+    iVar23 = *(int *)(iVar11 + 4 + g_LisaFrustumPlaneBottom * 4);
+    iVar4 = *(int *)(iVar11 + g_LisaFrustumPlaneBottom * 4);
+    iVar3 = *(int *)(iVar11 + g_LisaSubmeshPolyStride * 4);
 
-    _DAT_004cdbac =
+    g_LisaObjMat_00 =
 
          ((iVar19 >> 4) - (iVar23 >> 4)) * ((*(int *)(iVar11 + iVar25 * 4) >> 4) - (iVar4 >> 4)) +
 
          ((iVar23 >> 4) - (*(int *)(iVar11 + 4 + iVar25 * 4) >> 4)) * ((iVar3 >> 4) - (iVar4 >> 4))
 
-         ^ DAT_0049c9a8;
-    iVar26 = *(int *)(iVar11 + 8 + DAT_004cdce0 * 4);
-    iVar5 = *(int *)(iVar11 + 8 + DAT_0050ddc4 * 4);
+         ^ g_LisaBackfaceSign;
+    iVar26 = *(int *)(iVar11 + 8 + g_LisaFrustumPlaneBottom * 4);
+    iVar5 = *(int *)(iVar11 + 8 + g_LisaSubmeshPolyStride * 4);
     iVar13 = iVar26 + iVar5 + *(int *)(iVar11 + 8 + iVar25 * 4);
-    _DAT_004cdc50 = iVar25;
+    g_LisaObjMat_12 = iVar25;
 
-    if ((600 < iVar13) && (0 < (int)_DAT_004cdbac)) {
-      DAT_0050ddb8 = iVar13 >> 4;
-      puVar6 = (int *)*DAT_004cdc84;
+    if ((600 < iVar13) && (0 < (int)g_LisaObjMat_00)) {
+      g_LisaSubmeshVertexCount = iVar13 >> 4;
+      puVar6 = (int *)*g_pLisaDrawCommandWritePtr;
 
-      if (DAT_0049c9ac == 1) {
+      if (g_LisaShadingEnabled == 1) {
         iVar14 = *(int *)(iVar11 + 4 + iVar25 * 4) >> 8;
         iVar15 = *(int *)(iVar11 + iVar25 * 4) >> 8;
 
@@ -5825,13 +5824,13 @@ void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
 
                  (iVar14 + (iVar19 >> 8)) * (iVar15 - (iVar3 >> 8))) * 3;
         uVar20 = iVar14 >> 0x1f;
-        DAT_004cdc58 = (iVar14 >> 1 ^ uVar20) - uVar20;
-        iVar14 = *(int *)(DAT_0050dddc + 0x24) >> 8;
-        iVar15 = *(int *)(DAT_0050dddc + 0x14) >> 8;
-        iVar18 = *(int *)(DAT_0050dddc + 0x20) >> 8;
-        iVar16 = *(int *)(DAT_0050dddc + 0x10) >> 8;
-        iVar17 = *(int *)(DAT_0050dddc + 0x1c) >> 8;
-        iVar21 = *(int *)(DAT_0050dddc + 0x18) >> 8;
+        g_LisaCameraRoll = (iVar14 >> 1 ^ uVar20) - uVar20;
+        iVar14 = *(int *)(g_pLisaSubmeshPolygon + 0x24) >> 8;
+        iVar15 = *(int *)(g_pLisaSubmeshPolygon + 0x14) >> 8;
+        iVar18 = *(int *)(g_pLisaSubmeshPolygon + 0x20) >> 8;
+        iVar16 = *(int *)(g_pLisaSubmeshPolygon + 0x10) >> 8;
+        iVar17 = *(int *)(g_pLisaSubmeshPolygon + 0x1c) >> 8;
+        iVar21 = *(int *)(g_pLisaSubmeshPolygon + 0x18) >> 8;
 
         uVar20 = (iVar14 + iVar15) * (iVar16 - iVar18) + (iVar14 + iVar17) * (iVar18 - iVar21) +
 
@@ -5839,13 +5838,13 @@ void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
         uVar22 = (int)uVar20 >> 0x1f;
         iVar14 = (uVar20 ^ uVar22) - uVar22;
 
-        if (iVar14 < DAT_004cdc58) {
-          DAT_004cdc38 = -5;
+        if (iVar14 < g_LisaCameraRoll) {
+          g_LisaCameraYaw = -5;
         }
 
         else {
-          if (iVar14 < DAT_004cdc58 * 4) goto LAB_0044ecb6;
-          DAT_004cdc38 = (DAT_004cdc58 * 0x10 <= iVar14) - 3;
+          if (iVar14 < g_LisaCameraRoll * 4) goto LAB_0044ecb6;
+          g_LisaCameraYaw = (g_LisaCameraRoll * 0x10 <= iVar14) - 3;
         }
 
       }
@@ -5853,33 +5852,33 @@ void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
       else {
 LAB_0044ecb6:
 
-        DAT_004cdc38 = -4;
+        g_LisaCameraYaw = -4;
       }
 
-      sVar2 = *(short *)(DAT_0050dd28 + 0x1e);
-      _DAT_004cdcdc = (int)sVar2;
+      sVar2 = *(short *)(g_pLisaActiveSubmesh + 0x1e);
+      g_LisaObjMat_SinYaw = (int)sVar2;
 
-      if ((DAT_0050ddb8 < 0x2d1) &&
+      if ((g_LisaSubmeshVertexCount < 0x2d1) &&
 
-         (((_DAT_004cdcdc < 100 || (_DAT_004cdcdc == 200)) ||
+         (((g_LisaObjMat_SinYaw < 100 || (g_LisaObjMat_SinYaw == 200)) ||
 
-          ((299 < _DAT_004cdcdc && (_DAT_004cdcdc < 0x12f)))))) {
-        if (DAT_0050ddb8 < 0x1e1) {
+          ((299 < g_LisaObjMat_SinYaw && (g_LisaObjMat_SinYaw < 0x12f)))))) {
+        if (g_LisaSubmeshVertexCount < 0x1e1) {
           puVar6[4] = *(int *)(iVar11 + 8 + iVar25 * 4);
           puVar6[7] = iVar26;
           puVar6[10] = iVar5;
         }
 
         else {
-          DAT_0050dd54 = iVar13 / 3;
-          _DAT_0050dd98 = (float)(0x2d0 - DAT_0050ddb8) * _DAT_0047aea0;
+          g_LisaCurrentVertexIndex = iVar13 / 3;
+          g_LisaSubmeshTmp3 = (float)(0x2d0 - g_LisaSubmeshVertexCount) * g_Const_512;
           lVar28 = __ftol();
-          puVar6[4] = (int)lVar28 + DAT_0050dd54;
+          puVar6[4] = (int)lVar28 + g_LisaCurrentVertexIndex;
           lVar28 = __ftol();
-          puVar6[7] = (int)lVar28 + DAT_0050dd54;
-          _DAT_004cdbf0 = iVar5;
+          puVar6[7] = (int)lVar28 + g_LisaCurrentVertexIndex;
+          g_LisaObjMat_10 = iVar5;
           lVar28 = __ftol();
-          puVar6[10] = (int)lVar28 + DAT_0050dd54;
+          puVar6[10] = (int)lVar28 + g_LisaCurrentVertexIndex;
         }
 
         uVar7 = *(int *)(iVar11 + iVar25 * 4);
@@ -5887,7 +5886,7 @@ LAB_0044ecb6:
         *puVar6 = 0x14;
         puVar6[2] = uVar7;
         puVar6[3] = uVar8;
-        iVar25 = DAT_004cdc38;
+        iVar25 = g_LisaCameraYaw;
         puVar6[5] = iVar4;
         puVar6[6] = iVar23;
         puVar6[8] = iVar3;
@@ -5902,9 +5901,9 @@ LAB_0044ecb6:
           puVar6[0xe] = (*(unsigned int *)(iVar12 + 0x1c) & 0x3fff) << 2;
           iVar19 = (int)uVar20 >> 0xe;
           puVar6[0xf] = (*(unsigned int *)(iVar12 + 0x20) & 0x3fff) << 2;
-          _DAT_004cdbdc = (int)uVar22 >> 0xe;
-          iVar23 = _DAT_004cdbdc * 0x4000;
-          _DAT_0050dd60 = iVar19;
+          g_LisaObjMat_02 = (int)uVar22 >> 0xe;
+          iVar23 = g_LisaObjMat_02 * 0x4000;
+          g_LisaSubmeshTmp2 = iVar19;
           puVar6[0x10] = (*(unsigned int *)(iVar12 + 0x24) & 0x3fff) << 2;
           iVar19 = g_pLisaActiveMipTable[iVar19 * 4] + (*(int *)(iVar12 + 0x28) + iVar23) * 4;
         }
@@ -5919,14 +5918,14 @@ LAB_0044ecb6:
           uVar7 = *(int *)(iVar12 + 0x20);
           puVar6[0xd] = uVar8;
           puVar6[0xe] = uVar9;
-          iVar19 = DAT_004cdc38;
+          iVar19 = g_LisaCameraYaw;
           uVar8 = *(int *)(iVar12 + 0x24);
           puVar6[0xf] = uVar7;
           puVar6[0x10] = uVar8;
           iVar19 = piVar10[iVar19] + *(int *)(iVar12 + 0x28);
         }
 
-        puVar24 = DAT_004cdc84;
+        puVar24 = g_pLisaDrawCommandWritePtr;
         puVar6[1] = iVar19;
         puVar27 = puVar6 + 0x11;
       }
@@ -5936,72 +5935,72 @@ LAB_0044ecb6:
         puVar6[1] = *(int *)(iVar11 + iVar25 * 4);
         puVar6[2] = uVar7;
         puVar6[3] = iVar4;
-        iVar25 = DAT_004cdc38;
+        iVar25 = g_LisaCameraYaw;
         puVar6[4] = iVar23;
         puVar6[5] = iVar3;
         puVar6[6] = iVar19;
-        puVar6[7] = (int *)(DAT_0050dddc + 0x10);
-        iVar19 = DAT_004cdc38;
+        puVar6[7] = (int *)(g_pLisaSubmeshPolygon + 0x10);
+        iVar19 = g_LisaCameraYaw;
         piVar10 = g_pLisaActiveMipTable;
 
         if ((iVar25 == -5) && (g_pLisaActiveMipTable[-5] != *g_pLisaActiveMipTable)) {
-          _DAT_0050dd60 = *(int *)(DAT_0050dddc + 0x10);
+          g_LisaSubmeshTmp2 = *(int *)(g_pLisaSubmeshPolygon + 0x10);
           *puVar6 = 0x16;
-          _DAT_0050dd60 = _DAT_0050dd60 >> 0xe;
-          _DAT_004cdbdc = *(int *)(DAT_0050dddc + 0x14) >> 0xe;
+          g_LisaSubmeshTmp2 = g_LisaSubmeshTmp2 >> 0xe;
+          g_LisaObjMat_02 = *(int *)(g_pLisaSubmeshPolygon + 0x14) >> 0xe;
 
-          puVar6[8] = piVar10[_DAT_0050dd60 * 4] +
+          puVar6[8] = piVar10[g_LisaSubmeshTmp2 * 4] +
 
-                      (*(int *)(DAT_0050dddc + 0x28) + _DAT_004cdbdc * 0x4000) * 4;
+                      (*(int *)(g_pLisaSubmeshPolygon + 0x28) + g_LisaObjMat_02 * 0x4000) * 4;
         }
 
         else {
-          iVar23 = *(int *)(DAT_0050dddc + 0x28);
+          iVar23 = *(int *)(g_pLisaSubmeshPolygon + 0x28);
           *puVar6 = 0x11;
           puVar6[8] = piVar10[iVar19] + iVar23;
         }
 
         puVar27 = puVar6 + 9;
-        puVar24 = DAT_004cdc84;
+        puVar24 = g_pLisaDrawCommandWritePtr;
       }
 
-      _DAT_0050ddf4 = puVar6;
+      g_LisaSubmeshTmp6 = puVar6;
       puVar24[2] = puVar27;
       iVar19 = g_pLisaDepthBuckets;
-      puVar6 = DAT_004cdc84;
-      iVar23 = DAT_0050ddb8 + -0x50;
+      puVar6 = g_pLisaDrawCommandWritePtr;
+      iVar23 = g_LisaSubmeshVertexCount + -0x50;
 
       if (99 < sVar2) {
         if (sVar2 == 0xd2) {
-          iVar23 = DAT_0050ddb8 + -0xa4;
+          iVar23 = g_LisaSubmeshVertexCount + -0xa4;
         }
 
         else {
-          iVar23 = DAT_0050ddb8 + -0xac;
+          iVar23 = g_LisaSubmeshVertexCount + -0xac;
         }
 
       }
 
-      DAT_0050ddb8 = iVar23;
+      g_LisaSubmeshVertexCount = iVar23;
 
-      if (DAT_0050ddb8 < 0) {
-        DAT_0050ddb8 = 0;
+      if (g_LisaSubmeshVertexCount < 0) {
+        g_LisaSubmeshVertexCount = 0;
       }
 
-      if (5999 < DAT_0050ddb8) {
-        DAT_0050ddb8 = 5999;
+      if (5999 < g_LisaSubmeshVertexCount) {
+        g_LisaSubmeshVertexCount = 5999;
       }
 
-      iVar23 = DAT_0050ddb8;
-      puVar27 = DAT_004cdc84 + 1;
-      DAT_004cdc84 = puVar24 + 2;
-      *puVar27 = *(int *)(g_pLisaDepthBuckets + DAT_0050ddb8 * 4);
+      iVar23 = g_LisaSubmeshVertexCount;
+      puVar27 = g_pLisaDrawCommandWritePtr + 1;
+      g_pLisaDrawCommandWritePtr = puVar24 + 2;
+      *puVar27 = *(int *)(g_pLisaDepthBuckets + g_LisaSubmeshVertexCount * 4);
       *(int **)(iVar19 + iVar23 * 4) = puVar6;
     }
 
-    DAT_0050dddc = iVar12 + 0x2c;
+    g_pLisaSubmeshPolygon = iVar12 + 0x2c;
 
-    if ((*(char *)(iVar12 + 0x2c) != '\x11') || (iVar19 = DAT_0050dd6c + -1, DAT_0050dd6c + -1 < 1))
+    if ((*(char *)(iVar12 + 0x2c) != '\x11') || (iVar19 = g_LisaSubmeshPolyCount + -1, g_LisaSubmeshPolyCount + -1 < 1))
 
     {
       return;
@@ -6027,10 +6026,10 @@ long long Lisa_InitRasterizerTables(int param_1,unsigned int param_2) {
   
 
   if ((in_EAX < 0x579) && (unaff_EBX < 0x259)) {
-    piVar4 = &DAT_0049d3a8;
+    piVar4 = &g_LisaActiveTextureID;
     uVar2 = 1;
-    DAT_0049ca3c = in_EAX;
-    _DAT_0049ca40 = unaff_EBX;
+    g_LisaScanlinePitch = in_EAX;
+    g_LisaAspectScale = unaff_EBX;
 
     do {
       *piVar4 = (int)(0x10000 / (unsigned long long)uVar2) + -1;
@@ -6042,7 +6041,7 @@ long long Lisa_InitRasterizerTables(int param_1,unsigned int param_2) {
       (*(void (*)())*ppuVar5)(ppuVar5,unaff_ESI,unaff_EBX);
     }
 
-    piVar4 = &DAT_0049ca44;
+    piVar4 = &g_LisaScreenPitch;
     iVar3 = 0;
     sVar1 = 600;
 
@@ -6068,30 +6067,30 @@ long long Lisa_ExecuteRasterizerCommands(int param_1,unsigned int param_2) {
 
   
 
-  _DAT_0049c9e4 = unaff_ESI;
-  _DAT_0049c9e8 = (int *)*unaff_ESI;
-  _DAT_0049c9f0 = unaff_ESI[1];
-  _DAT_0049c9f8 = unaff_ESI[3];
-  _DAT_0049c9fc = unaff_ESI[4];
-  _DAT_0049ca00 = unaff_ESI[5];
-  _DAT_0049ca0c = _DAT_0049c9fc;
-  _DAT_0049ca1c = _DAT_0049c9fc << 8;
-  _DAT_0049ca10 = _DAT_0049ca00;
-  _DAT_0049ca20 = _DAT_0049ca00 << 8;
-  g_SubpixelMinX = _DAT_0049ca1c;
-  g_SubpixelMinY = _DAT_0049ca20;
-  _DAT_0049ca04 = unaff_ESI[6];
-  _DAT_0049ca08 = unaff_ESI[7];
-  _DAT_0049ca14 = _DAT_0049ca04 + 1;
-  _DAT_0049ca18 = _DAT_0049ca08 + 1;
-  g_SubpixelMaxX = _DAT_0049ca14 * 0x100;
-  _DAT_0049ca24 = g_SubpixelMaxX + -1;
-  g_SubpixelMaxY = _DAT_0049ca18 * 0x100;
-  _DAT_0049ca28 = g_SubpixelMaxY + -1;
-  _DAT_0049c9ec = (int *)*_DAT_0049c9e8;
+  g_pLisaScanlineBuffer = unaff_ESI;
+  g_pLisaSpanBuffer = (int *)*unaff_ESI;
+  g_LisaCameraZoom = unaff_ESI[1];
+  g_pLisaActiveShading = unaff_ESI[3];
+  g_LisaClipLeft = unaff_ESI[4];
+  g_LisaClipRight = unaff_ESI[5];
+  g_LisaClipSubpixelLeft = g_LisaClipLeft;
+  g_LisaViewportCenterX = g_LisaClipLeft << 8;
+  g_LisaClipSubpixelRight = g_LisaClipRight;
+  g_LisaViewportCenterY = g_LisaClipRight << 8;
+  g_SubpixelMinX = g_LisaViewportCenterX;
+  g_SubpixelMinY = g_LisaViewportCenterY;
+  g_LisaClipTop = unaff_ESI[6];
+  g_LisaClipBottom = unaff_ESI[7];
+  g_LisaClipSubpixelTop = g_LisaClipTop + 1;
+  g_LisaClipSubpixelBottom = g_LisaClipBottom + 1;
+  g_SubpixelMaxX = g_LisaClipSubpixelTop * 0x100;
+  g_LisaViewportWidth = g_SubpixelMaxX + -1;
+  g_SubpixelMaxY = g_LisaClipSubpixelBottom * 0x100;
+  g_LisaViewportHeight = g_SubpixelMaxY + -1;
+  g_pLisaEdgeBuffer = (int *)*g_pLisaSpanBuffer;
 
-  if (_DAT_0049c9ec != (int *)0x0) {
-    lVar1 = (*(long long (*)())(((void **)PTR_DAT_004abe10)[*_DAT_0049c9ec]))();
+  if (g_pLisaEdgeBuffer != (int *)0x0) {
+    lVar1 = (*(long long (*)())(((void **)PTR_DAT_004abe10)[*g_pLisaEdgeBuffer]))();
     return lVar1;
   }
 
