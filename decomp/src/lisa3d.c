@@ -501,41 +501,41 @@ void Lisa_DrawTexturedTriangle_Op11_Shaded(void) {
 int Lisa_RenderScene(void);
 int * Lisa_InitEngineMemory(void);
 void Lisa_FreeEngineMemory(void);
-int Lisa_InitSpatialGrid(int param_1,int param_2,size_t param_3);
-long long Lisa_CreateDynamicObject(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9);
-int Lisa_MoveDynamicObject(int *param_1);
-int Lisa_UpdateObjectSpatialGrid(int *param_1);
-long long Lisa_SetDynamicObjectMesh(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9);
-int Lisa_DeleteDynamicObject(int *param_1);
+int Lisa_InitSpatialGrid(int grid_w, int grid_h, size_t max_objects);
+long long Lisa_CreateDynamicObject(int unk1, int unk2, int *entity, int *mesh, int flags, short rot_x, short rot_y, short rot_z, short scale);
+int Lisa_MoveDynamicObject(int *entity);
+int Lisa_UpdateObjectSpatialGrid(int *entity);
+long long Lisa_SetDynamicObjectMesh(int unk1, int unk2, int *entity, int *mesh, int flags, short rot_x, short rot_y, short rot_z, short scale);
+int Lisa_DeleteDynamicObject(int *entity);
 unsigned long long Lisa_SetCameraViewport(void);
-int Lisa_GenerateMipmaps(unsigned int *param_1,int param_2,int param_3,int param_4,int param_5,int param_6 ,int param_7,int param_8,char *param_9);
-void Lisa_GenerateTextureSpanTable(int param_1,int param_2,int param_3,int param_4,int *param_5);
-void Lisa_DownsampleTextureMipmap(byte *param_1,byte *param_2,int param_3,int param_4,int param_5,int param_6);
-void Lisa_FilterTextureBlock(byte *param_1,int param_2,int param_3,int param_4,int param_5,int param_6, int param_7,int param_8);
-void Lisa_LoadOrCreateShadingTable(int param_1,int param_2);
-unsigned int Lisa_FindClosestPaletteColor(int *param_1,int param_2);
+int Lisa_GenerateMipmaps(unsigned int *texture_data, int width, int height, int page_w, int page_h, int mip_count, int flag1, int flag2, char *name);
+void Lisa_GenerateTextureSpanTable(int src_w, int src_h, int dst_w, int dst_h, int *span_table);
+void Lisa_DownsampleTextureMipmap(byte *src, byte *dst, int src_w, int src_h, int dst_w, int dst_h);
+void Lisa_FilterTextureBlock(byte *src, int src_w, int src_h, int dst_w, int dst_h, int filter_mode, int stride, int flags);
+void Lisa_LoadOrCreateShadingTable(int shade_level, int lighting_mode);
+unsigned int Lisa_FindClosestPaletteColor(int *rgb, int palette_offset);
 unsigned long long Lisa_RenderSkyBackdrop(void);
 int Lisa_CullObjectsOrthographic(void);
 int Lisa_FrustumCullObjects(void);
 int Lisa_CullObjects(void);
 void Lisa_TransformVertices(void);
 int Lisa_TransformVerticesPanorama(void);
-int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int *param_5);
-int Lisa_TransformSubmeshVerticesPanorama(int param_1,int param_2,int param_3,int param_4,int *param_5);
-void Lisa_ComputeCameraRotationMatrix(int *param_1);
+int Lisa_ComputeObjectMatrix(int pos_x, int pos_y, int pos_z, int rot_y, int *out_matrix);
+int Lisa_TransformSubmeshVerticesPanorama(int pos_x, int pos_y, int pos_z, int rot_y, int *out_matrix);
+void Lisa_ComputeCameraRotationMatrix(int *out_matrix);
 void Lisa_InitOpcodeTable(void);
 int Lisa_SortDepthBuckets(void);
 void Lisa_DrawTriangle_Op0F(void);
 void Lisa_DrawTriangle_Op10(void);
 int Lisa_RenderSubmeshes(void);
-void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2);
+void Lisa_DrawTriangle_OpcodeHelper(int shd_table, int depth_bias);
 void Lisa_DrawTriangle_Op14(void);
 void Lisa_DrawBillboard_Op07(void);
 void Lisa_DrawBillboard_Op08(void);
 void Lisa_DrawTexturedTriangle_Op15(void);
 void Lisa_DrawTexturedTriangle_Op15_Sub(void);
-long long Lisa_InitRasterizerTables(int param_1,unsigned int param_2);
-long long Lisa_ExecuteRasterizerCommands(int param_1,unsigned int param_2);
+long long Lisa_InitRasterizerTables(int mode, unsigned int flags);
+long long Lisa_ExecuteRasterizerCommands(int mode, unsigned int flags);
 
 /* --- Automatically extracted globals for Lisa 3D rendering pipeline --- */
 
@@ -4453,48 +4453,29 @@ void Lisa_InitOpcodeTable(void) {
  * @fidelity ADAPTED
  */
 int Lisa_SortDepthBuckets(void) {
-  int iVar1;
-  int iVar2;
-  int *puVar3;
-  int *piVar4;
-  int iVar5;
-  int *puVar6;
-  int local_4;
+    int *draw_cmds = (int *)g_LisaDrawCommands;
+    int **bucket_ptr = (int **)((char *)g_pLisaDepthBuckets + 0x5dbc);
+    int bucket_idx = 5999;
+    int cmd_count = 0;
 
-  
+    do {
+        int *node = *bucket_ptr;
 
-  iVar2 = g_LisaDrawCommands;
-  piVar4 = (int *)(g_pLisaDepthBuckets + 0x5dbc);
-  local_4 = 5999;
-  iVar5 = 0;
+        if (node != NULL) {
+            draw_cmds[cmd_count++] = *node;
+            while (node[1] != 0) {
+                node = (int *)node[1];
+                draw_cmds[cmd_count++] = *node;
+            }
+        }
 
-  do {
-    puVar6 = (int *)*piVar4;
+        *bucket_ptr = NULL;
+        bucket_ptr--;
+        bucket_idx--;
+    } while (bucket_idx >= 0);
 
-    if (puVar6 != (int *)0x0) {
-      iVar5 = iVar5 + 1;
-      iVar1 = puVar6[1];
-      *(int *)(iVar2 + -4 + iVar5 * 4) = *puVar6;
-
-      if (iVar1 != 0) {
-        puVar3 = (int *)(iVar2 + iVar5 * 4);
-
-        do {
-          puVar6 = (int *)puVar6[1];
-          iVar5 = iVar5 + 1;
-          *puVar3 = *puVar6;
-          puVar3 = puVar3 + 1;
-        } while (puVar6[1] != 0);
-      }
-
-    }
-
-    *piVar4 = 0;
-    piVar4 = piVar4 + -1;
-    local_4 = local_4 + -1;
-  } while (-1 < local_4);
-  *(int *)(iVar2 + iVar5 * 4) = 0;
-  return 0;
+    draw_cmds[cmd_count] = 0;
+    return 0;
 }
 
 /**
@@ -4502,147 +4483,84 @@ int Lisa_SortDepthBuckets(void) {
  * @fidelity ADAPTED
  */
 void Lisa_DrawTriangle_Op0F(void) {
-  int *piVar1;
-  short sVar2;
-  unsigned int uVar3;
-  unsigned int uVar4;
-  unsigned int uVar5;
-  unsigned int uVar6;
-  unsigned int uVar7;
-  unsigned int *puVar8;
-  int *piVar9;
-  int *piVar10;
-  int iVar11;
-  unsigned int *puVar12;
-  unsigned int uVar13;
-  unsigned int uVar14;
-  unsigned int uVar15;
-  int iVar16;
-  unsigned int uVar17;
+    uint32_t v0 = g_pLisaSubmeshPolygon[1];
+    uint32_t v1 = g_pLisaSubmeshPolygon[2];
+    uint32_t v2 = g_pLisaSubmeshPolygon[3];
+    int *verts = (int *)g_LisaTransformedVertices;
+    int x0 = verts[v0 * 3 + 0];
+    int y0 = verts[v0 * 3 + 1];
+    int x1 = verts[v1 * 3 + 0];
+    int y1 = verts[v1 * 3 + 1];
+    int x2 = verts[v2 * 3 + 0];
+    int y2 = verts[v2 * 3 + 1];
+    int max_x, min_x, max_y, min_y;
+    int depth;
+    int cross;
 
-  
-
-  iVar11 = g_LisaTransformedVertices;
-  uVar3 = g_pLisaSubmeshPolygon[1];
-  uVar4 = g_pLisaSubmeshPolygon[2];
-  uVar5 = g_pLisaSubmeshPolygon[3];
-  uVar6 = *(unsigned int *)(g_LisaTransformedVertices + uVar3 * 0xc);
-  uVar7 = *(unsigned int *)(g_LisaTransformedVertices + uVar4 * 0xc);
-  uVar13 = uVar7;
-
-  if ((int)uVar7 <= (int)uVar6) {
-    uVar13 = uVar6;
-  }
-
-  uVar14 = *(unsigned int *)(g_LisaTransformedVertices + uVar5 * 0xc);
-
-  if ((int)uVar13 <= (int)uVar14) {
-    uVar13 = uVar14;
-  }
-
-  if (g_SubpixelMinX <= (int)uVar13) {
-    uVar13 = uVar7;
-
-    if ((int)uVar6 <= (int)uVar7) {
-      uVar13 = uVar6;
+    max_x = (x1 > x0) ? x1 : x0;
+    if (x2 > max_x) max_x = x2;
+    if (max_x < g_SubpixelMinX) {
+        g_pLisaSubmeshPolygon += 5;
+        return;
     }
 
-    uVar14 = *(unsigned int *)(g_LisaTransformedVertices + uVar5 * 0xc);
-
-    if ((int)uVar13 < (int)uVar14) {
-      uVar14 = uVar13;
+    min_x = (x0 < x1) ? x0 : x1;
+    if (x2 < min_x) min_x = x2;
+    if (min_x > g_SubpixelMaxX) {
+        g_pLisaSubmeshPolygon += 5;
+        return;
     }
 
-    if ((int)uVar14 <= g_SubpixelMaxX) {
-      uVar13 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar4 * 0xc);
-      uVar14 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar3 * 0xc);
-      uVar15 = uVar13;
+    max_y = (y1 > y0) ? y1 : y0;
+    if (y2 > max_y) max_y = y2;
+    if (max_y < g_SubpixelMinY) {
+        g_pLisaSubmeshPolygon += 5;
+        return;
+    }
 
-      if ((int)uVar13 <= (int)uVar14) {
-        uVar15 = uVar14;
-      }
+    min_y = (y0 < y1) ? y0 : y1;
+    if (y2 < min_y) min_y = y2;
+    if (min_y > g_SubpixelMaxY) {
+        g_pLisaSubmeshPolygon += 5;
+        return;
+    }
 
-      uVar17 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc);
+    depth = verts[v0 * 3 + 2] + verts[v1 * 3 + 2] + verts[v2 * 3 + 2];
+    if (depth > 600) {
+        cross = (y2 - y1) * (x0 - x1) + (y1 - y0) * (x2 - x1);
+        if ((cross ^ g_LisaBackfaceSign) > 0) {
+            uint32_t *cmd = (uint32_t *)*g_pLisaDrawCommandWritePtr;
+            int **pwrite;
+            int **buckets;
 
-      if ((int)uVar15 <= (int)uVar17) {
-        uVar15 = uVar17;
-      }
+            cmd[0] = g_pLisaSubmeshPolygon[0] & 0xffff;
+            cmd[1] = (uint32_t)x0;
+            cmd[2] = (uint32_t)y0;
+            cmd[4] = (uint32_t)x1;
+            cmd[5] = (uint32_t)y1;
+            cmd[7] = (uint32_t)x2;
+            cmd[8] = (uint32_t)y2;
+            cmd[10] = g_pLisaSubmeshPolygon[4];
+            cmd[11] = 0;
 
-      if (g_SubpixelMinY <= (int)uVar15) {
-        uVar15 = uVar13;
-
-        if ((int)uVar14 <= (int)uVar13) {
-          uVar15 = uVar14;
-        }
-
-        uVar17 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc);
-
-        if ((int)uVar15 < (int)uVar17) {
-          uVar17 = uVar15;
-        }
-
-        if ((int)uVar17 <= g_SubpixelMaxY) {
-          iVar16 = *(int *)(g_LisaTransformedVertices + 8 + uVar5 * 0xc) +
-
-                   *(int *)(g_LisaTransformedVertices + 8 + uVar4 * 0xc) +
-
-                   *(int *)(g_LisaTransformedVertices + 8 + uVar3 * 0xc);
-
-          if ((600 < iVar16) &&
-
-             (0 < (int)((*(int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc) - uVar13) * (uVar6 - uVar7) +
-
-                        (uVar13 - uVar14) * (*(int *)(g_LisaTransformedVertices + uVar5 * 0xc) - uVar7) ^
-
-                       g_LisaBackfaceSign))) {
-            puVar8 = (unsigned int *)*g_pLisaDrawCommandWritePtr;
-            uVar3 = *g_pLisaSubmeshPolygon;
-            puVar8[1] = uVar6;
-            *puVar8 = uVar3 & 0xffff;
-            puVar8[2] = uVar14;
-            uVar3 = *(unsigned int *)(iVar11 + uVar5 * 0xc);
-            puVar8[4] = uVar7;
-            puVar8[5] = uVar13;
-            uVar4 = *(unsigned int *)(iVar11 + 4 + uVar5 * 0xc);
-            puVar8[7] = uVar3;
-            puVar12 = g_pLisaSubmeshPolygon;
-            puVar8[8] = uVar4;
-            puVar8[0xb] = 0;
-            sVar2 = *(short *)(g_pLisaActiveSubmesh + 0x1e);
-            puVar8[10] = puVar12[4];
-            piVar9 = g_pLisaDrawCommandWritePtr;
-            iVar16 = iVar16 >> 4;
-
-            if ((99 < sVar2) && (iVar16 = iVar16 + -0x5c, iVar16 < 0)) {
-              iVar16 = 0;
+            depth = depth >> 4;
+            if (*(short *)(g_pLisaActiveSubmesh + 0x1e) > 99) {
+                depth -= 0x5c;
+                if (depth < 0) depth = 0;
             }
+            if (depth > 5999) depth = 5999;
 
-            g_pLisaDrawCommandWritePtr[2] = (int)(puVar8 + 0xc);
-            iVar11 = g_pLisaDepthBuckets;
-            piVar10 = g_pLisaDrawCommandWritePtr;
+            g_pLisaDrawCommandWritePtr[2] = (int)(cmd + 12);
+            pwrite = (int **)g_pLisaDrawCommandWritePtr;
+            buckets = (int **)g_pLisaDepthBuckets;
 
-            if (5999 < iVar16) {
-              iVar16 = 5999;
-            }
-
-            piVar1 = g_pLisaDrawCommandWritePtr + 1;
-            g_pLisaDrawCommandWritePtr = piVar9 + 2;
-            *piVar1 = *(int *)(g_pLisaDepthBuckets + iVar16 * 4);
-            *(int **)(iVar11 + iVar16 * 4) = piVar10;
-          }
-
-          g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 5;
-          return;
+            g_pLisaDrawCommandWritePtr = (int *)(pwrite + 2);
+            pwrite[1] = buckets[depth];
+            buckets[depth] = (int *)pwrite;
         }
-
-      }
-
     }
 
-  }
-
-  g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 5;
-  return;
+    g_pLisaSubmeshPolygon += 5;
 }
 
 /**
@@ -4650,151 +4568,86 @@ void Lisa_DrawTriangle_Op0F(void) {
  * @fidelity ADAPTED
  */
 void Lisa_DrawTriangle_Op10(void) {
-  int *piVar1;
-  short sVar2;
-  unsigned int uVar3;
-  unsigned int uVar4;
-  unsigned int uVar5;
-  unsigned int uVar6;
-  unsigned int uVar7;
-  unsigned int *puVar8;
-  int *piVar9;
-  int *piVar10;
-  int iVar11;
-  unsigned int *puVar12;
-  unsigned int uVar13;
-  unsigned int uVar14;
-  unsigned int uVar15;
-  int iVar16;
-  unsigned int uVar17;
+    uint32_t v0 = g_pLisaSubmeshPolygon[1];
+    uint32_t v1 = g_pLisaSubmeshPolygon[2];
+    uint32_t v2 = g_pLisaSubmeshPolygon[3];
+    int *verts = (int *)g_LisaTransformedVertices;
+    int x0 = verts[v0 * 3 + 0];
+    int y0 = verts[v0 * 3 + 1];
+    int x1 = verts[v1 * 3 + 0];
+    int y1 = verts[v1 * 3 + 1];
+    int x2 = verts[v2 * 3 + 0];
+    int y2 = verts[v2 * 3 + 1];
+    int max_x, min_x, max_y, min_y;
+    int depth;
+    int cross;
 
-  
-
-  iVar11 = g_LisaTransformedVertices;
-  uVar3 = g_pLisaSubmeshPolygon[1];
-  uVar4 = g_pLisaSubmeshPolygon[2];
-  uVar5 = g_pLisaSubmeshPolygon[3];
-  uVar6 = *(unsigned int *)(g_LisaTransformedVertices + uVar3 * 0xc);
-  uVar7 = *(unsigned int *)(g_LisaTransformedVertices + uVar4 * 0xc);
-  uVar13 = uVar7;
-
-  if ((int)uVar7 <= (int)uVar6) {
-    uVar13 = uVar6;
-  }
-
-  uVar14 = *(unsigned int *)(g_LisaTransformedVertices + uVar5 * 0xc);
-
-  if ((int)uVar13 <= (int)uVar14) {
-    uVar13 = uVar14;
-  }
-
-  if (g_SubpixelMinX <= (int)uVar13) {
-    uVar13 = uVar7;
-
-    if ((int)uVar6 <= (int)uVar7) {
-      uVar13 = uVar6;
+    max_x = (x1 > x0) ? x1 : x0;
+    if (x2 > max_x) max_x = x2;
+    if (max_x < g_SubpixelMinX) {
+        g_pLisaSubmeshPolygon += 5;
+        return;
     }
 
-    uVar14 = *(unsigned int *)(g_LisaTransformedVertices + uVar5 * 0xc);
-
-    if ((int)uVar13 < (int)uVar14) {
-      uVar14 = uVar13;
+    min_x = (x0 < x1) ? x0 : x1;
+    if (x2 < min_x) min_x = x2;
+    if (min_x > g_SubpixelMaxX) {
+        g_pLisaSubmeshPolygon += 5;
+        return;
     }
 
-    if ((int)uVar14 <= g_SubpixelMaxX) {
-      uVar13 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar4 * 0xc);
-      uVar14 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar3 * 0xc);
-      uVar15 = uVar13;
+    max_y = (y1 > y0) ? y1 : y0;
+    if (y2 > max_y) max_y = y2;
+    if (max_y < g_SubpixelMinY) {
+        g_pLisaSubmeshPolygon += 5;
+        return;
+    }
 
-      if ((int)uVar13 <= (int)uVar14) {
-        uVar15 = uVar14;
-      }
+    min_y = (y0 < y1) ? y0 : y1;
+    if (y2 < min_y) min_y = y2;
+    if (min_y > g_SubpixelMaxY) {
+        g_pLisaSubmeshPolygon += 5;
+        return;
+    }
 
-      uVar17 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc);
+    depth = verts[v0 * 3 + 2] + verts[v1 * 3 + 2] + verts[v2 * 3 + 2];
+    if (depth > 600) {
+        cross = (y2 - y1) * (x0 - x1) + (y1 - y0) * (x2 - x1);
+        if ((cross ^ g_LisaBackfaceSign) > 0) {
+            uint32_t *cmd = (uint32_t *)*g_pLisaDrawCommandWritePtr;
+            int **pwrite;
+            int **buckets;
 
-      if ((int)uVar15 <= (int)uVar17) {
-        uVar15 = uVar17;
-      }
+            cmd[0] = g_pLisaSubmeshPolygon[0] & 0xffff;
+            cmd[1] = (uint32_t)x0;
+            cmd[2] = (uint32_t)y0;
+            cmd[4] = 0;
+            cmd[5] = (uint32_t)x1;
+            cmd[6] = (uint32_t)y1;
+            cmd[8] = 0;
+            cmd[9] = (uint32_t)x2;
+            cmd[10] = (uint32_t)y2;
+            cmd[12] = 0;
+            cmd[13] = g_pLisaSubmeshPolygon[4];
 
-      if (g_SubpixelMinY <= (int)uVar15) {
-        uVar15 = uVar13;
-
-        if ((int)uVar14 <= (int)uVar13) {
-          uVar15 = uVar14;
-        }
-
-        uVar17 = *(unsigned int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc);
-
-        if ((int)uVar15 < (int)uVar17) {
-          uVar17 = uVar15;
-        }
-
-        if ((int)uVar17 <= g_SubpixelMaxY) {
-          iVar16 = *(int *)(g_LisaTransformedVertices + 8 + uVar5 * 0xc) +
-
-                   *(int *)(g_LisaTransformedVertices + 8 + uVar4 * 0xc) +
-
-                   *(int *)(g_LisaTransformedVertices + 8 + uVar3 * 0xc);
-
-          if ((600 < iVar16) &&
-
-             (0 < (int)((*(int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc) - uVar13) * (uVar6 - uVar7) +
-
-                        (uVar13 - uVar14) * (*(int *)(g_LisaTransformedVertices + uVar5 * 0xc) - uVar7) ^
-
-                       g_LisaBackfaceSign))) {
-            puVar8 = (unsigned int *)*g_pLisaDrawCommandWritePtr;
-            uVar3 = *g_pLisaSubmeshPolygon;
-            puVar8[1] = uVar6;
-            *puVar8 = uVar3 & 0xffff;
-            puVar8[2] = uVar14;
-            uVar3 = *(unsigned int *)(iVar11 + uVar5 * 0xc);
-            puVar8[5] = uVar7;
-            puVar8[6] = uVar13;
-            uVar4 = *(unsigned int *)(iVar11 + 4 + uVar5 * 0xc);
-            puVar8[9] = uVar3;
-            puVar12 = g_pLisaSubmeshPolygon;
-            puVar8[10] = uVar4;
-            puVar8[4] = 0;
-            iVar11 = g_pLisaActiveSubmesh;
-            uVar3 = puVar12[4];
-            puVar8[8] = 0;
-            puVar8[0xc] = 0;
-            sVar2 = *(short *)(iVar11 + 0x1e);
-            puVar8[0xd] = uVar3;
-            piVar9 = g_pLisaDrawCommandWritePtr;
-            iVar16 = iVar16 >> 4;
-
-            if ((99 < sVar2) && (iVar16 = iVar16 + -0x5c, iVar16 < 0)) {
-              iVar16 = 0;
+            depth = depth >> 4;
+            if (*(short *)(g_pLisaActiveSubmesh + 0x1e) > 99) {
+                depth -= 0x5c;
+                if (depth < 0) depth = 0;
             }
+            if (depth > 5999) depth = 5999;
 
-            g_pLisaDrawCommandWritePtr[2] = (int)(puVar8 + 0xe);
-            iVar11 = g_pLisaDepthBuckets;
-            piVar10 = g_pLisaDrawCommandWritePtr;
+            g_pLisaDrawCommandWritePtr[2] = (int)(cmd + 14);
+            pwrite = (int **)g_pLisaDrawCommandWritePtr;
+            buckets = (int **)g_pLisaDepthBuckets;
 
-            if (5999 < iVar16) {
-              iVar16 = 5999;
-            }
-
-            piVar1 = g_pLisaDrawCommandWritePtr + 1;
-            g_pLisaDrawCommandWritePtr = piVar9 + 2;
-            *piVar1 = *(int *)(g_pLisaDepthBuckets + iVar16 * 4);
-            *(int **)(iVar11 + iVar16 * 4) = piVar10;
-          }
-
-          g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 5;
-          return;
+            g_pLisaDrawCommandWritePtr = (int *)(pwrite + 2);
+            pwrite[1] = buckets[depth];
+            buckets[depth] = (int *)pwrite;
         }
-
-      }
-
     }
 
-  }
-
-  g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 5;
-  return;
+    g_pLisaSubmeshPolygon += 5;
 }
 
 /**
@@ -4844,214 +4697,154 @@ int Lisa_RenderSubmeshes(void) {
  * @original Lisa_DrawTriangle_OpcodeHelper (IGN_WIN.EXE @ 0x0044cb20, lisa3d.c)
  * @fidelity ADAPTED
  */
-void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
-  int *puVar1;
-  short sVar2;
-  unsigned int uVar3;
-  unsigned int uVar4;
-  unsigned int uVar5;
-  int iVar6;
-  int iVar7;
-  int iVar8;
-  int uVar9;
-  int uVar10;
-  int iVar11;
-  unsigned int *puVar12;
-  int iVar13;
-  int iVar14;
-  int iVar15;
-  int iVar16;
-  int iVar17;
-  int iVar18;
-  int *puVar19;
-  int *puVar20;
-  long long lVar21;
-  int local_24;
+void Lisa_DrawTriangle_OpcodeHelper(int shd_table, int depth_bias) {
+    uint32_t *poly = (uint32_t *)g_pLisaSubmeshPolygon;
+    int *verts = (int *)g_LisaTransformedVertices;
+    uint32_t v0 = poly[1];
+    uint32_t v1 = poly[2];
+    uint32_t v2 = poly[3];
+    int x0 = verts[v0 * 3 + 0];
+    int y0 = verts[v0 * 3 + 1];
+    int z0 = verts[v0 * 3 + 2];
+    int x1 = verts[v1 * 3 + 0];
+    int y1 = verts[v1 * 3 + 1];
+    int z1 = verts[v1 * 3 + 2];
+    int x2 = verts[v2 * 3 + 0];
+    int y2 = verts[v2 * 3 + 1];
+    int z2 = verts[v2 * 3 + 2];
+    int max_x, min_x, max_y, min_y;
+    int depth, total_z;
+    int cross;
+    short submesh_type;
 
-  
-
-  puVar12 = g_pLisaSubmeshPolygon;
-  iVar11 = g_LisaTransformedVertices;
-  uVar3 = g_pLisaSubmeshPolygon[2];
-  uVar4 = g_pLisaSubmeshPolygon[1];
-  uVar5 = g_pLisaSubmeshPolygon[3];
-  iVar6 = *(int *)(g_LisaTransformedVertices + uVar4 * 0xc);
-  iVar13 = *(int *)(g_LisaTransformedVertices + uVar3 * 0xc);
-
-  if (iVar13 <= iVar6) {
-    iVar13 = iVar6;
-  }
-
-  iVar7 = *(int *)(g_LisaTransformedVertices + uVar5 * 0xc);
-
-  if (iVar13 <= iVar7) {
-    iVar13 = iVar7;
-  }
-
-  if (g_SubpixelMinX <= iVar13) {
-    iVar13 = *(int *)(g_LisaTransformedVertices + uVar3 * 0xc);
-
-    if (iVar6 <= iVar13) {
-      iVar13 = iVar6;
+    max_x = (x1 > x0) ? x1 : x0;
+    if (x2 > max_x) max_x = x2;
+    if (max_x < g_SubpixelMinX) {
+        g_pLisaSubmeshPolygon += 11;
+        return;
     }
 
-    iVar14 = iVar7;
-
-    if (iVar13 < iVar7) {
-      iVar14 = iVar13;
+    min_x = (x0 < x1) ? x0 : x1;
+    if (x2 < min_x) min_x = x2;
+    if (min_x > g_SubpixelMaxX) {
+        g_pLisaSubmeshPolygon += 11;
+        return;
     }
 
-    if (iVar14 <= g_SubpixelMaxX) {
-      iVar13 = *(int *)(g_LisaTransformedVertices + 4 + uVar4 * 0xc);
-      iVar14 = *(int *)(g_LisaTransformedVertices + 4 + uVar3 * 0xc);
-
-      if (iVar14 <= iVar13) {
-        iVar14 = iVar13;
-      }
-
-      iVar8 = *(int *)(g_LisaTransformedVertices + 4 + uVar5 * 0xc);
-
-      if (iVar14 <= iVar8) {
-        iVar14 = iVar8;
-      }
-
-      if (g_SubpixelMinY <= iVar14) {
-        iVar14 = *(int *)(g_LisaTransformedVertices + 4 + uVar3 * 0xc);
-
-        if (iVar13 <= iVar14) {
-          iVar14 = iVar13;
-        }
-
-        iVar17 = iVar8;
-
-        if (iVar14 < iVar8) {
-          iVar17 = iVar14;
-        }
-
-        if (iVar17 <= g_SubpixelMaxY) {
-          iVar18 = *(int *)(g_LisaTransformedVertices + 4 + uVar3 * 0xc) >> 4;
-          iVar15 = *(int *)(g_LisaTransformedVertices + uVar3 * 0xc) >> 4;
-          iVar14 = *(int *)(g_LisaTransformedVertices + 8 + uVar5 * 0xc);
-          iVar17 = *(int *)(g_LisaTransformedVertices + 8 + uVar4 * 0xc);
-          iVar16 = *(int *)(g_LisaTransformedVertices + 8 + uVar3 * 0xc) + iVar14 + iVar17;
-
-          if ((600 < iVar16) &&
-
-             (0 < (int)(((iVar8 >> 4) - iVar18) * ((iVar6 >> 4) - iVar15) +
-
-                        (iVar18 - (iVar13 >> 4)) * ((iVar7 >> 4) - iVar15) ^ g_LisaBackfaceSign))) {
-            puVar20 = (int *)*g_pLisaDrawCommandWritePtr;
-            local_24 = iVar16 >> 4;
-            sVar2 = *(short *)(g_pLisaActiveSubmesh + 0x1e);
-
-            if ((local_24 < 0x2d1) &&
-
-               ((((sVar2 < 100 || (sVar2 == 200)) || ((299 < sVar2 && (sVar2 < 0x12f)))) &&
-
-                ((g_LisaCamera->shading_mode != 0 &&
-
-                 ((char *)(*g_pLisaSubmeshPolygon & 0xffff0000) != &g_LisaPerspectiveDepthTable)))))) {
-              if (local_24 < 0x1e1) {
-                uVar9 = *(int *)(g_LisaTransformedVertices + 8 + uVar3 * 0xc);
-                puVar20[4] = iVar17;
-                puVar20[7] = uVar9;
-                puVar20[10] = iVar14;
-              }
-
-              else {
-                iVar16 = iVar16 / 3;
-                lVar21 = __ftol();
-                puVar20[4] = (int)lVar21 + iVar16;
-                lVar21 = __ftol();
-                puVar20[7] = (int)lVar21 + iVar16;
-                lVar21 = __ftol();
-                puVar20[10] = (int)lVar21 + iVar16;
-              }
-
-              uVar9 = *(int *)(iVar11 + uVar3 * 0xc);
-              *puVar20 = 0x15;
-              puVar20[2] = iVar6;
-              puVar20[3] = iVar13;
-              uVar10 = *(int *)(iVar11 + 4 + uVar3 * 0xc);
-              puVar20[5] = uVar9;
-              puVar20[6] = uVar10;
-              uVar3 = puVar12[4];
-              puVar20[8] = iVar7;
-              puVar20[9] = iVar8;
-              uVar4 = puVar12[5];
-              uVar5 = puVar12[6];
-              puVar20[0xb] = uVar3;
-              puVar20[0xc] = uVar4;
-              uVar3 = puVar12[7];
-              uVar4 = puVar12[8];
-              puVar20[0xd] = uVar5;
-              puVar20[0xe] = uVar3;
-              uVar3 = puVar12[9];
-              uVar5 = puVar12[10];
-              puVar20[0xf] = uVar4;
-              iVar6 = g_pLisaActiveMipTable;
-              puVar20[0x10] = uVar3;
-              puVar20[0x11] = param_1;
-              puVar19 = g_pLisaDrawCommandWritePtr;
-              puVar20[1] = *(int *)(iVar6 + -0x14) + uVar5;
-              puVar20 = puVar20 + 0x12;
-            }
-
-            else {
-              uVar9 = *(int *)(g_LisaTransformedVertices + uVar3 * 0xc);
-              *puVar20 = 0x12;
-              puVar20[1] = iVar6;
-              puVar20[2] = iVar13;
-              uVar10 = *(int *)(iVar11 + 4 + uVar3 * 0xc);
-              puVar20[3] = uVar9;
-              puVar20[4] = uVar10;
-              puVar20[5] = iVar7;
-              puVar20[6] = iVar8;
-              iVar6 = g_pLisaActiveMipTable;
-              uVar3 = g_pLisaSubmeshPolygon[10];
-              puVar20[7] = g_pLisaSubmeshPolygon + 4;
-              puVar20[9] = param_1;
-              puVar19 = g_pLisaDrawCommandWritePtr;
-              puVar20[8] = *(int *)(iVar6 + -0x14) + uVar3;
-              puVar20 = puVar20 + 10;
-            }
-
-            iVar6 = g_pLisaActiveSubmesh;
-            local_24 = local_24 - param_2;
-            puVar19[2] = puVar20;
-            iVar13 = g_pLisaDepthBuckets;
-            puVar20 = g_pLisaDrawCommandWritePtr;
-
-            if (99 < *(short *)(iVar6 + 0x1e)) {
-              local_24 = local_24 + -0x5c;
-            }
-
-            if (local_24 < 0) {
-              local_24 = 0;
-            }
-
-            if (5999 < local_24) {
-              local_24 = 5999;
-            }
-
-            puVar1 = g_pLisaDrawCommandWritePtr + 1;
-            g_pLisaDrawCommandWritePtr = puVar19 + 2;
-            *puVar1 = *(int *)(g_pLisaDepthBuckets + local_24 * 4);
-            *(int **)(iVar13 + local_24 * 4) = puVar20;
-          }
-
-          g_pLisaSubmeshPolygon = puVar12 + 0xb;
-          return;
-        }
-
-      }
-
+    max_y = (y1 > y0) ? y1 : y0;
+    if (y2 > max_y) max_y = y2;
+    if (max_y < g_SubpixelMinY) {
+        g_pLisaSubmeshPolygon += 11;
+        return;
     }
 
-  }
+    min_y = (y0 < y1) ? y0 : y1;
+    if (y2 < min_y) min_y = y2;
+    if (min_y > g_SubpixelMaxY) {
+        g_pLisaSubmeshPolygon += 11;
+        return;
+    }
 
-  g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 0xb;
-  return;
+    total_z = z0 + z1 + z2;
+    if (total_z <= 600) {
+        g_pLisaSubmeshPolygon += 11;
+        return;
+    }
+
+    cross = ((y2 >> 4) - (y1 >> 4)) * ((x0 >> 4) - (x1 >> 4)) +
+            ((y1 >> 4) - (y0 >> 4)) * ((x2 >> 4) - (x1 >> 4));
+    if ((cross ^ g_LisaBackfaceSign) <= 0) {
+        g_pLisaSubmeshPolygon += 11;
+        return;
+    }
+
+    depth = total_z >> 4;
+    submesh_type = *(short *)(g_pLisaActiveSubmesh + 0x1e);
+
+    if (depth < 0x2d1 &&
+        (submesh_type < 100 || submesh_type == 200 || (submesh_type > 299 && submesh_type < 0x12f)) &&
+        g_LisaCamera->shading_mode != 0 &&
+        (char *)(poly[0] & 0xffff0000) != (char *)&g_LisaPerspectiveDepthTable) {
+        int *cmd = (int *)*g_pLisaDrawCommandWritePtr;
+        int **pwrite;
+        int **buckets;
+
+        *cmd = 0x15;
+        if (depth < 0x1e1) {
+            cmd[4] = z0;
+            cmd[7] = z1;
+            cmd[10] = z2;
+        } else {
+            int avg_z = total_z / 3;
+            cmd[4] = (int)(double)z0 + avg_z;
+            cmd[7] = (int)(double)z1 + avg_z;
+            cmd[10] = (int)(double)z2 + avg_z;
+        }
+
+        cmd[1] = *(int *)(g_pLisaActiveMipTable - 5) + poly[10];
+        cmd[2] = x0;
+        cmd[3] = y0;
+        cmd[5] = x1;
+        cmd[6] = y1;
+        cmd[8] = x2;
+        cmd[9] = y2;
+        cmd[11] = poly[4];
+        cmd[12] = poly[5];
+        cmd[13] = poly[6];
+        cmd[14] = poly[7];
+        cmd[15] = poly[8];
+        cmd[16] = poly[9];
+        cmd[17] = shd_table;
+
+        cmd += 18;
+        g_pLisaDrawCommandWritePtr[2] = (int)cmd;
+
+        depth -= depth_bias;
+        if (submesh_type > 99) {
+            depth -= 0x5c;
+        }
+        if (depth < 0) depth = 0;
+        if (depth > 5999) depth = 5999;
+
+        pwrite = (int **)g_pLisaDrawCommandWritePtr;
+        buckets = (int **)g_pLisaDepthBuckets;
+        g_pLisaDrawCommandWritePtr = (int *)(pwrite + 2);
+        pwrite[1] = buckets[depth];
+        buckets[depth] = (int *)pwrite;
+    } else {
+        int *cmd = (int *)*g_pLisaDrawCommandWritePtr;
+        int **pwrite;
+        int **buckets;
+
+        *cmd = 0x12;
+        cmd[1] = x0;
+        cmd[2] = y0;
+        cmd[3] = x1;
+        cmd[4] = y1;
+        cmd[5] = x2;
+        cmd[6] = y2;
+        cmd[7] = (int)(poly + 4);
+        cmd[8] = *(int *)(g_pLisaActiveMipTable - 5) + poly[10];
+        cmd[9] = shd_table;
+
+        cmd += 10;
+        g_pLisaDrawCommandWritePtr[2] = (int)cmd;
+
+        depth -= depth_bias;
+        if (submesh_type > 99) {
+            depth -= 0x5c;
+        }
+        if (depth < 0) depth = 0;
+        if (depth > 5999) depth = 5999;
+
+        pwrite = (int **)g_pLisaDrawCommandWritePtr;
+        buckets = (int **)g_pLisaDepthBuckets;
+        g_pLisaDrawCommandWritePtr = (int *)(pwrite + 2);
+        pwrite[1] = buckets[depth];
+        buckets[depth] = (int *)pwrite;
+    }
+
+    g_pLisaSubmeshPolygon += 11;
 }
 
 /**
@@ -5059,146 +4852,84 @@ void Lisa_DrawTriangle_OpcodeHelper(int param_1,int param_2) {
  * @fidelity ADAPTED
  */
 void Lisa_DrawTriangle_Op14(void) {
-  int *puVar1;
-  int iVar2;
-  int iVar3;
-  int iVar4;
-  int *puVar5;
-  int uVar6;
-  int uVar7;
-  int *puVar8;
-  int iVar9;
-  int iVar10;
-  int iVar11;
-  int iVar12;
-  int iVar13;
+    int v0 = *(int *)(g_pLisaSubmeshPolygon + 4);
+    int v1 = *(int *)(g_pLisaSubmeshPolygon + 8);
+    int v2 = *(int *)(g_pLisaSubmeshPolygon + 0xc);
+    int *verts = (int *)g_LisaTransformedVertices;
+    int x0 = verts[v0 * 3 + 0];
+    int y0 = verts[v0 * 3 + 1];
+    int x1 = verts[v1 * 3 + 0];
+    int y1 = verts[v1 * 3 + 1];
+    int x2 = verts[v2 * 3 + 0];
+    int y2 = verts[v2 * 3 + 1];
+    int max_x, min_x, max_y, min_y;
+    int depth;
+    int cross;
 
-  
-
-  iVar9 = g_LisaTransformedVertices;
-  iVar11 = *(int *)(g_pLisaSubmeshPolygon + 4);
-  iVar2 = *(int *)(g_pLisaSubmeshPolygon + 8);
-  iVar3 = *(int *)(g_LisaTransformedVertices + iVar11 * 0xc);
-  iVar4 = *(int *)(g_pLisaSubmeshPolygon + 0xc);
-  iVar10 = *(int *)(g_LisaTransformedVertices + iVar2 * 0xc);
-
-  if (iVar10 <= iVar3) {
-    iVar10 = iVar3;
-  }
-
-  iVar12 = *(int *)(g_LisaTransformedVertices + iVar4 * 0xc);
-
-  if (iVar10 <= iVar12) {
-    iVar10 = iVar12;
-  }
-
-  if (g_SubpixelMinX <= iVar10) {
-    iVar10 = *(int *)(g_LisaTransformedVertices + iVar2 * 0xc);
-
-    if (iVar3 <= iVar10) {
-      iVar10 = iVar3;
+    max_x = (x1 > x0) ? x1 : x0;
+    if (x2 > max_x) max_x = x2;
+    if (max_x < g_SubpixelMinX) {
+        g_pLisaSubmeshPolygon = (int *)((char *)g_pLisaSubmeshPolygon + 0x14);
+        return;
     }
 
-    iVar12 = *(int *)(g_LisaTransformedVertices + iVar4 * 0xc);
-
-    if (iVar10 < iVar12) {
-      iVar12 = iVar10;
+    min_x = (x0 < x1) ? x0 : x1;
+    if (x2 < min_x) min_x = x2;
+    if (min_x > g_SubpixelMaxX) {
+        g_pLisaSubmeshPolygon = (int *)((char *)g_pLisaSubmeshPolygon + 0x14);
+        return;
     }
 
-    if (iVar12 <= g_SubpixelMaxX) {
-      iVar10 = *(int *)(g_LisaTransformedVertices + 4 + iVar2 * 0xc);
-      iVar12 = *(int *)(g_LisaTransformedVertices + 4 + iVar11 * 0xc);
+    max_y = (y1 > y0) ? y1 : y0;
+    if (y2 > max_y) max_y = y2;
+    if (max_y < g_SubpixelMinY) {
+        g_pLisaSubmeshPolygon = (int *)((char *)g_pLisaSubmeshPolygon + 0x14);
+        return;
+    }
 
-      if (iVar10 <= iVar12) {
-        iVar10 = iVar12;
-      }
+    min_y = (y0 < y1) ? y0 : y1;
+    if (y2 < min_y) min_y = y2;
+    if (min_y > g_SubpixelMaxY) {
+        g_pLisaSubmeshPolygon = (int *)((char *)g_pLisaSubmeshPolygon + 0x14);
+        return;
+    }
 
-      iVar13 = *(int *)(g_LisaTransformedVertices + 4 + iVar4 * 0xc);
+    depth = verts[v0 * 3 + 2] + verts[v1 * 3 + 2] + verts[v2 * 3 + 2];
+    if (depth > 600) {
+        cross = (y1 - y0) * (x2 - x1) + (y2 - y1) * (x0 - x1);
+        if ((cross ^ g_LisaBackfaceSign) > 0) {
+            int *cmd = (int *)*g_pLisaDrawCommandWritePtr;
+            int **pwrite;
+            int **buckets;
 
-      if (iVar10 <= iVar13) {
-        iVar10 = iVar13;
-      }
+            cmd[0] = 0x13;
+            cmd[1] = x0;
+            cmd[2] = y0;
+            cmd[3] = x1;
+            cmd[4] = y1;
+            cmd[5] = x2;
+            cmd[6] = y2;
+            cmd[7] = *(int *)(g_pLisaSubmeshPolygon + 0x10);
+            cmd[8] = g_pActiveSHD;
 
-      if (g_SubpixelMinY <= iVar10) {
-        iVar10 = *(int *)(g_LisaTransformedVertices + 4 + iVar2 * 0xc);
-
-        if (iVar12 <= iVar10) {
-          iVar10 = iVar12;
-        }
-
-        iVar13 = *(int *)(g_LisaTransformedVertices + 4 + iVar4 * 0xc);
-
-        if (iVar10 < iVar13) {
-          iVar13 = iVar10;
-        }
-
-        if (iVar13 <= g_SubpixelMaxY) {
-          iVar11 = *(int *)(g_LisaTransformedVertices + 8 + iVar4 * 0xc) +
-
-                   *(int *)(g_LisaTransformedVertices + 8 + iVar2 * 0xc) +
-
-                   *(int *)(g_LisaTransformedVertices + 8 + iVar11 * 0xc);
-
-          if ((600 < iVar11) &&
-
-             (0 < (int)((*(int *)(g_LisaTransformedVertices + 4 + iVar2 * 0xc) - iVar12) *
-
-                        (*(int *)(g_LisaTransformedVertices + iVar4 * 0xc) - *(int *)(g_LisaTransformedVertices + iVar2 * 0xc)
-
-                        ) + (*(int *)(g_LisaTransformedVertices + 4 + iVar4 * 0xc) -
-
-                            *(int *)(g_LisaTransformedVertices + 4 + iVar2 * 0xc)) *
-
-                            (iVar3 - *(int *)(g_LisaTransformedVertices + iVar2 * 0xc)) ^ g_LisaBackfaceSign))) {
-            puVar5 = (int *)*g_pLisaDrawCommandWritePtr;
-            uVar6 = *(int *)(g_LisaTransformedVertices + iVar2 * 0xc);
-            uVar7 = *(int *)(g_LisaTransformedVertices + 4 + iVar2 * 0xc);
-            puVar5[1] = iVar3;
-            *puVar5 = 0x13;
-            puVar5[3] = uVar6;
-            puVar5[2] = iVar12;
-            puVar5[4] = uVar7;
-            iVar2 = g_pLisaSubmeshPolygon;
-            uVar6 = *(int *)(iVar9 + 4 + iVar4 * 0xc);
-            puVar5[5] = *(int *)(iVar9 + iVar4 * 0xc);
-            puVar5[6] = uVar6;
-            uVar6 = *(int *)(iVar2 + 0x10);
-            puVar5[8] = g_pActiveSHD;
-            iVar2 = g_pLisaActiveSubmesh;
-            puVar5[7] = uVar6;
-            puVar8 = g_pLisaDrawCommandWritePtr;
-            iVar11 = iVar11 >> 4;
-
-            if ((99 < *(short *)(iVar2 + 0x1e)) && (iVar11 = iVar11 + -0x4c, iVar11 < 0)) {
-              iVar11 = 0;
+            depth = depth >> 4;
+            if (*(short *)(g_pLisaActiveSubmesh + 0x1e) > 99) {
+                depth -= 0x4c;
+                if (depth < 0) depth = 0;
             }
+            if (depth > 5999) depth = 5999;
 
-            g_pLisaDrawCommandWritePtr[2] = puVar5 + 9;
-            iVar2 = g_pLisaDepthBuckets;
-            puVar5 = g_pLisaDrawCommandWritePtr;
+            g_pLisaDrawCommandWritePtr[2] = (int)(cmd + 9);
+            pwrite = (int **)g_pLisaDrawCommandWritePtr;
+            buckets = (int **)g_pLisaDepthBuckets;
 
-            if (5999 < iVar11) {
-              iVar11 = 5999;
-            }
-
-            puVar1 = g_pLisaDrawCommandWritePtr + 1;
-            g_pLisaDrawCommandWritePtr = puVar8 + 2;
-            *puVar1 = *(int *)(g_pLisaDepthBuckets + iVar11 * 4);
-            *(int **)(iVar2 + iVar11 * 4) = puVar5;
-          }
-
-          g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 0x14;
-          return;
+            g_pLisaDrawCommandWritePtr = (int *)(pwrite + 2);
+            pwrite[1] = buckets[depth];
+            buckets[depth] = (int *)pwrite;
         }
-
-      }
-
     }
 
-  }
-
-  g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 0x14;
-  return;
+    g_pLisaSubmeshPolygon = (int *)((char *)g_pLisaSubmeshPolygon + 0x14);
 }
 
 /**
@@ -5206,72 +4937,60 @@ void Lisa_DrawTriangle_Op14(void) {
  * @fidelity ADAPTED
  */
 void Lisa_DrawBillboard_Op07(void) {
-  int *puVar1;
-  int uVar2;
-  int uVar3;
-  int iVar4;
-  int iVar5;
-  int *puVar6;
-  int iVar7;
-  int iVar8;
-  long long lVar9;
+    int *poly = (int *)g_pLisaSubmeshPolygon;
+    int *verts = (int *)g_LisaTransformedVertices;
+    int v_idx = poly[1];
+    int z = verts[v_idx * 3 + 2];
 
-  
+    if (z > 200) {
+        int *cmd = (int *)*g_pLisaDrawCommandWritePtr;
+        int x = verts[v_idx * 3 + 0];
+        int y = verts[v_idx * 3 + 1];
+        int u0 = poly[2];
+        int v0 = poly[3];
+        int u1 = poly[4];
+        int v1 = poly[5];
+        int tex_offset = poly[6];
+        float scale = 4.0f / (float)z;
+        int depth;
+        int **pwrite;
+        int **buckets;
 
-  iVar7 = g_pLisaSubmeshPolygon;
-  iVar4 = g_LisaTransformedVertices;
-  puVar6 = g_pLisaDrawCommandWritePtr;
-  iVar8 = *(int *)(g_pLisaSubmeshPolygon + 4);
+        cmd[0] = 7;
+        cmd[1] = (int)(cmd + 5);
+        cmd[2] = (int)(cmd + 13);
+        cmd[3] = x;
+        cmd[4] = y;
+        cmd[5] = (u0 + u1) / 2 - u0;
+        cmd[6] = (v0 + v1) / 2 - v0;
+        cmd[7] = u0;
+        cmd[8] = v0;
+        cmd[9] = u1;
+        cmd[10] = v1;
+        cmd[11] = *(int *)(g_pLisaActiveMipTable - 5) + tex_offset;
+        cmd[12] = g_pActiveSHD;
+        cmd[13] = (int)(scale * (float)poly[7]);
+        cmd[14] = 0;
+        cmd[15] = 0;
+        cmd[16] = (int)(scale * (float)poly[8]);
 
-  if (200 < *(int *)(g_LisaTransformedVertices + 8 + iVar8 * 0xc)) {
-    puVar1 = (int *)*g_pLisaDrawCommandWritePtr;
-    *puVar1 = 7;
-    puVar1[1] = puVar1 + 5;
-    uVar2 = *(int *)(iVar4 + iVar8 * 0xc);
-    puVar1[2] = puVar1 + 0xd;
-    uVar3 = *(int *)(iVar4 + 4 + iVar8 * 0xc);
-    puVar1[3] = uVar2;
-    iVar8 = *(int *)(iVar7 + 8);
-    puVar1[4] = uVar3;
-    iVar4 = *(int *)(iVar7 + 0x14);
-    puVar1[5] = (iVar8 + *(int *)(iVar7 + 0x10)) / 2 - *(int *)(iVar7 + 8);
-    iVar8 = *(int *)(iVar7 + 0xc);
-    iVar5 = *(int *)(iVar7 + 0xc);
-    puVar1[8] = iVar5;
-    uVar2 = *(int *)(iVar7 + 0x14);
-    puVar1[6] = (iVar8 + iVar4) / 2 - iVar5;
-    puVar1[10] = uVar2;
-    puVar1[7] = *(int *)(iVar7 + 8);
-    puVar1[9] = *(int *)(iVar7 + 0x10);
-    puVar1[0xc] = g_pActiveSHD;
-    lVar9 = __ftol();
-    puVar1[0xd] = (int)lVar9;
-    puVar1[0xe] = 0;
-    puVar1[0xf] = 0;
-    lVar9 = __ftol();
-    puVar1[0x10] = (int)lVar9;
-    lVar9 = __ftol();
-    iVar8 = (int)lVar9 >> 4;
-    puVar1[0xb] = *(int *)(g_pLisaActiveMipTable + -0x14) + *(int *)(iVar7 + 0x18);
+        depth = (int)((double)z * 2.8) >> 4;
+        if (*(short *)(g_pLisaActiveSubmesh + 0x1e) > 99) {
+            depth -= 0x5c;
+            if (depth < 0) depth = 0;
+        }
+        if (depth > 5999) depth = 5999;
 
-    if ((99 < *(short *)(g_pLisaActiveSubmesh + 0x1e)) && (iVar8 = iVar8 + -0x5c, iVar8 < 0)) {
-      iVar8 = 0;
+        g_pLisaDrawCommandWritePtr[2] = (int)(cmd + 17);
+        pwrite = (int **)g_pLisaDrawCommandWritePtr;
+        buckets = (int **)g_pLisaDepthBuckets;
+
+        g_pLisaDrawCommandWritePtr = (int *)(pwrite + 2);
+        pwrite[1] = buckets[depth];
+        buckets[depth] = (int *)pwrite;
     }
 
-    g_pLisaDrawCommandWritePtr = puVar6 + 2;
-    *g_pLisaDrawCommandWritePtr = puVar1 + 0x11;
-    iVar4 = g_pLisaDepthBuckets;
-
-    if (5999 < iVar8) {
-      iVar8 = 5999;
-    }
-
-    puVar6[1] = *(int *)(g_pLisaDepthBuckets + iVar8 * 4);
-    *(int **)(iVar4 + iVar8 * 4) = puVar6;
-  }
-
-  g_pLisaSubmeshPolygon = iVar7 + 0x24;
-  return;
+    g_pLisaSubmeshPolygon = (int *)((char *)poly + 0x24);
 }
 
 /**
@@ -5279,75 +4998,59 @@ void Lisa_DrawBillboard_Op07(void) {
  * @fidelity ADAPTED
  */
 void Lisa_DrawBillboard_Op08(void) {
-  int *puVar1;
-  short sVar2;
-  int *puVar3;
-  int iVar4;
-  int iVar5;
-  int uVar6;
-  int *puVar7;
-  int iVar8;
-  int uVar9;
-  int iVar10;
-  long long lVar11;
+    int *poly = (int *)g_pLisaSubmeshPolygon;
+    int *verts = (int *)g_LisaTransformedVertices;
+    int v_idx = poly[1];
+    int z = verts[v_idx * 3 + 2];
 
-  
+    if (z > 200) {
+        int *cmd = (int *)*g_pLisaDrawCommandWritePtr;
+        int x = verts[v_idx * 3 + 0] & ~0xff;
+        int y = verts[v_idx * 3 + 1] & ~0xff;
+        int u0 = poly[2];
+        int v0 = poly[3];
+        int u1 = poly[4];
+        int v1 = poly[5];
+        int tex_offset = poly[6];
+        int depth;
+        int **pwrite;
+        int **buckets;
 
-  iVar8 = g_pLisaSubmeshPolygon;
-  iVar5 = g_LisaTransformedVertices;
-  iVar10 = *(int *)(g_pLisaSubmeshPolygon + 4);
+        cmd[0] = 7;
+        cmd[1] = (int)(cmd + 5);
+        cmd[2] = (int)(cmd + 13);
+        cmd[3] = x;
+        cmd[4] = y;
+        cmd[5] = (u0 + u1) / 2 - u0;
+        cmd[6] = (v0 + v1) / 2 - v0;
+        cmd[7] = u0;
+        cmd[8] = v0;
+        cmd[9] = u1;
+        cmd[10] = v1;
+        cmd[11] = *(int *)(g_pLisaActiveMipTable - 5) + tex_offset;
+        cmd[12] = (int)g_pLisaTransparencyLUT;
+        cmd[13] = (int)((double)poly[7] * 0.0039525693 * (double)g_LisaCamera->viewport_y);
+        cmd[14] = 0;
+        cmd[15] = 0;
+        cmd[16] = (int)((double)poly[8] * 0.004820206304829848 * (double)g_LisaCamera->viewport_y);
 
-  if (200 < *(int *)(g_LisaTransformedVertices + 8 + iVar10 * 0xc)) {
-    puVar3 = (int *)*g_pLisaDrawCommandWritePtr;
-    *puVar3 = 7;
-    puVar3[1] = puVar3 + 5;
-    puVar3[2] = puVar3 + 0xd;
-    iVar4 = *(int *)(iVar8 + 0x10);
-    puVar3[3] = *(unsigned int *)(iVar5 + iVar10 * 0xc) & 0xffffff00;
-    puVar3[4] = *(unsigned int *)(iVar5 + 4 + iVar10 * 0xc) & 0xffffff00;
-    puVar3[5] = (*(int *)(iVar8 + 8) + iVar4) / 2 - *(int *)(iVar8 + 8);
-    iVar10 = *(int *)(iVar8 + 0xc);
-    iVar5 = *(int *)(iVar8 + 0x14);
-    puVar3[8] = iVar10;
-    puVar3[7] = *(int *)(iVar8 + 8);
-    uVar9 = g_pLisaTransparencyLUT;
-    uVar6 = *(int *)(iVar8 + 0x10);
-    puVar3[6] = (iVar5 + iVar10) / 2 - iVar10;
-    puVar3[9] = uVar6;
-    puVar3[10] = *(int *)(iVar8 + 0x14);
-    puVar3[0xc] = uVar9;
-    lVar11 = __ftol();
-    puVar3[0xe] = 0;
-    puVar3[0xf] = 0;
-    puVar3[0xd] = (int)lVar11;
-    lVar11 = __ftol();
-    puVar3[0x10] = (int)lVar11;
-    lVar11 = __ftol();
-    iVar10 = (int)lVar11 >> 4;
-    sVar2 = *(short *)(g_pLisaActiveSubmesh + 0x1e);
-    puVar3[0xb] = *(int *)(g_pLisaActiveMipTable + -0x14) + *(int *)(iVar8 + 0x18);
-    puVar7 = g_pLisaDrawCommandWritePtr;
+        depth = (int)((double)z * 2.8) >> 4;
+        if (*(short *)(g_pLisaActiveSubmesh + 0x1e) > 99) {
+            depth -= 0x5c;
+            if (depth < 0) depth = 0;
+        }
+        if (depth > 5999) depth = 5999;
 
-    if ((99 < sVar2) && (iVar10 = iVar10 + -0x5c, iVar10 < 0)) {
-      iVar10 = 0;
+        g_pLisaDrawCommandWritePtr[2] = (int)(cmd + 17);
+        pwrite = (int **)g_pLisaDrawCommandWritePtr;
+        buckets = (int **)g_pLisaDepthBuckets;
+
+        g_pLisaDrawCommandWritePtr = (int *)(pwrite + 2);
+        pwrite[1] = buckets[depth];
+        buckets[depth] = (int *)pwrite;
     }
 
-    g_pLisaDrawCommandWritePtr[2] = puVar3 + 0x11;
-    iVar5 = g_pLisaDepthBuckets;
-    puVar3 = g_pLisaDrawCommandWritePtr;
-
-    if (5999 < iVar10) {
-      iVar10 = 5999;
-    }
-
-    puVar1 = g_pLisaDrawCommandWritePtr + 1;
-    g_pLisaDrawCommandWritePtr = puVar7 + 2;
-    *puVar1 = *(int *)(g_pLisaDepthBuckets + iVar10 * 4);
-    *(int **)(iVar5 + iVar10 * 4) = puVar3;
-  }
-
-  g_pLisaSubmeshPolygon = iVar8 + 0x24;
-  return;
+    g_pLisaSubmeshPolygon = (int *)((char *)poly + 0x24);
 }
 
 /**
