@@ -1436,9 +1436,13 @@ int Collision_TestPolygonOverlap(float *poly1_x, float *poly1, int count1, float
  * @notes MAINDOS @ 0x00023ee8. Filters candidate collision triangles according to track-specific
  *        ground clearance thresholds (Snake: 350, Moose: 200, Mountain: 450, Ski: 125, Default: 2500).
  */
-int Collision_FilterTrackClearance(int param_1, int param_2, int param_3, int param_4, int is_wall) {
+int Collision_FilterTrackClearance(int tri_idx, int pos_x, int pos_y, int pos_z, int is_wall) {
     int clearance_limit;
 
+    (void)tri_idx;
+    (void)pos_x;
+    (void)pos_y;
+    (void)pos_z;
     if (is_wall == 0) {
         switch (g_SelectedTrack) {
             case 2: clearance_limit = 200; break; /* Moose */
@@ -1482,12 +1486,16 @@ void *Collision_RaycastVehicleSphere(int x, int y, int z, int car_idx) {
  * @notes MAINDOS @ 0x00022dc8. Iterates over track collision triangles from octree query,
  *        calculates closest point on triangle, plane distance, and penetration restitution.
  */
-void *Collision_TestTrackTriangles(uint32_t param_1, uint32_t param_2, int param_3, int param_4, int param_5) {
+void *Collision_TestTrackTriangles(uint32_t world_x, uint32_t world_y, int world_z, int radius, int flags) {
     int i, j;
     int hit_count = 0;
     int max_dist;
     uint8_t *car;
     SurfaceRaycastResult *result_table = (SurfaceRaycastResult *)g_pSRF_RaycastTable;
+
+    (void)world_y;
+    (void)radius;
+    (void)flags;
 
     if (g_pVehicleTable == NULL || result_table == NULL) return NULL;
     car = g_pVehicleTable + g_SelectedCar * VEHICLE_STRUCT_SIZE;
@@ -1503,8 +1511,8 @@ void *Collision_TestTrackTriangles(uint32_t param_1, uint32_t param_2, int param
 
         if (obj == NULL || obj->field_1e >= 100) continue;
 
-        dx = (int)(param_1 - obj->pos_x);
-        dz = (int)(param_3 - obj->pos_z);
+        dx = (int)(world_x - obj->pos_x);
+        dz = (int)(world_z - obj->pos_z);
         if (abs(dx) >= max_dist || abs(dz) >= max_dist) continue;
 
         mesh = (int *)obj->mesh_data;
