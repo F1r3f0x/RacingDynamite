@@ -75,4 +75,36 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x00552f44` | `AudioVoice[32]`| `g_AudioChannels`   | 32-channel software voice mixer table. |
 | `0x00552f48` | `int32_t`    | `g_MasterSoundVolume`| Master SFX attenuation level (0..128). |
 | `0x00552f4c` | `int32_t`    | `g_MasterMusicVolume`| Master CD-DA music attenuation level (0..128). |
+| `0x005daffc` | `VehicleState[]` | `g_Vehicles` | Master array of active vehicle physics & simulation states (stride `0x484c`). |
+| `0x005285c0` | `int32_t`    | `g_ActiveVehicleIndex` | Focused/controlled player vehicle index (0..5). |
+| `0x005daff4` | `VehicleConfig[]`| `g_VehicleConfigs` | Per-vehicle visual and camera configuration table (stride 200 bytes). |
+| `0x006192f0` | `int32_t`    | `g_NumRacers` | Total number of participating vehicles in current race. |
+| `0x00552ffc` | `uint8_t*`   | `g_PlayerHUDState` | Player telemetry and HUD viewport state array. |
+| `0x00527f24` | `int32_t`    | `g_PlayerCarModel` | Selected player car archetype / model ID. |
+| `0x005530a8` | `int32_t`    | `g_PlayerCarChoice` | Player selected vehicle slot. |
+| `0x00527f6c` | `int32_t`    | `g_GameMode` | Active gameplay mode (Championship, Single, Ghost, Multiplayer). |
+| `0x00639493` | `int32_t`    | `g_DifficultyLevel` | Current difficulty setting (0=Novice, 1=Amateur, 2=Pro). |
+| `0x00552fc4` | `int32_t`    | `g_CurrentTrackIndex` | Active circuit index (0..6). |
+| `0x00552fbc` | `int32_t`    | `g_RaceFinished` | Flag indicating player crossed finish line / race completed. |
+| `0x00563db0` | `uint8_t*`   | `g_VirtualFramebuffer` | Active virtual rendering surface / double-buffer page. |
+| `0x00563d40` | `int32_t`    | `g_RenderTargetSurface` | Active 2D rendering target surface index. |
+| `0x0055306c` | `int32_t`    | `g_IsSplitScreen` | Split-screen multiplayer mode toggle flag. |
+| `0x00527f2c` | `int32_t`    | `g_SplitScreenPlayer` | Active player viewport index during split-screen rendering. |
+| `0x00639933` | `int32_t`    | `g_LanguageId` | Active localization language index (German, English, French, etc.). |
+| `0x00552fd0` | `int32_t`    | `g_FontId_Large` | Font handle for large header and title font. |
+| `0x00552fd4` | `int32_t`    | `g_FontId_Medium` | Font handle for standard medium menu font. |
+| `0x00552fe8` | `int32_t`    | `g_FontId_Small` | Font handle for small telemetry overlay font. |
+| `0x00552fec` | `int32_t`    | `g_FontId_Menu` | Font handle for menu item text. |
+| `0x0054f9d4` | `int32_t`    | `g_ActiveFontColor` | Active font color index in palette. |
+| `0x0063f2e4` | `int32_t`    | `g_FontAlignMode` | Text alignment mode (0=Left, 1=Center, 2=Right). |
+| `0x004949a4` | `int32_t`    | `g_MenuCursorPos` | Current menu navigation cursor selection index. |
+| `0x00494990` | `int32_t`    | `g_IsDemoMode` | Attract / demo replay playback mode flag. |
+| `0x00553780` | `uint8_t*`   | `g_SpeedoConfig` | HUD speedometer dial and needle coordinate configuration. |
+| `0x00553770` | `uint8_t*`   | `g_SpeedoPosition` | Speedometer display screen offset. |
+| `0x00553774` | `int32_t`    | `g_HudEnabled` | HUD instrumentation rendering enable toggle. |
+| `0x005285ec` | `void*`      | `g_pSpeedoGaugeSprite` | Pointer to loaded speedometer gauge background sprite. |
+| `0x005285f0` | `void*`      | `g_pSpeedoNeedleSprite` | Pointer to loaded speedometer needle sprite. |
+| `0x00552f24` | `HUDMessage[5]` | `g_HudFloatingMessages` | Table of 5 active on-screen floating banner messages. |
+| `0x00639330` | `SceneryParticle` | `g_ActiveParticle` | Scratch particle struct populated during effect dispatch. |
+| `0x0063c5f0` | `double[20]` | `g_pActiveCamera` | Active camera position, direction, and projection matrix array. |
 

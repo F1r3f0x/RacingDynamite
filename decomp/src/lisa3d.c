@@ -4802,48 +4802,42 @@ void Lisa_DrawTriangle_Op10(void) {
  * @fidelity ADAPTED
  */
 int Lisa_RenderSubmeshes(void) {
-  int *piVar1;
-  int iVar2;
-  int iVar3;
-  int iVar4;
+    int *submesh_data;
+    int obj_idx;
+    int obj_offset;
+    int submesh_offset;
 
-  
+    obj_idx = 0;
+    Lisa_InitOpcodeTable();
+    g_pLisaDrawCommandWritePtr = g_LisaDrawCommandBuffer;
+    *g_LisaDrawCommandBuffer = g_pLisaDrawCommandTail;
 
-                    
+    if (g_LisaCamera->visible_obj_count > 0) {
+        submesh_offset = 0;
+        obj_offset = 0;
 
-  iVar2 = 0;
-  Lisa_InitOpcodeTable();
-  g_pLisaDrawCommandWritePtr = g_LisaDrawCommandBuffer;
-  *g_LisaDrawCommandBuffer = g_pLisaDrawCommandTail;
+        do {
+            g_pLisaActiveSubmesh = *(int *)(g_LisaVisibleObjects + obj_offset);
+            submesh_data = *(int **)(g_LisaVisibleSubmeshes + submesh_offset);
+            g_pLisaActiveMipTable = *(int *)(g_pLisaTextureSheets + *(int *)(g_pLisaActiveSubmesh + 8) * 4);
+            g_pLisaSubmeshPolygon = submesh_data + *submesh_data * 3 + 2;
+            g_LisaTransformedVertices = ((int *)(g_LisaVisibleSubmeshes + submesh_offset))[1];
 
-  if (0 < g_LisaCamera->visible_obj_count) {
-    iVar4 = 0;
-    iVar3 = 0;
+            for (g_LisaSubmeshPolyCount = submesh_data[1]; g_LisaSubmeshPolyCount > 0; g_LisaSubmeshPolyCount--) {
+                (*(void (*)(void))(&g_LisaOpcodeTable)[(char)*g_pLisaSubmeshPolygon])();
+            }
 
-    do {
-      g_pLisaActiveSubmesh = *(int *)(g_LisaVisibleObjects + iVar3);
-      piVar1 = *(int **)(g_LisaVisibleSubmeshes + iVar4);
-      g_pLisaActiveMipTable = *(int *)(g_pLisaTextureSheets + *(int *)(g_pLisaActiveSubmesh + 8) * 4);
-      g_pLisaSubmeshPolygon = piVar1 + *piVar1 * 3 + 2;
-      g_LisaTransformedVertices = ((int *)(g_LisaVisibleSubmeshes + iVar4))[1];
+            obj_idx++;
+            submesh_offset += 8;
+            obj_offset += 4;
+        } while (obj_idx < g_LisaCamera->visible_obj_count);
+    }
 
-      for (g_LisaSubmeshPolyCount = piVar1[1]; 0 < g_LisaSubmeshPolyCount; g_LisaSubmeshPolyCount = g_LisaSubmeshPolyCount + -1) {
-        (*(void (*)(void))(&g_LisaOpcodeTable)[(char)*g_pLisaSubmeshPolygon])();
-      }
-
-      iVar2 = iVar2 + 1;
-      iVar4 = iVar4 + 8;
-      iVar3 = iVar3 + 4;
-    } while (iVar2 < g_LisaCamera->visible_obj_count);
-  }
-
-  g_LisaCamera->active_draw_cmd =
-
-       (int)(((int)g_pLisaDrawCommandWritePtr - (int)g_LisaDrawCommandBuffer) +
-
-            ((int)g_pLisaDrawCommandWritePtr - (int)g_LisaDrawCommandBuffer >> 0x1f & 7U)) >> 3;
-  *g_pLisaDrawCommandWritePtr = 0;
-  return 0;
+    g_LisaCamera->active_draw_cmd =
+        (int)(((int)g_pLisaDrawCommandWritePtr - (int)g_LisaDrawCommandBuffer) +
+              ((int)g_pLisaDrawCommandWritePtr - (int)g_LisaDrawCommandBuffer >> 0x1f & 7U)) >> 3;
+    *g_pLisaDrawCommandWritePtr = 0;
+    return 0;
 }
 
 /**
