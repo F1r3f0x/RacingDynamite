@@ -187,7 +187,7 @@ extern int DAT_0054f934;
 extern int _DAT_0049873c;
 extern int DAT_0054f960;
 extern int DAT_00527f40;
-extern int DAT_00553788;
+extern int g_pCarGhostTransforms;
 extern int g_RaceTimer_P2;
 extern int DAT_0047a5a0;
 extern int DAT_00498540;
@@ -358,7 +358,7 @@ extern int _DAT_0047a6f0;
 extern int _DAT_0047a780;
 extern int DAT_0047a4f8;
 extern int DAT_00525e74;
-extern int g_RaceFinished;
+extern int g_pWheelTransforms;
 extern int DAT_00528620;
 extern int _DAT_0047a710;
 extern int DAT_0047a2b0;
@@ -377,7 +377,7 @@ extern int DAT_0047a288;
 extern int DAT_0047a6e8;
 extern int DAT_00563ce8;
 extern int _DAT_0047a340;
-extern int DAT_005537d8;
+extern int g_ParticleArray1;
 extern int DAT_00525e78;
 extern int DAT_0047a568;
 extern int DAT_0047a4e8;
@@ -393,7 +393,7 @@ extern int _DAT_0047a318;
 extern int _DAT_00563d74;
 extern int DAT_00563ce0;
 extern int DAT_00528850;
-extern int g_DynamicObjectArray2;
+extern int g_pCarShadowTransforms;
 extern int DAT_00552fc0;
 extern int DAT_0052870c[];
 extern int DAT_00525e84;
@@ -409,7 +409,7 @@ extern int _DAT_0047a300;
 extern int DAT_0047a2e0;
 extern int DAT_00639927;
 extern int DAT_004ba6ec;
-extern int DAT_00552f70;
+extern int g_pCarReflectionTransforms;
 extern int DAT_0047a500;
 extern int _DAT_0047a630;
 extern int DAT_00528830;
@@ -425,7 +425,7 @@ extern int _DAT_0047a488;
 extern int DAT_0052861c;
 extern int _DAT_0047a520;
 extern int _DAT_0047a540;
-extern int g_DynamicObjectArray1;
+extern int g_pCarTransforms;
 extern int DAT_0063959b;
 extern int DAT_00552d80;
 extern int _DAT_0047a760;
@@ -515,7 +515,7 @@ extern int DAT_00603738;
 extern int DAT_00528858;
 extern int DAT_005287e8;
 extern int DAT_0047a298;
-extern int DAT_00563da4;
+extern int g_ParticleCount1;
 extern int DAT_00528880;
 extern int DAT_00553030;
 extern int DAT_00553070;
@@ -607,7 +607,7 @@ extern int DAT_0047a8f0;
 extern int _DAT_0047a8f0;
 extern int DAT_0047a550;
 extern int DAT_0047a918;
-extern int DAT_00553ff8;
+extern int g_ParticleArray2;
 extern int DAT_00528874;
 extern int _DAT_00498478;
 extern int DAT_0047a290;
@@ -1302,7 +1302,7 @@ LAB_00436c9c:
     local_l20 = __ftol();
     local_u11 = (int)(unsigned int)local_l20 >> 0x1f;
     if (((((unsigned int)local_l20 ^ local_u11) - local_u11 & 1 ^ local_u11) == local_u11) &&
-       (local_pi6 = (int *)(g_NumRacers * 0x20 + DAT_00553788), local_pi6[7] == 0)) {
+       (local_pi6 = (int *)(g_NumRacers * 0x20 + g_pCarGhostTransforms), local_pi6[7] == 0)) {
       Lisa_MoveDynamicObject(local_pi6);
     }
   }
@@ -1331,7 +1331,7 @@ LAB_00436c9c:
   }
   Lisa_RenderScene();
   Lisa_FlushRasterizerCommands(extraout_ECX,extraout_EDX);
-  local_pi6 = (int *)(g_NumRacers * 0x20 + DAT_00553788);
+  local_pi6 = (int *)(g_NumRacers * 0x20 + g_pCarGhostTransforms);
   if (local_pi6[7] == 1) {
     Lisa_DeleteDynamicObject(local_pi6);
   }
@@ -1377,7 +1377,7 @@ LAB_00436c9c:
       local_l20 = __ftol();
       local_u11 = (int)(unsigned int)local_l20 >> 0x1f;
       if (((((unsigned int)local_l20 ^ local_u11) - local_u11 & 1 ^ local_u11) == local_u11) &&
-         (local_i14 = g_NumRacers * 0x20 + DAT_00553788, *(int *)(local_i14 + 0x3c) == 0)) {
+         (local_i14 = g_NumRacers * 0x20 + g_pCarGhostTransforms, *(int *)(local_i14 + 0x3c) == 0)) {
         Lisa_MoveDynamicObject((int *)(local_i14 + 0x20));
       }
     }
@@ -1392,7 +1392,7 @@ LAB_00436c9c:
     DAT_0063c5d8 = *(int *)(DAT_00552e40 + local_i14 * 0xc);
     Lisa_RenderScene();
     Lisa_FlushRasterizerCommands(extraout_ECX_00,extraout_EDX_00);
-    local_i14 = g_NumRacers * 0x20 + DAT_00553788;
+    local_i14 = g_NumRacers * 0x20 + g_pCarGhostTransforms;
     if (*(int *)(local_i14 + 0x3c) == 1) {
       Lisa_DeleteDynamicObject((int *)(local_i14 + 0x20));
     }
@@ -1677,28 +1677,28 @@ void FX_UpdateVehicleWreck(int *wreck) {
   *(int *)((int)g_Vehicles + veh_offset + 0x53c) = 0;
   if (timer1 == 0) {
     obj_offset = car_index * 0x20;
-    if ((((int *)(g_DynamicObjectArray1 + obj_offset))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
-      Lisa_DeleteDynamicObject((int *)(g_DynamicObjectArray1 + obj_offset));
+    if ((((int *)(g_pCarTransforms + obj_offset))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
+      Lisa_DeleteDynamicObject((int *)(g_pCarTransforms + obj_offset));
     }
     race_fin_offset = car_index * 0x80;
-    if (((int *)(g_RaceFinished + race_fin_offset))[7] != 0) {
-      Lisa_DeleteDynamicObject((int *)(g_RaceFinished + race_fin_offset));
+    if (((int *)(g_pWheelTransforms + race_fin_offset))[7] != 0) {
+      Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + race_fin_offset));
     }
-    if (*(int *)(g_RaceFinished + race_fin_offset + 0x3c) != 0) {
-      Lisa_DeleteDynamicObject((int *)(g_RaceFinished + race_fin_offset + 0x20));
+    if (*(int *)(g_pWheelTransforms + race_fin_offset + 0x3c) != 0) {
+      Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + race_fin_offset + 0x20));
     }
-    if (*(int *)(g_RaceFinished + race_fin_offset + 0x5c) != 0) {
-      Lisa_DeleteDynamicObject((int *)(g_RaceFinished + race_fin_offset + 0x40));
+    if (*(int *)(g_pWheelTransforms + race_fin_offset + 0x5c) != 0) {
+      Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + race_fin_offset + 0x40));
     }
-    if (*(int *)(g_RaceFinished + race_fin_offset + 0x7c) != 0) {
-      Lisa_DeleteDynamicObject((int *)(g_RaceFinished + race_fin_offset + 0x60));
+    if (*(int *)(g_pWheelTransforms + race_fin_offset + 0x7c) != 0) {
+      Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + race_fin_offset + 0x60));
     }
-    if ((((int *)(g_DynamicObjectArray2 + obj_offset))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
-      Lisa_DeleteDynamicObject((int *)(g_DynamicObjectArray2 + obj_offset));
+    if ((((int *)(g_pCarShadowTransforms + obj_offset))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
+      Lisa_DeleteDynamicObject((int *)(g_pCarShadowTransforms + obj_offset));
     }
     if (((*(int *)(g_PlayerHUDState + car_index * 0x4c) == 7) && (g_DynamicObjectsPaused == 0)) &&
-       (((int *)(obj_offset + DAT_00552f70))[7] != 0)) {
-      Lisa_DeleteDynamicObject((int *)(obj_offset + DAT_00552f70));
+       (((int *)(obj_offset + g_pCarReflectionTransforms))[7] != 0)) {
+      Lisa_DeleteDynamicObject((int *)(obj_offset + g_pCarReflectionTransforms));
     }
     mesh_ptr = (int *)((int)g_Vehicles + veh_offset);
     mesh_ptr[0xe2] = mesh_ptr[1];
@@ -2204,28 +2204,28 @@ LAB_00431ab6:
       veh_ptr = g_Vehicles;
       *(int *)((int)g_Vehicles + veh_offset + 0x534) = 0;
       *(int *)((int)veh_ptr + veh_offset + 0x538) = 0x40590000;
-      if ((((int *)(g_DynamicObjectArray1 + timer1))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
-        Lisa_MoveDynamicObject((int *)(g_DynamicObjectArray1 + timer1));
+      if ((((int *)(g_pCarTransforms + timer1))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
+        Lisa_MoveDynamicObject((int *)(g_pCarTransforms + timer1));
       }
       timer2 = car_index * 0x80;
-      if (((int *)(g_RaceFinished + timer2))[7] == 0) {
-        Lisa_MoveDynamicObject((int *)(g_RaceFinished + timer2));
+      if (((int *)(g_pWheelTransforms + timer2))[7] == 0) {
+        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + timer2));
       }
-      if (*(int *)(g_RaceFinished + timer2 + 0x3c) == 0) {
-        Lisa_MoveDynamicObject((int *)(g_RaceFinished + timer2 + 0x20));
+      if (*(int *)(g_pWheelTransforms + timer2 + 0x3c) == 0) {
+        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + timer2 + 0x20));
       }
-      if (*(int *)(g_RaceFinished + timer2 + 0x5c) == 0) {
-        Lisa_MoveDynamicObject((int *)(g_RaceFinished + timer2 + 0x40));
+      if (*(int *)(g_pWheelTransforms + timer2 + 0x5c) == 0) {
+        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + timer2 + 0x40));
       }
-      if (*(int *)(g_RaceFinished + timer2 + 0x7c) == 0) {
-        Lisa_MoveDynamicObject((int *)(g_RaceFinished + timer2 + 0x60));
+      if (*(int *)(g_pWheelTransforms + timer2 + 0x7c) == 0) {
+        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + timer2 + 0x60));
       }
-      if ((((int *)(g_DynamicObjectArray2 + timer1))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
-        Lisa_MoveDynamicObject((int *)(g_DynamicObjectArray2 + timer1));
+      if ((((int *)(g_pCarShadowTransforms + timer1))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
+        Lisa_MoveDynamicObject((int *)(g_pCarShadowTransforms + timer1));
       }
       if (((*(int *)(g_PlayerHUDState + car_index * 0x4c) == 7) && (g_DynamicObjectsPaused == 0)) &&
-         (((int *)(timer1 + DAT_00552f70))[7] == 0)) {
-        Lisa_MoveDynamicObject((int *)(timer1 + DAT_00552f70));
+         (((int *)(timer1 + g_pCarReflectionTransforms))[7] == 0)) {
+        Lisa_MoveDynamicObject((int *)(timer1 + g_pCarReflectionTransforms));
       }
       Car_UpdateDynamicObjects(car_index);
       temp_i1 = obj_offset;
@@ -2475,28 +2475,28 @@ void FX_UpdateVehicleCrashSequence(int *crash_seq) {
     }
     if (local_i25 == 0x1e) {
       local_i19 = local_i6 * 0x20;
-      if ((((int *)(g_DynamicObjectArray1 + local_i19))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
-        Lisa_DeleteDynamicObject((int *)(g_DynamicObjectArray1 + local_i19));
+      if ((((int *)(g_pCarTransforms + local_i19))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
+        Lisa_DeleteDynamicObject((int *)(g_pCarTransforms + local_i19));
       }
       local_i21 = local_i6 * 0x80;
-      if (((int *)(g_RaceFinished + local_i21))[7] != 0) {
-        Lisa_DeleteDynamicObject((int *)(g_RaceFinished + local_i21));
+      if (((int *)(g_pWheelTransforms + local_i21))[7] != 0) {
+        Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + local_i21));
       }
-      if (*(int *)(g_RaceFinished + local_i21 + 0x3c) != 0) {
-        Lisa_DeleteDynamicObject((int *)(g_RaceFinished + local_i21 + 0x20));
+      if (*(int *)(g_pWheelTransforms + local_i21 + 0x3c) != 0) {
+        Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + local_i21 + 0x20));
       }
-      if (*(int *)(g_RaceFinished + local_i21 + 0x5c) != 0) {
-        Lisa_DeleteDynamicObject((int *)(g_RaceFinished + local_i21 + 0x40));
+      if (*(int *)(g_pWheelTransforms + local_i21 + 0x5c) != 0) {
+        Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + local_i21 + 0x40));
       }
-      if (*(int *)(g_RaceFinished + local_i21 + 0x7c) != 0) {
-        Lisa_DeleteDynamicObject((int *)(g_RaceFinished + local_i21 + 0x60));
+      if (*(int *)(g_pWheelTransforms + local_i21 + 0x7c) != 0) {
+        Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + local_i21 + 0x60));
       }
-      if ((((int *)(g_DynamicObjectArray2 + local_i19))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
-        Lisa_DeleteDynamicObject((int *)(g_DynamicObjectArray2 + local_i19));
+      if ((((int *)(g_pCarShadowTransforms + local_i19))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
+        Lisa_DeleteDynamicObject((int *)(g_pCarShadowTransforms + local_i19));
       }
       if (((*(int *)(g_PlayerHUDState + local_i6 * 0x4c) == 7) && (g_DynamicObjectsPaused == 0)) &&
-         (((int *)(local_i19 + DAT_00552f70))[7] != 0)) {
-        Lisa_DeleteDynamicObject((int *)(local_i19 + DAT_00552f70));
+         (((int *)(local_i19 + g_pCarReflectionTransforms))[7] != 0)) {
+        Lisa_DeleteDynamicObject((int *)(local_i19 + g_pCarReflectionTransforms));
       }
     }
   }
@@ -2660,28 +2660,28 @@ LAB_00432970:
       local_pd13 = g_Vehicles;
       *(int *)((int)g_Vehicles + local_i15 + 0x534) = 0;
       *(int *)((int)local_pd13 + local_i15 + 0x538) = 0x40590000;
-      if ((((int *)(g_DynamicObjectArray1 + local_i25))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
-        Lisa_MoveDynamicObject((int *)(g_DynamicObjectArray1 + local_i25));
+      if ((((int *)(g_pCarTransforms + local_i25))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
+        Lisa_MoveDynamicObject((int *)(g_pCarTransforms + local_i25));
       }
       local_i23 = local_i6 * 0x80;
-      if (((int *)(g_RaceFinished + local_i23))[7] == 0) {
-        Lisa_MoveDynamicObject((int *)(g_RaceFinished + local_i23));
+      if (((int *)(g_pWheelTransforms + local_i23))[7] == 0) {
+        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + local_i23));
       }
-      if (*(int *)(g_RaceFinished + local_i23 + 0x3c) == 0) {
-        Lisa_MoveDynamicObject((int *)(g_RaceFinished + local_i23 + 0x20));
+      if (*(int *)(g_pWheelTransforms + local_i23 + 0x3c) == 0) {
+        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + local_i23 + 0x20));
       }
-      if (*(int *)(g_RaceFinished + local_i23 + 0x5c) == 0) {
-        Lisa_MoveDynamicObject((int *)(g_RaceFinished + local_i23 + 0x40));
+      if (*(int *)(g_pWheelTransforms + local_i23 + 0x5c) == 0) {
+        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + local_i23 + 0x40));
       }
-      if (*(int *)(g_RaceFinished + local_i23 + 0x7c) == 0) {
-        Lisa_MoveDynamicObject((int *)(g_RaceFinished + local_i23 + 0x60));
+      if (*(int *)(g_pWheelTransforms + local_i23 + 0x7c) == 0) {
+        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + local_i23 + 0x60));
       }
-      if ((((int *)(g_DynamicObjectArray2 + local_i25))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
-        Lisa_MoveDynamicObject((int *)(g_DynamicObjectArray2 + local_i25));
+      if ((((int *)(g_pCarShadowTransforms + local_i25))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
+        Lisa_MoveDynamicObject((int *)(g_pCarShadowTransforms + local_i25));
       }
       if (((*(int *)(g_PlayerHUDState + local_i6 * 0x4c) == 7) && (g_DynamicObjectsPaused == 0)) &&
-         (((int *)(local_i25 + DAT_00552f70))[7] == 0)) {
-        Lisa_MoveDynamicObject((int *)(local_i25 + DAT_00552f70));
+         (((int *)(local_i25 + g_pCarReflectionTransforms))[7] == 0)) {
+        Lisa_MoveDynamicObject((int *)(local_i25 + g_pCarReflectionTransforms));
       }
       Car_UpdateDynamicObjects(local_i6);
       local_3c = local_i24;
@@ -3896,7 +3896,7 @@ LAB_00435a9e:
     }
     local_l24 = Lisa_SetDynamicObjectMesh(*(int *)
                            (&DAT_005db000 + *(int *)(g_PlayerHUDState + g_ActiveVehicleIndex * 0x4c) * 4),
-                          g_PlayerHUDState,(int *)(g_ActiveVehicleIndex * 0x20 + g_DynamicObjectArray1),
+                          g_PlayerHUDState,(int *)(g_ActiveVehicleIndex * 0x20 + g_pCarTransforms),
                           (int *)*(int *)
                                   (&DAT_005db000 + *(int *)(g_PlayerHUDState + g_ActiveVehicleIndex * 0x4c) * 4)
                           ,1,(short)g_ActiveVehicleIndex + 100,0,-1,0);
@@ -3904,12 +3904,12 @@ LAB_00435a9e:
       Log_DebugPrintf(s_Error_while_changing_car_mesh_00499248);
     }
     local_i13 = 0;
-    local_28 = &DAT_005537d8 + g_ActiveVehicleIndex * 0x820;
+    local_28 = &g_ParticleArray1 + g_ActiveVehicleIndex * 0x820;
     local_pi15 = (int *)(g_PlayerHUDState + g_ActiveVehicleIndex * 0x4c);
     do {
       local_i21 = 0;
       local_i1 = local_i13 + *local_pi15 * 4;
-      if (0 < *(int *)(DAT_00563da4 + local_i1 * 0xc)) {
+      if (0 < *(int *)(g_ParticleCount1 + local_i1 * 0xc)) {
         local_pi18 = local_28;
         local_pi22 = (int *)(*(int *)(&DAT_00552e60 + local_i1 * 4) + 8);
         do {
@@ -3919,7 +3919,7 @@ LAB_00435a9e:
           local_pi18[2] = *(int *)(&DAT_00553300 + (local_i13 + *local_pi15 * 4) * 4) + local_pi22[2];
           local_pi18 = local_pi18 + 3;
           local_pi22 = local_pi22 + 3;
-        } while (local_i21 < *(int *)(DAT_00563da4 + (local_i13 + *local_pi15 * 4) * 0xc));
+        } while (local_i21 < *(int *)(g_ParticleCount1 + (local_i13 + *local_pi15 * 4) * 0xc));
       }
       local_i13 = local_i13 + 1;
       local_28 = local_28 + 0x208;
@@ -6166,18 +6166,18 @@ void Car_UpdateDynamicObjects(int car_idx) {
   int local_c;
   local_i3 = car_idx * 0x20;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray1 + 4 + local_i3) = (int)local_l8;
+  *(int *)(g_pCarTransforms + 4 + local_i3) = (int)local_l8;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray1 + 8 + local_i3) = (int)local_l8;
+  *(int *)(g_pCarTransforms + 8 + local_i3) = (int)local_l8;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray1 + 0xc + local_i3) = (int)local_l8;
+  *(int *)(g_pCarTransforms + 0xc + local_i3) = (int)local_l8;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray1 + 0x10 + local_i3) = (int)local_l8;
+  *(int *)(g_pCarTransforms + 0x10 + local_i3) = (int)local_l8;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray1 + 0x14 + local_i3) = (int)local_l8;
+  *(int *)(g_pCarTransforms + 0x14 + local_i3) = (int)local_l8;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray1 + 0x18 + local_i3) = (int)local_l8;
-  if ((g_DynamicObjectsPaused == 0) && (local_i1 = Lisa_UpdateObjectSpatialGrid((int *)(g_DynamicObjectArray1 + local_i3)), local_i1 != 0)) {
+  *(int *)(g_pCarTransforms + 0x18 + local_i3) = (int)local_l8;
+  if ((g_DynamicObjectsPaused == 0) && (local_i1 = Lisa_UpdateObjectSpatialGrid((int *)(g_pCarTransforms + local_i3)), local_i1 != 0)) {
     Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4);
   }
   local_i1 = g_Vehicles + car_idx * 0x484c;
@@ -6187,27 +6187,27 @@ void Car_UpdateDynamicObjects(int car_idx) {
   fsin(local_f7);
   if (*(int *)(local_i1 + 0x558) == 0) {
     local_pi6 = (int *)(g_PlayerHUDState + car_idx * 0x4c);
-    if (0 < *(int *)(*local_pi6 * 0x30 + DAT_00563da4)) {
-      local_pu4 = &DAT_005537d8 + car_idx * 0x820;
+    if (0 < *(int *)(*local_pi6 * 0x30 + g_ParticleCount1)) {
+      local_pu4 = &g_ParticleArray1 + car_idx * 0x820;
       do {
         local_i5 = local_i5 + 1;
         local_l8 = __ftol();
         *local_pu4 = (int)local_l8;
         local_l8 = __ftol();
-        local_i1 = DAT_00563da4;
+        local_i1 = g_ParticleCount1;
         local_pu4[2] = (int)local_l8;
         local_pu4 = local_pu4 + 3;
       } while (local_i5 < *(int *)(*local_pi6 * 0x30 + local_i1));
     }
     local_i1 = 0;
-    if (0 < *(int *)(*local_pi6 * 0x30 + 0xc + DAT_00563da4)) {
-      local_pu4 = (int *)(&DAT_00553ff8 + car_idx * 0x2080);
+    if (0 < *(int *)(*local_pi6 * 0x30 + 0xc + g_ParticleCount1)) {
+      local_pu4 = (int *)(&g_ParticleArray2 + car_idx * 0x2080);
       do {
         local_i1 = local_i1 + 1;
         local_l8 = __ftol();
         *local_pu4 = (int)local_l8;
         local_l8 = __ftol();
-        local_i5 = DAT_00563da4;
+        local_i5 = g_ParticleCount1;
         local_pu4[2] = (int)local_l8;
         local_pu4 = local_pu4 + 3;
       } while (local_i1 < *(int *)(*local_pi6 * 0x30 + 0xc + local_i5));
@@ -6215,12 +6215,12 @@ void Car_UpdateDynamicObjects(int car_idx) {
   }
   else {
     local_i1 = 0;
-    local_20 = &DAT_005537d8 + car_idx * 0x820;
+    local_20 = &g_ParticleArray1 + car_idx * 0x820;
     local_pi6 = (int *)(g_PlayerHUDState + car_idx * 0x4c);
     do {
       local_i5 = 0;
       local_pu4 = local_20;
-      if (0 < *(int *)(DAT_00563da4 + (local_i1 + *local_pi6 * 4) * 0xc)) {
+      if (0 < *(int *)(g_ParticleCount1 + (local_i1 + *local_pi6 * 4) * 0xc)) {
         do {
           local_l8 = __ftol();
           *local_pu4 = (int)local_l8;
@@ -6230,7 +6230,7 @@ void Car_UpdateDynamicObjects(int car_idx) {
           local_pu4[2] = (int)local_l8;
           local_i5 = local_i5 + 1;
           local_pu4 = local_pu4 + 3;
-        } while (local_i5 < *(int *)(DAT_00563da4 + (local_i1 + *local_pi6 * 4) * 0xc));
+        } while (local_i5 < *(int *)(g_ParticleCount1 + (local_i1 + *local_pi6 * 4) * 0xc));
       }
       local_i1 = local_i1 + 1;
       local_20 = local_20 + 0x208;
@@ -6241,18 +6241,18 @@ void Car_UpdateDynamicObjects(int car_idx) {
   local_i5 = car_idx << 7;
   do {
     local_l8 = __ftol();
-    *(int *)(g_RaceFinished + 4 + local_i5) = (int)local_l8;
+    *(int *)(g_pWheelTransforms + 4 + local_i5) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(g_RaceFinished + 8 + local_i5) = (int)local_l8;
+    *(int *)(g_pWheelTransforms + 8 + local_i5) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(g_RaceFinished + 0xc + local_i5) = (int)local_l8;
+    *(int *)(g_pWheelTransforms + 0xc + local_i5) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(g_RaceFinished + 0x10 + local_i5) = (int)local_l8;
+    *(int *)(g_pWheelTransforms + 0x10 + local_i5) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(g_RaceFinished + 0x14 + local_i5) = (int)local_l8;
+    *(int *)(g_pWheelTransforms + 0x14 + local_i5) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(g_RaceFinished + 0x18 + local_i5) = (int)local_l8;
-    local_i2 = Lisa_UpdateObjectSpatialGrid((int *)(g_RaceFinished + local_i5));
+    *(int *)(g_pWheelTransforms + 0x18 + local_i5) = (int)local_l8;
+    local_i2 = Lisa_UpdateObjectSpatialGrid((int *)(g_pWheelTransforms + local_i5));
     if (local_i2 != 0) {
       Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_WHE_00499580);
     }
@@ -6261,18 +6261,18 @@ void Car_UpdateDynamicObjects(int car_idx) {
   } while (local_i1 != 0);
   if ((*(int *)(g_PlayerHUDState + local_c) == 7) && (g_DynamicObjectsPaused == 0)) {
     local_l8 = __ftol();
-    *(int *)(local_i3 + 4 + DAT_00552f70) = (int)local_l8;
+    *(int *)(local_i3 + 4 + g_pCarReflectionTransforms) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(local_i3 + 8 + DAT_00552f70) = (int)local_l8;
+    *(int *)(local_i3 + 8 + g_pCarReflectionTransforms) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(local_i3 + 0xc + DAT_00552f70) = (int)local_l8;
+    *(int *)(local_i3 + 0xc + g_pCarReflectionTransforms) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(local_i3 + 0x10 + DAT_00552f70) = (int)local_l8;
+    *(int *)(local_i3 + 0x10 + g_pCarReflectionTransforms) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(local_i3 + 0x14 + DAT_00552f70) = (int)local_l8;
+    *(int *)(local_i3 + 0x14 + g_pCarReflectionTransforms) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(local_i3 + 0x18 + DAT_00552f70) = (int)local_l8;
-    if ((g_DynamicObjectsPaused == 0) && (local_i1 = Lisa_UpdateObjectSpatialGrid((int *)(DAT_00552f70 + local_i3)), local_i1 != 0)) {
+    *(int *)(local_i3 + 0x18 + g_pCarReflectionTransforms) = (int)local_l8;
+    if ((g_DynamicObjectsPaused == 0) && (local_i1 = Lisa_UpdateObjectSpatialGrid((int *)(g_pCarReflectionTransforms + local_i3)), local_i1 != 0)) {
       Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4);
     }
   }
@@ -6293,31 +6293,31 @@ void Car_UpdateDynamicObjects(int car_idx) {
   local_l8 = __ftol();
   ((int*)&(DAT_00603744))[car_idx * 0x1e] = (int)local_l8;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray2 + 4 + local_i3) = (int)local_l8;
+  *(int *)(g_pCarShadowTransforms + 4 + local_i3) = (int)local_l8;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray2 + 8 + local_i3) = (int)local_l8;
+  *(int *)(g_pCarShadowTransforms + 8 + local_i3) = (int)local_l8;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray2 + 0xc + local_i3) = (int)local_l8;
+  *(int *)(g_pCarShadowTransforms + 0xc + local_i3) = (int)local_l8;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray2 + 0x10 + local_i3) = (int)local_l8;
+  *(int *)(g_pCarShadowTransforms + 0x10 + local_i3) = (int)local_l8;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray2 + 0x14 + local_i3) = (int)local_l8;
+  *(int *)(g_pCarShadowTransforms + 0x14 + local_i3) = (int)local_l8;
   local_l8 = __ftol();
-  *(int *)(g_DynamicObjectArray2 + 0x18 + local_i3) = (int)local_l8;
-  if ((g_DynamicObjectsPaused == 0) && (local_i1 = Lisa_UpdateObjectSpatialGrid((int *)(g_DynamicObjectArray2 + local_i3)), local_i1 != 0)) {
+  *(int *)(g_pCarShadowTransforms + 0x18 + local_i3) = (int)local_l8;
+  if ((g_DynamicObjectsPaused == 0) && (local_i1 = Lisa_UpdateObjectSpatialGrid((int *)(g_pCarShadowTransforms + local_i3)), local_i1 != 0)) {
     Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_SHA_00499558);
   }
   if ((*(int *)(g_PlayerHUDState + 4 + local_c) == 2) && (car_idx != 0)) {
     local_l8 = __ftol();
-    *(int *)(DAT_00553788 + 4 + local_i3) = (int)local_l8;
+    *(int *)(g_pCarGhostTransforms + 4 + local_i3) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(DAT_00553788 + 8 + local_i3) = (int)local_l8;
+    *(int *)(g_pCarGhostTransforms + 8 + local_i3) = (int)local_l8;
     local_l8 = __ftol();
-    *(int *)(DAT_00553788 + 0xc + local_i3) = (int)local_l8;
-    *(int *)(DAT_00553788 + 0x10 + local_i3) = 0;
-    *(int *)(DAT_00553788 + 0x14 + local_i3) = 0;
-    *(int *)(DAT_00553788 + 0x18 + local_i3) = 0;
-    local_pi6 = (int *)(DAT_00553788 + local_i3);
+    *(int *)(g_pCarGhostTransforms + 0xc + local_i3) = (int)local_l8;
+    *(int *)(g_pCarGhostTransforms + 0x10 + local_i3) = 0;
+    *(int *)(g_pCarGhostTransforms + 0x14 + local_i3) = 0;
+    *(int *)(g_pCarGhostTransforms + 0x18 + local_i3) = 0;
+    local_pi6 = (int *)(g_pCarGhostTransforms + local_i3);
     if (local_pi6[7] == 1) {
       local_i3 = Lisa_UpdateObjectSpatialGrid(local_pi6);
       if (local_i3 != 0) {

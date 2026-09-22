@@ -2674,136 +2674,126 @@ LAB_00448c11:
  * @fidelity ADAPTED
  */
 int Lisa_CullObjectsOrthographic(void) {
-  int local_i1;
-  int local_i2;
-  int local_i3;
-  int local_i4;
-  int *local_pi5;
-  int *local_pu6;
-  int local_i7;
-  int local_i8;
-  long long local_l9;
-  long long local_l10;
-  long long local_l11;
-  int local_c;
-  int local_4;
+    LisaDynamicObject *obj_ptr;
+    LisaDynamicObject **visible_array;
+    int obj_count;
+    int grid_offset_z;
+    int loop_counter;
+    int array_index;
+    int cell_index;
+    int grid_index;
+    long long cam_z_int;
+    long long cam_x_int;
+    long long cam_y_int;
+    int param_idx;
+    int count;
 
-  
+    g_LisaCamera->visible_obj_count = 0;
+    cam_z_int = __ftol();
+    cam_x_int = __ftol();
+    cam_y_int = __ftol();
+    
+    // Abstract grid calculation
+    array_index = ((int)cam_z_int * 36 + (int)cam_x_int) * 8;
+    
+    // Base cell calculation using Y
+    cell_index = (*(int *)((char *)&g_LisaDefaultScale_Y + array_index) +
+             ((int)((int)cam_y_int + ((int)cam_y_int >> 31 & 0xffU)) >> 8) + g_LisaDefaultOffset_X) * g_LisaGridCellsX;
+             
+    cam_z_int = __ftol();
+    visible_array = (LisaDynamicObject **)g_LisaVisibleObjects;
+    param_idx = 3;
 
-  local_i3 = g_LisaCamera;
-  g_LisaCamera->visible_obj_count = 0;
-  local_l9 = __ftol();
-  local_l10 = __ftol();
-  local_l11 = __ftol();
-  local_i7 = ((int)local_l9 * 0x24 + (int)local_l10) * 8;
+    // Final grid pointer offset
+    grid_index = (int)g_pLisaGridCells +
+            (cell_index + ((int)((int)cam_z_int + ((int)cam_z_int >> 31 & 0xffU)) >> 8) +
+             *(int *)((char *)&g_LisaDefaultScale_X + array_index) + g_LisaDefaultOffset_Y) * 4;
+             
+    grid_offset_z = g_LisaDefaultOffset_Z;
 
-  local_i4 = (*(int *)(&g_LisaDefaultScale_Y + local_i7) +
+    if (g_pLisaAllocatedBuffersEnd == 0) {
+        while (grid_offset_z != -5000) {
+            grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
 
-           ((int)((int)local_l11 + ((int)local_l11 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) * g_LisaGridCellsX;
-  local_l9 = __ftol();
-  local_i2 = g_LisaVisibleObjects;
-  local_c = 3;
+            if (0 < grid_offset_z) {
+                do {
+                    obj_ptr = *(LisaDynamicObject **)(grid_index + 4);
+                    grid_index += 4;
 
-  local_i4 = (int)g_pLisaGridCells +
+                    if ((obj_ptr != NULL) && (obj_ptr->self_ptr == obj_ptr)) {
+                        obj_count = g_LisaCamera->visible_obj_count + 1;
+                        g_LisaCamera->visible_obj_count = obj_count;
+                        visible_array[obj_count - 1] = obj_ptr;
 
-          (local_i4 + ((int)((int)local_l9 + ((int)local_l9 >> 0x1f & 0xffU)) >> 8) +
+                        if (obj_ptr->next_in_cell != NULL) {
+                            LisaDynamicObject **out_ptr = &visible_array[obj_count];
 
-           *(int *)(&g_LisaDefaultScale_X + local_i7) + g_LisaDefaultOffset_Y) * 4;
-  local_i7 = g_LisaDefaultOffset_Z;
+                            do {
+                                obj_ptr = obj_ptr->next_in_cell;
 
-  if (g_pLisaAllocatedBuffersEnd == 0) {
-    while (local_i7 != -5000) {
-      local_i7 = *(int *)(local_c * 4 + 0x499fa0);
+                                if (obj_ptr->self_ptr == obj_ptr) {
+                                    *out_ptr = obj_ptr;
+                                    out_ptr++;
+                                    g_LisaCamera->visible_obj_count++;
+                                }
 
-      if (0 < local_i7) {
-        do {
-          local_pi5 = *(int **)(local_i4 + 4);
-          local_i4 = local_i4 + 4;
-
-          if ((local_pi5 != (int *)0x0) && ((int *)*local_pi5 == local_pi5)) {
-            local_i8 = *(int *)(local_i3 + 0x60) + 1;
-            local_i1 = *(int *)((int)local_pi5 + 0x26);
-            *(int *)(local_i3 + 0x60) = local_i8;
-            *(int **)(local_i2 + -4 + local_i8 * 4) = local_pi5;
-
-            if (local_i1 != 0) {
-              local_pu6 = (int *)(local_i2 + local_i8 * 4);
-
-              do {
-                local_pi5 = *(int **)((int)local_pi5 + 0x26);
-
-                if ((int *)*local_pi5 == local_pi5) {
-                  *local_pu6 = local_pi5;
-                  local_pu6 = local_pu6 + 1;
-                  *(int *)(local_i3 + 0x60) = *(int *)(local_i3 + 0x60) + 1;
-                }
-
-              } while (*(int *)((int)local_pi5 + 0x26) != 0);
+                            } while (obj_ptr->next_in_cell != NULL);
+                        }
+                    }
+                    grid_offset_z--;
+                } while (grid_offset_z != 0);
             }
 
-          }
+            grid_offset_z = param_idx + 1;
+            param_idx += 2;
+            grid_index += (*(int *)(grid_offset_z * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
+            grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
+        }
+    } else {
+        while (grid_offset_z != -5000) {
+            count = *(int *)(param_idx * 4 + 0x499fa0);
 
-          local_i7 = local_i7 + -1;
-        } while (local_i7 != 0);
-      }
+            if (0 < count) {
+                do {
+                    obj_ptr = *(LisaDynamicObject **)(grid_index + 4);
+                    grid_index += 4;
 
-      local_i7 = local_c + 1;
-      local_c = local_c + 2;
-      local_i4 = local_i4 + (*(int *)(local_i7 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-      local_i7 = *(int *)(local_c * 4 + 0x499fa0);
+                    if ((obj_ptr != NULL) && (obj_ptr->self_ptr == obj_ptr)) {
+                        if ((obj_ptr->unknown_24 == 0) || (obj_ptr->unknown_24 == g_pLisaAllocatedBuffersEnd)) {
+                            obj_count = g_LisaCamera->visible_obj_count + 1;
+                            g_LisaCamera->visible_obj_count = obj_count;
+                            visible_array[obj_count - 1] = obj_ptr;
+                        }
+
+                        if (obj_ptr->next_in_cell != NULL) {
+                            LisaDynamicObject **out_ptr = &visible_array[g_LisaCamera->visible_obj_count];
+
+                            do {
+                                obj_ptr = obj_ptr->next_in_cell;
+
+                                if ((obj_ptr->self_ptr == obj_ptr) &&
+                                   ((obj_ptr->unknown_24 == 0 || obj_ptr->unknown_24 == g_pLisaAllocatedBuffersEnd))) {
+                                    *out_ptr = obj_ptr;
+                                    out_ptr++;
+                                    g_LisaCamera->visible_obj_count++;
+                                }
+
+                            } while (obj_ptr->next_in_cell != NULL);
+                        }
+                    }
+                    count--;
+                } while (count != 0);
+            }
+
+            grid_offset_z = param_idx + 1;
+            param_idx += 2;
+            grid_index += (*(int *)(grid_offset_z * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
+            grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
+        }
     }
 
-  }
-
-  else {
-    while (local_i7 != -5000) {
-      local_4 = *(int *)(local_c * 4 + 0x499fa0);
-
-      if (0 < local_4) {
-        do {
-          local_pi5 = *(int **)(local_i4 + 4);
-          local_i4 = local_i4 + 4;
-
-          if ((local_pi5 != (int *)0x0) && ((int *)*local_pi5 == local_pi5)) {
-            if (((short)local_pi5[9] == 0) || ((short)local_pi5[9] == g_pLisaAllocatedBuffersEnd)) {
-              local_i7 = *(int *)(local_i3 + 0x60) + 1;
-              *(int *)(local_i3 + 0x60) = local_i7;
-              *(int **)(local_i2 + -4 + local_i7 * 4) = local_pi5;
-            }
-
-            if (*(int *)((int)local_pi5 + 0x26) != 0) {
-              local_pu6 = (int *)(local_i2 + *(int *)(local_i3 + 0x60) * 4);
-
-              do {
-                local_pi5 = *(int **)((int)local_pi5 + 0x26);
-
-                if (((int *)*local_pi5 == local_pi5) &&
-
-                   (((short)local_pi5[9] == 0 || ((short)local_pi5[9] == g_pLisaAllocatedBuffersEnd)))) {
-                  *local_pu6 = local_pi5;
-                  local_pu6 = local_pu6 + 1;
-                  *(int *)(local_i3 + 0x60) = *(int *)(local_i3 + 0x60) + 1;
-                }
-
-              } while (*(int *)((int)local_pi5 + 0x26) != 0);
-            }
-
-          }
-
-          local_4 = local_4 + -1;
-        } while (local_4 != 0);
-      }
-
-      local_i7 = local_c + 1;
-      local_c = local_c + 2;
-      local_i4 = local_i4 + (*(int *)(local_i7 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-      local_i7 = *(int *)(local_c * 4 + 0x499fa0);
-    }
-
-  }
-
-  *(int *)(local_i3 + 100) = *(int *)(local_i3 + 0x60);
-  return 0;
+    g_LisaCamera->submesh_count = g_LisaCamera->visible_obj_count;
+    return 0;
 }
 
 /**
@@ -2811,350 +2801,291 @@ int Lisa_CullObjectsOrthographic(void) {
  * @fidelity ADAPTED
  */
 int Lisa_FrustumCullObjects(void) {
-  int local_i1;
-  int local_i2;
-  int local_i3;
-  int local_i4;
-  int local_i5;
-  int *local_pi6;
-  int *local_pi7;
-  int local_i8;
-  int local_i9;
-  int local_i10;
-  int local_i11;
-  int local_i12;
-  int local_i13;
-  int *local_pi14;
-  int local_i15;
-  int local_i16;
-  int local_i17;
-  int local_i18;
-  int *local_pi19;
-  int local_i20;
-  int local_i21;
-  int local_i22;
-  double extraout_ST1;
-  long long local_l23;
-  long long local_l24;
-  long long local_l25;
-  int local_64;
-  int local_60;
-  int local_5c;
-  int *local_48;
-  int *local_44;
-  int local_38;
-  int local_24;
-  int local_20;
-  int local_1c;
-  int local_18;
-  int local_14;
-  int local_10;
-  int local_c;
-  int local_8;
-  int local_4;
+    LisaCamera *camera;
+    LisaDynamicObject *obj_ptr;
+    LisaDynamicObject **visible_array;
+    LisaDynamicObject **out_ptr;
+    
+    int obj_count;
+    int next_obj_count;
+    int grid_offset_z;
+    int cell_index;
+    int grid_index;
+    int param_idx;
+    int count;
+    int layer_id;
+    int grid_stride;
+    int submesh_count;
+    
+    long long cam_val1, cam_val2, cam_val3;
+    double extraout_ST1;
 
-  
+    // Viewport and rotation vars
+    int vp_center_x, vp_center_y, fov_x, fov_y;
+    int min_x, max_x, min_y, max_y;
+    int obj_x, obj_y, obj_z, rad_x, rad_y;
+    LisaDynamicObject **grid_cells;
+    int rot_matrix[9]; // Assuming Lisa_ComputeCameraRotationMatrix takes int[9]
+    int proj_x, proj_y, z_depth;
+    int obj_rot, obj_radius;
 
-  local_i2 = g_LisaCamera;
-  g_LisaCamera->visible_obj_count = 0;
+    camera = g_LisaCamera;
+    camera->visible_obj_count = 0;
 
-  if (*(int *)(local_i2 + 0xa4) == 0) {
-    local_l23 = __ftol();
-    local_l24 = __ftol();
-    local_l25 = __ftol();
-    local_i4 = ((int)local_l23 * 0x24 + (int)local_l24) * 8;
+    if (camera->projection_type == 0) {
+        cam_val1 = __ftol();
+        cam_val2 = __ftol();
+        cam_val3 = __ftol();
+        grid_stride = ((int)cam_val1 * 36 + (int)cam_val2) * 8;
 
-    local_i5 = (*(int *)(&g_LisaDefaultScale_Y + local_i4) +
+        cell_index = (*(int *)((char *)&g_LisaDefaultScale_Y + grid_stride) +
+                 ((int)((int)cam_val3 + ((int)cam_val3 >> 31 & 0xffU)) >> 8) + g_LisaDefaultOffset_X) *
+                g_LisaGridCellsX;
+                
+        cam_val1 = __ftol();
+        layer_id = (int)g_pLisaAllocatedBuffersEnd;
+        visible_array = (LisaDynamicObject **)g_LisaVisibleObjects;
+        param_idx = 3;
 
-             ((int)((int)local_l25 + ((int)local_l25 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) *
+        grid_index = (int)g_pLisaGridCells +
+                (cell_index + ((int)((int)cam_val1 + ((int)cam_val1 >> 31 & 0xffU)) >> 8) +
+                 *(int *)((char *)&g_LisaDefaultScale_X + grid_stride) + g_LisaDefaultOffset_Y) * 4;
+                 
+        grid_offset_z = g_LisaDefaultOffset_Z;
 
-            g_LisaGridCellsX;
-    local_l23 = __ftol();
-    local_i17 = g_pLisaAllocatedBuffersEnd;
-    local_pi14 = g_LisaVisibleObjects;
-    local_64 = 3;
+        if (g_pLisaAllocatedBuffersEnd == 0) {
+            while (grid_offset_z != -5000) {
+                grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
 
-    local_i5 = (int)g_pLisaGridCells +
+                if (0 < grid_offset_z) {
+                    do {
+                        obj_ptr = *(LisaDynamicObject **)(grid_index + 4);
+                        grid_index += 4;
 
-            (local_i5 + ((int)((int)local_l23 + ((int)local_l23 >> 0x1f & 0xffU)) >> 8) +
+                        if ((obj_ptr != NULL) && (obj_ptr->self_ptr == obj_ptr)) {
+                            obj_count = camera->visible_obj_count;
+                            next_obj_count = obj_count + 1;
+                            camera->visible_obj_count = next_obj_count;
+                            visible_array[obj_count] = obj_ptr;
 
-             *(int *)(&g_LisaDefaultScale_X + local_i4) + g_LisaDefaultOffset_Y) * 4;
-    local_i4 = g_LisaDefaultOffset_Z;
-
-    if (g_pLisaAllocatedBuffersEnd == 0) {
-      while (local_i4 != -5000) {
-        local_i4 = *(int *)(local_64 * 4 + 0x499fa0);
-
-        if (0 < local_i4) {
-          do {
-            local_pi19 = *(int **)(local_i5 + 4);
-            local_i5 = local_i5 + 4;
-
-            if ((local_pi19 != (int *)0x0) && ((int *)*local_pi19 == local_pi19)) {
-              local_i17 = *(int *)(local_i2 + 0x60);
-              local_i18 = local_i17 + 1;
-              local_i1 = *(int *)((int)local_pi19 + 0x26);
-              *(int *)(local_i2 + 0x60) = local_i18;
-              local_pi14[local_i17] = (int)local_pi19;
-
-              if (local_i1 != 0) {
-                local_pi7 = local_pi14 + local_i18;
-
-                do {
-                  local_pi19 = *(int **)((int)local_pi19 + 0x26);
-
-                  if ((int *)*local_pi19 == local_pi19) {
-                    *local_pi7 = (int)local_pi19;
-                    local_pi7 = local_pi7 + 1;
-                    *(int *)(local_i2 + 0x60) = *(int *)(local_i2 + 0x60) + 1;
-                  }
-
-                } while (*(int *)((int)local_pi19 + 0x26) != 0);
-              }
-
-            }
-
-            local_i4 = local_i4 + -1;
-          } while (local_i4 != 0);
-        }
-
-        local_i4 = local_64 + 1;
-        local_64 = local_64 + 2;
-        local_i5 = local_i5 + (*(int *)(local_i4 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-        local_i4 = *(int *)(local_64 * 4 + 0x499fa0);
-      }
-
-    }
-
-    else {
-      while (local_i4 != -5000) {
-        local_60 = *(int *)(local_64 * 4 + 0x499fa0);
-
-        if (0 < local_60) {
-          do {
-            local_pi19 = *(int **)(local_i5 + 4);
-            local_i5 = local_i5 + 4;
-
-            if ((local_pi19 != (int *)0x0) && ((int *)*local_pi19 == local_pi19)) {
-              if (((short)local_pi19[9] == 0) || ((short)local_pi19[9] == local_i17)) {
-                local_i4 = *(int *)(local_i2 + 0x60);
-                *(int *)(local_i2 + 0x60) = local_i4 + 1;
-                local_pi14[local_i4] = (int)local_pi19;
-              }
-
-              if (*(int *)((int)local_pi19 + 0x26) != 0) {
-                local_pi7 = local_pi14 + *(int *)(local_i2 + 0x60);
-
-                do {
-                  local_pi19 = *(int **)((int)local_pi19 + 0x26);
-
-                  if (((int *)*local_pi19 == local_pi19) &&
-
-                     (((short)local_pi19[9] == 0 || ((short)local_pi19[9] == local_i17)))) {
-                    *local_pi7 = (int)local_pi19;
-                    local_pi7 = local_pi7 + 1;
-                    *(int *)(local_i2 + 0x60) = *(int *)(local_i2 + 0x60) + 1;
-                  }
-
-                } while (*(int *)((int)local_pi19 + 0x26) != 0);
-              }
-
-            }
-
-            local_60 = local_60 + -1;
-          } while (local_60 != 0);
-        }
-
-        local_i4 = local_64 + 1;
-        local_64 = local_64 + 2;
-        local_i5 = local_i5 + (*(int *)(local_i4 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-        local_i4 = *(int *)(local_64 * 4 + 0x499fa0);
-      }
-
-    }
-
-  }
-
-  else {
-    fcos((double)*(double *)(local_i2 + 0x20) * (double)g_Const_TenthDegToRad);
-    local_i4 = *(int *)(local_i2 + 0xa4) / 2;
-    local_l23 = __ftol();
-    local_l24 = __ftol();
-    fsin(extraout_ST1);
-
-    local_i17 = (((int)local_l23 + ((int)((int)local_l24 + ((int)local_l24 >> 0x1f & 0xffU)) >> 8)) - local_i4) *
-
-             g_LisaGridCellsX;
-    local_l23 = __ftol();
-    local_l24 = __ftol();
-    local_i5 = g_pLisaAllocatedBuffersEnd;
-    local_pi19 = g_LisaVisibleObjects;
-
-    local_pi14 = (int *)((int)g_pLisaGridCells +
-
-                     ((local_i17 + (int)local_l23 +
-
-                      ((int)((int)local_l24 + ((int)local_l24 >> 0x1f & 0xffU)) >> 8)) - local_i4) * 4);
-
-    if (g_pLisaAllocatedBuffersEnd == 0) {
-      if (0 < *(int *)(local_i2 + 0xa4)) {
-        local_64 = *(int *)(local_i2 + 0xa4);
-        local_i5 = g_LisaGridCellsX - local_64;
-
-        do {
-          local_i4 = *(int *)(local_i2 + 0xa4);
-
-          if (0 < local_i4) {
-            do {
-              local_pi7 = (int *)*local_pi14;
-
-              if ((local_pi7 != (int *)0x0) && ((int *)*local_pi7 == local_pi7)) {
-                local_i17 = *(int *)(local_i2 + 0x60);
-                local_i18 = local_i17 + 1;
-                local_i1 = *(int *)((int)local_pi7 + 0x26);
-                *(int *)(local_i2 + 0x60) = local_i18;
-                local_pi19[local_i17] = (int)local_pi7;
-
-                if (local_i1 != 0) {
-                  local_pi6 = local_pi19 + local_i18;
-
-                  do {
-                    local_pi7 = *(int **)((int)local_pi7 + 0x26);
-
-                    if ((int *)*local_pi7 == local_pi7) {
-                      *local_pi6 = (int)local_pi7;
-                      local_pi6 = local_pi6 + 1;
-                      *(int *)(local_i2 + 0x60) = *(int *)(local_i2 + 0x60) + 1;
-                    }
-
-                  } while (*(int *)((int)local_pi7 + 0x26) != 0);
+                            if (obj_ptr->next_in_cell != NULL) {
+                                out_ptr = visible_array + next_obj_count;
+                                do {
+                                    obj_ptr = obj_ptr->next_in_cell;
+                                    if (obj_ptr->self_ptr == obj_ptr) {
+                                        *out_ptr = obj_ptr;
+                                        out_ptr++;
+                                        camera->visible_obj_count++;
+                                    }
+                                } while (obj_ptr->next_in_cell != NULL);
+                            }
+                        }
+                        grid_offset_z--;
+                    } while (grid_offset_z != 0);
                 }
 
-              }
+                grid_offset_z = param_idx + 1;
+                param_idx += 2;
+                grid_index += (*(int *)(grid_offset_z * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
+                grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
+            }
+        } else {
+            while (grid_offset_z != -5000) {
+                count = *(int *)(param_idx * 4 + 0x499fa0);
 
-              local_pi14 = local_pi14 + 1;
-              local_i4 = local_i4 + -1;
-            } while (local_i4 != 0);
-          }
+                if (0 < count) {
+                    do {
+                        obj_ptr = *(LisaDynamicObject **)(grid_index + 4);
+                        grid_index += 4;
 
-          local_pi14 = local_pi14 + local_i5;
-          local_64 = local_64 + -1;
-        } while (local_64 != 0);
-      }
+                        if ((obj_ptr != NULL) && (obj_ptr->self_ptr == obj_ptr)) {
+                            if ((obj_ptr->unknown_24 == 0) || (obj_ptr->unknown_24 == layer_id)) {
+                                obj_count = camera->visible_obj_count;
+                                camera->visible_obj_count = obj_count + 1;
+                                visible_array[obj_count] = obj_ptr;
+                            }
 
-    }
+                            if (obj_ptr->next_in_cell != NULL) {
+                                out_ptr = visible_array + camera->visible_obj_count;
+                                do {
+                                    obj_ptr = obj_ptr->next_in_cell;
+                                    if ((obj_ptr->self_ptr == obj_ptr) &&
+                                       ((obj_ptr->unknown_24 == 0 || obj_ptr->unknown_24 == layer_id))) {
+                                        *out_ptr = obj_ptr;
+                                        out_ptr++;
+                                        camera->visible_obj_count++;
+                                    }
+                                } while (obj_ptr->next_in_cell != NULL);
+                            }
+                        }
+                        count--;
+                    } while (count != 0);
+                }
 
-    else if (0 < *(int *)(local_i2 + 0xa4)) {
-      local_5c = *(int *)(local_i2 + 0xa4);
-      local_i4 = g_LisaGridCellsX - local_5c;
+                grid_offset_z = param_idx + 1;
+                param_idx += 2;
+                grid_index += (*(int *)(grid_offset_z * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
+                grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
+            }
+        }
+    } else {
+        // Projection calculation
+        fcos(camera->rot_y * 0.017453292519943295); // g_Const_TenthDegToRad approx
+        grid_stride = camera->projection_type / 2;
+        cam_val1 = __ftol();
+        cam_val2 = __ftol();
+        fsin(extraout_ST1);
 
-      do {
-        local_64 = *(int *)(local_i2 + 0xa4);
+        layer_id = (((int)cam_val1 + ((int)((int)cam_val2 + ((int)cam_val2 >> 31 & 0xffU)) >> 8)) - grid_stride) * g_LisaGridCellsX;
+        cam_val1 = __ftol();
+        cam_val2 = __ftol();
+        
+        cell_index = (int)g_pLisaAllocatedBuffersEnd;
+        visible_array = (LisaDynamicObject **)g_LisaVisibleObjects;
 
-        if (0 < local_64) {
-          do {
-            local_pi7 = (int *)*local_pi14;
+        grid_cells = (LisaDynamicObject **)((int)g_pLisaGridCells +
+                         ((layer_id + (int)cam_val1 +
+                          ((int)((int)cam_val2 + ((int)cam_val2 >> 31 & 0xffU)) >> 8)) - grid_stride) * 4);
 
-            if ((local_pi7 != (int *)0x0) && ((int *)*local_pi7 == local_pi7)) {
-              if (((short)local_pi7[9] == 0) || ((short)local_pi7[9] == local_i5)) {
-                local_i17 = *(int *)(local_i2 + 0x60);
-                *(int *)(local_i2 + 0x60) = local_i17 + 1;
-                local_pi19[local_i17] = (int)local_pi7;
-              }
-
-              if (*(int *)((int)local_pi7 + 0x26) != 0) {
-                local_pi6 = local_pi19 + *(int *)(local_i2 + 0x60);
+        if (g_pLisaAllocatedBuffersEnd == 0) {
+            if (0 < camera->projection_type) {
+                param_idx = camera->projection_type;
+                cell_index = g_LisaGridCellsX - param_idx;
 
                 do {
-                  local_pi7 = *(int **)((int)local_pi7 + 0x26);
+                    grid_stride = camera->projection_type;
+                    if (0 < grid_stride) {
+                        do {
+                            obj_ptr = *grid_cells;
 
-                  if (((int *)*local_pi7 == local_pi7) &&
+                            if ((obj_ptr != NULL) && (obj_ptr->self_ptr == obj_ptr)) {
+                                obj_count = camera->visible_obj_count;
+                                next_obj_count = obj_count + 1;
+                                camera->visible_obj_count = next_obj_count;
+                                visible_array[obj_count] = obj_ptr;
 
-                     (((short)local_pi7[9] == 0 || ((short)local_pi7[9] == local_i5)))) {
-                    *local_pi6 = (int)local_pi7;
-                    local_pi6 = local_pi6 + 1;
-                    *(int *)(local_i2 + 0x60) = *(int *)(local_i2 + 0x60) + 1;
-                  }
-
-                } while (*(int *)((int)local_pi7 + 0x26) != 0);
-              }
-
+                                if (obj_ptr->next_in_cell != NULL) {
+                                    out_ptr = visible_array + next_obj_count;
+                                    do {
+                                        obj_ptr = obj_ptr->next_in_cell;
+                                        if (obj_ptr->self_ptr == obj_ptr) {
+                                            *out_ptr = obj_ptr;
+                                            out_ptr++;
+                                            camera->visible_obj_count++;
+                                        }
+                                    } while (obj_ptr->next_in_cell != NULL);
+                                }
+                            }
+                            grid_cells++;
+                            grid_stride--;
+                        } while (grid_stride != 0);
+                    }
+                    grid_cells += cell_index;
+                    param_idx--;
+                } while (param_idx != 0);
             }
+        } else if (0 < camera->projection_type) {
+            count = camera->projection_type;
+            grid_stride = g_LisaGridCellsX - count;
 
-            local_pi14 = local_pi14 + 1;
-            local_64 = local_64 + -1;
-          } while (local_64 != 0);
+            do {
+                param_idx = camera->projection_type;
+                if (0 < param_idx) {
+                    do {
+                        obj_ptr = *grid_cells;
+                        if ((obj_ptr != NULL) && (obj_ptr->self_ptr == obj_ptr)) {
+                            if ((obj_ptr->unknown_24 == 0) || (obj_ptr->unknown_24 == cell_index)) {
+                                obj_count = camera->visible_obj_count;
+                                camera->visible_obj_count = obj_count + 1;
+                                visible_array[obj_count] = obj_ptr;
+                            }
+
+                            if (obj_ptr->next_in_cell != NULL) {
+                                out_ptr = visible_array + camera->visible_obj_count;
+                                do {
+                                    obj_ptr = obj_ptr->next_in_cell;
+                                    if ((obj_ptr->self_ptr == obj_ptr) &&
+                                       ((obj_ptr->unknown_24 == 0 || obj_ptr->unknown_24 == cell_index))) {
+                                        *out_ptr = obj_ptr;
+                                        out_ptr++;
+                                        camera->visible_obj_count++;
+                                    }
+                                } while (obj_ptr->next_in_cell != NULL);
+                            }
+                        }
+                        grid_cells++;
+                        param_idx--;
+                    } while (param_idx != 0);
+                }
+                grid_cells += grid_stride;
+                count--;
+            } while (count != 0);
         }
-
-        local_pi14 = local_pi14 + local_i4;
-        local_5c = local_5c + -1;
-      } while (local_5c != 0);
     }
 
-  }
+    vp_center_x = camera->viewport_x;
+    vp_center_y = camera->viewport_y;
+    fov_x = camera->fov_x;
+    fov_y = camera->fov_y;
+    
+    // Bounds based on projection and rotation matrix
+    min_x = g_SubpixelMinX >> 8;
+    max_x = g_SubpixelMaxX >> 8;
+    min_y = g_SubpixelMinY >> 8;
+    max_y = g_SubpixelMaxY >> 8;
+    
+    Lisa_ComputeCameraRotationMatrix(rot_matrix); // fills 9 ints
 
-  local_i5 = *(int *)(local_i2 + 0x80);
-  local_i4 = *(int *)(local_i2 + 0x88);
-  local_i17 = *(int *)(local_i2 + 0x9c);
-  local_i1 = *(int *)(local_i2 + 0x84);
-  local_i2 = *(int *)(local_i2 + 0xa0);
-  local_i8 = g_SubpixelMinX >> 8;
-  local_i9 = g_SubpixelMaxX >> 8;
-  local_i10 = g_SubpixelMinY >> 8;
-  local_i11 = g_SubpixelMaxY >> 8;
-  Lisa_ComputeCameraRotationMatrix(&local_24);
-  local_i18 = g_LisaCamera;
-  local_38 = g_LisaCamera->visible_obj_count;
-  g_LisaCamera->submesh_count = local_38;
-  *(int *)(local_i18 + 0x60) = 0;
+    submesh_count = camera->visible_obj_count;
+    camera->submesh_count = submesh_count;
+    camera->visible_obj_count = 0; // Reset for actual culling step
 
-  if (0 < local_38) {
-    local_48 = g_LisaVisibleObjects;
-    local_44 = g_LisaVisibleObjects;
+    if (0 < submesh_count) {
+        LisaDynamicObject **src_array = (LisaDynamicObject **)g_LisaVisibleObjects;
+        LisaDynamicObject **dst_array = (LisaDynamicObject **)g_LisaVisibleObjects;
 
-    do {
-      local_i3 = *local_44;
-      local_l23 = __ftol();
-      local_i21 = (int)local_l23;
-      local_l23 = __ftol();
-      local_i12 = (int)local_l23;
-      local_l23 = __ftol();
-      local_i13 = (int)local_l23;
-      local_i16 = (int)*(short *)(local_i3 + 0x22);
-      local_i15 = (local_i13 * local_4 + local_i12 * local_8 + local_i21 * local_c >> 0xf) + local_i4;
+        do {
+            obj_ptr = *src_array;
+            
+            // Re-read ftol inputs, presumably xyz pos of object relative to camera
+            cam_val1 = __ftol();
+            obj_x = (int)cam_val1;
+            cam_val1 = __ftol();
+            obj_y = (int)cam_val1;
+            cam_val1 = __ftol();
+            obj_z = (int)cam_val1;
+            
+            obj_radius = obj_ptr->unknown_22; // Offset 0x22 (34) -> unknown_22
+            
+            // Matrix multiply: rot_matrix[6, 7, 8] are local_4, local_8, local_c
+            z_depth = ((obj_z * rot_matrix[6] + obj_y * rot_matrix[7] + obj_x * rot_matrix[8]) >> 15) + vp_center_y;
 
-      if (-1 < local_i15 + local_i16) {
-        if (local_i15 < local_i4) {
-          local_i15 = local_i4;
-        }
+            if (-1 < z_depth + obj_radius) {
+                if (z_depth < vp_center_y) {
+                    z_depth = vp_center_y;
+                }
 
-        local_i20 = local_i17 + ((local_i13 * local_1c + local_i12 * local_20 + local_i21 * local_24 >> 0xf) *
+                proj_x = fov_x + (((obj_z * rot_matrix[3] + obj_y * rot_matrix[4] + obj_x * rot_matrix[5]) >> 15) *
+                                  -vp_center_x) / z_depth;
+                rad_x = 2 - (-vp_center_x * obj_radius) / z_depth;
 
-                          -local_i5) / local_i15;
-        local_i22 = 2 - (-local_i5 * local_i16) / local_i15;
+                if ((min_x <= rad_x + proj_x) && (proj_x - rad_x <= max_x)) {
+                    proj_y = fov_y + (((obj_z * rot_matrix[0] + obj_y * rot_matrix[1] + obj_x * rot_matrix[2]) >> 15) *
+                                     -vp_center_y) / z_depth;
+                    rad_y = 2 - (-vp_center_y * obj_radius) / z_depth;
 
-        if ((local_i8 <= local_i22 + local_i20) || (local_i20 - local_i22 <= local_i9)) {
-          local_i21 = local_i2 + ((local_i13 * local_10 + local_i12 * local_14 + local_i21 * local_18 >> 0xf) *
-
-                           -local_i1) / local_i15;
-          local_i15 = 2 - (-local_i1 * local_i16) / local_i15;
-
-          if ((local_i10 < local_i21 + local_i15) && (local_i21 - local_i15 < local_i11)) {
-            *(int *)(local_i18 + 0x60) = *(int *)(local_i18 + 0x60) + 1;
-            *local_48 = local_i3;
-            local_48 = local_48 + 1;
-          }
-
-        }
-
-      }
-
-      local_44 = local_44 + 1;
-      local_38 = local_38 + -1;
-    } while (local_38 != 0);
-  }
-
-  return 0;
+                    if ((min_y < proj_y + rad_y) && (proj_y - rad_y < max_y)) {
+                        camera->visible_obj_count++;
+                        *dst_array = obj_ptr;
+                        dst_array++;
+                    }
+                }
+            }
+            src_array++;
+            submesh_count--;
+        } while (submesh_count != 0);
+    }
+    return 0;
 }
 
 /**
