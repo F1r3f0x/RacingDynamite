@@ -550,11 +550,11 @@ extern int *g_LisaDrawCommandBuffer;
 /* extern int *g_ppLisaNextFreeObject; */
 extern void *g_LisaOpcodeTable[];
 extern void *g_LisaRasterizerJmpTable[];
-extern void *PTR_FUN_004abe6c[];
+extern void *g_pLisaShutdownCallbacks[];
 extern void *PTR_Lisa_DrawTexturedTriangle_Op15_0049c934;
 extern void *PTR_LAB_0049c924;
 extern void *g_LisaRasterizerJmpTable[];
-extern void *PTR_FUN_004abe6c[];
+extern void *g_pLisaShutdownCallbacks[];
 extern void *g_LisaOpcodeTable[];
 extern void *PTR_LAB_0049c924;
 extern void *PTR_Lisa_DrawTexturedTriangle_Op15_0049c934;
@@ -5673,7 +5673,7 @@ long long Lisa_InitRasterizerTables(int arg_1,unsigned int arg_2) {
       local_u2 = local_u2 + 1;
     } while (local_u2 != 0x3a9b);
 
-    for (ppuVar5 = (char **)PTR_FUN_004abe6c; *ppuVar5 != (char *)0x0; ppuVar5 = ppuVar5 + 1) {
+    for (ppuVar5 = (char **)g_pLisaShutdownCallbacks; *ppuVar5 != (char *)0x0; ppuVar5 = ppuVar5 + 1) {
       (*(void (*)())*ppuVar5)(ppuVar5,unaff_ESI,unaff_EBX);
     }
 
