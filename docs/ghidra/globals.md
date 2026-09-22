@@ -108,3 +108,10 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x00639330` | `SceneryParticle` | `g_ActiveParticle` | Scratch particle struct populated during effect dispatch. |
 | `0x0063c5f0` | `double[20]` | `g_pActiveCamera` | Active camera position, direction, and projection matrix array. |
 
+| `0x0054f980` | `double` | `g_RaceTimer` | Active race timer logic variable. |
+| `0x0063f2d8` | `int32_t*` | `g_pActiveDrawBuffer` | Pointer to the active draw buffer. |
+| `0x0054f994` | `LisaEntityTransform*`| `g_pFXTransforms` | Array of dynamic object transforms for VFX and debris. |
+| `0x00563d54` | `struct*` | `g_VehicleCameraStates`| Camera state structure per vehicle. |
+| `0x00553280` | `int32_t` | `g_LapsTotal` | Number of laps for the current race. |
+| `0x004920e8` | `char*` | `g_Format_Str_s` | Format string `"%s"`. |
+| `0x00493c78` | `char*` | `g_Format_Str_d` | Format string `"%d"`. |

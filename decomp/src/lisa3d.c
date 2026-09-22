@@ -549,11 +549,11 @@ extern int *g_pLisaActiveMipTable;
 extern int *g_LisaDrawCommandBuffer;
 /* extern int *g_ppLisaNextFreeObject; */
 extern void *g_LisaOpcodeTable[];
-extern void *PTR_DAT_004abe10[];
+extern void *g_LisaRasterizerJmpTable[];
 extern void *PTR_FUN_004abe6c[];
 extern void *PTR_Lisa_DrawTexturedTriangle_Op15_0049c934;
 extern void *PTR_LAB_0049c924;
-extern void *PTR_DAT_004abe10[];
+extern void *g_LisaRasterizerJmpTable[];
 extern void *PTR_FUN_004abe6c[];
 extern void *g_LisaOpcodeTable[];
 extern void *PTR_LAB_0049c924;
@@ -5726,7 +5726,7 @@ long long Lisa_ExecuteRasterizerCommands(int arg_1,unsigned int arg_2) {
   g_pLisaEdgeBuffer = (int *)*g_pLisaSpanBuffer;
 
   if (g_pLisaEdgeBuffer != (int *)0x0) {
-    local_l1 = (*(long long (*)())(((void **)PTR_DAT_004abe10)[*g_pLisaEdgeBuffer]))();
+    local_l1 = (*(long long (*)())(((void **)g_LisaRasterizerJmpTable)[*g_pLisaEdgeBuffer]))();
     return local_l1;
   }
 
