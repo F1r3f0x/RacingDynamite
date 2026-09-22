@@ -502,19 +502,19 @@ int Lisa_RenderScene(void);
 int * Lisa_InitEngineMemory(void);
 void Lisa_FreeEngineMemory(void);
 int Lisa_InitSpatialGrid(int grid_w, int grid_h, size_t max_objects);
-long long Lisa_CreateDynamicObject(int arg_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9);
+LisaReturn64 Lisa_CreateDynamicObject(int arg_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9);
 int Lisa_MoveDynamicObject(LisaEntityTransform *entity);
 int Lisa_UpdateObjectSpatialGrid(LisaEntityTransform *entity);
-long long Lisa_SetDynamicObjectMesh(int arg_1, int arg_2, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9);
+LisaReturn64 Lisa_SetDynamicObjectMesh(int arg_1, int arg_2, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9);
 int Lisa_DeleteDynamicObject(LisaEntityTransform *entity);
-unsigned long long Lisa_SetCameraViewport(void);
+LisaReturn64 Lisa_SetCameraViewport(void);
 int Lisa_GenerateMipmaps(unsigned int *texture_data, int width, int height, int page_w, int page_h, int mip_count, int flag1, int flag2, char *name);
 void Lisa_GenerateTextureSpanTable(int src_w, int src_h, int dst_w, int dst_h, int *span_table);
 void Lisa_DownsampleTextureMipmap(byte *src, byte *dst, int src_w, int src_h, int dst_w, int dst_h);
 void Lisa_FilterTextureBlock(byte *src, int src_w, int src_h, int dst_w, int dst_h, int filter_mode, int stride, int flags);
 void Lisa_LoadOrCreateShadingTable(int shade_level, int lighting_mode);
 unsigned int Lisa_FindClosestPaletteColor(int *rgb, int palette_offset);
-unsigned long long Lisa_RenderSkyBackdrop(void);
+LisaReturn64 Lisa_RenderSkyBackdrop(void);
 int Lisa_CullObjectsOrthographic(void);
 int Lisa_FrustumCullObjects(void);
 int Lisa_CullObjects(void);
@@ -534,8 +534,8 @@ void Lisa_DrawBillboard_Op07(void);
 void Lisa_DrawBillboard_Op08(void);
 void Lisa_DrawTexturedTriangle_Op15(void);
 void Lisa_DrawTexturedTriangle_Op15_Sub(void);
-long long Lisa_InitRasterizerTables(int mode, unsigned int flags);
-long long Lisa_ExecuteRasterizerCommands(int mode, unsigned int flags);
+LisaReturn64 Lisa_InitRasterizerTables(int mode, unsigned int flags);
+LisaReturn64 Lisa_ExecuteRasterizerCommands(int mode, unsigned int flags);
 
 /* --- Automatically extracted globals for Lisa 3D rendering pipeline --- */
 
@@ -1085,7 +1085,7 @@ int Lisa_InitSpatialGrid(int grid_w, int grid_h, size_t max_objects) {
  * @original Lisa_CreateDynamicObject (IGN_WIN.EXE @ 0x00446d90, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long Lisa_CreateDynamicObject(int arg_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9) {
+LisaReturn64 Lisa_CreateDynamicObject(int arg_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9) {
   LisaDynamicObject *obj;
   int max_dist;
   int i;
@@ -1096,7 +1096,7 @@ long long Lisa_CreateDynamicObject(int arg_1, int object_id, LisaEntityTransform
   obj = *g_ppLisaNextFreeObject;
 
   if (obj == (LisaDynamicObject *)0xffffffff) {
-    return (((long long)(object_id) << 32) | 0xffffffff);
+    LisaReturn64 _r; _r.edx = object_id; _r.eax = 0xffffffff; return _r;
   }
 
   g_ppLisaNextFreeObject++;
@@ -1144,7 +1144,7 @@ long long Lisa_CreateDynamicObject(int arg_1, int object_id, LisaEntityTransform
     obj->unknown_22 = (short)max_dist;
   }
 
-  return 0;
+  { LisaReturn64 _r; _r.edx = 0; _r.eax = 0; return _r; }
 }
 
 /**
@@ -1239,7 +1239,7 @@ int Lisa_UpdateObjectSpatialGrid(LisaEntityTransform *entity) {
  * @original Lisa_SetDynamicObjectMesh (IGN_WIN.EXE @ 0x00447070, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long Lisa_SetDynamicObjectMesh(int arg_1, int arg_2, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9) {
+LisaReturn64 Lisa_SetDynamicObjectMesh(int arg_1, int arg_2, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9) {
   LisaDynamicObject *obj;
   int max_dist;
   int i;
@@ -1283,7 +1283,7 @@ long long Lisa_SetDynamicObjectMesh(int arg_1, int arg_2, LisaEntityTransform *e
     obj->unknown_22 = (short)max_dist;
   }
 
-  return (unsigned long long)ret_val << 32;
+  { LisaReturn64 _r; _r.edx = ret_val; _r.eax = 0; return _r; }
 }
 
 /**
@@ -1322,10 +1322,10 @@ int Lisa_DeleteDynamicObject(LisaEntityTransform *entity) {
  * @original Lisa_SetCameraViewport (IGN_WIN.EXE @ 0x004471e0, lisa3d.c)
  * @fidelity ADAPTED
  */
-unsigned long long Lisa_SetCameraViewport(void) {
+LisaReturn64 Lisa_SetCameraViewport(void) {
   int local_i1;
-  long long local_l2;
-  unsigned long long local_u3;
+  int local_l2;
+  unsigned int local_u3;
 
   
 
@@ -1340,7 +1340,7 @@ unsigned long long Lisa_SetCameraViewport(void) {
   *(int *)(local_i1 + 0x9c) = (int)local_l2;
   local_u3 = __ftol();
   *(int *)(local_i1 + 0xa0) = (int)local_u3;
-  return local_u3 & 0xffffffff00000000;
+  { LisaReturn64 _r; _r.edx = local_u3; _r.eax = 0; return _r; }
 }
 
 /**
@@ -1363,7 +1363,7 @@ int Lisa_GenerateMipmaps(unsigned int *arg_1,int arg_2,int arg_3,int arg_4,int a
   byte *pbVar13;
   unsigned int *local_pu14;
   int local_b15;
-  long long local_l16;
+  int local_l16;
   byte *local_440;
   int local_438;
   byte *local_428;
@@ -1442,7 +1442,7 @@ int Lisa_GenerateMipmaps(unsigned int *arg_1,int arg_2,int arg_3,int arg_4,int a
 
       if (0 < arg_7 / arg_6) {
         local_424 = local_440;
-        local_i9 = (int)(0x100 / (long long)arg_5);
+        local_i9 = (int)(0x100 / (int)arg_5);
         local_428 = pbVar7;
         local_40c = arg_7 / arg_6;
 
@@ -2524,7 +2524,7 @@ unsigned int Lisa_FindClosestPaletteColor(int *arg_1,int arg_2) {
  * @original Lisa_RenderSkyBackdrop (IGN_WIN.EXE @ 0x00448990, lisa3d.c)
  * @fidelity ADAPTED
  */
-unsigned long long Lisa_RenderSkyBackdrop(void) {
+LisaReturn64 Lisa_RenderSkyBackdrop(void) {
   float local_f1;
   int local_i2;
   int local_i3;
@@ -2533,8 +2533,8 @@ unsigned long long Lisa_RenderSkyBackdrop(void) {
   unsigned int local_u6;
   double extraout_ST0;
   double extraout_ST1;
-  long long local_l7;
-  unsigned long long local_u8;
+  int local_l7;
+  unsigned int local_u8;
 
   
 
@@ -2544,7 +2544,7 @@ unsigned long long Lisa_RenderSkyBackdrop(void) {
   local_l7 = __ftol();
   local_i4 = (int)local_l7;
   local_l7 = __ftol();
-  local_u6 = (unsigned int)((unsigned long long)local_l7 >> 0x20);
+  local_u6 = (unsigned int)((unsigned int)local_l7 >> 0);
   local_i5 = (int)local_l7;
   local_f1 = (float)SQRT(extraout_ST1 * extraout_ST1 + extraout_ST0 * extraout_ST0);
 
@@ -2558,31 +2558,31 @@ unsigned long long Lisa_RenderSkyBackdrop(void) {
     else if (local_i4 == 0) {
       *(int *)(local_i2 + 0x18) = 0;
       *(int *)(local_i2 + 0x1c) = 0;
-      local_l7 = (unsigned long long)local_u6 << 0x20;
+      local_l7 = (unsigned int)local_u6 << 0;
     }
 
     else if ((local_i4 == 0) && (ABS(local_f1) == 0.0)) {
       *(int *)(local_i2 + 0x18) = 0;
       *(int *)(local_i2 + 0x1c) = 0;
-      local_l7 = (unsigned long long)local_u6 << 0x20;
+      local_l7 = (unsigned int)local_u6 << 0;
     }
 
     else if ((local_i4 < 0) && (ABS(local_f1) == 0.0)) {
       *(int *)(local_i2 + 0x18) = 0;
       *(int *)(local_i2 + 0x1c) = 0x40a51800;
-      local_l7 = (((long long)(local_u6) << 32) | ((unsigned int)(local_f1)));
+      local_l7 = (((int)(local_u6) << 0) | ((unsigned int)(local_f1)));
     }
 
     else {
-      local_l7 = (unsigned long long)local_u6 << 0x20;
+      local_l7 = (unsigned int)local_u6 << 0;
 
       if (0 < local_i4) {
-        local_l7 = (((long long)(local_u6) << 32) | ((unsigned int)(local_f1)));
+        local_l7 = (((int)(local_u6) << 0) | ((unsigned int)(local_f1)));
 
         if (ABS(local_f1) == 0.0) {
           *(int *)(local_i2 + 0x18) = 0;
           *(int *)(local_i2 + 0x1c) = 0x408c2000;
-          local_l7 = (((long long)(local_u6) << 32) | ((unsigned int)(local_f1)));
+          local_l7 = (((int)(local_u6) << 0) | ((unsigned int)(local_f1)));
         }
 
       }
@@ -2597,7 +2597,7 @@ unsigned long long Lisa_RenderSkyBackdrop(void) {
     *(double *)(local_i2 + 0x18) = (double)(int)local_l7;
   }
 
-  local_u6 = (unsigned int)((unsigned long long)local_l7 >> 0x20);
+  local_u6 = (unsigned int)((unsigned int)local_l7 >> 0);
 
   if ((local_i3 < 1) || (local_i5 < 1)) {
     if ((local_i5 < 0) && (0 < local_i3)) {
@@ -2617,14 +2617,14 @@ unsigned long long Lisa_RenderSkyBackdrop(void) {
         if (0 < local_i5) {
           *(int *)(local_i2 + 0x20) = 0;
           *(int *)(local_i2 + 0x24) = 0;
-          local_u8 = (unsigned long long)local_u6 << 0x20;
+          local_u8 = (unsigned int)local_u6 << 0;
           goto LAB_00448c11;
         }
 
         if (local_i5 < 0) {
           *(int *)(local_i2 + 0x20) = 0;
           *(int *)(local_i2 + 0x24) = 0x409c2000;
-          local_u8 = (unsigned long long)local_u6 << 0x20;
+          local_u8 = (unsigned int)local_u6 << 0;
           goto LAB_00448c11;
         }
 
@@ -2633,16 +2633,16 @@ unsigned long long Lisa_RenderSkyBackdrop(void) {
       if ((local_i5 == 0) && (0 < local_i3)) {
         *(int *)(local_i2 + 0x20) = 0;
         *(int *)(local_i2 + 0x24) = 0x408c2000;
-        local_u8 = (unsigned long long)local_u6 << 0x20;
+        local_u8 = (unsigned int)local_u6 << 0;
       }
 
       else {
-        local_u8 = (unsigned long long)local_u6 << 0x20;
+        local_u8 = (unsigned int)local_u6 << 0;
 
-        if ((local_i5 == 0) && (local_u8 = (unsigned long long)local_u6 << 0x20, local_i3 < 0)) {
+        if ((local_i5 == 0) && (local_u8 = (unsigned int)local_u6 << 0, local_i3 < 0)) {
           *(int *)(local_i2 + 0x20) = 0;
           *(int *)(local_i2 + 0x24) = 0x40a51800;
-          local_u8 = (unsigned long long)local_u6 << 0x20;
+          local_u8 = (unsigned int)local_u6 << 0;
         }
 
       }
@@ -2682,9 +2682,9 @@ int Lisa_CullObjectsOrthographic(void) {
     int array_index;
     int cell_index;
     int grid_index;
-    long long cam_z_int;
-    long long cam_x_int;
-    long long cam_y_int;
+    int cam_z_int;
+    int cam_x_int;
+    int cam_y_int;
     int param_idx;
     int count;
 
@@ -2817,7 +2817,7 @@ int Lisa_FrustumCullObjects(void) {
     int grid_stride;
     int submesh_count;
     
-    long long cam_val1, cam_val2, cam_val3;
+    int cam_val1, cam_val2, cam_val3;
     double extraout_ST1;
 
     // Viewport and rotation vars
@@ -3123,9 +3123,9 @@ int Lisa_CullObjects(void) {
   double local_f28;
   double local_f29;
   double extraout_ST1;
-  long long local_l30;
-  long long local_l31;
-  long long local_l32;
+  int local_l30;
+  int local_l31;
+  int local_l32;
   int local_70;
   int *local_6c;
   int local_68;
@@ -3581,10 +3581,10 @@ void Lisa_TransformVertices(void) {
   double local_f19;
   double local_f20;
   double local_f21;
-  long long local_l22;
-  long long local_l23;
-  long long local_l24;
-  long long local_l25;
+  int local_l22;
+  int local_l23;
+  int local_l24;
+  int local_l25;
   int local_1c;
   int local_18;
   int local_10;
@@ -3785,10 +3785,10 @@ int Lisa_TransformVerticesPanorama(void) {
   double local_f18;
   double local_f19;
   double local_f20;
-  long long local_l21;
-  long long local_l22;
-  long long local_l23;
-  long long local_l24;
+  int local_l21;
+  int local_l22;
+  int local_l23;
+  int local_l24;
   int local_20;
   int local_1c;
   int local_10;
@@ -3966,15 +3966,15 @@ int Lisa_ComputeObjectMatrix(int arg_1,int arg_2,int arg_3,int arg_4,int *arg_5)
   int local_i12;
   int local_i13;
   int local_i14;
-  long long local_l15;
-  long long local_l16;
-  long long local_l17;
-  long long local_l18;
-  long long local_l19;
-  long long local_l20;
-  long long local_l21;
-  long long local_l22;
-  long long local_l23;
+  int local_l15;
+  int local_l16;
+  int local_l17;
+  int local_l18;
+  int local_l19;
+  int local_l20;
+  int local_l21;
+  int local_l22;
+  int local_l23;
   int local_58;
 
   
@@ -4096,15 +4096,15 @@ int Lisa_TransformSubmeshVerticesPanorama(int arg_1,int arg_2,int arg_3,int arg_
   int local_i11;
   int local_i12;
   int local_i13;
-  long long local_l14;
-  long long local_l15;
-  long long local_l16;
-  long long local_l17;
-  long long local_l18;
-  long long local_l19;
-  long long local_l20;
-  long long local_l21;
-  long long local_l22;
+  int local_l14;
+  int local_l15;
+  int local_l16;
+  int local_l17;
+  int local_l18;
+  int local_l19;
+  int local_l20;
+  int local_l21;
+  int local_l22;
   int local_58;
 
   
@@ -4216,7 +4216,7 @@ int Lisa_TransformSubmeshVerticesPanorama(int arg_1,int arg_2,int arg_3,int arg_
 void Lisa_ComputeCameraRotationMatrix(int *arg_1) {
   double local_f1;
   double local_f2;
-  long long local_l3;
+  int local_l3;
 
   
 
@@ -4952,7 +4952,7 @@ void Lisa_DrawTexturedTriangle_Op15(void) {
   int local_i22;
   int *local_pu23;
   int local_i24;
-  long long local_l25;
+  int local_l25;
 
   
 
@@ -5258,7 +5258,7 @@ void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
   int local_i25;
   int local_i26;
   int *local_pu27;
-  long long local_l28;
+  int local_l28;
 
   
 
@@ -5580,7 +5580,7 @@ LAB_0044ecb6:
  * @original Lisa_InitRasterizerTables (IGN_WIN.EXE @ 0x0044f070, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long Lisa_InitRasterizerTables(int arg_1,unsigned int arg_2) {
+LisaReturn64 Lisa_InitRasterizerTables(int arg_1,unsigned int arg_2) {
   int in_EAX;
   short sVar1;
   int unaff_EBX;
@@ -5599,7 +5599,7 @@ long long Lisa_InitRasterizerTables(int arg_1,unsigned int arg_2) {
     g_LisaAspectScale = unaff_EBX;
 
     do {
-      *local_pi4 = (int)(0x10000 / (unsigned long long)local_u2) + -1;
+      *local_pi4 = (int)(0x10000 / (unsigned int)local_u2) + -1;
       local_pi4 = local_pi4 + 1;
       local_u2 = local_u2 + 1;
     } while (local_u2 != 0x3a9b);
@@ -5618,19 +5618,19 @@ long long Lisa_InitRasterizerTables(int arg_1,unsigned int arg_2) {
       local_i3 = local_i3 + in_EAX;
       sVar1 = sVar1 + -1;
     } while (sVar1 != 0);
-    return (unsigned long long)arg_2 << 0x20;
+    { LisaReturn64 _r; _r.edx = arg_2; _r.eax = 0; return _r; }
   }
 
-  return (((long long)(arg_2) << 32) | ((unsigned int)(0xffffffff)));
+  { LisaReturn64 _r; _r.edx = arg_2; _r.eax = 0xffffffff; return _r; }
 }
 
 /**
  * @original Lisa_ExecuteRasterizerCommands (IGN_WIN.EXE @ 0x0044f0e9, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long Lisa_ExecuteRasterizerCommands(int arg_1,unsigned int arg_2) {
+LisaReturn64 Lisa_ExecuteRasterizerCommands(int arg_1,unsigned int arg_2) {
   int *unaff_ESI;
-  long long local_l1;
+  LisaReturn64 local_l1;
 
   
 
@@ -5657,9 +5657,9 @@ long long Lisa_ExecuteRasterizerCommands(int arg_1,unsigned int arg_2) {
   g_pLisaEdgeBuffer = (int *)*g_pLisaSpanBuffer;
 
   if (g_pLisaEdgeBuffer != (int *)0x0) {
-    local_l1 = (*(long long (*)())(((void **)g_LisaRasterizerJmpTable)[*g_pLisaEdgeBuffer]))();
+    local_l1 = (*(LisaReturn64 (*)())(((void **)g_LisaRasterizerJmpTable)[*g_pLisaEdgeBuffer]))();
     return local_l1;
   }
 
-  return (unsigned long long)arg_2 << 0x20;
+  { LisaReturn64 _r; _r.edx = arg_2; _r.eax = 0; return _r; }
 }

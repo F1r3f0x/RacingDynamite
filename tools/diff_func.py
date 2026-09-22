@@ -116,7 +116,125 @@ def get_symbol_size(symbols, target_sym, sec_size):
         return min(next_vals) - target_val
     return sec_size - target_val
 
-def diff_func(symbol_name: str, dos_addr: int, size: int = 0, obj_file: Path = None, verbose: bool = True):
+
+def get_rebuilt_func(symbol_name: str, size: int):
+    map_path = ROOT / "build" / "decomp" / "MAINDOS_REBUILT.MAP"
+    exe_path = ROOT / "build" / "decomp" / "MAINDOS_REBUILT.EXE"
+    if not map_path.exists() or not exe_path.exists():
+        return None, None
+    with open(map_path, "r", encoding="utf-8") as f:
+        map_lines = f.readlines()
+    target_rva = None
+    target_names = [symbol_name, f"{symbol_name}_", f"_{symbol_name}"]
+    rvas = []
+    for line in map_lines:
+        parts = line.split()
+        if len(parts) >= 2 and ":" in parts[0]:
+            addr_str = parts[0]
+            if addr_str.endswith("*") or addr_str.endswith("+"):
+                addr_str = addr_str[:-1]
+            seg_str, off_str = addr_str.split(":")
+            if not off_str: continue
+            sym = parts[1]
+            try:
+                seg = int(seg_str, 16)
+                off = int(off_str, 16)
+                
+                # Seg 1 is _TEXT (RVA 0x1000), Seg 2 is DGROUP (RVA 0x10000)
+                # ImageBase is 0x400000
+                if seg == 1:
+                    val = 0x400000 + 0x1000 + off
+                elif seg == 2:
+                    val = 0x400000 + 0x10000 + off
+                else:
+                    continue
+            except ValueError:
+                continue
+            rvas.append((val, sym))
+            if sym in target_names:
+                target_rva = val
+    
+    if target_rva is not None and size <= 0:
+        # Find next rva
+        rvas.sort(key=lambda x: x[0])
+        for idx, (v, s) in enumerate(rvas):
+            if v == target_rva:
+                if idx + 1 < len(rvas):
+                    size = rvas[idx+1][0] - target_rva
+                else:
+                    size = 0x100 # fallback
+                break
+    if target_rva is None:
+        return None, None
+    with open(exe_path, "rb") as f:
+        data = f.read()
+    pe_hdr_off = int.from_bytes(data[0x3C:0x40], "little")
+    num_sections = int.from_bytes(data[pe_hdr_off+6:pe_hdr_off+8], "little")
+    opt_hdr_sz = int.from_bytes(data[pe_hdr_off+20:pe_hdr_off+22], "little")
+    sections_off = pe_hdr_off + 24 + opt_hdr_sz
+    raw_off = None
+    image_base = int.from_bytes(data[pe_hdr_off+52:pe_hdr_off+56], "little")
+    rva = target_rva - image_base
+    for i in range(num_sections):
+        sec = data[sections_off + i*40 : sections_off + (i+1)*40]
+        v_size = int.from_bytes(sec[8:12], "little")
+        v_addr = int.from_bytes(sec[12:16], "little")
+        raw_size = int.from_bytes(sec[16:20], "little")
+        raw_ptr = int.from_bytes(sec[20:24], "little")
+        if v_addr <= rva < v_addr + max(v_size, raw_size):
+            raw_off = raw_ptr + (rva - v_addr)
+            break
+    if raw_off is None:
+        return None, None
+    return data[raw_off : raw_off + size], target_rva
+
+def diff_func(symbol_name: str, dos_addr: int, size: int = 0, obj_file = None, verbose: bool = True):
+    rebuilt_code, target_val = get_rebuilt_func(symbol_name, size)
+    
+    if rebuilt_code is None:
+        return _diff_func_orig(symbol_name, dos_addr, size, obj_file, verbose)
+        
+    orig_code = get_orig_func(dos_addr, len(rebuilt_code))
+    
+    import capstone
+    md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)
+    orig_ins = list(md.disasm(orig_code, dos_addr))
+    comp_ins = list(md.disasm(rebuilt_code, target_val))
+    
+    if verbose:
+        print(f"=== Diffing {symbol_name} (DOS: {hex(dos_addr)}, Size: {size} bytes) ===")
+        print(f"{'ORIGINAL (MAINDOS)':<45} | {'COMPILED (Watcom)':<45}")
+        print("-" * 93)
+    
+    max_len = max(len(orig_ins), len(comp_ins))
+    matches = 0
+    mismatches = 0
+    
+    for i in range(max_len):
+        o_str = ""
+        c_str = ""
+        
+        if i < len(orig_ins):
+            o_ins = orig_ins[i]
+            o_str = normalize_asm(o_ins.mnemonic, o_ins.op_str, o_ins.address, dos_addr)
+        if i < len(comp_ins):
+            c_ins = comp_ins[i]
+            c_str = normalize_asm(c_ins.mnemonic, c_ins.op_str, c_ins.address, target_val)
+            
+        match = o_str == c_str
+        if match:
+            matches += 1
+        else:
+            mismatches += 1
+            
+        if verbose:
+            flag = " " if match else "!"
+            print(f"{flag} {o_str:<43} | {c_str:<43}")
+            
+    pct = (matches / max_len * 100.0) if max_len > 0 else 0.0
+    return (mismatches == 0 and max_len > 0), pct, matches, max_len
+
+def _diff_func_orig(symbol_name: str, dos_addr: int, size: int = 0, obj_file: Path = None, verbose: bool = True):
     if obj_file is None:
         # Search all obj files in build/decomp
         for cand in (ROOT / "build" / "decomp").glob("*.obj"):

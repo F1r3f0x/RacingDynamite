@@ -305,4 +305,10 @@ void Input_PollPlayerVehicleControls(void);
 void Ghost_SaveCarAndPath(void);
 void Track_SaveBinaryCache(void);
 
+extern int FixedMul10(int a, int b);
+#pragma aux FixedMul10 = \
+    "imul edx" \
+    "shrd eax, edx, 10" \
+    parm [eax] [edx] value [eax] modify [edx];
+
 #endif /* MAIN_H */

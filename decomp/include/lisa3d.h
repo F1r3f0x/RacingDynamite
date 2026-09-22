@@ -7,6 +7,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct {
+    unsigned int eax;
+    unsigned int edx;
+} LisaReturn64;
+
 #pragma pack(push, 1)
 typedef struct {
     uint8_t *file_data;         /* 0x00 */

@@ -14,7 +14,7 @@ typedef double undefined8;
 typedef double float10;
 typedef unsigned int uint;
 typedef unsigned short ushort;
-typedef long long longlong;
+
 
 
 /* Global Game Engine State */
@@ -2107,9 +2107,9 @@ void FX_UpdateTransparentSpriteObject(void *particle, int instance_idx) {
     p->pos_x += p->vel_x;
     p->pos_y += p->vel_y;
     p->pos_z += p->vel_z;
-    p->vel_x = (int)((longlong)p->vel_x * p->drag) >> 10;
+    p->vel_x = FixedMul10(p->vel_x, p->drag);
     p->vel_y += p->gravity;
-    p->vel_z = (int)((longlong)p->vel_z * p->drag) >> 10;
+    p->vel_z = FixedMul10(p->vel_z, p->drag);
 
     p->field_24++;
     if (p->field_24 >= p->life) {
@@ -2178,9 +2178,9 @@ void FX_UpdateSuperPlotObject(void *particle, int instance_idx) {
     p->pos_x += p->vel_x;
     p->pos_y += p->vel_y;
     p->pos_z += p->vel_z;
-    p->vel_x = (int)((longlong)p->vel_x * 0x3e0) >> 10;
+    p->vel_x = FixedMul10(p->vel_x, 0x3e0);
     p->vel_y += p->gravity;
-    p->vel_z = (int)((longlong)p->vel_z * 0x3e0) >> 10;
+    p->vel_z = FixedMul10(p->vel_z, 0x3e0);
 
     p->field_24++;
     if (p->field_24 >= p->life) {
