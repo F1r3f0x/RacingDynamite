@@ -1,6 +1,7 @@
 # Ignition (1997) Reverse Engineering & Porting Rules
 
-**CURRENT PHASE:** Functional decompilation of `MAINDOS_32BIT.EXE` to pure C (Open Watcom V2). Byte-matching is NOT required in this phase.
+**CURRENT PHASE:** 1:1 Byte-matching decompilation of `MAINDOS_32BIT.EXE` to pure C using the authentic 1996 Watcom C/C++ 10.6 compiler. Because we have the original toolchain, we aim for bit-for-bit accuracy directly from the start of the decompilation process.
+
 
 ## 1. Decompilation Constraints (MAINDOS_32BIT.EXE)
 - **TARGET:** ONLY reverse-engineer `MAINDOS_32BIT.EXE`. Use `IGN_WIN.EXE` purely as a reference.

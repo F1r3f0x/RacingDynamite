@@ -78,3 +78,5 @@ __pycache__/
 .DS_Store
 Thumbs.db
 scratch/
+/tools/openwatcomv2/
+*.err

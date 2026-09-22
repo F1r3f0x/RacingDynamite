@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 TOOLS_DIR = ROOT_DIR / "tools"
 OBJDIFF_DIR = TOOLS_DIR / "objdiff"
-WATCOM_DIR = TOOLS_DIR / "watcom"
+WATCOM_DIR = TOOLS_DIR / "openwatcomv2"
 
 OBJDIFF_GUI_URL = "https://github.com/encounter/objdiff/releases/download/v3.8.1/objdiff-windows-x86_64.exe"
 OBJDIFF_CLI_URL = "https://github.com/encounter/objdiff/releases/download/v3.8.1/objdiff-cli-windows-x86_64.exe"

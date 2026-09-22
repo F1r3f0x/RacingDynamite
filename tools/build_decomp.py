@@ -90,7 +90,6 @@ def compile_file(src_path: Path):
     cmd = [
         str(WCC386),
         *flags,
-        "-eoc",
         "-zq",
         f"-fo={obj_path}",
         str(src_path)
