@@ -86,10 +86,10 @@ extern long long Lisa_InitRasterizerTables(int a, unsigned int b);
 extern int *g_pLisaDrawCommandQueue;
 extern int *g_LisaDrawCommandBuffer;
 extern unsigned long long Lisa_FlushRasterizerCommands(int a, unsigned int b);
-void FX_UpdateVehicleWreck(int *param_1);
-void FX_UpdateDetachedWheel(int *param_1, int param_2);
-void FX_UpdateVehicleCrashSequence(int *param_1);
-void FX_UpdateCarDebris(int *param_1, int param_2);
+void FX_UpdateVehicleWreck(int *wreck);
+void FX_UpdateDetachedWheel(int *wheel, int wheel_index);
+void FX_UpdateVehicleCrashSequence(int *crash_seq);
+void FX_UpdateCarDebris(int *debris, int debris_idx);
 void FX_SpawnWaterSplashes(void);
 void FX_SpawnTireDirtDebris(void);
 void FX_SpawnLandingDustPuffs(void);
@@ -103,12 +103,12 @@ void HUD_RenderPauseMenu(void);
 void HUD_RenderConfirmationPrompt(void);
 int HUD_RenderTrackResults(void);
 void HUD_RenderPlayAgainPrompt(void);
-void Car_UpdateDynamicObjects(int param_1);
+void Car_UpdateDynamicObjects(int car_idx);
 int Video_SetGraphicsMode(void);
 void Video_FlipScreen(void);
 void HUD_RenderTelemetryOverlay(void);
-void HUD_CheckWrongWayHeading(int param_1);
-void HUD_RenderPlayerElements(int param_1);
+void HUD_CheckWrongWayHeading(int player_idx);
+void HUD_RenderPlayerElements(int player_idx);
 
 extern int DAT_004944e0;
 extern int DAT_004949bc;
@@ -1626,7 +1626,7 @@ void FX_UpdateWeatherBounds(void) {
  * @original FX_UpdateVehicleWreck (IGN_WIN.EXE @ 0x004307b0, fx.c)
  * @fidelity ADAPTED
  */
-void FX_UpdateVehicleWreck(int *param_1) {
+void FX_UpdateVehicleWreck(int *wreck) {
   int *piVar1;
   double dVar2;
   int uVar3;
@@ -1663,14 +1663,14 @@ void FX_UpdateVehicleWreck(int *param_1) {
   pdVar13 = g_Vehicles;
   local_18 = 0;
   local_34 = 0;
-  uVar3 = param_1[1];
-  uVar4 = param_1[2];
+  uVar3 = wreck[1];
+  uVar4 = wreck[2];
   local_30 = 0;
   local_1c = 0;
-  uVar5 = param_1[3];
-  iVar6 = param_1[4];
-  iVar23 = param_1[5];
-  iVar22 = param_1[6];
+  uVar5 = wreck[3];
+  iVar6 = wreck[4];
+  iVar23 = wreck[5];
+  iVar22 = wreck[6];
   iVar18 = iVar6 * 0x484c;
   *(int *)((int)g_Vehicles + iVar18 + 0x534) = 0;
   *(int *)((int)pdVar13 + iVar18 + 0x538) = 0x40590000;
@@ -2197,7 +2197,7 @@ LAB_00431ab6:
     if ((!bVar11) &&
        ((*(int *)((int)g_Vehicles + iVar18 + 0x528) == 0 ||
         (*(int *)((int)g_Vehicles + iVar18 + 0x604) == 1)))) {
-      *param_1 = 0;
+      *wreck = 0;
       *(int *)((int)g_Vehicles + iVar18 + 0x350) = 1;
       iVar23 = iVar6 * 0x20;
       *(int *)((int)g_Vehicles + iVar18 + 0x358) = 0;
@@ -2231,10 +2231,10 @@ LAB_00431ab6:
       local_3c = iVar20;
     }
   }
-  param_1[2] = uVar4;
-  param_1[1] = uVar3;
-  param_1[3] = uVar5;
-  param_1[5] = local_3c;
+  wreck[2] = uVar4;
+  wreck[1] = uVar3;
+  wreck[3] = uVar5;
+  wreck[5] = local_3c;
   return;
 }
 
@@ -2242,7 +2242,7 @@ LAB_00431ab6:
  * @original FX_UpdateDetachedWheel (IGN_WIN.EXE @ 0x00431d00, fx.c)
  * @fidelity ADAPTED
  */
-void FX_UpdateDetachedWheel(int *param_1,int param_2) {
+void FX_UpdateDetachedWheel(int *wheel, int wheel_index) {
   int uVar1;
   int uVar2;
   int uVar3;
@@ -2266,29 +2266,29 @@ void FX_UpdateDetachedWheel(int *param_1,int param_2) {
   int iVar21;
   int iVar22;
   int iVar23;
-  uVar1 = param_1[2];
-  uVar2 = param_1[1];
-  uVar3 = param_1[3];
-  uVar4 = param_1[4];
-  uVar5 = param_1[5];
-  uVar6 = param_1[6];
-  uVar7 = param_1[7];
-  uVar8 = param_1[8];
-  uVar9 = param_1[9];
-  uVar10 = param_1[10];
-  uVar11 = param_1[0xb];
-  iVar12 = param_1[0xd];
-  uVar13 = param_1[0xc];
-  iVar21 = param_1[0xf];
-  iVar14 = param_1[0x10];
-  iVar15 = param_1[0x11];
-  uVar16 = param_1[0xe];
-  iVar20 = param_1[0x12];
-  iVar17 = param_1[0x13];
-  iVar18 = param_1[0x15];
-  iVar22 = param_1[0x14];
+  uVar1 = wheel[2];
+  uVar2 = wheel[1];
+  uVar3 = wheel[3];
+  uVar4 = wheel[4];
+  uVar5 = wheel[5];
+  uVar6 = wheel[6];
+  uVar7 = wheel[7];
+  uVar8 = wheel[8];
+  uVar9 = wheel[9];
+  uVar10 = wheel[10];
+  uVar11 = wheel[0xb];
+  iVar12 = wheel[0xd];
+  uVar13 = wheel[0xc];
+  iVar21 = wheel[0xf];
+  iVar14 = wheel[0x10];
+  iVar15 = wheel[0x11];
+  uVar16 = wheel[0xe];
+  iVar20 = wheel[0x12];
+  iVar17 = wheel[0x13];
+  iVar18 = wheel[0x15];
+  iVar22 = wheel[0x14];
   if (iVar22 == 0) {
-    iVar23 = param_2 * 800;
+    iVar23 = wheel_index * 800;
     *(int *)(&DAT_00528800 + iVar23) = 4;
     *(int *)(&DAT_00528804 + iVar23) = 2;
     *(int *)(&DAT_00528808 + iVar23) = uVar2;
@@ -2313,10 +2313,10 @@ void FX_UpdateDetachedWheel(int *param_1,int param_2) {
     *(int *)(&DAT_0052886c + iVar23) = 2;
     *(int *)(&DAT_00528870 + iVar23) = 3;
     *(int *)(&DAT_0052888c + iVar23) = uVar16;
-    Lisa_SetDynamicObjectMesh(DAT_0054f994,uVar13,(int *)(param_2 * 0x20 + DAT_0054f994),
+    Lisa_SetDynamicObjectMesh(DAT_0054f994,uVar13,(int *)(wheel_index * 0x20 + DAT_0054f994),
                  (int *)(&DAT_00528800 + iVar23),uVar16,200,0,0x14,0);
   }
-  iVar23 = param_2 * 0x20;
+  iVar23 = wheel_index * 0x20;
   *(int *)(iVar23 + 4 + DAT_0054f994) = (int)(iVar21 + (iVar21 >> 0x1f & 0x3ffU)) >> 10;
   *(int *)(iVar23 + 8 + DAT_0054f994) = (int)(iVar14 + (iVar14 >> 0x1f & 0x3ffU)) >> 10;
   *(int *)(iVar23 + 0xc + DAT_0054f994) = (int)(iVar15 + (iVar15 >> 0x1f & 0x3ffU)) >> 10;
@@ -2334,7 +2334,7 @@ void FX_UpdateDetachedWheel(int *param_1,int param_2) {
     }
   }
   iVar20 = iVar20 + iVar17;
-  iVar21 = param_2 * 800;
+  iVar21 = wheel_index * 800;
   piVar19 = (int *)(iVar12 + ((int)(iVar20 + (iVar20 >> 0x1f & 0x3ffU)) >> 10) * 0x10);
   *(int *)(&DAT_00528848 + iVar21) = *piVar19 << 8;
   *(int *)(&DAT_0052884c + iVar21) = piVar19[3] << 8;
@@ -2351,10 +2351,10 @@ void FX_UpdateDetachedWheel(int *param_1,int param_2) {
   *(int *)(&DAT_00528888 + iVar21) = piVar19[3] << 8;
   if (iVar18 <= iVar22) {
     Lisa_DeleteDynamicObject((int *)(iVar23 + DAT_0054f994));
-    *param_1 = 0;
+    *wheel = 0;
   }
-  param_1[0x14] = iVar22;
-  param_1[0x12] = iVar20;
+  wheel[0x14] = iVar22;
+  wheel[0x12] = iVar20;
   return;
 }
 
@@ -2362,7 +2362,7 @@ void FX_UpdateDetachedWheel(int *param_1,int param_2) {
  * @original FX_UpdateVehicleCrashSequence (IGN_WIN.EXE @ 0x00432040, fx.c)
  * @fidelity ADAPTED
  */
-void FX_UpdateVehicleCrashSequence(int *param_1) {
+void FX_UpdateVehicleCrashSequence(int *crash_seq) {
   int *piVar1;
   double dVar2;
   int uVar3;
@@ -2400,13 +2400,13 @@ void FX_UpdateVehicleCrashSequence(int *param_1) {
   iVar24 = 0;
   local_1c = 0;
   local_34 = 0;
-  uVar3 = param_1[1];
-  uVar4 = param_1[2];
+  uVar3 = crash_seq[1];
+  uVar4 = crash_seq[2];
   local_20 = 0;
-  uVar5 = param_1[3];
-  iVar6 = param_1[4];
-  iVar25 = param_1[5];
-  iVar23 = param_1[6];
+  uVar5 = crash_seq[3];
+  iVar6 = crash_seq[4];
+  iVar25 = crash_seq[5];
+  iVar23 = crash_seq[6];
   iVar15 = iVar6 * 0x484c;
   *(int *)((int)g_Vehicles + iVar15 + 0x534) = 0;
   *(int *)((int)pdVar13 + iVar15 + 0x538) = 0x40590000;
@@ -2653,7 +2653,7 @@ LAB_00432970:
     if ((!bVar11) &&
        ((*(int *)((int)g_Vehicles + iVar15 + 0x528) == 0 ||
         (*(int *)((int)g_Vehicles + iVar15 + 0x604) == 1)))) {
-      *param_1 = 0;
+      *crash_seq = 0;
       *(int *)((int)g_Vehicles + iVar15 + 0x350) = 1;
       iVar25 = iVar6 * 0x20;
       *(int *)((int)g_Vehicles + iVar15 + 0x35c) = 0;
@@ -2687,10 +2687,10 @@ LAB_00432970:
       local_3c = iVar24;
     }
   }
-  param_1[2] = uVar4;
-  param_1[1] = uVar3;
-  param_1[3] = uVar5;
-  param_1[5] = local_3c;
+  crash_seq[2] = uVar4;
+  crash_seq[1] = uVar3;
+  crash_seq[3] = uVar5;
+  crash_seq[5] = local_3c;
   return;
 }
 
@@ -2698,7 +2698,7 @@ LAB_00432970:
  * @original FX_UpdateCarDebris (IGN_WIN.EXE @ 0x00432bb0, fx.c)
  * @fidelity ADAPTED
  */
-void FX_UpdateCarDebris(int *param_1,int param_2) {
+void FX_UpdateCarDebris(int *debris, int debris_idx) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -2712,16 +2712,16 @@ void FX_UpdateCarDebris(int *param_1,int param_2) {
   int iVar11;
   long long lVar12;
   int local_1c;
-  local_1c = param_1[2];
-  iVar11 = param_1[3];
-  iVar10 = param_1[4];
-  iVar1 = param_1[7];
-  iVar2 = param_1[5];
-  iVar3 = param_1[6];
-  iVar4 = param_1[8];
-  iVar5 = param_1[9];
+  local_1c = debris[2];
+  iVar11 = debris[3];
+  iVar10 = debris[4];
+  iVar1 = debris[7];
+  iVar2 = debris[5];
+  iVar3 = debris[6];
+  iVar4 = debris[8];
+  iVar5 = debris[9];
   if (iVar4 == 0) {
-    iVar6 = param_2 * 800;
+    iVar6 = debris_idx * 800;
     *(int *)(&DAT_00528800 + iVar6) = 1;
     *(int *)(&DAT_00528804 + iVar6) = 1;
     *(int *)(&DAT_00528808 + iVar6) = 0;
@@ -2739,13 +2739,13 @@ void FX_UpdateCarDebris(int *param_1,int param_2) {
     iVar9 = DAT_0054f994;
     iVar7 = DAT_00552f5c * 0x96;
     *(int *)(&DAT_00528834 + iVar6) = iVar7;
-    Lisa_SetDynamicObjectMesh(iVar9,iVar7,(int *)(param_2 * 0x20 + iVar9),(int *)(&DAT_00528800 + iVar6),2,200,0,
+    Lisa_SetDynamicObjectMesh(iVar9,iVar7,(int *)(debris_idx * 0x20 + iVar9),(int *)(&DAT_00528800 + iVar6),2,200,0,
                  0x14,0);
   }
   iVar7 = iVar4 * -8 + 0xfa;
-  *(int *)(&DAT_00528808 + param_2 * 800) = iVar7;
+  *(int *)(&DAT_00528808 + debris_idx * 800) = iVar7;
   if (iVar7 < 0x32) {
-    *(int *)(&DAT_00528808 + param_2 * 800) = 0x32;
+    *(int *)(&DAT_00528808 + debris_idx * 800) = 0x32;
   }
   if (0x59c00 < local_1c) {
     local_1c = local_1c + ((local_1c + 0x3ffU) / 0x5a000) * -0x5a000;
@@ -2765,7 +2765,7 @@ void FX_UpdateCarDebris(int *param_1,int param_2) {
   if (iVar10 < 0) {
     iVar10 = iVar10 + ((0x59fffU - iVar10) / 0x5a000) * 0x5a000;
   }
-  iVar7 = param_2 * 0x20;
+  iVar7 = debris_idx * 0x20;
   lVar12 = __ftol();
   *(int *)(iVar7 + 4 + DAT_0054f994) = (int)lVar12;
   lVar12 = __ftol();
@@ -2788,12 +2788,12 @@ void FX_UpdateCarDebris(int *param_1,int param_2) {
   }
   if (iVar5 <= iVar4 + 1) {
     Lisa_DeleteDynamicObject((int *)(iVar7 + DAT_0054f994));
-    *param_1 = 0;
+    *debris = 0;
   }
-  param_1[2] = local_1c + iVar2;
-  param_1[3] = iVar11 + iVar3;
-  param_1[4] = iVar10 + iVar1;
-  param_1[8] = iVar4 + 1;
+  debris[2] = local_1c + iVar2;
+  debris[3] = iVar11 + iVar3;
+  debris[4] = iVar10 + iVar1;
+  debris[8] = iVar4 + 1;
   return;
 }
 
@@ -6153,7 +6153,7 @@ LAB_0043cd2c:
  * @original Car_UpdateDynamicObjects (IGN_WIN.EXE @ 0x0043d540, fx.c)
  * @fidelity ADAPTED
  */
-void Car_UpdateDynamicObjects(int param_1) {
+void Car_UpdateDynamicObjects(int car_idx) {
   int iVar1;
   int iVar2;
   int iVar3;
@@ -6164,7 +6164,7 @@ void Car_UpdateDynamicObjects(int param_1) {
   long long lVar8;
   int *local_20;
   int local_c;
-  iVar3 = param_1 * 0x20;
+  iVar3 = car_idx * 0x20;
   lVar8 = __ftol();
   *(int *)(DAT_005db02c + 4 + iVar3) = (int)lVar8;
   lVar8 = __ftol();
@@ -6180,15 +6180,15 @@ void Car_UpdateDynamicObjects(int param_1) {
   if ((DAT_0054f930 == 0) && (iVar1 = Lisa_UpdateObjectSpatialGrid((int *)(DAT_005db02c + iVar3)), iVar1 != 0)) {
     Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4);
   }
-  iVar1 = g_Vehicles + param_1 * 0x484c;
+  iVar1 = g_Vehicles + car_idx * 0x484c;
   fVar7 = (double)*(double *)(iVar1 + 0xb0) * (double)_DAT_0047a7e0;
   iVar5 = 0;
   fcos(fVar7);
   fsin(fVar7);
   if (*(int *)(iVar1 + 0x558) == 0) {
-    piVar6 = (int *)(g_PlayerHUDState + param_1 * 0x4c);
+    piVar6 = (int *)(g_PlayerHUDState + car_idx * 0x4c);
     if (0 < *(int *)(*piVar6 * 0x30 + DAT_00563da4)) {
-      puVar4 = &DAT_005537d8 + param_1 * 0x820;
+      puVar4 = &DAT_005537d8 + car_idx * 0x820;
       do {
         iVar5 = iVar5 + 1;
         lVar8 = __ftol();
@@ -6201,7 +6201,7 @@ void Car_UpdateDynamicObjects(int param_1) {
     }
     iVar1 = 0;
     if (0 < *(int *)(*piVar6 * 0x30 + 0xc + DAT_00563da4)) {
-      puVar4 = (int *)(&DAT_00553ff8 + param_1 * 0x2080);
+      puVar4 = (int *)(&DAT_00553ff8 + car_idx * 0x2080);
       do {
         iVar1 = iVar1 + 1;
         lVar8 = __ftol();
@@ -6215,8 +6215,8 @@ void Car_UpdateDynamicObjects(int param_1) {
   }
   else {
     iVar1 = 0;
-    local_20 = &DAT_005537d8 + param_1 * 0x820;
-    piVar6 = (int *)(g_PlayerHUDState + param_1 * 0x4c);
+    local_20 = &DAT_005537d8 + car_idx * 0x820;
+    piVar6 = (int *)(g_PlayerHUDState + car_idx * 0x4c);
     do {
       iVar5 = 0;
       puVar4 = local_20;
@@ -6236,9 +6236,9 @@ void Car_UpdateDynamicObjects(int param_1) {
       local_20 = local_20 + 0x208;
     } while (iVar1 < 4);
   }
-  local_c = param_1 * 0x4c;
+  local_c = car_idx * 0x4c;
   iVar1 = 4;
-  iVar5 = param_1 << 7;
+  iVar5 = car_idx << 7;
   do {
     lVar8 = __ftol();
     *(int *)(g_RaceFinished + 4 + iVar5) = (int)lVar8;
@@ -6277,21 +6277,21 @@ void Car_UpdateDynamicObjects(int param_1) {
     }
   }
   lVar8 = __ftol();
-  ((int*)&(DAT_00603718))[param_1 * 0x1e] = (int)lVar8;
+  ((int*)&(DAT_00603718))[car_idx * 0x1e] = (int)lVar8;
   lVar8 = __ftol();
-  ((int*)&(DAT_00603720))[param_1 * 0x1e] = (int)lVar8;
+  ((int*)&(DAT_00603720))[car_idx * 0x1e] = (int)lVar8;
   lVar8 = __ftol();
-  ((int*)&(DAT_00603724))[param_1 * 0x1e] = (int)lVar8;
+  ((int*)&(DAT_00603724))[car_idx * 0x1e] = (int)lVar8;
   lVar8 = __ftol();
-  ((int*)&(DAT_0060372c))[param_1 * 0x1e] = (int)lVar8;
+  ((int*)&(DAT_0060372c))[car_idx * 0x1e] = (int)lVar8;
   lVar8 = __ftol();
-  ((int*)&(DAT_00603730))[param_1 * 0x1e] = (int)lVar8;
+  ((int*)&(DAT_00603730))[car_idx * 0x1e] = (int)lVar8;
   lVar8 = __ftol();
-  ((int*)&(DAT_00603738))[param_1 * 0x1e] = (int)lVar8;
+  ((int*)&(DAT_00603738))[car_idx * 0x1e] = (int)lVar8;
   lVar8 = __ftol();
-  ((int*)&(DAT_0060373c))[param_1 * 0x1e] = (int)lVar8;
+  ((int*)&(DAT_0060373c))[car_idx * 0x1e] = (int)lVar8;
   lVar8 = __ftol();
-  ((int*)&(DAT_00603744))[param_1 * 0x1e] = (int)lVar8;
+  ((int*)&(DAT_00603744))[car_idx * 0x1e] = (int)lVar8;
   lVar8 = __ftol();
   *(int *)(DAT_00552f20 + 4 + iVar3) = (int)lVar8;
   lVar8 = __ftol();
@@ -6307,7 +6307,7 @@ void Car_UpdateDynamicObjects(int param_1) {
   if ((DAT_0054f930 == 0) && (iVar1 = Lisa_UpdateObjectSpatialGrid((int *)(DAT_00552f20 + iVar3)), iVar1 != 0)) {
     Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_SHA_00499558);
   }
-  if ((*(int *)(g_PlayerHUDState + 4 + local_c) == 2) && (param_1 != 0)) {
+  if ((*(int *)(g_PlayerHUDState + 4 + local_c) == 2) && (car_idx != 0)) {
     lVar8 = __ftol();
     *(int *)(DAT_00553788 + 4 + iVar3) = (int)lVar8;
     lVar8 = __ftol();
@@ -6604,7 +6604,7 @@ void HUD_RenderTelemetryOverlay(void) {
  * @original HUD_CheckWrongWayHeading (IGN_WIN.EXE @ 0x0043edf0, fx.c)
  * @fidelity ADAPTED
  */
-void HUD_CheckWrongWayHeading(int param_1) {
+void HUD_CheckWrongWayHeading(int player_idx) {
   int iVar1;
   int iVar2;
   int *piVar3;
@@ -6613,8 +6613,8 @@ void HUD_CheckWrongWayHeading(int param_1) {
   double fVar6;
   double fVar7;
   long long lVar8;
-  iVar1 = param_1 * 0x484c;
-  uVar5 = *(unsigned int *)(g_Vehicles + 0x364 + param_1 * 0x484c);
+  iVar1 = player_idx * 0x484c;
+  uVar5 = *(unsigned int *)(g_Vehicles + 0x364 + player_idx * 0x484c);
   if ((int)uVar5 < 0) {
     dVar4 = *(double *)
              (g_pTrackRoadSequence + 0x10 + ((uVar5 ^ (int)uVar5 >> 0x1f) - ((int)uVar5 >> 0x1f)) * 0x18);
@@ -6650,7 +6650,7 @@ void HUD_CheckWrongWayHeading(int param_1) {
  * @original HUD_RenderPlayerElements (IGN_WIN.EXE @ 0x0043ef30, fx.c)
  * @fidelity ADAPTED
  */
-void HUD_RenderPlayerElements(int param_1) {
+void HUD_RenderPlayerElements(int player_idx) {
   int *puVar1;
   int iVar2;
   char *pcVar3;
@@ -6675,12 +6675,12 @@ void HUD_RenderPlayerElements(int param_1) {
   int local_64;
   double local_60 [8];
   char local_20 [32];
-  local_68 = param_1 * 0x4c;
+  local_68 = player_idx * 0x4c;
   iVar4 = g_PlayerHUDState + local_68;
   Gfx_SetClipRect(*(int *)(iVar4 + 0x2c),*(int *)(iVar4 + 0x30),
                *(int *)(iVar4 + 0x34),*(int *)(iVar4 + 0x38));
-  if (((*(unsigned int *)(g_VehicleConfigs + 0x3c + param_1 * 200) & 0x7fffffff) == 0 &&
-       *(int *)(g_VehicleConfigs + 0x38 + param_1 * 200) == 0) || (g_IsDemoMode == 1)) {
+  if (((*(unsigned int *)(g_VehicleConfigs + 0x3c + player_idx * 200) & 0x7fffffff) == 0 &&
+       *(int *)(g_VehicleConfigs + 0x38 + player_idx * 200) == 0) || (g_IsDemoMode == 1)) {
     iVar8 = g_PlayerHUDState + local_68;
     iVar4 = *(int *)(iVar8 + 0x2c);
     local_74 = *(int *)(iVar8 + 0x30);
@@ -6743,7 +6743,7 @@ void HUD_RenderPlayerElements(int param_1) {
     Gfx_DrawSprite(DAT_005285e4,&local_80,0);
     iVar5 = iVar8;
     if (_DAT_00552e48 == _DAT_0047a8c8) {
-      if (*(int *)(g_Vehicles + 0x374 + param_1 * 0x484c) == 0) {
+      if (*(int *)(g_Vehicles + 0x374 + player_idx * 0x484c) == 0) {
         iVar2 = g_SpeedoPosition[1] + local_74;
         iVar13 = ((int*)&(DAT_00528624))[g_ActiveFontColor];
         pcVar3 = HUD_FormatLapTime();
@@ -6760,7 +6760,7 @@ void HUD_RenderPlayerElements(int param_1) {
       pcVar3 = s__________00499730;
     }
     Font_DrawText(pcVar3,iVar13,iVar5,iVar2);
-    iVar5 = *(int *)(g_Vehicles + param_1 * 0x484c + 0x374);
+    iVar5 = *(int *)(g_Vehicles + player_idx * 0x484c + 0x374);
     if (iVar5 == 1) {
       iVar13 = g_SpeedoPosition[2];
       iVar5 = ((int*)&(DAT_00528624))[g_ActiveFontColor];
@@ -6775,7 +6775,7 @@ LAB_0043f316:
       iVar5 = ((int*)&(DAT_00528624))[g_ActiveFontColor];
       goto LAB_0043f316;
     }
-    iVar5 = *(int *)(g_Vehicles + param_1 * 0x484c + 0x374);
+    iVar5 = *(int *)(g_Vehicles + player_idx * 0x484c + 0x374);
     if (iVar5 == 2) {
       iVar13 = g_SpeedoPosition[3];
       iVar5 = ((int*)&(DAT_00528624))[g_ActiveFontColor];
@@ -6792,8 +6792,8 @@ LAB_0043f316:
 LAB_0043f3a7:
   if ((1 < g_NumRacers) || (DAT_00553068 == 1)) {
     if (g_GameMode == 3) {
-      iVar8 = g_Vehicles + param_1 * 0x484c;
-      if (*(int *)(g_Vehicles + 0x528 + param_1 * 0x484c) != 0) {
+      iVar8 = g_Vehicles + player_idx * 0x484c;
+      if (*(int *)(g_Vehicles + 0x528 + player_idx * 0x484c) != 0) {
         uVar14 = *(int *)(iVar8 + 0x39c);
         goto LAB_0043f498;
       }
@@ -6803,8 +6803,8 @@ LAB_0043f3a7:
       local_80 = (g_SpeedoConfig[1] + iVar4) * 0x100;
       local_7c = (g_SpeedoConfig[2] + local_6c) * 0x100;
       Gfx_DrawSprite(DAT_005285e8,&local_80,0);
-      iVar8 = g_Vehicles + param_1 * 0x484c;
-      if (*(int *)(g_Vehicles + 0x528 + param_1 * 0x484c) == 0) {
+      iVar8 = g_Vehicles + player_idx * 0x484c;
+      if (*(int *)(g_Vehicles + 0x528 + player_idx * 0x484c) == 0) {
         uVar14 = *(int *)(iVar8 + 0x39c);
       }
       else {
@@ -6816,8 +6816,8 @@ LAB_0043f498:
     Font_DrawText(local_20,((int*)&(DAT_0052863c))[g_ActiveFontColor],g_SpeedoPosition[4] + iVar4,
                  g_SpeedoPosition[5] + local_6c);
   }
-  HUD_RenderSpeedometerGauge(param_1);
-  iVar4 = param_1 * 0x484c;
+  HUD_RenderSpeedometerGauge(player_idx);
+  iVar4 = player_idx * 0x484c;
   iVar5 = g_Vehicles + iVar4;
   iVar8 = *(int *)(iVar5 + 0x27c) << 2;
   local_60[0] = (double)CONCAT44(((int*)&(local_60[0]))[1],iVar8);
@@ -7012,7 +7012,7 @@ LAB_0043fda0:
           goto LAB_0043fda0;
         }
       }
-      if (param_1 == 0) {
+      if (player_idx == 0) {
         if (g_IsSplitScreen == 0) {
           iVar6 = -1;
         }
@@ -7023,7 +7023,7 @@ LAB_0043fda0:
       }
       else {
 LAB_0043fdde:
-        if ((param_1 != 1) || (g_IsSplitScreen != 1)) goto LAB_0043fe07;
+        if ((player_idx != 1) || (g_IsSplitScreen != 1)) goto LAB_0043fe07;
         iVar6 = 1;
       }
       HUD_AddFloatingMessage(local_20,0,1,iVar6);
@@ -7093,7 +7093,7 @@ LAB_0043fe07:
         iVar6 = iVar6 + -0x484c;
       } while (-1 < iVar6);
     }
-    if ((param_1 == 1) && (*(int *)(g_Vehicles + 0x4d74) == 0)) {
+    if ((player_idx == 1) && (*(int *)(g_Vehicles + 0x4d74) == 0)) {
       if (_DAT_005285d8 < _DAT_0047a900) {
         local_60[1] = 0.0;
       }
@@ -7166,7 +7166,7 @@ LAB_0043fe07:
 LAB_00440490:
     Gfx_DrawSprite(uVar14,&local_80,0);
   }
-  if (((_DAT_0054f980 < 0.0) || (0x77 < (int)((int*)&(DAT_00527f40))[param_1])) ||
+  if (((_DAT_0054f980 < 0.0) || (0x77 < (int)((int*)&(DAT_00527f40))[player_idx])) ||
      ((g_GameMode == 2 && (g_NumRacers < 2)))) goto LAB_004407ac;
   if (g_GameMode == 3) {
 LAB_00440508:
@@ -7193,20 +7193,20 @@ LAB_00440508:
         puVar15 = (char *)0x0;
       }
       Gfx_DrawSprite(((int*)&(DAT_00528794))[*(int *)(iVar4 + 0x3a0)],&local_80,puVar15);
-      if ((99 < (int)((int*)&(DAT_006192a0))[param_1 * 10]) && (*(int *)(&DAT_005531c0 + param_1 * 4) == 0))
+      if ((99 < (int)((int*)&(DAT_006192a0))[player_idx * 10]) && (*(int *)(&DAT_005531c0 + player_idx * 4) == 0))
       {
         lVar11 = __ftol();
         ((int*)&(local_60[0]))[0] = (int)lVar11;
         lVar11 = __ftol();
         ((int*)&(local_60[0]))[0] = (int)lVar11;
         Audio_PlaySampleVol(0,4,5,0,0x10000,22000,0);
-        *(int *)(&DAT_005531c0 + param_1 * 4) = 1;
+        *(int *)(&DAT_005531c0 + player_idx * 4) = 1;
       }
     }
     iVar6 = 6;
-    iVar4 = param_1 * 0x28;
+    iVar4 = player_idx * 0x28;
     do {
-      if ((0xc < *(int *)((int)&DAT_006192a0 + iVar4)) && ((int)((int*)&(DAT_00527f40))[param_1] < 0x28)) {
+      if ((0xc < *(int *)((int)&DAT_006192a0 + iVar4)) && ((int)((int*)&(DAT_00527f40))[player_idx] < 0x28)) {
         iVar5 = g_PlayerHUDState + local_68;
         iVar8 = *(int *)(iVar5 + 0x2c);
         Math_RandomFloat0To1();
