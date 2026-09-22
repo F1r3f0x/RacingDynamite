@@ -502,10 +502,10 @@ int Lisa_RenderScene(void);
 int * Lisa_InitEngineMemory(void);
 void Lisa_FreeEngineMemory(void);
 int Lisa_InitSpatialGrid(int grid_w, int grid_h, size_t max_objects);
-long long Lisa_CreateDynamicObject(int param_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9);
+long long Lisa_CreateDynamicObject(int arg_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9);
 int Lisa_MoveDynamicObject(LisaEntityTransform *entity);
 int Lisa_UpdateObjectSpatialGrid(LisaEntityTransform *entity);
-long long Lisa_SetDynamicObjectMesh(int param_1, int param_2, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9);
+long long Lisa_SetDynamicObjectMesh(int arg_1, int arg_2, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9);
 int Lisa_DeleteDynamicObject(LisaEntityTransform *entity);
 unsigned long long Lisa_SetCameraViewport(void);
 int Lisa_GenerateMipmaps(unsigned int *texture_data, int width, int height, int page_w, int page_h, int mip_count, int flag1, int flag2, char *name);
@@ -716,14 +716,14 @@ extern double g_LisaViewportRemaining;
  * @fidelity ADAPTED
  */
 int Lisa_RenderScene(void) {
-  int iVar1;
-  int *puVar2;
-  int iVar3;
-  int iVar4;
-  int iVar5;
-  int *piVar6;
-  int *puVar7;
-  int iVar8;
+  int local_i1;
+  int *local_pu2;
+  int local_i3;
+  int local_i4;
+  int local_i5;
+  int *local_pi6;
+  int *local_pu7;
+  int local_i8;
 
   
 
@@ -748,82 +748,82 @@ int Lisa_RenderScene(void) {
     Lisa_RenderSubmeshes();
   }
 
-  iVar8 = 0;
+  local_i8 = 0;
 
   if (g_LisaCamera->enable_depth_sort != 0) {
-    iVar5 = 5999;
-    piVar6 = (int *)(g_pLisaDepthBuckets + 0x5dbc);
+    local_i5 = 5999;
+    local_pi6 = (int *)(g_pLisaDepthBuckets + 0x5dbc);
 
     do {
-      puVar7 = (int *)*piVar6;
+      local_pu7 = (int *)*local_pi6;
 
-      if (puVar7 != (int *)0x0) {
-        *(int *)(g_LisaDrawCommands + iVar8 * 4) = *puVar7;
-        iVar8 = iVar8 + 1;
+      if (local_pu7 != (int *)0x0) {
+        *(int *)(g_LisaDrawCommands + local_i8 * 4) = *local_pu7;
+        local_i8 = local_i8 + 1;
 
-        if (puVar7[1] != 0) {
-          puVar2 = (int *)(g_LisaDrawCommands + iVar8 * 4);
+        if (local_pu7[1] != 0) {
+          local_pu2 = (int *)(g_LisaDrawCommands + local_i8 * 4);
 
           do {
-            puVar7 = (int *)puVar7[1];
-            iVar8 = iVar8 + 1;
-            *puVar2 = *puVar7;
-            puVar2 = puVar2 + 1;
-          } while (puVar7[1] != 0);
+            local_pu7 = (int *)local_pu7[1];
+            local_i8 = local_i8 + 1;
+            *local_pu2 = *local_pu7;
+            local_pu2 = local_pu2 + 1;
+          } while (local_pu7[1] != 0);
         }
 
       }
 
-      *piVar6 = 0;
-      piVar6 = piVar6 + -1;
-      iVar5 = iVar5 + -1;
-    } while (-1 < iVar5);
-    *(int *)(g_LisaDrawCommands + iVar8 * 4) = 0;
+      *local_pi6 = 0;
+      local_pi6 = local_pi6 + -1;
+      local_i5 = local_i5 + -1;
+    } while (-1 < local_i5);
+    *(int *)(g_LisaDrawCommands + local_i8 * 4) = 0;
   }
 
   if (g_LisaEnableMipmaps != 0) {
     if (g_LisaEnableMipmaps < 10) {
-      iVar8 = g_LisaActivePageCount / 2;
+      local_i8 = g_LisaActivePageCount / 2;
 
-      if (0 < iVar8) {
-        iVar5 = 0x28;
+      if (0 < local_i8) {
+        local_i5 = 0x28;
 
         do {
-          iVar3 = rand();
-          iVar3 = iVar3 % iVar8;
-          iVar1 = *(int *)(&g_pLisaTexturePageTable1 + iVar3 * 8);
-          iVar3 = *(int *)(&g_pLisaTexturePageTable2 + iVar3 * 8);
-          iVar4 = rand();
-          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
-          iVar4 = rand();
-          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
-          iVar4 = rand();
-          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
-          iVar5 = iVar5 + -1;
-        } while (iVar5 != 0);
+          local_i3 = rand();
+          local_i3 = local_i3 % local_i8;
+          local_i1 = *(int *)(&g_pLisaTexturePageTable1 + local_i3 * 8);
+          local_i3 = *(int *)(&g_pLisaTexturePageTable2 + local_i3 * 8);
+          local_i4 = rand();
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((local_i4 << 10) % local_i3 + local_i1);
+          local_i4 = rand();
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((local_i4 << 10) % local_i3 + local_i1);
+          local_i4 = rand();
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((local_i4 << 10) % local_i3 + local_i1);
+          local_i5 = local_i5 + -1;
+        } while (local_i5 != 0);
       }
 
     }
 
     else {
-      iVar8 = g_LisaActivePageCount / 2;
+      local_i8 = g_LisaActivePageCount / 2;
 
-      if (0 < iVar8) {
-        iVar5 = 2;
+      if (0 < local_i8) {
+        local_i5 = 2;
 
         do {
-          iVar3 = rand();
-          iVar3 = iVar3 % iVar8;
-          iVar1 = *(int *)(&g_pLisaTexturePageTable1 + iVar3 * 8);
-          iVar3 = *(int *)(&g_pLisaTexturePageTable2 + iVar3 * 8);
-          iVar4 = rand();
-          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
-          iVar4 = rand();
-          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
-          iVar4 = rand();
-          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((iVar4 << 10) % iVar3 + iVar1);
-          iVar5 = iVar5 + -1;
-        } while (iVar5 != 0);
+          local_i3 = rand();
+          local_i3 = local_i3 % local_i8;
+          local_i1 = *(int *)(&g_pLisaTexturePageTable1 + local_i3 * 8);
+          local_i3 = *(int *)(&g_pLisaTexturePageTable2 + local_i3 * 8);
+          local_i4 = rand();
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((local_i4 << 10) % local_i3 + local_i1);
+          local_i4 = rand();
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((local_i4 << 10) % local_i3 + local_i1);
+          local_i4 = rand();
+          g_LisaRasterizerAccumulator = g_LisaRasterizerAccumulator + *(char *)((local_i4 << 10) % local_i3 + local_i1);
+          local_i5 = local_i5 + -1;
+        } while (local_i5 != 0);
       }
 
     }
@@ -847,11 +847,11 @@ int * Lisa_InitEngineMemory(void) {
   void *pvVar2;
   void *pvVar3;
   void *pvVar4;
-  int *puVar5;
+  int *local_pu5;
   void *pvVar6;
-  int iVar7;
-  int iVar8;
-  double fVar9;
+  int local_i7;
+  int local_i8;
+  double local_f9;
 
   
 
@@ -859,16 +859,16 @@ int * Lisa_InitEngineMemory(void) {
   g_LisaAllocatedBufferCount = 0;
   g_LisaVisibleObjects = calloc(0x5dc,4);
   g_LisaVisibleSubmeshes = calloc(3000,4);
-  puVar5 = calloc(0x1838,4);
-  iVar7 = g_LisaActivePageCount + 2;
-  g_pLisaDepthBuckets = puVar5;
-  g_LisaActivePageCount = iVar7;
-  *(int **)(&g_pLisaTexturePagePointers + iVar7 * 4) = puVar5;
-  *(int *)(&g_LisaTexturePageSizes + iVar7 * 4) = 0x1a90;
+  local_pu5 = calloc(0x1838,4);
+  local_i7 = g_LisaActivePageCount + 2;
+  g_pLisaDepthBuckets = local_pu5;
+  g_LisaActivePageCount = local_i7;
+  *(int **)(&g_pLisaTexturePagePointers + local_i7 * 4) = local_pu5;
+  *(int *)(&g_LisaTexturePageSizes + local_i7 * 4) = 0x1a90;
 
-  for (iVar7 = 6000; iVar7 != 0; iVar7 = iVar7 + -1) {
-    *puVar5 = 0;
-    puVar5 = puVar5 + 1;
+  for (local_i7 = 6000; local_i7 != 0; local_i7 = local_i7 + -1) {
+    *local_pu5 = 0;
+    local_pu5 = local_pu5 + 1;
   }
 
   g_LisaCamera = (LisaCamera *)calloc(1, sizeof(LisaCamera));
@@ -889,23 +889,23 @@ int * Lisa_InitEngineMemory(void) {
   *(int *)(&g_LisaTexturePageSizes + g_LisaActivePageCount * 4) = 0x2a30;
   *(void **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 3) * 4 + -0xc) = g_LisaVisibleObjects;
   pvVar1 = g_LisaDrawCommandBuffer;
-  puVar5 = g_pLisaDepthBuckets;
+  local_pu5 = g_pLisaDepthBuckets;
   *(void **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 5) * 4 + -0x10) = pvVar3;
   pvVar3 = g_LisaTransformedVertices;
-  *(int **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 5) * 4 + -0xc) = puVar5;
+  *(int **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 5) * 4 + -0xc) = local_pu5;
   pvVar4 = g_pLisaDrawCommandTail;
-  puVar5 = g_LisaCamera;
+  local_pu5 = g_LisaCamera;
   *(int **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 7) * 4 + -0x10) = g_LisaCamera;
-  iVar7 = g_LisaAllocatedBufferCount + 9;
-  g_LisaAllocatedBufferCount = iVar7;
-  *(void **)((int)pvVar2 + iVar7 * 4 + -0x14) = pvVar3;
-  *(void **)((int)pvVar2 + iVar7 * 4 + -0x10) = pvVar1;
+  local_i7 = g_LisaAllocatedBufferCount + 9;
+  g_LisaAllocatedBufferCount = local_i7;
+  *(void **)((int)pvVar2 + local_i7 * 4 + -0x14) = pvVar3;
+  *(void **)((int)pvVar2 + local_i7 * 4 + -0x10) = pvVar1;
   pvVar1 = g_pLisaTextureSheets;
-  *(void **)((int)pvVar2 + iVar7 * 4 + -0xc) = g_pLisaTextureSheets;
-  *(void **)((int)pvVar2 + iVar7 * 4 + -8) = pvVar4;
-  *(void **)((int)pvVar2 + iVar7 * 4 + -4) = pvVar6;
+  *(void **)((int)pvVar2 + local_i7 * 4 + -0xc) = g_pLisaTextureSheets;
+  *(void **)((int)pvVar2 + local_i7 * 4 + -8) = pvVar4;
+  *(void **)((int)pvVar2 + local_i7 * 4 + -4) = pvVar6;
 
-  if (puVar5 == (int *)0x0) {
+  if (local_pu5 == (int *)0x0) {
     return (int *)0x0;
   }
 
@@ -939,52 +939,52 @@ int * Lisa_InitEngineMemory(void) {
     return (int *)0x0;
   }
 
-  puVar5[0xe] = 1;
-  puVar5[0xf] = 1;
-  puVar5[0x10] = 1;
-  puVar5[0x11] = 1;
-  puVar5[0x12] = 1;
-  puVar5[0x13] = 1;
-  puVar5[0x14] = 1;
-  puVar5[0x15] = 1;
-  puVar5[0x16] = 1;
-  puVar5[0x23] = 1;
-  puVar5[0x24] = 1;
-  puVar5[0x25] = 1;
-  puVar5[0x20] = 0xfd;
-  puVar5[0x21] = 0xcf;
-  puVar5[0x22] = 0x2c;
-  puVar5[0x26] = 10;
-  puVar5[6] = 0;
-  puVar5[8] = 0;
-  puVar5[7] = 0;
-  puVar5[9] = 0;
-  puVar5[10] = 0;
-  *puVar5 = 0;
-  puVar5[0xb] = 0;
-  puVar5[1] = 0;
-  puVar5[2] = 0;
-  puVar5[4] = 0;
-  puVar5[3] = 0;
-  puVar5[5] = 0;
-  puVar5[0xc] = 0;
-  puVar5[0x29] = 0;
-  puVar5[0x27] = 0xa0;
-  puVar5[0xd] = 0x3ff00000;
-  puVar5[0x28] = 100;
-  iVar7 = -0x708;
+  local_pu5[0xe] = 1;
+  local_pu5[0xf] = 1;
+  local_pu5[0x10] = 1;
+  local_pu5[0x11] = 1;
+  local_pu5[0x12] = 1;
+  local_pu5[0x13] = 1;
+  local_pu5[0x14] = 1;
+  local_pu5[0x15] = 1;
+  local_pu5[0x16] = 1;
+  local_pu5[0x23] = 1;
+  local_pu5[0x24] = 1;
+  local_pu5[0x25] = 1;
+  local_pu5[0x20] = 0xfd;
+  local_pu5[0x21] = 0xcf;
+  local_pu5[0x22] = 0x2c;
+  local_pu5[0x26] = 10;
+  local_pu5[6] = 0;
+  local_pu5[8] = 0;
+  local_pu5[7] = 0;
+  local_pu5[9] = 0;
+  local_pu5[10] = 0;
+  *local_pu5 = 0;
+  local_pu5[0xb] = 0;
+  local_pu5[1] = 0;
+  local_pu5[2] = 0;
+  local_pu5[4] = 0;
+  local_pu5[3] = 0;
+  local_pu5[5] = 0;
+  local_pu5[0xc] = 0;
+  local_pu5[0x29] = 0;
+  local_pu5[0x27] = 0xa0;
+  local_pu5[0xd] = 0x3ff00000;
+  local_pu5[0x28] = 100;
+  local_i7 = -0x708;
 
   while( 1 ) {
-    iVar8 = iVar7 + 1;
-    fVar9 = (double)fsin((double)iVar7 * (double)g_Const_0_1 * (double)g_Const_DegToRad);
-    if (0x189b < iVar8) break;
-    *(float *)((int)pvVar6 + iVar8 * 4 + 0x1c1c) = (float)fVar9;
-    iVar7 = iVar8;
+    local_i8 = local_i7 + 1;
+    local_f9 = (double)fsin((double)local_i7 * (double)g_Const_0_1 * (double)g_Const_DegToRad);
+    if (0x189b < local_i8) break;
+    *(float *)((int)pvVar6 + local_i8 * 4 + 0x1c1c) = (float)local_f9;
+    local_i7 = local_i8;
   }
 
-  *(float *)((int)pvVar6 + iVar8 * 4 + 0x1c1c) = (float)fVar9;
+  *(float *)((int)pvVar6 + local_i8 * 4 + 0x1c1c) = (float)local_f9;
   g_LisaActiveTabSize = (int)pvVar6 + 0xe10;
-  return puVar5;
+  return local_pu5;
 }
 
 /**
@@ -993,31 +993,31 @@ int * Lisa_InitEngineMemory(void) {
  */
 void Lisa_FreeEngineMemory(void) {
   void *_Memory;
-  int iVar1;
-  int iVar2;
-  int iVar3;
+  int local_i1;
+  int local_i2;
+  int local_i3;
 
   
 
-  iVar2 = 0;
+  local_i2 = 0;
 
   if (g_pLisaAllocatedBuffers != (void *)0x0) {
     _Memory = g_pLisaAllocatedBuffers;
 
     if (0 < g_LisaAllocatedBufferCount) {
-      iVar3 = 0;
-      iVar1 = g_LisaAllocatedBufferCount;
+      local_i3 = 0;
+      local_i1 = g_LisaAllocatedBufferCount;
 
       do {
-        if (*(void **)(iVar3 + (int)_Memory) != (void *)0x0) {
-          _free(*(void **)(iVar3 + (int)_Memory));
+        if (*(void **)(local_i3 + (int)_Memory) != (void *)0x0) {
+          _free(*(void **)(local_i3 + (int)_Memory));
           _Memory = g_pLisaAllocatedBuffers;
-          iVar1 = g_LisaAllocatedBufferCount;
+          local_i1 = g_LisaAllocatedBufferCount;
         }
 
-        iVar3 = iVar3 + 4;
-        iVar2 = iVar2 + 1;
-      } while (iVar2 < iVar1);
+        local_i3 = local_i3 + 4;
+        local_i2 = local_i2 + 1;
+      } while (local_i2 < local_i1);
     }
 
     _free(_Memory);
@@ -1085,7 +1085,7 @@ int Lisa_InitSpatialGrid(int grid_w, int grid_h, size_t max_objects) {
  * @original Lisa_CreateDynamicObject (IGN_WIN.EXE @ 0x00446d90, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long Lisa_CreateDynamicObject(int param_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9) {
+long long Lisa_CreateDynamicObject(int arg_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9) {
   LisaDynamicObject *obj;
   int max_dist;
   int i;
@@ -1103,17 +1103,17 @@ long long Lisa_CreateDynamicObject(int param_1, int object_id, LisaEntityTransfo
   
   obj->self_ptr = obj;
   obj->mesh_data = mesh;
-  obj->unknown_08 = param_5;
+  obj->unknown_08 = arg_5;
   obj->pos_x = entity->pos_x;
   obj->pos_y = entity->pos_y;
   obj->pos_z = entity->pos_z;
   obj->rot_x = (short)entity->rot_x;
   obj->rot_y = (short)entity->rot_y;
   obj->rot_z = (short)entity->rot_z;
-  obj->unknown_1e = param_6;
-  obj->unknown_20 = param_7;
+  obj->unknown_1e = arg_6;
+  obj->unknown_20 = arg_7;
   obj->unknown_22 = base_elevation;
-  obj->unknown_24 = param_9;
+  obj->unknown_24 = arg_9;
   obj->next_in_cell = NULL;
 
   entity->dyn_obj = obj;
@@ -1239,7 +1239,7 @@ int Lisa_UpdateObjectSpatialGrid(LisaEntityTransform *entity) {
  * @original Lisa_SetDynamicObjectMesh (IGN_WIN.EXE @ 0x00447070, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long Lisa_SetDynamicObjectMesh(int param_1, int param_2, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9) {
+long long Lisa_SetDynamicObjectMesh(int arg_1, int arg_2, LisaEntityTransform *entity, MshSubmesh *mesh, int arg_5, short arg_6, short arg_7, short base_elevation, short arg_9) {
   LisaDynamicObject *obj;
   int max_dist;
   int i;
@@ -1250,14 +1250,14 @@ long long Lisa_SetDynamicObjectMesh(int param_1, int param_2, LisaEntityTransfor
 
   obj = entity->dyn_obj;
   
-  obj->unknown_1e = param_6;
+  obj->unknown_1e = arg_6;
   obj->unknown_22 = base_elevation;
   obj->mesh_data = mesh;
-  obj->unknown_08 = param_5;
-  obj->unknown_20 = param_7;
-  obj->unknown_24 = param_9;
+  obj->unknown_08 = arg_5;
+  obj->unknown_20 = arg_7;
+  obj->unknown_24 = arg_9;
   
-  ret_val = ((unsigned int)param_2 >> 16) | ((unsigned int)base_elevation << 16);
+  ret_val = ((unsigned int)arg_2 >> 16) | ((unsigned int)base_elevation << 16);
 
   if (base_elevation == -1) {
     max_dist = -1000;
@@ -1323,47 +1323,47 @@ int Lisa_DeleteDynamicObject(LisaEntityTransform *entity) {
  * @fidelity ADAPTED
  */
 unsigned long long Lisa_SetCameraViewport(void) {
-  int iVar1;
-  long long lVar2;
-  unsigned long long uVar3;
+  int local_i1;
+  long long local_l2;
+  unsigned long long local_u3;
 
   
 
-  lVar2 = __ftol();
-  iVar1 = g_LisaCamera;
-  g_LisaCamera->viewport_x = (int)lVar2;
-  lVar2 = __ftol();
-  *(int *)(iVar1 + 0x84) = (int)lVar2;
-  lVar2 = __ftol();
-  *(int *)(iVar1 + 0x88) = (int)lVar2;
-  lVar2 = __ftol();
-  *(int *)(iVar1 + 0x9c) = (int)lVar2;
-  uVar3 = __ftol();
-  *(int *)(iVar1 + 0xa0) = (int)uVar3;
-  return uVar3 & 0xffffffff00000000;
+  local_l2 = __ftol();
+  local_i1 = g_LisaCamera;
+  g_LisaCamera->viewport_x = (int)local_l2;
+  local_l2 = __ftol();
+  *(int *)(local_i1 + 0x84) = (int)local_l2;
+  local_l2 = __ftol();
+  *(int *)(local_i1 + 0x88) = (int)local_l2;
+  local_l2 = __ftol();
+  *(int *)(local_i1 + 0x9c) = (int)local_l2;
+  local_u3 = __ftol();
+  *(int *)(local_i1 + 0xa0) = (int)local_u3;
+  return local_u3 & 0xffffffff00000000;
 }
 
 /**
  * @original Lisa_GenerateMipmaps (IGN_WIN.EXE @ 0x00447280, lisa3d.c)
  * @fidelity ADAPTED
  */
-int Lisa_GenerateMipmaps(unsigned int *param_1,int param_2,int param_3,int param_4,int param_5,int param_6 ,int param_7,int param_8,char *param_9) {
-  char uVar1;
-  char *puVar2;
-  char *puVar3;
-  unsigned int *puVar4;
-  unsigned int *puVar5;
+int Lisa_GenerateMipmaps(unsigned int *arg_1,int arg_2,int arg_3,int arg_4,int arg_5,int arg_6 ,int arg_7,int arg_8,char *arg_9) {
+  char local_u1;
+  char *local_pu2;
+  char *local_pu3;
+  unsigned int *local_pu4;
+  unsigned int *local_pu5;
   void *pvVar6;
   byte *pbVar7;
-  int iVar8;
-  int iVar9;
-  int iVar10;
-  int iVar11;
+  int local_i8;
+  int local_i9;
+  int local_i10;
+  int local_i11;
   byte *pbVar12;
   byte *pbVar13;
-  unsigned int *puVar14;
-  int bVar15;
-  long long lVar16;
+  unsigned int *local_pu14;
+  int local_b15;
+  long long local_l16;
   byte *local_440;
   int local_438;
   byte *local_428;
@@ -1374,129 +1374,129 @@ int Lisa_GenerateMipmaps(unsigned int *param_1,int param_2,int param_3,int param
 
   
 
-  puVar2 = local_400;
+  local_pu2 = local_400;
 
   do {
-    uVar1 = param_9[1];
-    *puVar2 = *param_9;
-    puVar2[1] = uVar1;
-    puVar3 = puVar2 + 4;
-    puVar2[2] = param_9[2];
-    puVar2 = puVar3;
-    param_9 = param_9 + 3;
-  } while (puVar3 < (unsigned int *)(local_400 + sizeof(local_400)));
-  puVar4 = calloc(0x15,4);
+    local_u1 = arg_9[1];
+    *local_pu2 = *arg_9;
+    local_pu2[1] = local_u1;
+    local_pu3 = local_pu2 + 4;
+    local_pu2[2] = arg_9[2];
+    local_pu2 = local_pu3;
+    arg_9 = arg_9 + 3;
+  } while (local_pu3 < (unsigned int *)(local_400 + sizeof(local_400)));
+  local_pu4 = calloc(0x15,4);
   g_LisaAllocatedBufferCount = g_LisaAllocatedBufferCount + 1;
-  *(unsigned int **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = puVar4;
-  puVar5 = puVar4 + 5;
-  lVar16 = __ftol();
+  *(unsigned int **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = local_pu4;
+  local_pu5 = local_pu4 + 5;
+  local_l16 = __ftol();
   local_438 = 0;
 
-  if (0 < (int)lVar16) {
+  if (0 < (int)local_l16) {
     do {
       if (5999 < local_438) break;
       local_438 = local_438 + 1;
-    } while (local_438 < (int)lVar16);
+    } while (local_438 < (int)local_l16);
   }
 
-  lVar16 = __ftol();
-  iVar9 = (int)lVar16;
-  local_440 = (byte *)*param_1;
-  *puVar4 = (unsigned int)local_440;
-  puVar4[1] = (unsigned int)local_440;
-  puVar4[2] = (unsigned int)local_440;
-  puVar4[3] = (unsigned int)local_440;
-  puVar4[4] = (unsigned int)local_440;
-  *puVar5 = (unsigned int)local_440;
-  iVar10 = 0;
+  local_l16 = __ftol();
+  local_i9 = (int)local_l16;
+  local_440 = (byte *)*arg_1;
+  *local_pu4 = (unsigned int)local_440;
+  local_pu4[1] = (unsigned int)local_440;
+  local_pu4[2] = (unsigned int)local_440;
+  local_pu4[3] = (unsigned int)local_440;
+  local_pu4[4] = (unsigned int)local_440;
+  *local_pu5 = (unsigned int)local_440;
+  local_i10 = 0;
 
-  if (0 < param_4 + -1) {
-    iVar11 = iVar10;
+  if (0 < arg_4 + -1) {
+    local_i11 = local_i10;
 
     do {
       g_LisaEnableMipmaps = 1;
       g_LisaShadingEnabled = 1;
-      pvVar6 = calloc(param_7 * 0x100 + 0xffff,1);
+      pvVar6 = calloc(arg_7 * 0x100 + 0xffff,1);
       g_LisaAllocatedBufferCount = g_LisaAllocatedBufferCount + 1;
       *(void **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = pvVar6;
       pbVar7 = (byte *)((int)pvVar6 + 0xffffU & 0xffff0000);
-      iVar8 = g_LisaActivePageCount + 2;
-      g_LisaActivePageCount = iVar8;
-      *(byte **)(&g_pLisaTexturePagePointers + iVar8 * 4) = pbVar7;
-      iVar10 = iVar11 + 1;
-      *(int *)(&g_LisaTexturePageSizes + iVar8 * 4) = param_7 << 8;
+      local_i8 = g_LisaActivePageCount + 2;
+      g_LisaActivePageCount = local_i8;
+      *(byte **)(&g_pLisaTexturePagePointers + local_i8 * 4) = pbVar7;
+      local_i10 = local_i11 + 1;
+      *(int *)(&g_LisaTexturePageSizes + local_i8 * 4) = arg_7 << 8;
 
-      if (iVar10 < 5) {
-        puVar4[iVar11 + 1] = (unsigned int)pbVar7;
+      if (local_i10 < 5) {
+        local_pu4[local_i11 + 1] = (unsigned int)pbVar7;
       }
 
-      iVar8 = 0;
+      local_i8 = 0;
 
-      if (0 < iVar9) {
+      if (0 < local_i9) {
         do {
           if (5999 < local_438) break;
-          iVar8 = iVar8 + 1;
+          local_i8 = local_i8 + 1;
           local_438 = local_438 + 1;
-        } while (iVar8 < iVar9);
+        } while (local_i8 < local_i9);
       }
 
-      if (0 < param_7 / param_6) {
+      if (0 < arg_7 / arg_6) {
         local_424 = local_440;
-        iVar9 = (int)(0x100 / (long long)param_5);
+        local_i9 = (int)(0x100 / (long long)arg_5);
         local_428 = pbVar7;
-        local_40c = param_7 / param_6;
+        local_40c = arg_7 / arg_6;
 
         do {
           pbVar12 = local_428;
           pbVar13 = local_424;
-          local_414 = iVar9;
+          local_414 = local_i9;
 
-          if (0 < iVar9) {
+          if (0 < local_i9) {
             do {
-              if (iVar11 == 0) {
-                Lisa_DownsampleTextureMipmap(pbVar13,pbVar12,param_5,param_6,0x100,(int)local_400);
+              if (local_i11 == 0) {
+                Lisa_DownsampleTextureMipmap(pbVar13,pbVar12,arg_5,arg_6,0x100,(int)local_400);
               }
 
               else {
-                Lisa_FilterTextureBlock(pbVar13,(int)pbVar12,param_5,param_6,0x100,(int)local_400,param_8,
+                Lisa_FilterTextureBlock(pbVar13,(int)pbVar12,arg_5,arg_6,0x100,(int)local_400,arg_8,
 
-                             iVar11);
+                             local_i11);
               }
 
               local_414 = local_414 + -1;
-              pbVar12 = pbVar12 + param_5;
-              pbVar13 = pbVar13 + param_5;
+              pbVar12 = pbVar12 + arg_5;
+              pbVar13 = pbVar13 + arg_5;
             } while (local_414 != 0);
           }
 
-          local_428 = local_428 + param_6 * 0x100;
-          local_424 = local_424 + param_6 * 0x100;
+          local_428 = local_428 + arg_6 * 0x100;
+          local_424 = local_424 + arg_6 * 0x100;
           local_40c = local_40c + -1;
         } while (local_40c != 0);
       }
 
-      lVar16 = __ftol();
-      iVar9 = (int)lVar16;
-      iVar11 = iVar10;
+      local_l16 = __ftol();
+      local_i9 = (int)local_l16;
+      local_i11 = local_i10;
       local_440 = pbVar7;
-    } while (iVar10 < param_4 + -1);
+    } while (local_i10 < arg_4 + -1);
   }
 
-  if (iVar10 < 4) {
-    puVar14 = puVar4 + iVar10 + 1;
+  if (local_i10 < 4) {
+    local_pu14 = local_pu4 + local_i10 + 1;
 
-    for (iVar9 = 4 - iVar10; iVar9 != 0; iVar9 = iVar9 + -1) {
-      *puVar14 = (unsigned int)local_440;
-      puVar14 = puVar14 + 1;
+    for (local_i9 = 4 - local_i10; local_i9 != 0; local_i9 = local_i9 + -1) {
+      *local_pu14 = (unsigned int)local_440;
+      local_pu14 = local_pu14 + 1;
     }
 
   }
 
-  bVar15 = g_LisaDisableFiltering == 0;
-  *param_1 = (unsigned int)puVar5;
+  local_b15 = g_LisaDisableFiltering == 0;
+  *arg_1 = (unsigned int)local_pu5;
 
-  if ((bVar15) && (1 < param_4)) {
-    Lisa_GenerateTextureSpanTable(*puVar4,(int)local_400,param_8,param_7,puVar5);
+  if ((local_b15) && (1 < arg_4)) {
+    Lisa_GenerateTextureSpanTable(*local_pu4,(int)local_400,arg_8,arg_7,local_pu5);
   }
 
   return 0;
@@ -1506,23 +1506,23 @@ int Lisa_GenerateMipmaps(unsigned int *param_1,int param_2,int param_3,int param
  * @original Lisa_GenerateTextureSpanTable (IGN_WIN.EXE @ 0x004475c0, lisa3d.c)
  * @fidelity ADAPTED
  */
-void Lisa_GenerateTextureSpanTable(int param_1,int param_2,int param_3,int param_4,int *param_5) {
-  unsigned int uVar1;
-  int iVar2;
-  byte bVar3;
-  unsigned int uVar4;
-  unsigned int uVar5;
-  int iVar6;
+void Lisa_GenerateTextureSpanTable(int arg_1,int arg_2,int arg_3,int arg_4,int *arg_5) {
+  unsigned int local_u1;
+  int local_i2;
+  byte local_b3;
+  unsigned int local_u4;
+  unsigned int local_u5;
+  int local_i6;
   void *pvVar7;
-  unsigned int *puVar8;
+  unsigned int *local_pu8;
   byte *pbVar9;
-  unsigned int uVar10;
-  byte bVar11;
-  int *puVar12;
-  int iVar13;
-  unsigned int uVar14;
-  byte bVar15;
-  unsigned int *puVar16;
+  unsigned int local_u10;
+  byte local_b11;
+  int *local_pu12;
+  int local_i13;
+  unsigned int local_u14;
+  byte local_b15;
+  unsigned int *local_pu16;
   unsigned int local_c4 [3];
   unsigned int local_b8;
   int local_b4;
@@ -1572,39 +1572,39 @@ void Lisa_GenerateTextureSpanTable(int param_1,int param_2,int param_3,int param
 
   local_88 = calloc(0x10000,0x14);
   *local_88 = 1;
-  iVar6 = 0x10000;
-  puVar12 = local_88;
+  local_i6 = 0x10000;
+  local_pu12 = local_88;
 
   do {
-    *puVar12 = 0;
-    puVar12 = puVar12 + 5;
-    iVar6 = iVar6 + -1;
-  } while (iVar6 != 0);
-  local_98 = param_5;
-  local_c = param_4 * 0x400 + 0xffff;
+    *local_pu12 = 0;
+    local_pu12 = local_pu12 + 5;
+    local_i6 = local_i6 + -1;
+  } while (local_i6 != 0);
+  local_98 = arg_5;
+  local_c = arg_4 * 0x400 + 0xffff;
   local_94 = 0;
-  local_8 = param_4 << 10;
+  local_8 = arg_4 << 10;
 
   do {
     pvVar7 = calloc(local_c,1);
     g_LisaAllocatedBufferCount = g_LisaAllocatedBufferCount + 1;
     *(void **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = pvVar7;
-    puVar8 = (unsigned int *)((int)pvVar7 + 0xffffU & 0xffff0000);
-    iVar6 = g_LisaActivePageCount + 2;
-    puVar12 = local_98 + 4;
-    g_LisaActivePageCount = iVar6;
-    *(unsigned int **)(&g_pLisaTexturePagePointers + iVar6 * 4) = puVar8;
-    *(int *)(&g_LisaTexturePageSizes + iVar6 * 4) = local_8;
-    *local_98 = puVar8;
+    local_pu8 = (unsigned int *)((int)pvVar7 + 0xffffU & 0xffff0000);
+    local_i6 = g_LisaActivePageCount + 2;
+    local_pu12 = local_98 + 4;
+    g_LisaActivePageCount = local_i6;
+    *(unsigned int **)(&g_pLisaTexturePagePointers + local_i6 * 4) = local_pu8;
+    *(int *)(&g_LisaTexturePageSizes + local_i6 * 4) = local_8;
+    *local_98 = local_pu8;
     local_8c = 0;
-    local_98[1] = puVar8;
-    local_98[2] = puVar8;
-    local_98[3] = puVar8;
+    local_98[1] = local_pu8;
+    local_98[2] = local_pu8;
+    local_98[3] = local_pu8;
 
-    if (0 < param_4) {
-      local_4 = param_4 + -1;
+    if (0 < arg_4) {
+      local_4 = arg_4 + -1;
       local_90 = 0;
-      local_4c = puVar8;
+      local_4c = local_pu8;
 
       do {
         local_a8[0] = 0;
@@ -1614,72 +1614,72 @@ void Lisa_GenerateTextureSpanTable(int param_1,int param_2,int param_3,int param
         local_ac = local_4c;
 
         do {
-          bVar3 = *(byte *)(local_94 + local_b4 + param_1 + local_90);
-          local_b8 = ((((unsigned int)((((unsigned int)(local_b8)) >> 8))) << 8) | ((unsigned char)(bVar3)));
+          local_b3 = *(byte *)(local_94 + local_b4 + arg_1 + local_90);
+          local_b8 = ((((unsigned int)((((unsigned int)(local_b8)) >> 8))) << 8) | ((unsigned char)(local_b3)));
 
           if (local_b4 < 0x3f) {
-            pbVar9 = (byte *)(local_94 + local_b4 + param_1 + local_90);
-            bVar15 = pbVar9[1];
+            pbVar9 = (byte *)(local_94 + local_b4 + arg_1 + local_90);
+            local_b15 = pbVar9[1];
           }
 
           else {
-            pbVar9 = (byte *)(local_94 + local_b4 + param_1 + local_90);
-            bVar15 = *pbVar9;
+            pbVar9 = (byte *)(local_94 + local_b4 + arg_1 + local_90);
+            local_b15 = *pbVar9;
           }
 
-          local_9c = ((((unsigned int)((((unsigned int)(local_9c)) >> 8))) << 8) | ((unsigned char)(bVar15)));
+          local_9c = ((((unsigned int)((((unsigned int)(local_9c)) >> 8))) << 8) | ((unsigned char)(local_b15)));
 
           if (local_8c < local_4) {
-            bVar11 = pbVar9[0x100];
+            local_b11 = pbVar9[0x100];
 
             if (local_b4 < 0x3f) {
-              puVar8 = (unsigned int *)(unsigned int)pbVar9[0x101];
+              local_pu8 = (unsigned int *)(unsigned int)pbVar9[0x101];
             }
 
             else {
 LAB_00447785:
 
-              puVar8 = (unsigned int *)(unsigned int)bVar11;
+              local_pu8 = (unsigned int *)(unsigned int)local_b11;
             }
 
           }
 
           else {
-            bVar11 = *pbVar9;
+            local_b11 = *pbVar9;
             if (0x3e < local_b4) goto LAB_00447785;
-            puVar8 = (unsigned int *)(unsigned int)pbVar9[1];
+            local_pu8 = (unsigned int *)(unsigned int)pbVar9[1];
           }
 
-          uVar10 = (unsigned int)bVar11;
-          uVar14 = (unsigned int)bVar15;
-          uVar4 = (unsigned int)bVar3;
-          uVar1 = (((int)puVar8 * 0x100 + uVar10) * 0x100 + uVar14) * 0x100 + uVar4;
-          puVar16 = local_88 + ((uVar1 >> 0x11) + uVar10 + uVar14 + uVar1 & 0xffff) * 5;
-          local_b0 = puVar8;
+          local_u10 = (unsigned int)local_b11;
+          local_u14 = (unsigned int)local_b15;
+          local_u4 = (unsigned int)local_b3;
+          local_u1 = (((int)local_pu8 * 0x100 + local_u10) * 0x100 + local_u14) * 0x100 + local_u4;
+          local_pu16 = local_88 + ((local_u1 >> 0x11) + local_u10 + local_u14 + local_u1 & 0xffff) * 5;
+          local_b0 = local_pu8;
 
-          if (*puVar16 != uVar1) {
-            *puVar16 = uVar1;
-            local_b8 = (unsigned int)*(byte *)(param_2 + uVar4 * 4);
-            uVar1 = local_b8;
+          if (*local_pu16 != local_u1) {
+            *local_pu16 = local_u1;
+            local_b8 = (unsigned int)*(byte *)(arg_2 + local_u4 * 4);
+            local_u1 = local_b8;
             local_30 = local_b8;
-            local_b8 = (unsigned int)*(byte *)(param_2 + 1 + uVar4 * 4);
-            uVar5 = local_b8;
+            local_b8 = (unsigned int)*(byte *)(arg_2 + 1 + local_u4 * 4);
+            local_u5 = local_b8;
             local_2c = local_b8;
-            local_b8 = (unsigned int)*(byte *)(param_2 + 2 + uVar4 * 4);
-            uVar4 = local_b8;
+            local_b8 = (unsigned int)*(byte *)(arg_2 + 2 + local_u4 * 4);
+            local_u4 = local_b8;
             local_28 = local_b8;
-            local_3c = (unsigned int)*(byte *)(param_2 + uVar14 * 4);
-            local_38 = (unsigned int)*(byte *)(param_2 + 1 + uVar14 * 4);
-            local_34 = (unsigned int)*(byte *)(param_2 + 2 + uVar14 * 4);
-            local_18 = (unsigned int)*(byte *)(param_2 + uVar10 * 4);
-            local_14 = (unsigned int)*(byte *)(param_2 + 1 + uVar10 * 4);
-            local_10 = (unsigned int)*(byte *)(param_2 + 2 + uVar10 * 4);
-            local_24 = (unsigned int)*(byte *)(param_2 + (int)puVar8 * 4);
-            local_20 = (unsigned int)*(byte *)(param_2 + 1 + (int)puVar8 * 4);
+            local_3c = (unsigned int)*(byte *)(arg_2 + local_u14 * 4);
+            local_38 = (unsigned int)*(byte *)(arg_2 + 1 + local_u14 * 4);
+            local_34 = (unsigned int)*(byte *)(arg_2 + 2 + local_u14 * 4);
+            local_18 = (unsigned int)*(byte *)(arg_2 + local_u10 * 4);
+            local_14 = (unsigned int)*(byte *)(arg_2 + 1 + local_u10 * 4);
+            local_10 = (unsigned int)*(byte *)(arg_2 + 2 + local_u10 * 4);
+            local_24 = (unsigned int)*(byte *)(arg_2 + (int)local_pu8 * 4);
+            local_20 = (unsigned int)*(byte *)(arg_2 + 1 + (int)local_pu8 * 4);
             local_b0 = local_ac;
             local_9c = 0;
             local_74 = 0;
-            local_1c = (unsigned int)*(byte *)(param_2 + 2 + (int)puVar8 * 4);
+            local_1c = (unsigned int)*(byte *)(arg_2 + 2 + (int)local_pu8 * 4);
             local_6c = 0;
             local_78 = local_34 << 2;
             local_64 = 0;
@@ -1689,158 +1689,158 @@ LAB_00447785:
             local_54 = 0;
             local_60 = local_b8 << 2;
             local_b8 = 4;
-            local_58 = uVar5 * 4;
-            local_50 = uVar1 << 2;
-            puVar8 = puVar16;
+            local_58 = local_u5 * 4;
+            local_50 = local_u1 << 2;
+            local_pu8 = local_pu16;
 
             do {
-              iVar6 = (int)(local_54 + local_50 + (local_54 + local_50 >> 0x1f & 3U)) >> 2;
+              local_i6 = (int)(local_54 + local_50 + (local_54 + local_50 >> 0x1f & 3U)) >> 2;
               local_44 = (int)(local_5c + local_58 + (local_5c + local_58 >> 0x1f & 3U)) >> 2;
               local_40 = (int)(local_64 + local_60 + (local_64 + local_60 >> 0x1f & 3U)) >> 2;
               local_84 = (int)(local_6c + local_68 + (local_6c + local_68 >> 0x1f & 3U)) >> 2;
               local_80 = (int)(local_74 + local_70 + (local_74 + local_70 >> 0x1f & 3U)) >> 2;
               local_7c = (int)(local_9c + local_78 + (local_9c + local_78 >> 0x1f & 3U)) >> 2;
-              local_c4[0] = iVar6 * 4;
-              iVar13 = 0;
+              local_c4[0] = local_i6 * 4;
+              local_i13 = 0;
               local_c4[1] = local_44 << 2;
               local_c4[2] = local_40 << 2;
 
               do {
-                iVar2 = *(int *)((int)local_a8 + iVar13) + 8 + *(int *)((int)local_c4 + iVar13);
-                *(int *)((int)local_c4 + iVar13) = iVar2;
+                local_i2 = *(int *)((int)local_a8 + local_i13) + 8 + *(int *)((int)local_c4 + local_i13);
+                *(int *)((int)local_c4 + local_i13) = local_i2;
 
-                if (0x3ff < iVar2) {
-                  *(int *)((int)local_c4 + iVar13) = 0x3ff;
+                if (0x3ff < local_i2) {
+                  *(int *)((int)local_c4 + local_i13) = 0x3ff;
                 }
 
-                if (*(int *)((int)local_c4 + iVar13) < 0) {
-                  *(int *)((int)local_c4 + iVar13) = 0;
+                if (*(int *)((int)local_c4 + local_i13) < 0) {
+                  *(int *)((int)local_c4 + local_i13) = 0;
                 }
 
-                iVar13 = iVar13 + 4;
-              } while (iVar13 < 0xc);
+                local_i13 = local_i13 + 4;
+              } while (local_i13 < 0xc);
 
-              bVar3 = (&g_LisaObjectMatrix_22)
+              local_b3 = (&g_LisaObjectMatrix_22)
 
                       [(local_c4[1] & 0x3f0) * 4 +
 
                        ((local_c4[2] & 0x3f0) >> 4) + (local_c4[0] & 0x3f0) * 0x100];
-              uVar14 = (unsigned int)bVar3;
-              *(byte *)(puVar8 + 1) = bVar3;
-              bVar15 = *(byte *)(param_2 + uVar14 * 4);
-              *(byte *)local_b0 = bVar3;
-              local_a8[0] = (int)(local_c4[0] + (unsigned int)bVar15 * -4) / 2;
-              local_a8[1] = (int)(local_c4[1] + (unsigned int)*(byte *)(param_2 + 1 + uVar14 * 4) * -4) / 2;
-              local_a8[2] = (int)(local_c4[2] + (unsigned int)*(byte *)(param_2 + 2 + uVar14 * 4) * -4) / 2;
-              local_c4[0] = iVar6 * 3 + local_84;
+              local_u14 = (unsigned int)local_b3;
+              *(byte *)(local_pu8 + 1) = local_b3;
+              local_b15 = *(byte *)(arg_2 + local_u14 * 4);
+              *(byte *)local_b0 = local_b3;
+              local_a8[0] = (int)(local_c4[0] + (unsigned int)local_b15 * -4) / 2;
+              local_a8[1] = (int)(local_c4[1] + (unsigned int)*(byte *)(arg_2 + 1 + local_u14 * 4) * -4) / 2;
+              local_a8[2] = (int)(local_c4[2] + (unsigned int)*(byte *)(arg_2 + 2 + local_u14 * 4) * -4) / 2;
+              local_c4[0] = local_i6 * 3 + local_84;
               local_c4[1] = local_44 * 3 + local_80;
-              iVar13 = 0;
+              local_i13 = 0;
               local_c4[2] = local_40 * 3 + local_7c;
 
               do {
-                iVar2 = *(int *)((int)local_a8 + iVar13) + 8 + *(int *)((int)local_c4 + iVar13);
-                *(int *)((int)local_c4 + iVar13) = iVar2;
+                local_i2 = *(int *)((int)local_a8 + local_i13) + 8 + *(int *)((int)local_c4 + local_i13);
+                *(int *)((int)local_c4 + local_i13) = local_i2;
 
-                if (0x3ff < iVar2) {
-                  *(int *)((int)local_c4 + iVar13) = 0x3ff;
+                if (0x3ff < local_i2) {
+                  *(int *)((int)local_c4 + local_i13) = 0x3ff;
                 }
 
-                if (*(int *)((int)local_c4 + iVar13) < 0) {
-                  *(int *)((int)local_c4 + iVar13) = 0;
+                if (*(int *)((int)local_c4 + local_i13) < 0) {
+                  *(int *)((int)local_c4 + local_i13) = 0;
                 }
 
-                iVar13 = iVar13 + 4;
-              } while (iVar13 < 0xc);
+                local_i13 = local_i13 + 4;
+              } while (local_i13 < 0xc);
 
-              uVar14 = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
+              local_u14 = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
 
                                    [(local_c4[1] & 0x3f0) * 4 +
 
                                     ((local_c4[2] & 0x3f0) >> 4) + (local_c4[0] & 0x3f0) * 0x100];
 
-              *(char *)((int)puVar8 + 5) =
+              *(char *)((int)local_pu8 + 5) =
 
                    (&g_LisaObjectMatrix_22)
 
                    [(local_c4[1] & 0x3f0) * 4 +
 
                     ((local_c4[2] & 0x3f0) >> 4) + (local_c4[0] & 0x3f0) * 0x100];
-              local_a8[0] = (int)(local_c4[0] + (unsigned int)*(byte *)(param_2 + uVar14 * 4) * -4) / 2;
-              local_a8[1] = (int)(local_c4[1] + (unsigned int)*(byte *)(param_2 + 1 + uVar14 * 4) * -4) / 2;
-              local_a8[2] = (int)(local_c4[2] + (unsigned int)*(byte *)(param_2 + 2 + uVar14 * 4) * -4) / 2;
-              local_c4[0] = (local_84 + iVar6) * 2;
+              local_a8[0] = (int)(local_c4[0] + (unsigned int)*(byte *)(arg_2 + local_u14 * 4) * -4) / 2;
+              local_a8[1] = (int)(local_c4[1] + (unsigned int)*(byte *)(arg_2 + 1 + local_u14 * 4) * -4) / 2;
+              local_a8[2] = (int)(local_c4[2] + (unsigned int)*(byte *)(arg_2 + 2 + local_u14 * 4) * -4) / 2;
+              local_c4[0] = (local_84 + local_i6) * 2;
               local_c4[1] = (local_80 + local_44) * 2;
-              iVar13 = 0;
+              local_i13 = 0;
               local_c4[2] = (local_7c + local_40) * 2;
 
               do {
-                iVar2 = *(int *)((int)local_a8 + iVar13) + 8 + *(int *)((int)local_c4 + iVar13);
-                *(int *)((int)local_c4 + iVar13) = iVar2;
+                local_i2 = *(int *)((int)local_a8 + local_i13) + 8 + *(int *)((int)local_c4 + local_i13);
+                *(int *)((int)local_c4 + local_i13) = local_i2;
 
-                if (0x3ff < iVar2) {
-                  *(int *)((int)local_c4 + iVar13) = 0x3ff;
+                if (0x3ff < local_i2) {
+                  *(int *)((int)local_c4 + local_i13) = 0x3ff;
                 }
 
-                if (*(int *)((int)local_c4 + iVar13) < 0) {
-                  *(int *)((int)local_c4 + iVar13) = 0;
+                if (*(int *)((int)local_c4 + local_i13) < 0) {
+                  *(int *)((int)local_c4 + local_i13) = 0;
                 }
 
-                iVar13 = iVar13 + 4;
-              } while (iVar13 < 0xc);
+                local_i13 = local_i13 + 4;
+              } while (local_i13 < 0xc);
 
-              uVar14 = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
+              local_u14 = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
 
                                    [(local_c4[1] & 0x3f0) * 4 +
 
                                     ((local_c4[2] & 0x3f0) >> 4) + (local_c4[0] & 0x3f0) * 0x100];
 
-              *(char *)((int)puVar8 + 6) =
+              *(char *)((int)local_pu8 + 6) =
 
                    (&g_LisaObjectMatrix_22)
 
                    [(local_c4[1] & 0x3f0) * 4 +
 
                     ((local_c4[2] & 0x3f0) >> 4) + (local_c4[0] & 0x3f0) * 0x100];
-              local_a8[0] = (int)(local_c4[0] + (unsigned int)*(byte *)(param_2 + uVar14 * 4) * -4) / 2;
-              local_a8[1] = (int)(local_c4[1] + (unsigned int)*(byte *)(param_2 + 1 + uVar14 * 4) * -4) / 2;
-              local_a8[2] = (int)(local_c4[2] + (unsigned int)*(byte *)(param_2 + 2 + uVar14 * 4) * -4) / 2;
-              local_c4[0] = local_84 * 3 + iVar6;
-              iVar6 = 0;
+              local_a8[0] = (int)(local_c4[0] + (unsigned int)*(byte *)(arg_2 + local_u14 * 4) * -4) / 2;
+              local_a8[1] = (int)(local_c4[1] + (unsigned int)*(byte *)(arg_2 + 1 + local_u14 * 4) * -4) / 2;
+              local_a8[2] = (int)(local_c4[2] + (unsigned int)*(byte *)(arg_2 + 2 + local_u14 * 4) * -4) / 2;
+              local_c4[0] = local_84 * 3 + local_i6;
+              local_i6 = 0;
               local_c4[1] = local_80 * 3 + local_44;
               local_c4[2] = local_7c * 3 + local_40;
 
               do {
-                iVar13 = *(int *)((int)local_a8 + iVar6) + 8 + *(int *)((int)local_c4 + iVar6);
-                *(int *)((int)local_c4 + iVar6) = iVar13;
+                local_i13 = *(int *)((int)local_a8 + local_i6) + 8 + *(int *)((int)local_c4 + local_i6);
+                *(int *)((int)local_c4 + local_i6) = local_i13;
 
-                if (0x3ff < iVar13) {
-                  *(int *)((int)local_c4 + iVar6) = 0x3ff;
+                if (0x3ff < local_i13) {
+                  *(int *)((int)local_c4 + local_i6) = 0x3ff;
                 }
 
-                if (*(int *)((int)local_c4 + iVar6) < 0) {
-                  *(int *)((int)local_c4 + iVar6) = 0;
+                if (*(int *)((int)local_c4 + local_i6) < 0) {
+                  *(int *)((int)local_c4 + local_i6) = 0;
                 }
 
-                iVar6 = iVar6 + 4;
-              } while (iVar6 < 0xc);
+                local_i6 = local_i6 + 4;
+              } while (local_i6 < 0xc);
 
-              uVar14 = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
+              local_u14 = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
 
                                    [(local_c4[1] & 0x3f0) * 4 +
 
                                     ((local_c4[2] & 0x3f0) >> 4) + (local_c4[0] & 0x3f0) * 0x100];
 
-              *(char *)((int)puVar8 + 7) =
+              *(char *)((int)local_pu8 + 7) =
 
                    (&g_LisaObjectMatrix_22)
 
                    [(local_c4[1] & 0x3f0) * 4 +
 
                     ((local_c4[2] & 0x3f0) >> 4) + (local_c4[0] & 0x3f0) * 0x100];
-              local_a8[0] = (int)(local_c4[0] + (unsigned int)*(byte *)(param_2 + uVar14 * 4) * -4) / 2;
-              local_a8[1] = (int)(local_c4[1] + (unsigned int)*(byte *)(param_2 + 1 + uVar14 * 4) * -4) / 2;
+              local_a8[0] = (int)(local_c4[0] + (unsigned int)*(byte *)(arg_2 + local_u14 * 4) * -4) / 2;
+              local_a8[1] = (int)(local_c4[1] + (unsigned int)*(byte *)(arg_2 + 1 + local_u14 * 4) * -4) / 2;
               local_b0 = local_b0 + 0x40;
-              local_a8[2] = (int)(local_c4[2] + (unsigned int)*(byte *)(param_2 + 2 + uVar14 * 4) * -4) / 2;
+              local_a8[2] = (int)(local_c4[2] + (unsigned int)*(byte *)(arg_2 + 2 + local_u14 * 4) * -4) / 2;
               local_9c = local_9c + local_1c;
               local_78 = local_78 - local_34;
               local_74 = local_74 + local_20;
@@ -1848,13 +1848,13 @@ LAB_00447785:
               local_6c = local_6c + local_24;
               local_68 = local_68 - local_3c;
               local_64 = local_64 + local_10;
-              local_60 = local_60 - uVar4;
+              local_60 = local_60 - local_u4;
               local_5c = local_5c + local_14;
-              local_58 = local_58 - uVar5;
+              local_58 = local_58 - local_u5;
               local_54 = local_54 + local_18;
-              local_50 = local_50 - uVar1;
+              local_50 = local_50 - local_u1;
               local_b8 = local_b8 + -1;
-              puVar8 = puVar8 + 1;
+              local_pu8 = local_pu8 + 1;
             } while (local_b8 != 0);
             local_a8[0] = 0;
             local_a8[1] = 0;
@@ -1865,25 +1865,25 @@ LAB_00447785:
           local_a8[2] = 0;
           local_a8[1] = 0;
           local_a8[0] = 0;
-          uVar1 = puVar16[2];
-          puVar8 = local_ac + 1;
+          local_u1 = local_pu16[2];
+          local_pu8 = local_ac + 1;
           local_b4 = local_b4 + 1;
-          *local_ac = puVar16[1];
-          uVar14 = puVar16[3];
-          local_ac[0x40] = uVar1;
-          uVar1 = puVar16[4];
-          local_ac[0x80] = uVar14;
-          local_ac[0xc0] = uVar1;
-          local_ac = puVar8;
+          *local_ac = local_pu16[1];
+          local_u14 = local_pu16[3];
+          local_ac[0x40] = local_u1;
+          local_u1 = local_pu16[4];
+          local_ac[0x80] = local_u14;
+          local_ac[0xc0] = local_u1;
+          local_ac = local_pu8;
         } while (local_b4 < 0x40);
         local_90 = local_90 + 0x100;
         local_4c = local_4c + 0x100;
         local_8c = local_8c + 1;
-      } while (local_8c < param_4);
+      } while (local_8c < arg_4);
     }
 
     local_94 = local_94 + 0x40;
-    local_98 = puVar12;
+    local_98 = local_pu12;
 
     if (0xff < local_94) {
       _free(local_88);
@@ -1897,16 +1897,16 @@ LAB_00447785:
  * @original Lisa_DownsampleTextureMipmap (IGN_WIN.EXE @ 0x00447fb0, lisa3d.c)
  * @fidelity ADAPTED
  */
-void Lisa_DownsampleTextureMipmap(byte *param_1,byte *param_2,int param_3,int param_4,int param_5,int param_6) {
-  int iVar1;
-  byte bVar2;
-  int iVar3;
-  unsigned int *puVar4;
-  unsigned int uVar5;
-  unsigned int uVar6;
-  int iVar7;
-  int iVar8;
-  int iVar9;
+void Lisa_DownsampleTextureMipmap(byte *arg_1,byte *arg_2,int arg_3,int arg_4,int arg_5,int arg_6) {
+  int local_i1;
+  byte local_b2;
+  int local_i3;
+  unsigned int *local_pu4;
+  unsigned int local_u5;
+  unsigned int local_u6;
+  int local_i7;
+  int local_i8;
+  int local_i9;
   int local_2c;
   int local_24;
   unsigned int local_1c [4];
@@ -1916,113 +1916,113 @@ void Lisa_DownsampleTextureMipmap(byte *param_1,byte *param_2,int param_3,int pa
 
   local_24 = 0;
 
-  if (0 < param_4) {
+  if (0 < arg_4) {
     do {
       local_2c = 0;
       local_c[0] = 0;
       local_c[1] = 0;
       local_c[2] = 0;
 
-      if (0 < param_3) {
-        iVar3 = param_3 + -1;
+      if (0 < arg_3) {
+        local_i3 = arg_3 + -1;
 
         do {
-          iVar7 = 0;
-          puVar4 = local_1c;
-          bVar2 = *param_1;
+          local_i7 = 0;
+          local_pu4 = local_1c;
+          local_b2 = *arg_1;
 
           do {
-            uVar6 = (unsigned int)*(byte *)((unsigned int)bVar2 * 4 + iVar7 + param_6);
-            *puVar4 = uVar6;
+            local_u6 = (unsigned int)*(byte *)((unsigned int)local_b2 * 4 + local_i7 + arg_6);
+            *local_pu4 = local_u6;
 
-            if (local_2c < iVar3) {
-              uVar5 = *(byte *)(iVar7 + (unsigned int)param_1[1] * 4 + param_6) + uVar6;
+            if (local_2c < local_i3) {
+              local_u5 = *(byte *)(local_i7 + (unsigned int)arg_1[1] * 4 + arg_6) + local_u6;
             }
 
             else {
-              uVar5 = uVar6 * 2;
+              local_u5 = local_u6 * 2;
             }
 
-            *puVar4 = uVar5;
+            *local_pu4 = local_u5;
 
-            if (local_24 < param_4 + -1) {
-              uVar6 = (unsigned int)*(byte *)(iVar7 + (unsigned int)param_1[param_5] * 4 + param_6);
-              uVar5 = *puVar4 + uVar6;
-              *puVar4 = uVar5;
+            if (local_24 < arg_4 + -1) {
+              local_u6 = (unsigned int)*(byte *)(local_i7 + (unsigned int)arg_1[arg_5] * 4 + arg_6);
+              local_u5 = *local_pu4 + local_u6;
+              *local_pu4 = local_u5;
 
-              if (local_2c < iVar3) {
-                *puVar4 = *(byte *)(iVar7 + (unsigned int)param_1[param_5 + 1] * 4 + param_6) + uVar5;
+              if (local_2c < local_i3) {
+                *local_pu4 = *(byte *)(local_i7 + (unsigned int)arg_1[arg_5 + 1] * 4 + arg_6) + local_u5;
               }
 
               else {
-                *puVar4 = uVar6 + uVar5;
+                *local_pu4 = local_u6 + local_u5;
               }
 
             }
 
             else {
-              uVar5 = *puVar4 + uVar6;
-              *puVar4 = uVar5;
+              local_u5 = *local_pu4 + local_u6;
+              *local_pu4 = local_u5;
 
-              if (local_2c < iVar3) {
-                *puVar4 = *(byte *)(iVar7 + (unsigned int)param_1[1] * 4 + param_6) + uVar5;
+              if (local_2c < local_i3) {
+                *local_pu4 = *(byte *)(local_i7 + (unsigned int)arg_1[1] * 4 + arg_6) + local_u5;
               }
 
               else {
-                *puVar4 = uVar5 + uVar6;
+                *local_pu4 = local_u5 + local_u6;
               }
 
             }
 
-            puVar4 = puVar4 + 1;
-            iVar7 = iVar7 + 1;
-          } while (puVar4 < local_1c + 3);
-          iVar7 = 0;
+            local_pu4 = local_pu4 + 1;
+            local_i7 = local_i7 + 1;
+          } while (local_pu4 < local_1c + 3);
+          local_i7 = 0;
 
           do {
-            iVar9 = *(int *)((int)local_c + iVar7) + 8 + *(int *)((int)local_1c + iVar7);
-            *(int *)((int)local_1c + iVar7) = iVar9;
+            local_i9 = *(int *)((int)local_c + local_i7) + 8 + *(int *)((int)local_1c + local_i7);
+            *(int *)((int)local_1c + local_i7) = local_i9;
 
-            if (0x3ff < iVar9) {
-              *(int *)((int)local_1c + iVar7) = 0x3ff;
+            if (0x3ff < local_i9) {
+              *(int *)((int)local_1c + local_i7) = 0x3ff;
             }
 
-            if (*(int *)((int)local_1c + iVar7) < 0) {
-              *(int *)((int)local_1c + iVar7) = 0;
+            if (*(int *)((int)local_1c + local_i7) < 0) {
+              *(int *)((int)local_1c + local_i7) = 0;
             }
 
-            iVar7 = iVar7 + 4;
-          } while (iVar7 < 0xc);
-          iVar9 = 0;
+            local_i7 = local_i7 + 4;
+          } while (local_i7 < 0xc);
+          local_i9 = 0;
 
-          bVar2 = (&g_LisaObjectMatrix_22)
+          local_b2 = (&g_LisaObjectMatrix_22)
 
                   [(local_1c[1] & 0x3f0) * 4 +
 
                    ((local_1c[2] & 0x3f0) >> 4) + (local_1c[0] & 0x3f0) * 0x100];
-          *param_2 = bVar2;
-          iVar7 = 0;
+          *arg_2 = local_b2;
+          local_i7 = 0;
 
           do {
-            iVar8 = iVar7 + 4;
-            iVar1 = iVar9 + (unsigned int)bVar2 * 4;
-            iVar9 = iVar9 + 1;
+            local_i8 = local_i7 + 4;
+            local_i1 = local_i9 + (unsigned int)local_b2 * 4;
+            local_i9 = local_i9 + 1;
 
-            *(int *)((int)local_c + iVar7) =
+            *(int *)((int)local_c + local_i7) =
 
-                 (int)(*(int *)((int)local_1c + iVar7) + (unsigned int)*(byte *)(iVar1 + param_6) * -4) / 2;
-            iVar7 = iVar8;
-          } while (iVar8 < 0xc);
-          param_2 = param_2 + 1;
-          param_1 = param_1 + 1;
+                 (int)(*(int *)((int)local_1c + local_i7) + (unsigned int)*(byte *)(local_i1 + arg_6) * -4) / 2;
+            local_i7 = local_i8;
+          } while (local_i8 < 0xc);
+          arg_2 = arg_2 + 1;
+          arg_1 = arg_1 + 1;
           local_2c = local_2c + 1;
-        } while (local_2c < param_3);
+        } while (local_2c < arg_3);
       }
 
-      param_1 = param_1 + (param_5 - param_3);
+      arg_1 = arg_1 + (arg_5 - arg_3);
       local_24 = local_24 + 1;
-      param_2 = param_2 + (param_5 - param_3);
-    } while (local_24 < param_4);
+      arg_2 = arg_2 + (arg_5 - arg_3);
+    } while (local_24 < arg_4);
   }
 
   return;
@@ -2032,12 +2032,12 @@ void Lisa_DownsampleTextureMipmap(byte *param_1,byte *param_2,int param_3,int pa
  * @original Lisa_FilterTextureBlock (IGN_WIN.EXE @ 0x004481f0, lisa3d.c)
  * @fidelity ADAPTED
  */
-void Lisa_FilterTextureBlock(byte *param_1,int param_2,int param_3,int param_4,int param_5,int param_6, int param_7,int param_8) {
-  byte bVar1;
-  unsigned int uVar2;
-  int iVar3;
-  unsigned int *puVar4;
-  int iVar5;
+void Lisa_FilterTextureBlock(byte *arg_1,int arg_2,int arg_3,int arg_4,int arg_5,int arg_6, int arg_7,int arg_8) {
+  byte local_b1;
+  unsigned int local_u2;
+  int local_i3;
+  unsigned int *local_pu4;
+  int local_i5;
   int local_54;
   int local_4c;
   int local_48;
@@ -2056,15 +2056,15 @@ void Lisa_FilterTextureBlock(byte *param_1,int param_2,int param_3,int param_4,i
 
   local_4c = 0;
 
-  if (0 < param_4) {
-    local_40 = param_8 * param_5;
-    local_3c = param_1 + local_40;
-    local_44 = param_1 + local_40 + param_3 + -1;
-    local_38 = (param_5 + -1) * param_8;
-    local_34 = param_1 + (param_3 - local_40) + -1;
+  if (0 < arg_4) {
+    local_40 = arg_8 * arg_5;
+    local_3c = arg_1 + local_40;
+    local_44 = arg_1 + local_40 + arg_3 + -1;
+    local_38 = (arg_5 + -1) * arg_8;
+    local_34 = arg_1 + (arg_3 - local_40) + -1;
     local_30 = -local_40;
-    local_2c = param_1 + -local_40;
-    local_28 = (-1 - param_5) * param_8;
+    local_2c = arg_1 + -local_40;
+    local_28 = (-1 - arg_5) * arg_8;
 
     do {
       local_54 = 0;
@@ -2072,157 +2072,157 @@ void Lisa_FilterTextureBlock(byte *param_1,int param_2,int param_3,int param_4,i
       local_c[1] = 0;
       local_c[2] = 0;
 
-      if (0 < param_3) {
+      if (0 < arg_3) {
         do {
-          iVar3 = 0;
-          puVar4 = local_24;
+          local_i3 = 0;
+          local_pu4 = local_24;
 
           do {
-            if (local_4c - param_8 < 1) {
-              if (local_54 - param_8 < 1) {
-                bVar1 = *param_1;
+            if (local_4c - arg_8 < 1) {
+              if (local_54 - arg_8 < 1) {
+                local_b1 = *arg_1;
               }
 
               else {
-                bVar1 = param_1[local_54 - param_8];
+                local_b1 = arg_1[local_54 - arg_8];
               }
 
-              *puVar4 = (unsigned int)*(byte *)(iVar3 + (unsigned int)bVar1 * 4 + param_6);
+              *local_pu4 = (unsigned int)*(byte *)(local_i3 + (unsigned int)local_b1 * 4 + arg_6);
 
-              if (local_54 + param_8 < param_3) {
-                uVar2 = (unsigned int)param_1[local_54 + param_8];
+              if (local_54 + arg_8 < arg_3) {
+                local_u2 = (unsigned int)arg_1[local_54 + arg_8];
               }
 
               else {
-                uVar2 = (unsigned int)param_1[param_3 + -1];
+                local_u2 = (unsigned int)arg_1[arg_3 + -1];
               }
 
             }
 
             else {
-              if (local_54 == param_8 || local_54 - param_8 < 0) {
-                *puVar4 = (unsigned int)*(byte *)(iVar3 + (unsigned int)*local_2c * 4 + param_6);
+              if (local_54 == arg_8 || local_54 - arg_8 < 0) {
+                *local_pu4 = (unsigned int)*(byte *)(local_i3 + (unsigned int)*local_2c * 4 + arg_6);
               }
 
               else {
-                *puVar4 = (unsigned int)*(byte *)(iVar3 + (unsigned int)param_1[local_28 + local_54] * 4 + param_6);
+                *local_pu4 = (unsigned int)*(byte *)(local_i3 + (unsigned int)arg_1[local_28 + local_54] * 4 + arg_6);
               }
 
-              if (param_8 + local_54 < param_3) {
-                uVar2 = (unsigned int)param_1[local_30 + param_8 + local_54];
+              if (arg_8 + local_54 < arg_3) {
+                local_u2 = (unsigned int)arg_1[local_30 + arg_8 + local_54];
               }
 
               else {
-                uVar2 = (unsigned int)*local_34;
+                local_u2 = (unsigned int)*local_34;
               }
 
             }
 
-            *puVar4 = *puVar4 + (unsigned int)*(byte *)(iVar3 + uVar2 * 4 + param_6);
+            *local_pu4 = *local_pu4 + (unsigned int)*(byte *)(local_i3 + local_u2 * 4 + arg_6);
 
-            if (local_4c + param_8 < param_4) {
-              if (local_54 == param_8 || local_54 - param_8 < 0) {
-                bVar1 = *local_3c;
+            if (local_4c + arg_8 < arg_4) {
+              if (local_54 == arg_8 || local_54 - arg_8 < 0) {
+                local_b1 = *local_3c;
               }
 
               else {
-                bVar1 = param_1[local_38 + local_54];
+                local_b1 = arg_1[local_38 + local_54];
               }
 
-              *puVar4 = *puVar4 + (unsigned int)*(byte *)(iVar3 + (unsigned int)bVar1 * 4 + param_6);
+              *local_pu4 = *local_pu4 + (unsigned int)*(byte *)(local_i3 + (unsigned int)local_b1 * 4 + arg_6);
 
-              if (param_8 + local_54 < param_3) {
-                uVar2 = (unsigned int)param_1[local_40 + param_8 + local_54];
+              if (arg_8 + local_54 < arg_3) {
+                local_u2 = (unsigned int)arg_1[local_40 + arg_8 + local_54];
                 goto LAB_004484c0;
               }
 
-              *puVar4 = *puVar4 + (unsigned int)*(byte *)(iVar3 + (unsigned int)*local_44 * 4 + param_6);
+              *local_pu4 = *local_pu4 + (unsigned int)*(byte *)(local_i3 + (unsigned int)*local_44 * 4 + arg_6);
             }
 
             else {
-              if (local_54 == param_8 || local_54 - param_8 < 0) {
-                iVar5 = (param_4 + -1) * param_5;
-                bVar1 = *(byte *)(iVar3 + (unsigned int)param_1[iVar5] * 4 + param_6);
+              if (local_54 == arg_8 || local_54 - arg_8 < 0) {
+                local_i5 = (arg_4 + -1) * arg_5;
+                local_b1 = *(byte *)(local_i3 + (unsigned int)arg_1[local_i5] * 4 + arg_6);
               }
 
               else {
-                iVar5 = (param_4 + -1) * param_5;
+                local_i5 = (arg_4 + -1) * arg_5;
 
-                bVar1 = *(byte *)(iVar3 + (unsigned int)param_1[iVar5 + (local_54 - param_8)] * 4 + param_6)
+                local_b1 = *(byte *)(local_i3 + (unsigned int)arg_1[local_i5 + (local_54 - arg_8)] * 4 + arg_6)
 
                 ;
               }
 
-              *puVar4 = *puVar4 + (unsigned int)bVar1;
+              *local_pu4 = *local_pu4 + (unsigned int)local_b1;
 
-              if (param_8 + local_54 < param_3) {
-                uVar2 = (unsigned int)param_1[param_8 + local_54];
+              if (arg_8 + local_54 < arg_3) {
+                local_u2 = (unsigned int)arg_1[arg_8 + local_54];
               }
 
               else {
-                uVar2 = (unsigned int)param_1[iVar5 + param_3 + -1];
+                local_u2 = (unsigned int)arg_1[local_i5 + arg_3 + -1];
               }
 
 LAB_004484c0:
 
-              *puVar4 = *puVar4 + (unsigned int)*(byte *)(iVar3 + uVar2 * 4 + param_6);
+              *local_pu4 = *local_pu4 + (unsigned int)*(byte *)(local_i3 + local_u2 * 4 + arg_6);
             }
 
-            puVar4 = puVar4 + 1;
-            iVar3 = iVar3 + 1;
-          } while (puVar4 < local_24 + 3);
-          iVar3 = 0;
+            local_pu4 = local_pu4 + 1;
+            local_i3 = local_i3 + 1;
+          } while (local_pu4 < local_24 + 3);
+          local_i3 = 0;
 
           do {
-            iVar5 = *(int *)((int)local_c + iVar3) + 8 + *(int *)((int)local_24 + iVar3);
-            *(int *)((int)local_24 + iVar3) = iVar5;
+            local_i5 = *(int *)((int)local_c + local_i3) + 8 + *(int *)((int)local_24 + local_i3);
+            *(int *)((int)local_24 + local_i3) = local_i5;
 
-            if (0x3ff < iVar5) {
-              *(int *)((int)local_24 + iVar3) = 0x3ff;
+            if (0x3ff < local_i5) {
+              *(int *)((int)local_24 + local_i3) = 0x3ff;
             }
 
-            if (*(int *)((int)local_24 + iVar3) < 0) {
-              *(int *)((int)local_24 + iVar3) = 0;
+            if (*(int *)((int)local_24 + local_i3) < 0) {
+              *(int *)((int)local_24 + local_i3) = 0;
             }
 
-            iVar3 = iVar3 + 4;
-          } while (iVar3 < 0xc);
+            local_i3 = local_i3 + 4;
+          } while (local_i3 < 0xc);
           local_48 = 0;
 
-          bVar1 = (&g_LisaObjectMatrix_22)
+          local_b1 = (&g_LisaObjectMatrix_22)
 
                   [(local_24[0] & 0x3f0) * 0x100 +
 
                    ((local_24[2] & 0x3f0) >> 4) + (local_24[1] & 0x3f0) * 4];
-          *(byte *)(param_2 + local_54) = bVar1;
-          iVar3 = 0;
+          *(byte *)(arg_2 + local_54) = local_b1;
+          local_i3 = 0;
 
           do {
-            iVar5 = iVar3 + 4;
+            local_i5 = local_i3 + 4;
 
-            *(int *)((int)local_c + iVar3) =
+            *(int *)((int)local_c + local_i3) =
 
-                 (int)(*(int *)((int)local_24 + iVar3) +
+                 (int)(*(int *)((int)local_24 + local_i3) +
 
-                      (unsigned int)*(byte *)(local_48 + param_6 + (unsigned int)bVar1 * 4) * -4) / 2;
+                      (unsigned int)*(byte *)(local_48 + arg_6 + (unsigned int)local_b1 * 4) * -4) / 2;
             local_48 = local_48 + 1;
-            iVar3 = iVar5;
-          } while (iVar5 < 0xc);
+            local_i3 = local_i5;
+          } while (local_i5 < 0xc);
           local_54 = local_54 + 1;
-        } while (local_54 < param_3);
+        } while (local_54 < arg_3);
       }
 
-      param_2 = param_2 + param_5;
-      local_44 = local_44 + param_5;
-      local_40 = local_40 + param_5;
-      local_3c = local_3c + param_5;
-      local_38 = local_38 + param_5;
-      local_34 = local_34 + param_5;
-      local_30 = local_30 + param_5;
-      local_2c = local_2c + param_5;
-      local_28 = local_28 + param_5;
+      arg_2 = arg_2 + arg_5;
+      local_44 = local_44 + arg_5;
+      local_40 = local_40 + arg_5;
+      local_3c = local_3c + arg_5;
+      local_38 = local_38 + arg_5;
+      local_34 = local_34 + arg_5;
+      local_30 = local_30 + arg_5;
+      local_2c = local_2c + arg_5;
+      local_28 = local_28 + arg_5;
       local_4c = local_4c + 1;
-    } while (local_4c < param_4);
+    } while (local_4c < arg_4);
   }
 
   return;
@@ -2232,24 +2232,24 @@ LAB_004484c0:
  * @original Lisa_LoadOrCreateShadingTable (IGN_WIN.EXE @ 0x00448620, lisa3d.c)
  * @fidelity ADAPTED
  */
-void Lisa_LoadOrCreateShadingTable(int param_1,int param_2) {
+void Lisa_LoadOrCreateShadingTable(int arg_1,int arg_2) {
   byte *pbVar1;
   char cVar2;
-  unsigned int uVar3;
-  int iVar4;
+  unsigned int local_u3;
+  int local_i4;
   FILE *pFVar5;
-  unsigned int uVar6;
-  int iVar7;
-  unsigned int uVar8;
-  int iVar9;
+  unsigned int local_u6;
+  int local_i7;
+  unsigned int local_u8;
+  int local_i9;
   size_t sVar10;
-  char *pcVar11;
-  int iVar12;
-  unsigned int *puVar13;
-  unsigned int *puVar14;
-  char *pcVar15;
-  char *pcVar16;
-  int iVar17;
+  char *local_pc11;
+  int local_i12;
+  unsigned int *local_pu13;
+  unsigned int *local_pu14;
+  char *local_pc15;
+  char *local_pc16;
+  int local_i17;
   unsigned int local_48;
   int local_38;
   unsigned int local_34 [5];
@@ -2257,170 +2257,170 @@ void Lisa_LoadOrCreateShadingTable(int param_1,int param_2) {
 
   
 
-  uVar8 = 0;
-  iVar4 = 0;
+  local_u8 = 0;
+  local_i4 = 0;
 
   do {
-    pbVar1 = (byte *)(param_2 + iVar4);
-    iVar4 = iVar4 + 1;
-    iVar9 = uVar8 + *pbVar1;
-    uVar6 = iVar9 * 2;
-    uVar3 = (unsigned int)(iVar9 < 0);
-    uVar8 = uVar6 | uVar3;
-  } while (iVar4 < 0x300);
+    pbVar1 = (byte *)(arg_2 + local_i4);
+    local_i4 = local_i4 + 1;
+    local_i9 = local_u8 + *pbVar1;
+    local_u6 = local_i9 * 2;
+    local_u3 = (unsigned int)(local_i9 < 0);
+    local_u8 = local_u6 | local_u3;
+  } while (local_i4 < 0x300);
   sVar10 = 0;
   local_34[0] = 0xffffffff;
   local_20[0] = '\0';
-  pcVar11 = &s_pal_chk_str2;
+  local_pc11 = &s_pal_chk_str2;
 
   do {
-    pcVar16 = pcVar11;
+    local_pc16 = local_pc11;
     if (local_34[0] == 0) break;
     local_34[0] = local_34[0] - 1;
-    pcVar16 = pcVar11 + 1;
-    cVar2 = *pcVar11;
-    pcVar11 = pcVar16;
+    local_pc16 = local_pc11 + 1;
+    cVar2 = *local_pc11;
+    local_pc11 = local_pc16;
   } while (cVar2 != '\0');
   local_34[0] = ~local_34[0];
-  iVar4 = -1;
-  pcVar11 = local_20;
+  local_i4 = -1;
+  local_pc11 = local_20;
 
   do {
-    pcVar15 = pcVar11;
-    if (iVar4 == 0) break;
-    iVar4 = iVar4 + -1;
-    pcVar15 = pcVar11 + 1;
-    cVar2 = *pcVar11;
-    pcVar11 = pcVar15;
+    local_pc15 = local_pc11;
+    if (local_i4 == 0) break;
+    local_i4 = local_i4 + -1;
+    local_pc15 = local_pc11 + 1;
+    cVar2 = *local_pc11;
+    local_pc11 = local_pc15;
   } while (cVar2 != '\0');
-  pcVar11 = pcVar16 + -local_34[0];
-  pcVar16 = pcVar15 + -1;
+  local_pc11 = local_pc16 + -local_34[0];
+  local_pc16 = local_pc15 + -1;
 
-  for (uVar8 = local_34[0] >> 2; uVar8 != 0; uVar8 = uVar8 - 1) {
-    *(int *)pcVar16 = *(int *)pcVar11;
-    pcVar11 = pcVar11 + 4;
-    pcVar16 = pcVar16 + 4;
+  for (local_u8 = local_34[0] >> 2; local_u8 != 0; local_u8 = local_u8 - 1) {
+    *(int *)local_pc16 = *(int *)local_pc11;
+    local_pc11 = local_pc11 + 4;
+    local_pc16 = local_pc16 + 4;
   }
 
-  for (uVar8 = local_34[0] & 3; uVar8 != 0; uVar8 = uVar8 - 1) {
-    *pcVar16 = *pcVar11;
-    pcVar11 = pcVar11 + 1;
-    pcVar16 = pcVar16 + 1;
+  for (local_u8 = local_34[0] & 3; local_u8 != 0; local_u8 = local_u8 - 1) {
+    *local_pc16 = *local_pc11;
+    local_pc11 = local_pc11 + 1;
+    local_pc16 = local_pc16 + 1;
   }
 
-  __ultoa(uVar6 & 0xffff | uVar3,(char *)local_34,0x10);
-  uVar8 = 0xffffffff;
-  puVar13 = local_34;
+  __ultoa(local_u6 & 0xffff | local_u3,(char *)local_34,0x10);
+  local_u8 = 0xffffffff;
+  local_pu13 = local_34;
 
   do {
-    puVar14 = puVar13;
-    if (uVar8 == 0) break;
-    uVar8 = uVar8 - 1;
-    puVar14 = (unsigned int *)((int)puVar13 + 1);
-    uVar6 = *puVar13;
-    puVar13 = puVar14;
-  } while ((char)uVar6 != '\0');
-  uVar8 = ~uVar8;
-  iVar4 = -1;
-  pcVar11 = local_20;
+    local_pu14 = local_pu13;
+    if (local_u8 == 0) break;
+    local_u8 = local_u8 - 1;
+    local_pu14 = (unsigned int *)((int)local_pu13 + 1);
+    local_u6 = *local_pu13;
+    local_pu13 = local_pu14;
+  } while ((char)local_u6 != '\0');
+  local_u8 = ~local_u8;
+  local_i4 = -1;
+  local_pc11 = local_20;
 
   do {
-    pcVar16 = pcVar11;
-    if (iVar4 == 0) break;
-    iVar4 = iVar4 + -1;
-    pcVar16 = pcVar11 + 1;
-    cVar2 = *pcVar11;
-    pcVar11 = pcVar16;
+    local_pc16 = local_pc11;
+    if (local_i4 == 0) break;
+    local_i4 = local_i4 + -1;
+    local_pc16 = local_pc11 + 1;
+    cVar2 = *local_pc11;
+    local_pc11 = local_pc16;
   } while (cVar2 != '\0');
-  pcVar11 = (char *)((int)puVar14 - uVar8);
-  pcVar16 = pcVar16 + -1;
+  local_pc11 = (char *)((int)local_pu14 - local_u8);
+  local_pc16 = local_pc16 + -1;
 
-  for (uVar6 = uVar8 >> 2; uVar6 != 0; uVar6 = uVar6 - 1) {
-    *(int *)pcVar16 = *(int *)pcVar11;
-    pcVar11 = pcVar11 + 4;
-    pcVar16 = pcVar16 + 4;
+  for (local_u6 = local_u8 >> 2; local_u6 != 0; local_u6 = local_u6 - 1) {
+    *(int *)local_pc16 = *(int *)local_pc11;
+    local_pc11 = local_pc11 + 4;
+    local_pc16 = local_pc16 + 4;
   }
 
-  for (uVar8 = uVar8 & 3; uVar8 != 0; uVar8 = uVar8 - 1) {
-    *pcVar16 = *pcVar11;
-    pcVar11 = pcVar11 + 1;
-    pcVar16 = pcVar16 + 1;
+  for (local_u8 = local_u8 & 3; local_u8 != 0; local_u8 = local_u8 - 1) {
+    *local_pc16 = *local_pc11;
+    local_pc11 = local_pc11 + 1;
+    local_pc16 = local_pc16 + 1;
   }
 
-  uVar8 = 0xffffffff;
-  pcVar11 = (char *)&s_pal_chk_str1;
+  local_u8 = 0xffffffff;
+  local_pc11 = (char *)&s_pal_chk_str1;
 
   do {
-    pcVar16 = pcVar11;
-    if (uVar8 == 0) break;
-    uVar8 = uVar8 - 1;
-    pcVar16 = pcVar11 + 1;
-    cVar2 = *pcVar11;
-    pcVar11 = pcVar16;
+    local_pc16 = local_pc11;
+    if (local_u8 == 0) break;
+    local_u8 = local_u8 - 1;
+    local_pc16 = local_pc11 + 1;
+    cVar2 = *local_pc11;
+    local_pc11 = local_pc16;
   } while (cVar2 != '\0');
-  uVar8 = ~uVar8;
-  iVar4 = -1;
-  pcVar11 = local_20;
+  local_u8 = ~local_u8;
+  local_i4 = -1;
+  local_pc11 = local_20;
 
   do {
-    pcVar15 = pcVar11;
-    if (iVar4 == 0) break;
-    iVar4 = iVar4 + -1;
-    pcVar15 = pcVar11 + 1;
-    cVar2 = *pcVar11;
-    pcVar11 = pcVar15;
+    local_pc15 = local_pc11;
+    if (local_i4 == 0) break;
+    local_i4 = local_i4 + -1;
+    local_pc15 = local_pc11 + 1;
+    cVar2 = *local_pc11;
+    local_pc11 = local_pc15;
   } while (cVar2 != '\0');
-  pcVar11 = pcVar16 + -uVar8;
-  pcVar16 = pcVar15 + -1;
+  local_pc11 = local_pc16 + -local_u8;
+  local_pc16 = local_pc15 + -1;
 
-  for (uVar6 = uVar8 >> 2; uVar6 != 0; uVar6 = uVar6 - 1) {
-    *(int *)pcVar16 = *(int *)pcVar11;
-    pcVar11 = pcVar11 + 4;
-    pcVar16 = pcVar16 + 4;
+  for (local_u6 = local_u8 >> 2; local_u6 != 0; local_u6 = local_u6 - 1) {
+    *(int *)local_pc16 = *(int *)local_pc11;
+    local_pc11 = local_pc11 + 4;
+    local_pc16 = local_pc16 + 4;
   }
 
-  for (uVar8 = uVar8 & 3; uVar8 != 0; uVar8 = uVar8 - 1) {
-    *pcVar16 = *pcVar11;
-    pcVar11 = pcVar11 + 1;
-    pcVar16 = pcVar16 + 1;
+  for (local_u8 = local_u8 & 3; local_u8 != 0; local_u8 = local_u8 - 1) {
+    *local_pc16 = *local_pc11;
+    local_pc11 = local_pc11 + 1;
+    local_pc16 = local_pc16 + 1;
   }
 
-  uVar8 = 0xffffffff;
-  pcVar11 = (char *)&s_pal_checksum_fmt;
+  local_u8 = 0xffffffff;
+  local_pc11 = (char *)&s_pal_checksum_fmt;
 
   do {
-    pcVar16 = pcVar11;
-    if (uVar8 == 0) break;
-    uVar8 = uVar8 - 1;
-    pcVar16 = pcVar11 + 1;
-    cVar2 = *pcVar11;
-    pcVar11 = pcVar16;
+    local_pc16 = local_pc11;
+    if (local_u8 == 0) break;
+    local_u8 = local_u8 - 1;
+    local_pc16 = local_pc11 + 1;
+    cVar2 = *local_pc11;
+    local_pc11 = local_pc16;
   } while (cVar2 != '\0');
-  uVar8 = ~uVar8;
-  iVar4 = -1;
-  pcVar11 = local_20;
+  local_u8 = ~local_u8;
+  local_i4 = -1;
+  local_pc11 = local_20;
 
   do {
-    pcVar15 = pcVar11;
-    if (iVar4 == 0) break;
-    iVar4 = iVar4 + -1;
-    pcVar15 = pcVar11 + 1;
-    cVar2 = *pcVar11;
-    pcVar11 = pcVar15;
+    local_pc15 = local_pc11;
+    if (local_i4 == 0) break;
+    local_i4 = local_i4 + -1;
+    local_pc15 = local_pc11 + 1;
+    cVar2 = *local_pc11;
+    local_pc11 = local_pc15;
   } while (cVar2 != '\0');
-  pcVar11 = pcVar16 + -uVar8;
-  pcVar16 = pcVar15 + -1;
+  local_pc11 = local_pc16 + -local_u8;
+  local_pc16 = local_pc15 + -1;
 
-  for (uVar6 = uVar8 >> 2; uVar6 != 0; uVar6 = uVar6 - 1) {
-    *(int *)pcVar16 = *(int *)pcVar11;
-    pcVar11 = pcVar11 + 4;
-    pcVar16 = pcVar16 + 4;
+  for (local_u6 = local_u8 >> 2; local_u6 != 0; local_u6 = local_u6 - 1) {
+    *(int *)local_pc16 = *(int *)local_pc11;
+    local_pc11 = local_pc11 + 4;
+    local_pc16 = local_pc16 + 4;
   }
 
-  for (uVar8 = uVar8 & 3; uVar8 != 0; uVar8 = uVar8 - 1) {
-    *pcVar16 = *pcVar11;
-    pcVar11 = pcVar11 + 1;
-    pcVar16 = pcVar16 + 1;
+  for (local_u8 = local_u8 & 3; local_u8 != 0; local_u8 = local_u8 - 1) {
+    *local_pc16 = *local_pc11;
+    local_pc11 = local_pc11 + 1;
+    local_pc16 = local_pc16 + 1;
   }
 
   pFVar5 = (FILE *)fopen(local_20,(const char *)&s_rb);
@@ -2434,34 +2434,34 @@ void Lisa_LoadOrCreateShadingTable(int param_1,int param_2) {
     local_48 = 0;
 
     do {
-      iVar7 = 0;
-      iVar4 = 0x7f000000;
-      iVar9 = 0;
+      local_i7 = 0;
+      local_i4 = 0x7f000000;
+      local_i9 = 0;
 
       do {
-        iVar12 = ((local_48 & 0x3f000) >> 10) - (unsigned int)*(byte *)(iVar7 + param_2);
-        iVar12 = iVar12 * iVar12;
+        local_i12 = ((local_48 & 0x3f000) >> 10) - (unsigned int)*(byte *)(local_i7 + arg_2);
+        local_i12 = local_i12 * local_i12;
 
-        if (((iVar12 < iVar4) &&
+        if (((local_i12 < local_i4) &&
 
-            (iVar17 = ((local_48 & 0xfc0) >> 4) - (unsigned int)*(byte *)(iVar7 + 1 + param_2),
+            (local_i17 = ((local_48 & 0xfc0) >> 4) - (unsigned int)*(byte *)(local_i7 + 1 + arg_2),
 
-            iVar12 = iVar12 + iVar17 * iVar17, iVar12 < iVar4)) &&
+            local_i12 = local_i12 + local_i17 * local_i17, local_i12 < local_i4)) &&
 
-           (iVar17 = (local_48 & 0x3f) * 4 - (unsigned int)*(byte *)(iVar7 + 2 + param_2),
+           (local_i17 = (local_48 & 0x3f) * 4 - (unsigned int)*(byte *)(local_i7 + 2 + arg_2),
 
-           iVar12 = iVar12 + iVar17 * iVar17, iVar12 < iVar4)) {
-          iVar4 = iVar12;
-          local_38 = iVar9;
+           local_i12 = local_i12 + local_i17 * local_i17, local_i12 < local_i4)) {
+          local_i4 = local_i12;
+          local_38 = local_i9;
         }
 
-        iVar7 = iVar7 + 3;
-        iVar9 = iVar9 + 1;
-      } while (iVar9 < 0x100);
-      uVar8 = local_48 + 1;
+        local_i7 = local_i7 + 3;
+        local_i9 = local_i9 + 1;
+      } while (local_i9 < 0x100);
+      local_u8 = local_48 + 1;
       ((int*)&(g_LisaObjectMatrix_22))[local_48] = (char)local_38;
-      local_48 = uVar8;
-    } while ((int)uVar8 < 0x40000);
+      local_48 = local_u8;
+    } while ((int)local_u8 < 0x40000);
     pFVar5 = (FILE *)fopen(local_20,(const char *)&s_tab_tab);
 
     if (pFVar5 != (FILE *)0x0) {
@@ -2478,10 +2478,10 @@ void Lisa_LoadOrCreateShadingTable(int param_1,int param_2) {
  * @original Lisa_FindClosestPaletteColor (IGN_WIN.EXE @ 0x00448860, lisa3d.c)
  * @fidelity ADAPTED
  */
-unsigned int Lisa_FindClosestPaletteColor(int *param_1,int param_2) {
-  unsigned int uVar1;
-  int iVar2;
-  int iVar3;
+unsigned int Lisa_FindClosestPaletteColor(int *arg_1,int arg_2) {
+  unsigned int local_u1;
+  int local_i2;
+  int local_i3;
   unsigned int local_c;
   int local_8;
   unsigned int local_4;
@@ -2489,35 +2489,35 @@ unsigned int Lisa_FindClosestPaletteColor(int *param_1,int param_2) {
   
 
   local_8 = 0x7f000000;
-  iVar2 = 0;
+  local_i2 = 0;
   local_4 = 0;
-  uVar1 = local_c;
+  local_u1 = local_c;
 
   do {
-    iVar3 = *param_1 - (unsigned int)*(byte *)(param_2 + iVar2);
-    iVar3 = iVar3 * iVar3;
+    local_i3 = *arg_1 - (unsigned int)*(byte *)(arg_2 + local_i2);
+    local_i3 = local_i3 * local_i3;
 
-    if (iVar3 < local_8) {
-      local_c = (unsigned int)*(byte *)(param_2 + 1 + iVar2);
-      iVar3 = iVar3 + (param_1[1] - local_c) * (param_1[1] - local_c);
+    if (local_i3 < local_8) {
+      local_c = (unsigned int)*(byte *)(arg_2 + 1 + local_i2);
+      local_i3 = local_i3 + (arg_1[1] - local_c) * (arg_1[1] - local_c);
 
-      if (iVar3 < local_8) {
-        local_c = (unsigned int)*(byte *)(param_2 + 2 + iVar2);
-        iVar3 = iVar3 + (param_1[2] - local_c) * (param_1[2] - local_c);
+      if (local_i3 < local_8) {
+        local_c = (unsigned int)*(byte *)(arg_2 + 2 + local_i2);
+        local_i3 = local_i3 + (arg_1[2] - local_c) * (arg_1[2] - local_c);
 
-        if (iVar3 < local_8) {
-          uVar1 = local_4;
-          local_8 = iVar3;
+        if (local_i3 < local_8) {
+          local_u1 = local_4;
+          local_8 = local_i3;
         }
 
       }
 
     }
 
-    iVar2 = iVar2 + 3;
+    local_i2 = local_i2 + 3;
     local_4 = local_4 + 1;
   } while ((int)local_4 < 0x100);
-  return uVar1;
+  return local_u1;
 }
 
 /**
@@ -2525,64 +2525,64 @@ unsigned int Lisa_FindClosestPaletteColor(int *param_1,int param_2) {
  * @fidelity ADAPTED
  */
 unsigned long long Lisa_RenderSkyBackdrop(void) {
-  float fVar1;
-  int iVar2;
-  int iVar3;
-  int iVar4;
-  int iVar5;
-  unsigned int uVar6;
+  float local_f1;
+  int local_i2;
+  int local_i3;
+  int local_i4;
+  int local_i5;
+  unsigned int local_u6;
   double extraout_ST0;
   double extraout_ST1;
-  long long lVar7;
-  unsigned long long uVar8;
+  long long local_l7;
+  unsigned long long local_u8;
 
   
 
-  iVar2 = g_LisaCamera;
-  lVar7 = __ftol();
-  iVar3 = (int)lVar7;
-  lVar7 = __ftol();
-  iVar4 = (int)lVar7;
-  lVar7 = __ftol();
-  uVar6 = (unsigned int)((unsigned long long)lVar7 >> 0x20);
-  iVar5 = (int)lVar7;
-  fVar1 = (float)SQRT(extraout_ST1 * extraout_ST1 + extraout_ST0 * extraout_ST0);
+  local_i2 = g_LisaCamera;
+  local_l7 = __ftol();
+  local_i3 = (int)local_l7;
+  local_l7 = __ftol();
+  local_i4 = (int)local_l7;
+  local_l7 = __ftol();
+  local_u6 = (unsigned int)((unsigned long long)local_l7 >> 0x20);
+  local_i5 = (int)local_l7;
+  local_f1 = (float)SQRT(extraout_ST1 * extraout_ST1 + extraout_ST0 * extraout_ST0);
 
-  if ((iVar4 < 1) || ((int)fVar1 < 1)) {
-    if ((iVar4 < 0) && (0 < (int)fVar1)) {
-      fpatan((double)fVar1 / (double)-iVar4,(double)1);
-      lVar7 = __ftol();
-      *(double *)(iVar2 + 0x18) = (double)(int)lVar7;
+  if ((local_i4 < 1) || ((int)local_f1 < 1)) {
+    if ((local_i4 < 0) && (0 < (int)local_f1)) {
+      fpatan((double)local_f1 / (double)-local_i4,(double)1);
+      local_l7 = __ftol();
+      *(double *)(local_i2 + 0x18) = (double)(int)local_l7;
     }
 
-    else if (iVar4 == 0) {
-      *(int *)(iVar2 + 0x18) = 0;
-      *(int *)(iVar2 + 0x1c) = 0;
-      lVar7 = (unsigned long long)uVar6 << 0x20;
+    else if (local_i4 == 0) {
+      *(int *)(local_i2 + 0x18) = 0;
+      *(int *)(local_i2 + 0x1c) = 0;
+      local_l7 = (unsigned long long)local_u6 << 0x20;
     }
 
-    else if ((iVar4 == 0) && (ABS(fVar1) == 0.0)) {
-      *(int *)(iVar2 + 0x18) = 0;
-      *(int *)(iVar2 + 0x1c) = 0;
-      lVar7 = (unsigned long long)uVar6 << 0x20;
+    else if ((local_i4 == 0) && (ABS(local_f1) == 0.0)) {
+      *(int *)(local_i2 + 0x18) = 0;
+      *(int *)(local_i2 + 0x1c) = 0;
+      local_l7 = (unsigned long long)local_u6 << 0x20;
     }
 
-    else if ((iVar4 < 0) && (ABS(fVar1) == 0.0)) {
-      *(int *)(iVar2 + 0x18) = 0;
-      *(int *)(iVar2 + 0x1c) = 0x40a51800;
-      lVar7 = (((long long)(uVar6) << 32) | ((unsigned int)(fVar1)));
+    else if ((local_i4 < 0) && (ABS(local_f1) == 0.0)) {
+      *(int *)(local_i2 + 0x18) = 0;
+      *(int *)(local_i2 + 0x1c) = 0x40a51800;
+      local_l7 = (((long long)(local_u6) << 32) | ((unsigned int)(local_f1)));
     }
 
     else {
-      lVar7 = (unsigned long long)uVar6 << 0x20;
+      local_l7 = (unsigned long long)local_u6 << 0x20;
 
-      if (0 < iVar4) {
-        lVar7 = (((long long)(uVar6) << 32) | ((unsigned int)(fVar1)));
+      if (0 < local_i4) {
+        local_l7 = (((long long)(local_u6) << 32) | ((unsigned int)(local_f1)));
 
-        if (ABS(fVar1) == 0.0) {
-          *(int *)(iVar2 + 0x18) = 0;
-          *(int *)(iVar2 + 0x1c) = 0x408c2000;
-          lVar7 = (((long long)(uVar6) << 32) | ((unsigned int)(fVar1)));
+        if (ABS(local_f1) == 0.0) {
+          *(int *)(local_i2 + 0x18) = 0;
+          *(int *)(local_i2 + 0x1c) = 0x408c2000;
+          local_l7 = (((long long)(local_u6) << 32) | ((unsigned int)(local_f1)));
         }
 
       }
@@ -2592,57 +2592,57 @@ unsigned long long Lisa_RenderSkyBackdrop(void) {
   }
 
   else {
-    fpatan((double)iVar4 / (double)fVar1,(double)1);
-    lVar7 = __ftol();
-    *(double *)(iVar2 + 0x18) = (double)(int)lVar7;
+    fpatan((double)local_i4 / (double)local_f1,(double)1);
+    local_l7 = __ftol();
+    *(double *)(local_i2 + 0x18) = (double)(int)local_l7;
   }
 
-  uVar6 = (unsigned int)((unsigned long long)lVar7 >> 0x20);
+  local_u6 = (unsigned int)((unsigned long long)local_l7 >> 0x20);
 
-  if ((iVar3 < 1) || (iVar5 < 1)) {
-    if ((iVar5 < 0) && (0 < iVar3)) {
-      fpatan((double)-iVar5 / (double)iVar3,(double)1);
-      uVar8 = __ftol();
-      *(double *)(iVar2 + 0x20) = (double)(int)uVar8;
+  if ((local_i3 < 1) || (local_i5 < 1)) {
+    if ((local_i5 < 0) && (0 < local_i3)) {
+      fpatan((double)-local_i5 / (double)local_i3,(double)1);
+      local_u8 = __ftol();
+      *(double *)(local_i2 + 0x20) = (double)(int)local_u8;
     }
 
-    else if ((iVar3 < 0) && (iVar5 < 0)) {
-      fpatan((double)iVar3 / (double)iVar5,(double)1);
-      uVar8 = __ftol();
-      *(double *)(iVar2 + 0x20) = (double)(int)uVar8;
+    else if ((local_i3 < 0) && (local_i5 < 0)) {
+      fpatan((double)local_i3 / (double)local_i5,(double)1);
+      local_u8 = __ftol();
+      *(double *)(local_i2 + 0x20) = (double)(int)local_u8;
     }
 
-    else if ((iVar5 < 1) || (-1 < iVar3)) {
-      if (iVar3 == 0) {
-        if (0 < iVar5) {
-          *(int *)(iVar2 + 0x20) = 0;
-          *(int *)(iVar2 + 0x24) = 0;
-          uVar8 = (unsigned long long)uVar6 << 0x20;
+    else if ((local_i5 < 1) || (-1 < local_i3)) {
+      if (local_i3 == 0) {
+        if (0 < local_i5) {
+          *(int *)(local_i2 + 0x20) = 0;
+          *(int *)(local_i2 + 0x24) = 0;
+          local_u8 = (unsigned long long)local_u6 << 0x20;
           goto LAB_00448c11;
         }
 
-        if (iVar5 < 0) {
-          *(int *)(iVar2 + 0x20) = 0;
-          *(int *)(iVar2 + 0x24) = 0x409c2000;
-          uVar8 = (unsigned long long)uVar6 << 0x20;
+        if (local_i5 < 0) {
+          *(int *)(local_i2 + 0x20) = 0;
+          *(int *)(local_i2 + 0x24) = 0x409c2000;
+          local_u8 = (unsigned long long)local_u6 << 0x20;
           goto LAB_00448c11;
         }
 
       }
 
-      if ((iVar5 == 0) && (0 < iVar3)) {
-        *(int *)(iVar2 + 0x20) = 0;
-        *(int *)(iVar2 + 0x24) = 0x408c2000;
-        uVar8 = (unsigned long long)uVar6 << 0x20;
+      if ((local_i5 == 0) && (0 < local_i3)) {
+        *(int *)(local_i2 + 0x20) = 0;
+        *(int *)(local_i2 + 0x24) = 0x408c2000;
+        local_u8 = (unsigned long long)local_u6 << 0x20;
       }
 
       else {
-        uVar8 = (unsigned long long)uVar6 << 0x20;
+        local_u8 = (unsigned long long)local_u6 << 0x20;
 
-        if ((iVar5 == 0) && (uVar8 = (unsigned long long)uVar6 << 0x20, iVar3 < 0)) {
-          *(int *)(iVar2 + 0x20) = 0;
-          *(int *)(iVar2 + 0x24) = 0x40a51800;
-          uVar8 = (unsigned long long)uVar6 << 0x20;
+        if ((local_i5 == 0) && (local_u8 = (unsigned long long)local_u6 << 0x20, local_i3 < 0)) {
+          *(int *)(local_i2 + 0x20) = 0;
+          *(int *)(local_i2 + 0x24) = 0x40a51800;
+          local_u8 = (unsigned long long)local_u6 << 0x20;
         }
 
       }
@@ -2650,23 +2650,23 @@ unsigned long long Lisa_RenderSkyBackdrop(void) {
     }
 
     else {
-      fpatan((double)iVar5 / (double)-iVar3,(double)1);
-      uVar8 = __ftol();
-      *(double *)(iVar2 + 0x20) = (double)(int)uVar8;
+      fpatan((double)local_i5 / (double)-local_i3,(double)1);
+      local_u8 = __ftol();
+      *(double *)(local_i2 + 0x20) = (double)(int)local_u8;
     }
 
   }
 
   else {
-    fpatan((double)iVar3 / (double)iVar5,(double)1);
-    uVar8 = __ftol();
-    *(double *)(iVar2 + 0x20) = (double)(int)uVar8;
+    fpatan((double)local_i3 / (double)local_i5,(double)1);
+    local_u8 = __ftol();
+    *(double *)(local_i2 + 0x20) = (double)(int)local_u8;
   }
 
 LAB_00448c11:
 
-  *(double *)(iVar2 + 0x28) = (double)*(int *)(iVar2 + 0x7c);
-  return uVar8 & 0xffffffff00000000;
+  *(double *)(local_i2 + 0x28) = (double)*(int *)(local_i2 + 0x7c);
+  return local_u8 & 0xffffffff00000000;
 }
 
 /**
@@ -2674,118 +2674,118 @@ LAB_00448c11:
  * @fidelity ADAPTED
  */
 int Lisa_CullObjectsOrthographic(void) {
-  int iVar1;
-  int iVar2;
-  int iVar3;
-  int iVar4;
-  int *piVar5;
-  int *puVar6;
-  int iVar7;
-  int iVar8;
-  long long lVar9;
-  long long lVar10;
-  long long lVar11;
+  int local_i1;
+  int local_i2;
+  int local_i3;
+  int local_i4;
+  int *local_pi5;
+  int *local_pu6;
+  int local_i7;
+  int local_i8;
+  long long local_l9;
+  long long local_l10;
+  long long local_l11;
   int local_c;
   int local_4;
 
   
 
-  iVar3 = g_LisaCamera;
+  local_i3 = g_LisaCamera;
   g_LisaCamera->visible_obj_count = 0;
-  lVar9 = __ftol();
-  lVar10 = __ftol();
-  lVar11 = __ftol();
-  iVar7 = ((int)lVar9 * 0x24 + (int)lVar10) * 8;
+  local_l9 = __ftol();
+  local_l10 = __ftol();
+  local_l11 = __ftol();
+  local_i7 = ((int)local_l9 * 0x24 + (int)local_l10) * 8;
 
-  iVar4 = (*(int *)(&g_LisaDefaultScale_Y + iVar7) +
+  local_i4 = (*(int *)(&g_LisaDefaultScale_Y + local_i7) +
 
-           ((int)((int)lVar11 + ((int)lVar11 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) * g_LisaGridCellsX;
-  lVar9 = __ftol();
-  iVar2 = g_LisaVisibleObjects;
+           ((int)((int)local_l11 + ((int)local_l11 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) * g_LisaGridCellsX;
+  local_l9 = __ftol();
+  local_i2 = g_LisaVisibleObjects;
   local_c = 3;
 
-  iVar4 = (int)g_pLisaGridCells +
+  local_i4 = (int)g_pLisaGridCells +
 
-          (iVar4 + ((int)((int)lVar9 + ((int)lVar9 >> 0x1f & 0xffU)) >> 8) +
+          (local_i4 + ((int)((int)local_l9 + ((int)local_l9 >> 0x1f & 0xffU)) >> 8) +
 
-           *(int *)(&g_LisaDefaultScale_X + iVar7) + g_LisaDefaultOffset_Y) * 4;
-  iVar7 = g_LisaDefaultOffset_Z;
+           *(int *)(&g_LisaDefaultScale_X + local_i7) + g_LisaDefaultOffset_Y) * 4;
+  local_i7 = g_LisaDefaultOffset_Z;
 
   if (g_pLisaAllocatedBuffersEnd == 0) {
-    while (iVar7 != -5000) {
-      iVar7 = *(int *)(local_c * 4 + 0x499fa0);
+    while (local_i7 != -5000) {
+      local_i7 = *(int *)(local_c * 4 + 0x499fa0);
 
-      if (0 < iVar7) {
+      if (0 < local_i7) {
         do {
-          piVar5 = *(int **)(iVar4 + 4);
-          iVar4 = iVar4 + 4;
+          local_pi5 = *(int **)(local_i4 + 4);
+          local_i4 = local_i4 + 4;
 
-          if ((piVar5 != (int *)0x0) && ((int *)*piVar5 == piVar5)) {
-            iVar8 = *(int *)(iVar3 + 0x60) + 1;
-            iVar1 = *(int *)((int)piVar5 + 0x26);
-            *(int *)(iVar3 + 0x60) = iVar8;
-            *(int **)(iVar2 + -4 + iVar8 * 4) = piVar5;
+          if ((local_pi5 != (int *)0x0) && ((int *)*local_pi5 == local_pi5)) {
+            local_i8 = *(int *)(local_i3 + 0x60) + 1;
+            local_i1 = *(int *)((int)local_pi5 + 0x26);
+            *(int *)(local_i3 + 0x60) = local_i8;
+            *(int **)(local_i2 + -4 + local_i8 * 4) = local_pi5;
 
-            if (iVar1 != 0) {
-              puVar6 = (int *)(iVar2 + iVar8 * 4);
+            if (local_i1 != 0) {
+              local_pu6 = (int *)(local_i2 + local_i8 * 4);
 
               do {
-                piVar5 = *(int **)((int)piVar5 + 0x26);
+                local_pi5 = *(int **)((int)local_pi5 + 0x26);
 
-                if ((int *)*piVar5 == piVar5) {
-                  *puVar6 = piVar5;
-                  puVar6 = puVar6 + 1;
-                  *(int *)(iVar3 + 0x60) = *(int *)(iVar3 + 0x60) + 1;
+                if ((int *)*local_pi5 == local_pi5) {
+                  *local_pu6 = local_pi5;
+                  local_pu6 = local_pu6 + 1;
+                  *(int *)(local_i3 + 0x60) = *(int *)(local_i3 + 0x60) + 1;
                 }
 
-              } while (*(int *)((int)piVar5 + 0x26) != 0);
+              } while (*(int *)((int)local_pi5 + 0x26) != 0);
             }
 
           }
 
-          iVar7 = iVar7 + -1;
-        } while (iVar7 != 0);
+          local_i7 = local_i7 + -1;
+        } while (local_i7 != 0);
       }
 
-      iVar7 = local_c + 1;
+      local_i7 = local_c + 1;
       local_c = local_c + 2;
-      iVar4 = iVar4 + (*(int *)(iVar7 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-      iVar7 = *(int *)(local_c * 4 + 0x499fa0);
+      local_i4 = local_i4 + (*(int *)(local_i7 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
+      local_i7 = *(int *)(local_c * 4 + 0x499fa0);
     }
 
   }
 
   else {
-    while (iVar7 != -5000) {
+    while (local_i7 != -5000) {
       local_4 = *(int *)(local_c * 4 + 0x499fa0);
 
       if (0 < local_4) {
         do {
-          piVar5 = *(int **)(iVar4 + 4);
-          iVar4 = iVar4 + 4;
+          local_pi5 = *(int **)(local_i4 + 4);
+          local_i4 = local_i4 + 4;
 
-          if ((piVar5 != (int *)0x0) && ((int *)*piVar5 == piVar5)) {
-            if (((short)piVar5[9] == 0) || ((short)piVar5[9] == g_pLisaAllocatedBuffersEnd)) {
-              iVar7 = *(int *)(iVar3 + 0x60) + 1;
-              *(int *)(iVar3 + 0x60) = iVar7;
-              *(int **)(iVar2 + -4 + iVar7 * 4) = piVar5;
+          if ((local_pi5 != (int *)0x0) && ((int *)*local_pi5 == local_pi5)) {
+            if (((short)local_pi5[9] == 0) || ((short)local_pi5[9] == g_pLisaAllocatedBuffersEnd)) {
+              local_i7 = *(int *)(local_i3 + 0x60) + 1;
+              *(int *)(local_i3 + 0x60) = local_i7;
+              *(int **)(local_i2 + -4 + local_i7 * 4) = local_pi5;
             }
 
-            if (*(int *)((int)piVar5 + 0x26) != 0) {
-              puVar6 = (int *)(iVar2 + *(int *)(iVar3 + 0x60) * 4);
+            if (*(int *)((int)local_pi5 + 0x26) != 0) {
+              local_pu6 = (int *)(local_i2 + *(int *)(local_i3 + 0x60) * 4);
 
               do {
-                piVar5 = *(int **)((int)piVar5 + 0x26);
+                local_pi5 = *(int **)((int)local_pi5 + 0x26);
 
-                if (((int *)*piVar5 == piVar5) &&
+                if (((int *)*local_pi5 == local_pi5) &&
 
-                   (((short)piVar5[9] == 0 || ((short)piVar5[9] == g_pLisaAllocatedBuffersEnd)))) {
-                  *puVar6 = piVar5;
-                  puVar6 = puVar6 + 1;
-                  *(int *)(iVar3 + 0x60) = *(int *)(iVar3 + 0x60) + 1;
+                   (((short)local_pi5[9] == 0 || ((short)local_pi5[9] == g_pLisaAllocatedBuffersEnd)))) {
+                  *local_pu6 = local_pi5;
+                  local_pu6 = local_pu6 + 1;
+                  *(int *)(local_i3 + 0x60) = *(int *)(local_i3 + 0x60) + 1;
                 }
 
-              } while (*(int *)((int)piVar5 + 0x26) != 0);
+              } while (*(int *)((int)local_pi5 + 0x26) != 0);
             }
 
           }
@@ -2794,15 +2794,15 @@ int Lisa_CullObjectsOrthographic(void) {
         } while (local_4 != 0);
       }
 
-      iVar7 = local_c + 1;
+      local_i7 = local_c + 1;
       local_c = local_c + 2;
-      iVar4 = iVar4 + (*(int *)(iVar7 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-      iVar7 = *(int *)(local_c * 4 + 0x499fa0);
+      local_i4 = local_i4 + (*(int *)(local_i7 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
+      local_i7 = *(int *)(local_c * 4 + 0x499fa0);
     }
 
   }
 
-  *(int *)(iVar3 + 100) = *(int *)(iVar3 + 0x60);
+  *(int *)(local_i3 + 100) = *(int *)(local_i3 + 0x60);
   return 0;
 }
 
@@ -2811,32 +2811,32 @@ int Lisa_CullObjectsOrthographic(void) {
  * @fidelity ADAPTED
  */
 int Lisa_FrustumCullObjects(void) {
-  int iVar1;
-  int iVar2;
-  int iVar3;
-  int iVar4;
-  int iVar5;
-  int *piVar6;
-  int *piVar7;
-  int iVar8;
-  int iVar9;
-  int iVar10;
-  int iVar11;
-  int iVar12;
-  int iVar13;
-  int *piVar14;
-  int iVar15;
-  int iVar16;
-  int iVar17;
-  int iVar18;
-  int *piVar19;
-  int iVar20;
-  int iVar21;
-  int iVar22;
+  int local_i1;
+  int local_i2;
+  int local_i3;
+  int local_i4;
+  int local_i5;
+  int *local_pi6;
+  int *local_pi7;
+  int local_i8;
+  int local_i9;
+  int local_i10;
+  int local_i11;
+  int local_i12;
+  int local_i13;
+  int *local_pi14;
+  int local_i15;
+  int local_i16;
+  int local_i17;
+  int local_i18;
+  int *local_pi19;
+  int local_i20;
+  int local_i21;
+  int local_i22;
   double extraout_ST1;
-  long long lVar23;
-  long long lVar24;
-  long long lVar25;
+  long long local_l23;
+  long long local_l24;
+  long long local_l25;
   int local_64;
   int local_60;
   int local_5c;
@@ -2855,108 +2855,108 @@ int Lisa_FrustumCullObjects(void) {
 
   
 
-  iVar2 = g_LisaCamera;
+  local_i2 = g_LisaCamera;
   g_LisaCamera->visible_obj_count = 0;
 
-  if (*(int *)(iVar2 + 0xa4) == 0) {
-    lVar23 = __ftol();
-    lVar24 = __ftol();
-    lVar25 = __ftol();
-    iVar4 = ((int)lVar23 * 0x24 + (int)lVar24) * 8;
+  if (*(int *)(local_i2 + 0xa4) == 0) {
+    local_l23 = __ftol();
+    local_l24 = __ftol();
+    local_l25 = __ftol();
+    local_i4 = ((int)local_l23 * 0x24 + (int)local_l24) * 8;
 
-    iVar5 = (*(int *)(&g_LisaDefaultScale_Y + iVar4) +
+    local_i5 = (*(int *)(&g_LisaDefaultScale_Y + local_i4) +
 
-             ((int)((int)lVar25 + ((int)lVar25 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) *
+             ((int)((int)local_l25 + ((int)local_l25 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) *
 
             g_LisaGridCellsX;
-    lVar23 = __ftol();
-    iVar17 = g_pLisaAllocatedBuffersEnd;
-    piVar14 = g_LisaVisibleObjects;
+    local_l23 = __ftol();
+    local_i17 = g_pLisaAllocatedBuffersEnd;
+    local_pi14 = g_LisaVisibleObjects;
     local_64 = 3;
 
-    iVar5 = (int)g_pLisaGridCells +
+    local_i5 = (int)g_pLisaGridCells +
 
-            (iVar5 + ((int)((int)lVar23 + ((int)lVar23 >> 0x1f & 0xffU)) >> 8) +
+            (local_i5 + ((int)((int)local_l23 + ((int)local_l23 >> 0x1f & 0xffU)) >> 8) +
 
-             *(int *)(&g_LisaDefaultScale_X + iVar4) + g_LisaDefaultOffset_Y) * 4;
-    iVar4 = g_LisaDefaultOffset_Z;
+             *(int *)(&g_LisaDefaultScale_X + local_i4) + g_LisaDefaultOffset_Y) * 4;
+    local_i4 = g_LisaDefaultOffset_Z;
 
     if (g_pLisaAllocatedBuffersEnd == 0) {
-      while (iVar4 != -5000) {
-        iVar4 = *(int *)(local_64 * 4 + 0x499fa0);
+      while (local_i4 != -5000) {
+        local_i4 = *(int *)(local_64 * 4 + 0x499fa0);
 
-        if (0 < iVar4) {
+        if (0 < local_i4) {
           do {
-            piVar19 = *(int **)(iVar5 + 4);
-            iVar5 = iVar5 + 4;
+            local_pi19 = *(int **)(local_i5 + 4);
+            local_i5 = local_i5 + 4;
 
-            if ((piVar19 != (int *)0x0) && ((int *)*piVar19 == piVar19)) {
-              iVar17 = *(int *)(iVar2 + 0x60);
-              iVar18 = iVar17 + 1;
-              iVar1 = *(int *)((int)piVar19 + 0x26);
-              *(int *)(iVar2 + 0x60) = iVar18;
-              piVar14[iVar17] = (int)piVar19;
+            if ((local_pi19 != (int *)0x0) && ((int *)*local_pi19 == local_pi19)) {
+              local_i17 = *(int *)(local_i2 + 0x60);
+              local_i18 = local_i17 + 1;
+              local_i1 = *(int *)((int)local_pi19 + 0x26);
+              *(int *)(local_i2 + 0x60) = local_i18;
+              local_pi14[local_i17] = (int)local_pi19;
 
-              if (iVar1 != 0) {
-                piVar7 = piVar14 + iVar18;
+              if (local_i1 != 0) {
+                local_pi7 = local_pi14 + local_i18;
 
                 do {
-                  piVar19 = *(int **)((int)piVar19 + 0x26);
+                  local_pi19 = *(int **)((int)local_pi19 + 0x26);
 
-                  if ((int *)*piVar19 == piVar19) {
-                    *piVar7 = (int)piVar19;
-                    piVar7 = piVar7 + 1;
-                    *(int *)(iVar2 + 0x60) = *(int *)(iVar2 + 0x60) + 1;
+                  if ((int *)*local_pi19 == local_pi19) {
+                    *local_pi7 = (int)local_pi19;
+                    local_pi7 = local_pi7 + 1;
+                    *(int *)(local_i2 + 0x60) = *(int *)(local_i2 + 0x60) + 1;
                   }
 
-                } while (*(int *)((int)piVar19 + 0x26) != 0);
+                } while (*(int *)((int)local_pi19 + 0x26) != 0);
               }
 
             }
 
-            iVar4 = iVar4 + -1;
-          } while (iVar4 != 0);
+            local_i4 = local_i4 + -1;
+          } while (local_i4 != 0);
         }
 
-        iVar4 = local_64 + 1;
+        local_i4 = local_64 + 1;
         local_64 = local_64 + 2;
-        iVar5 = iVar5 + (*(int *)(iVar4 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-        iVar4 = *(int *)(local_64 * 4 + 0x499fa0);
+        local_i5 = local_i5 + (*(int *)(local_i4 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
+        local_i4 = *(int *)(local_64 * 4 + 0x499fa0);
       }
 
     }
 
     else {
-      while (iVar4 != -5000) {
+      while (local_i4 != -5000) {
         local_60 = *(int *)(local_64 * 4 + 0x499fa0);
 
         if (0 < local_60) {
           do {
-            piVar19 = *(int **)(iVar5 + 4);
-            iVar5 = iVar5 + 4;
+            local_pi19 = *(int **)(local_i5 + 4);
+            local_i5 = local_i5 + 4;
 
-            if ((piVar19 != (int *)0x0) && ((int *)*piVar19 == piVar19)) {
-              if (((short)piVar19[9] == 0) || ((short)piVar19[9] == iVar17)) {
-                iVar4 = *(int *)(iVar2 + 0x60);
-                *(int *)(iVar2 + 0x60) = iVar4 + 1;
-                piVar14[iVar4] = (int)piVar19;
+            if ((local_pi19 != (int *)0x0) && ((int *)*local_pi19 == local_pi19)) {
+              if (((short)local_pi19[9] == 0) || ((short)local_pi19[9] == local_i17)) {
+                local_i4 = *(int *)(local_i2 + 0x60);
+                *(int *)(local_i2 + 0x60) = local_i4 + 1;
+                local_pi14[local_i4] = (int)local_pi19;
               }
 
-              if (*(int *)((int)piVar19 + 0x26) != 0) {
-                piVar7 = piVar14 + *(int *)(iVar2 + 0x60);
+              if (*(int *)((int)local_pi19 + 0x26) != 0) {
+                local_pi7 = local_pi14 + *(int *)(local_i2 + 0x60);
 
                 do {
-                  piVar19 = *(int **)((int)piVar19 + 0x26);
+                  local_pi19 = *(int **)((int)local_pi19 + 0x26);
 
-                  if (((int *)*piVar19 == piVar19) &&
+                  if (((int *)*local_pi19 == local_pi19) &&
 
-                     (((short)piVar19[9] == 0 || ((short)piVar19[9] == iVar17)))) {
-                    *piVar7 = (int)piVar19;
-                    piVar7 = piVar7 + 1;
-                    *(int *)(iVar2 + 0x60) = *(int *)(iVar2 + 0x60) + 1;
+                     (((short)local_pi19[9] == 0 || ((short)local_pi19[9] == local_i17)))) {
+                    *local_pi7 = (int)local_pi19;
+                    local_pi7 = local_pi7 + 1;
+                    *(int *)(local_i2 + 0x60) = *(int *)(local_i2 + 0x60) + 1;
                   }
 
-                } while (*(int *)((int)piVar19 + 0x26) != 0);
+                } while (*(int *)((int)local_pi19 + 0x26) != 0);
               }
 
             }
@@ -2965,10 +2965,10 @@ int Lisa_FrustumCullObjects(void) {
           } while (local_60 != 0);
         }
 
-        iVar4 = local_64 + 1;
+        local_i4 = local_64 + 1;
         local_64 = local_64 + 2;
-        iVar5 = iVar5 + (*(int *)(iVar4 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-        iVar4 = *(int *)(local_64 * 4 + 0x499fa0);
+        local_i5 = local_i5 + (*(int *)(local_i4 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
+        local_i4 = *(int *)(local_64 * 4 + 0x499fa0);
       }
 
     }
@@ -2976,172 +2976,172 @@ int Lisa_FrustumCullObjects(void) {
   }
 
   else {
-    fcos((double)*(double *)(iVar2 + 0x20) * (double)g_Const_TenthDegToRad);
-    iVar4 = *(int *)(iVar2 + 0xa4) / 2;
-    lVar23 = __ftol();
-    lVar24 = __ftol();
+    fcos((double)*(double *)(local_i2 + 0x20) * (double)g_Const_TenthDegToRad);
+    local_i4 = *(int *)(local_i2 + 0xa4) / 2;
+    local_l23 = __ftol();
+    local_l24 = __ftol();
     fsin(extraout_ST1);
 
-    iVar17 = (((int)lVar23 + ((int)((int)lVar24 + ((int)lVar24 >> 0x1f & 0xffU)) >> 8)) - iVar4) *
+    local_i17 = (((int)local_l23 + ((int)((int)local_l24 + ((int)local_l24 >> 0x1f & 0xffU)) >> 8)) - local_i4) *
 
              g_LisaGridCellsX;
-    lVar23 = __ftol();
-    lVar24 = __ftol();
-    iVar5 = g_pLisaAllocatedBuffersEnd;
-    piVar19 = g_LisaVisibleObjects;
+    local_l23 = __ftol();
+    local_l24 = __ftol();
+    local_i5 = g_pLisaAllocatedBuffersEnd;
+    local_pi19 = g_LisaVisibleObjects;
 
-    piVar14 = (int *)((int)g_pLisaGridCells +
+    local_pi14 = (int *)((int)g_pLisaGridCells +
 
-                     ((iVar17 + (int)lVar23 +
+                     ((local_i17 + (int)local_l23 +
 
-                      ((int)((int)lVar24 + ((int)lVar24 >> 0x1f & 0xffU)) >> 8)) - iVar4) * 4);
+                      ((int)((int)local_l24 + ((int)local_l24 >> 0x1f & 0xffU)) >> 8)) - local_i4) * 4);
 
     if (g_pLisaAllocatedBuffersEnd == 0) {
-      if (0 < *(int *)(iVar2 + 0xa4)) {
-        local_64 = *(int *)(iVar2 + 0xa4);
-        iVar5 = g_LisaGridCellsX - local_64;
+      if (0 < *(int *)(local_i2 + 0xa4)) {
+        local_64 = *(int *)(local_i2 + 0xa4);
+        local_i5 = g_LisaGridCellsX - local_64;
 
         do {
-          iVar4 = *(int *)(iVar2 + 0xa4);
+          local_i4 = *(int *)(local_i2 + 0xa4);
 
-          if (0 < iVar4) {
+          if (0 < local_i4) {
             do {
-              piVar7 = (int *)*piVar14;
+              local_pi7 = (int *)*local_pi14;
 
-              if ((piVar7 != (int *)0x0) && ((int *)*piVar7 == piVar7)) {
-                iVar17 = *(int *)(iVar2 + 0x60);
-                iVar18 = iVar17 + 1;
-                iVar1 = *(int *)((int)piVar7 + 0x26);
-                *(int *)(iVar2 + 0x60) = iVar18;
-                piVar19[iVar17] = (int)piVar7;
+              if ((local_pi7 != (int *)0x0) && ((int *)*local_pi7 == local_pi7)) {
+                local_i17 = *(int *)(local_i2 + 0x60);
+                local_i18 = local_i17 + 1;
+                local_i1 = *(int *)((int)local_pi7 + 0x26);
+                *(int *)(local_i2 + 0x60) = local_i18;
+                local_pi19[local_i17] = (int)local_pi7;
 
-                if (iVar1 != 0) {
-                  piVar6 = piVar19 + iVar18;
+                if (local_i1 != 0) {
+                  local_pi6 = local_pi19 + local_i18;
 
                   do {
-                    piVar7 = *(int **)((int)piVar7 + 0x26);
+                    local_pi7 = *(int **)((int)local_pi7 + 0x26);
 
-                    if ((int *)*piVar7 == piVar7) {
-                      *piVar6 = (int)piVar7;
-                      piVar6 = piVar6 + 1;
-                      *(int *)(iVar2 + 0x60) = *(int *)(iVar2 + 0x60) + 1;
+                    if ((int *)*local_pi7 == local_pi7) {
+                      *local_pi6 = (int)local_pi7;
+                      local_pi6 = local_pi6 + 1;
+                      *(int *)(local_i2 + 0x60) = *(int *)(local_i2 + 0x60) + 1;
                     }
 
-                  } while (*(int *)((int)piVar7 + 0x26) != 0);
+                  } while (*(int *)((int)local_pi7 + 0x26) != 0);
                 }
 
               }
 
-              piVar14 = piVar14 + 1;
-              iVar4 = iVar4 + -1;
-            } while (iVar4 != 0);
+              local_pi14 = local_pi14 + 1;
+              local_i4 = local_i4 + -1;
+            } while (local_i4 != 0);
           }
 
-          piVar14 = piVar14 + iVar5;
+          local_pi14 = local_pi14 + local_i5;
           local_64 = local_64 + -1;
         } while (local_64 != 0);
       }
 
     }
 
-    else if (0 < *(int *)(iVar2 + 0xa4)) {
-      local_5c = *(int *)(iVar2 + 0xa4);
-      iVar4 = g_LisaGridCellsX - local_5c;
+    else if (0 < *(int *)(local_i2 + 0xa4)) {
+      local_5c = *(int *)(local_i2 + 0xa4);
+      local_i4 = g_LisaGridCellsX - local_5c;
 
       do {
-        local_64 = *(int *)(iVar2 + 0xa4);
+        local_64 = *(int *)(local_i2 + 0xa4);
 
         if (0 < local_64) {
           do {
-            piVar7 = (int *)*piVar14;
+            local_pi7 = (int *)*local_pi14;
 
-            if ((piVar7 != (int *)0x0) && ((int *)*piVar7 == piVar7)) {
-              if (((short)piVar7[9] == 0) || ((short)piVar7[9] == iVar5)) {
-                iVar17 = *(int *)(iVar2 + 0x60);
-                *(int *)(iVar2 + 0x60) = iVar17 + 1;
-                piVar19[iVar17] = (int)piVar7;
+            if ((local_pi7 != (int *)0x0) && ((int *)*local_pi7 == local_pi7)) {
+              if (((short)local_pi7[9] == 0) || ((short)local_pi7[9] == local_i5)) {
+                local_i17 = *(int *)(local_i2 + 0x60);
+                *(int *)(local_i2 + 0x60) = local_i17 + 1;
+                local_pi19[local_i17] = (int)local_pi7;
               }
 
-              if (*(int *)((int)piVar7 + 0x26) != 0) {
-                piVar6 = piVar19 + *(int *)(iVar2 + 0x60);
+              if (*(int *)((int)local_pi7 + 0x26) != 0) {
+                local_pi6 = local_pi19 + *(int *)(local_i2 + 0x60);
 
                 do {
-                  piVar7 = *(int **)((int)piVar7 + 0x26);
+                  local_pi7 = *(int **)((int)local_pi7 + 0x26);
 
-                  if (((int *)*piVar7 == piVar7) &&
+                  if (((int *)*local_pi7 == local_pi7) &&
 
-                     (((short)piVar7[9] == 0 || ((short)piVar7[9] == iVar5)))) {
-                    *piVar6 = (int)piVar7;
-                    piVar6 = piVar6 + 1;
-                    *(int *)(iVar2 + 0x60) = *(int *)(iVar2 + 0x60) + 1;
+                     (((short)local_pi7[9] == 0 || ((short)local_pi7[9] == local_i5)))) {
+                    *local_pi6 = (int)local_pi7;
+                    local_pi6 = local_pi6 + 1;
+                    *(int *)(local_i2 + 0x60) = *(int *)(local_i2 + 0x60) + 1;
                   }
 
-                } while (*(int *)((int)piVar7 + 0x26) != 0);
+                } while (*(int *)((int)local_pi7 + 0x26) != 0);
               }
 
             }
 
-            piVar14 = piVar14 + 1;
+            local_pi14 = local_pi14 + 1;
             local_64 = local_64 + -1;
           } while (local_64 != 0);
         }
 
-        piVar14 = piVar14 + iVar4;
+        local_pi14 = local_pi14 + local_i4;
         local_5c = local_5c + -1;
       } while (local_5c != 0);
     }
 
   }
 
-  iVar5 = *(int *)(iVar2 + 0x80);
-  iVar4 = *(int *)(iVar2 + 0x88);
-  iVar17 = *(int *)(iVar2 + 0x9c);
-  iVar1 = *(int *)(iVar2 + 0x84);
-  iVar2 = *(int *)(iVar2 + 0xa0);
-  iVar8 = g_SubpixelMinX >> 8;
-  iVar9 = g_SubpixelMaxX >> 8;
-  iVar10 = g_SubpixelMinY >> 8;
-  iVar11 = g_SubpixelMaxY >> 8;
+  local_i5 = *(int *)(local_i2 + 0x80);
+  local_i4 = *(int *)(local_i2 + 0x88);
+  local_i17 = *(int *)(local_i2 + 0x9c);
+  local_i1 = *(int *)(local_i2 + 0x84);
+  local_i2 = *(int *)(local_i2 + 0xa0);
+  local_i8 = g_SubpixelMinX >> 8;
+  local_i9 = g_SubpixelMaxX >> 8;
+  local_i10 = g_SubpixelMinY >> 8;
+  local_i11 = g_SubpixelMaxY >> 8;
   Lisa_ComputeCameraRotationMatrix(&local_24);
-  iVar18 = g_LisaCamera;
+  local_i18 = g_LisaCamera;
   local_38 = g_LisaCamera->visible_obj_count;
   g_LisaCamera->submesh_count = local_38;
-  *(int *)(iVar18 + 0x60) = 0;
+  *(int *)(local_i18 + 0x60) = 0;
 
   if (0 < local_38) {
     local_48 = g_LisaVisibleObjects;
     local_44 = g_LisaVisibleObjects;
 
     do {
-      iVar3 = *local_44;
-      lVar23 = __ftol();
-      iVar21 = (int)lVar23;
-      lVar23 = __ftol();
-      iVar12 = (int)lVar23;
-      lVar23 = __ftol();
-      iVar13 = (int)lVar23;
-      iVar16 = (int)*(short *)(iVar3 + 0x22);
-      iVar15 = (iVar13 * local_4 + iVar12 * local_8 + iVar21 * local_c >> 0xf) + iVar4;
+      local_i3 = *local_44;
+      local_l23 = __ftol();
+      local_i21 = (int)local_l23;
+      local_l23 = __ftol();
+      local_i12 = (int)local_l23;
+      local_l23 = __ftol();
+      local_i13 = (int)local_l23;
+      local_i16 = (int)*(short *)(local_i3 + 0x22);
+      local_i15 = (local_i13 * local_4 + local_i12 * local_8 + local_i21 * local_c >> 0xf) + local_i4;
 
-      if (-1 < iVar15 + iVar16) {
-        if (iVar15 < iVar4) {
-          iVar15 = iVar4;
+      if (-1 < local_i15 + local_i16) {
+        if (local_i15 < local_i4) {
+          local_i15 = local_i4;
         }
 
-        iVar20 = iVar17 + ((iVar13 * local_1c + iVar12 * local_20 + iVar21 * local_24 >> 0xf) *
+        local_i20 = local_i17 + ((local_i13 * local_1c + local_i12 * local_20 + local_i21 * local_24 >> 0xf) *
 
-                          -iVar5) / iVar15;
-        iVar22 = 2 - (-iVar5 * iVar16) / iVar15;
+                          -local_i5) / local_i15;
+        local_i22 = 2 - (-local_i5 * local_i16) / local_i15;
 
-        if ((iVar8 <= iVar22 + iVar20) || (iVar20 - iVar22 <= iVar9)) {
-          iVar21 = iVar2 + ((iVar13 * local_10 + iVar12 * local_14 + iVar21 * local_18 >> 0xf) *
+        if ((local_i8 <= local_i22 + local_i20) || (local_i20 - local_i22 <= local_i9)) {
+          local_i21 = local_i2 + ((local_i13 * local_10 + local_i12 * local_14 + local_i21 * local_18 >> 0xf) *
 
-                           -iVar1) / iVar15;
-          iVar15 = 2 - (-iVar1 * iVar16) / iVar15;
+                           -local_i1) / local_i15;
+          local_i15 = 2 - (-local_i1 * local_i16) / local_i15;
 
-          if ((iVar10 < iVar21 + iVar15) && (iVar21 - iVar15 < iVar11)) {
-            *(int *)(iVar18 + 0x60) = *(int *)(iVar18 + 0x60) + 1;
-            *local_48 = iVar3;
+          if ((local_i10 < local_i21 + local_i15) && (local_i21 - local_i15 < local_i11)) {
+            *(int *)(local_i18 + 0x60) = *(int *)(local_i18 + 0x60) + 1;
+            *local_48 = local_i3;
             local_48 = local_48 + 1;
           }
 
@@ -3162,39 +3162,39 @@ int Lisa_FrustumCullObjects(void) {
  * @fidelity ADAPTED
  */
 int Lisa_CullObjects(void) {
-  float fVar1;
-  float fVar2;
-  float fVar3;
-  float fVar4;
-  float fVar5;
-  float fVar6;
-  float fVar7;
-  float fVar8;
-  int iVar9;
-  int *piVar10;
-  int *piVar11;
-  unsigned int uVar12;
-  unsigned int uVar13;
-  int *piVar14;
-  int *piVar15;
+  float local_f1;
+  float local_f2;
+  float local_f3;
+  float local_f4;
+  float local_f5;
+  float local_f6;
+  float local_f7;
+  float local_f8;
+  int local_i9;
+  int *local_pi10;
+  int *local_pi11;
+  unsigned int local_u12;
+  unsigned int local_u13;
+  int *local_pi14;
+  int *local_pi15;
   float *pfVar16;
   float *pfVar17;
-  int iVar18;
-  int iVar19;
-  int *piVar20;
-  int iVar21;
-  int iVar22;
-  int *puVar23;
-  double fVar24;
-  double fVar25;
-  double fVar26;
-  double fVar27;
-  double fVar28;
-  double fVar29;
+  int local_i18;
+  int local_i19;
+  int *local_pi20;
+  int local_i21;
+  int local_i22;
+  int *local_pu23;
+  double local_f24;
+  double local_f25;
+  double local_f26;
+  double local_f27;
+  double local_f28;
+  double local_f29;
   double extraout_ST1;
-  long long lVar30;
-  long long lVar31;
-  long long lVar32;
+  long long local_l30;
+  long long local_l31;
+  long long local_l32;
   int local_70;
   int *local_6c;
   int local_68;
@@ -3205,110 +3205,110 @@ int Lisa_CullObjects(void) {
 
   
 
-  iVar22 = g_LisaCamera;
-  iVar19 = g_LisaCamera->projection_type;
+  local_i22 = g_LisaCamera;
+  local_i19 = g_LisaCamera->projection_type;
 
-  if (iVar19 == 0) {
+  if (local_i19 == 0) {
     g_LisaCamera->visible_obj_count = 0;
-    piVar15 = (int *)(iVar22 + 0x60);
+    local_pi15 = (int *)(local_i22 + 0x60);
     local_58 = &g_LisaCamera->rot_y;
-    lVar30 = __ftol();
-    lVar31 = __ftol();
-    iVar19 = ((int)lVar30 * 0x24 + (int)lVar31) * 8;
-    lVar30 = __ftol();
+    local_l30 = __ftol();
+    local_l31 = __ftol();
+    local_i19 = ((int)local_l30 * 0x24 + (int)local_l31) * 8;
+    local_l30 = __ftol();
 
-    iVar9 = (*(int *)(&g_LisaDefaultScale_Y + iVar19) +
+    local_i9 = (*(int *)(&g_LisaDefaultScale_Y + local_i19) +
 
-             ((int)((int)lVar30 + ((int)lVar30 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) *
+             ((int)((int)local_l30 + ((int)local_l30 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) *
 
             g_LisaGridCellsX;
-    lVar30 = __ftol();
-    iVar18 = g_pLisaAllocatedBuffersEnd;
-    piVar20 = g_LisaVisibleObjects;
+    local_l30 = __ftol();
+    local_i18 = g_pLisaAllocatedBuffersEnd;
+    local_pi20 = g_LisaVisibleObjects;
     local_70 = 3;
 
-    iVar19 = (int)g_pLisaGridCells +
+    local_i19 = (int)g_pLisaGridCells +
 
-             (iVar9 + ((int)((int)lVar30 + ((int)lVar30 >> 0x1f & 0xffU)) >> 8) +
+             (local_i9 + ((int)((int)local_l30 + ((int)local_l30 >> 0x1f & 0xffU)) >> 8) +
 
-              *(int *)(&g_LisaDefaultScale_X + iVar19) + g_LisaDefaultOffset_Y) * 4;
-    iVar9 = g_LisaDefaultOffset_Z;
+              *(int *)(&g_LisaDefaultScale_X + local_i19) + g_LisaDefaultOffset_Y) * 4;
+    local_i9 = g_LisaDefaultOffset_Z;
 
     if (g_pLisaAllocatedBuffersEnd == 0) {
-      while (iVar9 != -5000) {
-        iVar9 = *(int *)(local_70 * 4 + 0x499fa0);
+      while (local_i9 != -5000) {
+        local_i9 = *(int *)(local_70 * 4 + 0x499fa0);
 
-        if (0 < iVar9) {
+        if (0 < local_i9) {
           do {
-            piVar14 = *(int **)(iVar19 + 4);
-            iVar19 = iVar19 + 4;
+            local_pi14 = *(int **)(local_i19 + 4);
+            local_i19 = local_i19 + 4;
 
-            if ((piVar14 != (int *)0x0) && ((int *)*piVar14 == piVar14)) {
-              iVar18 = *piVar15;
-              piVar20[iVar18] = (int)piVar14;
-              iVar18 = iVar18 + 1;
-              *piVar15 = iVar18;
+            if ((local_pi14 != (int *)0x0) && ((int *)*local_pi14 == local_pi14)) {
+              local_i18 = *local_pi15;
+              local_pi20[local_i18] = (int)local_pi14;
+              local_i18 = local_i18 + 1;
+              *local_pi15 = local_i18;
 
-              if (*(int *)((int)piVar14 + 0x26) != 0) {
-                piVar11 = piVar20 + iVar18;
+              if (*(int *)((int)local_pi14 + 0x26) != 0) {
+                local_pi11 = local_pi20 + local_i18;
 
                 do {
-                  piVar14 = *(int **)((int)piVar14 + 0x26);
+                  local_pi14 = *(int **)((int)local_pi14 + 0x26);
 
-                  if ((int *)*piVar14 == piVar14) {
-                    *piVar11 = (int)piVar14;
-                    piVar11 = piVar11 + 1;
-                    *piVar15 = *piVar15 + 1;
+                  if ((int *)*local_pi14 == local_pi14) {
+                    *local_pi11 = (int)local_pi14;
+                    local_pi11 = local_pi11 + 1;
+                    *local_pi15 = *local_pi15 + 1;
                   }
 
-                } while (*(int *)((int)piVar14 + 0x26) != 0);
+                } while (*(int *)((int)local_pi14 + 0x26) != 0);
               }
 
             }
 
-            iVar9 = iVar9 + -1;
-          } while (iVar9 != 0);
+            local_i9 = local_i9 + -1;
+          } while (local_i9 != 0);
         }
 
-        iVar9 = local_70 + 1;
+        local_i9 = local_70 + 1;
         local_70 = local_70 + 2;
-        iVar19 = iVar19 + (*(int *)(iVar9 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-        iVar9 = *(int *)(local_70 * 4 + 0x499fa0);
+        local_i19 = local_i19 + (*(int *)(local_i9 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
+        local_i9 = *(int *)(local_70 * 4 + 0x499fa0);
       }
 
     }
 
     else {
-      while (iVar9 != -5000) {
+      while (local_i9 != -5000) {
         local_50[0] = *(float *)(local_70 * 4 + 0x499fa0);
 
         if (0 < (int)local_50[0]) {
           do {
-            piVar14 = *(int **)(iVar19 + 4);
-            iVar19 = iVar19 + 4;
+            local_pi14 = *(int **)(local_i19 + 4);
+            local_i19 = local_i19 + 4;
 
-            if ((piVar14 != (int *)0x0) && ((int *)*piVar14 == piVar14)) {
-              if (((short)piVar14[9] == 0) || ((short)piVar14[9] == iVar18)) {
-                iVar9 = *piVar15;
-                piVar20[iVar9] = (int)piVar14;
-                *piVar15 = iVar9 + 1;
+            if ((local_pi14 != (int *)0x0) && ((int *)*local_pi14 == local_pi14)) {
+              if (((short)local_pi14[9] == 0) || ((short)local_pi14[9] == local_i18)) {
+                local_i9 = *local_pi15;
+                local_pi20[local_i9] = (int)local_pi14;
+                *local_pi15 = local_i9 + 1;
               }
 
-              if (*(int *)((int)piVar14 + 0x26) != 0) {
-                piVar11 = piVar20 + *piVar15;
+              if (*(int *)((int)local_pi14 + 0x26) != 0) {
+                local_pi11 = local_pi20 + *local_pi15;
 
                 do {
-                  piVar14 = *(int **)((int)piVar14 + 0x26);
+                  local_pi14 = *(int **)((int)local_pi14 + 0x26);
 
-                  if (((int *)*piVar14 == piVar14) &&
+                  if (((int *)*local_pi14 == local_pi14) &&
 
-                     (((short)piVar14[9] == 0 || ((short)piVar14[9] == iVar18)))) {
-                    *piVar11 = (int)piVar14;
-                    piVar11 = piVar11 + 1;
-                    *piVar15 = *piVar15 + 1;
+                     (((short)local_pi14[9] == 0 || ((short)local_pi14[9] == local_i18)))) {
+                    *local_pi11 = (int)local_pi14;
+                    local_pi11 = local_pi11 + 1;
+                    *local_pi15 = *local_pi15 + 1;
                   }
 
-                } while (*(int *)((int)piVar14 + 0x26) != 0);
+                } while (*(int *)((int)local_pi14 + 0x26) != 0);
               }
 
             }
@@ -3317,10 +3317,10 @@ int Lisa_CullObjects(void) {
           } while (local_50[0] != 0.0);
         }
 
-        iVar9 = local_70 + 1;
+        local_i9 = local_70 + 1;
         local_70 = local_70 + 2;
-        iVar19 = iVar19 + (*(int *)(iVar9 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-        iVar9 = *(int *)(local_70 * 4 + 0x499fa0);
+        local_i19 = local_i19 + (*(int *)(local_i9 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
+        local_i9 = *(int *)(local_70 * 4 + 0x499fa0);
       }
 
     }
@@ -3329,128 +3329,128 @@ int Lisa_CullObjects(void) {
 
   else {
     g_LisaCamera->visible_obj_count = 0;
-    piVar14 = (int *)(iVar22 + 0x60);
+    local_pi14 = (int *)(local_i22 + 0x60);
     local_58 = &g_LisaCamera->rot_y;
-    local_50[0] = (float)(iVar19 / 3);
+    local_50[0] = (float)(local_i19 / 3);
     fcos((double)*local_58 * (double)g_Const_TenthDegToRad);
-    lVar30 = __ftol();
-    lVar31 = __ftol();
+    local_l30 = __ftol();
+    local_l31 = __ftol();
     fsin(extraout_ST1);
 
-    iVar18 = (((int)lVar30 + ((int)((int)lVar31 + ((int)lVar31 >> 0x1f & 0xffU)) >> 8)) - iVar19 / 2
+    local_i18 = (((int)local_l30 + ((int)((int)local_l31 + ((int)local_l31 >> 0x1f & 0xffU)) >> 8)) - local_i19 / 2
 
              ) * g_LisaGridCellsX;
-    lVar30 = __ftol();
-    lVar31 = __ftol();
-    iVar9 = g_pLisaAllocatedBuffersEnd;
-    piVar20 = g_LisaVisibleObjects;
+    local_l30 = __ftol();
+    local_l31 = __ftol();
+    local_i9 = g_pLisaAllocatedBuffersEnd;
+    local_pi20 = g_LisaVisibleObjects;
 
-    piVar15 = (int *)((int)g_pLisaGridCells +
+    local_pi15 = (int *)((int)g_pLisaGridCells +
 
-                     ((iVar18 + (int)lVar30 +
+                     ((local_i18 + (int)local_l30 +
 
-                      ((int)((int)lVar31 + ((int)lVar31 >> 0x1f & 0xffU)) >> 8)) - iVar19 / 2) * 4);
-    local_68 = iVar19;
+                      ((int)((int)local_l31 + ((int)local_l31 >> 0x1f & 0xffU)) >> 8)) - local_i19 / 2) * 4);
+    local_68 = local_i19;
 
     if (g_pLisaAllocatedBuffersEnd == 0) {
-      if (0 < iVar19) {
-        iVar9 = g_LisaGridCellsX - iVar19;
+      if (0 < local_i19) {
+        local_i9 = g_LisaGridCellsX - local_i19;
 
         do {
-          iVar18 = iVar19;
+          local_i18 = local_i19;
 
-          if (0 < iVar19) {
+          if (0 < local_i19) {
             do {
-              piVar11 = (int *)*piVar15;
+              local_pi11 = (int *)*local_pi15;
 
-              if ((piVar11 != (int *)0x0) && ((int *)*piVar11 == piVar11)) {
-                iVar21 = *piVar14;
-                piVar20[iVar21] = (int)piVar11;
-                iVar21 = iVar21 + 1;
-                *piVar14 = iVar21;
+              if ((local_pi11 != (int *)0x0) && ((int *)*local_pi11 == local_pi11)) {
+                local_i21 = *local_pi14;
+                local_pi20[local_i21] = (int)local_pi11;
+                local_i21 = local_i21 + 1;
+                *local_pi14 = local_i21;
 
-                if (*(int *)((int)piVar11 + 0x26) != 0) {
-                  piVar10 = piVar20 + iVar21;
+                if (*(int *)((int)local_pi11 + 0x26) != 0) {
+                  local_pi10 = local_pi20 + local_i21;
 
                   do {
-                    piVar11 = *(int **)((int)piVar11 + 0x26);
+                    local_pi11 = *(int **)((int)local_pi11 + 0x26);
 
-                    if ((int *)*piVar11 == piVar11) {
-                      *piVar10 = (int)piVar11;
-                      piVar10 = piVar10 + 1;
-                      *piVar14 = *piVar14 + 1;
+                    if ((int *)*local_pi11 == local_pi11) {
+                      *local_pi10 = (int)local_pi11;
+                      local_pi10 = local_pi10 + 1;
+                      *local_pi14 = *local_pi14 + 1;
                     }
 
-                  } while (*(int *)((int)piVar11 + 0x26) != 0);
+                  } while (*(int *)((int)local_pi11 + 0x26) != 0);
                 }
 
               }
 
-              piVar15 = piVar15 + 1;
-              iVar18 = iVar18 + -1;
-            } while (iVar18 != 0);
+              local_pi15 = local_pi15 + 1;
+              local_i18 = local_i18 + -1;
+            } while (local_i18 != 0);
           }
 
-          piVar15 = piVar15 + iVar9;
+          local_pi15 = local_pi15 + local_i9;
           local_68 = local_68 + -1;
         } while (local_68 != 0);
       }
 
     }
 
-    else if (0 < iVar19) {
-      iVar18 = g_LisaGridCellsX - iVar19;
+    else if (0 < local_i19) {
+      local_i18 = g_LisaGridCellsX - local_i19;
 
       do {
-        local_64 = (int *)iVar19;
+        local_64 = (int *)local_i19;
 
-        if (0 < iVar19) {
+        if (0 < local_i19) {
           do {
-            piVar11 = (int *)*piVar15;
+            local_pi11 = (int *)*local_pi15;
 
-            if ((piVar11 != (int *)0x0) && ((int *)*piVar11 == piVar11)) {
-              if (((short)piVar11[9] == 0) || ((short)piVar11[9] == iVar9)) {
-                iVar21 = *piVar14;
-                piVar20[iVar21] = (int)piVar11;
-                *piVar14 = iVar21 + 1;
+            if ((local_pi11 != (int *)0x0) && ((int *)*local_pi11 == local_pi11)) {
+              if (((short)local_pi11[9] == 0) || ((short)local_pi11[9] == local_i9)) {
+                local_i21 = *local_pi14;
+                local_pi20[local_i21] = (int)local_pi11;
+                *local_pi14 = local_i21 + 1;
               }
 
-              if (*(int *)((int)piVar11 + 0x26) != 0) {
-                piVar10 = piVar20 + *piVar14;
+              if (*(int *)((int)local_pi11 + 0x26) != 0) {
+                local_pi10 = local_pi20 + *local_pi14;
 
                 do {
-                  piVar11 = *(int **)((int)piVar11 + 0x26);
+                  local_pi11 = *(int **)((int)local_pi11 + 0x26);
 
-                  if (((int *)*piVar11 == piVar11) &&
+                  if (((int *)*local_pi11 == local_pi11) &&
 
-                     (((short)piVar11[9] == 0 || ((short)piVar11[9] == iVar9)))) {
-                    *piVar10 = (int)piVar11;
-                    piVar10 = piVar10 + 1;
-                    *piVar14 = *piVar14 + 1;
+                     (((short)local_pi11[9] == 0 || ((short)local_pi11[9] == local_i9)))) {
+                    *local_pi10 = (int)local_pi11;
+                    local_pi10 = local_pi10 + 1;
+                    *local_pi14 = *local_pi14 + 1;
                   }
 
-                } while (*(int *)((int)piVar11 + 0x26) != 0);
+                } while (*(int *)((int)local_pi11 + 0x26) != 0);
               }
 
             }
 
-            piVar15 = piVar15 + 1;
+            local_pi15 = local_pi15 + 1;
             local_64 = (int *)((int)local_64 + -1);
           } while (local_64 != (int *)0x0);
         }
 
-        piVar15 = piVar15 + iVar18;
+        local_pi15 = local_pi15 + local_i18;
         local_68 = local_68 + -1;
       } while (local_68 != 0);
     }
 
   }
 
-  local_6c = (int *)(iVar22 + 0x60);
-  iVar19 = g_LisaCamera->fov_x;
-  iVar22 = g_SubpixelMinX + iVar19 * -0x100;
+  local_6c = (int *)(local_i22 + 0x60);
+  local_i19 = g_LisaCamera->fov_x;
+  local_i22 = g_SubpixelMinX + local_i19 * -0x100;
 
-  if ((((g_LisaActiveMaterial != iVar22) || (g_SubpixelMaxX + iVar19 * -0x100 != g_LisaSubmeshLodLevel)) ||
+  if ((((g_LisaActiveMaterial != local_i22) || (g_SubpixelMaxX + local_i19 * -0x100 != g_LisaSubmeshLodLevel)) ||
 
       (g_SubpixelMinY + g_LisaCamera->fov_y * -0x100 != g_LisaActiveSubmeshFlags)) ||
 
@@ -3459,28 +3459,28 @@ int Lisa_CullObjects(void) {
        (g_LisaCamera->viewport_x != g_LisaSubmeshClipMask)) ||
 
       ((g_LisaCamera->viewport_y != g_LisaCameraDistance || (g_LisaMipmapQuality == 1)))))) {
-    uVar13 = 0;
+    local_u13 = 0;
     g_LisaMipmapQuality = 0;
-    g_LisaSubmeshLodLevel = g_SubpixelMaxX + iVar19 * -0x100;
-    iVar9 = g_LisaCamera->fov_y;
-    g_LisaActiveSubmeshFlags = g_SubpixelMinY + iVar9 * -0x100;
-    g_LisaCameraPitch = g_SubpixelMaxY + iVar9 * -0x100;
+    g_LisaSubmeshLodLevel = g_SubpixelMaxX + local_i19 * -0x100;
+    local_i9 = g_LisaCamera->fov_y;
+    g_LisaActiveSubmeshFlags = g_SubpixelMinY + local_i9 * -0x100;
+    g_LisaCameraPitch = g_SubpixelMaxY + local_i9 * -0x100;
     g_LisaSubmeshClipMask = g_LisaCamera->viewport_x;
     g_LisaCameraDistance = g_LisaCamera->viewport_y;
 
-    local_50[0] = ((float)((-1 - iVar19) * 0x100 + g_SubpixelMinX) * (float)g_Const_1000) /
+    local_50[0] = ((float)((-1 - local_i19) * 0x100 + g_SubpixelMinX) * (float)g_Const_1000) /
 
                   ((float)g_LisaSubmeshClipMask * (float)g_Const_Neg256);
 
-    local_50[3] = ((float)((1 - iVar19) * 0x100 + g_SubpixelMaxX) * (float)g_Const_1000) /
+    local_50[3] = ((float)((1 - local_i19) * 0x100 + g_SubpixelMaxX) * (float)g_Const_1000) /
 
                   ((float)g_LisaSubmeshClipMask * (float)g_Const_Neg256);
 
-    local_50[1] = ((float)((-1 - iVar9) * 0x100 + g_SubpixelMinY) * (float)g_Const_1000) /
+    local_50[1] = ((float)((-1 - local_i9) * 0x100 + g_SubpixelMinY) * (float)g_Const_1000) /
 
                   ((float)g_LisaCameraDistance * (float)g_Const_Neg256);
 
-    local_50[7] = ((float)((1 - iVar9) * 0x100 + g_SubpixelMaxY) * (float)g_Const_1000) /
+    local_50[7] = ((float)((1 - local_i9) * 0x100 + g_SubpixelMaxY) * (float)g_Const_1000) /
 
                   ((float)g_LisaCameraDistance * (float)g_Const_Neg256);
     local_50[2] = 1000.0;
@@ -3491,92 +3491,92 @@ int Lisa_CullObjects(void) {
     local_50[9] = local_50[0];
     local_50[10] = local_50[7];
     local_50[0xb] = 1000.0;
-    iVar19 = 0;
-    g_LisaActiveMaterial = iVar22;
+    local_i19 = 0;
+    g_LisaActiveMaterial = local_i22;
 
     while( 1 ) {
-      uVar13 = uVar13 + 1;
-      uVar12 = uVar13 & 3;
-      fVar1 = local_50[uVar12 * 3];
-      fVar2 = *(float *)((int)local_50 + iVar19 + 8);
-      fVar3 = local_50[uVar12 * 3 + 2];
-      fVar4 = *(float *)((int)local_50 + iVar19);
-      fVar5 = local_50[uVar12 * 3 + 1];
-      fVar6 = *(float *)((int)local_50 + iVar19);
+      local_u13 = local_u13 + 1;
+      local_u12 = local_u13 & 3;
+      local_f1 = local_50[local_u12 * 3];
+      local_f2 = *(float *)((int)local_50 + local_i19 + 8);
+      local_f3 = local_50[local_u12 * 3 + 2];
+      local_f4 = *(float *)((int)local_50 + local_i19);
+      local_f5 = local_50[local_u12 * 3 + 1];
+      local_f6 = *(float *)((int)local_50 + local_i19);
 
-      *(float *)((int)&g_LisaFrustumPlaneLeft + iVar19) =
+      *(float *)((int)&g_LisaFrustumPlaneLeft + local_i19) =
 
-           local_50[uVar12 * 3 + 2] * *(float *)((int)local_50 + iVar19 + 4) -
+           local_50[local_u12 * 3 + 2] * *(float *)((int)local_50 + local_i19 + 4) -
 
-           local_50[uVar12 * 3 + 1] * *(float *)((int)local_50 + iVar19 + 8);
-      fVar7 = local_50[uVar12 * 3];
-      fVar8 = *(float *)((int)local_50 + iVar19 + 4);
-      *(float *)((int)&g_LisaFrustumPlaneRight + iVar19) = fVar1 * fVar2 - fVar3 * fVar4;
-      *(float *)((int)&g_LisaFrustumPlaneTop + iVar19) = fVar5 * fVar6 - fVar7 * fVar8;
+           local_50[local_u12 * 3 + 1] * *(float *)((int)local_50 + local_i19 + 8);
+      local_f7 = local_50[local_u12 * 3];
+      local_f8 = *(float *)((int)local_50 + local_i19 + 4);
+      *(float *)((int)&g_LisaFrustumPlaneRight + local_i19) = local_f1 * local_f2 - local_f3 * local_f4;
+      *(float *)((int)&g_LisaFrustumPlaneTop + local_i19) = local_f5 * local_f6 - local_f7 * local_f8;
 
-      fVar1 = SQRT(*(float *)((int)&g_LisaFrustumPlaneLeft + iVar19) * *(float *)((int)&g_LisaFrustumPlaneLeft + iVar19)
+      local_f1 = SQRT(*(float *)((int)&g_LisaFrustumPlaneLeft + local_i19) * *(float *)((int)&g_LisaFrustumPlaneLeft + local_i19)
 
-                   + *(float *)((int)&g_LisaFrustumPlaneRight + iVar19) *
+                   + *(float *)((int)&g_LisaFrustumPlaneRight + local_i19) *
 
-                     *(float *)((int)&g_LisaFrustumPlaneRight + iVar19) +
+                     *(float *)((int)&g_LisaFrustumPlaneRight + local_i19) +
 
-                     *(float *)((int)&g_LisaFrustumPlaneTop + iVar19) *
+                     *(float *)((int)&g_LisaFrustumPlaneTop + local_i19) *
 
-                     *(float *)((int)&g_LisaFrustumPlaneTop + iVar19));
+                     *(float *)((int)&g_LisaFrustumPlaneTop + local_i19));
 
-      *(float *)((int)&g_LisaFrustumPlaneLeft + iVar19) =
+      *(float *)((int)&g_LisaFrustumPlaneLeft + local_i19) =
 
-           (*(float *)((int)&g_LisaFrustumPlaneLeft + iVar19) / fVar1) * g_Const_TenthDegToRadFloat;
+           (*(float *)((int)&g_LisaFrustumPlaneLeft + local_i19) / local_f1) * g_Const_TenthDegToRadFloat;
 
-      *(float *)((int)&g_LisaFrustumPlaneRight + iVar19) =
+      *(float *)((int)&g_LisaFrustumPlaneRight + local_i19) =
 
-           (*(float *)((int)&g_LisaFrustumPlaneRight + iVar19) / fVar1) * g_Const_TenthDegToRadFloat;
-      fVar1 = (*(float *)((int)&g_LisaFrustumPlaneTop + iVar19) / fVar1) * g_Const_TenthDegToRadFloat;
-      if (0x2f < iVar19 + 0xc) break;
-      *(float *)((int)&g_LisaFrustumPlaneTop + iVar19) = fVar1;
-      iVar19 = iVar19 + 0xc;
+           (*(float *)((int)&g_LisaFrustumPlaneRight + local_i19) / local_f1) * g_Const_TenthDegToRadFloat;
+      local_f1 = (*(float *)((int)&g_LisaFrustumPlaneTop + local_i19) / local_f1) * g_Const_TenthDegToRadFloat;
+      if (0x2f < local_i19 + 0xc) break;
+      *(float *)((int)&g_LisaFrustumPlaneTop + local_i19) = local_f1;
+      local_i19 = local_i19 + 0xc;
     }
 
-    *(float *)((int)&g_LisaFrustumPlaneTop + iVar19) = fVar1;
+    *(float *)((int)&g_LisaFrustumPlaneTop + local_i19) = local_f1;
   }
 
-  fVar24 = (double)g_LisaCamera->rot_x * (double)g_Const_TenthDegToRad;
-  fVar25 = (double)fcos(fVar24);
-  fVar26 = (double)fcos((double)*local_58 * (double)g_Const_TenthDegToRad);
-  fVar24 = (double)fsin(fVar24);
-  fVar27 = (double)g_LisaCamera->rot_z * (double)g_Const_TenthDegToRad;
-  fVar28 = (double)fsin((double)*local_58 * (double)g_Const_TenthDegToRad);
-  fVar29 = (double)fcos(fVar27);
-  local_50[0] = (float)fVar29;
-  fVar27 = (double)fsin(fVar27);
-  g_LisaObjMat_CosRoll = (float)(fVar24 * fVar28);
-  g_LisaObjMat_CosPitch = (float)((double)g_LisaObjMat_CosRoll * fVar27 + (double)local_50[0] * fVar26);
-  g_LisaObjMat_SinPitch = (float)((double)local_50[0] * (double)g_LisaObjMat_CosRoll - fVar26 * fVar27);
-  g_LisaObjMat_SinRoll = (float)(fVar25 * fVar27);
-  g_LisaObjMat_Tmp1 = (float)((double)local_50[0] * fVar25);
-  g_LisaObjMat_Tmp2 = (float)-fVar24;
-  g_LisaObjMat_Tmp3 = (float)(fVar27 * fVar24 * fVar26 - (double)local_50[0] * fVar28);
+  local_f24 = (double)g_LisaCamera->rot_x * (double)g_Const_TenthDegToRad;
+  local_f25 = (double)fcos(local_f24);
+  local_f26 = (double)fcos((double)*local_58 * (double)g_Const_TenthDegToRad);
+  local_f24 = (double)fsin(local_f24);
+  local_f27 = (double)g_LisaCamera->rot_z * (double)g_Const_TenthDegToRad;
+  local_f28 = (double)fsin((double)*local_58 * (double)g_Const_TenthDegToRad);
+  local_f29 = (double)fcos(local_f27);
+  local_50[0] = (float)local_f29;
+  local_f27 = (double)fsin(local_f27);
+  g_LisaObjMat_CosRoll = (float)(local_f24 * local_f28);
+  g_LisaObjMat_CosPitch = (float)((double)g_LisaObjMat_CosRoll * local_f27 + (double)local_50[0] * local_f26);
+  g_LisaObjMat_SinPitch = (float)((double)local_50[0] * (double)g_LisaObjMat_CosRoll - local_f26 * local_f27);
+  g_LisaObjMat_SinRoll = (float)(local_f25 * local_f27);
+  g_LisaObjMat_Tmp1 = (float)((double)local_50[0] * local_f25);
+  g_LisaObjMat_Tmp2 = (float)-local_f24;
+  g_LisaObjMat_Tmp3 = (float)(local_f27 * local_f24 * local_f26 - (double)local_50[0] * local_f28);
   g_LisaObjMat_21 = 0;
   g_LisaObjMat_Scale = 0;
-  puVar23 = &g_LisaFrustumPlaneTop;
-  g_LisaObjMat_Tmp4 = (float)((double)local_50[0] * fVar24 * fVar26 + fVar28 * fVar27);
+  local_pu23 = &g_LisaFrustumPlaneTop;
+  g_LisaObjMat_Tmp4 = (float)((double)local_50[0] * local_f24 * local_f26 + local_f28 * local_f27);
   g_LisaObjMat_CosYaw = 0;
-  g_LisaObjMat_Tmp5 = (float)(fVar25 * fVar26);
+  g_LisaObjMat_Tmp5 = (float)(local_f25 * local_f26);
   pfVar17 = local_50;
 
   do {
-    puVar23 = puVar23 + 3;
-    lVar30 = __ftol();
-    *pfVar17 = (float)lVar30;
-    lVar30 = __ftol();
-    pfVar17[1] = (float)lVar30;
-    lVar30 = __ftol();
-    pfVar17[2] = (float)lVar30;
+    local_pu23 = local_pu23 + 3;
+    local_l30 = __ftol();
+    *pfVar17 = (float)local_l30;
+    local_l30 = __ftol();
+    pfVar17[1] = (float)local_l30;
+    local_l30 = __ftol();
+    pfVar17[2] = (float)local_l30;
     pfVar17 = pfVar17 + 4;
-  } while (puVar23 < &g_LisaFrustumNear);
-  lVar30 = __ftol();
-  lVar31 = __ftol();
-  lVar32 = __ftol();
+  } while (local_pu23 < &g_LisaFrustumNear);
+  local_l30 = __ftol();
+  local_l31 = __ftol();
+  local_l32 = __ftol();
   local_70 = *local_6c;
   g_LisaCamera->submesh_count = local_70;
   *local_6c = 0;
@@ -3585,38 +3585,38 @@ int Lisa_CullObjects(void) {
   do {
     pfVar16 = pfVar17 + 4;
 
-    *pfVar17 = (float)-((int)pfVar17[-1] * (int)lVar32 + (int)pfVar17[-2] * (int)lVar31 +
+    *pfVar17 = (float)-((int)pfVar17[-1] * (int)local_l32 + (int)pfVar17[-2] * (int)local_l31 +
 
-                       (int)pfVar17[-3] * (int)lVar30);
+                       (int)pfVar17[-3] * (int)local_l30);
     pfVar17 = pfVar16;
   } while (pfVar16 < &local_4);
-  local_64 = piVar20;
+  local_64 = local_pi20;
 
   if (0 < local_70) {
     do {
-      iVar19 = *piVar20;
-      uVar13 = 0;
+      local_i19 = *local_pi20;
+      local_u13 = 0;
       pfVar17 = local_50 + 2;
 
       do {
-        uVar13 = uVar13 | (int)pfVar17[-1] * *(int *)(iVar19 + 0x10) +
+        local_u13 = local_u13 | (int)pfVar17[-1] * *(int *)(local_i19 + 0x10) +
 
-                          (int)pfVar17[-2] * *(int *)(iVar19 + 0xc) +
+                          (int)pfVar17[-2] * *(int *)(local_i19 + 0xc) +
 
-                          (int)*pfVar17 * *(int *)(iVar19 + 0x14) + (int)pfVar17[1] +
+                          (int)*pfVar17 * *(int *)(local_i19 + 0x14) + (int)pfVar17[1] +
 
-                          *(short *)(iVar19 + 0x22) * 0x40000;
-        if ((int)uVar13 < 0) break;
+                          *(short *)(local_i19 + 0x22) * 0x40000;
+        if ((int)local_u13 < 0) break;
         pfVar17 = pfVar17 + 4;
       } while (pfVar17 < local_50 + 0x12);
 
-      if (0 < (int)uVar13) {
-        *local_64 = iVar19;
+      if (0 < (int)local_u13) {
+        *local_64 = local_i19;
         *local_6c = *local_6c + 1;
         local_64 = local_64 + 1;
       }
 
-      piVar20 = piVar20 + 1;
+      local_pi20 = local_pi20 + 1;
       local_70 = local_70 + -1;
     } while (local_70 != 0);
   }
@@ -3629,31 +3629,31 @@ int Lisa_CullObjects(void) {
  * @fidelity ADAPTED
  */
 void Lisa_TransformVertices(void) {
-  int *piVar1;
-  float fVar2;
-  float fVar3;
-  float fVar4;
-  int iVar5;
-  int iVar6;
-  int iVar7;
-  int iVar8;
-  int iVar9;
-  double *pdVar10;
-  int *piVar11;
-  int iVar12;
-  int iVar13;
-  int iVar14;
-  int iVar15;
-  double fVar16;
-  double fVar17;
-  double fVar18;
-  double fVar19;
-  double fVar20;
-  double fVar21;
-  long long lVar22;
-  long long lVar23;
-  long long lVar24;
-  long long lVar25;
+  int *local_pi1;
+  float local_f2;
+  float local_f3;
+  float local_f4;
+  int local_i5;
+  int local_i6;
+  int local_i7;
+  int local_i8;
+  int local_i9;
+  double *local_pd10;
+  int *local_pi11;
+  int local_i12;
+  int local_i13;
+  int local_i14;
+  int local_i15;
+  double local_f16;
+  double local_f17;
+  double local_f18;
+  double local_f19;
+  double local_f20;
+  double local_f21;
+  long long local_l22;
+  long long local_l23;
+  long long local_l24;
+  long long local_l25;
   int local_1c;
   int local_18;
   int local_10;
@@ -3663,161 +3663,161 @@ void Lisa_TransformVertices(void) {
 
                     
 
-  iVar6 = g_LisaCamera;
-  pdVar10 = &g_LisaCamera->zoom;
+  local_i6 = g_LisaCamera;
+  local_pd10 = &g_LisaCamera->zoom;
   g_LisaBackfaceSign = 0;
 
   if (g_LisaCamera->zoom <= 0.0) {
     g_LisaBackfaceSign = 0xffffffff;
   }
 
-  piVar11 = &g_LisaCamera->viewport_x;
+  local_pi11 = &g_LisaCamera->viewport_x;
 
-  if (300 < *piVar11) {
+  if (300 < *local_pi11) {
     Lisa_TransformVerticesPanorama();
     return;
   }
 
-  piVar1 = &g_LisaCamera->viewport_width;
+  local_pi1 = &g_LisaCamera->viewport_width;
   g_LisaCamera->vertex_counter = 0;
-  g_LisaCameraFocalLength = *piVar1 << 2;
-  fVar16 = (double)*(double *)(iVar6 + 0x18) * (double)g_Const_NegTenthDegToRad;
-  g_LisaCameraOffsetX = *(int *)(iVar6 + 0x9c) << 8;
-  fVar17 = (double)fcos(fVar16);
-  g_LisaCameraOffsetY = *(int *)(iVar6 + 0xa0) << 8;
-  fVar18 = (double)*(double *)(iVar6 + 0x20) * (double)g_Const_NegTenthDegToRad;
-  fVar19 = (double)fcos(fVar18);
-  fVar16 = (double)fsin(fVar16);
-  fVar20 = (double)*(double *)(iVar6 + 0x28) * (double)g_Const_NegTenthDegToRad;
-  fVar18 = (double)fsin(fVar18);
-  fVar21 = (double)fcos(fVar20);
-  fVar20 = (double)fsin(fVar20);
-  fVar2 = (float)fVar21;
-  fVar3 = (float)-*piVar11 * (float)*pdVar10 * (float)g_Const_1024;
-  fVar4 = (float)-*(int *)(iVar6 + 0x84) * (float)g_Const_1024;
+  g_LisaCameraFocalLength = *local_pi1 << 2;
+  local_f16 = (double)*(double *)(local_i6 + 0x18) * (double)g_Const_NegTenthDegToRad;
+  g_LisaCameraOffsetX = *(int *)(local_i6 + 0x9c) << 8;
+  local_f17 = (double)fcos(local_f16);
+  g_LisaCameraOffsetY = *(int *)(local_i6 + 0xa0) << 8;
+  local_f18 = (double)*(double *)(local_i6 + 0x20) * (double)g_Const_NegTenthDegToRad;
+  local_f19 = (double)fcos(local_f18);
+  local_f16 = (double)fsin(local_f16);
+  local_f20 = (double)*(double *)(local_i6 + 0x28) * (double)g_Const_NegTenthDegToRad;
+  local_f18 = (double)fsin(local_f18);
+  local_f21 = (double)fcos(local_f20);
+  local_f20 = (double)fsin(local_f20);
+  local_f2 = (float)local_f21;
+  local_f3 = (float)-*local_pi11 * (float)*local_pd10 * (float)g_Const_1024;
+  local_f4 = (float)-*(int *)(local_i6 + 0x84) * (float)g_Const_1024;
 
   g_LisaObjMat_CosPitch =
 
-       (float)(((double)fVar2 * fVar19 - (double)(float)(fVar16 * fVar18) * fVar20) *
+       (float)(((double)local_f2 * local_f19 - (double)(float)(local_f16 * local_f18) * local_f20) *
 
-              (double)fVar3);
-  g_LisaObjMat_SinPitch = (float)-((double)fVar3 * fVar17 * fVar20);
-  g_LisaObjMat_CosRoll = (float)((fVar16 * fVar19 * fVar20 + (double)fVar2 * fVar18) * (double)fVar3);
+              (double)local_f3);
+  g_LisaObjMat_SinPitch = (float)-((double)local_f3 * local_f17 * local_f20);
+  g_LisaObjMat_CosRoll = (float)((local_f16 * local_f19 * local_f20 + (double)local_f2 * local_f18) * (double)local_f3);
 
   g_LisaObjMat_SinRoll =
 
-       (float)(((double)(float)(fVar16 * fVar18) * (double)fVar2 + fVar19 * fVar20) *
+       (float)(((double)(float)(local_f16 * local_f18) * (double)local_f2 + local_f19 * local_f20) *
 
-              (double)fVar4);
-  g_LisaObjMat_Tmp1 = (float)((double)fVar4 * fVar17 * (double)fVar2);
-  g_LisaObjMat_Tmp3 = (float)(-(fVar18 * fVar17) * (double)g_Const_262144);
-  g_LisaObjMat_Tmp4 = (float)(fVar16 * (double)g_Const_262144);
+              (double)local_f4);
+  g_LisaObjMat_Tmp1 = (float)((double)local_f4 * local_f17 * (double)local_f2);
+  g_LisaObjMat_Tmp3 = (float)(-(local_f18 * local_f17) * (double)g_Const_262144);
+  g_LisaObjMat_Tmp4 = (float)(local_f16 * (double)g_Const_262144);
 
   g_LisaObjMat_Tmp2 =
 
-       (float)((fVar18 * fVar20 - (double)(float)(fVar16 * fVar19) * (double)fVar2) *
+       (float)((local_f18 * local_f20 - (double)(float)(local_f16 * local_f19) * (double)local_f2) *
 
-              (double)fVar4);
-  g_LisaObjMat_Tmp5 = (float)(fVar17 * fVar19 * (double)g_Const_262144);
-  lVar22 = __ftol();
-  g_LisaCameraMatrix_00 = (int)lVar22;
-  lVar22 = __ftol();
-  g_LisaCameraMatrix_01 = (int)lVar22;
-  lVar22 = __ftol();
-  g_LisaCameraMatrix_02 = (int)lVar22;
-  lVar22 = __ftol();
-  g_LisaCameraMatrix_10 = (int)lVar22;
-  lVar22 = __ftol();
-  g_LisaCameraMatrix_11 = (int)lVar22;
-  lVar22 = __ftol();
-  g_LisaCameraMatrix_12 = (int)lVar22;
-  lVar22 = __ftol();
-  g_LisaCameraMatrix_20 = (int)lVar22;
-  lVar22 = __ftol();
-  g_LisaCameraMatrix_21 = (int)lVar22;
-  lVar22 = __ftol();
-  g_LisaCameraMatrix_22 = (int)lVar22;
-  lVar22 = __ftol();
-  lVar23 = __ftol();
-  iVar6 = (int)lVar23;
-  lVar23 = __ftol();
-  lVar24 = __ftol();
-  iVar15 = (int)lVar24;
-  lVar24 = __ftol();
-  lVar25 = __ftol();
-  iVar7 = (int)lVar25;
-  iVar5 = g_LisaCameraMatrix_01 * iVar15 + iVar6 * g_LisaCameraMatrix_00 + g_LisaCameraMatrix_02 * iVar7;
-  g_LisaSubmeshCenterWorldX = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
-  iVar5 = g_LisaCameraMatrix_11 * iVar15 + iVar6 * g_LisaCameraMatrix_10 + g_LisaCameraMatrix_12 * iVar7;
-  g_LisaSubmeshCenterWorldZ = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
-  iVar6 = g_LisaCameraMatrix_21 * iVar15 + iVar6 * g_LisaCameraMatrix_20 + g_LisaCameraMatrix_22 * iVar7;
+              (double)local_f4);
+  g_LisaObjMat_Tmp5 = (float)(local_f17 * local_f19 * (double)g_Const_262144);
+  local_l22 = __ftol();
+  g_LisaCameraMatrix_00 = (int)local_l22;
+  local_l22 = __ftol();
+  g_LisaCameraMatrix_01 = (int)local_l22;
+  local_l22 = __ftol();
+  g_LisaCameraMatrix_02 = (int)local_l22;
+  local_l22 = __ftol();
+  g_LisaCameraMatrix_10 = (int)local_l22;
+  local_l22 = __ftol();
+  g_LisaCameraMatrix_11 = (int)local_l22;
+  local_l22 = __ftol();
+  g_LisaCameraMatrix_12 = (int)local_l22;
+  local_l22 = __ftol();
+  g_LisaCameraMatrix_20 = (int)local_l22;
+  local_l22 = __ftol();
+  g_LisaCameraMatrix_21 = (int)local_l22;
+  local_l22 = __ftol();
+  g_LisaCameraMatrix_22 = (int)local_l22;
+  local_l22 = __ftol();
+  local_l23 = __ftol();
+  local_i6 = (int)local_l23;
+  local_l23 = __ftol();
+  local_l24 = __ftol();
+  local_i15 = (int)local_l24;
+  local_l24 = __ftol();
+  local_l25 = __ftol();
+  local_i7 = (int)local_l25;
+  local_i5 = g_LisaCameraMatrix_01 * local_i15 + local_i6 * g_LisaCameraMatrix_00 + g_LisaCameraMatrix_02 * local_i7;
+  g_LisaSubmeshCenterWorldX = (int)(local_i5 + (local_i5 >> 0x1f & 0xfffU)) >> 0xc;
+  local_i5 = g_LisaCameraMatrix_11 * local_i15 + local_i6 * g_LisaCameraMatrix_10 + g_LisaCameraMatrix_12 * local_i7;
+  g_LisaSubmeshCenterWorldZ = (int)(local_i5 + (local_i5 >> 0x1f & 0xfffU)) >> 0xc;
+  local_i6 = g_LisaCameraMatrix_21 * local_i15 + local_i6 * g_LisaCameraMatrix_20 + g_LisaCameraMatrix_22 * local_i7;
   local_c = 0;
-  g_LisaSubmeshDepthOffset = (int)(iVar6 + (iVar6 >> 0x1f & 0xfffU)) >> 0xc;
+  g_LisaSubmeshDepthOffset = (int)(local_i6 + (local_i6 >> 0x1f & 0xfffU)) >> 0xc;
 
   if (0 < g_LisaCamera->visible_obj_count) {
     local_18 = 0;
     local_10 = 0;
 
     do {
-      iVar5 = g_LisaVisibleSubmeshes;
-      iVar7 = g_LisaTransformedVertices;
-      iVar6 = *(int *)(g_LisaVisibleObjects + local_10);
-      piVar1 = *(int **)(iVar6 + 4);
-      iVar15 = g_LisaCamera->vertex_counter;
-      *(int **)(g_LisaVisibleSubmeshes + local_18) = piVar1;
-      piVar11 = (int *)(iVar7 + iVar15 * 0xc);
-      iVar7 = *(int *)(iVar6 + 0xc) - (int)lVar22;
-      *(int **)(iVar5 + 4 + local_18) = piVar11;
-      iVar5 = *(int *)(iVar6 + 0x10) - (int)lVar23;
-      iVar8 = *(int *)(iVar6 + 0x14) - (int)lVar24;
+      local_i5 = g_LisaVisibleSubmeshes;
+      local_i7 = g_LisaTransformedVertices;
+      local_i6 = *(int *)(g_LisaVisibleObjects + local_10);
+      local_pi1 = *(int **)(local_i6 + 4);
+      local_i15 = g_LisaCamera->vertex_counter;
+      *(int **)(g_LisaVisibleSubmeshes + local_18) = local_pi1;
+      local_pi11 = (int *)(local_i7 + local_i15 * 0xc);
+      local_i7 = *(int *)(local_i6 + 0xc) - (int)local_l22;
+      *(int **)(local_i5 + 4 + local_18) = local_pi11;
+      local_i5 = *(int *)(local_i6 + 0x10) - (int)local_l23;
+      local_i8 = *(int *)(local_i6 + 0x14) - (int)local_l24;
 
-      if ((*(short *)(iVar6 + 0x18) == 0 && *(short *)(iVar6 + 0x1a) == 0) &&
+      if ((*(short *)(local_i6 + 0x18) == 0 && *(short *)(local_i6 + 0x1a) == 0) &&
 
-          *(short *)(iVar6 + 0x1c) == 0) {
-        iVar6 = 2;
-        local_1c = *piVar1;
+          *(short *)(local_i6 + 0x1c) == 0) {
+        local_i6 = 2;
+        local_1c = *local_pi1;
 
         if (0 < local_1c) {
-          g_LisaCamera->vertex_counter = iVar15 + local_1c;
+          g_LisaCamera->vertex_counter = local_i15 + local_1c;
 
           do {
-            iVar12 = piVar1[iVar6] + iVar7;
-            iVar14 = iVar5 - piVar1[iVar6 + 1];
-            iVar15 = iVar6 + 2;
-            iVar6 = iVar6 + 3;
-            iVar9 = iVar8 + piVar1[iVar15];
+            local_i12 = local_pi1[local_i6] + local_i7;
+            local_i14 = local_i5 - local_pi1[local_i6 + 1];
+            local_i15 = local_i6 + 2;
+            local_i6 = local_i6 + 3;
+            local_i9 = local_i8 + local_pi1[local_i15];
 
-            iVar13 = (iVar12 * g_LisaCameraMatrix_10 + g_LisaCameraMatrix_12 * iVar9 + g_LisaCameraMatrix_11 * iVar14) -
+            local_i13 = (local_i12 * g_LisaCameraMatrix_10 + g_LisaCameraMatrix_12 * local_i9 + g_LisaCameraMatrix_11 * local_i14) -
 
                      g_LisaSubmeshCenterWorldZ;
 
-            iVar15 = g_LisaCameraFocalLength +
+            local_i15 = g_LisaCameraFocalLength +
 
-                     ((iVar12 * g_LisaCameraMatrix_20 + g_LisaCameraMatrix_22 * iVar9 + g_LisaCameraMatrix_21 * iVar14) -
+                     ((local_i12 * g_LisaCameraMatrix_20 + g_LisaCameraMatrix_22 * local_i9 + g_LisaCameraMatrix_21 * local_i14) -
 
                       g_LisaSubmeshDepthOffset >> 0x10);
 
-            if (iVar15 < g_LisaCameraFocalLength) {
-              iVar15 = g_LisaCameraFocalLength;
+            if (local_i15 < g_LisaCameraFocalLength) {
+              local_i15 = g_LisaCameraFocalLength;
             }
 
-            *piVar11 = g_LisaCameraOffsetX +
+            *local_pi11 = g_LisaCameraOffsetX +
 
-                       ((iVar12 * g_LisaCameraMatrix_00 + g_LisaCameraMatrix_02 * iVar9 + g_LisaCameraMatrix_01 * iVar14) -
+                       ((local_i12 * g_LisaCameraMatrix_00 + g_LisaCameraMatrix_02 * local_i9 + g_LisaCameraMatrix_01 * local_i14) -
 
-                       g_LisaSubmeshCenterWorldX) / iVar15;
-            iVar9 = g_LisaCameraOffsetY;
-            piVar11[2] = iVar15;
+                       g_LisaSubmeshCenterWorldX) / local_i15;
+            local_i9 = g_LisaCameraOffsetY;
+            local_pi11[2] = local_i15;
             local_1c = local_1c + -1;
-            piVar11[1] = iVar9 + iVar13 / iVar15;
-            piVar11 = piVar11 + 3;
+            local_pi11[1] = local_i9 + local_i13 / local_i15;
+            local_pi11 = local_pi11 + 3;
           } while (local_1c != 0);
         }
 
       }
 
       else {
-        Lisa_ComputeObjectMatrix(iVar7,iVar5,iVar8,iVar6,piVar1);
+        Lisa_ComputeObjectMatrix(local_i7,local_i5,local_i8,local_i6,local_pi1);
       }
 
       local_18 = local_18 + 8;
@@ -3834,30 +3834,30 @@ void Lisa_TransformVertices(void) {
  * @fidelity ADAPTED
  */
 int Lisa_TransformVerticesPanorama(void) {
-  float fVar1;
-  int *piVar2;
-  float fVar3;
-  float fVar4;
-  int iVar5;
-  int iVar6;
-  int iVar7;
-  int iVar8;
-  int iVar9;
-  int iVar10;
-  int *piVar11;
-  int iVar12;
-  int iVar13;
-  int iVar14;
-  double fVar15;
-  double fVar16;
-  double fVar17;
-  double fVar18;
-  double fVar19;
-  double fVar20;
-  long long lVar21;
-  long long lVar22;
-  long long lVar23;
-  long long lVar24;
+  float local_f1;
+  int *local_pi2;
+  float local_f3;
+  float local_f4;
+  int local_i5;
+  int local_i6;
+  int local_i7;
+  int local_i8;
+  int local_i9;
+  int local_i10;
+  int *local_pi11;
+  int local_i12;
+  int local_i13;
+  int local_i14;
+  double local_f15;
+  double local_f16;
+  double local_f17;
+  double local_f18;
+  double local_f19;
+  double local_f20;
+  long long local_l21;
+  long long local_l22;
+  long long local_l23;
+  long long local_l24;
   int local_20;
   int local_1c;
   int local_10;
@@ -3865,146 +3865,146 @@ int Lisa_TransformVerticesPanorama(void) {
 
   
 
-  iVar6 = g_LisaCamera;
+  local_i6 = g_LisaCamera;
   g_LisaCameraFocalLength = g_LisaCamera->viewport_width << 2;
   g_LisaCamera->vertex_counter = 0;
-  fVar15 = (double)*(double *)(iVar6 + 0x18) * (double)g_Const_NegTenthDegToRad;
-  g_LisaCameraOffsetX = *(int *)(iVar6 + 0x9c) << 8;
-  fVar16 = (double)fcos(fVar15);
-  g_LisaCameraOffsetY = *(int *)(iVar6 + 0xa0) << 8;
-  fVar17 = (double)*(double *)(iVar6 + 0x20) * (double)g_Const_NegTenthDegToRad;
-  fVar18 = (double)fcos(fVar17);
-  fVar15 = (double)fsin(fVar15);
-  fVar19 = (double)*(double *)(iVar6 + 0x28) * (double)g_Const_NegTenthDegToRad;
-  fVar17 = (double)fsin(fVar17);
-  fVar20 = (double)fcos(fVar19);
-  fVar19 = (double)fsin(fVar19);
-  fVar1 = (float)fVar20;
-  fVar3 = (float)-*(int *)(iVar6 + 0x80) * (float)*(double *)(iVar6 + 0x30) * (float)g_Const_256;
-  fVar4 = (float)-*(int *)(iVar6 + 0x84) * (float)g_Const_256;
+  local_f15 = (double)*(double *)(local_i6 + 0x18) * (double)g_Const_NegTenthDegToRad;
+  g_LisaCameraOffsetX = *(int *)(local_i6 + 0x9c) << 8;
+  local_f16 = (double)fcos(local_f15);
+  g_LisaCameraOffsetY = *(int *)(local_i6 + 0xa0) << 8;
+  local_f17 = (double)*(double *)(local_i6 + 0x20) * (double)g_Const_NegTenthDegToRad;
+  local_f18 = (double)fcos(local_f17);
+  local_f15 = (double)fsin(local_f15);
+  local_f19 = (double)*(double *)(local_i6 + 0x28) * (double)g_Const_NegTenthDegToRad;
+  local_f17 = (double)fsin(local_f17);
+  local_f20 = (double)fcos(local_f19);
+  local_f19 = (double)fsin(local_f19);
+  local_f1 = (float)local_f20;
+  local_f3 = (float)-*(int *)(local_i6 + 0x80) * (float)*(double *)(local_i6 + 0x30) * (float)g_Const_256;
+  local_f4 = (float)-*(int *)(local_i6 + 0x84) * (float)g_Const_256;
 
   g_LisaObjMat_CosPitch =
 
-       (float)(((double)fVar1 * fVar18 - (double)(float)(fVar15 * fVar17) * fVar19) *
+       (float)(((double)local_f1 * local_f18 - (double)(float)(local_f15 * local_f17) * local_f19) *
 
-              (double)fVar3);
-  g_LisaObjMat_SinPitch = (float)-((double)fVar3 * fVar16 * fVar19);
+              (double)local_f3);
+  g_LisaObjMat_SinPitch = (float)-((double)local_f3 * local_f16 * local_f19);
 
   g_LisaObjMat_CosRoll =
 
-       (float)(((double)(float)(fVar15 * fVar18) * fVar19 + (double)fVar1 * fVar17) *
+       (float)(((double)(float)(local_f15 * local_f18) * local_f19 + (double)local_f1 * local_f17) *
 
-              (double)fVar3);
+              (double)local_f3);
 
   g_LisaObjMat_SinRoll =
 
-       (float)(((double)fVar1 * (double)(float)(fVar15 * fVar17) + fVar18 * fVar19) *
+       (float)(((double)local_f1 * (double)(float)(local_f15 * local_f17) + local_f18 * local_f19) *
 
-              (double)fVar4);
-  g_LisaObjMat_Tmp1 = (float)((double)fVar4 * fVar16 * (double)fVar1);
-  g_LisaObjMat_Tmp4 = (float)(fVar15 * (double)g_Const_262144);
-  g_LisaObjMat_Tmp3 = (float)(-(fVar16 * fVar17) * (double)g_Const_262144);
+              (double)local_f4);
+  g_LisaObjMat_Tmp1 = (float)((double)local_f4 * local_f16 * (double)local_f1);
+  g_LisaObjMat_Tmp4 = (float)(local_f15 * (double)g_Const_262144);
+  g_LisaObjMat_Tmp3 = (float)(-(local_f16 * local_f17) * (double)g_Const_262144);
 
   g_LisaObjMat_Tmp2 =
 
-       (float)((fVar17 * fVar19 - (double)fVar1 * (double)(float)(fVar15 * fVar18)) *
+       (float)((local_f17 * local_f19 - (double)local_f1 * (double)(float)(local_f15 * local_f18)) *
 
-              (double)fVar4);
-  g_LisaObjMat_Tmp5 = (float)(fVar18 * fVar16 * (double)g_Const_262144);
-  lVar21 = __ftol();
-  g_LisaCameraMatrix_00 = (int)lVar21;
-  lVar21 = __ftol();
-  g_LisaCameraMatrix_01 = (int)lVar21;
-  lVar21 = __ftol();
-  g_LisaCameraMatrix_02 = (int)lVar21;
-  lVar21 = __ftol();
-  g_LisaCameraMatrix_10 = (int)lVar21;
-  lVar21 = __ftol();
-  g_LisaCameraMatrix_11 = (int)lVar21;
-  lVar21 = __ftol();
-  g_LisaCameraMatrix_12 = (int)lVar21;
-  lVar21 = __ftol();
-  g_LisaCameraMatrix_20 = (int)lVar21;
-  lVar21 = __ftol();
-  g_LisaCameraMatrix_21 = (int)lVar21;
-  lVar21 = __ftol();
-  g_LisaCameraMatrix_22 = (int)lVar21;
-  lVar21 = __ftol();
-  lVar22 = __ftol();
-  iVar6 = (int)lVar22;
-  lVar22 = __ftol();
-  lVar23 = __ftol();
-  iVar14 = (int)lVar23;
-  lVar23 = __ftol();
-  lVar24 = __ftol();
-  iVar7 = (int)lVar24;
-  iVar5 = g_LisaCameraMatrix_00 * iVar6 + g_LisaCameraMatrix_02 * iVar7 + g_LisaCameraMatrix_01 * iVar14;
-  g_LisaSubmeshCenterWorldX = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
-  iVar5 = g_LisaCameraMatrix_10 * iVar6 + g_LisaCameraMatrix_12 * iVar7 + g_LisaCameraMatrix_11 * iVar14;
-  g_LisaSubmeshCenterWorldZ = (int)(iVar5 + (iVar5 >> 0x1f & 0xfffU)) >> 0xc;
-  iVar6 = g_LisaCameraMatrix_20 * iVar6 + g_LisaCameraMatrix_22 * iVar7 + g_LisaCameraMatrix_21 * iVar14;
+              (double)local_f4);
+  g_LisaObjMat_Tmp5 = (float)(local_f18 * local_f16 * (double)g_Const_262144);
+  local_l21 = __ftol();
+  g_LisaCameraMatrix_00 = (int)local_l21;
+  local_l21 = __ftol();
+  g_LisaCameraMatrix_01 = (int)local_l21;
+  local_l21 = __ftol();
+  g_LisaCameraMatrix_02 = (int)local_l21;
+  local_l21 = __ftol();
+  g_LisaCameraMatrix_10 = (int)local_l21;
+  local_l21 = __ftol();
+  g_LisaCameraMatrix_11 = (int)local_l21;
+  local_l21 = __ftol();
+  g_LisaCameraMatrix_12 = (int)local_l21;
+  local_l21 = __ftol();
+  g_LisaCameraMatrix_20 = (int)local_l21;
+  local_l21 = __ftol();
+  g_LisaCameraMatrix_21 = (int)local_l21;
+  local_l21 = __ftol();
+  g_LisaCameraMatrix_22 = (int)local_l21;
+  local_l21 = __ftol();
+  local_l22 = __ftol();
+  local_i6 = (int)local_l22;
+  local_l22 = __ftol();
+  local_l23 = __ftol();
+  local_i14 = (int)local_l23;
+  local_l23 = __ftol();
+  local_l24 = __ftol();
+  local_i7 = (int)local_l24;
+  local_i5 = g_LisaCameraMatrix_00 * local_i6 + g_LisaCameraMatrix_02 * local_i7 + g_LisaCameraMatrix_01 * local_i14;
+  g_LisaSubmeshCenterWorldX = (int)(local_i5 + (local_i5 >> 0x1f & 0xfffU)) >> 0xc;
+  local_i5 = g_LisaCameraMatrix_10 * local_i6 + g_LisaCameraMatrix_12 * local_i7 + g_LisaCameraMatrix_11 * local_i14;
+  g_LisaSubmeshCenterWorldZ = (int)(local_i5 + (local_i5 >> 0x1f & 0xfffU)) >> 0xc;
+  local_i6 = g_LisaCameraMatrix_20 * local_i6 + g_LisaCameraMatrix_22 * local_i7 + g_LisaCameraMatrix_21 * local_i14;
   local_c = 0;
-  g_LisaSubmeshDepthOffset = (int)(iVar6 + (iVar6 >> 0x1f & 0xfffU)) >> 0xc;
+  g_LisaSubmeshDepthOffset = (int)(local_i6 + (local_i6 >> 0x1f & 0xfffU)) >> 0xc;
 
   if (0 < g_LisaCamera->visible_obj_count) {
     local_1c = 0;
     local_10 = 0;
 
     do {
-      iVar14 = g_LisaCamera;
-      iVar6 = *(int *)(g_LisaVisibleObjects + local_10);
-      piVar2 = *(int **)(iVar6 + 4);
-      *(int **)(g_LisaVisibleSubmeshes + local_1c) = piVar2;
-      iVar14 = *(int *)(iVar14 + 0x5c);
-      piVar11 = (int *)(g_LisaTransformedVertices + iVar14 * 0xc);
-      *(int **)(g_LisaVisibleSubmeshes + 4 + local_1c) = piVar11;
-      iVar7 = *(int *)(iVar6 + 0xc) - (int)lVar21;
-      iVar5 = *(int *)(iVar6 + 0x10) - (int)lVar22;
-      iVar8 = *(int *)(iVar6 + 0x14) - (int)lVar23;
+      local_i14 = g_LisaCamera;
+      local_i6 = *(int *)(g_LisaVisibleObjects + local_10);
+      local_pi2 = *(int **)(local_i6 + 4);
+      *(int **)(g_LisaVisibleSubmeshes + local_1c) = local_pi2;
+      local_i14 = *(int *)(local_i14 + 0x5c);
+      local_pi11 = (int *)(g_LisaTransformedVertices + local_i14 * 0xc);
+      *(int **)(g_LisaVisibleSubmeshes + 4 + local_1c) = local_pi11;
+      local_i7 = *(int *)(local_i6 + 0xc) - (int)local_l21;
+      local_i5 = *(int *)(local_i6 + 0x10) - (int)local_l22;
+      local_i8 = *(int *)(local_i6 + 0x14) - (int)local_l23;
 
-      if ((*(short *)(iVar6 + 0x18) == 0 && *(short *)(iVar6 + 0x1a) == 0) &&
+      if ((*(short *)(local_i6 + 0x18) == 0 && *(short *)(local_i6 + 0x1a) == 0) &&
 
-          *(short *)(iVar6 + 0x1c) == 0) {
-        local_20 = *piVar2;
+          *(short *)(local_i6 + 0x1c) == 0) {
+        local_20 = *local_pi2;
 
         if (0 < local_20) {
-          g_LisaCamera->vertex_counter = iVar14 + local_20;
-          iVar6 = 2;
+          g_LisaCamera->vertex_counter = local_i14 + local_20;
+          local_i6 = 2;
 
           do {
-            iVar9 = iVar7 + piVar2[iVar6];
-            iVar12 = iVar5 - piVar2[iVar6 + 1];
-            iVar10 = iVar8 + piVar2[iVar6 + 2];
+            local_i9 = local_i7 + local_pi2[local_i6];
+            local_i12 = local_i5 - local_pi2[local_i6 + 1];
+            local_i10 = local_i8 + local_pi2[local_i6 + 2];
 
-            iVar13 = (g_LisaCameraMatrix_12 * iVar10 + g_LisaCameraMatrix_11 * iVar12 + g_LisaCameraMatrix_10 * iVar9) -
+            local_i13 = (g_LisaCameraMatrix_12 * local_i10 + g_LisaCameraMatrix_11 * local_i12 + g_LisaCameraMatrix_10 * local_i9) -
 
                      g_LisaSubmeshCenterWorldZ;
 
-            iVar14 = ((g_LisaCameraMatrix_22 * iVar10 + g_LisaCameraMatrix_21 * iVar12 + g_LisaCameraMatrix_20 * iVar9) -
+            local_i14 = ((g_LisaCameraMatrix_22 * local_i10 + g_LisaCameraMatrix_21 * local_i12 + g_LisaCameraMatrix_20 * local_i9) -
 
                       g_LisaSubmeshDepthOffset >> 0x10) + g_LisaCameraFocalLength;
 
-            if (iVar14 < g_LisaCameraFocalLength) {
-              iVar14 = g_LisaCameraFocalLength;
+            if (local_i14 < g_LisaCameraFocalLength) {
+              local_i14 = g_LisaCameraFocalLength;
             }
 
-            *piVar11 = g_LisaCameraOffsetX +
+            *local_pi11 = g_LisaCameraOffsetX +
 
-                       (((g_LisaCameraMatrix_02 * iVar10 + g_LisaCameraMatrix_01 * iVar12 + g_LisaCameraMatrix_00 * iVar9) -
+                       (((g_LisaCameraMatrix_02 * local_i10 + g_LisaCameraMatrix_01 * local_i12 + g_LisaCameraMatrix_00 * local_i9) -
 
-                        g_LisaSubmeshCenterWorldX) / iVar14) * 4;
+                        g_LisaSubmeshCenterWorldX) / local_i14) * 4;
             local_20 = local_20 + -1;
-            piVar11[2] = iVar14;
-            piVar11[1] = g_LisaCameraOffsetY + (iVar13 / iVar14) * 4;
-            piVar11 = piVar11 + 3;
-            iVar6 = iVar6 + 3;
+            local_pi11[2] = local_i14;
+            local_pi11[1] = g_LisaCameraOffsetY + (local_i13 / local_i14) * 4;
+            local_pi11 = local_pi11 + 3;
+            local_i6 = local_i6 + 3;
           } while (local_20 != 0);
         }
 
       }
 
       else {
-        Lisa_TransformSubmeshVerticesPanorama(iVar7,iVar5,iVar8,iVar6,piVar2);
+        Lisa_TransformSubmeshVerticesPanorama(local_i7,local_i5,local_i8,local_i6,local_pi2);
       }
 
       local_1c = local_1c + 8;
@@ -4020,127 +4020,127 @@ int Lisa_TransformVerticesPanorama(void) {
  * @original Lisa_ComputeObjectMatrix (IGN_WIN.EXE @ 0x0044a900, lisa3d.c)
  * @fidelity ADAPTED
  */
-int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int *param_5) {
-  ushort uVar1;
-  ushort uVar2;
-  ushort uVar3;
+int Lisa_ComputeObjectMatrix(int arg_1,int arg_2,int arg_3,int arg_4,int *arg_5) {
+  ushort local_u1;
+  ushort local_u2;
+  ushort local_u3;
   short sVar4;
-  int iVar5;
-  int iVar6;
-  int iVar7;
-  int iVar8;
-  int iVar9;
-  int *piVar10;
-  int iVar11;
-  int iVar12;
-  int iVar13;
-  int iVar14;
-  long long lVar15;
-  long long lVar16;
-  long long lVar17;
-  long long lVar18;
-  long long lVar19;
-  long long lVar20;
-  long long lVar21;
-  long long lVar22;
-  long long lVar23;
+  int local_i5;
+  int local_i6;
+  int local_i7;
+  int local_i8;
+  int local_i9;
+  int *local_pi10;
+  int local_i11;
+  int local_i12;
+  int local_i13;
+  int local_i14;
+  long long local_l15;
+  long long local_l16;
+  long long local_l17;
+  long long local_l18;
+  long long local_l19;
+  long long local_l20;
+  long long local_l21;
+  long long local_l22;
+  long long local_l23;
   int local_58;
 
   
 
-  iVar11 = (g_LisaCameraMatrix_02 * param_3 + g_LisaCameraMatrix_01 * param_2 + g_LisaCameraMatrix_00 * param_1) - g_LisaSubmeshCenterWorldX
+  local_i11 = (g_LisaCameraMatrix_02 * arg_3 + g_LisaCameraMatrix_01 * arg_2 + g_LisaCameraMatrix_00 * arg_1) - g_LisaSubmeshCenterWorldX
 
   ;
 
-  iVar12 = (g_LisaCameraMatrix_12 * param_3 + g_LisaCameraMatrix_11 * param_2 + g_LisaCameraMatrix_10 * param_1) - g_LisaSubmeshCenterWorldZ
+  local_i12 = (g_LisaCameraMatrix_12 * arg_3 + g_LisaCameraMatrix_11 * arg_2 + g_LisaCameraMatrix_10 * arg_1) - g_LisaSubmeshCenterWorldZ
 
   ;
 
-  iVar13 = (g_LisaCameraMatrix_22 * param_3 + g_LisaCameraMatrix_21 * param_2 + g_LisaCameraMatrix_20 * param_1) - g_LisaSubmeshDepthOffset
+  local_i13 = (g_LisaCameraMatrix_22 * arg_3 + g_LisaCameraMatrix_21 * arg_2 + g_LisaCameraMatrix_20 * arg_1) - g_LisaSubmeshDepthOffset
 
   ;
-  uVar1 = *(ushort *)(param_4 + 0x1a);
-  uVar2 = *(ushort *)(param_4 + 0x18);
-  uVar3 = *(ushort *)(param_4 + 0x1c);
+  local_u1 = *(ushort *)(arg_4 + 0x1a);
+  local_u2 = *(ushort *)(arg_4 + 0x18);
+  local_u3 = *(ushort *)(arg_4 + 0x1c);
 
-  if (0xe10 < (ushort)(uVar2 | uVar1 | uVar3)) {
-    if ((short)uVar2 < 0) {
-      *(ushort *)(param_4 + 0x18) = ((ushort)(0xe0f - uVar2) / 0xe10) * 0xe10 + uVar2;
+  if (0xe10 < (ushort)(local_u2 | local_u1 | local_u3)) {
+    if ((short)local_u2 < 0) {
+      *(ushort *)(arg_4 + 0x18) = ((ushort)(0xe0f - local_u2) / 0xe10) * 0xe10 + local_u2;
     }
 
-    if ((short)uVar1 < 0) {
-      *(ushort *)(param_4 + 0x1a) = ((ushort)(0xe0f - uVar1) / 0xe10) * 0xe10 + uVar1;
+    if ((short)local_u1 < 0) {
+      *(ushort *)(arg_4 + 0x1a) = ((ushort)(0xe0f - local_u1) / 0xe10) * 0xe10 + local_u1;
     }
 
-    if ((short)uVar3 < 0) {
-      *(ushort *)(param_4 + 0x1c) = ((ushort)(0xe0f - uVar3) / 0xe10) * 0xe10 + uVar3;
+    if ((short)local_u3 < 0) {
+      *(ushort *)(arg_4 + 0x1c) = ((ushort)(0xe0f - local_u3) / 0xe10) * 0xe10 + local_u3;
     }
 
-    sVar4 = *(short *)(param_4 + 0x18);
+    sVar4 = *(short *)(arg_4 + 0x18);
 
     if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x18) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+      *(ushort *)(arg_4 + 0x18) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
     }
 
-    sVar4 = *(short *)(param_4 + 0x1a);
+    sVar4 = *(short *)(arg_4 + 0x1a);
 
     if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x1a) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+      *(ushort *)(arg_4 + 0x1a) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
     }
 
-    sVar4 = *(short *)(param_4 + 0x1c);
+    sVar4 = *(short *)(arg_4 + 0x1c);
 
     if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x1c) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+      *(ushort *)(arg_4 + 0x1c) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
     }
 
   }
 
-  lVar15 = __ftol();
-  lVar16 = __ftol();
-  lVar17 = __ftol();
-  lVar18 = __ftol();
-  lVar19 = __ftol();
-  lVar20 = __ftol();
-  lVar21 = __ftol();
-  lVar22 = __ftol();
-  lVar23 = __ftol();
-  iVar6 = g_LisaTransformedVertices;
-  iVar9 = 2;
-  local_58 = *param_5;
+  local_l15 = __ftol();
+  local_l16 = __ftol();
+  local_l17 = __ftol();
+  local_l18 = __ftol();
+  local_l19 = __ftol();
+  local_l20 = __ftol();
+  local_l21 = __ftol();
+  local_l22 = __ftol();
+  local_l23 = __ftol();
+  local_i6 = g_LisaTransformedVertices;
+  local_i9 = 2;
+  local_58 = *arg_5;
 
   if (0 < local_58) {
-    iVar5 = g_LisaCamera->vertex_counter;
-    g_LisaCamera->vertex_counter = iVar5 + local_58;
-    piVar10 = (int *)(iVar6 + iVar5 * 0xc);
+    local_i5 = g_LisaCamera->vertex_counter;
+    g_LisaCamera->vertex_counter = local_i5 + local_58;
+    local_pi10 = (int *)(local_i6 + local_i5 * 0xc);
 
     do {
-      iVar6 = param_5[iVar9];
-      iVar5 = param_5[iVar9 + 1];
-      iVar7 = param_5[iVar9 + 2];
-      iVar9 = iVar9 + 3;
+      local_i6 = arg_5[local_i9];
+      local_i5 = arg_5[local_i9 + 1];
+      local_i7 = arg_5[local_i9 + 2];
+      local_i9 = local_i9 + 3;
 
-      iVar14 = g_LisaCameraFocalLength +
+      local_i14 = g_LisaCameraFocalLength +
 
-               (iVar7 * (int)lVar23 + iVar5 * (int)lVar22 + iVar6 * (int)lVar21 + iVar13 >> 0x10);
+               (local_i7 * (int)local_l23 + local_i5 * (int)local_l22 + local_i6 * (int)local_l21 + local_i13 >> 0x10);
 
-      if (iVar14 < g_LisaCameraFocalLength) {
-        iVar14 = g_LisaCameraFocalLength;
+      if (local_i14 < g_LisaCameraFocalLength) {
+        local_i14 = g_LisaCameraFocalLength;
       }
 
-      *piVar10 = g_LisaCameraOffsetX +
+      *local_pi10 = g_LisaCameraOffsetX +
 
-                 (iVar11 + iVar7 * (int)lVar17 + iVar5 * (int)lVar16 + iVar6 * (int)lVar15) / iVar14
+                 (local_i11 + local_i7 * (int)local_l17 + local_i5 * (int)local_l16 + local_i6 * (int)local_l15) / local_i14
 
       ;
-      iVar8 = g_LisaCameraOffsetY;
-      piVar10[2] = iVar14;
+      local_i8 = g_LisaCameraOffsetY;
+      local_pi10[2] = local_i14;
       local_58 = local_58 + -1;
 
-      piVar10[1] = iVar8 + (iVar12 + iVar7 * (int)lVar20 + iVar5 * (int)lVar19 + iVar6 * (int)lVar18
+      local_pi10[1] = local_i8 + (local_i12 + local_i7 * (int)local_l20 + local_i5 * (int)local_l19 + local_i6 * (int)local_l18
 
-                           ) / iVar14;
-      piVar10 = piVar10 + 3;
+                           ) / local_i14;
+      local_pi10 = local_pi10 + 3;
     } while (local_58 != 0);
   }
 
@@ -4151,127 +4151,127 @@ int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int
  * @original Lisa_TransformSubmeshVerticesPanorama (IGN_WIN.EXE @ 0x0044ae20, lisa3d.c)
  * @fidelity ADAPTED
  */
-int Lisa_TransformSubmeshVerticesPanorama(int param_1,int param_2,int param_3,int param_4,int *param_5) {
-  ushort uVar1;
-  ushort uVar2;
-  ushort uVar3;
+int Lisa_TransformSubmeshVerticesPanorama(int arg_1,int arg_2,int arg_3,int arg_4,int *arg_5) {
+  ushort local_u1;
+  ushort local_u2;
+  ushort local_u3;
   short sVar4;
-  int iVar5;
-  int iVar6;
-  int iVar7;
-  int iVar8;
-  int iVar9;
-  int *piVar10;
-  int iVar11;
-  int iVar12;
-  int iVar13;
-  long long lVar14;
-  long long lVar15;
-  long long lVar16;
-  long long lVar17;
-  long long lVar18;
-  long long lVar19;
-  long long lVar20;
-  long long lVar21;
-  long long lVar22;
+  int local_i5;
+  int local_i6;
+  int local_i7;
+  int local_i8;
+  int local_i9;
+  int *local_pi10;
+  int local_i11;
+  int local_i12;
+  int local_i13;
+  long long local_l14;
+  long long local_l15;
+  long long local_l16;
+  long long local_l17;
+  long long local_l18;
+  long long local_l19;
+  long long local_l20;
+  long long local_l21;
+  long long local_l22;
   int local_58;
 
   
 
-  iVar11 = (g_LisaCameraMatrix_02 * param_3 + g_LisaCameraMatrix_01 * param_2 + g_LisaCameraMatrix_00 * param_1) - g_LisaSubmeshCenterWorldX
+  local_i11 = (g_LisaCameraMatrix_02 * arg_3 + g_LisaCameraMatrix_01 * arg_2 + g_LisaCameraMatrix_00 * arg_1) - g_LisaSubmeshCenterWorldX
 
   ;
 
-  iVar12 = (g_LisaCameraMatrix_12 * param_3 + g_LisaCameraMatrix_11 * param_2 + g_LisaCameraMatrix_10 * param_1) - g_LisaSubmeshCenterWorldZ
+  local_i12 = (g_LisaCameraMatrix_12 * arg_3 + g_LisaCameraMatrix_11 * arg_2 + g_LisaCameraMatrix_10 * arg_1) - g_LisaSubmeshCenterWorldZ
 
   ;
 
-  iVar13 = (g_LisaCameraMatrix_22 * param_3 + g_LisaCameraMatrix_21 * param_2 + g_LisaCameraMatrix_20 * param_1) - g_LisaSubmeshDepthOffset
+  local_i13 = (g_LisaCameraMatrix_22 * arg_3 + g_LisaCameraMatrix_21 * arg_2 + g_LisaCameraMatrix_20 * arg_1) - g_LisaSubmeshDepthOffset
 
   ;
-  uVar1 = *(ushort *)(param_4 + 0x1a);
-  uVar2 = *(ushort *)(param_4 + 0x18);
-  uVar3 = *(ushort *)(param_4 + 0x1c);
+  local_u1 = *(ushort *)(arg_4 + 0x1a);
+  local_u2 = *(ushort *)(arg_4 + 0x18);
+  local_u3 = *(ushort *)(arg_4 + 0x1c);
 
-  if (0xe10 < (ushort)(uVar2 | uVar1 | uVar3)) {
-    if ((short)uVar2 < 0) {
-      *(ushort *)(param_4 + 0x18) = ((ushort)(0xe0f - uVar2) / 0xe10) * 0xe10 + uVar2;
+  if (0xe10 < (ushort)(local_u2 | local_u1 | local_u3)) {
+    if ((short)local_u2 < 0) {
+      *(ushort *)(arg_4 + 0x18) = ((ushort)(0xe0f - local_u2) / 0xe10) * 0xe10 + local_u2;
     }
 
-    if ((short)uVar1 < 0) {
-      *(ushort *)(param_4 + 0x1a) = ((ushort)(0xe0f - uVar1) / 0xe10) * 0xe10 + uVar1;
+    if ((short)local_u1 < 0) {
+      *(ushort *)(arg_4 + 0x1a) = ((ushort)(0xe0f - local_u1) / 0xe10) * 0xe10 + local_u1;
     }
 
-    if ((short)uVar3 < 0) {
-      *(ushort *)(param_4 + 0x1c) = ((ushort)(0xe0f - uVar3) / 0xe10) * 0xe10 + uVar3;
+    if ((short)local_u3 < 0) {
+      *(ushort *)(arg_4 + 0x1c) = ((ushort)(0xe0f - local_u3) / 0xe10) * 0xe10 + local_u3;
     }
 
-    sVar4 = *(short *)(param_4 + 0x18);
+    sVar4 = *(short *)(arg_4 + 0x18);
 
     if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x18) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+      *(ushort *)(arg_4 + 0x18) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
     }
 
-    sVar4 = *(short *)(param_4 + 0x1a);
+    sVar4 = *(short *)(arg_4 + 0x1a);
 
     if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x1a) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+      *(ushort *)(arg_4 + 0x1a) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
     }
 
-    sVar4 = *(short *)(param_4 + 0x1c);
+    sVar4 = *(short *)(arg_4 + 0x1c);
 
     if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x1c) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+      *(ushort *)(arg_4 + 0x1c) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
     }
 
   }
 
-  lVar14 = __ftol();
-  lVar15 = __ftol();
-  lVar16 = __ftol();
-  lVar17 = __ftol();
-  lVar18 = __ftol();
-  lVar19 = __ftol();
-  lVar20 = __ftol();
-  lVar21 = __ftol();
-  lVar22 = __ftol();
-  iVar6 = g_LisaTransformedVertices;
-  local_58 = *param_5;
+  local_l14 = __ftol();
+  local_l15 = __ftol();
+  local_l16 = __ftol();
+  local_l17 = __ftol();
+  local_l18 = __ftol();
+  local_l19 = __ftol();
+  local_l20 = __ftol();
+  local_l21 = __ftol();
+  local_l22 = __ftol();
+  local_i6 = g_LisaTransformedVertices;
+  local_58 = *arg_5;
 
   if (0 < local_58) {
-    iVar5 = g_LisaCamera->vertex_counter;
-    g_LisaCamera->vertex_counter = iVar5 + local_58;
-    iVar8 = 2;
-    piVar10 = (int *)(iVar6 + iVar5 * 0xc);
+    local_i5 = g_LisaCamera->vertex_counter;
+    g_LisaCamera->vertex_counter = local_i5 + local_58;
+    local_i8 = 2;
+    local_pi10 = (int *)(local_i6 + local_i5 * 0xc);
 
     do {
-      iVar6 = param_5[iVar8];
-      iVar5 = param_5[iVar8 + 1];
-      iVar7 = param_5[iVar8 + 2];
+      local_i6 = arg_5[local_i8];
+      local_i5 = arg_5[local_i8 + 1];
+      local_i7 = arg_5[local_i8 + 2];
 
-      iVar9 = (iVar5 * (int)lVar21 + iVar7 * (int)lVar22 + iVar6 * (int)lVar20 + iVar13 >> 0x10) +
+      local_i9 = (local_i5 * (int)local_l21 + local_i7 * (int)local_l22 + local_i6 * (int)local_l20 + local_i13 >> 0x10) +
 
               g_LisaCameraFocalLength;
 
-      if (iVar9 < g_LisaCameraFocalLength) {
-        iVar9 = g_LisaCameraFocalLength;
+      if (local_i9 < g_LisaCameraFocalLength) {
+        local_i9 = g_LisaCameraFocalLength;
       }
 
-      *piVar10 = g_LisaCameraOffsetX +
+      *local_pi10 = g_LisaCameraOffsetX +
 
-                 ((iVar11 + iVar5 * (int)lVar15 + iVar7 * (int)lVar16 + iVar6 * (int)lVar14) / iVar9
+                 ((local_i11 + local_i5 * (int)local_l15 + local_i7 * (int)local_l16 + local_i6 * (int)local_l14) / local_i9
 
                  ) * 4;
       local_58 = local_58 + -1;
-      piVar10[2] = iVar9;
+      local_pi10[2] = local_i9;
 
-      piVar10[1] = g_LisaCameraOffsetY +
+      local_pi10[1] = g_LisaCameraOffsetY +
 
-                   ((iVar12 + iVar7 * (int)lVar19 + iVar5 * (int)lVar18 + iVar6 * (int)lVar17) /
+                   ((local_i12 + local_i7 * (int)local_l19 + local_i5 * (int)local_l18 + local_i6 * (int)local_l17) /
 
-                   iVar9) * 4;
-      iVar8 = iVar8 + 3;
-      piVar10 = piVar10 + 3;
+                   local_i9) * 4;
+      local_i8 = local_i8 + 3;
+      local_pi10 = local_pi10 + 3;
     } while (local_58 != 0);
   }
 
@@ -4282,40 +4282,40 @@ int Lisa_TransformSubmeshVerticesPanorama(int param_1,int param_2,int param_3,in
  * @original Lisa_ComputeCameraRotationMatrix (IGN_WIN.EXE @ 0x0044b340, lisa3d.c)
  * @fidelity ADAPTED
  */
-void Lisa_ComputeCameraRotationMatrix(int *param_1) {
-  double fVar1;
-  double fVar2;
-  long long lVar3;
+void Lisa_ComputeCameraRotationMatrix(int *arg_1) {
+  double local_f1;
+  double local_f2;
+  long long local_l3;
 
   
 
-  fVar1 = (double)g_LisaCamera->rot_x * (double)g_Const_NegTenthDegToRad;
-  fcos(fVar1);
-  fVar2 = (double)g_LisaCamera->rot_y * (double)g_Const_NegTenthDegToRad;
-  fcos(fVar2);
-  fsin(fVar1);
-  fVar1 = (double)g_LisaCamera->rot_z * (double)g_Const_NegTenthDegToRad;
-  fsin(fVar2);
-  fcos(fVar1);
-  fsin(fVar1);
-  lVar3 = __ftol();
-  *param_1 = (int)lVar3;
-  lVar3 = __ftol();
-  param_1[1] = (int)lVar3;
-  lVar3 = __ftol();
-  param_1[2] = (int)lVar3;
-  lVar3 = __ftol();
-  param_1[3] = (int)lVar3;
-  lVar3 = __ftol();
-  param_1[4] = (int)lVar3;
-  lVar3 = __ftol();
-  param_1[5] = (int)lVar3;
-  lVar3 = __ftol();
-  param_1[6] = (int)lVar3;
-  lVar3 = __ftol();
-  param_1[7] = (int)lVar3;
-  lVar3 = __ftol();
-  param_1[8] = (int)lVar3;
+  local_f1 = (double)g_LisaCamera->rot_x * (double)g_Const_NegTenthDegToRad;
+  fcos(local_f1);
+  local_f2 = (double)g_LisaCamera->rot_y * (double)g_Const_NegTenthDegToRad;
+  fcos(local_f2);
+  fsin(local_f1);
+  local_f1 = (double)g_LisaCamera->rot_z * (double)g_Const_NegTenthDegToRad;
+  fsin(local_f2);
+  fcos(local_f1);
+  fsin(local_f1);
+  local_l3 = __ftol();
+  *arg_1 = (int)local_l3;
+  local_l3 = __ftol();
+  arg_1[1] = (int)local_l3;
+  local_l3 = __ftol();
+  arg_1[2] = (int)local_l3;
+  local_l3 = __ftol();
+  arg_1[3] = (int)local_l3;
+  local_l3 = __ftol();
+  arg_1[4] = (int)local_l3;
+  local_l3 = __ftol();
+  arg_1[5] = (int)local_l3;
+  local_l3 = __ftol();
+  arg_1[6] = (int)local_l3;
+  local_l3 = __ftol();
+  arg_1[7] = (int)local_l3;
+  local_l3 = __ftol();
+  arg_1[8] = (int)local_l3;
   return;
 }
 
@@ -4324,11 +4324,11 @@ void Lisa_ComputeCameraRotationMatrix(int *param_1) {
  * @fidelity ADAPTED
  */
 void Lisa_InitOpcodeTable(void) {
-  int iVar1;
+  int local_i1;
 
   
 
-  iVar1 = g_LisaCamera;
+  local_i1 = g_LisaCamera;
   g_LisaViewportQuarter = (g_LisaCamera->viewport_width >> 2) + 1;
   g_LisaViewportRemaining = g_LisaCamera->viewport_width - g_LisaViewportQuarter;
 
@@ -4350,7 +4350,7 @@ void Lisa_InitOpcodeTable(void) {
 
     PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15;
     g_LisaCamera->active_draw_cmd = 0;
-    *(int *)(iVar1 + 0x6c) = 0;
+    *(int *)(local_i1 + 0x6c) = 0;
     return;
   }
 
@@ -4377,13 +4377,13 @@ void Lisa_InitOpcodeTable(void) {
   if (g_LisaShadingEnabled == 0) {
     PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15;
     g_LisaCamera->active_draw_cmd = 0;
-    *(int *)(iVar1 + 0x6c) = 0;
+    *(int *)(local_i1 + 0x6c) = 0;
     return;
   }
 
   PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15_Sub;
   g_LisaCamera->active_draw_cmd = 0;
-  *(int *)(iVar1 + 0x6c) = 0;
+  *(int *)(local_i1 + 0x6c) = 0;
   return;
 }
 
@@ -4997,182 +4997,182 @@ void Lisa_DrawBillboard_Op08(void) {
  * @fidelity ADAPTED
  */
 void Lisa_DrawTexturedTriangle_Op15(void) {
-  int iVar1;
-  int iVar2;
-  int iVar3;
-  int iVar4;
-  int *puVar5;
-  int uVar6;
-  int uVar7;
-  int uVar8;
-  int iVar9;
-  int iVar10;
-  int iVar11;
-  int iVar12;
-  int iVar13;
-  int iVar14;
-  int iVar15;
-  int iVar16;
-  int iVar17;
-  int iVar18;
-  int *puVar19;
-  unsigned int uVar20;
-  unsigned int uVar21;
-  int iVar22;
-  int *puVar23;
-  int iVar24;
-  long long lVar25;
+  int local_i1;
+  int local_i2;
+  int local_i3;
+  int local_i4;
+  int *local_pu5;
+  int local_u6;
+  int local_u7;
+  int local_u8;
+  int local_i9;
+  int local_i10;
+  int local_i11;
+  int local_i12;
+  int local_i13;
+  int local_i14;
+  int local_i15;
+  int local_i16;
+  int local_i17;
+  int local_i18;
+  int *local_pu19;
+  unsigned int local_u20;
+  unsigned int local_u21;
+  int local_i22;
+  int *local_pu23;
+  int local_i24;
+  long long local_l25;
 
   
 
-  iVar9 = g_LisaTransformedVertices;
+  local_i9 = g_LisaTransformedVertices;
   g_LisaObjMat_11 = g_LisaTransformedVertices;
 
   do {
-    iVar24 = *(int *)(g_pLisaSubmeshPolygon + 4);
-    iVar22 = iVar24 * 3;
+    local_i24 = *(int *)(g_pLisaSubmeshPolygon + 4);
+    local_i22 = local_i24 * 3;
     g_LisaSubmeshVertexStride = *(int *)(g_pLisaSubmeshPolygon + 8) * 3;
     g_LisaCameraFocalScale = *(int *)(g_pLisaSubmeshPolygon + 0xc) * 3;
-    iVar1 = *(int *)(iVar9 + 4 + iVar24 * 0xc);
-    iVar24 = *(int *)(iVar9 + iVar24 * 0xc);
+    local_i1 = *(int *)(local_i9 + 4 + local_i24 * 0xc);
+    local_i24 = *(int *)(local_i9 + local_i24 * 0xc);
 
-    if ((g_SubpixelMaxY - iVar1 | g_SubpixelMaxX - iVar24 | iVar1 - g_SubpixelMinY | iVar24 - g_SubpixelMinX
+    if ((g_SubpixelMaxY - local_i1 | g_SubpixelMaxX - local_i24 | local_i1 - g_SubpixelMinY | local_i24 - g_SubpixelMinX
 
         ) < 0) {
       do {
-        iVar24 = *(int *)(iVar9 + iVar22 * 4);
-        iVar1 = *(int *)(iVar9 + g_LisaSubmeshVertexStride * 4);
-        g_LisaCameraMatrix_Y = iVar24;
+        local_i24 = *(int *)(local_i9 + local_i22 * 4);
+        local_i1 = *(int *)(local_i9 + g_LisaSubmeshVertexStride * 4);
+        g_LisaCameraMatrix_Y = local_i24;
 
-        if (iVar24 <= iVar1) {
-          g_LisaCameraMatrix_Y = iVar1;
+        if (local_i24 <= local_i1) {
+          g_LisaCameraMatrix_Y = local_i1;
         }
 
-        iVar2 = *(int *)(iVar9 + g_LisaCameraFocalScale * 4);
-        iVar11 = g_LisaCameraMatrix_Y;
+        local_i2 = *(int *)(local_i9 + g_LisaCameraFocalScale * 4);
+        local_i11 = g_LisaCameraMatrix_Y;
 
-        if (g_LisaCameraMatrix_Y <= iVar2) {
-          iVar11 = iVar2;
+        if (g_LisaCameraMatrix_Y <= local_i2) {
+          local_i11 = local_i2;
         }
 
-        if (g_SubpixelMinX <= iVar11) {
-          g_LisaCameraMatrix_Y = iVar24;
+        if (g_SubpixelMinX <= local_i11) {
+          g_LisaCameraMatrix_Y = local_i24;
 
-          if (iVar1 <= iVar24) {
-            g_LisaCameraMatrix_Y = iVar1;
+          if (local_i1 <= local_i24) {
+            g_LisaCameraMatrix_Y = local_i1;
           }
 
-          iVar24 = g_LisaCameraMatrix_Y;
+          local_i24 = g_LisaCameraMatrix_Y;
 
-          if (iVar2 <= g_LisaCameraMatrix_Y) {
-            iVar24 = iVar2;
+          if (local_i2 <= g_LisaCameraMatrix_Y) {
+            local_i24 = local_i2;
           }
 
-          if (iVar24 <= g_SubpixelMaxX) {
-            iVar24 = *(int *)(iVar9 + 4 + iVar22 * 4);
-            iVar1 = *(int *)(iVar9 + 4 + g_LisaSubmeshVertexStride * 4);
-            g_LisaCameraMatrix_Y = iVar24;
+          if (local_i24 <= g_SubpixelMaxX) {
+            local_i24 = *(int *)(local_i9 + 4 + local_i22 * 4);
+            local_i1 = *(int *)(local_i9 + 4 + g_LisaSubmeshVertexStride * 4);
+            g_LisaCameraMatrix_Y = local_i24;
 
-            if (iVar24 <= iVar1) {
-              g_LisaCameraMatrix_Y = iVar1;
+            if (local_i24 <= local_i1) {
+              g_LisaCameraMatrix_Y = local_i1;
             }
 
-            iVar2 = *(int *)(iVar9 + 4 + g_LisaCameraFocalScale * 4);
-            iVar11 = g_LisaCameraMatrix_Y;
+            local_i2 = *(int *)(local_i9 + 4 + g_LisaCameraFocalScale * 4);
+            local_i11 = g_LisaCameraMatrix_Y;
 
-            if (g_LisaCameraMatrix_Y <= iVar2) {
-              iVar11 = iVar2;
+            if (g_LisaCameraMatrix_Y <= local_i2) {
+              local_i11 = local_i2;
             }
 
-            if (g_SubpixelMinY <= iVar11) {
-              g_LisaCameraMatrix_Y = iVar24;
+            if (g_SubpixelMinY <= local_i11) {
+              g_LisaCameraMatrix_Y = local_i24;
 
-              if (iVar1 <= iVar24) {
-                g_LisaCameraMatrix_Y = iVar1;
+              if (local_i1 <= local_i24) {
+                g_LisaCameraMatrix_Y = local_i1;
               }
 
-              iVar24 = g_LisaCameraMatrix_Y;
+              local_i24 = g_LisaCameraMatrix_Y;
 
-              if (iVar2 <= g_LisaCameraMatrix_Y) {
-                iVar24 = iVar2;
+              if (local_i2 <= g_LisaCameraMatrix_Y) {
+                local_i24 = local_i2;
               }
 
-              if (iVar24 <= g_SubpixelMaxY) break;
+              if (local_i24 <= g_SubpixelMaxY) break;
             }
 
           }
 
         }
 
-        iVar24 = g_pLisaSubmeshPolygon + 0x2c;
+        local_i24 = g_pLisaSubmeshPolygon + 0x2c;
 
         if (*(char *)(g_pLisaSubmeshPolygon + 0x2c) != '\x15') {
-          g_LisaObjMat_Tmp6 = iVar22;
-          g_pLisaSubmeshPolygon = iVar24;
+          g_LisaObjMat_Tmp6 = local_i22;
+          g_pLisaSubmeshPolygon = local_i24;
           return;
         }
 
         if (g_LisaSubmeshPolyCount < 3) {
-          g_LisaObjMat_Tmp6 = iVar22;
-          g_pLisaSubmeshPolygon = iVar24;
+          g_LisaObjMat_Tmp6 = local_i22;
+          g_pLisaSubmeshPolygon = local_i24;
           return;
         }
 
         g_LisaSubmeshPolyCount = g_LisaSubmeshPolyCount + -1;
-        iVar22 = *(int *)(g_pLisaSubmeshPolygon + 0x30) * 3;
+        local_i22 = *(int *)(g_pLisaSubmeshPolygon + 0x30) * 3;
         g_LisaCameraFocalScale = *(int *)(g_pLisaSubmeshPolygon + 0x38) * 3;
         g_LisaSubmeshVertexStride = *(int *)(g_pLisaSubmeshPolygon + 0x34) * 3;
-        g_pLisaSubmeshPolygon = iVar24;
+        g_pLisaSubmeshPolygon = local_i24;
       } while( 1 );
     }
 
-    iVar10 = g_pLisaSubmeshPolygon;
-    iVar24 = *(int *)(iVar9 + 4 + g_LisaSubmeshVertexStride * 4);
-    iVar1 = *(int *)(iVar9 + g_LisaCameraFocalScale * 4);
-    iVar2 = *(int *)(iVar9 + g_LisaSubmeshVertexStride * 4);
-    iVar11 = *(int *)(iVar9 + 4 + g_LisaCameraFocalScale * 4);
+    local_i10 = g_pLisaSubmeshPolygon;
+    local_i24 = *(int *)(local_i9 + 4 + g_LisaSubmeshVertexStride * 4);
+    local_i1 = *(int *)(local_i9 + g_LisaCameraFocalScale * 4);
+    local_i2 = *(int *)(local_i9 + g_LisaSubmeshVertexStride * 4);
+    local_i11 = *(int *)(local_i9 + 4 + g_LisaCameraFocalScale * 4);
 
-    g_LisaSubmeshCenterWorldY = ((iVar24 >> 4) - (*(int *)(iVar9 + 4 + iVar22 * 4) >> 4)) *
+    g_LisaSubmeshCenterWorldY = ((local_i24 >> 4) - (*(int *)(local_i9 + 4 + local_i22 * 4) >> 4)) *
 
-                   ((iVar1 >> 4) - (iVar2 >> 4)) +
+                   ((local_i1 >> 4) - (local_i2 >> 4)) +
 
-                   ((iVar11 >> 4) - (iVar24 >> 4)) *
+                   ((local_i11 >> 4) - (local_i24 >> 4)) *
 
-                   ((*(int *)(iVar9 + iVar22 * 4) >> 4) - (iVar2 >> 4)) ^ g_LisaBackfaceSign;
-    iVar3 = *(int *)(iVar9 + 8 + g_LisaCameraFocalScale * 4);
-    iVar4 = *(int *)(iVar9 + 8 + g_LisaSubmeshVertexStride * 4);
-    iVar12 = iVar3 + iVar4 + *(int *)(iVar9 + 8 + iVar22 * 4);
-    g_LisaObjMat_Tmp6 = iVar22;
+                   ((*(int *)(local_i9 + local_i22 * 4) >> 4) - (local_i2 >> 4)) ^ g_LisaBackfaceSign;
+    local_i3 = *(int *)(local_i9 + 8 + g_LisaCameraFocalScale * 4);
+    local_i4 = *(int *)(local_i9 + 8 + g_LisaSubmeshVertexStride * 4);
+    local_i12 = local_i3 + local_i4 + *(int *)(local_i9 + 8 + local_i22 * 4);
+    g_LisaObjMat_Tmp6 = local_i22;
 
-    if ((600 < iVar12) && (0 < (int)g_LisaSubmeshCenterWorldY)) {
-      g_LisaCameraMatrix_X = iVar12 >> 4;
-      puVar5 = (int *)*g_pLisaDrawCommandWritePtr;
+    if ((600 < local_i12) && (0 < (int)g_LisaSubmeshCenterWorldY)) {
+      g_LisaCameraMatrix_X = local_i12 >> 4;
+      local_pu5 = (int *)*g_pLisaDrawCommandWritePtr;
 
       if (g_LisaShadingEnabled == 1) {
-        iVar17 = *(int *)(iVar9 + iVar22 * 4) >> 8;
-        iVar13 = *(int *)(iVar9 + 4 + iVar22 * 4) >> 8;
+        local_i17 = *(int *)(local_i9 + local_i22 * 4) >> 8;
+        local_i13 = *(int *)(local_i9 + 4 + local_i22 * 4) >> 8;
 
-        iVar13 = (((iVar24 >> 8) + iVar13) * ((iVar2 >> 8) - iVar17) +
+        local_i13 = (((local_i24 >> 8) + local_i13) * ((local_i2 >> 8) - local_i17) +
 
-                  ((iVar11 >> 8) + iVar13) * (iVar17 - (iVar1 >> 8)) +
+                  ((local_i11 >> 8) + local_i13) * (local_i17 - (local_i1 >> 8)) +
 
-                 ((iVar24 >> 8) + (iVar11 >> 8)) * ((iVar1 >> 8) - (iVar2 >> 8))) * 3;
-        uVar20 = iVar13 >> 0x1f;
-        g_LisaActiveLightingMode = (iVar13 >> 1 ^ uVar20) - uVar20;
-        iVar13 = *(int *)(g_pLisaSubmeshPolygon + 0x24) >> 8;
-        iVar17 = *(int *)(g_pLisaSubmeshPolygon + 0x14) >> 8;
-        iVar18 = *(int *)(g_pLisaSubmeshPolygon + 0x20) >> 8;
-        iVar14 = *(int *)(g_pLisaSubmeshPolygon + 0x10) >> 8;
-        iVar15 = *(int *)(g_pLisaSubmeshPolygon + 0x1c) >> 8;
-        iVar16 = *(int *)(g_pLisaSubmeshPolygon + 0x18) >> 8;
+                 ((local_i24 >> 8) + (local_i11 >> 8)) * ((local_i1 >> 8) - (local_i2 >> 8))) * 3;
+        local_u20 = local_i13 >> 0x1f;
+        g_LisaActiveLightingMode = (local_i13 >> 1 ^ local_u20) - local_u20;
+        local_i13 = *(int *)(g_pLisaSubmeshPolygon + 0x24) >> 8;
+        local_i17 = *(int *)(g_pLisaSubmeshPolygon + 0x14) >> 8;
+        local_i18 = *(int *)(g_pLisaSubmeshPolygon + 0x20) >> 8;
+        local_i14 = *(int *)(g_pLisaSubmeshPolygon + 0x10) >> 8;
+        local_i15 = *(int *)(g_pLisaSubmeshPolygon + 0x1c) >> 8;
+        local_i16 = *(int *)(g_pLisaSubmeshPolygon + 0x18) >> 8;
 
-        uVar20 = (iVar15 + iVar17) * (iVar16 - iVar14) +
+        local_u20 = (local_i15 + local_i17) * (local_i16 - local_i14) +
 
-                 (iVar17 + iVar13) * (iVar14 - iVar18) + (iVar15 + iVar13) * (iVar18 - iVar16);
-        uVar21 = (int)uVar20 >> 0x1f;
-        iVar13 = (uVar20 ^ uVar21) - uVar21;
-        if (iVar13 < g_LisaActiveLightingMode) goto LAB_0044d8ef;
-        g_LisaSubmeshBoundRadius = (g_LisaActiveLightingMode * 4 <= iVar13) - 4;
+                 (local_i17 + local_i13) * (local_i14 - local_i18) + (local_i15 + local_i13) * (local_i18 - local_i16);
+        local_u21 = (int)local_u20 >> 0x1f;
+        local_i13 = (local_u20 ^ local_u21) - local_u21;
+        if (local_i13 < g_LisaActiveLightingMode) goto LAB_0044d8ef;
+        g_LisaSubmeshBoundRadius = (g_LisaActiveLightingMode * 4 <= local_i13) - 4;
       }
 
       else {
@@ -5188,86 +5188,86 @@ LAB_0044d8ef:
          (((99 < g_LisaObjMat_20 && (g_LisaObjMat_20 != 200)) &&
 
           ((g_LisaObjMat_20 < 300 || (0x12e < g_LisaObjMat_20)))))) {
-        uVar6 = *(int *)(iVar9 + iVar22 * 4);
-        uVar7 = *(int *)(iVar9 + 4 + iVar22 * 4);
-        g_LisaSubmeshTmp5 = puVar5;
-        *puVar5 = 0x11;
-        puVar5[1] = uVar6;
-        puVar5[2] = uVar7;
-        puVar5[3] = iVar2;
-        iVar22 = g_pLisaActiveMipTable;
-        puVar5[4] = iVar24;
-        puVar5[5] = iVar1;
-        iVar24 = g_LisaSubmeshBoundRadius;
-        puVar5[6] = iVar11;
-        puVar5[7] = g_pLisaSubmeshPolygon + 0x10;
-        puVar19 = g_pLisaDrawCommandWritePtr;
-        puVar23 = puVar5 + 9;
-        puVar5[8] = *(int *)(iVar22 + iVar24 * 4) + *(int *)(g_pLisaSubmeshPolygon + 0x28);
+        local_u6 = *(int *)(local_i9 + local_i22 * 4);
+        local_u7 = *(int *)(local_i9 + 4 + local_i22 * 4);
+        g_LisaSubmeshTmp5 = local_pu5;
+        *local_pu5 = 0x11;
+        local_pu5[1] = local_u6;
+        local_pu5[2] = local_u7;
+        local_pu5[3] = local_i2;
+        local_i22 = g_pLisaActiveMipTable;
+        local_pu5[4] = local_i24;
+        local_pu5[5] = local_i1;
+        local_i24 = g_LisaSubmeshBoundRadius;
+        local_pu5[6] = local_i11;
+        local_pu5[7] = g_pLisaSubmeshPolygon + 0x10;
+        local_pu19 = g_pLisaDrawCommandWritePtr;
+        local_pu23 = local_pu5 + 9;
+        local_pu5[8] = *(int *)(local_i22 + local_i24 * 4) + *(int *)(g_pLisaSubmeshPolygon + 0x28);
       }
 
       else {
         if (g_LisaCameraMatrix_X < 0x1e1) {
-          puVar5[4] = *(int *)(iVar9 + 8 + iVar22 * 4);
-          puVar5[7] = iVar4;
-          puVar5[10] = iVar3;
+          local_pu5[4] = *(int *)(local_i9 + 8 + local_i22 * 4);
+          local_pu5[7] = local_i4;
+          local_pu5[10] = local_i3;
         }
 
         else {
-          g_LisaSubmeshFlags = iVar12 / 3;
+          g_LisaSubmeshFlags = local_i12 / 3;
           g_LisaSubmeshTmp4 = (float)(0x2d0 - g_LisaCameraMatrix_X) * g_Const_512;
-          lVar25 = __ftol();
-          puVar5[4] = (int)lVar25 + g_LisaSubmeshFlags;
-          lVar25 = __ftol();
-          puVar5[7] = (int)lVar25 + g_LisaSubmeshFlags;
-          g_LisaSubmeshTmp1 = iVar3;
-          lVar25 = __ftol();
-          puVar5[10] = (int)lVar25 + g_LisaSubmeshFlags;
+          local_l25 = __ftol();
+          local_pu5[4] = (int)local_l25 + g_LisaSubmeshFlags;
+          local_l25 = __ftol();
+          local_pu5[7] = (int)local_l25 + g_LisaSubmeshFlags;
+          g_LisaSubmeshTmp1 = local_i3;
+          local_l25 = __ftol();
+          local_pu5[10] = (int)local_l25 + g_LisaSubmeshFlags;
         }
 
-        uVar6 = *(int *)(iVar9 + iVar22 * 4);
-        uVar7 = *(int *)(iVar9 + 4 + iVar22 * 4);
-        g_LisaSubmeshTmp5 = puVar5;
-        *puVar5 = 0x14;
-        puVar5[2] = uVar6;
-        puVar5[3] = uVar7;
-        puVar5[5] = iVar2;
-        puVar5[6] = iVar24;
-        uVar6 = *(int *)(iVar10 + 0x10);
-        puVar5[8] = iVar1;
-        uVar7 = *(int *)(iVar10 + 0x14);
-        puVar5[9] = iVar11;
-        uVar8 = *(int *)(iVar10 + 0x18);
-        puVar5[0xb] = uVar6;
-        uVar6 = *(int *)(iVar10 + 0x1c);
-        puVar5[0xc] = uVar7;
-        uVar7 = *(int *)(iVar10 + 0x20);
-        puVar5[0xd] = uVar8;
-        uVar8 = *(int *)(iVar10 + 0x24);
-        puVar5[0xe] = uVar6;
-        puVar5[0xf] = uVar7;
-        puVar5[0x10] = uVar8;
-        puVar19 = g_pLisaDrawCommandWritePtr;
-        puVar23 = puVar5 + 0x11;
-        puVar5[1] = *(int *)(g_pLisaActiveMipTable + g_LisaSubmeshBoundRadius * 4) + *(int *)(iVar10 + 0x28);
+        local_u6 = *(int *)(local_i9 + local_i22 * 4);
+        local_u7 = *(int *)(local_i9 + 4 + local_i22 * 4);
+        g_LisaSubmeshTmp5 = local_pu5;
+        *local_pu5 = 0x14;
+        local_pu5[2] = local_u6;
+        local_pu5[3] = local_u7;
+        local_pu5[5] = local_i2;
+        local_pu5[6] = local_i24;
+        local_u6 = *(int *)(local_i10 + 0x10);
+        local_pu5[8] = local_i1;
+        local_u7 = *(int *)(local_i10 + 0x14);
+        local_pu5[9] = local_i11;
+        local_u8 = *(int *)(local_i10 + 0x18);
+        local_pu5[0xb] = local_u6;
+        local_u6 = *(int *)(local_i10 + 0x1c);
+        local_pu5[0xc] = local_u7;
+        local_u7 = *(int *)(local_i10 + 0x20);
+        local_pu5[0xd] = local_u8;
+        local_u8 = *(int *)(local_i10 + 0x24);
+        local_pu5[0xe] = local_u6;
+        local_pu5[0xf] = local_u7;
+        local_pu5[0x10] = local_u8;
+        local_pu19 = g_pLisaDrawCommandWritePtr;
+        local_pu23 = local_pu5 + 0x11;
+        local_pu5[1] = *(int *)(g_pLisaActiveMipTable + g_LisaSubmeshBoundRadius * 4) + *(int *)(local_i10 + 0x28);
       }
 
-      iVar24 = g_pLisaActiveSubmesh;
+      local_i24 = g_pLisaActiveSubmesh;
       g_LisaCameraMatrix_X = g_LisaCameraMatrix_X + -0x50;
-      puVar19[2] = puVar23;
-      iVar1 = g_pLisaDepthBuckets;
-      puVar5 = g_pLisaDrawCommandWritePtr;
+      local_pu19[2] = local_pu23;
+      local_i1 = g_pLisaDepthBuckets;
+      local_pu5 = g_pLisaDrawCommandWritePtr;
 
-      if (99 < *(short *)(iVar24 + 0x1e)) {
-        if (*(short *)(iVar24 + 0x1e) == 0xd2) {
-          iVar24 = -0x54;
+      if (99 < *(short *)(local_i24 + 0x1e)) {
+        if (*(short *)(local_i24 + 0x1e) == 0xd2) {
+          local_i24 = -0x54;
         }
 
         else {
-          iVar24 = -0x5c;
+          local_i24 = -0x5c;
         }
 
-        g_LisaCameraMatrix_X = g_LisaCameraMatrix_X + iVar24;
+        g_LisaCameraMatrix_X = g_LisaCameraMatrix_X + local_i24;
       }
 
       if (g_LisaCameraMatrix_X < 0) {
@@ -5278,16 +5278,16 @@ LAB_0044d8ef:
         g_LisaCameraMatrix_X = 5999;
       }
 
-      iVar24 = g_LisaCameraMatrix_X;
-      puVar23 = g_pLisaDrawCommandWritePtr + 1;
-      g_pLisaDrawCommandWritePtr = puVar19 + 2;
-      *puVar23 = *(int *)(g_pLisaDepthBuckets + g_LisaCameraMatrix_X * 4);
-      *(int **)(iVar1 + iVar24 * 4) = puVar5;
+      local_i24 = g_LisaCameraMatrix_X;
+      local_pu23 = g_pLisaDrawCommandWritePtr + 1;
+      g_pLisaDrawCommandWritePtr = local_pu19 + 2;
+      *local_pu23 = *(int *)(g_pLisaDepthBuckets + g_LisaCameraMatrix_X * 4);
+      *(int **)(local_i1 + local_i24 * 4) = local_pu5;
     }
 
-    g_pLisaSubmeshPolygon = iVar10 + 0x2c;
+    g_pLisaSubmeshPolygon = local_i10 + 0x2c;
 
-    if ((*(char *)(iVar10 + 0x2c) != '\x15') || (g_LisaSubmeshPolyCount < 3)) {
+    if ((*(char *)(local_i10 + 0x2c) != '\x15') || (g_LisaSubmeshPolyCount < 3)) {
       return;
     }
 
@@ -5300,187 +5300,187 @@ LAB_0044d8ef:
  * @fidelity ADAPTED
  */
 void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
-  char *pcVar1;
+  char *local_pc1;
   short sVar2;
-  int iVar3;
-  int iVar4;
-  int iVar5;
-  int *puVar6;
-  int uVar7;
-  int uVar8;
-  int uVar9;
-  int *piVar10;
-  int iVar11;
-  int iVar12;
-  int iVar13;
-  int iVar14;
-  int iVar15;
-  int iVar16;
-  int iVar17;
-  int iVar18;
-  int iVar19;
-  unsigned int uVar20;
-  int iVar21;
-  unsigned int uVar22;
-  int iVar23;
-  int *puVar24;
-  int iVar25;
-  int iVar26;
-  int *puVar27;
-  long long lVar28;
+  int local_i3;
+  int local_i4;
+  int local_i5;
+  int *local_pu6;
+  int local_u7;
+  int local_u8;
+  int local_u9;
+  int *local_pi10;
+  int local_i11;
+  int local_i12;
+  int local_i13;
+  int local_i14;
+  int local_i15;
+  int local_i16;
+  int local_i17;
+  int local_i18;
+  int local_i19;
+  unsigned int local_u20;
+  int local_i21;
+  unsigned int local_u22;
+  int local_i23;
+  int *local_pu24;
+  int local_i25;
+  int local_i26;
+  int *local_pu27;
+  long long local_l28;
 
   
 
-  iVar11 = g_LisaTransformedVertices;
+  local_i11 = g_LisaTransformedVertices;
   g_LisaObjMat_01 = g_LisaTransformedVertices;
-  iVar19 = g_LisaSubmeshPolyCount;
+  local_i19 = g_LisaSubmeshPolyCount;
 
   do {
-    g_LisaSubmeshPolyCount = iVar19;
-    iVar19 = *(int *)(g_pLisaSubmeshPolygon + 4);
-    iVar25 = iVar19 * 3;
+    g_LisaSubmeshPolyCount = local_i19;
+    local_i19 = *(int *)(g_pLisaSubmeshPolygon + 4);
+    local_i25 = local_i19 * 3;
     g_LisaFrustumPlaneBottom = *(int *)(g_pLisaSubmeshPolygon + 8) * 3;
     g_LisaSubmeshPolyStride = *(int *)(g_pLisaSubmeshPolygon + 0xc) * 3;
-    iVar23 = *(int *)(iVar11 + 4 + iVar19 * 0xc);
-    iVar19 = *(int *)(iVar11 + iVar19 * 0xc);
+    local_i23 = *(int *)(local_i11 + 4 + local_i19 * 0xc);
+    local_i19 = *(int *)(local_i11 + local_i19 * 0xc);
 
-    if ((g_SubpixelMaxY - iVar23 | g_SubpixelMaxX - iVar19 | iVar23 - g_SubpixelMinY |
+    if ((g_SubpixelMaxY - local_i23 | g_SubpixelMaxX - local_i19 | local_i23 - g_SubpixelMinY |
 
-        iVar19 - g_SubpixelMinX) < 0) {
+        local_i19 - g_SubpixelMinX) < 0) {
       do {
-        iVar4 = g_pLisaSubmeshPolygon;
-        iVar19 = *(int *)(iVar11 + iVar25 * 4);
-        iVar23 = *(int *)(iVar11 + g_LisaFrustumPlaneBottom * 4);
-        g_LisaCameraMatrix_Z = iVar23;
+        local_i4 = g_pLisaSubmeshPolygon;
+        local_i19 = *(int *)(local_i11 + local_i25 * 4);
+        local_i23 = *(int *)(local_i11 + g_LisaFrustumPlaneBottom * 4);
+        g_LisaCameraMatrix_Z = local_i23;
 
-        if (iVar23 <= iVar19) {
-          g_LisaCameraMatrix_Z = iVar19;
+        if (local_i23 <= local_i19) {
+          g_LisaCameraMatrix_Z = local_i19;
         }
 
-        iVar3 = *(int *)(iVar11 + g_LisaSubmeshPolyStride * 4);
-        iVar26 = g_LisaCameraMatrix_Z;
+        local_i3 = *(int *)(local_i11 + g_LisaSubmeshPolyStride * 4);
+        local_i26 = g_LisaCameraMatrix_Z;
 
-        if (g_LisaCameraMatrix_Z <= iVar3) {
-          iVar26 = iVar3;
+        if (g_LisaCameraMatrix_Z <= local_i3) {
+          local_i26 = local_i3;
         }
 
-        if (g_SubpixelMinX <= iVar26) {
-          g_LisaCameraMatrix_Z = iVar23;
+        if (g_SubpixelMinX <= local_i26) {
+          g_LisaCameraMatrix_Z = local_i23;
 
-          if (iVar19 <= iVar23) {
-            g_LisaCameraMatrix_Z = iVar19;
+          if (local_i19 <= local_i23) {
+            g_LisaCameraMatrix_Z = local_i19;
           }
 
-          iVar19 = g_LisaCameraMatrix_Z;
+          local_i19 = g_LisaCameraMatrix_Z;
 
-          if (iVar3 <= g_LisaCameraMatrix_Z) {
-            iVar19 = iVar3;
+          if (local_i3 <= g_LisaCameraMatrix_Z) {
+            local_i19 = local_i3;
           }
 
-          if (iVar19 <= g_SubpixelMaxX) {
-            iVar19 = *(int *)(iVar11 + 4 + g_LisaFrustumPlaneBottom * 4);
-            iVar23 = *(int *)(iVar11 + 4 + iVar25 * 4);
-            g_LisaCameraMatrix_Z = iVar19;
+          if (local_i19 <= g_SubpixelMaxX) {
+            local_i19 = *(int *)(local_i11 + 4 + g_LisaFrustumPlaneBottom * 4);
+            local_i23 = *(int *)(local_i11 + 4 + local_i25 * 4);
+            g_LisaCameraMatrix_Z = local_i19;
 
-            if (iVar19 <= iVar23) {
-              g_LisaCameraMatrix_Z = iVar23;
+            if (local_i19 <= local_i23) {
+              g_LisaCameraMatrix_Z = local_i23;
             }
 
-            iVar3 = *(int *)(iVar11 + 4 + g_LisaSubmeshPolyStride * 4);
-            iVar26 = g_LisaCameraMatrix_Z;
+            local_i3 = *(int *)(local_i11 + 4 + g_LisaSubmeshPolyStride * 4);
+            local_i26 = g_LisaCameraMatrix_Z;
 
-            if (g_LisaCameraMatrix_Z <= iVar3) {
-              iVar26 = iVar3;
+            if (g_LisaCameraMatrix_Z <= local_i3) {
+              local_i26 = local_i3;
             }
 
-            if (g_SubpixelMinY <= iVar26) {
-              g_LisaCameraMatrix_Z = iVar19;
+            if (g_SubpixelMinY <= local_i26) {
+              g_LisaCameraMatrix_Z = local_i19;
 
-              if (iVar23 <= iVar19) {
-                g_LisaCameraMatrix_Z = iVar23;
+              if (local_i23 <= local_i19) {
+                g_LisaCameraMatrix_Z = local_i23;
               }
 
-              iVar19 = g_LisaCameraMatrix_Z;
+              local_i19 = g_LisaCameraMatrix_Z;
 
-              if (iVar3 <= g_LisaCameraMatrix_Z) {
-                iVar19 = iVar3;
+              if (local_i3 <= g_LisaCameraMatrix_Z) {
+                local_i19 = local_i3;
               }
 
-              if (iVar19 <= g_SubpixelMaxY) break;
+              if (local_i19 <= g_SubpixelMaxY) break;
             }
 
           }
 
         }
 
-        g_LisaObjMat_12 = iVar25;
-        pcVar1 = (char *)(g_pLisaSubmeshPolygon + 0x2c);
+        g_LisaObjMat_12 = local_i25;
+        local_pc1 = (char *)(g_pLisaSubmeshPolygon + 0x2c);
         g_pLisaSubmeshPolygon = g_pLisaSubmeshPolygon + 0x2c;
 
-        if ((*pcVar1 != '\x11') || (g_LisaSubmeshPolyCount + -1 < 1)) {
+        if ((*local_pc1 != '\x11') || (g_LisaSubmeshPolyCount + -1 < 1)) {
           return;
         }
 
-        iVar25 = *(int *)(iVar4 + 0x30) * 3;
-        g_LisaFrustumPlaneBottom = *(int *)(iVar4 + 0x34) * 3;
-        g_LisaSubmeshPolyStride = *(int *)(iVar4 + 0x38) * 3;
+        local_i25 = *(int *)(local_i4 + 0x30) * 3;
+        g_LisaFrustumPlaneBottom = *(int *)(local_i4 + 0x34) * 3;
+        g_LisaSubmeshPolyStride = *(int *)(local_i4 + 0x38) * 3;
         g_LisaSubmeshPolyCount = g_LisaSubmeshPolyCount + -1;
       } while( 1 );
     }
 
-    iVar12 = g_pLisaSubmeshPolygon;
-    iVar19 = *(int *)(iVar11 + 4 + g_LisaSubmeshPolyStride * 4);
-    iVar23 = *(int *)(iVar11 + 4 + g_LisaFrustumPlaneBottom * 4);
-    iVar4 = *(int *)(iVar11 + g_LisaFrustumPlaneBottom * 4);
-    iVar3 = *(int *)(iVar11 + g_LisaSubmeshPolyStride * 4);
+    local_i12 = g_pLisaSubmeshPolygon;
+    local_i19 = *(int *)(local_i11 + 4 + g_LisaSubmeshPolyStride * 4);
+    local_i23 = *(int *)(local_i11 + 4 + g_LisaFrustumPlaneBottom * 4);
+    local_i4 = *(int *)(local_i11 + g_LisaFrustumPlaneBottom * 4);
+    local_i3 = *(int *)(local_i11 + g_LisaSubmeshPolyStride * 4);
 
     g_LisaObjMat_00 =
 
-         ((iVar19 >> 4) - (iVar23 >> 4)) * ((*(int *)(iVar11 + iVar25 * 4) >> 4) - (iVar4 >> 4)) +
+         ((local_i19 >> 4) - (local_i23 >> 4)) * ((*(int *)(local_i11 + local_i25 * 4) >> 4) - (local_i4 >> 4)) +
 
-         ((iVar23 >> 4) - (*(int *)(iVar11 + 4 + iVar25 * 4) >> 4)) * ((iVar3 >> 4) - (iVar4 >> 4))
+         ((local_i23 >> 4) - (*(int *)(local_i11 + 4 + local_i25 * 4) >> 4)) * ((local_i3 >> 4) - (local_i4 >> 4))
 
          ^ g_LisaBackfaceSign;
-    iVar26 = *(int *)(iVar11 + 8 + g_LisaFrustumPlaneBottom * 4);
-    iVar5 = *(int *)(iVar11 + 8 + g_LisaSubmeshPolyStride * 4);
-    iVar13 = iVar26 + iVar5 + *(int *)(iVar11 + 8 + iVar25 * 4);
-    g_LisaObjMat_12 = iVar25;
+    local_i26 = *(int *)(local_i11 + 8 + g_LisaFrustumPlaneBottom * 4);
+    local_i5 = *(int *)(local_i11 + 8 + g_LisaSubmeshPolyStride * 4);
+    local_i13 = local_i26 + local_i5 + *(int *)(local_i11 + 8 + local_i25 * 4);
+    g_LisaObjMat_12 = local_i25;
 
-    if ((600 < iVar13) && (0 < (int)g_LisaObjMat_00)) {
-      g_LisaSubmeshVertexCount = iVar13 >> 4;
-      puVar6 = (int *)*g_pLisaDrawCommandWritePtr;
+    if ((600 < local_i13) && (0 < (int)g_LisaObjMat_00)) {
+      g_LisaSubmeshVertexCount = local_i13 >> 4;
+      local_pu6 = (int *)*g_pLisaDrawCommandWritePtr;
 
       if (g_LisaShadingEnabled == 1) {
-        iVar14 = *(int *)(iVar11 + 4 + iVar25 * 4) >> 8;
-        iVar15 = *(int *)(iVar11 + iVar25 * 4) >> 8;
+        local_i14 = *(int *)(local_i11 + 4 + local_i25 * 4) >> 8;
+        local_i15 = *(int *)(local_i11 + local_i25 * 4) >> 8;
 
-        iVar14 = (((iVar19 >> 8) + (iVar23 >> 8)) * ((iVar3 >> 8) - (iVar4 >> 8)) +
+        local_i14 = (((local_i19 >> 8) + (local_i23 >> 8)) * ((local_i3 >> 8) - (local_i4 >> 8)) +
 
-                  (iVar14 + (iVar23 >> 8)) * ((iVar4 >> 8) - iVar15) +
+                  (local_i14 + (local_i23 >> 8)) * ((local_i4 >> 8) - local_i15) +
 
-                 (iVar14 + (iVar19 >> 8)) * (iVar15 - (iVar3 >> 8))) * 3;
-        uVar20 = iVar14 >> 0x1f;
-        g_LisaCameraRoll = (iVar14 >> 1 ^ uVar20) - uVar20;
-        iVar14 = *(int *)(g_pLisaSubmeshPolygon + 0x24) >> 8;
-        iVar15 = *(int *)(g_pLisaSubmeshPolygon + 0x14) >> 8;
-        iVar18 = *(int *)(g_pLisaSubmeshPolygon + 0x20) >> 8;
-        iVar16 = *(int *)(g_pLisaSubmeshPolygon + 0x10) >> 8;
-        iVar17 = *(int *)(g_pLisaSubmeshPolygon + 0x1c) >> 8;
-        iVar21 = *(int *)(g_pLisaSubmeshPolygon + 0x18) >> 8;
+                 (local_i14 + (local_i19 >> 8)) * (local_i15 - (local_i3 >> 8))) * 3;
+        local_u20 = local_i14 >> 0x1f;
+        g_LisaCameraRoll = (local_i14 >> 1 ^ local_u20) - local_u20;
+        local_i14 = *(int *)(g_pLisaSubmeshPolygon + 0x24) >> 8;
+        local_i15 = *(int *)(g_pLisaSubmeshPolygon + 0x14) >> 8;
+        local_i18 = *(int *)(g_pLisaSubmeshPolygon + 0x20) >> 8;
+        local_i16 = *(int *)(g_pLisaSubmeshPolygon + 0x10) >> 8;
+        local_i17 = *(int *)(g_pLisaSubmeshPolygon + 0x1c) >> 8;
+        local_i21 = *(int *)(g_pLisaSubmeshPolygon + 0x18) >> 8;
 
-        uVar20 = (iVar14 + iVar15) * (iVar16 - iVar18) + (iVar14 + iVar17) * (iVar18 - iVar21) +
+        local_u20 = (local_i14 + local_i15) * (local_i16 - local_i18) + (local_i14 + local_i17) * (local_i18 - local_i21) +
 
-                 (iVar17 + iVar15) * (iVar21 - iVar16);
-        uVar22 = (int)uVar20 >> 0x1f;
-        iVar14 = (uVar20 ^ uVar22) - uVar22;
+                 (local_i17 + local_i15) * (local_i21 - local_i16);
+        local_u22 = (int)local_u20 >> 0x1f;
+        local_i14 = (local_u20 ^ local_u22) - local_u22;
 
-        if (iVar14 < g_LisaCameraRoll) {
+        if (local_i14 < g_LisaCameraRoll) {
           g_LisaCameraYaw = -5;
         }
 
         else {
-          if (iVar14 < g_LisaCameraRoll * 4) goto LAB_0044ecb6;
-          g_LisaCameraYaw = (g_LisaCameraRoll * 0x10 <= iVar14) - 3;
+          if (local_i14 < g_LisaCameraRoll * 4) goto LAB_0044ecb6;
+          g_LisaCameraYaw = (g_LisaCameraRoll * 0x10 <= local_i14) - 3;
         }
 
       }
@@ -5500,124 +5500,124 @@ LAB_0044ecb6:
 
           ((299 < g_LisaObjMat_SinYaw && (g_LisaObjMat_SinYaw < 0x12f)))))) {
         if (g_LisaSubmeshVertexCount < 0x1e1) {
-          puVar6[4] = *(int *)(iVar11 + 8 + iVar25 * 4);
-          puVar6[7] = iVar26;
-          puVar6[10] = iVar5;
+          local_pu6[4] = *(int *)(local_i11 + 8 + local_i25 * 4);
+          local_pu6[7] = local_i26;
+          local_pu6[10] = local_i5;
         }
 
         else {
-          g_LisaCurrentVertexIndex = iVar13 / 3;
+          g_LisaCurrentVertexIndex = local_i13 / 3;
           g_LisaSubmeshTmp3 = (float)(0x2d0 - g_LisaSubmeshVertexCount) * g_Const_512;
-          lVar28 = __ftol();
-          puVar6[4] = (int)lVar28 + g_LisaCurrentVertexIndex;
-          lVar28 = __ftol();
-          puVar6[7] = (int)lVar28 + g_LisaCurrentVertexIndex;
-          g_LisaObjMat_10 = iVar5;
-          lVar28 = __ftol();
-          puVar6[10] = (int)lVar28 + g_LisaCurrentVertexIndex;
+          local_l28 = __ftol();
+          local_pu6[4] = (int)local_l28 + g_LisaCurrentVertexIndex;
+          local_l28 = __ftol();
+          local_pu6[7] = (int)local_l28 + g_LisaCurrentVertexIndex;
+          g_LisaObjMat_10 = local_i5;
+          local_l28 = __ftol();
+          local_pu6[10] = (int)local_l28 + g_LisaCurrentVertexIndex;
         }
 
-        uVar7 = *(int *)(iVar11 + iVar25 * 4);
-        uVar8 = *(int *)(iVar11 + 4 + iVar25 * 4);
-        *puVar6 = 0x14;
-        puVar6[2] = uVar7;
-        puVar6[3] = uVar8;
-        iVar25 = g_LisaCameraYaw;
-        puVar6[5] = iVar4;
-        puVar6[6] = iVar23;
-        puVar6[8] = iVar3;
-        puVar6[9] = iVar19;
+        local_u7 = *(int *)(local_i11 + local_i25 * 4);
+        local_u8 = *(int *)(local_i11 + 4 + local_i25 * 4);
+        *local_pu6 = 0x14;
+        local_pu6[2] = local_u7;
+        local_pu6[3] = local_u8;
+        local_i25 = g_LisaCameraYaw;
+        local_pu6[5] = local_i4;
+        local_pu6[6] = local_i23;
+        local_pu6[8] = local_i3;
+        local_pu6[9] = local_i19;
 
-        if ((iVar25 == -5) && (g_pLisaActiveMipTable[-5] != *g_pLisaActiveMipTable)) {
-          uVar20 = *(unsigned int *)(iVar12 + 0x10);
-          uVar22 = *(unsigned int *)(iVar12 + 0x14);
-          puVar6[0xb] = (uVar20 & 0x3fff) << 2;
-          puVar6[0xc] = (uVar22 & 0x3fff) << 2;
-          puVar6[0xd] = (*(unsigned int *)(iVar12 + 0x18) & 0x3fff) << 2;
-          puVar6[0xe] = (*(unsigned int *)(iVar12 + 0x1c) & 0x3fff) << 2;
-          iVar19 = (int)uVar20 >> 0xe;
-          puVar6[0xf] = (*(unsigned int *)(iVar12 + 0x20) & 0x3fff) << 2;
-          g_LisaObjMat_02 = (int)uVar22 >> 0xe;
-          iVar23 = g_LisaObjMat_02 * 0x4000;
-          g_LisaSubmeshTmp2 = iVar19;
-          puVar6[0x10] = (*(unsigned int *)(iVar12 + 0x24) & 0x3fff) << 2;
-          iVar19 = g_pLisaActiveMipTable[iVar19 * 4] + (*(int *)(iVar12 + 0x28) + iVar23) * 4;
+        if ((local_i25 == -5) && (g_pLisaActiveMipTable[-5] != *g_pLisaActiveMipTable)) {
+          local_u20 = *(unsigned int *)(local_i12 + 0x10);
+          local_u22 = *(unsigned int *)(local_i12 + 0x14);
+          local_pu6[0xb] = (local_u20 & 0x3fff) << 2;
+          local_pu6[0xc] = (local_u22 & 0x3fff) << 2;
+          local_pu6[0xd] = (*(unsigned int *)(local_i12 + 0x18) & 0x3fff) << 2;
+          local_pu6[0xe] = (*(unsigned int *)(local_i12 + 0x1c) & 0x3fff) << 2;
+          local_i19 = (int)local_u20 >> 0xe;
+          local_pu6[0xf] = (*(unsigned int *)(local_i12 + 0x20) & 0x3fff) << 2;
+          g_LisaObjMat_02 = (int)local_u22 >> 0xe;
+          local_i23 = g_LisaObjMat_02 * 0x4000;
+          g_LisaSubmeshTmp2 = local_i19;
+          local_pu6[0x10] = (*(unsigned int *)(local_i12 + 0x24) & 0x3fff) << 2;
+          local_i19 = g_pLisaActiveMipTable[local_i19 * 4] + (*(int *)(local_i12 + 0x28) + local_i23) * 4;
         }
 
         else {
-          uVar7 = *(int *)(iVar12 + 0x14);
-          uVar8 = *(int *)(iVar12 + 0x18);
-          puVar6[0xb] = *(int *)(iVar12 + 0x10);
-          uVar9 = *(int *)(iVar12 + 0x1c);
-          puVar6[0xc] = uVar7;
-          piVar10 = g_pLisaActiveMipTable;
-          uVar7 = *(int *)(iVar12 + 0x20);
-          puVar6[0xd] = uVar8;
-          puVar6[0xe] = uVar9;
-          iVar19 = g_LisaCameraYaw;
-          uVar8 = *(int *)(iVar12 + 0x24);
-          puVar6[0xf] = uVar7;
-          puVar6[0x10] = uVar8;
-          iVar19 = piVar10[iVar19] + *(int *)(iVar12 + 0x28);
+          local_u7 = *(int *)(local_i12 + 0x14);
+          local_u8 = *(int *)(local_i12 + 0x18);
+          local_pu6[0xb] = *(int *)(local_i12 + 0x10);
+          local_u9 = *(int *)(local_i12 + 0x1c);
+          local_pu6[0xc] = local_u7;
+          local_pi10 = g_pLisaActiveMipTable;
+          local_u7 = *(int *)(local_i12 + 0x20);
+          local_pu6[0xd] = local_u8;
+          local_pu6[0xe] = local_u9;
+          local_i19 = g_LisaCameraYaw;
+          local_u8 = *(int *)(local_i12 + 0x24);
+          local_pu6[0xf] = local_u7;
+          local_pu6[0x10] = local_u8;
+          local_i19 = local_pi10[local_i19] + *(int *)(local_i12 + 0x28);
         }
 
-        puVar24 = g_pLisaDrawCommandWritePtr;
-        puVar6[1] = iVar19;
-        puVar27 = puVar6 + 0x11;
+        local_pu24 = g_pLisaDrawCommandWritePtr;
+        local_pu6[1] = local_i19;
+        local_pu27 = local_pu6 + 0x11;
       }
 
       else {
-        uVar7 = *(int *)(iVar11 + 4 + iVar25 * 4);
-        puVar6[1] = *(int *)(iVar11 + iVar25 * 4);
-        puVar6[2] = uVar7;
-        puVar6[3] = iVar4;
-        iVar25 = g_LisaCameraYaw;
-        puVar6[4] = iVar23;
-        puVar6[5] = iVar3;
-        puVar6[6] = iVar19;
-        puVar6[7] = (int *)(g_pLisaSubmeshPolygon + 0x10);
-        iVar19 = g_LisaCameraYaw;
-        piVar10 = g_pLisaActiveMipTable;
+        local_u7 = *(int *)(local_i11 + 4 + local_i25 * 4);
+        local_pu6[1] = *(int *)(local_i11 + local_i25 * 4);
+        local_pu6[2] = local_u7;
+        local_pu6[3] = local_i4;
+        local_i25 = g_LisaCameraYaw;
+        local_pu6[4] = local_i23;
+        local_pu6[5] = local_i3;
+        local_pu6[6] = local_i19;
+        local_pu6[7] = (int *)(g_pLisaSubmeshPolygon + 0x10);
+        local_i19 = g_LisaCameraYaw;
+        local_pi10 = g_pLisaActiveMipTable;
 
-        if ((iVar25 == -5) && (g_pLisaActiveMipTable[-5] != *g_pLisaActiveMipTable)) {
+        if ((local_i25 == -5) && (g_pLisaActiveMipTable[-5] != *g_pLisaActiveMipTable)) {
           g_LisaSubmeshTmp2 = *(int *)(g_pLisaSubmeshPolygon + 0x10);
-          *puVar6 = 0x16;
+          *local_pu6 = 0x16;
           g_LisaSubmeshTmp2 = g_LisaSubmeshTmp2 >> 0xe;
           g_LisaObjMat_02 = *(int *)(g_pLisaSubmeshPolygon + 0x14) >> 0xe;
 
-          puVar6[8] = piVar10[g_LisaSubmeshTmp2 * 4] +
+          local_pu6[8] = local_pi10[g_LisaSubmeshTmp2 * 4] +
 
                       (*(int *)(g_pLisaSubmeshPolygon + 0x28) + g_LisaObjMat_02 * 0x4000) * 4;
         }
 
         else {
-          iVar23 = *(int *)(g_pLisaSubmeshPolygon + 0x28);
-          *puVar6 = 0x11;
-          puVar6[8] = piVar10[iVar19] + iVar23;
+          local_i23 = *(int *)(g_pLisaSubmeshPolygon + 0x28);
+          *local_pu6 = 0x11;
+          local_pu6[8] = local_pi10[local_i19] + local_i23;
         }
 
-        puVar27 = puVar6 + 9;
-        puVar24 = g_pLisaDrawCommandWritePtr;
+        local_pu27 = local_pu6 + 9;
+        local_pu24 = g_pLisaDrawCommandWritePtr;
       }
 
-      g_LisaSubmeshTmp6 = puVar6;
-      puVar24[2] = puVar27;
-      iVar19 = g_pLisaDepthBuckets;
-      puVar6 = g_pLisaDrawCommandWritePtr;
-      iVar23 = g_LisaSubmeshVertexCount + -0x50;
+      g_LisaSubmeshTmp6 = local_pu6;
+      local_pu24[2] = local_pu27;
+      local_i19 = g_pLisaDepthBuckets;
+      local_pu6 = g_pLisaDrawCommandWritePtr;
+      local_i23 = g_LisaSubmeshVertexCount + -0x50;
 
       if (99 < sVar2) {
         if (sVar2 == 0xd2) {
-          iVar23 = g_LisaSubmeshVertexCount + -0xa4;
+          local_i23 = g_LisaSubmeshVertexCount + -0xa4;
         }
 
         else {
-          iVar23 = g_LisaSubmeshVertexCount + -0xac;
+          local_i23 = g_LisaSubmeshVertexCount + -0xac;
         }
 
       }
 
-      g_LisaSubmeshVertexCount = iVar23;
+      g_LisaSubmeshVertexCount = local_i23;
 
       if (g_LisaSubmeshVertexCount < 0) {
         g_LisaSubmeshVertexCount = 0;
@@ -5627,16 +5627,16 @@ LAB_0044ecb6:
         g_LisaSubmeshVertexCount = 5999;
       }
 
-      iVar23 = g_LisaSubmeshVertexCount;
-      puVar27 = g_pLisaDrawCommandWritePtr + 1;
-      g_pLisaDrawCommandWritePtr = puVar24 + 2;
-      *puVar27 = *(int *)(g_pLisaDepthBuckets + g_LisaSubmeshVertexCount * 4);
-      *(int **)(iVar19 + iVar23 * 4) = puVar6;
+      local_i23 = g_LisaSubmeshVertexCount;
+      local_pu27 = g_pLisaDrawCommandWritePtr + 1;
+      g_pLisaDrawCommandWritePtr = local_pu24 + 2;
+      *local_pu27 = *(int *)(g_pLisaDepthBuckets + g_LisaSubmeshVertexCount * 4);
+      *(int **)(local_i19 + local_i23 * 4) = local_pu6;
     }
 
-    g_pLisaSubmeshPolygon = iVar12 + 0x2c;
+    g_pLisaSubmeshPolygon = local_i12 + 0x2c;
 
-    if ((*(char *)(iVar12 + 0x2c) != '\x11') || (iVar19 = g_LisaSubmeshPolyCount + -1, g_LisaSubmeshPolyCount + -1 < 1))
+    if ((*(char *)(local_i12 + 0x2c) != '\x11') || (local_i19 = g_LisaSubmeshPolyCount + -1, g_LisaSubmeshPolyCount + -1 < 1))
 
     {
       return;
@@ -5649,57 +5649,57 @@ LAB_0044ecb6:
  * @original Lisa_InitRasterizerTables (IGN_WIN.EXE @ 0x0044f070, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long Lisa_InitRasterizerTables(int param_1,unsigned int param_2) {
+long long Lisa_InitRasterizerTables(int arg_1,unsigned int arg_2) {
   int in_EAX;
   short sVar1;
   int unaff_EBX;
-  unsigned int uVar2;
-  int iVar3;
+  unsigned int local_u2;
+  int local_i3;
   int unaff_ESI;
-  int *piVar4;
+  int *local_pi4;
   char **ppuVar5;
 
   
 
   if ((in_EAX < 0x579) && (unaff_EBX < 0x259)) {
-    piVar4 = &g_LisaActiveTextureID;
-    uVar2 = 1;
+    local_pi4 = &g_LisaActiveTextureID;
+    local_u2 = 1;
     g_LisaScanlinePitch = in_EAX;
     g_LisaAspectScale = unaff_EBX;
 
     do {
-      *piVar4 = (int)(0x10000 / (unsigned long long)uVar2) + -1;
-      piVar4 = piVar4 + 1;
-      uVar2 = uVar2 + 1;
-    } while (uVar2 != 0x3a9b);
+      *local_pi4 = (int)(0x10000 / (unsigned long long)local_u2) + -1;
+      local_pi4 = local_pi4 + 1;
+      local_u2 = local_u2 + 1;
+    } while (local_u2 != 0x3a9b);
 
     for (ppuVar5 = (char **)PTR_FUN_004abe6c; *ppuVar5 != (char *)0x0; ppuVar5 = ppuVar5 + 1) {
       (*(void (*)())*ppuVar5)(ppuVar5,unaff_ESI,unaff_EBX);
     }
 
-    piVar4 = &g_LisaScreenPitch;
-    iVar3 = 0;
+    local_pi4 = &g_LisaScreenPitch;
+    local_i3 = 0;
     sVar1 = 600;
 
     do {
-      *piVar4 = iVar3;
-      piVar4 = piVar4 + 1;
-      iVar3 = iVar3 + in_EAX;
+      *local_pi4 = local_i3;
+      local_pi4 = local_pi4 + 1;
+      local_i3 = local_i3 + in_EAX;
       sVar1 = sVar1 + -1;
     } while (sVar1 != 0);
-    return (unsigned long long)param_2 << 0x20;
+    return (unsigned long long)arg_2 << 0x20;
   }
 
-  return (((long long)(param_2) << 32) | ((unsigned int)(0xffffffff)));
+  return (((long long)(arg_2) << 32) | ((unsigned int)(0xffffffff)));
 }
 
 /**
  * @original Lisa_ExecuteRasterizerCommands (IGN_WIN.EXE @ 0x0044f0e9, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long Lisa_ExecuteRasterizerCommands(int param_1,unsigned int param_2) {
+long long Lisa_ExecuteRasterizerCommands(int arg_1,unsigned int arg_2) {
   int *unaff_ESI;
-  long long lVar1;
+  long long local_l1;
 
   
 
@@ -5726,9 +5726,9 @@ long long Lisa_ExecuteRasterizerCommands(int param_1,unsigned int param_2) {
   g_pLisaEdgeBuffer = (int *)*g_pLisaSpanBuffer;
 
   if (g_pLisaEdgeBuffer != (int *)0x0) {
-    lVar1 = (*(long long (*)())(((void **)PTR_DAT_004abe10)[*g_pLisaEdgeBuffer]))();
-    return lVar1;
+    local_l1 = (*(long long (*)())(((void **)PTR_DAT_004abe10)[*g_pLisaEdgeBuffer]))();
+    return local_l1;
   }
 
-  return (unsigned long long)param_2 << 0x20;
+  return (unsigned long long)arg_2 << 0x20;
 }
