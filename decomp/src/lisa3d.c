@@ -47,7 +47,7 @@ int32_t g_LisaMipmapTable[16] = {0};
 
 /**
  * @original Lisa_PrintVersion (IGN_WIN.EXE @ 0x0045b4f0, lisa3d.c)
- * @fidelity EXACT
+ * @fidelity ADAPTED
  * @notes Prints Lisa 2 Development System version and UDS copyright header.
  */
 int Lisa_PrintVersion(void) {
@@ -58,7 +58,7 @@ int Lisa_PrintVersion(void) {
 
 /**
  * @original Cdp_OpenFile (IGN_WIN.EXE @ 0x00412580, lisa3d.c)
- * @fidelity EXACT
+ * @fidelity ADAPTED
  * @notes Validates CDP header magic "CDP\0", version 100, parses dimensions,
  *        frame count, and binds 768-byte embedded palette and frame stream offsets.
  */
@@ -94,7 +94,7 @@ int Cdp_OpenFile(CdpFile *cdp) {
 
 /**
  * @original Cdp_DecompressRLE (IGN_WIN.EXE @ 0x00499abc, lisa3d.c)
- * @fidelity EXACT
+ * @fidelity ADAPTED
  * @notes Delta-skip RLE decompression decoding skip commands (0xF7-0xFC),
  *        repeat runs (0xFD, 0xFE), end of frame (0xFF), and raw pixel literals.
  */
@@ -172,7 +172,7 @@ int Cdp_DecompressRLE(CdpFile *cdp, unsigned int unused) {
 
 /**
  * @original Cdp_DecodeFrame (IGN_WIN.EXE @ 0x00412610, lisa3d.c)
- * @fidelity EXACT
+ * @fidelity ADAPTED
  * @notes Advances animation stream and triggers inter-frame delta decompression.
  */
 int Cdp_DecodeFrame(CdpFile *cdp) {
@@ -230,7 +230,7 @@ void Lisa_RenderPanorama(void) {
 
 /**
  * @original Lisa_DrawTexturedTriangle_Op11_Unshaded (IGN_WIN.EXE @ 0x0044dc60, lisa3d.c)
- * @fidelity EXACT
+ * @fidelity ADAPTED
  * @notes MAINDOS @ 0x0004d718. Processes Opcode 0x11 (textured triangle, unshaded, 44-byte packet)
  *        from display list: screen viewport clipping, 2D backface culling, depth calculation,
  *        area-based mipmap selection, and linked-list insertion into 0..5999 depth buckets.
@@ -364,7 +364,7 @@ void Lisa_DrawTexturedTriangle_Op11_Unshaded(void) {
 
 /**
  * @original Lisa_DrawTexturedTriangle_Op11_Shaded (IGN_WIN.EXE @ 0x0044e1b0, lisa3d.c)
- * @fidelity EXACT
+ * @fidelity ADAPTED
  * @notes Processes Opcode 0x11 (textured triangle with Gouraud shading, 56-byte packet)
  *        from display list: screen boundary clipping, 2D backface culling, depth calculation,
  *        area-based mipmap selection, and linked-list insertion into 0..5999 depth buckets with vertex colors.
@@ -502,11 +502,11 @@ int Lisa_RenderScene(void);
 int * Lisa_InitEngineMemory(void);
 void Lisa_FreeEngineMemory(void);
 int Lisa_InitSpatialGrid(int grid_w, int grid_h, size_t max_objects);
-long long Lisa_CreateDynamicObject(int unk1, int unk2, int *entity, int *mesh, int flags, short rot_x, short rot_y, short rot_z, short scale);
-int Lisa_MoveDynamicObject(int *entity);
-int Lisa_UpdateObjectSpatialGrid(int *entity);
-long long Lisa_SetDynamicObjectMesh(int unk1, int unk2, int *entity, int *mesh, int flags, short rot_x, short rot_y, short rot_z, short scale);
-int Lisa_DeleteDynamicObject(int *entity);
+long long Lisa_CreateDynamicObject(int param_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9);
+int Lisa_MoveDynamicObject(LisaEntityTransform *entity);
+int Lisa_UpdateObjectSpatialGrid(LisaEntityTransform *entity);
+long long Lisa_SetDynamicObjectMesh(int param_1, int param_2, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9);
+int Lisa_DeleteDynamicObject(LisaEntityTransform *entity);
 unsigned long long Lisa_SetCameraViewport(void);
 int Lisa_GenerateMipmaps(unsigned int *texture_data, int width, int height, int page_w, int page_h, int mip_count, int flag1, int flag2, char *name);
 void Lisa_GenerateTextureSpanTable(int src_w, int src_h, int dst_w, int dst_h, int *span_table);
@@ -539,11 +539,15 @@ long long Lisa_ExecuteRasterizerCommands(int mode, unsigned int flags);
 
 /* --- Automatically extracted globals for Lisa 3D rendering pipeline --- */
 
+extern LisaDynamicObject **g_ppLisaNextFreeObject;
+extern int g_LisaTexture_Base;
+extern int g_LisaGridCellsX;
+extern LisaDynamicObject **g_pLisaFreeObjectsArray;
 extern int *g_pLisaSubmeshPolygon;
 extern int *g_pLisaDrawCommandWritePtr;
 extern int *g_pLisaActiveMipTable;
 extern int *g_LisaDrawCommandBuffer;
-extern int *g_pLisaActiveDrawQueue;
+/* extern int *g_ppLisaNextFreeObject; */
 extern void *g_LisaOpcodeTable[];
 extern void *PTR_DAT_004abe10[];
 extern void *PTR_FUN_004abe6c[];
@@ -623,7 +627,7 @@ extern int g_LisaSubmeshCenterWorldY;
 extern int g_LisaSubmeshCenterWorldZ;
 extern int g_LisaCameraFocalLength;
 extern int g_LisaSubmeshDepthOffset;
-extern int g_LisaActiveSubmeshIndex;
+extern LisaDynamicObject **g_pLisaGridCells;
 extern int g_pActiveSHD;
 extern int g_LisaActiveShdSize;
 extern int g_LisaActiveTabSize;
@@ -632,19 +636,19 @@ extern int g_LisaTexturePageSizes;
 extern int g_pLisaTexturePageTable1;
 extern int g_pLisaTexturePageTable2;
 extern int g_LisaActivePageCount;
-extern int g_LisaActiveTextureCount;
+extern int g_LisaGridCellsX;
 extern int g_LisaDrawCommands;
-extern int g_LisaActiveTextureBase;
+/* g_pLisaFreeObjectsArray declared earlier */
 extern int g_LisaVisibleObjects;
-extern int g_pLisaAllocatedBuffers;
+extern void **g_pLisaAllocatedBuffers;
 extern int g_LisaAllocatedBufferCount;
 extern int g_pLisaAllocatedBuffersEnd;
-extern int g_LisaAllocatedBufferMax;
+extern void *g_LisaAllocatedBufferMax;
 extern int g_LisaTransformedVertices;
 extern int g_LisaVisibleSubmeshes;
 extern int g_pLisaDrawCommandTail;
-extern int g_LisaTotalDrawCommands;
-extern int g_LisaDrawQueueOverflow;
+extern int g_LisaGridWorldWidth;
+extern int g_LisaGridWorldHeight;
 extern double g_Const_0_1;
 extern double g_Const_DegToRad;
 extern double g_Const_TenthDegToRad;
@@ -1031,171 +1035,143 @@ void Lisa_FreeEngineMemory(void) {
  * @original Lisa_InitSpatialGrid (IGN_WIN.EXE @ 0x00446ca0, lisa3d.c)
  * @fidelity ADAPTED
  */
-int Lisa_InitSpatialGrid(int param_1,int param_2,size_t param_3) {
-  int *puVar1;
-  int iVar2;
-  void *pvVar3;
-  int *puVar4;
-  int iVar5;
-  size_t sVar6;
-  int bVar7;
+int Lisa_InitSpatialGrid(int grid_w, int grid_h, size_t max_objects) {
+  int *next_free;
+  void *allocated_array;
+  int i;
+  int old_buffer_count;
 
+  g_LisaGridWorldWidth = grid_w;
+  g_LisaGridWorldHeight = grid_h;
   
+  g_LisaGridCellsX = ((grid_w + 0xff) >> 8);
 
-  g_LisaTotalDrawCommands = param_1;
-  g_LisaDrawQueueOverflow = param_2;
-  g_LisaActiveTextureCount = (int)(param_1 + 0xff + (param_1 + 0xff >> 0x1f & 0xffU)) >> 8;
+  g_pLisaGridCells = (LisaDynamicObject **)calloc(((grid_h + 0xff) >> 8) * g_LisaGridCellsX, 4);
+  
+  g_pLisaFreeObjectsArray = (LisaDynamicObject **)calloc(max_objects + 5, 4);
+  allocated_array = calloc(max_objects, sizeof(LisaDynamicObject));
+  
+  old_buffer_count = g_LisaAllocatedBufferCount;
+  
+  g_ppLisaNextFreeObject = g_pLisaFreeObjectsArray;
+  
+  g_LisaAllocatedBufferCount = old_buffer_count + 3;
+  g_LisaAllocatedBufferMax = allocated_array;
+  
+  /* Register allocations to be freed later */
+  g_pLisaAllocatedBuffers[old_buffer_count] = g_pLisaGridCells;
+  g_pLisaAllocatedBuffers[old_buffer_count + 1] = g_pLisaFreeObjectsArray;
+  g_pLisaAllocatedBuffers[old_buffer_count + 2] = allocated_array;
 
-  g_LisaActiveSubmeshIndex = calloc(((int)(param_2 + 0xff + (param_2 + 0xff >> 0x1f & 0xffU)) >> 8) *
+  if (g_pLisaGridCells != NULL && allocated_array != NULL && g_pLisaFreeObjectsArray != NULL) {
+    next_free = (int *)g_pLisaFreeObjectsArray;
 
-                         g_LisaActiveTextureCount,4);
-  g_LisaActiveTextureBase = calloc(param_3 + 5,4);
-  pvVar3 = calloc(param_3,0x2a);
-  iVar2 = g_pLisaAllocatedBuffers;
-  puVar1 = g_LisaActiveTextureBase;
-  iVar5 = g_LisaAllocatedBufferCount + 3;
-  g_pLisaActiveDrawQueue = g_LisaActiveTextureBase;
-  bVar7 = g_LisaActiveSubmeshIndex != (void *)0x0;
-  g_LisaAllocatedBufferCount = iVar5;
-  g_LisaAllocatedBufferMax = pvVar3;
-  *(void **)(g_pLisaAllocatedBuffers + -0xc + iVar5 * 4) = g_LisaActiveSubmeshIndex;
-  *(int **)(iVar2 + -8 + iVar5 * 4) = puVar1;
-  *(void **)(iVar2 + -4 + iVar5 * 4) = pvVar3;
-
-  if (((bVar7) && (pvVar3 != (void *)0x0)) && (puVar1 != (int *)0x0)) {
-    puVar4 = puVar1;
-    sVar6 = param_3;
-
-    if (0 < (int)param_3) {
-      do {
-        *puVar4 = pvVar3;
-        pvVar3 = (void *)((int)pvVar3 + 0x2a);
-        sVar6 = sVar6 - 1;
-        puVar4 = puVar4 + 1;
-      } while (sVar6 != 0);
+    if ((int)max_objects > 0) {
+      for (i = 0; i < (int)max_objects; i++) {
+        *next_free = (int)allocated_array;
+        allocated_array = (void *)((int)allocated_array + sizeof(LisaDynamicObject));
+        next_free++;
+      }
     }
 
-    puVar1[param_3] = 0xffffffff;
+    g_pLisaFreeObjectsArray[max_objects] = (LisaDynamicObject *)0xffffffff;
     return 0;
   }
 
-  return 0xffffffff;
+  return -1;
 }
 
 /**
  * @original Lisa_CreateDynamicObject (IGN_WIN.EXE @ 0x00446d90, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long Lisa_CreateDynamicObject(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9) {
-  int iVar1;
-  int iVar2;
-  int iVar3;
-  int iVar4;
-  unsigned int uVar5;
-  unsigned int uVar6;
-  unsigned int uVar7;
-  unsigned int *puVar8;
-  long long lVar9;
-  int local_8;
-  int local_4;
+long long Lisa_CreateDynamicObject(int param_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9) {
+  LisaDynamicObject *obj;
+  int max_dist;
+  int i;
+  int *vertices;
+  float fx, fy, fz;
+  float dist;
 
-  
+  obj = *g_ppLisaNextFreeObject;
 
-  iVar1 = *g_pLisaActiveDrawQueue;
-
-  if (iVar1 == -1) {
-    return (((long long)(param_2) << 32) | ((unsigned int)(0xffffffff)));
+  if (obj == (LisaDynamicObject *)0xffffffff) {
+    return (((long long)(object_id) << 32) | 0xffffffff);
   }
 
-  g_pLisaActiveDrawQueue = g_pLisaActiveDrawQueue + 1;
-  *(int *)(iVar1 + 8) = param_5;
-  *(int *)iVar1 = iVar1;
-  *(int **)(iVar1 + 4) = param_4;
-  iVar2 = param_3[2];
-  iVar3 = param_3[3];
-  *(int *)(iVar1 + 0xc) = param_3[1];
-  iVar4 = param_3[4];
-  *(int *)(iVar1 + 0x10) = iVar2;
-  *(short *)(iVar1 + 0x18) = (short)iVar4;
-  iVar2 = param_3[5];
-  *(int *)(iVar1 + 0x14) = iVar3;
-  *(short *)(iVar1 + 0x1a) = (short)iVar2;
-  *(short *)(iVar1 + 0x1c) = (short)param_3[6];
-  *(short *)(iVar1 + 0x1e) = param_6;
-  *param_3 = iVar1;
-  *(short *)(iVar1 + 0x20) = param_7;
-  uVar5 = 0;
-  *(short *)(iVar1 + 0x22) = param_8;
-  *(int *)(iVar1 + 0x26) = 0;
-  *(short *)(iVar1 + 0x24) = param_9;
-  param_3[7] = 0;
+  g_ppLisaNextFreeObject++;
+  
+  obj->self_ptr = obj;
+  obj->mesh_data = mesh;
+  obj->unknown_08 = param_5;
+  obj->pos_x = entity->pos_x;
+  obj->pos_y = entity->pos_y;
+  obj->pos_z = entity->pos_z;
+  obj->rot_x = (short)entity->rot_x;
+  obj->rot_y = (short)entity->rot_y;
+  obj->rot_z = (short)entity->rot_z;
+  obj->unknown_1e = param_6;
+  obj->unknown_20 = param_7;
+  obj->unknown_22 = base_elevation;
+  obj->unknown_24 = param_9;
+  obj->next_in_cell = NULL;
 
-  if (param_8 == -1) {
-    local_8 = -1000;
-    local_4 = *param_4;
+  entity->dyn_obj = obj;
+  entity->in_grid = 0;
 
-    if (0 < local_4) {
-      puVar8 = (unsigned int *)(param_4 + 2);
+  if (base_elevation == -1) {
+    max_dist = -1000;
+    
+    if (mesh->vertex_count > 0) {
+      vertices = (int *)((char *)mesh + 8);
 
-      do {
-        uVar6 = (int)*puVar8 >> 0x1f;
-        uVar7 = (int)puVar8[1] >> 0x1f;
-        uVar5 = (int)puVar8[2] >> 0x1f;
+      for (i = 0; i < mesh->vertex_count; i++) {
+        /* If manhattan distance > max_dist, we check actual euclidean distance */
+        if (max_dist < abs(vertices[0]) + abs(vertices[1]) + abs(vertices[2])) {
+          fx = (float)vertices[0];
+          fy = (float)vertices[1];
+          fz = (float)vertices[2];
+          dist = (float)sqrt(fx*fx + fy*fy + fz*fz);
 
-        if (local_8 < (int)((((((*puVar8 ^ uVar6) - uVar6) - uVar7) + (puVar8[1] ^ uVar7)) - uVar5)
-
-                           + (puVar8[2] ^ uVar5))) {
-          lVar9 = __ftol();
-          uVar5 = (unsigned int)((unsigned long long)lVar9 >> 0x20);
-
-          if (local_8 < (int)lVar9) {
-            local_8 = (int)lVar9;
+          if (max_dist < (int)dist) {
+            max_dist = (int)dist;
           }
-
         }
-
-        puVar8 = puVar8 + 3;
-        local_4 = local_4 + -1;
-      } while (local_4 != 0);
+        vertices += 3;
+      }
     }
 
-    *(short *)(iVar1 + 0x22) = (short)local_8;
+    obj->unknown_22 = (short)max_dist;
   }
 
-  return (unsigned long long)uVar5 << 0x20;
+  return 0;
 }
 
 /**
  * @original Lisa_MoveDynamicObject (IGN_WIN.EXE @ 0x00446eb0, lisa3d.c)
  * @fidelity ADAPTED
  */
-int Lisa_MoveDynamicObject(int *param_1) {
-  int iVar1;
-  int iVar2;
-  int iVar3;
-  int iVar4;
+int Lisa_MoveDynamicObject(LisaEntityTransform *entity) {
+  LisaDynamicObject *obj;
+  int cell_index;
 
-  
+  if (entity->in_grid != 1) {
+    obj = entity->dyn_obj;
+    
+    obj->pos_x = entity->pos_x;
+    obj->pos_y = entity->pos_y;
+    obj->pos_z = entity->pos_z;
+    
+    obj->rot_x = (short)entity->rot_x;
+    obj->rot_y = (short)entity->rot_y;
+    obj->rot_z = (short)entity->rot_z;
 
-  if (param_1[7] != 1) {
-    iVar1 = *param_1;
-    iVar4 = param_1[1];
-    iVar2 = param_1[2];
-    *(short *)(iVar1 + 0x18) = (short)param_1[4];
-    *(short *)(iVar1 + 0x1a) = (short)param_1[5];
-    *(short *)(iVar1 + 0x1c) = (short)param_1[6];
-    *(int *)(iVar1 + 0xc) = iVar4;
-    *(int *)(iVar1 + 0x10) = iVar2;
-    iVar2 = param_1[3];
-    *(int *)(iVar1 + 0x14) = iVar2;
-    iVar3 = g_LisaActiveSubmeshIndex;
-
-    iVar4 = ((int)(iVar2 + (iVar2 >> 0x1f & 0xffU)) >> 8) * g_LisaActiveTextureCount +
-
-            ((int)(iVar4 + (iVar4 >> 0x1f & 0xffU)) >> 8);
-    param_1[7] = 1;
-    *(int *)(iVar1 + 0x26) = *(int *)(iVar3 + iVar4 * 4);
-    *(int *)(iVar3 + iVar4 * 4) = iVar1;
+    cell_index = (obj->pos_z >> 8) * g_LisaGridCellsX + (obj->pos_x >> 8);
+    
+    entity->in_grid = 1;
+    
+    obj->next_in_cell = g_pLisaGridCells[cell_index];
+    g_pLisaGridCells[cell_index] = obj;
   }
 
   return 0;
@@ -1205,175 +1181,138 @@ int Lisa_MoveDynamicObject(int *param_1) {
  * @original Lisa_UpdateObjectSpatialGrid (IGN_WIN.EXE @ 0x00446f30, lisa3d.c)
  * @fidelity ADAPTED
  */
-int Lisa_UpdateObjectSpatialGrid(int *param_1) {
-  int *piVar1;
-  int iVar2;
-  int iVar3;
-  int iVar4;
-  int iVar5;
-  int iVar6;
-  int iVar7;
-  int iVar8;
+int Lisa_UpdateObjectSpatialGrid(LisaEntityTransform *entity) {
+  LisaDynamicObject *obj;
+  LisaDynamicObject *curr;
+  int old_cell_x, old_cell_z;
+  int new_cell_x, new_cell_z;
+  int old_cell_index, new_cell_index;
 
-  
+  obj = entity->dyn_obj;
+  old_cell_x = obj->pos_x;
+  old_cell_z = obj->pos_z;
 
-  iVar2 = *param_1;
-  iVar7 = param_1[1];
-  iVar8 = *(int *)(iVar2 + 0xc);
-  iVar3 = *(int *)(iVar2 + 0x14);
+  if (entity->pos_x >= 0 && entity->pos_z >= 0 && 
+      entity->pos_x <= g_LisaGridWorldWidth && 
+      entity->pos_z <= g_LisaGridWorldHeight) {
+    
+    obj->pos_x = entity->pos_x;
+    obj->pos_y = entity->pos_y;
+    obj->pos_z = entity->pos_z;
+    obj->rot_x = (short)entity->rot_x;
+    obj->rot_y = (short)entity->rot_y;
+    obj->rot_z = (short)entity->rot_z;
 
-  if ((((-1 < iVar7) && (iVar4 = param_1[3], -1 < iVar4)) && (iVar7 <= g_LisaTotalDrawCommands)) &&
+    if (entity->in_grid == 1) {
+      old_cell_x = old_cell_x >> 8;
+      old_cell_z = old_cell_z >> 8;
+      new_cell_x = obj->pos_x >> 8;
+      new_cell_z = obj->pos_z >> 8;
 
-     (iVar4 <= g_LisaDrawQueueOverflow)) {
-    iVar5 = param_1[2];
-    *(int *)(iVar2 + 0xc) = iVar7;
-    *(int *)(iVar2 + 0x10) = iVar5;
-    *(int *)(iVar2 + 0x14) = iVar4;
-    *(short *)(iVar2 + 0x18) = (short)param_1[4];
-    *(short *)(iVar2 + 0x1a) = (short)param_1[5];
-    *(short *)(iVar2 + 0x1c) = (short)param_1[6];
-    iVar6 = g_LisaActiveTextureCount;
-    iVar5 = g_LisaActiveSubmeshIndex;
+      if (old_cell_x != new_cell_x || old_cell_z != new_cell_z) {
+        old_cell_index = old_cell_z * g_LisaGridCellsX + old_cell_x;
+        curr = g_pLisaGridCells[old_cell_index];
 
-    if (param_1[7] == 1) {
-      iVar7 = (int)(iVar7 + (iVar7 >> 0x1f & 0xffU)) >> 8;
-      iVar8 = (int)(iVar8 + (iVar8 >> 0x1f & 0xffU)) >> 8;
-
-      if ((iVar7 != iVar8) ||
-
-         ((int)(iVar4 + (iVar4 >> 0x1f & 0xffU)) >> 8 != (int)(iVar3 + (iVar3 >> 0x1f & 0xffU)) >> 8
-
-         )) {
-        iVar8 = ((int)(iVar3 + (iVar3 >> 0x1f & 0xffU)) >> 8) * g_LisaActiveTextureCount + iVar8;
-        iVar3 = *(int *)(g_LisaActiveSubmeshIndex + iVar8 * 4);
-
-        if (iVar3 == iVar2) {
-          *(int *)(g_LisaActiveSubmeshIndex + iVar8 * 4) = *(int *)(iVar2 + 0x26);
-        }
-
-        else {
-          iVar8 = *(int *)(iVar3 + 0x26);
-
-          while (iVar8 != iVar2) {
-            iVar3 = *(int *)(iVar3 + 0x26);
-            iVar8 = *(int *)(iVar3 + 0x26);
+        if (curr == obj) {
+          g_pLisaGridCells[old_cell_index] = obj->next_in_cell;
+        } else {
+          while (curr != NULL && curr->next_in_cell != obj) {
+            curr = curr->next_in_cell;
           }
-
-          *(int *)(iVar3 + 0x26) = *(int *)(iVar2 + 0x26);
+          if (curr != NULL) {
+            curr->next_in_cell = obj->next_in_cell;
+          }
         }
 
-        piVar1 = (int *)(iVar5 + (((int)(iVar4 + (iVar4 >> 0x1f & 0xffU)) >> 8) * iVar6 + iVar7) * 4
-
-                        );
-        *(int *)(iVar2 + 0x26) = *piVar1;
-        *piVar1 = iVar2;
+        new_cell_index = new_cell_z * g_LisaGridCellsX + new_cell_x;
+        obj->next_in_cell = g_pLisaGridCells[new_cell_index];
+        g_pLisaGridCells[new_cell_index] = obj;
       }
-
     }
-
     return 0;
   }
 
-  return 0xffffffff;
+  return -1;
 }
 
 /**
  * @original Lisa_SetDynamicObjectMesh (IGN_WIN.EXE @ 0x00447070, lisa3d.c)
  * @fidelity ADAPTED
  */
-long long Lisa_SetDynamicObjectMesh(int param_1,int param_2,int *param_3,int *param_4,int param_5, short param_6,short param_7,short param_8,short param_9) {
-  int iVar1;
-  unsigned int uVar2;
-  unsigned int uVar3;
-  unsigned int uVar4;
-  unsigned int *puVar5;
-  long long lVar6;
-  int local_8;
-  int local_4;
+long long Lisa_SetDynamicObjectMesh(int param_1, int param_2, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9) {
+  LisaDynamicObject *obj;
+  int max_dist;
+  int i;
+  int *vertices;
+  float fx, fy, fz;
+  float dist;
+  unsigned int ret_val;
 
+  obj = entity->dyn_obj;
   
+  obj->unknown_1e = param_6;
+  obj->unknown_22 = base_elevation;
+  obj->mesh_data = mesh;
+  obj->unknown_08 = param_5;
+  obj->unknown_20 = param_7;
+  obj->unknown_24 = param_9;
+  
+  ret_val = ((unsigned int)param_2 >> 16) | ((unsigned int)base_elevation << 16);
 
-  iVar1 = *param_3;
-  *(short *)(iVar1 + 0x1e) = param_6;
-  uVar4 = CONCAT22((short)((unsigned int)param_2 >> 0x10),param_8);
-  *(short *)(iVar1 + 0x22) = param_8;
-  *(int **)(iVar1 + 4) = param_4;
-  *(int *)(iVar1 + 8) = param_5;
-  *(short *)(iVar1 + 0x20) = param_7;
-  *(short *)(iVar1 + 0x24) = param_9;
+  if (base_elevation == -1) {
+    max_dist = -1000;
+    
+    if (mesh->vertex_count > 0) {
+      vertices = (int *)((char *)mesh + 8);
 
-  if (param_8 == -1) {
-    local_8 = -1000;
-    local_4 = *param_4;
+      for (i = 0; i < mesh->vertex_count; i++) {
+        if (max_dist < abs(vertices[0]) + abs(vertices[1]) + abs(vertices[2])) {
+          fx = (float)vertices[0];
+          fy = (float)vertices[1];
+          fz = (float)vertices[2];
+          dist = (float)sqrt(fx*fx + fy*fy + fz*fz);
 
-    if (0 < local_4) {
-      puVar5 = (unsigned int *)(param_4 + 2);
-
-      do {
-        uVar2 = (int)*puVar5 >> 0x1f;
-        uVar3 = (int)puVar5[1] >> 0x1f;
-        uVar4 = (int)puVar5[2] >> 0x1f;
-
-        if (local_8 < (int)((((((*puVar5 ^ uVar2) - uVar2) - uVar3) + (puVar5[1] ^ uVar3)) - uVar4)
-
-                           + (puVar5[2] ^ uVar4))) {
-          lVar6 = __ftol();
-          uVar4 = (unsigned int)((unsigned long long)lVar6 >> 0x20);
-
-          if (local_8 < (int)lVar6) {
-            local_8 = (int)lVar6;
+          if (max_dist < (int)dist) {
+            max_dist = (int)dist;
           }
-
         }
-
-        puVar5 = puVar5 + 3;
-        local_4 = local_4 + -1;
-      } while (local_4 != 0);
+        vertices += 3;
+      }
     }
 
-    *(short *)(iVar1 + 0x22) = (short)local_8;
+    obj->unknown_22 = (short)max_dist;
   }
 
-  return (unsigned long long)uVar4 << 0x20;
+  return (unsigned long long)ret_val << 32;
 }
 
 /**
  * @original Lisa_DeleteDynamicObject (IGN_WIN.EXE @ 0x00447150, lisa3d.c)
  * @fidelity ADAPTED
  */
-int Lisa_DeleteDynamicObject(int *param_1) {
-  int iVar1;
-  int iVar2;
-  int iVar3;
+int Lisa_DeleteDynamicObject(LisaEntityTransform *entity) {
+  LisaDynamicObject *obj;
+  LisaDynamicObject *curr;
+  int cell_index;
 
-  
+  if (entity->in_grid == 1) {
+    obj = entity->dyn_obj;
 
-  if (param_1[7] == 1) {
-    iVar1 = *param_1;
+    cell_index = (obj->pos_z >> 8) * g_LisaGridCellsX + (obj->pos_x >> 8);
+    curr = g_pLisaGridCells[cell_index];
 
-    iVar3 = ((int)(*(int *)(iVar1 + 0x14) + (*(int *)(iVar1 + 0x14) >> 0x1f & 0xffU)) >> 8) *
-
-            g_LisaActiveTextureCount +
-
-            ((int)(*(int *)(iVar1 + 0xc) + (*(int *)(iVar1 + 0xc) >> 0x1f & 0xffU)) >> 8);
-    iVar2 = *(int *)(g_LisaActiveSubmeshIndex + iVar3 * 4);
-
-    if (iVar1 == iVar2) {
-      *(int *)(g_LisaActiveSubmeshIndex + iVar3 * 4) = *(int *)(iVar1 + 0x26);
-    }
-
-    else {
-      iVar3 = *(int *)(iVar2 + 0x26);
-
-      while (iVar3 != iVar1) {
-        iVar2 = *(int *)(iVar2 + 0x26);
-        iVar3 = *(int *)(iVar2 + 0x26);
+    if (curr == obj) {
+      g_pLisaGridCells[cell_index] = obj->next_in_cell;
+    } else {
+      while (curr != NULL && curr->next_in_cell != obj) {
+        curr = curr->next_in_cell;
       }
-
-      *(int *)(iVar2 + 0x26) = *(int *)(iVar1 + 0x26);
+      if (curr != NULL) {
+        curr->next_in_cell = obj->next_in_cell;
+      }
     }
 
-    param_1[7] = 0;
+    entity->in_grid = 0;
   }
 
   return 0;
@@ -2760,12 +2699,12 @@ int Lisa_CullObjectsOrthographic(void) {
 
   iVar4 = (*(int *)(&g_LisaDefaultScale_Y + iVar7) +
 
-           ((int)((int)lVar11 + ((int)lVar11 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) * g_LisaActiveTextureCount;
+           ((int)((int)lVar11 + ((int)lVar11 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) * g_LisaGridCellsX;
   lVar9 = __ftol();
   iVar2 = g_LisaVisibleObjects;
   local_c = 3;
 
-  iVar4 = g_LisaActiveSubmeshIndex +
+  iVar4 = (int)g_pLisaGridCells +
 
           (iVar4 + ((int)((int)lVar9 + ((int)lVar9 >> 0x1f & 0xffU)) >> 8) +
 
@@ -2810,7 +2749,7 @@ int Lisa_CullObjectsOrthographic(void) {
 
       iVar7 = local_c + 1;
       local_c = local_c + 2;
-      iVar4 = iVar4 + (*(int *)(iVar7 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
+      iVar4 = iVar4 + (*(int *)(iVar7 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
       iVar7 = *(int *)(local_c * 4 + 0x499fa0);
     }
 
@@ -2857,7 +2796,7 @@ int Lisa_CullObjectsOrthographic(void) {
 
       iVar7 = local_c + 1;
       local_c = local_c + 2;
-      iVar4 = iVar4 + (*(int *)(iVar7 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
+      iVar4 = iVar4 + (*(int *)(iVar7 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
       iVar7 = *(int *)(local_c * 4 + 0x499fa0);
     }
 
@@ -2929,13 +2868,13 @@ int Lisa_FrustumCullObjects(void) {
 
              ((int)((int)lVar25 + ((int)lVar25 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) *
 
-            g_LisaActiveTextureCount;
+            g_LisaGridCellsX;
     lVar23 = __ftol();
     iVar17 = g_pLisaAllocatedBuffersEnd;
     piVar14 = g_LisaVisibleObjects;
     local_64 = 3;
 
-    iVar5 = g_LisaActiveSubmeshIndex +
+    iVar5 = (int)g_pLisaGridCells +
 
             (iVar5 + ((int)((int)lVar23 + ((int)lVar23 >> 0x1f & 0xffU)) >> 8) +
 
@@ -2981,7 +2920,7 @@ int Lisa_FrustumCullObjects(void) {
 
         iVar4 = local_64 + 1;
         local_64 = local_64 + 2;
-        iVar5 = iVar5 + (*(int *)(iVar4 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
+        iVar5 = iVar5 + (*(int *)(iVar4 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
         iVar4 = *(int *)(local_64 * 4 + 0x499fa0);
       }
 
@@ -3028,7 +2967,7 @@ int Lisa_FrustumCullObjects(void) {
 
         iVar4 = local_64 + 1;
         local_64 = local_64 + 2;
-        iVar5 = iVar5 + (*(int *)(iVar4 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
+        iVar5 = iVar5 + (*(int *)(iVar4 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
         iVar4 = *(int *)(local_64 * 4 + 0x499fa0);
       }
 
@@ -3045,13 +2984,13 @@ int Lisa_FrustumCullObjects(void) {
 
     iVar17 = (((int)lVar23 + ((int)((int)lVar24 + ((int)lVar24 >> 0x1f & 0xffU)) >> 8)) - iVar4) *
 
-             g_LisaActiveTextureCount;
+             g_LisaGridCellsX;
     lVar23 = __ftol();
     lVar24 = __ftol();
     iVar5 = g_pLisaAllocatedBuffersEnd;
     piVar19 = g_LisaVisibleObjects;
 
-    piVar14 = (int *)(g_LisaActiveSubmeshIndex +
+    piVar14 = (int *)((int)g_pLisaGridCells +
 
                      ((iVar17 + (int)lVar23 +
 
@@ -3060,7 +2999,7 @@ int Lisa_FrustumCullObjects(void) {
     if (g_pLisaAllocatedBuffersEnd == 0) {
       if (0 < *(int *)(iVar2 + 0xa4)) {
         local_64 = *(int *)(iVar2 + 0xa4);
-        iVar5 = g_LisaActiveTextureCount - local_64;
+        iVar5 = g_LisaGridCellsX - local_64;
 
         do {
           iVar4 = *(int *)(iVar2 + 0xa4);
@@ -3107,7 +3046,7 @@ int Lisa_FrustumCullObjects(void) {
 
     else if (0 < *(int *)(iVar2 + 0xa4)) {
       local_5c = *(int *)(iVar2 + 0xa4);
-      iVar4 = g_LisaActiveTextureCount - local_5c;
+      iVar4 = g_LisaGridCellsX - local_5c;
 
       do {
         local_64 = *(int *)(iVar2 + 0xa4);
@@ -3282,13 +3221,13 @@ int Lisa_CullObjects(void) {
 
              ((int)((int)lVar30 + ((int)lVar30 >> 0x1f & 0xffU)) >> 8) + g_LisaDefaultOffset_X) *
 
-            g_LisaActiveTextureCount;
+            g_LisaGridCellsX;
     lVar30 = __ftol();
     iVar18 = g_pLisaAllocatedBuffersEnd;
     piVar20 = g_LisaVisibleObjects;
     local_70 = 3;
 
-    iVar19 = g_LisaActiveSubmeshIndex +
+    iVar19 = (int)g_pLisaGridCells +
 
              (iVar9 + ((int)((int)lVar30 + ((int)lVar30 >> 0x1f & 0xffU)) >> 8) +
 
@@ -3333,7 +3272,7 @@ int Lisa_CullObjects(void) {
 
         iVar9 = local_70 + 1;
         local_70 = local_70 + 2;
-        iVar19 = iVar19 + (*(int *)(iVar9 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
+        iVar19 = iVar19 + (*(int *)(iVar9 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
         iVar9 = *(int *)(local_70 * 4 + 0x499fa0);
       }
 
@@ -3380,7 +3319,7 @@ int Lisa_CullObjects(void) {
 
         iVar9 = local_70 + 1;
         local_70 = local_70 + 2;
-        iVar19 = iVar19 + (*(int *)(iVar9 * 4 + 0x499fa0) + g_LisaActiveTextureCount) * 4;
+        iVar19 = iVar19 + (*(int *)(iVar9 * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
         iVar9 = *(int *)(local_70 * 4 + 0x499fa0);
       }
 
@@ -3400,13 +3339,13 @@ int Lisa_CullObjects(void) {
 
     iVar18 = (((int)lVar30 + ((int)((int)lVar31 + ((int)lVar31 >> 0x1f & 0xffU)) >> 8)) - iVar19 / 2
 
-             ) * g_LisaActiveTextureCount;
+             ) * g_LisaGridCellsX;
     lVar30 = __ftol();
     lVar31 = __ftol();
     iVar9 = g_pLisaAllocatedBuffersEnd;
     piVar20 = g_LisaVisibleObjects;
 
-    piVar15 = (int *)(g_LisaActiveSubmeshIndex +
+    piVar15 = (int *)((int)g_pLisaGridCells +
 
                      ((iVar18 + (int)lVar30 +
 
@@ -3415,7 +3354,7 @@ int Lisa_CullObjects(void) {
 
     if (g_pLisaAllocatedBuffersEnd == 0) {
       if (0 < iVar19) {
-        iVar9 = g_LisaActiveTextureCount - iVar19;
+        iVar9 = g_LisaGridCellsX - iVar19;
 
         do {
           iVar18 = iVar19;
@@ -3460,7 +3399,7 @@ int Lisa_CullObjects(void) {
     }
 
     else if (0 < iVar19) {
-      iVar18 = g_LisaActiveTextureCount - iVar19;
+      iVar18 = g_LisaGridCellsX - iVar19;
 
       do {
         local_64 = (int *)iVar19;

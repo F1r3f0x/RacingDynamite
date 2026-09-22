@@ -78,6 +78,41 @@ typedef struct MshPolygon {
     int32_t  tv2;                  /* 0x24: Vertex 2 V (8.8 fixed) */
     uint32_t extra;                /* 0x28: Texture page byte offset within .TEX */
 } MshPolygon;
+
+typedef struct {
+    int32_t     vertex_count;  /* 0x00: Number of 3D vertices */
+    int32_t     polygon_count; /* 0x04: Number of polygon records */
+    /* Followed by vertex_count * 3 x int32_t */
+    /* Followed by polygon_count * MshPolygon */
+} MshSubmesh;
+
+typedef struct LisaDynamicObject {
+    struct LisaDynamicObject *self_ptr; /* 0x00 */
+    MshSubmesh *mesh_data;              /* 0x04 */
+    int32_t unknown_08;                 /* 0x08 */
+    int32_t pos_x;                      /* 0x0C */
+    int32_t pos_y;                      /* 0x10 */
+    int32_t pos_z;                      /* 0x14 */
+    int16_t rot_x;                      /* 0x18 */
+    int16_t rot_y;                      /* 0x1A */
+    int16_t rot_z;                      /* 0x1C */
+    int16_t unknown_1e;                 /* 0x1E */
+    int16_t unknown_20;                 /* 0x20 */
+    int16_t unknown_22;                 /* 0x22 */
+    int16_t unknown_24;                 /* 0x24 */
+    struct LisaDynamicObject *next_in_cell; /* 0x26 */
+} LisaDynamicObject;
+
+typedef struct {
+    LisaDynamicObject *dyn_obj;         /* 0x00 */
+    int32_t pos_x;                      /* 0x04 */
+    int32_t pos_y;                      /* 0x08 */
+    int32_t pos_z;                      /* 0x0C */
+    int32_t rot_x;                      /* 0x10 */
+    int32_t rot_y;                      /* 0x14 */
+    int32_t rot_z;                      /* 0x18 */
+    int32_t in_grid;                    /* 0x1C */
+} LisaEntityTransform;
 #pragma pack(pop)
 
 /* Global active panorama backdrop buffer (64KB, 256x256 8bpp) */
