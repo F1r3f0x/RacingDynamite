@@ -3560,201 +3560,202 @@ int Lisa_CullObjects(void) {
  * @fidelity ADAPTED
  */
 void Lisa_TransformVertices(void) {
-  int *local_pi1;
-  float local_f2;
-  float local_f3;
-  float local_f4;
-  int local_i5;
-  int local_i6;
-  int local_i7;
-  int local_i8;
-  int local_i9;
-  double *local_pd10;
-  int *local_pi11;
-  int local_i12;
-  int local_i13;
-  int local_i14;
-  int local_i15;
-  double local_f16;
-  double local_f17;
-  double local_f18;
-  double local_f19;
-  double local_f20;
-  double local_f21;
-  int local_l22;
-  int local_l23;
-  int local_l24;
-  int local_l25;
-  int local_1c;
-  int local_18;
-  int local_10;
-  int local_c;
+  /* Refactored and semantically cleaned */
+  int *mesh_ptr;
+  float roll_cos_f;
+  float scale_x;
+  float scale_y;
+  int temp_x;
+  int camera_int;
+  int temp_z;
+  int obj_y;
+  int vert_z;
+  double *zoom_ptr;
+  int *dst_vert_ptr;
+  int vert_x;
+  int trans_y;
+  int vert_y;
+  int trans_z;
+  double pitch_sin;
+  double pitch_cos;
+  double yaw_sin;
+  double yaw_cos;
+  double roll_sin;
+  double roll_cos;
+  int cam_pos_x;
+  int cam_pos_y;
+  int cam_pos_z_1;
+  int cam_pos_z_2;
+  int vert_idx;
+  int visible_idx;
+  int obj_idx;
+  int i;
 
   
 
                     
 
-  local_i6 = g_LisaCamera;
-  local_pd10 = &g_LisaCamera->zoom;
+  LisaCamera *camera = g_LisaCamera;
+  zoom_ptr = &g_LisaCamera->zoom;
   g_LisaBackfaceSign = 0;
 
   if (g_LisaCamera->zoom <= 0.0) {
     g_LisaBackfaceSign = 0xffffffff;
   }
 
-  local_pi11 = &g_LisaCamera->viewport_x;
+  dst_vert_ptr = &g_LisaCamera->viewport_x;
 
-  if (300 < *local_pi11) {
+  if (300 < *dst_vert_ptr) {
     Lisa_TransformVerticesPanorama();
     return;
   }
 
-  local_pi1 = &g_LisaCamera->viewport_width;
+  mesh_ptr = &g_LisaCamera->viewport_width;
   g_LisaCamera->vertex_counter = 0;
-  g_LisaCameraFocalLength = *local_pi1 << 2;
-  local_f16 = (double)*(double *)(local_i6 + 0x18) * (double)g_Const_NegTenthDegToRad;
-  g_LisaCameraOffsetX = *(int *)(local_i6 + 0x9c) << 8;
-  local_f17 = (double)fcos(local_f16);
-  g_LisaCameraOffsetY = *(int *)(local_i6 + 0xa0) << 8;
-  local_f18 = (double)*(double *)(local_i6 + 0x20) * (double)g_Const_NegTenthDegToRad;
-  local_f19 = (double)fcos(local_f18);
-  local_f16 = (double)fsin(local_f16);
-  local_f20 = (double)*(double *)(local_i6 + 0x28) * (double)g_Const_NegTenthDegToRad;
-  local_f18 = (double)fsin(local_f18);
-  local_f21 = (double)fcos(local_f20);
-  local_f20 = (double)fsin(local_f20);
-  local_f2 = (float)local_f21;
-  local_f3 = (float)-*local_pi11 * (float)*local_pd10 * (float)g_Const_1024;
-  local_f4 = (float)-*(int *)(local_i6 + 0x84) * (float)g_Const_1024;
+  g_LisaCameraFocalLength = *mesh_ptr << 2;
+  pitch_sin = (double)camera->rot_x * (double)g_Const_NegTenthDegToRad;
+  g_LisaCameraOffsetX = camera->fov_x << 8;
+  pitch_cos = (double)fcos(pitch_sin);
+  g_LisaCameraOffsetY = camera->fov_y << 8;
+  yaw_sin = (double)camera->rot_y * (double)g_Const_NegTenthDegToRad;
+  yaw_cos = (double)fcos(yaw_sin);
+  pitch_sin = (double)fsin(pitch_sin);
+  roll_sin = (double)camera->rot_z * (double)g_Const_NegTenthDegToRad;
+  yaw_sin = (double)fsin(yaw_sin);
+  roll_cos = (double)fcos(roll_sin);
+  roll_sin = (double)fsin(roll_sin);
+  roll_cos_f = (float)roll_cos;
+  scale_x = (float)-*dst_vert_ptr * (float)*zoom_ptr * (float)g_Const_1024;
+  scale_y = (float)-camera->viewport_y * (float)g_Const_1024;
 
   g_LisaObjMat_CosPitch =
 
-       (float)(((double)local_f2 * local_f19 - (double)(float)(local_f16 * local_f18) * local_f20) *
+       (float)(((double)roll_cos_f * yaw_cos - (double)(float)(pitch_sin * yaw_sin) * roll_sin) *
 
-              (double)local_f3);
-  g_LisaObjMat_SinPitch = (float)-((double)local_f3 * local_f17 * local_f20);
-  g_LisaObjMat_CosRoll = (float)((local_f16 * local_f19 * local_f20 + (double)local_f2 * local_f18) * (double)local_f3);
+              (double)scale_x);
+  g_LisaObjMat_SinPitch = (float)-((double)scale_x * pitch_cos * roll_sin);
+  g_LisaObjMat_CosRoll = (float)((pitch_sin * yaw_cos * roll_sin + (double)roll_cos_f * yaw_sin) * (double)scale_x);
 
   g_LisaObjMat_SinRoll =
 
-       (float)(((double)(float)(local_f16 * local_f18) * (double)local_f2 + local_f19 * local_f20) *
+       (float)(((double)(float)(pitch_sin * yaw_sin) * (double)roll_cos_f + yaw_cos * roll_sin) *
 
-              (double)local_f4);
-  g_LisaObjMat_Tmp1 = (float)((double)local_f4 * local_f17 * (double)local_f2);
-  g_LisaObjMat_Tmp3 = (float)(-(local_f18 * local_f17) * (double)g_Const_262144);
-  g_LisaObjMat_Tmp4 = (float)(local_f16 * (double)g_Const_262144);
+              (double)scale_y);
+  g_LisaObjMat_Tmp1 = (float)((double)scale_y * pitch_cos * (double)roll_cos_f);
+  g_LisaObjMat_Tmp3 = (float)(-(yaw_sin * pitch_cos) * (double)g_Const_262144);
+  g_LisaObjMat_Tmp4 = (float)(pitch_sin * (double)g_Const_262144);
 
   g_LisaObjMat_Tmp2 =
 
-       (float)((local_f18 * local_f20 - (double)(float)(local_f16 * local_f19) * (double)local_f2) *
+       (float)((yaw_sin * roll_sin - (double)(float)(pitch_sin * yaw_cos) * (double)roll_cos_f) *
 
-              (double)local_f4);
-  g_LisaObjMat_Tmp5 = (float)(local_f17 * local_f19 * (double)g_Const_262144);
-  local_l22 = __ftol();
-  g_LisaCameraMatrix_00 = (int)local_l22;
-  local_l22 = __ftol();
-  g_LisaCameraMatrix_01 = (int)local_l22;
-  local_l22 = __ftol();
-  g_LisaCameraMatrix_02 = (int)local_l22;
-  local_l22 = __ftol();
-  g_LisaCameraMatrix_10 = (int)local_l22;
-  local_l22 = __ftol();
-  g_LisaCameraMatrix_11 = (int)local_l22;
-  local_l22 = __ftol();
-  g_LisaCameraMatrix_12 = (int)local_l22;
-  local_l22 = __ftol();
-  g_LisaCameraMatrix_20 = (int)local_l22;
-  local_l22 = __ftol();
-  g_LisaCameraMatrix_21 = (int)local_l22;
-  local_l22 = __ftol();
-  g_LisaCameraMatrix_22 = (int)local_l22;
-  local_l22 = __ftol();
-  local_l23 = __ftol();
-  local_i6 = (int)local_l23;
-  local_l23 = __ftol();
-  local_l24 = __ftol();
-  local_i15 = (int)local_l24;
-  local_l24 = __ftol();
-  local_l25 = __ftol();
-  local_i7 = (int)local_l25;
-  local_i5 = g_LisaCameraMatrix_01 * local_i15 + local_i6 * g_LisaCameraMatrix_00 + g_LisaCameraMatrix_02 * local_i7;
-  g_LisaSubmeshCenterWorldX = (int)(local_i5 + (local_i5 >> 0x1f & 0xfffU)) >> 0xc;
-  local_i5 = g_LisaCameraMatrix_11 * local_i15 + local_i6 * g_LisaCameraMatrix_10 + g_LisaCameraMatrix_12 * local_i7;
-  g_LisaSubmeshCenterWorldZ = (int)(local_i5 + (local_i5 >> 0x1f & 0xfffU)) >> 0xc;
-  local_i6 = g_LisaCameraMatrix_21 * local_i15 + local_i6 * g_LisaCameraMatrix_20 + g_LisaCameraMatrix_22 * local_i7;
-  local_c = 0;
-  g_LisaSubmeshDepthOffset = (int)(local_i6 + (local_i6 >> 0x1f & 0xfffU)) >> 0xc;
+              (double)scale_y);
+  g_LisaObjMat_Tmp5 = (float)(pitch_cos * yaw_cos * (double)g_Const_262144);
+  cam_pos_x = __ftol();
+  g_LisaCameraMatrix_00 = (int)cam_pos_x;
+  cam_pos_x = __ftol();
+  g_LisaCameraMatrix_01 = (int)cam_pos_x;
+  cam_pos_x = __ftol();
+  g_LisaCameraMatrix_02 = (int)cam_pos_x;
+  cam_pos_x = __ftol();
+  g_LisaCameraMatrix_10 = (int)cam_pos_x;
+  cam_pos_x = __ftol();
+  g_LisaCameraMatrix_11 = (int)cam_pos_x;
+  cam_pos_x = __ftol();
+  g_LisaCameraMatrix_12 = (int)cam_pos_x;
+  cam_pos_x = __ftol();
+  g_LisaCameraMatrix_20 = (int)cam_pos_x;
+  cam_pos_x = __ftol();
+  g_LisaCameraMatrix_21 = (int)cam_pos_x;
+  cam_pos_x = __ftol();
+  g_LisaCameraMatrix_22 = (int)cam_pos_x;
+  cam_pos_x = __ftol();
+  cam_pos_y = __ftol();
+  camera_int = cam_pos_y;
+  cam_pos_y = __ftol();
+  cam_pos_z_1 = __ftol();
+  trans_z = (int)cam_pos_z_1;
+  cam_pos_z_1 = __ftol();
+  cam_pos_z_2 = __ftol();
+  temp_z = (int)cam_pos_z_2;
+  temp_x = g_LisaCameraMatrix_01 * trans_z + camera_int * g_LisaCameraMatrix_00 + g_LisaCameraMatrix_02 * temp_z;
+  g_LisaSubmeshCenterWorldX = (int)(temp_x + (temp_x >> 0x1f & 0xfffU)) >> 0xc;
+  temp_x = g_LisaCameraMatrix_11 * trans_z + camera_int * g_LisaCameraMatrix_10 + g_LisaCameraMatrix_12 * temp_z;
+  g_LisaSubmeshCenterWorldZ = (int)(temp_x + (temp_x >> 0x1f & 0xfffU)) >> 0xc;
+  camera_int = g_LisaCameraMatrix_21 * trans_z + camera_int * g_LisaCameraMatrix_20 + g_LisaCameraMatrix_22 * temp_z;
+  i = 0;
+  g_LisaSubmeshDepthOffset = (int)(camera_int + (camera_int >> 0x1f & 0xfffU)) >> 0xc;
 
   if (0 < g_LisaCamera->visible_obj_count) {
-    local_18 = 0;
-    local_10 = 0;
+    visible_idx = 0;
+    obj_idx = 0;
 
     do {
-      local_i5 = g_LisaVisibleSubmeshes;
-      local_i7 = g_LisaTransformedVertices;
-      local_i6 = *(int *)(g_LisaVisibleObjects + local_10);
-      local_pi1 = *(int **)(local_i6 + 4);
-      local_i15 = g_LisaCamera->vertex_counter;
-      *(int **)(g_LisaVisibleSubmeshes + local_18) = local_pi1;
-      local_pi11 = (int *)(local_i7 + local_i15 * 0xc);
-      local_i7 = *(int *)(local_i6 + 0xc) - (int)local_l22;
-      *(int **)(local_i5 + 4 + local_18) = local_pi11;
-      local_i5 = *(int *)(local_i6 + 0x10) - (int)local_l23;
-      local_i8 = *(int *)(local_i6 + 0x14) - (int)local_l24;
+      temp_x = g_LisaVisibleSubmeshes;
+      temp_z = g_LisaTransformedVertices;
+      LisaDynamicObject *obj = g_LisaVisibleObjects[obj_idx >> 2];
+      mesh_ptr = (int *)obj->mesh_data;
+      trans_z = g_LisaCamera->vertex_counter;
+      *(int **)(g_LisaVisibleSubmeshes + visible_idx) = mesh_ptr;
+      dst_vert_ptr = (int *)(temp_z + trans_z * 0xc);
+      temp_z = obj->pos_x - (int)cam_pos_x;
+      *(int **)(temp_x + 4 + visible_idx) = dst_vert_ptr;
+      temp_x = obj->pos_y - (int)cam_pos_y;
+      obj_y = obj->pos_z - (int)cam_pos_z_1;
 
-      if ((*(short *)(local_i6 + 0x18) == 0 && *(short *)(local_i6 + 0x1a) == 0) &&
+      if ((obj->rot_x == 0 && obj->rot_y == 0) &&
 
-          *(short *)(local_i6 + 0x1c) == 0) {
-        local_i6 = 2;
-        local_1c = *local_pi1;
+          obj->rot_z == 0) {
+        int vert_stride = 2;
+        vert_idx = *mesh_ptr;
 
-        if (0 < local_1c) {
-          g_LisaCamera->vertex_counter = local_i15 + local_1c;
+        if (0 < vert_idx) {
+          g_LisaCamera->vertex_counter = trans_z + vert_idx;
 
           do {
-            local_i12 = local_pi1[local_i6] + local_i7;
-            local_i14 = local_i5 - local_pi1[local_i6 + 1];
-            local_i15 = local_i6 + 2;
-            local_i6 = local_i6 + 3;
-            local_i9 = local_i8 + local_pi1[local_i15];
+            vert_x = mesh_ptr[vert_stride] + temp_z;
+            vert_y = temp_x - mesh_ptr[vert_stride + 1];
+            trans_z = vert_stride + 2;
+            vert_stride = vert_stride + 3;
+            vert_z = obj_y + mesh_ptr[trans_z];
 
-            local_i13 = (local_i12 * g_LisaCameraMatrix_10 + g_LisaCameraMatrix_12 * local_i9 + g_LisaCameraMatrix_11 * local_i14) -
+            trans_y = (vert_x * g_LisaCameraMatrix_10 + g_LisaCameraMatrix_12 * vert_z + g_LisaCameraMatrix_11 * vert_y) -
 
                      g_LisaSubmeshCenterWorldZ;
 
-            local_i15 = g_LisaCameraFocalLength +
+            trans_z = g_LisaCameraFocalLength +
 
-                     ((local_i12 * g_LisaCameraMatrix_20 + g_LisaCameraMatrix_22 * local_i9 + g_LisaCameraMatrix_21 * local_i14) -
+                     ((vert_x * g_LisaCameraMatrix_20 + g_LisaCameraMatrix_22 * vert_z + g_LisaCameraMatrix_21 * vert_y) -
 
                       g_LisaSubmeshDepthOffset >> 0x10);
 
-            if (local_i15 < g_LisaCameraFocalLength) {
-              local_i15 = g_LisaCameraFocalLength;
+            if (trans_z < g_LisaCameraFocalLength) {
+              trans_z = g_LisaCameraFocalLength;
             }
 
-            *local_pi11 = g_LisaCameraOffsetX +
+            *dst_vert_ptr = g_LisaCameraOffsetX +
 
-                       ((local_i12 * g_LisaCameraMatrix_00 + g_LisaCameraMatrix_02 * local_i9 + g_LisaCameraMatrix_01 * local_i14) -
+                       ((vert_x * g_LisaCameraMatrix_00 + g_LisaCameraMatrix_02 * vert_z + g_LisaCameraMatrix_01 * vert_y) -
 
-                       g_LisaSubmeshCenterWorldX) / local_i15;
-            local_i9 = g_LisaCameraOffsetY;
-            local_pi11[2] = local_i15;
-            local_1c = local_1c + -1;
-            local_pi11[1] = local_i9 + local_i13 / local_i15;
-            local_pi11 = local_pi11 + 3;
-          } while (local_1c != 0);
+                       g_LisaSubmeshCenterWorldX) / trans_z;
+            vert_z = g_LisaCameraOffsetY;
+            dst_vert_ptr[2] = trans_z;
+            vert_idx = vert_idx + -1;
+            dst_vert_ptr[1] = vert_z + trans_y / trans_z;
+            dst_vert_ptr = dst_vert_ptr + 3;
+          } while (vert_idx != 0);
         }
 
       }
 
       else {
-        Lisa_ComputeObjectMatrix(local_i7,local_i5,local_i8,local_i6,local_pi1);
+        Lisa_ComputeObjectMatrix(temp_z,temp_x,obj_y,(int)obj,mesh_ptr);
       }
 
-      local_18 = local_18 + 8;
-      local_10 = local_10 + 4;
-      local_c = local_c + 1;
-    } while (local_c < g_LisaCamera->visible_obj_count);
+      visible_idx = visible_idx + 8;
+      obj_idx = obj_idx + 4;
+      i = i + 1;
+    } while (i < g_LisaCamera->visible_obj_count);
   }
 
   return;
