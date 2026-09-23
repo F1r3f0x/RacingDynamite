@@ -69,6 +69,37 @@ extern char s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468[];
 #include "main.h"
 #include "fx.h"
 
+// Reconstructed FX and HUD global constants and tables
+extern int g_TrigAngleTable[];
+extern int g_SmokeParticleDescriptor;
+extern char g_SurfaceDustFlagTable[];
+extern int g_ForceDirtDebris;
+extern int g_ShowFpsOverlay;
+extern int g_ShowRecordingOverlay;
+extern int g_ShowRollTelemetry;
+extern int g_TelemetryRollAngle;
+extern int g_WeatherActive;
+extern int g_pAnimatedSceneryObjects;
+extern int g_DebrisDynamicMeshes;
+extern int g_CameraFovScaleX;
+extern int g_CameraFovScaleY;
+extern int g_CameraTargetHysteresis;
+
+extern double k_SkidSmokeSpeedThreshold;
+extern double k_SkidSmokeProbabilityFactor;
+extern double k_SkidSmokeRandomScale;
+extern double k_TireDirtSpeedThreshold;
+extern double k_WaterSplashSpeedThreshold;
+extern double k_LandingDustAngularOffset;
+extern double k_SplashAccumIncrement;
+extern double k_TurboProgressMinTimer;
+extern double k_SpecialCarBonusLimit;
+extern double k_SpecialCarBonusStep;
+extern double k_WrongWayTrackHeadingOffset;
+extern double k_WrongWayThresholdMin;
+extern double k_WrongWayThresholdMax;
+
+
 // External references
 extern int Lisa_DeleteDynamicObject(void *obj);
 extern int Lisa_MoveDynamicObject(void *obj);
@@ -110,7 +141,7 @@ void HUD_RenderTelemetryOverlay(void);
 void HUD_CheckWrongWayHeading(int player_idx);
 void HUD_RenderPlayerElements(int player_idx);
 
-extern int DAT_004944e0;
+extern int g_TrigAngleTable;
 extern int DAT_004949bc;
 extern double DAT_005532c0;
 extern double DAT_005532c4;
@@ -204,7 +235,7 @@ extern int g_pTrackRoadSequence[];
 extern int _DAT_0047a5e0;
 extern int DAT_0054f9dc;
 extern int DAT_00552f58;
-extern int DAT_00563bec;
+extern int g_TelemetryRollAngle;
 extern int DAT_005285d8;
 extern int g_ViewportMinY;
 extern int _DAT_00498734;
@@ -229,11 +260,11 @@ extern int DAT_005dfe60;
 extern int DAT_00563cf0;
 extern int _DAT_0047a430;
 extern int _DAT_00563d64;
-extern int DAT_00552f30;
+extern int g_WeatherActive;
 extern int _DAT_00552f34;
 extern int DAT_00552f34;
 extern int DAT_0047a548;
-extern int _DAT_0047a3f8;
+extern int k_SkidSmokeRandomScale;
 extern int DAT_00563d74;
 extern int _DAT_0047a548;
 extern int DAT_00528624;
@@ -242,10 +273,10 @@ extern int DAT_0047a798;
 extern int DAT_00639378;
 extern int DAT_0047a480;
 extern int DAT_005287f0;
-extern int _DAT_0047a888;
+extern int k_WrongWayTrackHeadingOffset;
 extern int DAT_0047a518;
 extern int _DAT_0047a768;
-extern int _DAT_0047a8a0;
+extern int k_WrongWayThresholdMax;
 extern int DAT_005286f4;
 extern int DAT_0052863c;
 extern int DAT_0047a3e8;
@@ -279,7 +310,7 @@ extern int DAT_0063956f;
 extern int DAT_006395ab;
 extern int DAT_0047a770;
 extern int DAT_005531c0;
-extern int DAT_004949dc;
+extern int g_ShowRecordingOverlay;
 extern int DAT_0047a3f0;
 extern int _DAT_0047a550;
 extern int DAT_0047a4f0;
@@ -309,7 +340,7 @@ extern int _DAT_0047a758;
 extern int g_DynamicObjectsPaused;
 extern int DAT_00525e50;
 extern int DAT_005287ec;
-extern int DAT_0054f908;
+extern int g_pAnimatedSceneryObjects;
 extern int DAT_0047a318;
 extern int _DAT_0047a6e8;
 extern int DAT_006192b8;
@@ -338,7 +369,7 @@ extern int DAT_00552d90;
 extern int DAT_00527f74;
 extern int DAT_005db000;
 extern int DAT_00553784;
-extern int DAT_00497438;
+extern int g_SurfaceDustFlagTable;
 extern int DAT_0047a330;
 extern int DAT_0047a778;
 extern int DAT_005285e4;
@@ -376,7 +407,7 @@ extern int DAT_0063935c;
 extern int DAT_0047a288;
 extern int DAT_0047a6e8;
 extern int DAT_00563ce8;
-extern int _DAT_0047a340;
+extern int k_WaterSplashSpeedThreshold;
 extern int g_ParticleArray1;
 extern int DAT_00525e78;
 extern int DAT_0047a568;
@@ -404,7 +435,7 @@ extern int DAT_00525e6c;
 extern int DAT_0047a300;
 extern int DAT_0052873c;
 extern int g_pActiveMSH;
-extern int _DAT_0047a3c0;
+extern int k_LandingDustAngularOffset;
 extern int _DAT_0047a300;
 extern int DAT_0047a2e0;
 extern int DAT_00639927;
@@ -423,11 +454,11 @@ extern int _DAT_0047a288;
 extern int DAT_0047a658;
 extern int _DAT_0047a488;
 extern int DAT_0052861c;
-extern int _DAT_0047a520;
+extern int k_SpecialCarBonusLimit;
 extern int _DAT_0047a540;
 extern int g_pCarTransforms;
 extern int DAT_0063959b;
-extern int DAT_00552d80;
+extern int g_CameraFovScaleX;
 extern int _DAT_0047a760;
 extern int DAT_0047a2d8;
 extern int DAT_00563c34[];
@@ -435,10 +466,10 @@ extern int _DAT_0047a748;
 extern int DAT_0047a310;
 extern int DAT_00528878;
 extern int g_pActivePLC[];
-extern int _DAT_0047a380;
+extern int k_TireDirtSpeedThreshold;
 extern int DAT_00528848;
 extern int DAT_00563c30[];
-extern int DAT_004949b0;
+extern int g_ForceDirtDebris;
 extern int _DAT_0047a2e0;
 extern int DAT_0052882c;
 extern int DAT_0052881c;
@@ -451,7 +482,7 @@ extern int DAT_0052886c;
 extern int _DAT_0047a7e0;
 extern int DAT_00528664;
 extern int DAT_005285e8;
-extern int _DAT_0047a510;
+extern int k_SplashAccumIncrement;
 extern int DAT_00639354;
 extern int DAT_0047a570;
 extern int _DAT_0047a658;
@@ -459,14 +490,14 @@ extern int DAT_0063933c;
 extern int DAT_0047a708;
 extern int DAT_00603730;
 extern int DAT_0047a710;
-extern int _DAT_0047a3f0;
+extern int k_SkidSmokeProbabilityFactor;
 extern int DAT_00525e44;
 extern int DAT_0047a760;
 extern int DAT_0047a8b0;
 extern int _DAT_0047a330;
 extern int _DAT_0047a920;
 extern int DAT_005daff0;
-extern int _DAT_0047a518;
+extern int k_TurboProgressMinTimer;
 extern int DAT_00553068;
 extern int DAT_00639344;
 extern int DAT_00639577;
@@ -476,7 +507,7 @@ extern int DAT_0047a3f8;
 extern int DAT_00528814;
 extern int DAT_0047a718;
 extern int DAT_00619310;
-extern int DAT_00528800;
+extern int g_DebrisDynamicMeshes;
 extern int DAT_00528870;
 extern int DAT_0047a700;
 extern int DAT_0047a630;
@@ -486,7 +517,7 @@ extern int DAT_00563d28;
 extern int DAT_0063936c;
 extern int DAT_00528868;
 extern int DAT_00553040;
-extern int _DAT_0047a528;
+extern int k_SpecialCarBonusStep;
 extern int DAT_0063955b;
 extern int DAT_0047a540;
 extern int DAT_0052885c;
@@ -494,7 +525,7 @@ extern int _DAT_0047a6e0;
 extern int DAT_00603720;
 extern int DAT_0047a510;
 extern int DAT_0052880c;
-extern int DAT_004949a8;
+extern int g_CameraTargetHysteresis;
 extern int DAT_0047a720;
 extern int DAT_00563d00;
 extern int DAT_0052883c;
@@ -537,10 +568,10 @@ extern int DAT_00552f28;
 extern int DAT_00528660;
 extern int DAT_0047a758;
 extern int DAT_00639360;
-extern int _DAT_0047a3e8;
+extern int k_SkidSmokeSpeedThreshold;
 extern int DAT_00639593;
 extern int _DAT_0047a570;
-extern int _DAT_0047a898;
+extern int k_WrongWayThresholdMin;
 extern int DAT_00528884;
 extern int DAT_00639350;
 extern int DAT_00552f50;
@@ -553,7 +584,7 @@ extern int DAT_00639388;
 extern int DAT_00563d70;
 extern int g_ColorDepth;
 extern int DAT_00603718;
-extern int DAT_00552f5c;
+extern int g_CameraFovScaleY;
 extern int DAT_00552fdc;
 extern int DAT_005285e0;
 extern int DAT_00639374;
@@ -598,7 +629,7 @@ extern int g_VehicleCameraStates;
 extern int DAT_0054f98c;
 extern int g_RacePosition;
 extern int DAT_00528828;
-extern int DAT_004949b4;
+extern int g_ShowFpsOverlay;
 extern int _DAT_0047a728;
 extern int _DAT_0047a2c8;
 extern int DAT_0047a728;
@@ -622,14 +653,14 @@ extern int DAT_00525e7c;
 extern int DAT_0054f988;
 extern int DAT_0047a788;
 extern int DAT_0047a740;
-extern int DAT_00497ff8;
+extern int g_SmokeParticleDescriptor;
 extern int DAT_00603724;
 extern int DAT_00528864;
 extern int DAT_00563d8c;
 extern int DAT_005285f4;
 extern int DAT_0047a3c0;
 extern double DAT_0063c64c[];
-extern int DAT_005532b0;
+extern int g_ShowRollTelemetry;
 extern int g_RaceTimer;
 extern int DAT_0047a440;
 extern int DAT_004986e0[];
@@ -807,10 +838,10 @@ unsigned int FX_SpawnParticle(SceneryParticle *p) {
             diff_z = pos_z - (int)g_pActiveCamera[2];
             if (abs(diff_z) <= 3500) {
                 should_spawn = 1;
-            } else if (DAT_0047a440 <= g_RaceTimer || DAT_005532b0 == 1) {
+            } else if (DAT_0047a440 <= g_RaceTimer || g_ShowRollTelemetry == 1) {
                 should_spawn = 1;
             }
-        } else if (DAT_0047a440 <= g_RaceTimer || DAT_005532b0 == 1) {
+        } else if (DAT_0047a440 <= g_RaceTimer || g_ShowRollTelemetry == 1) {
             should_spawn = 1;
         }
 
@@ -1204,7 +1235,7 @@ LAB_00436c9c:
       }
     }
   }
-  if (DAT_005532b0 == 1) {
+  if (g_ShowRollTelemetry == 1) {
     var_6c = DAT_005532c0;
     var_54 = _DAT_006192f8 * _DAT_0047a5e8;
     var_7c = _DAT_00619318 * _DAT_0047a5e8;
@@ -1246,8 +1277,8 @@ LAB_00436c9c:
   if (DAT_00552f58 == 1) {
     *(int *)((int)g_pActiveCamera + 0x9c) = g_ScreenWidth / 2;
   }
-  if (DAT_005532b0 == 1) {
-    *(int *)((int)g_pActiveCamera + 0x7c) = DAT_00563bec;
+  if (g_ShowRollTelemetry == 1) {
+    *(int *)((int)g_pActiveCamera + 0x7c) = g_TelemetryRollAngle;
     if (DAT_00563c14 == 1) {
       *(int *)(g_pActiveCamera + 7) = 1;
       var_l20 = __ftol();
@@ -1336,7 +1367,7 @@ LAB_00436c9c:
     Lisa_DeleteDynamicObject(var_pi6);
   }
   if (((*(int *)(g_Vehicles + 0x528) == 0) || (g_RaceTimer <= _DAT_0047a5c0)) &&
-     (DAT_005532b0 == 0)) {
+     (g_ShowRollTelemetry == 0)) {
     HUD_RenderPlayerElements(g_MenuCursorPos);
   }
   if ((g_IsSplitScreen == 1) && (DAT_00552f58 == 0)) {
@@ -1408,7 +1439,7 @@ LAB_00436c9c:
   if (((((g_IsSplitScreen == 0) && (*(int *)(g_Vehicles + 0x528) == 1)) ||
        ((g_IsSplitScreen == 1 &&
         ((*(int *)(g_Vehicles + 0x528) == 1 && (*(int *)(g_Vehicles + 0x4d74) == 1)))))) &&
-      (_DAT_0047a5c0 <= g_RaceTimer)) && ((DAT_00563c60 == 0 && (DAT_005532b0 == 0)))) {
+      (_DAT_0047a5c0 <= g_RaceTimer)) && ((DAT_00563c60 == 0 && (g_ShowRollTelemetry == 0)))) {
     HUD_RenderTrackResults();
   }
   var_i14 = *(int *)(g_PlayerHUDState + 0x38);
@@ -1558,7 +1589,7 @@ void FX_UpdateWeatherBounds(void) {
         (var_i2 = *(int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), 0x2d < var_i2)) &&
        (var_i2 < 0x78)) {
       if (g_ActiveVehicleIndex == 0) {
-        DAT_00552f30 = 1;
+        g_WeatherActive = 1;
       }
       else if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
         _DAT_00552f34 = 1;
@@ -1568,7 +1599,7 @@ void FX_UpdateWeatherBounds(void) {
        ((var_i2 = *(int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), var_i2 < 0x2e ||
         (0x77 < var_i2)))) {
       if (g_ActiveVehicleIndex == 0) {
-        DAT_00552f30 = 0;
+        g_WeatherActive = 0;
       }
       else if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
         _DAT_00552f34 = 0;
@@ -1580,7 +1611,7 @@ void FX_UpdateWeatherBounds(void) {
         (var_u1 = *(unsigned int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), var_u3 = (int)var_u1 >> 0x1f
         , var_i2 = (var_u1 ^ var_u3) - var_u3, 0 < var_i2)) && (var_i2 < 0x1e)) {
       if (g_ActiveVehicleIndex == 0) {
-        DAT_00552f30 = 1;
+        g_WeatherActive = 1;
       }
       else if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
         _DAT_00552f34 = 1;
@@ -1590,7 +1621,7 @@ void FX_UpdateWeatherBounds(void) {
        ((var_u1 = *(unsigned int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), var_u3 = (int)var_u1 >> 0x1f
         , var_i2 = (var_u1 ^ var_u3) - var_u3, var_i2 < 1 || (0x1d < var_i2)))) {
       if (g_ActiveVehicleIndex == 0) {
-        DAT_00552f30 = 0;
+        g_WeatherActive = 0;
       }
       else if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
         _DAT_00552f34 = 0;
@@ -1602,7 +1633,7 @@ void FX_UpdateWeatherBounds(void) {
         (var_u1 = *(unsigned int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), var_u3 = (int)var_u1 >> 0x1f
         , var_i2 = (var_u1 ^ var_u3) - var_u3, 0x1c < var_i2)) && (var_i2 < 100)) {
       if (g_ActiveVehicleIndex == 0) {
-        DAT_00552f30 = 1;
+        g_WeatherActive = 1;
       }
       else if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
         _DAT_00552f34 = 1;
@@ -1612,7 +1643,7 @@ void FX_UpdateWeatherBounds(void) {
        ((var_u1 = *(unsigned int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), var_u3 = (int)var_u1 >> 0x1f
         , var_i2 = (var_u1 ^ var_u3) - var_u3, var_i2 < 0x1d || (99 < var_i2)))) {
       if (g_ActiveVehicleIndex == 0) {
-        DAT_00552f30 = 0;
+        g_WeatherActive = 0;
         return;
       }
       if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
@@ -2289,7 +2320,7 @@ void FX_UpdateDetachedWheel(int *wheel, int wheel_index) {
   var_i22 = wheel[0x14];
   if (var_i22 == 0) {
     var_i23 = wheel_index * 800;
-    *(int *)(&DAT_00528800 + var_i23) = 4;
+    *(int *)(&g_DebrisDynamicMeshes + var_i23) = 4;
     *(int *)(&DAT_00528804 + var_i23) = 2;
     *(int *)(&DAT_00528808 + var_i23) = var_u2;
     *(int *)(&DAT_0052880c + var_i23) = var_u1;
@@ -2314,7 +2345,7 @@ void FX_UpdateDetachedWheel(int *wheel, int wheel_index) {
     *(int *)(&DAT_00528870 + var_i23) = 3;
     *(int *)(&DAT_0052888c + var_i23) = var_u16;
     Lisa_SetDynamicObjectMesh(g_pFXTransforms,var_u13,(int *)(wheel_index * 0x20 + g_pFXTransforms),
-                 (int *)(&DAT_00528800 + var_i23),var_u16,200,0,0x14,0);
+                 (int *)(&g_DebrisDynamicMeshes + var_i23),var_u16,200,0,0x14,0);
   }
   var_i23 = wheel_index * 0x20;
   *(int *)(var_i23 + 4 + g_pFXTransforms) = (int)(var_i21 + (var_i21 >> 0x1f & 0x3ffU)) >> 10;
@@ -2699,102 +2730,109 @@ LAB_00432970:
  * @fidelity ADAPTED
  */
 void FX_UpdateCarDebris(int *debris, int debris_idx) {
-  int var_i1;
-  int var_i2;
-  int var_i3;
-  int var_i4;
-  int var_i5;
-  int var_i6;
-  int var_i7;
-  int *var_pi8;
-  int var_i9;
-  int var_i10;
-  int var_i11;
-  __int64 var_l12;
-  int var_1c;
-  var_1c = debris[2];
-  var_i11 = debris[3];
-  var_i10 = debris[4];
-  var_i1 = debris[7];
-  var_i2 = debris[5];
-  var_i3 = debris[6];
-  var_i4 = debris[8];
-  var_i5 = debris[9];
-  if (var_i4 == 0) {
-    var_i6 = debris_idx * 800;
-    *(int *)(&DAT_00528800 + var_i6) = 1;
-    *(int *)(&DAT_00528804 + var_i6) = 1;
-    *(int *)(&DAT_00528808 + var_i6) = 0;
-    *(int *)(&DAT_0052880c + var_i6) = 0;
-    *(int *)(&DAT_00528810 + var_i6) = 0;
-    *(int *)(&DAT_00528814 + var_i6) = 7;
-    var_i7 = DAT_00552d80;
-    *(int *)(&DAT_00528818 + var_i6) = 0;
-    *(int *)(&DAT_0052881c + var_i6) = 0x2100;
-    *(int *)(&DAT_00528820 + var_i6) = 0x5400;
-    *(int *)(&DAT_00528824 + var_i6) = 0x4200;
-    *(int *)(&DAT_00528828 + var_i6) = 0x7500;
-    *(int *)(&DAT_0052882c + var_i6) = 0;
-    *(int *)(&DAT_00528830 + var_i6) = var_i7 * 0x96;
-    var_i9 = g_pFXTransforms;
-    var_i7 = DAT_00552f5c * 0x96;
-    *(int *)(&DAT_00528834 + var_i6) = var_i7;
-    Lisa_SetDynamicObjectMesh(var_i9,var_i7,(int *)(debris_idx * 0x20 + var_i9),(int *)(&DAT_00528800 + var_i6),2,200,0,
-                 0x14,0);
-  }
-  var_i7 = var_i4 * -8 + 0xfa;
-  *(int *)(&DAT_00528808 + debris_idx * 800) = var_i7;
-  if (var_i7 < 0x32) {
-    *(int *)(&DAT_00528808 + debris_idx * 800) = 0x32;
-  }
-  if (0x59c00 < var_1c) {
-    var_1c = var_1c + ((var_1c + 0x3ffU) / 0x5a000) * -0x5a000;
-  }
-  if (0x59c00 < var_i11) {
-    var_i11 = var_i11 + ((var_i11 + 0x3ffU) / 0x5a000) * -0x5a000;
-  }
-  if (0x59c00 < var_i10) {
-    var_i10 = var_i10 + ((var_i10 + 0x3ffU) / 0x5a000) * -0x5a000;
-  }
-  if (var_1c < 0) {
-    var_1c = var_1c + ((0x59fffU - var_1c) / 0x5a000) * 0x5a000;
-  }
-  if (var_i11 < 0) {
-    var_i11 = var_i11 + ((0x59fffU - var_i11) / 0x5a000) * 0x5a000;
-  }
-  if (var_i10 < 0) {
-    var_i10 = var_i10 + ((0x59fffU - var_i10) / 0x5a000) * 0x5a000;
-  }
-  var_i7 = debris_idx * 0x20;
-  var_l12 = __ftol();
-  *(int *)(var_i7 + 4 + g_pFXTransforms) = (int)var_l12;
-  var_l12 = __ftol();
-  *(int *)(var_i7 + 8 + g_pFXTransforms) = (int)var_l12;
-  var_l12 = __ftol();
-  *(int *)(var_i7 + 0xc + g_pFXTransforms) = (int)var_l12;
-  *(int *)(var_i7 + 0x10 + g_pFXTransforms) =
-       (int)(var_1c * 10 + (var_1c * 10 >> 0x1f & 0x3ffU)) >> 10;
-  *(int *)(var_i7 + 0x14 + g_pFXTransforms) = (int)(var_i11 * 10 + (var_i11 * 10 >> 0x1f & 0x3ffU)) >> 10;
-  *(int *)(var_i7 + 0x18 + g_pFXTransforms) = (int)(var_i10 * 10 + (var_i10 * 10 >> 0x1f & 0x3ffU)) >> 10;
-  var_pi8 = (int *)(g_pFXTransforms + var_i7);
-  if (var_pi8[7] == 0) {
-    Lisa_MoveDynamicObject(var_pi8);
-  }
-  else {
-    var_i9 = Lisa_UpdateObjectSpatialGrid(var_pi8);
-    if (var_i9 != 0) {
-      Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_TRAN_SPRIT_004993b4);
+    int rot_vel_z;
+    int rot_vel_x;
+    int rot_vel_y;
+    int age;
+    int max_age;
+    int mesh_stride;
+    int scaled_alpha;
+    int *transform_ptr;
+    int update_res;
+    int rot_z;
+    int rot_y;
+    __int64 ftol_result;
+    int rot_x;
+
+    rot_x = debris[2];
+    rot_y = debris[3];
+    rot_z = debris[4];
+    rot_vel_z = debris[7];
+    rot_vel_x = debris[5];
+    rot_vel_y = debris[6];
+    age = debris[8];
+    max_age = debris[9];
+
+    if (age == 0) {
+        mesh_stride = debris_idx * 800;
+        *(int *)(&g_DebrisDynamicMeshes + mesh_stride) = 1;
+        *(int *)((int)&g_DebrisDynamicMeshes + 4 + mesh_stride) = 1;
+        *(int *)((int)&g_DebrisDynamicMeshes + 8 + mesh_stride) = 0;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0xc + mesh_stride) = 0;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x10 + mesh_stride) = 0;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x14 + mesh_stride) = 7;
+        scaled_alpha = g_CameraFovScaleX;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x18 + mesh_stride) = 0;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x1c + mesh_stride) = 0x2100;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x20 + mesh_stride) = 0x5400;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x24 + mesh_stride) = 0x4200;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x28 + mesh_stride) = 0x7500;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x2c + mesh_stride) = 0;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x30 + mesh_stride) = scaled_alpha * 0x96;
+        scaled_alpha = g_CameraFovScaleY * 0x96;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x34 + mesh_stride) = scaled_alpha;
+        Lisa_SetDynamicObjectMesh(g_pFXTransforms, scaled_alpha, (int *)(debris_idx * 0x20 + g_pFXTransforms),
+                                 (int *)((int)&g_DebrisDynamicMeshes + mesh_stride), 2, 200, 0, 0x14, 0);
     }
-  }
-  if (var_i5 <= var_i4 + 1) {
-    Lisa_DeleteDynamicObject((int *)(var_i7 + g_pFXTransforms));
-    *debris = 0;
-  }
-  debris[2] = var_1c + var_i2;
-  debris[3] = var_i11 + var_i3;
-  debris[4] = var_i10 + var_i1;
-  debris[8] = var_i4 + 1;
-  return;
+
+    scaled_alpha = age * -8 + 0xfa;
+    *(int *)((int)&g_DebrisDynamicMeshes + 8 + debris_idx * 800) = scaled_alpha;
+    if (scaled_alpha < 0x32) {
+        *(int *)((int)&g_DebrisDynamicMeshes + 8 + debris_idx * 800) = 0x32;
+    }
+
+    if (0x59c00 < rot_x) {
+        rot_x = rot_x + ((rot_x + 0x3ffU) / 0x5a000) * -0x5a000;
+    }
+    if (0x59c00 < rot_y) {
+        rot_y = rot_y + ((rot_y + 0x3ffU) / 0x5a000) * -0x5a000;
+    }
+    if (0x59c00 < rot_z) {
+        rot_z = rot_z + ((rot_z + 0x3ffU) / 0x5a000) * -0x5a000;
+    }
+    if (rot_x < 0) {
+        rot_x = rot_x + ((0x59fffU - rot_x) / 0x5a000) * 0x5a000;
+    }
+    if (rot_y < 0) {
+        rot_y = rot_y + ((0x59fffU - rot_y) / 0x5a000) * 0x5a000;
+    }
+    if (rot_z < 0) {
+        rot_z = rot_z + ((0x59fffU - rot_z) / 0x5a000) * 0x5a000;
+    }
+
+    mesh_stride = debris_idx * 0x20;
+    ftol_result = __ftol();
+    *(int *)(mesh_stride + 4 + g_pFXTransforms) = (int)ftol_result;
+    ftol_result = __ftol();
+    *(int *)(mesh_stride + 8 + g_pFXTransforms) = (int)ftol_result;
+    ftol_result = __ftol();
+    *(int *)(mesh_stride + 0xc + g_pFXTransforms) = (int)ftol_result;
+    *(int *)(mesh_stride + 0x10 + g_pFXTransforms) =
+        (int)(rot_x * 10 + (rot_x * 10 >> 0x1f & 0x3ffU)) >> 10;
+    *(int *)(mesh_stride + 0x14 + g_pFXTransforms) =
+        (int)(rot_y * 10 + (rot_y * 10 >> 0x1f & 0x3ffU)) >> 10;
+    *(int *)(mesh_stride + 0x18 + g_pFXTransforms) =
+        (int)(rot_z * 10 + (rot_z * 10 >> 0x1f & 0x3ffU)) >> 10;
+
+    transform_ptr = (int *)(g_pFXTransforms + mesh_stride);
+    if (transform_ptr[7] == 0) {
+        Lisa_MoveDynamicObject(transform_ptr);
+    } else {
+        update_res = Lisa_UpdateObjectSpatialGrid(transform_ptr);
+        if (update_res != 0) {
+            Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_TRAN_SPRIT_004993b4);
+        }
+    }
+
+    if (max_age <= age + 1) {
+        Lisa_DeleteDynamicObject((int *)(mesh_stride + g_pFXTransforms));
+        *debris = 0;
+    }
+
+    debris[2] = rot_x + rot_vel_x;
+    debris[3] = rot_y + rot_vel_y;
+    debris[4] = rot_z + rot_vel_z;
+    debris[8] = age + 1;
 }
 
 /**
@@ -2802,83 +2840,85 @@ void FX_UpdateCarDebris(int *debris, int debris_idx) {
  * @fidelity ADAPTED
  */
 void FX_SpawnWaterSplashes(void) {
-  int var_i1;
-  __int64 var_l2;
-  __int64 var_l3;
-  __int64 var_l4;
-  var_i1 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-  if (((((*(int *)(g_Vehicles + 0x5d8 + g_ActiveVehicleIndex * 0x484c) == 0x5a) ||
-        (*(int *)(var_i1 + 0x5dc) == 0x5a)) || (*(int *)(var_i1 + 0x5e0) == 0x5a)) ||
-      (*(int *)(var_i1 + 0x5e4) == 0x5a)) &&
-     ((_DAT_0047a340 < *(double *)(var_i1 + 0x118) && (*(int *)(var_i1 + 0x270) == 0)))) {
-    *(int *)(var_i1 + 0x33c) = 6;
-    *(int *)(g_Vehicles + 0x5e8 + g_ActiveVehicleIndex * 0x484c) =
-         *(int *)(g_Vehicles + 0x5d8 + g_ActiveVehicleIndex * 0x484c);
-    *(int *)(g_Vehicles + 0x5ec + g_ActiveVehicleIndex * 0x484c) =
-         *(int *)(g_Vehicles + 0x5dc + g_ActiveVehicleIndex * 0x484c);
-    *(int *)(g_Vehicles + 0x5f0 + g_ActiveVehicleIndex * 0x484c) =
-         *(int *)(g_Vehicles + 0x5e0 + g_ActiveVehicleIndex * 0x484c);
-    *(int *)(g_Vehicles + 0x5f4 + g_ActiveVehicleIndex * 0x484c) =
-         *(int *)(g_Vehicles + 0x5e4 + g_ActiveVehicleIndex * 0x484c);
-  }
-  if (0 < *(int *)(g_Vehicles + 0x33c + g_ActiveVehicleIndex * 0x484c)) {
-    Math_RandomFloat0To1();
-    __ftol();
-    var_i1 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-    if (*(int *)(g_Vehicles + 0x5e8 + g_ActiveVehicleIndex * 0x484c) == 0x5a) {
-      fcos((double)*(double *)(var_i1 + 0xf8));
-      fsin((double)*(double *)(var_i1 + 0xf8));
+    int car_base_offset;
+    __int64 pos_x_ftol;
+    __int64 pos_z_ftol;
+    __int64 ftol_result;
+
+    car_base_offset = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
+    if (((((*(int *)(g_Vehicles + 0x5d8 + g_ActiveVehicleIndex * 0x484c) == 0x5a) ||
+          (*(int *)(car_base_offset + 0x5dc) == 0x5a)) || (*(int *)(car_base_offset + 0x5e0) == 0x5a)) ||
+        (*(int *)(car_base_offset + 0x5e4) == 0x5a)) &&
+       ((k_WaterSplashSpeedThreshold < *(double *)(car_base_offset + 0x118) && (*(int *)(car_base_offset + 0x270) == 0)))) {
+        *(int *)(car_base_offset + 0x33c) = 6;
+        *(int *)(g_Vehicles + 0x5e8 + g_ActiveVehicleIndex * 0x484c) =
+            *(int *)(g_Vehicles + 0x5d8 + g_ActiveVehicleIndex * 0x484c);
+        *(int *)(g_Vehicles + 0x5ec + g_ActiveVehicleIndex * 0x484c) =
+            *(int *)(g_Vehicles + 0x5dc + g_ActiveVehicleIndex * 0x484c);
+        *(int *)(g_Vehicles + 0x5f0 + g_ActiveVehicleIndex * 0x484c) =
+            *(int *)(g_Vehicles + 0x5e0 + g_ActiveVehicleIndex * 0x484c);
+        *(int *)(g_Vehicles + 0x5f4 + g_ActiveVehicleIndex * 0x484c) =
+            *(int *)(g_Vehicles + 0x5e4 + g_ActiveVehicleIndex * 0x484c);
     }
-    if (*(int *)(var_i1 + 0x5ec) == 0x5a) {
-      fcos((double)*(double *)(var_i1 + 0xf8));
-      fsin((double)*(double *)(var_i1 + 0xf8));
-    }
-    if (*(int *)(var_i1 + 0x5f0) == 0x5a) {
-      fcos((double)*(double *)(var_i1 + 0xf8));
-      fsin((double)*(double *)(var_i1 + 0xf8));
-    }
-    if (*(int *)(var_i1 + 0x5f4) == 0x5a) {
-      fcos((double)*(double *)(var_i1 + 0xf8));
-      fsin((double)*(double *)(var_i1 + 0xf8));
-    }
-    var_i1 = (*(int *)(g_PlayerHUDState + 4 + g_ActiveVehicleIndex * 0x4c) == 0) + 1;
-    if (var_i1 != 0) {
-      var_l2 = __ftol();
-      var_l3 = __ftol();
-      do {
+
+    if (0 < *(int *)(g_Vehicles + 0x33c + g_ActiveVehicleIndex * 0x484c)) {
+        int splash_count;
         Math_RandomFloat0To1();
-        Math_RandomFloat0To1();
-        fcos((double)*(double *)(g_Vehicles + 0xf8 + g_ActiveVehicleIndex * 0x484c));
-        fsin((double)*(double *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c + 0xf8));
-        g_ActiveParticle.type = 2;
-        g_ActiveParticle.pos_x = (int)var_l2;
-        var_l4 = __ftol();
-        g_ActiveParticle.pos_y = (int)var_l4;
-        g_ActiveParticle.pos_z = (int)var_l3;
-        var_l4 = __ftol();
-        g_ActiveParticle.vel_x = (int)var_l4;
-        g_ActiveParticle.vel_y = 0x4cc;
-        var_l4 = __ftol();
-        g_ActiveParticle.vel_z = (int)var_l4;
-        g_ActiveParticle.drag = 0x3e1;
-        g_ActiveParticle.gravity = 0xffffff67;
-        Math_RandomFloat0To1();
-        var_l4 = __ftol();
-        g_ActiveParticle.field_24 = (int)var_l4;
-        g_ActiveParticle.field_28 = 0xfffffd9a;
-        g_ActiveParticle.field_2c = 1;
-        g_ActiveParticle.rot_x = 0;
-        g_ActiveParticle.rot_y = 0xf;
-        FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
-        var_i1 = var_i1 + -1;
-      } while (var_i1 != 0);
+        __ftol();
+        car_base_offset = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
+        if (*(int *)(g_Vehicles + 0x5e8 + g_ActiveVehicleIndex * 0x484c) == 0x5a) {
+            fcos((double)*(double *)(car_base_offset + 0xf8));
+            fsin((double)*(double *)(car_base_offset + 0xf8));
+        }
+        if (*(int *)(car_base_offset + 0x5ec) == 0x5a) {
+            fcos((double)*(double *)(car_base_offset + 0xf8));
+            fsin((double)*(double *)(car_base_offset + 0xf8));
+        }
+        if (*(int *)(car_base_offset + 0x5f0) == 0x5a) {
+            fcos((double)*(double *)(car_base_offset + 0xf8));
+            fsin((double)*(double *)(car_base_offset + 0xf8));
+        }
+        if (*(int *)(car_base_offset + 0x5f4) == 0x5a) {
+            fcos((double)*(double *)(car_base_offset + 0xf8));
+            fsin((double)*(double *)(car_base_offset + 0xf8));
+        }
+        splash_count = (*(int *)(g_PlayerHUDState + 4 + g_ActiveVehicleIndex * 0x4c) == 0) + 1;
+        if (splash_count != 0) {
+            pos_x_ftol = __ftol();
+            pos_z_ftol = __ftol();
+            do {
+                Math_RandomFloat0To1();
+                Math_RandomFloat0To1();
+                fcos((double)*(double *)(g_Vehicles + 0xf8 + g_ActiveVehicleIndex * 0x484c));
+                fsin((double)*(double *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c + 0xf8));
+                g_ActiveParticle.type = 2;
+                g_ActiveParticle.pos_x = (int)pos_x_ftol;
+                ftol_result = __ftol();
+                g_ActiveParticle.pos_y = (int)ftol_result;
+                g_ActiveParticle.pos_z = (int)pos_z_ftol;
+                ftol_result = __ftol();
+                g_ActiveParticle.vel_x = (int)ftol_result;
+                g_ActiveParticle.vel_y = 0x4cc;
+                ftol_result = __ftol();
+                g_ActiveParticle.vel_z = (int)ftol_result;
+                g_ActiveParticle.drag = 0x3e1;
+                g_ActiveParticle.gravity = 0xffffff67;
+                Math_RandomFloat0To1();
+                ftol_result = __ftol();
+                g_ActiveParticle.field_24 = (int)ftol_result;
+                g_ActiveParticle.field_28 = 0xfffffd9a;
+                g_ActiveParticle.field_2c = 1;
+                g_ActiveParticle.rot_x = 0;
+                g_ActiveParticle.rot_y = 0xf;
+                FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
+                splash_count = splash_count - 1;
+            } while (splash_count != 0);
+        }
     }
-  }
-  var_i1 = *(int *)(g_Vehicles + 0x33c + g_ActiveVehicleIndex * 0x484c);
-  if (0 < var_i1) {
-    *(int *)(g_Vehicles + 0x33c + g_ActiveVehicleIndex * 0x484c) = var_i1 + -1;
-  }
-  return;
+
+    if (0 < *(int *)(g_Vehicles + 0x33c + g_ActiveVehicleIndex * 0x484c)) {
+        *(int *)(g_Vehicles + 0x33c + g_ActiveVehicleIndex * 0x484c) -= 1;
+    }
 }
 
 /**
@@ -2886,93 +2926,93 @@ void FX_SpawnWaterSplashes(void) {
  * @fidelity ADAPTED
  */
 void FX_SpawnTireDirtDebris(void) {
-  int var_i1;
-  int var_i2;
-  __int64 var_l3;
-  __int64 var_l4;
-  int var_24;
-  if ((_DAT_0047a380 < *(double *)(g_Vehicles + 0x118 + g_ActiveVehicleIndex * 0x484c)) &&
-     (*(int *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c + 0x270) == 0)) {
-    var_24 = 0;
-    do {
-      *(int *)(g_Vehicles + 0x360 + g_ActiveVehicleIndex * 0x484c) = 0;
-      var_i2 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-      var_i1 = *(int *)(g_Vehicles + 0x150 + g_ActiveVehicleIndex * 0x484c);
-      if (((((var_i1 == 6) || (var_i1 == 0x10)) || (var_i1 == 0x1a)) || (DAT_004949b0 == 1)) &&
-         (var_24 == 0)) {
-        fcos((double)*(double *)(var_i2 + 0xf8));
-        fsin((double)*(double *)(var_i2 + 0xf8));
-        *(int *)(var_i2 + 0x360) = 1;
-      }
-      var_i2 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-      var_i1 = *(int *)(var_i2 + 0x154);
-      if ((((var_i1 == 6) || (var_i1 == 0x10)) || ((var_i1 == 0x1a || (DAT_004949b0 == 1)))) &&
-         (var_24 == 1)) {
-        fcos((double)*(double *)(var_i2 + 0xf8));
-        fsin((double)*(double *)(var_i2 + 0xf8));
-        *(int *)(var_i2 + 0x360) = 1;
-      }
-      var_i2 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-      var_i1 = *(int *)(var_i2 + 0x158);
-      if ((((var_i1 == 6) || (var_i1 == 0x10)) || ((var_i1 == 0x1a || (DAT_004949b0 == 1)))) &&
-         (var_24 == 2)) {
-        fcos((double)*(double *)(var_i2 + 0xf8));
-        fsin((double)*(double *)(var_i2 + 0xf8));
-        *(int *)(var_i2 + 0x360) = 1;
-      }
-      var_i2 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-      var_i1 = *(int *)(var_i2 + 0x15c);
-      if (((((var_i1 == 6) || (var_i1 == 0x10)) || (var_i1 == 0x1a)) || (DAT_004949b0 == 1)) &&
-         (var_24 == 3)) {
-        fcos((double)*(double *)(var_i2 + 0xf8));
-        fsin((double)*(double *)(var_i2 + 0xf8));
-        *(int *)(var_i2 + 0x360) = 1;
-      }
-      if (*(int *)(g_Vehicles + 0x360 + g_ActiveVehicleIndex * 0x484c) == 1) {
-        var_i2 = 2;
-        var_l3 = __ftol();
+    int surface_code;
+    int car_base_offset;
+    __int64 vel_y_ftol;
+    __int64 ftol_result;
+    int wheel_idx;
+
+    if ((k_TireDirtSpeedThreshold < *(double *)(g_Vehicles + 0x118 + g_ActiveVehicleIndex * 0x484c)) &&
+       (*(int *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c + 0x270) == 0)) {
+        wheel_idx = 0;
         do {
-          Math_RandomFloat0To1();
-          Math_RandomFloat0To1();
-          g_ActiveParticle.type = 8;
-          var_l4 = __ftol();
-          g_ActiveParticle.pos_x = (int)var_l4;
-          var_l4 = __ftol();
-          g_ActiveParticle.pos_y = (int)var_l4;
-          var_l4 = __ftol();
-          g_ActiveParticle.pos_z = (int)var_l4;
-          var_l4 = __ftol();
-          g_ActiveParticle.vel_x = (int)var_l4;
-          g_ActiveParticle.vel_y = (int)var_l3;
-          var_l4 = __ftol();
-          g_ActiveParticle.vel_z = (int)var_l4;
-          g_ActiveParticle.rot_x = 0;
-          g_ActiveParticle.rot_y = 0;
-          g_ActiveParticle.rot_z = 0;
-          g_ActiveParticle.drag = 0x3d7;
-          g_ActiveParticle.gravity = 0xffffff67;
-          g_ActiveParticle.field_24 = 0x1ec00;
-          g_ActiveParticle.field_28 = 0xffffffe0;
-          g_ActiveParticle.field_2c = 1;
-          Math_RandomFloat0To1();
-          var_l4 = __ftol();
-          g_ActiveParticle.field_3c = (int)var_l4;
-          Math_RandomFloat0To1();
-          var_l4 = __ftol();
-          g_ActiveParticle.field_40 = (int)var_l4;
-          Math_RandomFloat0To1();
-          var_l4 = __ftol();
-          g_ActiveParticle.field_44 = (int)var_l4;
-          g_ActiveParticle.field_48 = 0;
-          g_ActiveParticle.field_4c = 0x3c;
-          FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
-          var_i2 = var_i2 + -1;
-        } while (var_i2 != 0);
-      }
-      var_24 = var_24 + 1;
-    } while (var_24 < 4);
-  }
-  return;
+            *(int *)(g_Vehicles + 0x360 + g_ActiveVehicleIndex * 0x484c) = 0;
+            car_base_offset = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
+            surface_code = *(int *)(g_Vehicles + 0x150 + g_ActiveVehicleIndex * 0x484c);
+            if (((((surface_code == 6) || (surface_code == 0x10)) || (surface_code == 0x1a)) || (g_ForceDirtDebris == 1)) &&
+               (wheel_idx == 0)) {
+                fcos((double)*(double *)(car_base_offset + 0xf8));
+                fsin((double)*(double *)(car_base_offset + 0xf8));
+                *(int *)(car_base_offset + 0x360) = 1;
+            }
+            car_base_offset = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
+            surface_code = *(int *)(car_base_offset + 0x154);
+            if ((((surface_code == 6) || (surface_code == 0x10)) || ((surface_code == 0x1a || (g_ForceDirtDebris == 1)))) &&
+               (wheel_idx == 1)) {
+                fcos((double)*(double *)(car_base_offset + 0xf8));
+                fsin((double)*(double *)(car_base_offset + 0xf8));
+                *(int *)(car_base_offset + 0x360) = 1;
+            }
+            car_base_offset = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
+            surface_code = *(int *)(car_base_offset + 0x158);
+            if ((((surface_code == 6) || (surface_code == 0x10)) || ((surface_code == 0x1a || (g_ForceDirtDebris == 1)))) &&
+               (wheel_idx == 2)) {
+                fcos((double)*(double *)(car_base_offset + 0xf8));
+                fsin((double)*(double *)(car_base_offset + 0xf8));
+                *(int *)(car_base_offset + 0x360) = 1;
+            }
+            car_base_offset = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
+            surface_code = *(int *)(car_base_offset + 0x15c);
+            if (((((surface_code == 6) || (surface_code == 0x10)) || (surface_code == 0x1a)) || (g_ForceDirtDebris == 1)) &&
+               (wheel_idx == 3)) {
+                fcos((double)*(double *)(car_base_offset + 0xf8));
+                fsin((double)*(double *)(car_base_offset + 0xf8));
+                *(int *)(car_base_offset + 0x360) = 1;
+            }
+            if (*(int *)(g_Vehicles + 0x360 + g_ActiveVehicleIndex * 0x484c) == 1) {
+                int particle_batch = 2;
+                vel_y_ftol = __ftol();
+                do {
+                    Math_RandomFloat0To1();
+                    Math_RandomFloat0To1();
+                    g_ActiveParticle.type = 8;
+                    ftol_result = __ftol();
+                    g_ActiveParticle.pos_x = (int)ftol_result;
+                    ftol_result = __ftol();
+                    g_ActiveParticle.pos_y = (int)ftol_result;
+                    ftol_result = __ftol();
+                    g_ActiveParticle.pos_z = (int)ftol_result;
+                    ftol_result = __ftol();
+                    g_ActiveParticle.vel_x = (int)ftol_result;
+                    g_ActiveParticle.vel_y = (int)vel_y_ftol;
+                    ftol_result = __ftol();
+                    g_ActiveParticle.vel_z = (int)ftol_result;
+                    g_ActiveParticle.rot_x = 0;
+                    g_ActiveParticle.rot_y = 0;
+                    g_ActiveParticle.rot_z = 0;
+                    g_ActiveParticle.drag = 0x3d7;
+                    g_ActiveParticle.gravity = 0xffffff67;
+                    g_ActiveParticle.field_24 = 0x1ec00;
+                    g_ActiveParticle.field_28 = 0xffffffe0;
+                    g_ActiveParticle.field_2c = 1;
+                    Math_RandomFloat0To1();
+                    ftol_result = __ftol();
+                    g_ActiveParticle.field_3c = (int)ftol_result;
+                    Math_RandomFloat0To1();
+                    ftol_result = __ftol();
+                    g_ActiveParticle.field_40 = (int)ftol_result;
+                    Math_RandomFloat0To1();
+                    ftol_result = __ftol();
+                    g_ActiveParticle.field_44 = (int)ftol_result;
+                    g_ActiveParticle.field_48 = 0;
+                    g_ActiveParticle.field_4c = 0x3c;
+                    FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
+                    particle_batch = particle_batch - 1;
+                } while (particle_batch != 0);
+            }
+            wheel_idx = wheel_idx + 1;
+        } while (wheel_idx < 4);
+    }
 }
 
 /**
@@ -2980,176 +3020,64 @@ void FX_SpawnTireDirtDebris(void) {
  * @fidelity ADAPTED
  */
 void FX_SpawnLandingDustPuffs(void) {
-  int var_i1;
-  int var_i2;
-  double var_f3;
-  __int64 var_l4;
-  var_i1 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-  if (*(int *)(g_Vehicles + 0x278 + g_ActiveVehicleIndex * 0x484c) == 1) {
-    var_i2 = *(int *)(var_i1 + 0x158);
-    if (((var_i2 < 0) || (0x27 < var_i2)) &&
-       ((var_i2 = *(int *)(var_i1 + 0x15c), var_i2 < 0 || (0x27 < var_i2)))) {
-      var_i2 = 0;
+    int car_base_offset;
+    int surface_code;
+    double wheel_angle;
+    __int64 ftol_result;
+
+    car_base_offset = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
+    if (*(int *)(g_Vehicles + 0x278 + g_ActiveVehicleIndex * 0x484c) == 1) {
+        surface_code = *(int *)(car_base_offset + 0x158);
+        if (((surface_code < 0) || (0x27 < surface_code)) &&
+           ((surface_code = *(int *)(car_base_offset + 0x15c), surface_code < 0 || (0x27 < surface_code)))) {
+            surface_code = 0;
+        }
+
+        if (((int*)&(g_SurfaceDustFlagTable))[surface_code] == '\x01') {
+            int wheel_idx;
+            for (wheel_idx = 0; wheel_idx < 4; wheel_idx++) {
+                wheel_angle = (double)*(double *)(g_Vehicles + 0xf8 + g_ActiveVehicleIndex * 0x484c) +
+                              (double)k_LandingDustAngularOffset;
+                fcos(wheel_angle);
+                fsin(wheel_angle);
+                g_ActiveParticle.type = 1;
+                ftol_result = __ftol();
+                g_ActiveParticle.pos_x = (int)ftol_result;
+                ftol_result = __ftol();
+                g_ActiveParticle.pos_y = (int)ftol_result;
+                ftol_result = __ftol();
+                g_ActiveParticle.pos_z = (int)ftol_result;
+                Math_RandomFloat0To1();
+                ftol_result = __ftol();
+                g_ActiveParticle.vel_x = (int)ftol_result;
+                g_ActiveParticle.vel_y = 0xfffffc00;
+                Math_RandomFloat0To1();
+                ftol_result = __ftol();
+                g_ActiveParticle.vel_z = (int)ftol_result;
+                g_ActiveParticle.gravity = 0;
+                g_ActiveParticle.drag = 0x400;
+                g_ActiveParticle.field_24 = 4;
+                g_ActiveParticle.field_2c = 0xcc;
+                g_ActiveParticle.field_28 = 0;
+                Math_RandomFloat0To1();
+                ftol_result = __ftol();
+                g_ActiveParticle.rot_x = (int)ftol_result;
+                Math_RandomFloat0To1();
+                ftol_result = __ftol();
+                g_ActiveParticle.rot_y = (int)ftol_result;
+                g_ActiveParticle.field_3c = 0;
+                g_ActiveParticle.field_40 = 0;
+                g_ActiveParticle.field_44 = 0;
+                g_ActiveParticle.field_48 = 0;
+                g_ActiveParticle.field_4c = 0;
+                g_ActiveParticle.life = 0;
+                g_ActiveParticle.rot_z = &g_SmokeParticleDescriptor;
+                g_ActiveParticle.field_58 = 0x28;
+                g_ActiveParticle.field_54 = 0;
+                FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
+            }
+        }
     }
-    if (((int*)&(DAT_00497438))[var_i2] == '\x01') {
-      var_f3 = (double)*(double *)(var_i1 + 0xf8) + (double)_DAT_0047a3c0;
-      fcos(var_f3);
-      fsin(var_f3);
-      g_ActiveParticle.type = 1;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_x = (int)var_l4;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_y = (int)var_l4;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_z = (int)var_l4;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.vel_x = (int)var_l4;
-      g_ActiveParticle.vel_y = 0xfffffc00;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.vel_z = (int)var_l4;
-      g_ActiveParticle.gravity = 0;
-      g_ActiveParticle.drag = 0x400;
-      g_ActiveParticle.field_24 = 4;
-      g_ActiveParticle.field_2c = 0xcc;
-      g_ActiveParticle.field_28 = 0;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.rot_x = (int)var_l4;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.rot_y = (int)var_l4;
-      g_ActiveParticle.field_3c = 0;
-      g_ActiveParticle.field_40 = 0;
-      g_ActiveParticle.field_44 = 0;
-      g_ActiveParticle.field_48 = 0;
-      g_ActiveParticle.field_4c = 0;
-      g_ActiveParticle.life = 0;
-      g_ActiveParticle.field_54 = 0;
-      g_ActiveParticle.rot_z = &DAT_00497ff8;
-      g_ActiveParticle.field_58 = 0x28;
-      FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
-      var_f3 = (double)*(double *)(g_Vehicles + 0xf8 + g_ActiveVehicleIndex * 0x484c) +
-              (double)_DAT_0047a3c0;
-      fcos(var_f3);
-      fsin(var_f3);
-      g_ActiveParticle.type = 1;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_x = (int)var_l4;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_y = (int)var_l4;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_z = (int)var_l4;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.vel_x = (int)var_l4;
-      g_ActiveParticle.vel_y = 0xfffffc00;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.vel_z = (int)var_l4;
-      g_ActiveParticle.gravity = 0;
-      g_ActiveParticle.field_28 = 0;
-      g_ActiveParticle.drag = 0x400;
-      g_ActiveParticle.field_24 = 4;
-      g_ActiveParticle.field_2c = 0xcc;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.rot_x = (int)var_l4;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.rot_y = (int)var_l4;
-      g_ActiveParticle.field_3c = 0;
-      g_ActiveParticle.field_40 = 0;
-      g_ActiveParticle.field_44 = 0;
-      g_ActiveParticle.field_48 = 0;
-      g_ActiveParticle.field_4c = 0;
-      g_ActiveParticle.life = 0;
-      g_ActiveParticle.rot_z = &DAT_00497ff8;
-      g_ActiveParticle.field_58 = 0x28;
-      g_ActiveParticle.field_54 = 0;
-      FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
-      var_f3 = (double)*(double *)(g_Vehicles + 0xf8 + g_ActiveVehicleIndex * 0x484c) +
-              (double)_DAT_0047a3c0;
-      fcos(var_f3);
-      fsin(var_f3);
-      g_ActiveParticle.type = 1;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_x = (int)var_l4;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_y = (int)var_l4;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_z = (int)var_l4;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.vel_x = (int)var_l4;
-      g_ActiveParticle.vel_y = 0xfffffc00;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.vel_z = (int)var_l4;
-      g_ActiveParticle.gravity = 0;
-      g_ActiveParticle.drag = 0x400;
-      g_ActiveParticle.field_24 = 4;
-      g_ActiveParticle.field_2c = 0xcc;
-      g_ActiveParticle.field_28 = 0;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.rot_x = (int)var_l4;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.rot_y = (int)var_l4;
-      g_ActiveParticle.field_3c = 0;
-      g_ActiveParticle.field_40 = 0;
-      g_ActiveParticle.field_44 = 0;
-      g_ActiveParticle.field_48 = 0;
-      g_ActiveParticle.field_4c = 0;
-      g_ActiveParticle.life = 0;
-      g_ActiveParticle.rot_z = &DAT_00497ff8;
-      g_ActiveParticle.field_58 = 0x28;
-      g_ActiveParticle.field_54 = 0;
-      FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
-      var_f3 = (double)*(double *)(g_Vehicles + 0xf8 + g_ActiveVehicleIndex * 0x484c) +
-              (double)_DAT_0047a3c0;
-      fcos(var_f3);
-      fsin(var_f3);
-      g_ActiveParticle.type = 1;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_x = (int)var_l4;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_y = (int)var_l4;
-      var_l4 = __ftol();
-      g_ActiveParticle.pos_z = (int)var_l4;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.vel_x = (int)var_l4;
-      g_ActiveParticle.vel_y = 0xfffffc00;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.vel_z = (int)var_l4;
-      g_ActiveParticle.gravity = 0;
-      g_ActiveParticle.drag = 0x400;
-      g_ActiveParticle.field_24 = 4;
-      g_ActiveParticle.field_2c = 0xcc;
-      g_ActiveParticle.field_28 = 0;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.rot_x = (int)var_l4;
-      Math_RandomFloat0To1();
-      var_l4 = __ftol();
-      g_ActiveParticle.rot_y = (int)var_l4;
-      g_ActiveParticle.field_3c = 0;
-      g_ActiveParticle.field_40 = 0;
-      g_ActiveParticle.field_44 = 0;
-      g_ActiveParticle.field_48 = 0;
-      g_ActiveParticle.field_4c = 0;
-      g_ActiveParticle.life = 0;
-      g_ActiveParticle.rot_z = &DAT_00497ff8;
-      g_ActiveParticle.field_58 = 0x28;
-      g_ActiveParticle.field_54 = 0;
-      FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
-    }
-  }
-  return;
 }
 
 /**
@@ -3157,58 +3085,59 @@ void FX_SpawnLandingDustPuffs(void) {
  * @fidelity ADAPTED
  */
 void FX_SpawnTireSkidSmoke(void) {
-  int var_i1;
-  double var_d2;
-  int var_i3;
-  double var_f4;
-  __int64 var_l5;
-  var_i1 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-  var_i3 = *(int *)(var_i1 + 0x158);
-  if (((var_i3 < 0) || (0x27 < var_i3)) &&
-     ((var_i3 = *(int *)(var_i1 + 0x15c), var_i3 < 0 || (0x27 < var_i3)))) {
-    var_i3 = 0;
-  }
-  if ((((var_i3 == 4) || (var_i3 == 0xe)) || (var_i3 == 0x18)) &&
-     ((_DAT_0047a3e8 < *(double *)(var_i1 + 0x118) && (*(int *)(var_i1 + 0x270) == 0)))) {
-    var_d2 = *(double *)(var_i1 + 0x118) * *(double *)(var_i1 + 0x118) * _DAT_0047a3f0;
-    var_f4 = Math_RandomFloat0To1();
-    if (var_f4 * (double)_DAT_0047a3f8 < (double)var_d2) {
-      g_ActiveParticle.type = 1;
-      var_l5 = __ftol();
-      g_ActiveParticle.pos_x = (int)var_l5;
-      var_l5 = __ftol();
-      g_ActiveParticle.pos_y = (int)var_l5;
-      var_l5 = __ftol();
-      g_ActiveParticle.pos_z = (int)var_l5;
-      g_ActiveParticle.vel_x = 0;
-      Math_RandomFloat0To1();
-      var_l5 = __ftol();
-      g_ActiveParticle.vel_y = (int)var_l5;
-      g_ActiveParticle.vel_z = 0;
-      g_ActiveParticle.drag = 0x3f5;
-      g_ActiveParticle.field_24 = 4;
-      g_ActiveParticle.field_28 = 0x800;
-      g_ActiveParticle.field_2c = 0x3d;
-      g_ActiveParticle.gravity = 0;
-      Math_RandomFloat0To1();
-      var_l5 = __ftol();
-      g_ActiveParticle.rot_x = (int)var_l5;
-      Math_RandomFloat0To1();
-      var_l5 = __ftol();
-      g_ActiveParticle.rot_y = (int)var_l5;
-      g_ActiveParticle.field_3c = 0;
-      g_ActiveParticle.field_40 = 0;
-      g_ActiveParticle.field_44 = 0;
-      g_ActiveParticle.field_48 = 0;
-      g_ActiveParticle.field_4c = 0;
-      g_ActiveParticle.life = 0;
-      g_ActiveParticle.rot_z = &DAT_00497ff8;
-      g_ActiveParticle.field_58 = 100;
-      g_ActiveParticle.field_54 = 0;
-      FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
+    int car_base_offset;
+    double skid_energy;
+    int surface_code;
+    double rand_val;
+    __int64 ftol_result;
+
+    car_base_offset = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
+    surface_code = *(int *)(car_base_offset + 0x158);
+    if (((surface_code < 0) || (0x27 < surface_code)) &&
+       ((surface_code = *(int *)(car_base_offset + 0x15c), surface_code < 0 || (0x27 < surface_code)))) {
+        surface_code = 0;
     }
-  }
-  return;
+
+    if ((((surface_code == 4) || (surface_code == 0xe)) || (surface_code == 0x18)) &&
+       ((k_SkidSmokeSpeedThreshold < *(double *)(car_base_offset + 0x118) && (*(int *)(car_base_offset + 0x270) == 0)))) {
+        skid_energy = *(double *)(car_base_offset + 0x118) * *(double *)(car_base_offset + 0x118) * k_SkidSmokeProbabilityFactor;
+        rand_val = Math_RandomFloat0To1();
+        if (rand_val * (double)k_SkidSmokeRandomScale < (double)skid_energy) {
+            g_ActiveParticle.type = 1;
+            ftol_result = __ftol();
+            g_ActiveParticle.pos_x = (int)ftol_result;
+            ftol_result = __ftol();
+            g_ActiveParticle.pos_y = (int)ftol_result;
+            ftol_result = __ftol();
+            g_ActiveParticle.pos_z = (int)ftol_result;
+            g_ActiveParticle.vel_x = 0;
+            Math_RandomFloat0To1();
+            ftol_result = __ftol();
+            g_ActiveParticle.vel_y = (int)ftol_result;
+            g_ActiveParticle.vel_z = 0;
+            g_ActiveParticle.drag = 0x3f5;
+            g_ActiveParticle.field_24 = 4;
+            g_ActiveParticle.field_28 = 0x800;
+            g_ActiveParticle.field_2c = 0x3d;
+            g_ActiveParticle.gravity = 0;
+            Math_RandomFloat0To1();
+            ftol_result = __ftol();
+            g_ActiveParticle.rot_x = (int)ftol_result;
+            Math_RandomFloat0To1();
+            ftol_result = __ftol();
+            g_ActiveParticle.rot_y = (int)ftol_result;
+            g_ActiveParticle.field_3c = 0;
+            g_ActiveParticle.field_40 = 0;
+            g_ActiveParticle.field_44 = 0;
+            g_ActiveParticle.field_48 = 0;
+            g_ActiveParticle.field_4c = 0;
+            g_ActiveParticle.life = 0;
+            g_ActiveParticle.rot_z = &g_SmokeParticleDescriptor;
+            g_ActiveParticle.field_58 = 100;
+            g_ActiveParticle.field_54 = 0;
+            FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
+        }
+    }
 }
 
 /**
@@ -3248,7 +3177,7 @@ void FX_UpdateWeatherGeometry(void) {
             var_pi4 = DAT_00563c30;
           }
           if ((double)(DAT_00563cf4 + 2) < _DAT_005285d8) {
-            if (((((int*)&(DAT_00552f30))[var_18] == 1) && (g_RaceTimer < 0.0)) &&
+            if (((((int*)&(g_WeatherActive))[var_18] == 1) && (g_RaceTimer < 0.0)) &&
                (var_i9 = var_pi4[1], (double)var_i9 < _DAT_0047a458)) {
               var_i10 = var_i9 / 2;
               if ((DAT_0054f98c == 1) && (g_HudEnabled == 1)) {
@@ -3313,8 +3242,8 @@ void FX_UpdateWeatherGeometry(void) {
                     var_pi8[4] = 0x1f00;
                     var_pi8[5] = 0x9400;
                     var_pi8[6] = 0;
-                    var_pi8[7] = DAT_00552d80 * 100;
-                    var_pi8[8] = DAT_00552f5c * 100;
+                    var_pi8[7] = g_CameraFovScaleX * 100;
+                    var_pi8[8] = g_CameraFovScaleY * 100;
                   }
                   var_pi8 = var_pi8 + 9;
                   var_pi5 = var_pi5 + 6;
@@ -3323,7 +3252,7 @@ void FX_UpdateWeatherGeometry(void) {
                 } while (var_i6 < var_i9);
               }
             }
-            if (((((int*)&(DAT_00552f30))[var_18] == 0) || (0.0 <= g_RaceTimer)) && (0 < var_pi4[1])) {
+            if (((((int*)&(g_WeatherActive))[var_18] == 0) || (0.0 <= g_RaceTimer)) && (0 < var_pi4[1])) {
               if (g_HudEnabled == 1) {
                 var_i9 = *var_pi4 + -4;
 LAB_00434c38:
@@ -3361,8 +3290,8 @@ LAB_00434c38:
                     var_pi8[4] = 0x1f00;
                     var_pi8[5] = 0x9400;
                     var_pi8[6] = 0;
-                    var_pi8[7] = DAT_00552d80 * 100;
-                    var_pi8[8] = DAT_00552f5c * 100;
+                    var_pi8[7] = g_CameraFovScaleX * 100;
+                    var_pi8[8] = g_CameraFovScaleY * 100;
                   }
                   var_pi8 = var_pi8 + 9;
                   var_pi5 = var_pi5 + 6;
@@ -3448,7 +3377,7 @@ LAB_00434c38:
             var_l12 = __ftol();
             *(int *)(var_pu3 + 0xc) = (int)var_l12;
           }
-          if (((g_HudEnabled == 1) && (((int*)&(DAT_00552f30))[var_18] == 1)) && (DAT_00553084 == 1)) {
+          if (((g_HudEnabled == 1) && (((int*)&(g_WeatherActive))[var_18] == 1)) && (DAT_00553084 == 1)) {
             Math_RandomFloat0To1();
             var_l12 = __ftol();
             if ((int)var_l12 == 0) {
@@ -3506,10 +3435,10 @@ LAB_00434c38:
       do {
         var_pu3 = Audio_GetVoice(*(int *)((int)&DAT_00525e50 + var_i9));
         if (var_pu3 != (char *)0x0) {
-          if ((*(int *)((int)&DAT_00552f30 + var_i9) == 1) && (*(int *)(var_pu3 + 0xc) < 30000)) {
+          if ((*(int *)((int)&g_WeatherActive + var_i9) == 1) && (*(int *)(var_pu3 + 0xc) < 30000)) {
             *(int *)(var_pu3 + 0xc) = *(int *)(var_pu3 + 0xc) + 0x9c4;
           }
-          else if ((*(int *)((int)&DAT_00552f30 + var_i9) == 0) &&
+          else if ((*(int *)((int)&g_WeatherActive + var_i9) == 0) &&
                   ((0 < *(int *)(var_pu3 + 0xc) &&
                    (var_i6 = *(int *)(var_pu3 + 0xc) + -0x9c4, *(int *)(var_pu3 + 0xc) = var_i6,
                    var_i6 < 0)))) {
@@ -3566,7 +3495,7 @@ void FX_FrameTick(void) {
       var_pd2 = (double *)(g_Vehicles + 0x60c + g_ActiveVehicleIndex * 0x484c);
       if ((0.0 < *(double *)(g_Vehicles + 0x60c + g_ActiveVehicleIndex * 0x484c)) &&
          (*var_pd2 < g_Const_0_05)) {
-        *var_pd2 = *var_pd2 + _DAT_0047a510;
+        *var_pd2 = *var_pd2 + k_SplashAccumIncrement;
       }
       g_ActiveVehicleIndex = g_ActiveVehicleIndex + 1;
     } while (g_ActiveVehicleIndex < g_NumRacers);
@@ -3575,7 +3504,7 @@ void FX_FrameTick(void) {
   if ((((g_IsSplitScreen == 0) && (*(int *)(g_Vehicles + 0x528) == 1)) ||
       ((g_IsSplitScreen == 1 &&
        ((*(int *)(g_Vehicles + 0x528) == 1 && (*(int *)(g_Vehicles + 0x4d74) == 1)))))) &&
-     ((_DAT_0047a518 <= g_RaceTimer &&
+     ((k_TurboProgressMinTimer <= g_RaceTimer &&
       ((DAT_00563c60 == 0 && (DAT_005db038 = DAT_005db038 + 10, 0x13f < DAT_005db038)))))) {
     DAT_005db038 = 0x13f;
     if (g_GameMode == 3) {
@@ -3602,8 +3531,8 @@ LAB_00435673:
     var_pi4[10] = var_pi4[10] + 1;
     var_pi4 = var_pi5;
   } while (var_pi5 < &DAT_006192c8);
-  if ((g_PlayerCarChoice == 7) && (_DAT_00552f68 < _DAT_0047a520)) {
-    _DAT_00552f68 = _DAT_00552f68 + _DAT_0047a528;
+  if ((g_PlayerCarChoice == 7) && (_DAT_00552f68 < k_SpecialCarBonusLimit)) {
+    _DAT_00552f68 = _DAT_00552f68 + k_SpecialCarBonusStep;
   }
   return;
 }
@@ -3613,47 +3542,43 @@ LAB_00435673:
  * @fidelity ADAPTED
  */
 void Pos_InitAnimatedObjects(void) {
-  int *var_pi1;
-  int *var_pi2;
-  int var_i3;
-  int var_i4;
-  int var_i5;
-  int *var_pi6;
-  int var_i7;
-  int var_i8;
-  int *var_pi9;
-  var_i7 = 0;
-  if (0 < *g_pActivePLC) {
-    do {
-      var_i3 = *(int *)(g_pActivePOS + var_i7 * 4);
-      if (var_i3 != -1) {
-        var_pi2 = (int *)(g_pActivePOS + (var_i3 + var_i7) * 4);
-        var_i3 = var_pi2[2];
-        var_i4 = var_pi2[3];
-        var_i5 = var_pi2[4];
-        var_pi1 = var_pi2 + 2;
-        var_i8 = 0;
-        if (*var_pi2 != 1 && -1 < *var_pi2 + -1) {
-          var_pi6 = var_pi1;
-          var_pi9 = var_pi2 + 8;
-          do {
-            var_i8 = var_i8 + 1;
-            *var_pi6 = *var_pi6 - *var_pi9;
-            var_pi6[1] = var_pi6[1] - var_pi9[1];
-            var_pi6[2] = var_pi6[2] - var_pi9[2];
-            var_pi6 = var_pi6 + 6;
-            var_pi9 = var_pi9 + 6;
-          } while (var_i8 < *var_pi2 + -1);
+    int *anim_node;
+    int *keyframe_ptr;
+    int delta_x, delta_y, delta_z;
+    int *base_node;
+    int anim_idx;
+    int frame_idx;
+    int *next_keyframe;
+
+    if (0 < *g_pActivePLC) {
+        for (anim_idx = 0; anim_idx < *g_pActivePLC; anim_idx++) {
+            int node_offset = *(int *)(g_pActivePOS + anim_idx * 4);
+            if (node_offset != -1) {
+                keyframe_ptr = (int *)(g_pActivePOS + (node_offset + anim_idx) * 4);
+                delta_x = keyframe_ptr[2];
+                delta_y = keyframe_ptr[3];
+                delta_z = keyframe_ptr[4];
+                base_node = keyframe_ptr + 2;
+                frame_idx = 0;
+                if (*keyframe_ptr != 1 && -1 < *keyframe_ptr - 1) {
+                    anim_node = base_node;
+                    next_keyframe = keyframe_ptr + 8;
+                    do {
+                        frame_idx = frame_idx + 1;
+                        *anim_node = *anim_node - *next_keyframe;
+                        anim_node[1] = anim_node[1] - next_keyframe[1];
+                        anim_node[2] = anim_node[2] - next_keyframe[2];
+                        anim_node = anim_node + 6;
+                        next_keyframe = next_keyframe + 6;
+                    } while (frame_idx < *keyframe_ptr - 1);
+                }
+                keyframe_ptr = base_node + frame_idx * 6;
+                *keyframe_ptr = base_node[frame_idx * 6] - delta_x;
+                keyframe_ptr[1] = keyframe_ptr[1] - delta_y;
+                keyframe_ptr[2] = keyframe_ptr[2] - delta_z;
+            }
         }
-        var_pi2 = var_pi1 + var_i8 * 6;
-        *var_pi2 = var_pi1[var_i8 * 6] - var_i3;
-        var_pi2[1] = var_pi2[1] - var_i4;
-        var_pi2[2] = var_pi2[2] - var_i5;
-      }
-      var_i7 = var_i7 + 1;
-    } while (var_i7 < *g_pActivePLC);
-  }
-  return;
+    }
 }
 
 /**
@@ -3661,57 +3586,57 @@ void Pos_InitAnimatedObjects(void) {
  * @fidelity ADAPTED
  */
 void Pos_UpdateAnimatedObjects(void) {
-  int var_i1;
-  int *var_pi2;
-  int var_i3;
-  int var_i4;
-  int var_i5;
-  int var_i6;
-  var_i5 = 0;
-  var_i6 = 0;
-  if (0 < *g_pActivePLC) {
-    var_i4 = 0;
-    do {
-      if ((*(int *)(g_pActivePOS + var_i5) != -1) && (*(int *)(DAT_0054f908 + 0x1c + var_i4) == 1)) {
-        var_i3 = *(int *)(g_pActivePOS + var_i5) + var_i6;
-        var_i1 = g_pActivePOS + var_i3 * 4;
-        if (*(int *)(g_pActivePOS + 4 + var_i3 * 4) == *(int *)(g_pActivePOS + var_i3 * 4)) {
-          *(int *)(var_i1 + 4) = 0;
+    int keyframe_base;
+    int *transform_field;
+    int frame_pos;
+    int entity_offset;
+    int pos_table_offset;
+    int plc_idx;
+
+    pos_table_offset = 0;
+    if (0 < *g_pActivePLC) {
+        entity_offset = 0;
+        for (plc_idx = 0; plc_idx < *g_pActivePLC; plc_idx++) {
+            if ((*(int *)(g_pActivePOS + pos_table_offset) != -1) &&
+                (*(int *)((int)&g_pAnimatedSceneryObjects + 0x1c + entity_offset) == 1)) {
+                frame_pos = *(int *)(g_pActivePOS + pos_table_offset) + plc_idx;
+                keyframe_base = g_pActivePOS + frame_pos * 4;
+                if (*(int *)(g_pActivePOS + 4 + frame_pos * 4) == *(int *)(g_pActivePOS + frame_pos * 4)) {
+                    *(int *)(keyframe_base + 4) = 0;
+                }
+                frame_pos = keyframe_base + 8 + *(int *)(keyframe_base + 4) * 0x18;
+                transform_field = (int *)((int)&g_pAnimatedSceneryObjects + 4 + entity_offset);
+                *transform_field = *transform_field - *(int *)(keyframe_base + 8 + *(int *)(keyframe_base + 4) * 0x18);
+                transform_field = (int *)((int)&g_pAnimatedSceneryObjects + 8 + entity_offset);
+                *transform_field = *transform_field - *(int *)(frame_pos + 4);
+                transform_field = (int *)((int)&g_pAnimatedSceneryObjects + 0xc + entity_offset);
+                *transform_field = *transform_field - *(int *)(frame_pos + 8);
+                *(int *)((int)&g_pAnimatedSceneryObjects + 0x10 + entity_offset) = *(int *)(frame_pos + 0xc);
+                *(int *)((int)&g_pAnimatedSceneryObjects + 0x14 + entity_offset) = *(int *)(frame_pos + 0x10);
+                *(int *)((int)&g_pAnimatedSceneryObjects + 0x18 + entity_offset) = *(int *)(frame_pos + 0x14);
+
+                frame_pos = *(int *)((int)&g_pAnimatedSceneryObjects + 0x10 + entity_offset);
+                if (0xe0f < frame_pos) {
+                    *(int *)((int)&g_pAnimatedSceneryObjects + 0x10 + entity_offset) = frame_pos - 0xe10;
+                }
+                frame_pos = *(int *)((int)&g_pAnimatedSceneryObjects + 0x14 + entity_offset);
+                if (0xe0f < frame_pos) {
+                    *(int *)((int)&g_pAnimatedSceneryObjects + 0x14 + entity_offset) = frame_pos - 0xe10;
+                }
+                frame_pos = *(int *)((int)&g_pAnimatedSceneryObjects + 0x18 + entity_offset);
+                if (0xe0f < frame_pos) {
+                    *(int *)((int)&g_pAnimatedSceneryObjects + 0x18 + entity_offset) = frame_pos - 0xe10;
+                }
+
+                if (Lisa_UpdateObjectSpatialGrid((int *)((int)&g_pAnimatedSceneryObjects + entity_offset)) != 0) {
+                    Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_ANIM_OBJ_004994ac);
+                }
+                *(int *)(keyframe_base + 4) = *(int *)(keyframe_base + 4) + 1;
+            }
+            entity_offset = entity_offset + 0x20;
+            pos_table_offset = pos_table_offset + 4;
         }
-        var_i3 = var_i1 + 8 + *(int *)(var_i1 + 4) * 0x18;
-        var_pi2 = (int *)(DAT_0054f908 + 4 + var_i4);
-        *var_pi2 = *var_pi2 - *(int *)(var_i1 + 8 + *(int *)(var_i1 + 4) * 0x18);
-        var_pi2 = (int *)(DAT_0054f908 + 8 + var_i4);
-        *var_pi2 = *var_pi2 - *(int *)(var_i3 + 4);
-        var_pi2 = (int *)(DAT_0054f908 + 0xc + var_i4);
-        *var_pi2 = *var_pi2 - *(int *)(var_i3 + 8);
-        *(int *)(DAT_0054f908 + 0x10 + var_i4) = *(int *)(var_i3 + 0xc);
-        *(int *)(DAT_0054f908 + 0x14 + var_i4) = *(int *)(var_i3 + 0x10);
-        *(int *)(DAT_0054f908 + 0x18 + var_i4) = *(int *)(var_i3 + 0x14);
-        var_i3 = *(int *)(DAT_0054f908 + 0x10 + var_i4);
-        if (0xe0f < var_i3) {
-          *(int *)(DAT_0054f908 + 0x10 + var_i4) = var_i3 + -0xe10;
-        }
-        var_i3 = *(int *)(DAT_0054f908 + 0x14 + var_i4);
-        if (0xe0f < var_i3) {
-          *(int *)(DAT_0054f908 + 0x14 + var_i4) = var_i3 + -0xe10;
-        }
-        var_i3 = *(int *)(DAT_0054f908 + 0x18 + var_i4);
-        if (0xe0f < var_i3) {
-          *(int *)(DAT_0054f908 + 0x18 + var_i4) = var_i3 + -0xe10;
-        }
-        var_i3 = Lisa_UpdateObjectSpatialGrid((int *)(DAT_0054f908 + var_i4));
-        if (var_i3 != 0) {
-          Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_ANIM_OBJ_004994ac);
-        }
-        *(int *)(var_i1 + 4) = *(int *)(var_i1 + 4) + 1;
-      }
-      var_i6 = var_i6 + 1;
-      var_i4 = var_i4 + 0x20;
-      var_i5 = var_i5 + 4;
-    } while (var_i6 < *g_pActivePLC);
-  }
-  return;
+    }
 }
 
 /**
@@ -3720,7 +3645,7 @@ void Pos_UpdateAnimatedObjects(void) {
  */
 double Math_LookupTrigAngle(double angle) {
     int index = (int)(angle * g_Const_200_0);
-    return (double)*(int *)(&DAT_004944e0 + index * 4) * g_Const_0_005;
+    return (double)*(int *)(&g_TrigAngleTable[index]) * g_Const_0_005;
 }
 
 /**
@@ -4138,63 +4063,60 @@ LAB_00435a9e:
  * @fidelity ADAPTED
  */
 int Race_FindFocusedVehicle(void) {
-  int var_i1;
-  int *var_pi2;
-  int var_i3;
-  int var_4;
-  if (g_GameMode == 3) {
-    var_i1 = 1;
-    var_i3 = 0;
-    if (0 < g_NumRacers) {
-      var_pi2 = (int *)(g_Vehicles + 0x39c);
-      do {
-        if ((var_pi2[99] == 0) && (var_i1 < *var_pi2)) {
-          var_i1 = *var_pi2;
-          var_4 = var_i3;
+    int top_rank;
+    int *car_rank_ptr;
+    int racer_idx;
+    int best_car_idx;
+
+    if (g_GameMode == 3) {
+        top_rank = 1;
+        best_car_idx = 0;
+        if (0 < g_NumRacers) {
+            car_rank_ptr = (int *)(g_Vehicles + 0x39c);
+            for (racer_idx = 0; racer_idx < g_NumRacers; racer_idx++) {
+                if ((car_rank_ptr[99] == 0) && (top_rank < *car_rank_ptr)) {
+                    top_rank = *car_rank_ptr;
+                    best_car_idx = racer_idx;
+                }
+                car_rank_ptr = (int *)((char *)car_rank_ptr + 0x484c);
+            }
         }
-        var_pi2 = var_pi2 + 0x1213;
-        var_i3 = var_i3 + 1;
-      } while (var_i3 < g_NumRacers);
-    }
-    if (var_i1 == 1) {
-      var_i1 = g_NumRacers + 1;
-    }
-    if (var_4 == g_MenuCursorPos) {
-      DAT_004949a8 = 0;
-    }
-    else {
-      DAT_004949a8 = DAT_004949a8 + 1;
-      if (0x14 < DAT_004949a8) {
-        g_MenuCursorPos = var_4;
-        return var_i1;
-      }
-    }
-  }
-  else {
-    var_i3 = 0;
-    var_i1 = g_NumRacers + 1;
-    if (0 < g_NumRacers) {
-      var_pi2 = (int *)(g_Vehicles + 0x39c);
-      do {
-        if ((var_pi2[99] == 0) && (*var_pi2 < var_i1)) {
-          var_i1 = *var_pi2;
-          var_4 = var_i3;
+        if (top_rank == 1) {
+            top_rank = g_NumRacers + 1;
         }
-        var_pi2 = var_pi2 + 0x1213;
-        var_i3 = var_i3 + 1;
-      } while (var_i3 < g_NumRacers);
+        if (best_car_idx == g_MenuCursorPos) {
+            g_CameraTargetHysteresis = 0;
+        } else {
+            g_CameraTargetHysteresis = g_CameraTargetHysteresis + 1;
+            if (0x14 < g_CameraTargetHysteresis) {
+                g_MenuCursorPos = best_car_idx;
+                return top_rank;
+            }
+        }
+    } else {
+        top_rank = g_NumRacers + 1;
+        best_car_idx = 0;
+        if (0 < g_NumRacers) {
+            car_rank_ptr = (int *)(g_Vehicles + 0x39c);
+            for (racer_idx = 0; racer_idx < g_NumRacers; racer_idx++) {
+                if ((car_rank_ptr[99] == 0) && (*car_rank_ptr < top_rank)) {
+                    top_rank = *car_rank_ptr;
+                    best_car_idx = racer_idx;
+                }
+                car_rank_ptr = (int *)((char *)car_rank_ptr + 0x484c);
+            }
+        }
+        if (best_car_idx == g_MenuCursorPos) {
+            g_CameraTargetHysteresis = 0;
+            return top_rank;
+        }
+        g_CameraTargetHysteresis = g_CameraTargetHysteresis + 1;
+        if (0x14 < g_CameraTargetHysteresis) {
+            g_MenuCursorPos = best_car_idx;
+            return top_rank;
+        }
     }
-    if (var_4 == g_MenuCursorPos) {
-      DAT_004949a8 = 0;
-      return var_i1;
-    }
-    DAT_004949a8 = DAT_004949a8 + 1;
-    if (0x14 < DAT_004949a8) {
-      g_MenuCursorPos = var_4;
-      return var_i1;
-    }
-  }
-  return var_i1;
+    return top_rank;
 }
 
 /**
@@ -6377,7 +6299,7 @@ int Video_SetGraphicsMode(void) {
       } while (var_i2 < g_NumRacers);
     }
     Lisa_ResetRasterizerContext();
-    if ((((DAT_00552f30 == 1) && (g_IsSplitScreen == 0)) && (DAT_0054f98c == 1)) && (g_HudEnabled == 1)
+    if ((((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && (DAT_0054f98c == 1)) && (g_HudEnabled == 1)
        ) {
       var_u7 = Palette_AdjustRGB(out_ECX,*(int *)(DAT_00563c34 + 4) >> 0x1f,g_ActiveTrackPalette + 8);
       Gfx_FreeSurface((int)var_u7);
@@ -6410,7 +6332,7 @@ int Video_SetGraphicsMode(void) {
       } while (var_i2 < g_NumRacers);
     }
     Lisa_ResetRasterizerContext();
-    if (((DAT_00552f30 == 1) && (g_IsSplitScreen == 0)) && ((DAT_0054f98c == 1 && (g_HudEnabled == 1)))
+    if (((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && ((DAT_0054f98c == 1 && (g_HudEnabled == 1)))
        ) {
       var_u7 = Palette_AdjustRGB(extraout_ECX_00,*(int *)(DAT_00563c34 + 4) >> 0x1f,g_ActiveTrackPalette + 8);
       Gfx_FreeSurface((int)var_u7);
@@ -6443,7 +6365,7 @@ int Video_SetGraphicsMode(void) {
       } while (var_i2 < g_NumRacers);
     }
     Lisa_ResetRasterizerContext();
-    if (((DAT_00552f30 == 1) && (g_IsSplitScreen == 0)) && ((DAT_0054f98c == 1 && (g_HudEnabled == 1)))
+    if (((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && ((DAT_0054f98c == 1 && (g_HudEnabled == 1)))
        ) {
       var_u7 = Palette_AdjustRGB(extraout_ECX_01,*(int *)(DAT_00563c34 + 4) >> 0x1f,g_ActiveTrackPalette + 8);
       Gfx_FreeSurface((int)var_u7);
@@ -6484,9 +6406,9 @@ void Lisa_Init(void) {
   var_l5 = __ftol();
   DAT_00552f50 = (int)var_l5;
   var_l5 = __ftol();
-  DAT_00552d80 = (int)var_l5;
+  g_CameraFovScaleX = (int)var_l5;
   var_l5 = __ftol();
-  DAT_00552f5c = (int)var_l5;
+  g_CameraFovScaleY = (int)var_l5;
   var_i2 = 0;
   if ((g_IsSplitScreen == 0) || (DAT_00552f58 == 1)) {
     var_i2 = 0;
@@ -6545,8 +6467,8 @@ void Lisa_Init(void) {
     Audio_StopSample();
     var_u7 = Audio_LoadAssets(g_ScreenHeight,g_ScreenWidth);
     if (-1 < (int)var_u7) {
-      _DAT_00498478 = DAT_00552d80 * 500;
-      _DAT_0049847c = DAT_00552f5c * 500;
+      _DAT_00498478 = g_CameraFovScaleX * 500;
+      _DAT_0049847c = g_CameraFovScaleY * 500;
       return;
     }
     Log_DebugPrintf(s_Error_while_initializing_lisaGM_004995c8);
@@ -6568,36 +6490,36 @@ void Lisa_Init(void) {
  * @fidelity ADAPTED
  */
 void HUD_RenderTelemetryOverlay(void) {
-  char var_24 [32];
-  int var_4;
-  if (DAT_004949b4 != 0) {
-    _sprintf(var_24,s_FPS__d_00499658, 0);
-    Font_PrintDirect(0x10e,0,var_24,(void*)0x563db0,g_ScreenWidth,g_ScreenHeightAlt,'\x14');
-  }
-  if (DAT_004949dc == 1) {
-    _sprintf(var_24,s_RECORDING__0049964c);
-    Font_PrintDirect(0x96,10,var_24,0x563db0,g_ScreenWidth,g_ScreenHeightAlt,'\x14');
-  }
-  if (DAT_005532b0 == 1) {
-    var_4 = DAT_00563bec / 10;
-    _sprintf(var_24,s_ROLL___1f_00499640,(double)var_4);
-    Font_PrintDirect(5,0x1e,var_24,0x563db0,g_ScreenWidth,g_ScreenHeightAlt,'\x14');
-    return;
-  }
-  _sprintf(var_24,s_OLDROADNR__d_00499630);
-  Font_PrintDirect(5,10,var_24,0x563db0,g_ScreenWidth,g_ScreenHeightAlt,'\x14');
-  _sprintf(var_24,s_SQUASHED2__d_00499620);
-  Font_PrintDirect(5,0x14,var_24,0x563db0,g_ScreenWidth,g_ScreenHeightAlt,'\x14');
-  _sprintf(var_24,s_TYPE1__d_00499614);
-  Font_PrintDirect(0,0x28,var_24,0x563db0,g_ScreenWidth,g_ScreenHeightAlt,'\x14');
-  _sprintf(var_24,s_TYPE2__d_00499608);
-  Font_PrintDirect(0,0x32,var_24,0x563db0,g_ScreenWidth,g_ScreenHeightAlt,'\x14');
-  _sprintf(var_24,s_SKILLNAD___3f_004995f8,
-           ABS(*(double *)(g_Vehicles + 0x128) - *(double *)(g_Vehicles + 0x120)));
-  Font_PrintDirect(0,0x3c,var_24,0x563db0,g_ScreenWidth,g_ScreenHeightAlt,'\x14');
-  _sprintf(var_24,s_SPEED___3f_004995ec,ABS(*(double *)(g_Vehicles + 0x118)));
-  Font_PrintDirect(0,0x46,var_24,0x563db0,g_ScreenWidth,g_ScreenHeightAlt,'\x14');
-  return;
+    char text_buf[32];
+    int roll_tenths;
+
+    if (g_ShowFpsOverlay != 0) {
+        _sprintf(text_buf, s_FPS__d_00499658, 0);
+        Font_PrintDirect(0x10e, 0, text_buf, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, '\x14');
+    }
+    if (g_ShowRecordingOverlay == 1) {
+        _sprintf(text_buf, s_RECORDING__0049964c);
+        Font_PrintDirect(0x96, 10, text_buf, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, '\x14');
+    }
+    if (g_ShowRollTelemetry == 1) {
+        roll_tenths = g_TelemetryRollAngle / 10;
+        _sprintf(text_buf, s_ROLL___1f_00499640, (double)roll_tenths);
+        Font_PrintDirect(5, 0x1e, text_buf, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, '\x14');
+        return;
+    }
+    _sprintf(text_buf, s_OLDROADNR__d_00499630);
+    Font_PrintDirect(5, 10, text_buf, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, '\x14');
+    _sprintf(text_buf, s_SQUASHED2__d_00499620);
+    Font_PrintDirect(5, 0x14, text_buf, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, '\x14');
+    _sprintf(text_buf, s_TYPE1__d_00499614);
+    Font_PrintDirect(0, 0x28, text_buf, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, '\x14');
+    _sprintf(text_buf, s_TYPE2__d_00499608);
+    Font_PrintDirect(0, 0x32, text_buf, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, '\x14');
+    _sprintf(text_buf, s_SKILLNAD___3f_004995f8,
+             ABS(*(double *)(g_Vehicles + 0x128) - *(double *)(g_Vehicles + 0x120)));
+    Font_PrintDirect(0, 0x3c, text_buf, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, '\x14');
+    _sprintf(text_buf, s_SPEED___3f_004995ec, ABS(*(double *)(g_Vehicles + 0x118)));
+    Font_PrintDirect(0, 0x46, text_buf, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, '\x14');
 }
 
 /**
@@ -6605,45 +6527,41 @@ void HUD_RenderTelemetryOverlay(void) {
  * @fidelity ADAPTED
  */
 void HUD_CheckWrongWayHeading(int player_idx) {
-  int var_i1;
-  int var_i2;
-  int *var_pi3;
-  double var_d4;
-  unsigned int var_u5;
-  double var_f6;
-  double var_f7;
-  __int64 var_l8;
-  var_i1 = player_idx * 0x484c;
-  var_u5 = *(unsigned int *)(g_Vehicles + 0x364 + player_idx * 0x484c);
-  if ((int)var_u5 < 0) {
-    var_d4 = *(double *)
-             (g_pTrackRoadSequence + 0x10 + ((var_u5 ^ (int)var_u5 >> 0x1f) - ((int)var_u5 >> 0x1f)) * 0x18);
-  }
-  else {
-    var_d4 = *(double *)(g_pTrackRoadSequence + 4 + var_u5 * 0x18);
-  }
-  var_f6 = Math_WrapAngle(var_d4 - _DAT_0047a888,6.2831853071796);
-  var_f7 = Math_WrapAngle((double)CONCAT44(*(int *)(g_Vehicles + 0xfc + var_i1),
-                                        *(int *)(g_Vehicles + 0xf8 + var_i1)),
-                       6.2831853071796);
-  if (((double)ABS((double)(double)var_f6 - var_f7) <= _DAT_0047a898) ||
-     (_DAT_0047a8a0 <= (double)ABS((double)(double)var_f6 - var_f7))) {
-    var_pi3 = (int *)(g_Vehicles + 0x580 + var_i1);
-    if (0 < *var_pi3) {
-      var_l8 = __ftol();
-      *var_pi3 = (int)var_l8;
+    int car_base_offset;
+    int *warning_timer_ptr;
+    double track_heading;
+    unsigned int road_node_idx;
+    double track_angle_wrapped;
+    double car_heading_wrapped;
+    __int64 ftol_result;
+
+    car_base_offset = player_idx * 0x484c;
+    road_node_idx = *(unsigned int *)(g_Vehicles + 0x364 + player_idx * 0x484c);
+    if ((int)road_node_idx < 0) {
+        track_heading = *(double *)(g_pTrackRoadSequence + 0x10 + ((road_node_idx ^ (int)road_node_idx >> 0x1f) - ((int)road_node_idx >> 0x1f)) * 0x18);
+    } else {
+        track_heading = *(double *)(g_pTrackRoadSequence + 4 + road_node_idx * 0x18);
     }
-  }
-  else {
-    var_i2 = g_Vehicles + 0x580;
-    var_l8 = __ftol();
-    *(int *)(var_i2 + var_i1) = (int)var_l8;
-    if (0x78 < *(int *)(g_Vehicles + 0x580 + var_i1)) {
-      *(int *)(g_Vehicles + 0x580 + var_i1) = 0x78;
-      return;
+
+    track_angle_wrapped = Math_WrapAngle(track_heading - k_WrongWayTrackHeadingOffset, 6.2831853071796);
+    car_heading_wrapped = Math_WrapAngle((double)CONCAT44(*(int *)(g_Vehicles + 0xfc + car_base_offset),
+                                                          *(int *)(g_Vehicles + 0xf8 + car_base_offset)),
+                                         6.2831853071796);
+
+    if (((double)ABS((double)track_angle_wrapped - car_heading_wrapped) <= k_WrongWayThresholdMin) ||
+        (k_WrongWayThresholdMax <= (double)ABS((double)track_angle_wrapped - car_heading_wrapped))) {
+        warning_timer_ptr = (int *)(g_Vehicles + 0x580 + car_base_offset);
+        if (0 < *warning_timer_ptr) {
+            ftol_result = __ftol();
+            *warning_timer_ptr = (int)ftol_result;
+        }
+    } else {
+        ftol_result = __ftol();
+        *(int *)(g_Vehicles + 0x580 + car_base_offset) = (int)ftol_result;
+        if (0x78 < *(int *)(g_Vehicles + 0x580 + car_base_offset)) {
+            *(int *)(g_Vehicles + 0x580 + car_base_offset) = 0x78;
+        }
     }
-  }
-  return;
 }
 
 /**

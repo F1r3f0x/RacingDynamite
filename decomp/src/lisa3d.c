@@ -1502,9 +1502,9 @@ void Lisa_GenerateTextureSpanTable(int src_tex_ptr,int palette_ptr,int dst_w,int
   unsigned int texel_b;
   unsigned int g00_temp;
   int i_counter;
-  void *pvVar7;
+  void *allocated_mem;
   unsigned int *diag_texel;
-  byte *pbVar9;
+  byte *temp_byte_ptr;
   unsigned int texel_r;
   byte row_texel;
   int *span_ptr;
@@ -1575,10 +1575,10 @@ void Lisa_GenerateTextureSpanTable(int src_tex_ptr,int palette_ptr,int dst_w,int
   page_limit = dst_h << 10;
 
   do {
-    pvVar7 = calloc(page_size,1);
+    allocated_mem = calloc(page_size,1);
     g_LisaAllocatedBufferCount = g_LisaAllocatedBufferCount + 1;
-    *(void **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = pvVar7;
-    diag_texel = (unsigned int *)((int)pvVar7 + 0xffffU & 0xffff0000);
+    *(void **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = allocated_mem;
+    diag_texel = (unsigned int *)((int)allocated_mem + 0xffffU & 0xffff0000);
     i_counter = g_LisaActivePageCount + 2;
     span_ptr = out_val_span + 4;
     g_LisaActivePageCount = i_counter;
@@ -1607,22 +1607,22 @@ void Lisa_GenerateTextureSpanTable(int src_tex_ptr,int palette_ptr,int dst_w,int
           color_accum = ((((unsigned int)((((unsigned int)(color_accum)) >> 8))) << 8) | ((unsigned char)(texel_color)));
 
           if (x_idx < 0x3f) {
-            pbVar9 = (byte *)(y_offset + x_idx + src_tex_ptr + row_offset);
-            next_texel = pbVar9[1];
+            temp_byte_ptr = (byte *)(y_offset + x_idx + src_tex_ptr + row_offset);
+            next_texel = temp_byte_ptr[1];
           }
 
           else {
-            pbVar9 = (byte *)(y_offset + x_idx + src_tex_ptr + row_offset);
-            next_texel = *pbVar9;
+            temp_byte_ptr = (byte *)(y_offset + x_idx + src_tex_ptr + row_offset);
+            next_texel = *temp_byte_ptr;
           }
 
           b11_scaled = ((((unsigned int)((((unsigned int)(b11_scaled)) >> 8))) << 8) | ((unsigned char)(next_texel)));
 
           if (y_idx < h_limit) {
-            row_texel = pbVar9[0x100];
+            row_texel = temp_byte_ptr[0x100];
 
             if (x_idx < 0x3f) {
-              diag_texel = (unsigned int *)(unsigned int)pbVar9[0x101];
+              diag_texel = (unsigned int *)(unsigned int)temp_byte_ptr[0x101];
             }
 
             else {
@@ -1634,9 +1634,9 @@ LAB_00447785:
           }
 
           else {
-            row_texel = *pbVar9;
+            row_texel = *temp_byte_ptr;
             if (0x3e < x_idx) goto LAB_00447785;
-            diag_texel = (unsigned int *)(unsigned int)pbVar9[1];
+            diag_texel = (unsigned int *)(unsigned int)temp_byte_ptr[1];
           }
 
           texel_r = (unsigned int)row_texel;
@@ -5386,22 +5386,22 @@ void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
  * @fidelity ADAPTED
  */
 LisaReturn64 Lisa_InitRasterizerTables(int screen_pitch,unsigned int flags) {
-  int in_EAX;
-  short sVar1;
-  int unaff_EBX;
+  int pitch_increment;
+  short row_counter;
+  int tmp_ebx;
   unsigned int idx;
   int accum_pitch;
-  int unaff_ESI;
+  int tmp_esi;
   int *table_ptr;
-  char **ppuVar5;
+  char **temp_uint_ptr_ptr;
 
   
 
-  if ((in_EAX < 0x579) && (unaff_EBX < 0x259)) {
+  if ((pitch_increment < 0x579) && (tmp_ebx < 0x259)) {
     table_ptr = &g_LisaActiveTextureID;
     idx = 1;
-    g_LisaScanlinePitch = in_EAX;
-    g_LisaAspectScale = unaff_EBX;
+    g_LisaScanlinePitch = pitch_increment;
+    g_LisaAspectScale = tmp_ebx;
 
     do {
       *table_ptr = (int)(0x10000 / (unsigned int)idx) + -1;
@@ -5409,20 +5409,20 @@ LisaReturn64 Lisa_InitRasterizerTables(int screen_pitch,unsigned int flags) {
       idx = idx + 1;
     } while (idx != 0x3a9b);
 
-    for (ppuVar5 = (char **)g_pLisaShutdownCallbacks; *ppuVar5 != (char *)0x0; ppuVar5 = ppuVar5 + 1) {
-      (*(void (*)())*ppuVar5)(ppuVar5,unaff_ESI,unaff_EBX);
+    for (temp_uint_ptr_ptr = (char **)g_pLisaShutdownCallbacks; *temp_uint_ptr_ptr != (char *)0x0; temp_uint_ptr_ptr = temp_uint_ptr_ptr + 1) {
+      (*(void (*)())*temp_uint_ptr_ptr)(temp_uint_ptr_ptr,tmp_esi,tmp_ebx);
     }
 
     table_ptr = &g_LisaScreenPitch;
     accum_pitch = 0;
-    sVar1 = 600;
+    row_counter = 600;
 
     do {
       *table_ptr = accum_pitch;
       table_ptr = table_ptr + 1;
-      accum_pitch = accum_pitch + in_EAX;
-      sVar1 = sVar1 + -1;
-    } while (sVar1 != 0);
+      accum_pitch = accum_pitch + pitch_increment;
+      row_counter = row_counter + -1;
+    } while (row_counter != 0);
     { LisaReturn64 _r; _r.edx = flags; _r.eax = 0; return _r; }
   }
 
@@ -5434,25 +5434,25 @@ LisaReturn64 Lisa_InitRasterizerTables(int screen_pitch,unsigned int flags) {
  * @fidelity ADAPTED
  */
 LisaReturn64 Lisa_ExecuteRasterizerCommands(int mode,unsigned int flags) {
-  int *unaff_ESI;
+  int *tmp_esi;
   LisaReturn64 ret_val;
 
   
 
-  g_pLisaScanlineBuffer = unaff_ESI;
-  g_pLisaSpanBuffer = (int *)*unaff_ESI;
-  g_LisaCameraZoom = unaff_ESI[1];
-  g_pLisaActiveShading = unaff_ESI[3];
-  g_LisaClipLeft = unaff_ESI[4];
-  g_LisaClipRight = unaff_ESI[5];
+  g_pLisaScanlineBuffer = tmp_esi;
+  g_pLisaSpanBuffer = (int *)*tmp_esi;
+  g_LisaCameraZoom = tmp_esi[1];
+  g_pLisaActiveShading = tmp_esi[3];
+  g_LisaClipLeft = tmp_esi[4];
+  g_LisaClipRight = tmp_esi[5];
   g_LisaClipSubpixelLeft = g_LisaClipLeft;
   g_LisaViewportCenterX = g_LisaClipLeft << 8;
   g_LisaClipSubpixelRight = g_LisaClipRight;
   g_LisaViewportCenterY = g_LisaClipRight << 8;
   g_SubpixelMinX = g_LisaViewportCenterX;
   g_SubpixelMinY = g_LisaViewportCenterY;
-  g_LisaClipTop = unaff_ESI[6];
-  g_LisaClipBottom = unaff_ESI[7];
+  g_LisaClipTop = tmp_esi[6];
+  g_LisaClipBottom = tmp_esi[7];
   g_LisaClipSubpixelTop = g_LisaClipTop + 1;
   g_LisaClipSubpixelBottom = g_LisaClipBottom + 1;
   g_SubpixelMaxX = g_LisaClipSubpixelTop * 0x100;
