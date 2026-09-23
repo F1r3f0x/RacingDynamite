@@ -70,6 +70,30 @@ extern char s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468[];
 #include "fx.h"
 
 // Reconstructed FX and HUD global constants and tables
+
+extern double k_WreckRespawnSplineOffset;
+extern double k_WreckRespawnAngleMin;
+extern double k_WreckRespawnAngleModulo;
+extern double k_WreckRespawnInterpolationScale;
+extern double k_WreckRespawnHeadingMax;
+extern double k_WreckRespawnHeadingMin;
+extern double k_WreckRespawnVehicleClearance;
+
+extern int g_WheelParticleDescriptor;
+extern int g_TrackRoadSequenceNodeCount;
+extern double k_CrashElevationStepUp;
+extern double k_CrashElevationStepDown;
+extern double k_CrashTumblePitchDelta;
+extern double k_CrashTumbleRollDelta;
+extern double k_CrashSoundRandomChance;
+extern double k_RespawnSplineOffset;
+extern double k_RespawnAngleMin;
+extern double k_RespawnAngleModulo;
+extern double k_RespawnInterpolationScale;
+extern double k_RespawnHeadingMax;
+extern double k_RespawnHeadingMin;
+extern double k_RespawnVehicleClearance;
+
 extern int g_TrigAngleTable[];
 extern int g_SmokeParticleDescriptor;
 extern char g_SurfaceDustFlagTable[];
@@ -319,7 +343,7 @@ extern int DAT_00528818;
 extern int DAT_00639340;
 extern int DAT_0049847c;
 extern int DAT_0047a898;
-extern int _DAT_0047a2a0;
+extern int k_WreckRespawnInterpolationScale;
 extern int DAT_006192a0;
 extern int DAT_0047a6f0;
 extern int DAT_006035f0;
@@ -347,7 +371,7 @@ extern int DAT_006192b8;
 extern int DAT_00639334;
 extern int DAT_00563da0;
 extern int _DAT_0047a788;
-extern int DAT_005287f8;
+extern int g_TrackRoadSequenceNodeCount;
 extern int DAT_00639358;
 extern int DAT_00639597;
 extern int DAT_00639348;
@@ -360,11 +384,11 @@ extern int DAT_00553084;
 extern int DAT_00563c04;
 extern int DAT_0047a560;
 extern int DAT_0047a8b8;
-extern int _DAT_0047a2b0;
-extern int _DAT_0047a320;
+extern int k_WreckRespawnHeadingMin;
+extern int k_RespawnHeadingMax;
 extern int DAT_00528810;
 extern int DAT_005db038;
-extern int _DAT_0047a2d8;
+extern int k_CrashTumblePitchDelta;
 extern int DAT_00552d90;
 extern int DAT_00527f74;
 extern int DAT_005db000;
@@ -401,7 +425,7 @@ extern int DAT_006395a7;
 extern int g_LapsTotal;
 extern int DAT_0054f978;
 extern int DAT_00528618;
-extern int _DAT_0047a2b8;
+extern int k_WreckRespawnVehicleClearance;
 extern int DAT_0047a730;
 extern int DAT_0063935c;
 extern int DAT_0047a288;
@@ -420,7 +444,7 @@ extern int DAT_0047a380;
 extern int DAT_0047a738;
 extern int DAT_0063992b;
 extern int DAT_0047a908;
-extern int _DAT_0047a318;
+extern int k_RespawnInterpolationScale;
 extern int _DAT_00563d74;
 extern int DAT_00563ce0;
 extern int DAT_00528850;
@@ -436,7 +460,7 @@ extern int DAT_0047a300;
 extern int DAT_0052873c;
 extern int g_pActiveMSH;
 extern int k_LandingDustAngularOffset;
-extern int _DAT_0047a300;
+extern int k_RespawnSplineOffset;
 extern int DAT_0047a2e0;
 extern int DAT_00639927;
 extern int DAT_004ba6ec;
@@ -450,7 +474,7 @@ extern int DAT_005286a0;
 extern int DAT_0047a780;
 extern int _DAT_004949e0;
 extern int DAT_00603744;
-extern int _DAT_0047a288;
+extern int k_WreckRespawnSplineOffset;
 extern int DAT_0047a658;
 extern int _DAT_0047a488;
 extern int DAT_0052861c;
@@ -470,7 +494,7 @@ extern int k_TireDirtSpeedThreshold;
 extern int DAT_00528848;
 extern int DAT_00563c30[];
 extern int g_ForceDirtDebris;
-extern int _DAT_0047a2e0;
+extern int k_CrashTumbleRollDelta;
 extern int DAT_0052882c;
 extern int DAT_0052881c;
 extern int DAT_00525e80;
@@ -494,7 +518,7 @@ extern int k_SkidSmokeProbabilityFactor;
 extern int DAT_00525e44;
 extern int DAT_0047a760;
 extern int DAT_0047a8b0;
-extern int _DAT_0047a330;
+extern int k_RespawnVehicleClearance;
 extern int _DAT_0047a920;
 extern int DAT_005daff0;
 extern int k_TurboProgressMinTimer;
@@ -533,7 +557,7 @@ extern int _DAT_0047a908;
 extern int DAT_00494d94;
 extern int DAT_00563d38;
 extern int _DAT_0047a740;
-extern int _DAT_0047a2e8;
+extern int k_CrashSoundRandomChance;
 extern int DAT_00639384;
 extern int DAT_005285c8;
 extern int DAT_00525e70;
@@ -576,7 +600,7 @@ extern int DAT_00528884;
 extern int DAT_00639350;
 extern int DAT_00552f50;
 extern int DAT_0047a2d0;
-extern int _DAT_0047a290;
+extern int k_WreckRespawnAngleMin;
 extern int DAT_004949e0;
 extern int DAT_0047a308;
 extern int DAT_0047a4d8;
@@ -591,12 +615,12 @@ extern int DAT_00639374;
 extern int DAT_0047a920;
 extern int DAT_005533b0;
 extern int DAT_006395b3;
-extern int _DAT_0047a2a8;
+extern int k_WreckRespawnHeadingMax;
 extern int DAT_00497d74;
 extern int g_pFXTransforms;
 extern int _DAT_0063992b;
 extern int DAT_0063955f;
-extern int _DAT_0047a308;
+extern int k_RespawnAngleMin;
 extern int DAT_0047a768;
 extern int _DAT_0047a730;
 extern int DAT_00528820;
@@ -612,17 +636,25 @@ extern int DAT_00528794;
 extern int DAT_006393ac;
 extern int _DAT_0047a560;
 extern int DAT_0047a7e0;
-extern int _DAT_0047a328;
+extern int k_RespawnHeadingMin;
 extern int _DAT_0047a720;
 extern int DAT_0047a888;
-extern int _DAT_0047a310;
-extern int _DAT_0047a2d0;
+extern int k_RespawnAngleModulo;
+extern int k_CrashElevationStepDown;
 extern int DAT_00639497;
-extern int _DAT_0047a298;
+extern int k_WreckRespawnAngleModulo;
 extern int DAT_0047a520;
 extern int DAT_0047a328;
 extern int DAT_0054f970;
-extern int DAT_00497f48;
+extern double k_WreckRespawnSplineOffset;
+extern double k_WreckRespawnAngleMin;
+extern double k_WreckRespawnAngleModulo;
+extern double k_WreckRespawnInterpolationScale;
+extern double k_WreckRespawnHeadingMax;
+extern double k_WreckRespawnHeadingMin;
+extern double k_WreckRespawnVehicleClearance;
+
+extern int g_WheelParticleDescriptor;
 extern int DAT_0063937c;
 extern int _DAT_0049847c;
 extern int g_VehicleCameraStates;
@@ -631,7 +663,7 @@ extern int g_RacePosition;
 extern int DAT_00528828;
 extern int g_ShowFpsOverlay;
 extern int _DAT_0047a728;
-extern int _DAT_0047a2c8;
+extern int k_CrashElevationStepUp;
 extern int DAT_0047a728;
 extern int DAT_00528844;
 extern int DAT_0047a8f0;
@@ -1658,7 +1690,7 @@ void FX_UpdateWeatherBounds(void) {
  * @fidelity ADAPTED
  */
 void FX_UpdateVehicleWreck(int *wreck) {
-  int *dyn_obj;
+  int *road_seq_ptr;
   double velocity;
   int pos_x;
   int pos_y;
@@ -1669,35 +1701,35 @@ void FX_UpdateVehicleWreck(int *wreck) {
   unsigned int rot_z;
   double speed;
   int is_active;
-  char *model_ptr;
+  char *voice_ptr;
   double *veh_ptr;
   int temp_val1;
-  int *mesh_ptr;
+  int *car_state_ptr;
   int temp_val2;
-  double *veh_state_ptr;
+  double *other_veh_ptr;
   int veh_offset;
-  int *transform_ptr;
+  int *spline_node_ptr;
   int obj_offset;
   unsigned int *model_data;
   int timer2;
   int timer1;
   int race_fin_offset;
-  double float_val;
-  __int64 long_val;
-  double temp_f1;
+  double trig_factor;
+  __int64 ftol_result;
+  double respawn_heading;
   int temp_i1;
-  int temp_i2;
-  int temp_i3;
-  double temp_f2;
-  int temp_i4;
-  int temp_i5;
+  int world_pos_x_accum;
+  int world_pos_z_accum;
+  double heading_accum;
+  int vertex_count_accum;
+  int world_pos_y_accum;
   veh_ptr = g_Vehicles;
-  temp_i5 = 0;
-  temp_i2 = 0;
+  world_pos_y_accum = 0;
+  world_pos_x_accum = 0;
   pos_x = wreck[1];
   pos_y = wreck[2];
-  temp_i3 = 0;
-  temp_i4 = 0;
+  world_pos_z_accum = 0;
+  vertex_count_accum = 0;
   pos_z = wreck[3];
   car_index = wreck[4];
   timer1 = wreck[5];
@@ -1731,9 +1763,9 @@ void FX_UpdateVehicleWreck(int *wreck) {
        (((int *)(obj_offset + g_pCarReflectionTransforms))[7] != 0)) {
       Lisa_DeleteDynamicObject((int *)(obj_offset + g_pCarReflectionTransforms));
     }
-    mesh_ptr = (int *)((int)g_Vehicles + veh_offset);
-    mesh_ptr[0xe2] = mesh_ptr[1];
-    mesh_ptr[0xe1] = *mesh_ptr;
+    car_state_ptr = (int *)((int)g_Vehicles + veh_offset);
+    car_state_ptr[0xe2] = car_state_ptr[1];
+    car_state_ptr[0xe1] = *car_state_ptr;
     veh_ptr = g_Vehicles;
     *(int *)((int)g_Vehicles + veh_offset + 0x390) =
          *(int *)((int)g_Vehicles + veh_offset + 0xc);
@@ -1748,16 +1780,16 @@ void FX_UpdateVehicleWreck(int *wreck) {
     *(int *)((int)veh_ptr + veh_offset + 0x37c) = *(int *)((int)veh_ptr + veh_offset + 0xf8);
     *(int *)((int)g_Vehicles + veh_offset + 0x270) = 1;
     if (*(int *)((int)g_Vehicles + veh_offset + 0x298) == 1) {
-      model_ptr = Audio_GetVoice(*(int *)((int)g_Vehicles + veh_offset + 0x99c));
-      if (model_ptr != (char *)0x0) {
-        *(int *)(model_ptr + 0x10) = 0;
+      voice_ptr = Audio_GetVoice(*(int *)((int)g_Vehicles + veh_offset + 0x99c));
+      if (voice_ptr != (char *)0x0) {
+        *(int *)(voice_ptr + 0x10) = 0;
       }
       *(int *)((int)g_Vehicles + g_ActiveVehicleIndex * 0x484c + 0x298) = 0;
     }
     if (*(int *)((int)g_Vehicles + veh_offset + 0x29c) == 1) {
-      model_ptr = Audio_GetVoice(*(int *)((int)g_Vehicles + veh_offset + 0x9a0));
-      if (model_ptr != (char *)0x0) {
-        *(int *)(model_ptr + 0x10) = 0;
+      voice_ptr = Audio_GetVoice(*(int *)((int)g_Vehicles + veh_offset + 0x9a0));
+      if (voice_ptr != (char *)0x0) {
+        *(int *)(voice_ptr + 0x10) = 0;
       }
       *(int *)((int)g_Vehicles + g_ActiveVehicleIndex * 0x484c + 0x29c) = 0;
     }
@@ -1774,14 +1806,14 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.gravity = 0xfffffed4;
     g_ActiveParticle.field_2c = 0;
     g_ActiveParticle.rot_x = 0xffffffd8;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.life = 0;
     g_ActiveParticle.field_4c = 0x166;
@@ -1800,14 +1832,14 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.gravity = 0xfffffed4;
     g_ActiveParticle.field_2c = 0;
     g_ActiveParticle.rot_x = 0xffffffd8;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.life = 0;
     g_ActiveParticle.field_4c = 0x166;
@@ -1826,14 +1858,14 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.gravity = 0xfffffed4;
     g_ActiveParticle.rot_x = 0xffffffc4;
     g_ActiveParticle.field_28 = 0xffffffd8;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.life = 0;
     g_ActiveParticle.field_4c = 0x166;
@@ -1852,14 +1884,14 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.gravity = 0xfffffed4;
     g_ActiveParticle.field_28 = 0xffffffd8;
     g_ActiveParticle.rot_x = 0x3c;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.life = 0;
     g_ActiveParticle.field_4c = 0x166;
@@ -1878,14 +1910,14 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.gravity = 0xfffffed4;
     g_ActiveParticle.field_2c = 0;
     g_ActiveParticle.rot_x = 0x28;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.life = 0;
     g_ActiveParticle.field_4c = 0x166;
@@ -1904,14 +1936,14 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.vel_y = 0xfffffed4;
     g_ActiveParticle.gravity = 0xfffffed4;
     g_ActiveParticle.rot_x = 0x28;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.life = 0;
     g_ActiveParticle.field_4c = 0x166;
@@ -1930,14 +1962,14 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.gravity = 0xfffffed4;
     g_ActiveParticle.rot_x = 0xffffffc4;
     g_ActiveParticle.field_28 = 0x28;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.field_4c = 0x166;
     g_ActiveParticle.field_54 = 0x1f;
@@ -1956,14 +1988,14 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.gravity = 0xfffffed4;
     g_ActiveParticle.rot_x = 0x3c;
     g_ActiveParticle.field_28 = 0x28;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.life = 0;
     g_ActiveParticle.field_4c = 0x166;
@@ -1982,14 +2014,14 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.gravity = 10;
     g_ActiveParticle.rot_x = 0;
     g_ActiveParticle.field_2c = 10;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.life = 0;
     g_ActiveParticle.field_4c = 0x166;
@@ -2008,14 +2040,14 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.gravity = 10;
     g_ActiveParticle.rot_x = 0;
     g_ActiveParticle.field_2c = 10;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.life = 0;
     g_ActiveParticle.field_4c = 0x166;
@@ -2034,14 +2066,14 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.field_28 = 0x3c;
     g_ActiveParticle.rot_x = 0xffffffc4;
     g_ActiveParticle.field_2c = 10;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.life = 0;
     g_ActiveParticle.field_4c = 0x166;
@@ -2059,15 +2091,15 @@ void FX_UpdateVehicleWreck(int *wreck) {
     g_ActiveParticle.vel_y = 10;
     g_ActiveParticle.gravity = 10;
     g_ActiveParticle.field_2c = 10;
-    g_ActiveParticle.rot_y = &DAT_00497f48;
+    g_ActiveParticle.rot_y = &g_WheelParticleDescriptor;
     g_ActiveParticle.rot_z = 3;
     g_ActiveParticle.rot_x = 0xffffffc4;
-    long_val = __ftol();
-    g_ActiveParticle.field_3c = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_40 = (int)long_val;
-    long_val = __ftol();
-    g_ActiveParticle.field_44 = (int)long_val;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_3c = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_40 = (int)ftol_result;
+    ftol_result = __ftol();
+    g_ActiveParticle.field_44 = (int)ftol_result;
     g_ActiveParticle.field_48 = 0;
     g_ActiveParticle.life = 0;
     g_ActiveParticle.field_4c = 0x166;
@@ -2082,11 +2114,11 @@ void FX_UpdateVehicleWreck(int *wreck) {
       g_ActiveParticle.pos_y = 0;
       g_ActiveParticle.pos_x = car_index;
       Math_RandomFloat0To1();
-      long_val = __ftol();
-      g_ActiveParticle.pos_z = (int)long_val;
+      ftol_result = __ftol();
+      g_ActiveParticle.pos_z = (int)ftol_result;
       Math_RandomFloat0To1();
-      long_val = __ftol();
-      g_ActiveParticle.vel_x = (int)long_val;
+      ftol_result = __ftol();
+      g_ActiveParticle.vel_x = (int)ftol_result;
       g_ActiveParticle.vel_y = 0;
       g_ActiveParticle.vel_z = 0;
       g_ActiveParticle.drag = 0x2800;
@@ -2103,44 +2135,44 @@ void FX_UpdateVehicleWreck(int *wreck) {
   veh_ptr = (double *)((int)g_Vehicles + veh_offset);
   rot_x = *(unsigned int *)((int)veh_ptr + 0x364);
   obj_offset = (rot_x ^ (int)rot_x >> 0x1f) - ((int)rot_x >> 0x1f);
-  if (obj_offset + 2 < DAT_005287f8) {
+  if (obj_offset + 2 < g_TrackRoadSequenceNodeCount) {
     if (-1 < (int)rot_x) {
-      temp_f1 = *(double *)(g_pTrackRoadSequence + rot_x * 6 + 0xd);
+      respawn_heading = *(double *)(g_pTrackRoadSequence + rot_x * 6 + 0xd);
       race_fin_offset = g_pTrackRoadSequence[rot_x * 6 + 0xc];
       goto joined_r0x004317bd;
     }
-    temp_f1 = *(double *)(g_pTrackRoadSequence + obj_offset * 6 + 0x10) - _DAT_0047a288;
-    transform_ptr = g_pTrackRoadSequence + obj_offset * 6 + 0xf;
-    race_fin_offset = *transform_ptr;
-    if (temp_f1 < _DAT_0047a290) {
-      temp_f1 = temp_f1 + _DAT_0047a298;
+    respawn_heading = *(double *)(g_pTrackRoadSequence + obj_offset * 6 + 0x10) - k_WreckRespawnSplineOffset;
+    spline_node_ptr = g_pTrackRoadSequence + obj_offset * 6 + 0xf;
+    race_fin_offset = *spline_node_ptr;
+    if (respawn_heading < k_WreckRespawnAngleMin) {
+      respawn_heading = respawn_heading + k_WreckRespawnAngleModulo;
     }
     if (race_fin_offset == 10000) {
-      temp_f1 = *(double *)(g_pTrackRoadSequence + rot_x * 6 + 0xd) - _DAT_0047a288;
+      respawn_heading = *(double *)(g_pTrackRoadSequence + rot_x * 6 + 0xd) - k_WreckRespawnSplineOffset;
       race_fin_offset = g_pTrackRoadSequence[rot_x * 6 + 0xc];
-      if (temp_f1 < _DAT_0047a290) {
-        temp_f1 = temp_f1 + _DAT_0047a298;
+      if (respawn_heading < k_WreckRespawnAngleMin) {
+        respawn_heading = respawn_heading + k_WreckRespawnAngleModulo;
       }
     }
     if (race_fin_offset == -2) {
       race_fin_offset = 0;
       do {
-        dyn_obj = transform_ptr + 6;
-        transform_ptr = transform_ptr + 6;
+        road_seq_ptr = spline_node_ptr + 6;
+        spline_node_ptr = spline_node_ptr + 6;
         race_fin_offset = race_fin_offset + 1;
-      } while (*dyn_obj == -2);
-      temp_f1 = *(double *)(g_pTrackRoadSequence + (race_fin_offset + obj_offset) * 6 + 0xd);
+      } while (*road_seq_ptr == -2);
+      respawn_heading = *(double *)(g_pTrackRoadSequence + (race_fin_offset + obj_offset) * 6 + 0xd);
       race_fin_offset = g_pTrackRoadSequence[(race_fin_offset + obj_offset) * 6 + 0xc];
       goto joined_r0x004317bd;
     }
   }
   else {
-    temp_f1 = *(double *)(g_pTrackRoadSequence + 1);
+    respawn_heading = *(double *)(g_pTrackRoadSequence + 1);
     race_fin_offset = *g_pTrackRoadSequence;
 joined_r0x004317bd:
-    temp_f1 = temp_f1 - _DAT_0047a288;
-    if (temp_f1 < _DAT_0047a290) {
-      temp_f1 = temp_f1 + _DAT_0047a298;
+    respawn_heading = respawn_heading - k_WreckRespawnSplineOffset;
+    if (respawn_heading < k_WreckRespawnAngleMin) {
+      respawn_heading = respawn_heading + k_WreckRespawnAngleModulo;
     }
   }
   temp_val2 = race_fin_offset * 0x14 + g_pActivePLC;
@@ -2154,14 +2186,14 @@ joined_r0x004317bd:
       rot_y = model_data[2];
       rot_z = model_data[3];
       if ((*model_data & 0xffff0000) < 0x280000) {
-        temp_i5 = temp_i5 +
+        world_pos_y_accum = world_pos_y_accum +
                    *(int *)(obj_offset + 8 + rot_x * 0xc) + (*(int *)(temp_val2 + 0xc) + 0x6400) * 3 +
                    *(int *)(obj_offset + 8 + rot_y * 0xc) + *(int *)(obj_offset + 8 + rot_z * 0xc);
-        temp_i2 = (((((temp_i2 - *(int *)(obj_offset + 0xc + rot_x * 0xc)) + race_fin_offset) -
+        world_pos_x_accum = (((((world_pos_x_accum - *(int *)(obj_offset + 0xc + rot_x * 0xc)) + race_fin_offset) -
                      *(int *)(obj_offset + 0xc + rot_y * 0xc)) + race_fin_offset) -
                    *(int *)(obj_offset + 0xc + rot_z * 0xc)) + race_fin_offset;
-        temp_i4 = temp_i4 + 3;
-        temp_i3 = temp_i3 +
+        vertex_count_accum = vertex_count_accum + 3;
+        world_pos_z_accum = world_pos_z_accum +
                    *(int *)(obj_offset + 0x10 + rot_x * 0xc) + (*(int *)(temp_val2 + 0x14) + 0x6400) * 3 +
                    *(int *)(obj_offset + 0x10 + rot_y * 0xc) + *(int *)(obj_offset + 0x10 + rot_z * 0xc);
       }
@@ -2169,38 +2201,38 @@ joined_r0x004317bd:
       temp_val1 = temp_val1 + -1;
     } while (temp_val1 != 0);
   }
-  temp_f2 = temp_f1;
-  if (temp_f1 < 0.0) {
-    temp_f2 = temp_f1 + _DAT_0047a298;
+  heading_accum = respawn_heading;
+  if (respawn_heading < 0.0) {
+    heading_accum = respawn_heading + k_WreckRespawnAngleModulo;
   }
   velocity = (double)((timer1 - timer2) + 0x28);
-  float_val = Math_LookupTrigAngle(velocity);
-  *veh_ptr = (double)(((double)(temp_i5 / temp_i4) - (double)*(double *)((int)veh_ptr + 900)) *
-                      float_val + (double)*(double *)((int)veh_ptr + 900));
+  trig_factor = Math_LookupTrigAngle(velocity);
+  *veh_ptr = (double)(((double)(world_pos_y_accum / vertex_count_accum) - (double)*(double *)((int)veh_ptr + 900)) *
+                      trig_factor + (double)*(double *)((int)veh_ptr + 900));
   *(double *)((int)g_Vehicles + veh_offset + 8) =
-       ((double)(temp_i2 / temp_i4 + 0xfa) - *(double *)((int)g_Vehicles + veh_offset + 0x38c)) *
-       velocity * _DAT_0047a2a0 + *(double *)((int)g_Vehicles + veh_offset + 0x38c);
+       ((double)(world_pos_x_accum / vertex_count_accum + 0xfa) - *(double *)((int)g_Vehicles + veh_offset + 0x38c)) *
+       velocity * k_WreckRespawnInterpolationScale + *(double *)((int)g_Vehicles + veh_offset + 0x38c);
   veh_ptr = g_Vehicles;
-  float_val = Math_LookupTrigAngle(velocity);
-  speed = temp_f2 - _DAT_0047a298;
+  trig_factor = Math_LookupTrigAngle(velocity);
+  speed = heading_accum - k_WreckRespawnAngleModulo;
   *(double *)((int)veh_ptr + veh_offset + 0x10) =
-       (double)(((double)(temp_i3 / temp_i4) -
-                (double)*(double *)((int)veh_ptr + veh_offset + 0x394)) * float_val +
+       (double)(((double)(world_pos_z_accum / vertex_count_accum) -
+                (double)*(double *)((int)veh_ptr + veh_offset + 0x394)) * trig_factor +
                (double)*(double *)((int)veh_ptr + veh_offset + 0x394));
   if (ABS(speed - *(double *)((int)g_Vehicles + veh_offset + 0x37c)) <
-      ABS(temp_f2 - *(double *)((int)g_Vehicles + veh_offset + 0x37c))) {
-    temp_f2 = speed;
+      ABS(heading_accum - *(double *)((int)g_Vehicles + veh_offset + 0x37c))) {
+    heading_accum = speed;
   }
   *(double *)((int)g_Vehicles + veh_offset + 0xf8) =
-       (temp_f2 - *(double *)((int)g_Vehicles + veh_offset + 0x37c)) * velocity * _DAT_0047a2a0 +
+       (heading_accum - *(double *)((int)g_Vehicles + veh_offset + 0x37c)) * velocity * k_WreckRespawnInterpolationScale +
        *(double *)((int)g_Vehicles + veh_offset + 0x37c);
   veh_ptr = (double *)((int)g_Vehicles + veh_offset + 0xf8);
-  if (_DAT_0047a2a8 < *(double *)((int)g_Vehicles + veh_offset + 0xf8)) {
-    *veh_ptr = *veh_ptr - _DAT_0047a298;
+  if (k_WreckRespawnHeadingMax < *(double *)((int)g_Vehicles + veh_offset + 0xf8)) {
+    *veh_ptr = *veh_ptr - k_WreckRespawnAngleModulo;
   }
   veh_ptr = (double *)((int)g_Vehicles + veh_offset + 0xf8);
-  if (*(double *)((int)g_Vehicles + veh_offset + 0xf8) < _DAT_0047a2b0) {
-    *veh_ptr = *veh_ptr + _DAT_0047a298;
+  if (*(double *)((int)g_Vehicles + veh_offset + 0xf8) < k_WreckRespawnHeadingMin) {
+    *veh_ptr = *veh_ptr + k_WreckRespawnAngleModulo;
   }
 LAB_00431ab6:
   obj_offset = timer1 + 1;
@@ -2212,10 +2244,10 @@ LAB_00431ab6:
     if (0 < g_NumRacers) {
       do {
         if (((((car_index != timer2) &&
-              (veh_state_ptr = (double *)((int)g_Vehicles + veh_offset),
-              ABS(*veh_ptr - *veh_state_ptr) < _DAT_0047a2b8)) &&
-             ((ABS(veh_ptr[1] - veh_state_ptr[1]) < _DAT_0047a2b8 &&
-              ((ABS(veh_ptr[2] - veh_state_ptr[2]) < _DAT_0047a2b8 &&
+              (other_veh_ptr = (double *)((int)g_Vehicles + veh_offset),
+              ABS(*veh_ptr - *other_veh_ptr) < k_WreckRespawnVehicleClearance)) &&
+             ((ABS(veh_ptr[1] - other_veh_ptr[1]) < k_WreckRespawnVehicleClearance &&
+              ((ABS(veh_ptr[2] - other_veh_ptr[2]) < k_WreckRespawnVehicleClearance &&
                (*(int *)((int)veh_ptr + 0x354) == 0)))))) && (*(int *)(veh_ptr + 0x6b) == 0)) &&
            (*(int *)((int)veh_ptr + 0x35c) == 0)) {
           is_active = 1;
@@ -2274,119 +2306,123 @@ LAB_00431ab6:
  * @fidelity ADAPTED
  */
 void FX_UpdateDetachedWheel(int *wheel, int wheel_index) {
-  int var_u1;
-  int var_u2;
-  int var_u3;
-  int var_u4;
-  int var_u5;
-  int var_u6;
-  int var_u7;
-  int var_u8;
-  int var_u9;
-  int var_u10;
-  int var_u11;
-  int var_i12;
-  int var_u13;
-  int var_i14;
-  int var_i15;
-  int var_u16;
-  int var_i17;
-  int var_i18;
-  int *var_pi19;
-  int var_i20;
-  int var_i21;
-  int var_i22;
-  int var_i23;
-  var_u1 = wheel[2];
-  var_u2 = wheel[1];
-  var_u3 = wheel[3];
-  var_u4 = wheel[4];
-  var_u5 = wheel[5];
-  var_u6 = wheel[6];
-  var_u7 = wheel[7];
-  var_u8 = wheel[8];
-  var_u9 = wheel[9];
-  var_u10 = wheel[10];
-  var_u11 = wheel[0xb];
-  var_i12 = wheel[0xd];
-  var_u13 = wheel[0xc];
-  var_i21 = wheel[0xf];
-  var_i14 = wheel[0x10];
-  var_i15 = wheel[0x11];
-  var_u16 = wheel[0xe];
-  var_i20 = wheel[0x12];
-  var_i17 = wheel[0x13];
-  var_i18 = wheel[0x15];
-  var_i22 = wheel[0x14];
-  if (var_i22 == 0) {
-    var_i23 = wheel_index * 800;
-    *(int *)(&g_DebrisDynamicMeshes + var_i23) = 4;
-    *(int *)(&DAT_00528804 + var_i23) = 2;
-    *(int *)(&DAT_00528808 + var_i23) = var_u2;
-    *(int *)(&DAT_0052880c + var_i23) = var_u1;
-    *(int *)(&DAT_00528810 + var_i23) = var_u3;
-    *(int *)(&DAT_00528814 + var_i23) = var_u4;
-    *(int *)(&DAT_00528818 + var_i23) = var_u5;
-    *(int *)(&DAT_0052881c + var_i23) = var_u6;
-    *(int *)(&DAT_00528820 + var_i23) = var_u7;
-    *(int *)(&DAT_00528824 + var_i23) = var_u8;
-    *(int *)(&DAT_00528828 + var_i23) = var_u9;
-    *(int *)(&DAT_0052882c + var_i23) = var_u10;
-    *(int *)(&DAT_00528830 + var_i23) = var_u11;
-    *(int *)(&DAT_00528834 + var_i23) = var_u13;
-    *(int *)(&DAT_00528838 + var_i23) = 0x13;
-    *(int *)(&DAT_0052883c + var_i23) = 0;
-    *(int *)(&DAT_00528840 + var_i23) = 1;
-    *(int *)(&DAT_00528844 + var_i23) = 2;
-    *(int *)(&DAT_00528860 + var_i23) = var_u16;
-    *(int *)(&DAT_00528864 + var_i23) = 0x13;
-    *(int *)(&DAT_00528868 + var_i23) = 0;
-    *(int *)(&DAT_0052886c + var_i23) = 2;
-    *(int *)(&DAT_00528870 + var_i23) = 3;
-    *(int *)(&DAT_0052888c + var_i23) = var_u16;
-    Lisa_SetDynamicObjectMesh(g_pFXTransforms,var_u13,(int *)(wheel_index * 0x20 + g_pFXTransforms),
-                 (int *)(&g_DebrisDynamicMeshes + var_i23),var_u16,200,0,0x14,0);
-  }
-  var_i23 = wheel_index * 0x20;
-  *(int *)(var_i23 + 4 + g_pFXTransforms) = (int)(var_i21 + (var_i21 >> 0x1f & 0x3ffU)) >> 10;
-  *(int *)(var_i23 + 8 + g_pFXTransforms) = (int)(var_i14 + (var_i14 >> 0x1f & 0x3ffU)) >> 10;
-  *(int *)(var_i23 + 0xc + g_pFXTransforms) = (int)(var_i15 + (var_i15 >> 0x1f & 0x3ffU)) >> 10;
-  *(int *)(var_i23 + 0x10 + g_pFXTransforms) = 0;
-  *(int *)(var_i23 + 0x14 + g_pFXTransforms) = 0;
-  *(int *)(var_i23 + 0x18 + g_pFXTransforms) = 0;
-  var_pi19 = (int *)(g_pFXTransforms + var_i23);
-  if (var_pi19[7] == 0) {
-    Lisa_MoveDynamicObject(var_pi19);
-  }
-  else {
-    var_i21 = Lisa_UpdateObjectSpatialGrid(var_pi19);
-    if (var_i21 != 0) {
-      Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468);
+    int v_pos_y;
+    int v_pos_x;
+    int v_pos_z;
+    int v_norm_x;
+    int v_norm_y;
+    int v_norm_z;
+    int v_tang_x;
+    int v_tang_y;
+    int v_tang_z;
+    int v_extra_a;
+    int v_extra_b;
+    int uv_anim_table;
+    int submesh_idx;
+    int world_pos_y;
+    int world_pos_z;
+    int texture_page;
+    int roll_speed;
+    int max_age;
+    int *transform_ptr;
+    int roll_angle;
+    int world_pos_x;
+    int age;
+    int mesh_stride;
+
+    v_pos_y = wheel[2];
+    v_pos_x = wheel[1];
+    v_pos_z = wheel[3];
+    v_norm_x = wheel[4];
+    v_norm_y = wheel[5];
+    v_norm_z = wheel[6];
+    v_tang_x = wheel[7];
+    v_tang_y = wheel[8];
+    v_tang_z = wheel[9];
+    v_extra_a = wheel[10];
+    v_extra_b = wheel[0xb];
+    uv_anim_table = wheel[0xd];
+    submesh_idx = wheel[0xc];
+    world_pos_x = wheel[0xf];
+    world_pos_y = wheel[0x10];
+    world_pos_z = wheel[0x11];
+    texture_page = wheel[0xe];
+    roll_angle = wheel[0x12];
+    roll_speed = wheel[0x13];
+    max_age = wheel[0x15];
+    age = wheel[0x14];
+
+    if (age == 0) {
+        mesh_stride = wheel_index * 800;
+        *(int *)((int)&g_DebrisDynamicMeshes + mesh_stride) = 4;
+        *(int *)((int)&g_DebrisDynamicMeshes + 4 + mesh_stride) = 2;
+        *(int *)((int)&g_DebrisDynamicMeshes + 8 + mesh_stride) = v_pos_x;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0xc + mesh_stride) = v_pos_y;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x10 + mesh_stride) = v_pos_z;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x14 + mesh_stride) = v_norm_x;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x18 + mesh_stride) = v_norm_y;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x1c + mesh_stride) = v_norm_z;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x20 + mesh_stride) = v_tang_x;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x24 + mesh_stride) = v_tang_y;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x28 + mesh_stride) = v_tang_z;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x2c + mesh_stride) = v_extra_a;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x30 + mesh_stride) = v_extra_b;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x34 + mesh_stride) = submesh_idx;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x38 + mesh_stride) = 0x13;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x3c + mesh_stride) = 0;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x40 + mesh_stride) = 1;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x44 + mesh_stride) = 2;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x60 + mesh_stride) = texture_page;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x64 + mesh_stride) = 0x13;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x68 + mesh_stride) = 0;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x6c + mesh_stride) = 2;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x70 + mesh_stride) = 3;
+        *(int *)((int)&g_DebrisDynamicMeshes + 0x8c + mesh_stride) = texture_page;
+        Lisa_SetDynamicObjectMesh(g_pFXTransforms, submesh_idx, (int *)(wheel_index * 0x20 + g_pFXTransforms),
+                                 (int *)((int)&g_DebrisDynamicMeshes + mesh_stride), texture_page, 200, 0, 0x14, 0);
     }
-  }
-  var_i20 = var_i20 + var_i17;
-  var_i21 = wheel_index * 800;
-  var_pi19 = (int *)(var_i12 + ((int)(var_i20 + (var_i20 >> 0x1f & 0x3ffU)) >> 10) * 0x10);
-  *(int *)(&DAT_00528848 + var_i21) = *var_pi19 << 8;
-  *(int *)(&DAT_0052884c + var_i21) = var_pi19[3] << 8;
-  *(int *)(&DAT_00528850 + var_i21) = *var_pi19 << 8;
-  *(int *)(&DAT_00528854 + var_i21) = var_pi19[1] << 8;
-  *(int *)(&DAT_00528858 + var_i21) = var_pi19[2] << 8;
-  *(int *)(&DAT_0052885c + var_i21) = var_pi19[1] << 8;
-  *(int *)(&DAT_00528874 + var_i21) = *var_pi19 << 8;
-  *(int *)(&DAT_00528878 + var_i21) = var_pi19[3] << 8;
-  *(int *)(&DAT_0052887c + var_i21) = var_pi19[2] << 8;
-  *(int *)(&DAT_00528880 + var_i21) = var_pi19[1] << 8;
-  var_i22 = var_i22 + 1;
-  *(int *)(&DAT_00528884 + var_i21) = var_pi19[2] << 8;
-  *(int *)(&DAT_00528888 + var_i21) = var_pi19[3] << 8;
-  if (var_i18 <= var_i22) {
-    Lisa_DeleteDynamicObject((int *)(var_i23 + g_pFXTransforms));
-    *wheel = 0;
-  }
-  wheel[0x14] = var_i22;
-  wheel[0x12] = var_i20;
-  return;
+
+    mesh_stride = wheel_index * 0x20;
+    *(int *)(mesh_stride + 4 + g_pFXTransforms) = (int)(world_pos_x + (world_pos_x >> 0x1f & 0x3ffU)) >> 10;
+    *(int *)(mesh_stride + 8 + g_pFXTransforms) = (int)(world_pos_y + (world_pos_y >> 0x1f & 0x3ffU)) >> 10;
+    *(int *)(mesh_stride + 0xc + g_pFXTransforms) = (int)(world_pos_z + (world_pos_z >> 0x1f & 0x3ffU)) >> 10;
+    *(int *)(mesh_stride + 0x10 + g_pFXTransforms) = 0;
+    *(int *)(mesh_stride + 0x14 + g_pFXTransforms) = 0;
+    *(int *)(mesh_stride + 0x18 + g_pFXTransforms) = 0;
+
+    transform_ptr = (int *)(g_pFXTransforms + mesh_stride);
+    if (transform_ptr[7] == 0) {
+        Lisa_MoveDynamicObject(transform_ptr);
+    } else {
+        if (Lisa_UpdateObjectSpatialGrid(transform_ptr) != 0) {
+            Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468);
+        }
+    }
+
+    roll_angle = roll_angle + roll_speed;
+    mesh_stride = wheel_index * 800;
+    transform_ptr = (int *)(uv_anim_table + ((int)(roll_angle + (roll_angle >> 0x1f & 0x3ffU)) >> 10) * 0x10);
+
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x48 + mesh_stride) = *transform_ptr << 8;
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x4c + mesh_stride) = transform_ptr[3] << 8;
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x50 + mesh_stride) = *transform_ptr << 8;
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x54 + mesh_stride) = transform_ptr[1] << 8;
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x58 + mesh_stride) = transform_ptr[2] << 8;
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x5c + mesh_stride) = transform_ptr[1] << 8;
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x74 + mesh_stride) = *transform_ptr << 8;
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x78 + mesh_stride) = transform_ptr[3] << 8;
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x7c + mesh_stride) = transform_ptr[2] << 8;
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x80 + mesh_stride) = transform_ptr[1] << 8;
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x84 + mesh_stride) = transform_ptr[2] << 8;
+    *(int *)((int)&g_DebrisDynamicMeshes + 0x88 + mesh_stride) = transform_ptr[3] << 8;
+
+    age = age + 1;
+    if (max_age <= age) {
+        Lisa_DeleteDynamicObject((int *)(wheel_index * 0x20 + g_pFXTransforms));
+        *wheel = 0;
+    }
+    wheel[0x14] = age;
+    wheel[0x12] = roll_angle;
 }
 
 /**
@@ -2394,335 +2430,340 @@ void FX_UpdateDetachedWheel(int *wheel, int wheel_index) {
  * @fidelity ADAPTED
  */
 void FX_UpdateVehicleCrashSequence(int *crash_seq) {
-  int *var_pi1;
-  double var_d2;
-  int var_u3;
-  int var_u4;
-  int var_u5;
-  int var_i6;
-  unsigned int var_u7;
-  unsigned int var_u8;
-  unsigned int var_u9;
-  double var_d10;
-  int var_b11;
-  char *var_pu12;
-  double *var_pd13;
-  int var_i14;
-  int var_i15;
-  int *var_pu16;
-  int var_i17;
-  double *var_pd18;
-  int var_i19;
-  unsigned int *var_pu20;
-  int var_i21;
-  int *var_pi22;
-  int var_i23;
-  int var_i24;
-  int var_i25;
-  double var_f26;
-  __int64 var_l27;
-  double var_48;
-  int var_3c;
-  int var_34;
-  double var_28;
-  int var_20;
-  int var_1c;
-  var_pd13 = g_Vehicles;
-  var_i24 = 0;
-  var_1c = 0;
-  var_34 = 0;
-  var_u3 = crash_seq[1];
-  var_u4 = crash_seq[2];
-  var_20 = 0;
-  var_u5 = crash_seq[3];
-  var_i6 = crash_seq[4];
-  var_i25 = crash_seq[5];
-  var_i23 = crash_seq[6];
-  var_i15 = var_i6 * 0x484c;
-  *(int *)((int)g_Vehicles + var_i15 + 0x534) = 0;
-  *(int *)((int)var_pd13 + var_i15 + 0x538) = 0x40590000;
-  *(int *)((int)g_Vehicles + var_i15 + 0x53c) = 0;
-  if (var_i25 == 0) {
-    var_pu16 = (int *)(var_i15 + (int)g_Vehicles);
-    var_pu16[0xe2] = var_pu16[1];
-    var_pu16[0xe1] = *var_pu16;
-    var_pd13 = g_Vehicles;
-    *(int *)((int)g_Vehicles + var_i15 + 0x390) =
-         *(int *)((int)g_Vehicles + var_i15 + 0xc);
-    *(int *)((int)var_pd13 + var_i15 + 0x38c) = *(int *)((int)var_pd13 + var_i15 + 8);
-    var_pd13 = g_Vehicles;
-    *(int *)((int)g_Vehicles + var_i15 + 0x398) =
-         *(int *)((int)g_Vehicles + var_i15 + 0x14);
-    *(int *)((int)var_pd13 + var_i15 + 0x394) = *(int *)((int)var_pd13 + var_i15 + 0x10);
-    var_pd13 = g_Vehicles;
-    *(int *)((int)g_Vehicles + var_i15 + 0x380) =
-         *(int *)((int)g_Vehicles + var_i15 + 0xfc);
-    *(int *)((int)var_pd13 + var_i15 + 0x37c) = *(int *)((int)var_pd13 + var_i15 + 0xf8);
-    *(int *)((int)g_Vehicles + var_i15 + 0x270) = 1;
-    if (*(int *)((int)g_Vehicles + var_i15 + 0x298) == 1) {
-      var_pu12 = Audio_GetVoice(*(int *)((int)g_Vehicles + var_i15 + 0x99c));
-      if (var_pu12 != (char *)0x0) {
-        *(int *)(var_pu12 + 0x10) = 0;
-      }
-      *(int *)((int)g_Vehicles + g_ActiveVehicleIndex * 0x484c + 0x298) = 0;
-    }
-    if (*(int *)((int)g_Vehicles + var_i15 + 0x29c) == 1) {
-      var_pu12 = Audio_GetVoice(*(int *)((int)g_Vehicles + var_i15 + 0x9a0));
-      if (var_pu12 != (char *)0x0) {
-        *(int *)(var_pu12 + 0x10) = 0;
-      }
-      *(int *)((int)g_Vehicles + g_ActiveVehicleIndex * 0x484c + 0x29c) = 0;
-    }
-  }
-  if (var_i25 < 0x1f) {
-    var_i19 = 0x1e - var_i25;
-    if (10 < var_i19) {
-      var_i19 = 10;
-    }
-    var_d2 = (double)var_i19;
-    var_pd13 = (double *)((int)g_Vehicles + var_i15 + 900);
-    *var_pd13 = var_d2 + *var_pd13;
-    *(double *)((int)g_Vehicles + var_i15 + 0x394) =
-         *(double *)((int)g_Vehicles + var_i15 + 0x394) + var_d2;
-    *(double *)((int)g_Vehicles + var_i15) = *(double *)((int)g_Vehicles + var_i15) + var_d2;
-    if (var_i25 < 10) {
-      var_d10 = *(double *)((int)g_Vehicles + var_i15 + 8) + _DAT_0047a2c8;
-    }
-    else {
-      var_d10 = *(double *)((int)g_Vehicles + var_i15 + 8) - _DAT_0047a2d0;
-    }
-    *(double *)((int)g_Vehicles + var_i15 + 8) = var_d10;
-    *(double *)((int)g_Vehicles + var_i15 + 0x10) =
-         *(double *)((int)g_Vehicles + var_i15 + 0x10) + var_d2;
-    *(double *)((int)g_Vehicles + var_i15 + 0x108) =
-         *(double *)((int)g_Vehicles + var_i15 + 0x108) + _DAT_0047a2d8;
-    *(double *)((int)g_Vehicles + var_i15 + 0x110) =
-         *(double *)((int)g_Vehicles + var_i15 + 0x110) + _DAT_0047a2e0;
-    var_f26 = Math_RandomFloat0To1();
-    if (var_f26 == (double)_DAT_0047a2e8) {
-      __ftol();
-      __ftol();
-      Audio_PlaySampleVol(0,2,1,0,0x10000,22000,0);
-    }
-    if (var_i25 == 0x1e) {
-      var_i19 = var_i6 * 0x20;
-      if ((((int *)(g_pCarTransforms + var_i19))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
-        Lisa_DeleteDynamicObject((int *)(g_pCarTransforms + var_i19));
-      }
-      var_i21 = var_i6 * 0x80;
-      if (((int *)(g_pWheelTransforms + var_i21))[7] != 0) {
-        Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + var_i21));
-      }
-      if (*(int *)(g_pWheelTransforms + var_i21 + 0x3c) != 0) {
-        Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + var_i21 + 0x20));
-      }
-      if (*(int *)(g_pWheelTransforms + var_i21 + 0x5c) != 0) {
-        Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + var_i21 + 0x40));
-      }
-      if (*(int *)(g_pWheelTransforms + var_i21 + 0x7c) != 0) {
-        Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + var_i21 + 0x60));
-      }
-      if ((((int *)(g_pCarShadowTransforms + var_i19))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
-        Lisa_DeleteDynamicObject((int *)(g_pCarShadowTransforms + var_i19));
-      }
-      if (((*(int *)(g_PlayerHUDState + var_i6 * 0x4c) == 7) && (g_DynamicObjectsPaused == 0)) &&
-         (((int *)(var_i19 + g_pCarReflectionTransforms))[7] != 0)) {
-        Lisa_DeleteDynamicObject((int *)(var_i19 + g_pCarReflectionTransforms));
-      }
-    }
-  }
-  if (var_i23 - var_i25 == 0x14) {
-    var_i19 = 10;
-    do {
-      g_ActiveParticle.type = 0xb;
-      g_ActiveParticle.pos_y = 0;
-      g_ActiveParticle.pos_x = var_i6;
-      Math_RandomFloat0To1();
-      var_l27 = __ftol();
-      g_ActiveParticle.pos_z = (int)var_l27;
-      Math_RandomFloat0To1();
-      var_l27 = __ftol();
-      g_ActiveParticle.vel_x = (int)var_l27;
-      g_ActiveParticle.vel_y = 0;
-      g_ActiveParticle.vel_z = 0;
-      g_ActiveParticle.drag = 0x2800;
-      g_ActiveParticle.field_24 = 0x3c;
-      g_ActiveParticle.gravity = 0;
-      FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
-      var_i19 = var_i19 + -1;
-    } while (var_i19 != 0);
-    __ftol();
-    __ftol();
-    Audio_PlaySampleVol(0,4,3,0,0xe000,0,0);
-  }
-  if (var_i25 <= var_i23 + -0x28) goto LAB_00432970;
-  var_pd13 = (double *)((int)g_Vehicles + var_i15);
-  var_u7 = *(unsigned int *)((int)var_pd13 + 0x364);
-  var_i19 = (var_u7 ^ (int)var_u7 >> 0x1f) - ((int)var_u7 >> 0x1f);
-  if (var_i19 + 2 < DAT_005287f8) {
-    if (-1 < (int)var_u7) {
-      var_48 = *(double *)(g_pTrackRoadSequence + var_u7 * 6 + 0xd);
-      var_i21 = g_pTrackRoadSequence[var_u7 * 6 + 0xc];
-      goto joined_r0x00432683;
-    }
-    var_48 = *(double *)(g_pTrackRoadSequence + var_i19 * 6 + 0x10) - _DAT_0047a300;
-    var_pi22 = g_pTrackRoadSequence + var_i19 * 6 + 0xf;
-    var_i21 = *var_pi22;
-    if (var_48 < _DAT_0047a308) {
-      var_48 = var_48 + _DAT_0047a310;
-    }
-    if (var_i21 == 10000) {
-      var_48 = *(double *)(g_pTrackRoadSequence + var_u7 * 6 + 0xd) - _DAT_0047a300;
-      var_i21 = g_pTrackRoadSequence[var_u7 * 6 + 0xc];
-      if (var_48 < _DAT_0047a308) {
-        var_48 = var_48 + _DAT_0047a310;
-      }
-    }
-    if (var_i21 == -2) {
-      var_i21 = 0;
-      do {
-        var_pi1 = var_pi22 + 6;
-        var_pi22 = var_pi22 + 6;
-        var_i21 = var_i21 + 1;
-      } while (*var_pi1 == -2);
-      var_48 = *(double *)(g_pTrackRoadSequence + (var_i21 + var_i19) * 6 + 0xd);
-      var_i21 = g_pTrackRoadSequence[(var_i21 + var_i19) * 6 + 0xc];
-      goto joined_r0x00432683;
-    }
-  }
-  else {
-    var_48 = *(double *)(g_pTrackRoadSequence + 1);
-    var_i21 = *g_pTrackRoadSequence;
-joined_r0x00432683:
-    var_48 = var_48 - _DAT_0047a300;
-    if (var_48 < _DAT_0047a308) {
-      var_48 = var_48 + _DAT_0047a310;
-    }
-  }
-  var_i17 = var_i21 * 0x14 + g_pActivePLC;
-  var_i21 = *(int *)(var_i17 + 0x10);
-  var_i19 = g_pActiveMSH + *(int *)(var_i17 + 4) * 4;
-  var_i14 = *(int *)(var_i19 + 4);
-  var_pu20 = (unsigned int *)(var_i19 + 8 + *(int *)(g_pActiveMSH + *(int *)(var_i17 + 4) * 4) * 0xc);
-  if (0 < var_i14) {
-    do {
-      var_u7 = var_pu20[1];
-      var_u8 = var_pu20[2];
-      var_u9 = var_pu20[3];
-      if ((*var_pu20 & 0xffff0000) < 0x280000) {
-        var_1c = var_1c +
-                   *(int *)(var_i19 + 8 + var_u7 * 0xc) + (*(int *)(var_i17 + 0xc) + 0x6400) * 3 +
-                   *(int *)(var_i19 + 8 + var_u8 * 0xc) + *(int *)(var_i19 + 8 + var_u9 * 0xc);
-        var_i24 = (((((var_i24 - *(int *)(var_i19 + 0xc + var_u7 * 0xc)) + var_i21) -
-                   *(int *)(var_i19 + 0xc + var_u8 * 0xc)) + var_i21) -
-                 *(int *)(var_i19 + 0xc + var_u9 * 0xc)) + var_i21;
-        var_34 = var_34 +
-                   *(int *)(var_i19 + 0x10 + var_u7 * 0xc) + (*(int *)(var_i17 + 0x14) + 0x6400) * 3 +
-                   *(int *)(var_i19 + 0x10 + var_u8 * 0xc) + *(int *)(var_i19 + 0x10 + var_u9 * 0xc);
-        var_20 = var_20 + 3;
-      }
-      var_pu20 = var_pu20 + 0xb;
-      var_i14 = var_i14 + -1;
-    } while (var_i14 != 0);
-  }
-  var_28 = var_48;
-  if (var_48 < 0.0) {
-    var_28 = var_48 + _DAT_0047a310;
-  }
-  var_d2 = (double)((var_i25 - var_i23) + 0x28);
-  var_f26 = Math_LookupTrigAngle(var_d2);
-  *var_pd13 = (double)(((double)(var_1c / var_20) - (double)*(double *)((int)var_pd13 + 900)) *
-                      var_f26 + (double)*(double *)((int)var_pd13 + 900));
-  *(double *)((int)g_Vehicles + var_i15 + 8) =
-       ((double)(var_i24 / var_20 + 0xfa) - *(double *)((int)g_Vehicles + var_i15 + 0x38c)) *
-       var_d2 * _DAT_0047a318 + *(double *)((int)g_Vehicles + var_i15 + 0x38c);
-  var_pd13 = g_Vehicles;
-  var_f26 = Math_LookupTrigAngle(var_d2);
-  var_d10 = var_28 - _DAT_0047a310;
-  *(double *)((int)var_pd13 + var_i15 + 0x10) =
-       (double)(((double)(var_34 / var_20) -
-                (double)*(double *)((int)var_pd13 + var_i15 + 0x394)) * var_f26 +
-               (double)*(double *)((int)var_pd13 + var_i15 + 0x394));
-  if (ABS(var_d10 - *(double *)((int)g_Vehicles + var_i15 + 0x37c)) <
-      ABS(var_28 - *(double *)((int)g_Vehicles + var_i15 + 0x37c))) {
-    var_28 = var_d10;
-  }
-  *(double *)((int)g_Vehicles + var_i15 + 0xf8) =
-       (var_28 - *(double *)((int)g_Vehicles + var_i15 + 0x37c)) * var_d2 * _DAT_0047a318 +
-       *(double *)((int)g_Vehicles + var_i15 + 0x37c);
-  var_pd13 = (double *)((int)g_Vehicles + var_i15 + 0xf8);
-  if (_DAT_0047a320 < *(double *)((int)g_Vehicles + var_i15 + 0xf8)) {
-    *var_pd13 = *var_pd13 - _DAT_0047a310;
-  }
-  var_pd13 = (double *)((int)g_Vehicles + var_i15 + 0xf8);
-  if (*(double *)((int)g_Vehicles + var_i15 + 0xf8) < _DAT_0047a328) {
-    *var_pd13 = *var_pd13 + _DAT_0047a310;
-  }
-LAB_00432970:
-  var_i24 = var_i25 + 1;
-  var_3c = var_i24;
-  if (var_i23 <= var_i24) {
-    var_b11 = 0;
-    var_i23 = 0;
-    var_pd13 = g_Vehicles;
-    if (0 < g_NumRacers) {
-      do {
-        if (((((var_i6 != var_i23) &&
-              (var_pd18 = (double *)(var_i15 + (int)g_Vehicles),
-              ABS(*var_pd13 - *var_pd18) < _DAT_0047a330)) &&
-             ((ABS(var_pd13[1] - var_pd18[1]) < _DAT_0047a330 &&
-              ((ABS(var_pd13[2] - var_pd18[2]) < _DAT_0047a330 &&
-               (*(int *)((int)var_pd13 + 0x354) == 0)))))) && (*(int *)(var_pd13 + 0x6b) == 0)) &&
-           (*(int *)((int)var_pd13 + 0x35c) == 0)) {
-          var_b11 = 1;
+    int *road_seq_ptr;
+    double tumble_delta;
+    int crash_pos_x;
+    int crash_pos_y;
+    int crash_pos_z;
+    int car_idx;
+    unsigned int vi0;
+    unsigned int vi1;
+    unsigned int vi2;
+    double current_x;
+    int is_occupied;
+    char *voice_ptr;
+    int *car_state_ptr;
+    int msh_entry_offset;
+    int car_offset;
+    int poly_count;
+    double *veh_ptr;
+    unsigned int *poly_ptr;
+    int plc_model_idx;
+    int *spline_ptr;
+    int total_ticks;
+    int world_pos_y_accum;
+    int crash_tick;
+    double trig_factor;
+    __int64 ftol_result;
+    double respawn_heading;
+    int final_crash_tick;
+    int world_pos_z_accum;
+    double heading_accum;
+    int vertex_count_accum;
+    int world_pos_x_accum;
+
+    world_pos_y_accum = 0;
+    world_pos_x_accum = 0;
+    world_pos_z_accum = 0;
+    vertex_count_accum = 0;
+
+    crash_pos_x = crash_seq[1];
+    crash_pos_y = crash_seq[2];
+    crash_pos_z = crash_seq[3];
+    car_idx = crash_seq[4];
+    crash_tick = crash_seq[5];
+    total_ticks = crash_seq[6];
+
+    car_offset = car_idx * 0x484c;
+    *(int *)((int)g_Vehicles + car_offset + 0x534) = 0;
+    *(int *)((int)g_Vehicles + car_offset + 0x538) = 0x40590000;
+    *(int *)((int)g_Vehicles + car_offset + 0x53c) = 0;
+
+    if (crash_tick == 0) {
+        car_state_ptr = (int *)(car_offset + (int)g_Vehicles);
+        car_state_ptr[0xe2] = car_state_ptr[1];
+        car_state_ptr[0xe1] = *car_state_ptr;
+        *(int *)((int)g_Vehicles + car_offset + 0x390) = *(int *)((int)g_Vehicles + car_offset + 0xc);
+        *(int *)((int)g_Vehicles + car_offset + 0x38c) = *(int *)((int)g_Vehicles + car_offset + 8);
+        *(int *)((int)g_Vehicles + car_offset + 0x398) = *(int *)((int)g_Vehicles + car_offset + 0x14);
+        *(int *)((int)g_Vehicles + car_offset + 0x394) = *(int *)((int)g_Vehicles + car_offset + 0x10);
+        *(int *)((int)g_Vehicles + car_offset + 0x380) = *(int *)((int)g_Vehicles + car_offset + 0xfc);
+        *(int *)((int)g_Vehicles + car_offset + 0x37c) = *(int *)((int)g_Vehicles + car_offset + 0xf8);
+        *(int *)((int)g_Vehicles + car_offset + 0x270) = 1;
+
+        if (*(int *)((int)g_Vehicles + car_offset + 0x298) == 1) {
+            voice_ptr = Audio_GetVoice(*(int *)((int)g_Vehicles + car_offset + 0x99c));
+            if (voice_ptr != (char *)0x0) {
+                *(int *)(voice_ptr + 0x10) = 0;
+            }
+            *(int *)((int)g_Vehicles + g_ActiveVehicleIndex * 0x484c + 0x298) = 0;
         }
-        var_i23 = var_i23 + 1;
-        var_pd13 = (double *)((int)var_pd13 + 0x484c);
-      } while (var_i23 < g_NumRacers);
+        if (*(int *)((int)g_Vehicles + car_offset + 0x29c) == 1) {
+            voice_ptr = Audio_GetVoice(*(int *)((int)g_Vehicles + car_offset + 0x9a0));
+            if (voice_ptr != (char *)0x0) {
+                *(int *)(voice_ptr + 0x10) = 0;
+            }
+            *(int *)((int)g_Vehicles + g_ActiveVehicleIndex * 0x484c + 0x29c) = 0;
+        }
     }
-    var_3c = var_i25;
-    if ((!var_b11) &&
-       ((*(int *)((int)g_Vehicles + var_i15 + 0x528) == 0 ||
-        (*(int *)((int)g_Vehicles + var_i15 + 0x604) == 1)))) {
-      *crash_seq = 0;
-      *(int *)((int)g_Vehicles + var_i15 + 0x350) = 1;
-      var_i25 = var_i6 * 0x20;
-      *(int *)((int)g_Vehicles + var_i15 + 0x35c) = 0;
-      var_pd13 = g_Vehicles;
-      *(int *)((int)g_Vehicles + var_i15 + 0x534) = 0;
-      *(int *)((int)var_pd13 + var_i15 + 0x538) = 0x40590000;
-      if ((((int *)(g_pCarTransforms + var_i25))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
-        Lisa_MoveDynamicObject((int *)(g_pCarTransforms + var_i25));
-      }
-      var_i23 = var_i6 * 0x80;
-      if (((int *)(g_pWheelTransforms + var_i23))[7] == 0) {
-        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + var_i23));
-      }
-      if (*(int *)(g_pWheelTransforms + var_i23 + 0x3c) == 0) {
-        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + var_i23 + 0x20));
-      }
-      if (*(int *)(g_pWheelTransforms + var_i23 + 0x5c) == 0) {
-        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + var_i23 + 0x40));
-      }
-      if (*(int *)(g_pWheelTransforms + var_i23 + 0x7c) == 0) {
-        Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + var_i23 + 0x60));
-      }
-      if ((((int *)(g_pCarShadowTransforms + var_i25))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
-        Lisa_MoveDynamicObject((int *)(g_pCarShadowTransforms + var_i25));
-      }
-      if (((*(int *)(g_PlayerHUDState + var_i6 * 0x4c) == 7) && (g_DynamicObjectsPaused == 0)) &&
-         (((int *)(var_i25 + g_pCarReflectionTransforms))[7] == 0)) {
-        Lisa_MoveDynamicObject((int *)(var_i25 + g_pCarReflectionTransforms));
-      }
-      Car_UpdateDynamicObjects(var_i6);
-      var_3c = var_i24;
+
+    if (crash_tick < 0x1f) {
+        int tumble_steps = 0x1e - crash_tick;
+        if (10 < tumble_steps) {
+            tumble_steps = 10;
+        }
+        tumble_delta = (double)tumble_steps;
+        *(double *)((int)g_Vehicles + car_offset + 900) += tumble_delta;
+        *(double *)((int)g_Vehicles + car_offset + 0x394) += tumble_delta;
+        *(double *)((int)g_Vehicles + car_offset) += tumble_delta;
+
+        if (crash_tick < 10) {
+            current_x = *(double *)((int)g_Vehicles + car_offset + 8) + k_CrashElevationStepUp;
+        } else {
+            current_x = *(double *)((int)g_Vehicles + car_offset + 8) - k_CrashElevationStepDown;
+        }
+        *(double *)((int)g_Vehicles + car_offset + 8) = current_x;
+        *(double *)((int)g_Vehicles + car_offset + 0x10) += tumble_delta;
+        *(double *)((int)g_Vehicles + car_offset + 0x108) += k_CrashTumblePitchDelta;
+        *(double *)((int)g_Vehicles + car_offset + 0x110) += k_CrashTumbleRollDelta;
+
+        trig_factor = Math_RandomFloat0To1();
+        if (trig_factor == (double)k_CrashSoundRandomChance) {
+            __ftol();
+            __ftol();
+            Audio_PlaySampleVol(0, 2, 1, 0, 0x10000, 22000, 0);
+        }
+
+        if (crash_tick == 0x1e) {
+            int entity_stride = car_idx * 0x20;
+            if ((((int *)(g_pCarTransforms + entity_stride))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
+                Lisa_DeleteDynamicObject((int *)(g_pCarTransforms + entity_stride));
+            }
+            int wheel_stride = car_idx * 0x80;
+            if (((int *)(g_pWheelTransforms + wheel_stride))[7] != 0) {
+                Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + wheel_stride));
+            }
+            if (*(int *)(g_pWheelTransforms + wheel_stride + 0x3c) != 0) {
+                Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + wheel_stride + 0x20));
+            }
+            if (*(int *)(g_pWheelTransforms + wheel_stride + 0x5c) != 0) {
+                Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + wheel_stride + 0x40));
+            }
+            if (*(int *)(g_pWheelTransforms + wheel_stride + 0x7c) != 0) {
+                Lisa_DeleteDynamicObject((int *)(g_pWheelTransforms + wheel_stride + 0x60));
+            }
+            if ((((int *)(g_pCarShadowTransforms + entity_stride))[7] != 0) && (g_DynamicObjectsPaused == 0)) {
+                Lisa_DeleteDynamicObject((int *)(g_pCarShadowTransforms + entity_stride));
+            }
+            if (((*(int *)(g_PlayerHUDState + car_idx * 0x4c) == 7) && (g_DynamicObjectsPaused == 0)) &&
+               (((int *)(entity_stride + g_pCarReflectionTransforms))[7] != 0)) {
+                Lisa_DeleteDynamicObject((int *)(entity_stride + g_pCarReflectionTransforms));
+            }
+        }
     }
-  }
-  crash_seq[2] = var_u4;
-  crash_seq[1] = var_u3;
-  crash_seq[3] = var_u5;
-  crash_seq[5] = var_3c;
-  return;
+
+    if (total_ticks - crash_tick == 0x14) {
+        int debris_count = 10;
+        do {
+            g_ActiveParticle.type = 0xb;
+            g_ActiveParticle.pos_y = 0;
+            g_ActiveParticle.pos_x = car_idx;
+            Math_RandomFloat0To1();
+            ftol_result = __ftol();
+            g_ActiveParticle.pos_z = (int)ftol_result;
+            Math_RandomFloat0To1();
+            ftol_result = __ftol();
+            g_ActiveParticle.vel_x = (int)ftol_result;
+            g_ActiveParticle.vel_y = 0;
+            g_ActiveParticle.vel_z = 0;
+            g_ActiveParticle.drag = 0x2800;
+            g_ActiveParticle.field_24 = 0x3c;
+            g_ActiveParticle.gravity = 0;
+            FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
+            debris_count = debris_count - 1;
+        } while (debris_count != 0);
+        __ftol();
+        __ftol();
+        Audio_PlaySampleVol(0, 4, 3, 0, 0xe000, 0, 0);
+    }
+
+    if (crash_tick <= total_ticks - 0x28) {
+        goto LAB_CRASH_NEXT_TICK;
+    }
+
+    unsigned int road_node = *(unsigned int *)((int)g_Vehicles + car_offset + 0x364);
+    int node_abs = (road_node ^ (int)road_node >> 0x1f) - ((int)road_node >> 0x1f);
+
+    if (node_abs + 2 < g_TrackRoadSequenceNodeCount) {
+        if (-1 < (int)road_node) {
+            respawn_heading = *(double *)(g_pTrackRoadSequence + road_node * 6 + 0xd);
+            plc_model_idx = g_pTrackRoadSequence[road_node * 6 + 0xc];
+            goto LAB_RESPAWN_WRAP;
+        }
+        respawn_heading = *(double *)(g_pTrackRoadSequence + node_abs * 6 + 0x10) - k_RespawnSplineOffset;
+        spline_ptr = g_pTrackRoadSequence + node_abs * 6 + 0xf;
+        plc_model_idx = *spline_ptr;
+        if (respawn_heading < k_RespawnAngleMin) {
+            respawn_heading = respawn_heading + k_RespawnAngleModulo;
+        }
+        if (plc_model_idx == 10000) {
+            respawn_heading = *(double *)(g_pTrackRoadSequence + road_node * 6 + 0xd) - k_RespawnSplineOffset;
+            plc_model_idx = g_pTrackRoadSequence[road_node * 6 + 0xc];
+            if (respawn_heading < k_RespawnAngleMin) {
+                respawn_heading = respawn_heading + k_RespawnAngleModulo;
+            }
+        }
+        if (plc_model_idx == -2) {
+            int skip_count = 0;
+            do {
+                road_seq_ptr = spline_ptr + 6;
+                spline_ptr = spline_ptr + 6;
+                skip_count = skip_count + 1;
+            } while (*road_seq_ptr == -2);
+            respawn_heading = *(double *)(g_pTrackRoadSequence + (skip_count + node_abs) * 6 + 0xd);
+            plc_model_idx = g_pTrackRoadSequence[(skip_count + node_abs) * 6 + 0xc];
+            goto LAB_RESPAWN_WRAP;
+        }
+    } else {
+        respawn_heading = *(double *)(g_pTrackRoadSequence + 1);
+        plc_model_idx = *g_pTrackRoadSequence;
+LAB_RESPAWN_WRAP:
+        respawn_heading = respawn_heading - k_RespawnSplineOffset;
+        if (respawn_heading < k_RespawnAngleMin) {
+            respawn_heading = respawn_heading + k_RespawnAngleModulo;
+        }
+    }
+
+    msh_entry_offset = plc_model_idx * 0x14 + g_pActivePLC;
+    plc_model_idx = *(int *)(msh_entry_offset + 0x10);
+    int msh_data_offset = g_pActiveMSH + *(int *)(msh_entry_offset + 4) * 4;
+    poly_count = *(int *)(msh_data_offset + 4);
+    poly_ptr = (unsigned int *)(msh_data_offset + 8 + *(int *)(g_pActiveMSH + *(int *)(msh_entry_offset + 4) * 4) * 0xc);
+
+    if (0 < poly_count) {
+        do {
+            vi0 = poly_ptr[1];
+            vi1 = poly_ptr[2];
+            vi2 = poly_ptr[3];
+            if ((*poly_ptr & 0xffff0000) < 0x280000) {
+                world_pos_y_accum = world_pos_y_accum +
+                           *(int *)(msh_data_offset + 8 + vi0 * 0xc) + (*(int *)(msh_entry_offset + 0xc) + 0x6400) * 3 +
+                           *(int *)(msh_data_offset + 8 + vi1 * 0xc) + *(int *)(msh_data_offset + 8 + vi2 * 0xc);
+                world_pos_x_accum = (((((world_pos_x_accum - *(int *)(msh_data_offset + 0xc + vi0 * 0xc)) + plc_model_idx) -
+                           *(int *)(msh_data_offset + 0xc + vi1 * 0xc)) + plc_model_idx) -
+                         *(int *)(msh_data_offset + 0xc + vi2 * 0xc)) + plc_model_idx;
+                world_pos_z_accum = world_pos_z_accum +
+                           *(int *)(msh_data_offset + 0x10 + vi0 * 0xc) + (*(int *)(msh_entry_offset + 0x14) + 0x6400) * 3 +
+                           *(int *)(msh_data_offset + 0x10 + vi1 * 0xc) + *(int *)(msh_data_offset + 0x10 + vi2 * 0xc);
+                vertex_count_accum = vertex_count_accum + 3;
+            }
+            poly_ptr = poly_ptr + 0xb;
+            poly_count = poly_count - 1;
+        } while (poly_count != 0);
+    }
+
+    heading_accum = respawn_heading;
+    if (respawn_heading < 0.0) {
+        heading_accum = respawn_heading + k_RespawnAngleModulo;
+    }
+    tumble_delta = (double)((crash_tick - total_ticks) + 0x28);
+    trig_factor = Math_LookupTrigAngle(tumble_delta);
+
+    *(double *)((int)g_Vehicles + car_offset) =
+        (double)(((double)(world_pos_y_accum / vertex_count_accum) - (double)*(double *)((int)g_Vehicles + car_offset + 900)) *
+                 trig_factor + (double)*(double *)((int)g_Vehicles + car_offset + 900));
+
+    *(double *)((int)g_Vehicles + car_offset + 8) =
+        ((double)(world_pos_x_accum / vertex_count_accum + 0xfa) - *(double *)((int)g_Vehicles + car_offset + 0x38c)) *
+        tumble_delta * k_RespawnInterpolationScale + *(double *)((int)g_Vehicles + car_offset + 0x38c);
+
+    trig_factor = Math_LookupTrigAngle(tumble_delta);
+    current_x = heading_accum - k_RespawnAngleModulo;
+    *(double *)((int)g_Vehicles + car_offset + 0x10) =
+        (double)(((double)(world_pos_z_accum / vertex_count_accum) -
+                  (double)*(double *)((int)g_Vehicles + car_offset + 0x394)) * trig_factor +
+                 (double)*(double *)((int)g_Vehicles + car_offset + 0x394));
+
+    if (ABS(current_x - *(double *)((int)g_Vehicles + car_offset + 0x37c)) <
+        ABS(heading_accum - *(double *)((int)g_Vehicles + car_offset + 0x37c))) {
+        heading_accum = current_x;
+    }
+
+    *(double *)((int)g_Vehicles + car_offset + 0xf8) =
+        (heading_accum - *(double *)((int)g_Vehicles + car_offset + 0x37c)) * tumble_delta * k_RespawnInterpolationScale +
+        *(double *)((int)g_Vehicles + car_offset + 0x37c);
+
+    if (k_RespawnHeadingMax < *(double *)((int)g_Vehicles + car_offset + 0xf8)) {
+        *(double *)((int)g_Vehicles + car_offset + 0xf8) -= k_RespawnAngleModulo;
+    }
+    if (*(double *)((int)g_Vehicles + car_offset + 0xf8) < k_RespawnHeadingMin) {
+        *(double *)((int)g_Vehicles + car_offset + 0xf8) += k_RespawnAngleModulo;
+    }
+
+LAB_CRASH_NEXT_TICK:
+    final_crash_tick = crash_tick + 1;
+    if (total_ticks <= final_crash_tick) {
+        is_occupied = 0;
+        int check_idx = 0;
+        veh_ptr = g_Vehicles;
+        if (0 < g_NumRacers) {
+            do {
+                if (((((car_idx != check_idx) &&
+                      (veh_ptr = (double *)(car_offset + (int)g_Vehicles),
+                       ABS(*(double *)((int)g_Vehicles + check_idx * 0x484c) - *veh_ptr) < k_RespawnVehicleClearance)) &&
+                     ((ABS(*(double *)((int)g_Vehicles + check_idx * 0x484c + 8) - veh_ptr[1]) < k_RespawnVehicleClearance &&
+                      ((ABS(*(double *)((int)g_Vehicles + check_idx * 0x484c + 0x10) - veh_ptr[2]) < k_RespawnVehicleClearance &&
+                       (*(int *)((int)g_Vehicles + check_idx * 0x484c + 0x354) == 0)))))) && (*(int *)((int)g_Vehicles + check_idx * 0x484c + 0x358) == 0)) &&
+                    (*(int *)((int)g_Vehicles + check_idx * 0x484c + 0x35c) == 0)) {
+                    is_occupied = 1;
+                }
+                check_idx = check_idx + 1;
+            } while (check_idx < g_NumRacers);
+        }
+
+        if ((!is_occupied) &&
+            ((*(int *)((int)g_Vehicles + car_offset + 0x528) == 0 ||
+              (*(int *)((int)g_Vehicles + car_offset + 0x604) == 1)))) {
+            *crash_seq = 0;
+            *(int *)((int)g_Vehicles + car_offset + 0x350) = 1;
+            int car_entity_stride = car_idx * 0x20;
+            *(int *)((int)g_Vehicles + car_offset + 0x35c) = 0;
+            *(int *)((int)g_Vehicles + car_offset + 0x534) = 0;
+            *(int *)((int)g_Vehicles + car_offset + 0x538) = 0x40590000;
+
+            if ((((int *)(g_pCarTransforms + car_entity_stride))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
+                Lisa_MoveDynamicObject((int *)(g_pCarTransforms + car_entity_stride));
+            }
+            int wheel_entity_stride = car_idx * 0x80;
+            if (((int *)(g_pWheelTransforms + wheel_entity_stride))[7] == 0) {
+                Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + wheel_entity_stride));
+            }
+            if (*(int *)(g_pWheelTransforms + wheel_entity_stride + 0x3c) == 0) {
+                Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + wheel_entity_stride + 0x20));
+            }
+            if (*(int *)(g_pWheelTransforms + wheel_entity_stride + 0x5c) == 0) {
+                Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + wheel_entity_stride + 0x40));
+            }
+            if (*(int *)(g_pWheelTransforms + wheel_entity_stride + 0x7c) == 0) {
+                Lisa_MoveDynamicObject((int *)(g_pWheelTransforms + wheel_entity_stride + 0x60));
+            }
+            if ((((int *)(g_pCarShadowTransforms + car_entity_stride))[7] == 0) && (g_DynamicObjectsPaused == 0)) {
+                Lisa_MoveDynamicObject((int *)(g_pCarShadowTransforms + car_entity_stride));
+            }
+            if (((*(int *)(g_PlayerHUDState + car_idx * 0x4c) == 7) && (g_DynamicObjectsPaused == 0)) &&
+               (((int *)(car_entity_stride + g_pCarReflectionTransforms))[7] == 0)) {
+                Lisa_MoveDynamicObject((int *)(car_entity_stride + g_pCarReflectionTransforms));
+            }
+            Car_UpdateDynamicObjects(car_idx);
+        } else {
+            final_crash_tick = crash_tick;
+        }
+    }
+
+    crash_seq[2] = crash_pos_y;
+    crash_seq[1] = crash_pos_x;
+    crash_seq[3] = crash_pos_z;
+    crash_seq[5] = final_crash_tick;
 }
 
 /**
@@ -3387,7 +3428,7 @@ LAB_00434c38:
               var_u1 = *(unsigned int *)(g_Vehicles + 0x364 + var_10 * 0x484c);
               var_u7 = (int)var_u1 >> 0x1f;
               var_i9 = ((var_u1 ^ var_u7) - var_u7) + var_18;
-              if (var_i9 < DAT_005287f8) {
+              if (var_i9 < g_TrackRoadSequenceNodeCount) {
                 var_i9 = *(int *)(g_pTrackRoadSequence + var_i9 * 0x18);
               }
               else {
@@ -3692,7 +3733,7 @@ void Camera_UpdateOverview(void) {
   var_4 = 0;
   var_u14 = *(unsigned int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c);
   var_i13 = (var_u14 ^ (int)var_u14 >> 0x1f) - ((int)var_u14 >> 0x1f);
-  if (var_i13 + 2 < DAT_005287f8) {
+  if (var_i13 + 2 < g_TrackRoadSequenceNodeCount) {
     if ((int)var_u14 < 0) {
       var_18 = *(double *)(g_pTrackRoadSequence + var_i13 * 6 + 0x10) - _DAT_0047a540;
       var_pi15 = g_pTrackRoadSequence + var_i13 * 6 + 0xf;
@@ -6972,7 +7013,7 @@ LAB_0043fe07:
           *(int *)((int)var_pd9 + 4) = 0;
         }
         else {
-          *var_pd9 = ABS((double)*(int *)(g_Vehicles + 0x364 + var_i6)) / (double)DAT_005287f8;
+          *var_pd9 = ABS((double)*(int *)(g_Vehicles + 0x364 + var_i6)) / (double)g_TrackRoadSequenceNodeCount;
         }
         if (*(int *)(g_Vehicles + 0x528 + var_i6) == 0) {
           var_i5 = g_PlayerHUDState + var_68;
@@ -7016,7 +7057,7 @@ LAB_0043fe07:
         var_60[1] = 0.0;
       }
       else {
-        var_60[1] = ABS((double)*(int *)(g_Vehicles + 0x4bb0)) / (double)DAT_005287f8;
+        var_60[1] = ABS((double)*(int *)(g_Vehicles + 0x4bb0)) / (double)g_TrackRoadSequenceNodeCount;
       }
       var_80 = (*(int *)(var_68 + g_PlayerHUDState + 0x2c) + 5) * 0x100;
       var_i6 = *(int *)(var_68 + g_PlayerHUDState + 0x30);
