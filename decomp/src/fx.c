@@ -4114,126 +4114,107 @@ int Race_FindFocusedVehicle(void) {
  * @fidelity ADAPTED
  */
 void HUD_RenderPauseMenu(void) {
-  int var_i1;
-  int var_i2;
-  char *out_ECX;
-  char *var_pc3;
-  char *out_EDX;
-  int var_i4;
-  int *var_pu5;
-  int *var_pu6;
-  int var_b7;
-  __int64 var_u8;
-  int var_i9;
-  char *var_pc10;
-  char *var_pc11;
-  char var_18 [12];
-  int var_c [3];
-  var_pu5 = (int *)(g_RenderTargetSurface + 0x25800);
-  Gfx_SetRenderTarget(var_pu5,0x140,0x140,0x1e0,8);
-  g_pActiveDrawBuffer = DAT_00525e64;
-  var_pu6 = var_pu5;
-  for (var_i2 = 8000; var_i2 != 0; var_i2 = var_i2 + -1) {
-    *var_pu6 = 0;
-    var_pu6 = var_pu6 + 1;
-  }
-  if ((((DAT_00552f10 == 2) || (DAT_00552f10 == 3)) && (DAT_00563da0 != 1)) &&
-     (((DAT_005daff0 != 1 && (0 < DAT_00552f28)) && (g_PlayerCarChoice < 6)))) {
-    var_i4 = 1;
-    var_i2 = 0;
-  }
-  else {
-    var_i4 = 4;
-    var_i2 = 4;
-  }
-  var_u8 = Font_GetTextWidth((const char *)(s_CONTINUE_00494d58 + g_LanguageId * 0xd2), g_FontId_Medium);
-  Menu_AddLayoutItem(0x39,0,(int)var_u8,0,0);
-  var_u8 = Font_GetTextWidth((const char *)(s_RESTART_00494d76 + g_LanguageId * 0xd2), g_FontId_Medium);
-  Menu_AddLayoutItem(0x39,1,(int)var_u8,0,0);
-  var_u8 = Font_GetTextWidth((const char *)(&DAT_00494d94 + g_LanguageId * 0xd2), g_FontId_Medium);
-  Menu_AddLayoutItem(0x39,2,(int)var_u8,0,0);
-  var_u8 = Font_GetTextWidth((const char *)(s_CD_TRACK_00494db2 + g_LanguageId * 0xd2), g_FontId_Medium);
-  var_i1 = (int)var_u8;
-  Menu_AddLayoutItem(0x39,3,var_i1,0,0);
-  Menu_LayoutItems(var_pu5,0x140);
-  Menu_ClearLayout();
-  if (DAT_00639497 == 0) {
-    var_pc11 = (char *)(g_LanguageId * 0x69);
-    var_pc3 = s_DEFAULT_00494dee + g_LanguageId * 0xd2;
-    var_pc10 = var_pc3;
-  }
-  else if (DAT_00639497 == -1) {
-    var_pc3 = (char *)(g_LanguageId * 0x15);
-    var_pc11 = s_RANDOM_00494e0c + g_LanguageId * 0xd2;
-    var_pc10 = var_pc11;
-  }
-  else {
-    var_pc10 = &DAT_00499504;
-    var_pc3 = out_ECX;
-    var_pc11 = out_EDX;
-  }
-  var_u8 = Font_GetTextWidth((const char *)(var_pc10), DAT_00552fdc);
-  Menu_AddLayoutItem(var_i1 + 0x57,3,(int)var_u8,0,1);
-  Menu_LayoutItems(var_pu5,0x140);
-  Menu_ClearLayout();
-  var_i9 = g_FontId_Large;
-  if (DAT_00563c04 == 0) {
-    var_i9 = g_FontId_Medium;
-  }
-  Font_DrawText(s_CONTINUE_00494d58 + g_LanguageId * 0xd2,var_i9,0x46,0xc);
-  if (DAT_00563c04 == 1) {
-    var_i2 = ((int*)&(g_FontId_Large))[var_i4];
-  }
-  else {
-    var_i2 = ((int*)&(g_FontId_Large))[var_i2];
-  }
-  Font_DrawText(s_RESTART_00494d76 + g_LanguageId * 0xd2,var_i2,0x46,0x1f);
-  var_i2 = g_FontId_Large;
-  if (DAT_00563c04 == 2) {
-    var_i2 = g_FontId_Medium;
-  }
-  Font_DrawText((const char *)(&DAT_00494d94 + g_LanguageId * 0xd2),var_i2,0x46,0x32);
-  var_i2 = g_FontId_Large;
-  if (DAT_00563c04 == 3) {
-    var_i2 = g_FontId_Medium;
-  }
-  Font_DrawText(s_CD_TRACK_00494db2 + g_LanguageId * 0xd2,var_i2,0x46,0x45);
-  if (DAT_00639497 == 0) {
-    var_pc11 = &g_Format_Str_s;
-    var_pc3 = s_DEFAULT_00494dee + g_LanguageId * 0xd2;
-  }
-  else if (DAT_00639497 == -1) {
-    var_pc11 = &g_Format_Str_s;
-    var_pc3 = s_RANDOM_00494e0c + g_LanguageId * 0xd2;
-  }
-  else {
-    var_pc11 = &g_Format_Str_d;
-    var_pc3 = DAT_00552e54;
-  }
-  _sprintf(var_18,var_pc11,var_pc3);
-  ((int*)&(g_FontAlignMode))[DAT_00552fdc * 400] = 1;
-  Font_DrawText(var_18,DAT_00552fdc,(int)var_u8 / 2 + var_i1 + 100,0x45);
-  var_i2 = 0;
-  var_b7 = g_GameMode == 0;
-  ((int*)&(g_FontAlignMode))[DAT_00552fdc * 400] = 0;
-  if (var_b7) {
-    var_u8 = Font_GetTextWidth((const char *)(s_RESTART_00494d76 + g_LanguageId * 0xd2), g_FontId_Medium);
-    if (0 < DAT_00552f28) {
-      var_i4 = ((int)var_u8 + 0x67) * 0x100;
-      do {
-        var_i2 = var_i2 + 1;
-        var_c[1] = 0x1b00;
-        var_c[0] = var_i4;
-        Gfx_DrawSprite(DAT_005287e8,var_c,0);
-        var_i4 = var_i4 + 0x1a00;
-      } while (var_i2 < DAT_00552f28);
+    int text_w;
+    int i;
+    int restart_font_idx;
+    int restart_font_unsel;
+    int *prompt_surface;
+    int *clear_ptr;
+    int font_id;
+    const char *cd_text;
+    char text_buf[16];
+    int sprite_coords[3];
+    int screen_w;
+
+    prompt_surface = (int *)(g_RenderTargetSurface + 0x25800);
+    Gfx_SetRenderTarget(prompt_surface, 0x140, 0x140, 0x1e0, 8);
+    g_pActiveDrawBuffer = g_pHudDrawCommandBuffer;
+
+    clear_ptr = prompt_surface;
+    for (i = 8000; i != 0; i--) {
+        *clear_ptr++ = 0;
     }
-  }
-  Gfx_BlitTransparentLUT((int)var_pu5,0,0,0x140,100,0x563db0,g_ScreenWidth / 2 + -0xa0,g_ScreenHeight / 2 + -0x32,
-               g_pLisaDrawCommandWritePtr,0x140,g_ScreenWidth);
-  Gfx_SetRenderTarget(&g_VirtualFramebuffer,g_ScreenWidth,g_ScreenWidth,g_ScreenHeight,8);
-  g_pActiveDrawBuffer = g_pLisaDrawCommandWritePtr;
-  return;
+
+    if ((g_MultiplayerMode == 2 || g_MultiplayerMode == 3) && g_TimeTrialActive != 1 &&
+        g_IsAttractDemoMode != 1 && g_ChampionshipCredits > 0 && g_PlayerCarChoice < 6) {
+        restart_font_idx = 1;
+        restart_font_unsel = 0;
+    } else {
+        restart_font_idx = 4;
+        restart_font_unsel = 4;
+    }
+
+    text_w = (int)Font_GetTextWidth((const char *)(s_CONTINUE_00494d58 + g_LanguageId * 0xd2), g_FontId_Medium);
+    Menu_AddLayoutItem(0x39, 0, text_w, 0, 0);
+
+    text_w = (int)Font_GetTextWidth((const char *)(s_RESTART_00494d76 + g_LanguageId * 0xd2), g_FontId_Medium);
+    Menu_AddLayoutItem(0x39, 1, text_w, 0, 0);
+
+    text_w = (int)Font_GetTextWidth((const char *)(s_QUIT_00494d94 + g_LanguageId * 0xd2), g_FontId_Medium);
+    Menu_AddLayoutItem(0x39, 2, text_w, 0, 0);
+
+    text_w = (int)Font_GetTextWidth((const char *)(s_CD_TRACK_00494db2 + g_LanguageId * 0xd2), g_FontId_Medium);
+    Menu_AddLayoutItem(0x39, 3, text_w, 0, 0);
+
+    Menu_LayoutItems(prompt_surface, 0x140);
+    Menu_ClearLayout();
+
+    if (g_AudioCdTrackMode == 0) {
+        cd_text = s_DEFAULT_00494dee + g_LanguageId * 0xd2;
+    } else if (g_AudioCdTrackMode == -1) {
+        cd_text = s_RANDOM_00494e0c + g_LanguageId * 0xd2;
+    } else {
+        cd_text = "00";
+    }
+
+    font_id = (int)Font_GetTextWidth(cd_text, g_FontId_Small);
+    Menu_AddLayoutItem(text_w + 0x57, 3, font_id, 0, 1);
+    Menu_LayoutItems(prompt_surface, 0x140);
+    Menu_ClearLayout();
+
+    font_id = (g_MenuCursorPos == 0) ? g_FontId_Medium : g_FontId_Large;
+    Font_DrawText(s_CONTINUE_00494d58 + g_LanguageId * 0xd2, font_id, 0x46, 0xc);
+
+    font_id = (g_MenuCursorPos == 1) ? ((int *)&g_FontId_Large)[restart_font_idx] : ((int *)&g_FontId_Large)[restart_font_unsel];
+    Font_DrawText(s_RESTART_00494d76 + g_LanguageId * 0xd2, font_id, 0x46, 0x1f);
+
+    font_id = (g_MenuCursorPos == 2) ? g_FontId_Medium : g_FontId_Large;
+    Font_DrawText(s_QUIT_00494d94 + g_LanguageId * 0xd2, font_id, 0x46, 0x32);
+
+    font_id = (g_MenuCursorPos == 3) ? g_FontId_Medium : g_FontId_Large;
+    Font_DrawText(s_CD_TRACK_00494db2 + g_LanguageId * 0xd2, font_id, 0x46, 0x45);
+
+    if (g_AudioCdTrackMode == 0) {
+        sprintf(text_buf, "%s", s_DEFAULT_00494dee + g_LanguageId * 0xd2);
+    } else if (g_AudioCdTrackMode == -1) {
+        sprintf(text_buf, "%s", s_RANDOM_00494e0c + g_LanguageId * 0xd2);
+    } else {
+        sprintf(text_buf, "%d", g_CurrentCdTrackNumber);
+    }
+
+    ((int *)&g_FontAlignMode)[g_FontId_Small * 400] = 1;
+    Font_DrawText(text_buf, g_FontId_Small, font_id / 2 + text_w + 100, 0x45);
+    ((int *)&g_FontAlignMode)[g_FontId_Small * 400] = 0;
+
+    if (g_GameMode == 0) {
+        text_w = (int)Font_GetTextWidth((const char *)(s_RESTART_00494d76 + g_LanguageId * 0xd2), g_FontId_Medium);
+        if (g_ChampionshipCredits > 0) {
+            int spr_x = (text_w + 0x67) * 256;
+            for (i = 0; i < g_ChampionshipCredits; i++) {
+                sprite_coords[1] = 0x1b00;
+                sprite_coords[0] = spr_x;
+                Gfx_DrawSprite(g_pCreditIconSprite, sprite_coords, 0);
+                spr_x += 0x1a00;
+            }
+        }
+    }
+
+    screen_w = g_ScreenWidth;
+    Gfx_BlitTransparentLUT((int)prompt_surface, 0, 0, 0x140, 100, (void *)g_VirtualFramebuffer,
+                           screen_w / 2 - 0xa0, g_ScreenHeight / 2 - 0x32,
+                           g_pLisaDrawCommandWritePtr, 0x140, screen_w);
+    Gfx_SetRenderTarget(&g_VirtualFramebuffer, screen_w, screen_w, g_ScreenHeight, 8);
+    g_pActiveDrawBuffer = g_pLisaDrawCommandWritePtr;
 }
 
 /**
@@ -4251,16 +4232,16 @@ void HUD_RenderConfirmationPrompt(void) {
 
     prompt_surface = (int *)(g_RenderTargetSurface + 0x25800);
     Gfx_SetRenderTarget(prompt_surface, 0x140, 0x140, 0x1e0, 8);
-    g_pActiveDrawBuffer = DAT_00525e64;
+    g_pActiveDrawBuffer = g_pHudDrawCommandBuffer;
 
     clear_ptr = prompt_surface;
     for (clear_count = 8000; clear_count != 0; clear_count--) {
         *clear_ptr++ = 0;
     }
 
-    if (DAT_00601674 == 2) {
+    if (g_ConfirmationPromptType == 2) {
         text_width = (int)Font_GetTextWidth((const char *)(s_RESTART___Y_N__00495300 + g_LanguageId * 0x1e), g_FontId_Medium);
-    } else if (DAT_00601674 == 1) {
+    } else if (g_ConfirmationPromptType == 1) {
         text_width = (int)Font_GetTextWidth((const char *)(s_QUIT___Y_N__00495248 + g_LanguageId * 0x1e), g_FontId_Medium);
     } else {
         text_width = 0;
@@ -4271,18 +4252,18 @@ void HUD_RenderConfirmationPrompt(void) {
     Menu_ClearLayout();
 
     font_id = g_FontId_Medium;
-    ((int*)&(g_FontAlignMode))[g_FontId_Medium * 400] = 1;
-    if (DAT_00601674 == 2) {
+    ((int *)&g_FontAlignMode)[g_FontId_Medium * 400] = 1;
+    if (g_ConfirmationPromptType == 2) {
         prompt_text = s_RESTART___Y_N__00495300 + g_LanguageId * 0x1e;
         Font_DrawText(prompt_text, font_id, 0xa0, 0xc);
-    } else if (DAT_00601674 == 1) {
+    } else if (g_ConfirmationPromptType == 1) {
         prompt_text = s_QUIT___Y_N__00495248 + g_LanguageId * 0x1e;
         Font_DrawText(prompt_text, font_id, 0xa0, 0xc);
     }
 
     screen_w = g_ScreenWidth;
-    ((int*)&(g_FontAlignMode))[g_FontId_Medium * 400] = 0;
-    Gfx_BlitTransparentLUT((int)prompt_surface, 0, 0, 0x140, 0x22, 0x563db0,
+    ((int *)&g_FontAlignMode)[g_FontId_Medium * 400] = 0;
+    Gfx_BlitTransparentLUT((int)prompt_surface, 0, 0, 0x140, 0x22, (void *)g_VirtualFramebuffer,
                            screen_w / 2 - 0xa0, g_ScreenHeight / 2 - 0xf,
                            g_pLisaDrawCommandWritePtr, 0x140, screen_w);
     Gfx_SetRenderTarget(&g_VirtualFramebuffer, g_ScreenWidth, g_ScreenWidth, g_ScreenHeight, 8);
@@ -5311,7 +5292,7 @@ LAB_0043b5f5:
       _sprintf(var_50,s_RETRY_00494dd0 + g_LanguageId * 0xd2);
       var_u16 = Font_GetTextWidth((const char *)(var_50), g_FontId_Medium);
       Menu_AddLayoutItem(0x32,0,(int)var_u16,0x50,0);
-      _sprintf(var_28,&DAT_00494d94 + g_LanguageId * 0xd2);
+      _sprintf(var_28,s_QUIT_00494d94 + g_LanguageId * 0xd2);
       var_u16 = Font_GetTextWidth((const char *)(var_28), g_FontId_Medium);
       Menu_AddLayoutItem(0x32,1,(int)var_u16,0x50,0);
       Menu_LayoutItems(g_RenderTargetSurface,0x140);
@@ -5667,132 +5648,118 @@ LAB_0043c34d:
  * @fidelity ADAPTED
  */
 void HUD_RenderPlayAgainPrompt(void) {
-  int var_u1;
-  int *var_pi2;
-  int var_i3;
-  int var_i4;
-  int var_i5;
-  int *var_pu6;
-  int var_i7;
-  int var_i8;
-  int var_i9;
-  int var_2c;
-  int var_28;
-  int aiStack_20 [8];
-  var_i4 = 0;
-  if (0 < g_LapsTotal) {
-    do {
-      var_i3 = 0;
-      if (0 < g_NumRacers) {
-        var_pi2 = (int *)(g_Vehicles + 0x3a0);
-        do {
-          if (*var_pi2 - var_i4 == 1) break;
-          var_pi2 = var_pi2 + 0x1213;
-          var_i3 = var_i3 + 1;
-        } while (var_i3 < g_NumRacers);
-        if (var_i3 < g_NumRacers) {
-          aiStack_20[var_i4] = var_i3;
+    int racer_rank_map[8];
+    int lap_idx;
+    int racer_idx;
+    int *pVehicleRank;
+    int font_small;
+    int font_menu;
+    int spr_coords[2];
+    int item_y;
+    int spr_x;
+    int i;
+    void **pCarIcon;
+
+    for (lap_idx = 0; lap_idx < g_LapsTotal; lap_idx++) {
+        for (racer_idx = 0; racer_idx < g_NumRacers; racer_idx++) {
+            pVehicleRank = (int *)(g_Vehicles + 0x3a0 + racer_idx * 0x484c);
+            if (*pVehicleRank - lap_idx == 1) {
+                racer_rank_map[lap_idx] = racer_idx;
+                break;
+            }
         }
-      }
-      var_i4 = var_i4 + 1;
-    } while (var_i4 < g_LapsTotal);
-  }
-  Font_GetTextWidth((const char *)(s_TRACK_RESULTS_00495470 + g_LanguageId * 0x1e), g_FontId_Medium);
-  Gfx_SetRenderTarget(g_RenderTargetSurface,0x140,0x140,0x1e0,8);
-  var_i4 = g_FontId_Small;
-  g_pActiveDrawBuffer = DAT_00525e64;
-  if (DAT_00552f10 == 4) {
-    ((int*)&(g_FontAlignMode))[g_FontId_Small * 400] = 1;
-    Font_DrawText(s_WAITING_FOR_HOST_004957a8 + g_LanguageId * 0x1e,var_i4,0xa0,0x19c);
-    var_u1 = g_RenderTargetSurface;
-    ((int*)&(g_FontAlignMode))[g_FontId_Small * 400] = 0;
-    Gfx_SetRenderTarget(var_u1,0x280,0x280,0xf0,8);
-    var_i4 = g_FontId_Menu;
-    ((int*)&(g_FontAlignMode))[g_FontId_Menu * 400] = 1;
-    Font_DrawText(s_WAITING_FOR_HOST_004957a8 + g_LanguageId * 0x1e,var_i4,0x140,0xd3);
-    ((int*)&(g_FontAlignMode))[g_FontId_Menu * 400] = 0;
-  }
-  else {
-    if (g_GameMode != 0) {
-      ((int*)&(g_FontAlignMode))[g_FontId_Small * 400] = 1;
-      Font_DrawText(s_PLAY_TRACK_AGAIN___Y_N__00495698 + g_LanguageId * 0x2d,var_i4,0xa0,0x19c);
-      var_u1 = g_RenderTargetSurface;
-      ((int*)&(g_FontAlignMode))[g_FontId_Small * 400] = 0;
-      Gfx_SetRenderTarget(var_u1,0x280,0x280,0xf0,8);
-      var_i3 = g_LanguageId;
-      var_i4 = g_FontId_Menu;
-      ((int*)&(g_FontAlignMode))[g_FontId_Menu * 400] = 1;
-      Font_DrawText(s_PLAY_TRACK_AGAIN___Y_N__00495698 + var_i3 * 0x2d,var_i4,0x140,0xd3);
-      var_u1 = g_RenderTargetSurface;
-      ((int*)&(g_FontAlignMode))[g_FontId_Menu * 400] = 0;
-      Gfx_SetRenderTarget(var_u1,0x140,0x140,0x1e0,8);
-      DAT_005285c8 = 1;
-      goto LAB_0043c75a;
     }
-    Font_GetTextWidth((const char *)(s_PRESS_RETURN_TO_CONTINUE_00495860 + g_LanguageId * 0x32), g_FontId_Small);
-    var_i4 = g_FontId_Small;
-    ((int*)&(g_FontAlignMode))[g_FontId_Small * 400] = 1;
-    Font_DrawText(s_PRESS_RETURN_TO_CONTINUE_00495860 + g_LanguageId * 0x32,var_i4,0xa0,0x19c);
-    var_u1 = g_RenderTargetSurface;
-    ((int*)&(g_FontAlignMode))[g_FontId_Small * 400] = 0;
-    Gfx_SetRenderTarget(var_u1,0x280,0x280,0xf0,8);
-    var_i3 = g_LanguageId;
-    var_i4 = g_FontId_Menu;
-    ((int*)&(g_FontAlignMode))[g_FontId_Menu * 400] = 1;
-    Font_DrawText(s_PRESS_RETURN_TO_CONTINUE_00495860 + var_i3 * 0x32,var_i4,0x140,0xd3);
-    ((int*)&(g_FontAlignMode))[g_FontId_Menu * 400] = 0;
-  }
-  Gfx_SetRenderTarget(g_RenderTargetSurface,0x140,0x140,0x1e0,8);
-LAB_0043c75a:
-  var_i4 = 0;
-  if (0 < g_NumRacers) {
-    var_i3 = 0x28;
-    var_pu6 = &DAT_005286f4;
-    var_i5 = 0x3000;
-    do {
-      var_28 = var_i5;
-      if (g_GameMode == 3) {
-        var_2c = 0x7000;
-        Gfx_DrawSprite(*var_pu6,&var_2c,0);
-        var_i8 = 0x28;
-        var_i7 = 0x8b;
-        var_i9 = var_i3;
-LAB_0043c897:
-        Menu_AddLayoutItem(var_i7,0,var_i8,var_i9,0);
-        Menu_LayoutItems(g_RenderTargetSurface,0x140);
-        Menu_ClearLayout();
-      }
-      else {
-        var_2c = 0x3400;
-        Gfx_DrawSprite(*var_pu6,&var_2c,0);
-        Menu_AddLayoutItem(0x4f,0,0x28,var_i3,0);
-        Menu_LayoutItems(g_RenderTargetSurface,0x140);
-        Menu_ClearLayout();
-        Menu_AddLayoutItem(0x92,0,0x5f,var_i3,0);
-        Menu_LayoutItems(g_RenderTargetSurface,0x140);
-        Menu_ClearLayout();
-        if (DAT_00553068 == 1) {
-          var_28 = var_i5 + 0x3c00;
-          var_2c = 0x3400;
-          Gfx_DrawSprite(var_pu6[1],&var_2c,0);
-          Menu_AddLayoutItem(0x4f,0,0x28,var_i3 + 0x3c,0);
-          Menu_LayoutItems(g_RenderTargetSurface,0x140);
-          Menu_ClearLayout();
-          var_i8 = 0x5f;
-          var_i7 = 0x92;
-          var_i9 = var_i3 + 0x3c;
-          goto LAB_0043c897;
+
+    Font_GetTextWidth((const char *)(s_TRACK_RESULTS_00495470 + g_LanguageId * 0x1e), g_FontId_Medium);
+    Gfx_SetRenderTarget(g_RenderTargetSurface, 0x140, 0x140, 0x1e0, 8);
+    font_small = g_FontId_Small;
+    g_pActiveDrawBuffer = g_pHudDrawCommandBuffer;
+
+    if (g_MultiplayerMode == 4) {
+        ((int *)&g_FontAlignMode)[font_small * 400] = 1;
+        Font_DrawText(s_WAITING_FOR_HOST_004957a8 + g_LanguageId * 0x1e, font_small, 0xa0, 0x19c);
+        ((int *)&g_FontAlignMode)[font_small * 400] = 0;
+
+        Gfx_SetRenderTarget(g_RenderTargetSurface, 0x280, 0x280, 0xf0, 8);
+        font_menu = g_FontId_Menu;
+        ((int *)&g_FontAlignMode)[font_menu * 400] = 1;
+        Font_DrawText(s_WAITING_FOR_HOST_004957a8 + g_LanguageId * 0x1e, font_menu, 0x140, 0xd3);
+        ((int *)&g_FontAlignMode)[font_menu * 400] = 0;
+    } else {
+        if (g_GameMode != 0) {
+            ((int *)&g_FontAlignMode)[font_small * 400] = 1;
+            Font_DrawText(s_PLAY_TRACK_AGAIN___Y_N__00495698 + g_LanguageId * 0x2d, font_small, 0xa0, 0x19c);
+            ((int *)&g_FontAlignMode)[font_small * 400] = 0;
+
+            Gfx_SetRenderTarget(g_RenderTargetSurface, 0x280, 0x280, 0xf0, 8);
+            font_menu = g_FontId_Menu;
+            ((int *)&g_FontAlignMode)[font_menu * 400] = 1;
+            Font_DrawText(s_PLAY_TRACK_AGAIN___Y_N__00495698 + g_LanguageId * 0x2d, font_menu, 0x140, 0xd3);
+            ((int *)&g_FontAlignMode)[font_menu * 400] = 0;
+
+            Gfx_SetRenderTarget(g_RenderTargetSurface, 0x140, 0x140, 0x1e0, 8);
+            g_PlayAgainPromptActive = 1;
+            goto layout_racers;
         }
-      }
-      var_i3 = var_i3 + 0x3c;
-      var_pu6 = var_pu6 + 1;
-      var_i5 = var_i5 + 0x3c00;
-      var_i4 = var_i4 + 1;
-    } while (var_i4 < g_NumRacers);
-  }
-  Gfx_SetRenderTarget(&g_VirtualFramebuffer,g_ScreenWidth,g_ScreenWidth,g_ScreenHeight,8);
-  g_pActiveDrawBuffer = g_pLisaDrawCommandWritePtr;
-  return;
+
+        Font_GetTextWidth((const char *)(s_PRESS_RETURN_TO_CONTINUE_00495860 + g_LanguageId * 0x32), font_small);
+        ((int *)&g_FontAlignMode)[font_small * 400] = 1;
+        Font_DrawText(s_PRESS_RETURN_TO_CONTINUE_00495860 + g_LanguageId * 0x32, font_small, 0xa0, 0x19c);
+        ((int *)&g_FontAlignMode)[font_small * 400] = 0;
+
+        Gfx_SetRenderTarget(g_RenderTargetSurface, 0x280, 0x280, 0xf0, 8);
+        font_menu = g_FontId_Menu;
+        ((int *)&g_FontAlignMode)[font_menu * 400] = 1;
+        Font_DrawText(s_PRESS_RETURN_TO_CONTINUE_00495860 + g_LanguageId * 0x32, font_menu, 0x140, 0xd3);
+        ((int *)&g_FontAlignMode)[font_menu * 400] = 0;
+    }
+
+    Gfx_SetRenderTarget(g_RenderTargetSurface, 0x140, 0x140, 0x1e0, 8);
+
+layout_racers:
+    if (g_NumRacers > 0) {
+        item_y = 0x28;
+        pCarIcon = (void **)&g_pCarIconSprites;
+        spr_x = 0x3000;
+        for (i = 0; i < g_NumRacers; i++) {
+            if (g_GameMode == 3) {
+                spr_coords[1] = spr_x;
+                spr_coords[0] = 0x7000;
+                Gfx_DrawSprite(*pCarIcon, spr_coords, 0);
+                Menu_AddLayoutItem(0x8b, 0, 0x28, item_y, 0);
+                Menu_LayoutItems(g_RenderTargetSurface, 0x140);
+                Menu_ClearLayout();
+            } else {
+                spr_coords[1] = spr_x;
+                spr_coords[0] = 0x3400;
+                Gfx_DrawSprite(*pCarIcon, spr_coords, 0);
+                Menu_AddLayoutItem(0x4f, 0, 0x28, item_y, 0);
+                Menu_LayoutItems(g_RenderTargetSurface, 0x140);
+                Menu_ClearLayout();
+                Menu_AddLayoutItem(0x92, 0, 0x5f, item_y, 0);
+                Menu_LayoutItems(g_RenderTargetSurface, 0x140);
+                Menu_ClearLayout();
+
+                if (g_ShowSecondPlayerFlag == 1) {
+                    spr_coords[1] = spr_x + 0x3c00;
+                    spr_coords[0] = 0x3400;
+                    Gfx_DrawSprite(pCarIcon[1], spr_coords, 0);
+                    Menu_AddLayoutItem(0x4f, 0, 0x28, item_y + 0x3c, 0);
+                    Menu_LayoutItems(g_RenderTargetSurface, 0x140);
+                    Menu_ClearLayout();
+                    Menu_AddLayoutItem(0x92, 0, 0x5f, item_y + 0x3c, 0);
+                    Menu_LayoutItems(g_RenderTargetSurface, 0x140);
+                    Menu_ClearLayout();
+                }
+            }
+            item_y += 0x3c;
+            pCarIcon++;
+            spr_x += 0x3c00;
+        }
+    }
+
+    Gfx_SetRenderTarget((int *)g_VirtualFramebuffer, g_ScreenWidth, g_ScreenWidth, g_ScreenHeight, 8);
+    g_pActiveDrawBuffer = g_pLisaDrawCommandWritePtr;
 }
 
 /**

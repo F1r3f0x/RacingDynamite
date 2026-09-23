@@ -148,4 +148,19 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x00553090` | `double`     | `g_LapRecordSeconds` | Best lap time record in floating-point seconds. |
 | `0x00525e44` | `int32_t`    | `g_TargetLapTimeCents` | Target track record time in centiseconds. |
 | `0x00552f68` | `double`     | `g_HudAnimSinPhase` | Sinusoidal phase accumulator for animated HUD elements. |
+| `0x00601674` | `int32_t`    | `g_ConfirmationPromptType` | Active confirmation prompt dialog mode: `1` = Quit, `2` = Restart. |
+| `0x00525e64` | `int32_t*`   | `g_pHudDrawCommandBuffer` | Secondary command buffer for HUD/UI dialog rendering. |
+| `0x00552f10` | `int32_t`    | `g_MultiplayerMode` | Network / split-screen multiplayer mode flag (`4` = waiting for host). |
+| `0x00563da0` | `int32_t`    | `g_TimeTrialActive` | Time trial game mode flag. |
+| `0x005daff0` | `int32_t`    | `g_IsAttractDemoMode` | Attract / idle demo mode playback toggle. |
+| `0x00552f28` | `int32_t`    | `g_ChampionshipCredits` | Number of remaining restart credits in Championship mode. |
+| `0x00639497` | `int32_t`    | `g_AudioCdTrackMode` | Audio CD playback selection: `0` = Default, `-1` = Random, `>0` = Track. |
+| `0x00552e54` | `int32_t`    | `g_CurrentCdTrackNumber` | Currently playing audio CD track number. |
+| `0x005287e8` | `void*`      | `g_pCreditIconSprite` | Sprite graphic for restart credit icons in pause menu. |
+| `0x005285c8` | `int32_t`    | `g_PlayAgainPromptActive` | Flag indicating post-race Play Again confirmation prompt is visible. |
+| `0x005286f4` | `void*[]`    | `g_pCarIconSprites` | Table of car icon sprites rendered on the post-race results screen. |
+| `0x00553068` | `int32_t`    | `g_ShowSecondPlayerFlag` | Display toggle for Player 2 elements in split-screen menus. |
+| `0x00552fe0` | `int32_t`    | `g_FontId_Disabled` | Font resource ID for disabled / greyed-out menu options. |
+| `0x00494d94` | `char[]`     | `s_QUIT_00494d94` | Localized string table for 'QUIT' option in pause menu. |
+
 
