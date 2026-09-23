@@ -551,13 +551,13 @@ extern int *g_LisaDrawCommandBuffer;
 extern void *g_LisaOpcodeTable[];
 extern void *g_LisaRasterizerJmpTable[];
 extern void *g_pLisaShutdownCallbacks[];
-extern void *PTR_Lisa_DrawTexturedTriangle_Op15_0049c934;
-extern void *PTR_LAB_0049c924;
+extern void *g_LisaRenderTexturedOp15_FuncPtr;
+extern void *g_LisaRenderTexturedOp11_FuncPtr;
 extern void *g_LisaRasterizerJmpTable[];
 extern void *g_pLisaShutdownCallbacks[];
 extern void *g_LisaOpcodeTable[];
-extern void *PTR_LAB_0049c924;
-extern void *PTR_Lisa_DrawTexturedTriangle_Op15_0049c934;
+extern void *g_LisaRenderTexturedOp11_FuncPtr;
+extern void *g_LisaRenderTexturedOp15_FuncPtr;
 extern int s_rb;
 extern int g_ViewportMinX;
 extern int g_ViewportMinY;
@@ -1886,132 +1886,132 @@ LAB_00447785:
  * @original Lisa_DownsampleTextureMipmap (IGN_WIN.EXE @ 0x00447fb0, lisa3d.c)
  * @fidelity ADAPTED
  */
-void Lisa_DownsampleTextureMipmap(byte *prm_1,byte *prm_2,int prm_3,int prm_4,int prm_5,int prm_6) {
-  int tmp_i1;
-  byte tmp_b2;
-  int tmp_i3;
-  unsigned int *tmp_pu4;
-  unsigned int tmp_u5;
-  unsigned int tmp_u6;
-  int tmp_i7;
-  int tmp_i8;
-  int tmp_i9;
-  int tmp_2c;
-  int tmp_24;
-  unsigned int tmp_1c [4];
-  int tmp_c [3];
+void Lisa_DownsampleTextureMipmap(byte *src_ptr,byte *dst_ptr,int width,int height,int stride,int palette) {
+  int pal_offset;
+  byte src_pixel;
+  int width_minus_1;
+  unsigned int *accum_ptr;
+  unsigned int chan_sum;
+  unsigned int chan_val;
+  int chan_offset;
+  int next_chan_offset;
+  int temp_val;
+  int x;
+  int y;
+  unsigned int color_accum [4];
+  int error_acc [3];
 
   
 
-  tmp_24 = 0;
+  y = 0;
 
-  if (0 < prm_4) {
+  if (0 < height) {
     do {
-      tmp_2c = 0;
-      tmp_c[0] = 0;
-      tmp_c[1] = 0;
-      tmp_c[2] = 0;
+      x = 0;
+      error_acc[0] = 0;
+      error_acc[1] = 0;
+      error_acc[2] = 0;
 
-      if (0 < prm_3) {
-        tmp_i3 = prm_3 + -1;
+      if (0 < width) {
+        width_minus_1 = width + -1;
 
         do {
-          tmp_i7 = 0;
-          tmp_pu4 = tmp_1c;
-          tmp_b2 = *prm_1;
+          chan_offset = 0;
+          accum_ptr = color_accum;
+          src_pixel = *src_ptr;
 
           do {
-            tmp_u6 = (unsigned int)*(byte *)((unsigned int)tmp_b2 * 4 + tmp_i7 + prm_6);
-            *tmp_pu4 = tmp_u6;
+            chan_val = (unsigned int)*(byte *)((unsigned int)src_pixel * 4 + chan_offset + palette);
+            *accum_ptr = chan_val;
 
-            if (tmp_2c < tmp_i3) {
-              tmp_u5 = *(byte *)(tmp_i7 + (unsigned int)prm_1[1] * 4 + prm_6) + tmp_u6;
+            if (x < width_minus_1) {
+              chan_sum = *(byte *)(chan_offset + (unsigned int)src_ptr[1] * 4 + palette) + chan_val;
             }
 
             else {
-              tmp_u5 = tmp_u6 * 2;
+              chan_sum = chan_val * 2;
             }
 
-            *tmp_pu4 = tmp_u5;
+            *accum_ptr = chan_sum;
 
-            if (tmp_24 < prm_4 + -1) {
-              tmp_u6 = (unsigned int)*(byte *)(tmp_i7 + (unsigned int)prm_1[prm_5] * 4 + prm_6);
-              tmp_u5 = *tmp_pu4 + tmp_u6;
-              *tmp_pu4 = tmp_u5;
+            if (y < height + -1) {
+              chan_val = (unsigned int)*(byte *)(chan_offset + (unsigned int)src_ptr[stride] * 4 + palette);
+              chan_sum = *accum_ptr + chan_val;
+              *accum_ptr = chan_sum;
 
-              if (tmp_2c < tmp_i3) {
-                *tmp_pu4 = *(byte *)(tmp_i7 + (unsigned int)prm_1[prm_5 + 1] * 4 + prm_6) + tmp_u5;
+              if (x < width_minus_1) {
+                *accum_ptr = *(byte *)(chan_offset + (unsigned int)src_ptr[stride + 1] * 4 + palette) + chan_sum;
               }
 
               else {
-                *tmp_pu4 = tmp_u6 + tmp_u5;
+                *accum_ptr = chan_val + chan_sum;
               }
 
             }
 
             else {
-              tmp_u5 = *tmp_pu4 + tmp_u6;
-              *tmp_pu4 = tmp_u5;
+              chan_sum = *accum_ptr + chan_val;
+              *accum_ptr = chan_sum;
 
-              if (tmp_2c < tmp_i3) {
-                *tmp_pu4 = *(byte *)(tmp_i7 + (unsigned int)prm_1[1] * 4 + prm_6) + tmp_u5;
+              if (x < width_minus_1) {
+                *accum_ptr = *(byte *)(chan_offset + (unsigned int)src_ptr[1] * 4 + palette) + chan_sum;
               }
 
               else {
-                *tmp_pu4 = tmp_u5 + tmp_u6;
+                *accum_ptr = chan_sum + chan_val;
               }
 
             }
 
-            tmp_pu4 = tmp_pu4 + 1;
-            tmp_i7 = tmp_i7 + 1;
-          } while (tmp_pu4 < tmp_1c + 3);
-          tmp_i7 = 0;
+            accum_ptr = accum_ptr + 1;
+            chan_offset = chan_offset + 1;
+          } while (accum_ptr < color_accum + 3);
+          chan_offset = 0;
 
           do {
-            tmp_i9 = *(int *)((int)tmp_c + tmp_i7) + 8 + *(int *)((int)tmp_1c + tmp_i7);
-            *(int *)((int)tmp_1c + tmp_i7) = tmp_i9;
+            temp_val = *(int *)((int)error_acc + chan_offset) + 8 + *(int *)((int)color_accum + chan_offset);
+            *(int *)((int)color_accum + chan_offset) = temp_val;
 
-            if (0x3ff < tmp_i9) {
-              *(int *)((int)tmp_1c + tmp_i7) = 0x3ff;
+            if (0x3ff < temp_val) {
+              *(int *)((int)color_accum + chan_offset) = 0x3ff;
             }
 
-            if (*(int *)((int)tmp_1c + tmp_i7) < 0) {
-              *(int *)((int)tmp_1c + tmp_i7) = 0;
+            if (*(int *)((int)color_accum + chan_offset) < 0) {
+              *(int *)((int)color_accum + chan_offset) = 0;
             }
 
-            tmp_i7 = tmp_i7 + 4;
-          } while (tmp_i7 < 0xc);
-          tmp_i9 = 0;
+            chan_offset = chan_offset + 4;
+          } while (chan_offset < 0xc);
+          temp_val = 0;
 
-          tmp_b2 = (&g_LisaObjectMatrix_22)
+          src_pixel = (&g_LisaObjectMatrix_22)
 
-                  [(tmp_1c[1] & 0x3f0) * 4 +
+                  [(color_accum[1] & 0x3f0) * 4 +
 
-                   ((tmp_1c[2] & 0x3f0) >> 4) + (tmp_1c[0] & 0x3f0) * 0x100];
-          *prm_2 = tmp_b2;
-          tmp_i7 = 0;
+                   ((color_accum[2] & 0x3f0) >> 4) + (color_accum[0] & 0x3f0) * 0x100];
+          *dst_ptr = src_pixel;
+          chan_offset = 0;
 
           do {
-            tmp_i8 = tmp_i7 + 4;
-            tmp_i1 = tmp_i9 + (unsigned int)tmp_b2 * 4;
-            tmp_i9 = tmp_i9 + 1;
+            next_chan_offset = chan_offset + 4;
+            pal_offset = temp_val + (unsigned int)src_pixel * 4;
+            temp_val = temp_val + 1;
 
-            *(int *)((int)tmp_c + tmp_i7) =
+            *(int *)((int)error_acc + chan_offset) =
 
-                 (int)(*(int *)((int)tmp_1c + tmp_i7) + (unsigned int)*(byte *)(tmp_i1 + prm_6) * -4) / 2;
-            tmp_i7 = tmp_i8;
-          } while (tmp_i8 < 0xc);
-          prm_2 = prm_2 + 1;
-          prm_1 = prm_1 + 1;
-          tmp_2c = tmp_2c + 1;
-        } while (tmp_2c < prm_3);
+                 (int)(*(int *)((int)color_accum + chan_offset) + (unsigned int)*(byte *)(pal_offset + palette) * -4) / 2;
+            chan_offset = next_chan_offset;
+          } while (next_chan_offset < 0xc);
+          dst_ptr = dst_ptr + 1;
+          src_ptr = src_ptr + 1;
+          x = x + 1;
+        } while (x < width);
       }
 
-      prm_1 = prm_1 + (prm_5 - prm_3);
-      tmp_24 = tmp_24 + 1;
-      prm_2 = prm_2 + (prm_5 - prm_3);
-    } while (tmp_24 < prm_4);
+      src_ptr = src_ptr + (stride - width);
+      y = y + 1;
+      dst_ptr = dst_ptr + (stride - width);
+    } while (y < height);
   }
 
   return;
@@ -3914,128 +3914,128 @@ int Lisa_TransformVerticesPanorama(void) {
  * @original Lisa_ComputeObjectMatrix (IGN_WIN.EXE @ 0x0044a900, lisa3d.c)
  * @fidelity ADAPTED
  */
-int Lisa_ComputeObjectMatrix(int prm_1,int prm_2,int prm_3,int prm_4,int *prm_5) {
-  ushort tmp_u1;
-  ushort tmp_u2;
-  ushort tmp_u3;
-  short sVar4;
-  int tmp_i5;
-  int tmp_i6;
-  int tmp_i7;
-  int tmp_i8;
-  int tmp_i9;
-  int *tmp_pi10;
-  int tmp_i11;
-  int tmp_i12;
-  int tmp_i13;
-  int tmp_i14;
-  int tmp_l15;
-  int tmp_l16;
-  int tmp_l17;
-  int tmp_l18;
-  int tmp_l19;
-  int tmp_l20;
-  int tmp_l21;
-  int tmp_l22;
-  int tmp_l23;
-  int tmp_58;
+int Lisa_ComputeObjectMatrix(int pos_x,int pos_y,int pos_z,int obj_ptr,int *vertex_array) {
+  ushort rot_y;
+  ushort rot_x;
+  ushort rot_z;
+  short temp_rot;
+  int local_y;
+  int local_x;
+  int local_z;
+  int cam_offset_y;
+  int vertex_idx;
+  int *out_val_vertex;
+  int cam_space_x;
+  int cam_space_y;
+  int cam_space_z;
+  int proj_z;
+  int mat_00;
+  int mat_01;
+  int mat_02;
+  int mat_10;
+  int mat_11;
+  int mat_12;
+  int mat_20;
+  int mat_21;
+  int mat_22;
+  int num_vertices;
 
   
 
-  tmp_i11 = (g_LisaCameraMatrix_02 * prm_3 + g_LisaCameraMatrix_01 * prm_2 + g_LisaCameraMatrix_00 * prm_1) - g_LisaSubmeshCenterWorldX
+  cam_space_x = (g_LisaCameraMatrix_02 * pos_z + g_LisaCameraMatrix_01 * pos_y + g_LisaCameraMatrix_00 * pos_x) - g_LisaSubmeshCenterWorldX
 
   ;
 
-  tmp_i12 = (g_LisaCameraMatrix_12 * prm_3 + g_LisaCameraMatrix_11 * prm_2 + g_LisaCameraMatrix_10 * prm_1) - g_LisaSubmeshCenterWorldZ
+  cam_space_y = (g_LisaCameraMatrix_12 * pos_z + g_LisaCameraMatrix_11 * pos_y + g_LisaCameraMatrix_10 * pos_x) - g_LisaSubmeshCenterWorldZ
 
   ;
 
-  tmp_i13 = (g_LisaCameraMatrix_22 * prm_3 + g_LisaCameraMatrix_21 * prm_2 + g_LisaCameraMatrix_20 * prm_1) - g_LisaSubmeshDepthOffset
+  cam_space_z = (g_LisaCameraMatrix_22 * pos_z + g_LisaCameraMatrix_21 * pos_y + g_LisaCameraMatrix_20 * pos_x) - g_LisaSubmeshDepthOffset
 
   ;
-  tmp_u1 = *(ushort *)(prm_4 + 0x1a);
-  tmp_u2 = *(ushort *)(prm_4 + 0x18);
-  tmp_u3 = *(ushort *)(prm_4 + 0x1c);
+  rot_y = *(ushort *)(obj_ptr + 0x1a);
+  rot_x = *(ushort *)(obj_ptr + 0x18);
+  rot_z = *(ushort *)(obj_ptr + 0x1c);
 
-  if (0xe10 < (ushort)(tmp_u2 | tmp_u1 | tmp_u3)) {
-    if ((short)tmp_u2 < 0) {
-      *(ushort *)(prm_4 + 0x18) = ((ushort)(0xe0f - tmp_u2) / 0xe10) * 0xe10 + tmp_u2;
+  if (0xe10 < (ushort)(rot_x | rot_y | rot_z)) {
+    if ((short)rot_x < 0) {
+      *(ushort *)(obj_ptr + 0x18) = ((ushort)(0xe0f - rot_x) / 0xe10) * 0xe10 + rot_x;
     }
 
-    if ((short)tmp_u1 < 0) {
-      *(ushort *)(prm_4 + 0x1a) = ((ushort)(0xe0f - tmp_u1) / 0xe10) * 0xe10 + tmp_u1;
+    if ((short)rot_y < 0) {
+      *(ushort *)(obj_ptr + 0x1a) = ((ushort)(0xe0f - rot_y) / 0xe10) * 0xe10 + rot_y;
     }
 
-    if ((short)tmp_u3 < 0) {
-      *(ushort *)(prm_4 + 0x1c) = ((ushort)(0xe0f - tmp_u3) / 0xe10) * 0xe10 + tmp_u3;
+    if ((short)rot_z < 0) {
+      *(ushort *)(obj_ptr + 0x1c) = ((ushort)(0xe0f - rot_z) / 0xe10) * 0xe10 + rot_z;
     }
 
-    sVar4 = *(short *)(prm_4 + 0x18);
+    temp_rot = *(short *)(obj_ptr + 0x18);
 
-    if (0xe10 < sVar4) {
-      *(ushort *)(prm_4 + 0x18) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+    if (0xe10 < temp_rot) {
+      *(ushort *)(obj_ptr + 0x18) = ((ushort)(temp_rot - 1U) / 0xe10) * -0xe10 + temp_rot;
     }
 
-    sVar4 = *(short *)(prm_4 + 0x1a);
+    temp_rot = *(short *)(obj_ptr + 0x1a);
 
-    if (0xe10 < sVar4) {
-      *(ushort *)(prm_4 + 0x1a) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+    if (0xe10 < temp_rot) {
+      *(ushort *)(obj_ptr + 0x1a) = ((ushort)(temp_rot - 1U) / 0xe10) * -0xe10 + temp_rot;
     }
 
-    sVar4 = *(short *)(prm_4 + 0x1c);
+    temp_rot = *(short *)(obj_ptr + 0x1c);
 
-    if (0xe10 < sVar4) {
-      *(ushort *)(prm_4 + 0x1c) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+    if (0xe10 < temp_rot) {
+      *(ushort *)(obj_ptr + 0x1c) = ((ushort)(temp_rot - 1U) / 0xe10) * -0xe10 + temp_rot;
     }
 
   }
 
-  tmp_l15 = __ftol();
-  tmp_l16 = __ftol();
-  tmp_l17 = __ftol();
-  tmp_l18 = __ftol();
-  tmp_l19 = __ftol();
-  tmp_l20 = __ftol();
-  tmp_l21 = __ftol();
-  tmp_l22 = __ftol();
-  tmp_l23 = __ftol();
-  tmp_i6 = g_LisaTransformedVertices;
-  tmp_i9 = 2;
-  tmp_58 = *prm_5;
+  mat_00 = __ftol();
+  mat_01 = __ftol();
+  mat_02 = __ftol();
+  mat_10 = __ftol();
+  mat_11 = __ftol();
+  mat_12 = __ftol();
+  mat_20 = __ftol();
+  mat_21 = __ftol();
+  mat_22 = __ftol();
+  local_x = g_LisaTransformedVertices;
+  vertex_idx = 2;
+  num_vertices = *vertex_array;
 
-  if (0 < tmp_58) {
-    tmp_i5 = g_LisaCamera->vertex_counter;
-    g_LisaCamera->vertex_counter = tmp_i5 + tmp_58;
-    tmp_pi10 = (int *)(tmp_i6 + tmp_i5 * 0xc);
+  if (0 < num_vertices) {
+    local_y = g_LisaCamera->vertex_counter;
+    g_LisaCamera->vertex_counter = local_y + num_vertices;
+    out_val_vertex = (int *)(local_x + local_y * 0xc);
 
     do {
-      tmp_i6 = prm_5[tmp_i9];
-      tmp_i5 = prm_5[tmp_i9 + 1];
-      tmp_i7 = prm_5[tmp_i9 + 2];
-      tmp_i9 = tmp_i9 + 3;
+      local_x = vertex_array[vertex_idx];
+      local_y = vertex_array[vertex_idx + 1];
+      local_z = vertex_array[vertex_idx + 2];
+      vertex_idx = vertex_idx + 3;
 
-      tmp_i14 = g_LisaCameraFocalLength +
+      proj_z = g_LisaCameraFocalLength +
 
-               (tmp_i7 * (int)tmp_l23 + tmp_i5 * (int)tmp_l22 + tmp_i6 * (int)tmp_l21 + tmp_i13 >> 0x10);
+               (local_z * (int)mat_22 + local_y * (int)mat_21 + local_x * (int)mat_20 + cam_space_z >> 0x10);
 
-      if (tmp_i14 < g_LisaCameraFocalLength) {
-        tmp_i14 = g_LisaCameraFocalLength;
+      if (proj_z < g_LisaCameraFocalLength) {
+        proj_z = g_LisaCameraFocalLength;
       }
 
-      *tmp_pi10 = g_LisaCameraOffsetX +
+      *out_val_vertex = g_LisaCameraOffsetX +
 
-                 (tmp_i11 + tmp_i7 * (int)tmp_l17 + tmp_i5 * (int)tmp_l16 + tmp_i6 * (int)tmp_l15) / tmp_i14
+                 (cam_space_x + local_z * (int)mat_02 + local_y * (int)mat_01 + local_x * (int)mat_00) / proj_z
 
       ;
-      tmp_i8 = g_LisaCameraOffsetY;
-      tmp_pi10[2] = tmp_i14;
-      tmp_58 = tmp_58 + -1;
+      cam_offset_y = g_LisaCameraOffsetY;
+      out_val_vertex[2] = proj_z;
+      num_vertices = num_vertices + -1;
 
-      tmp_pi10[1] = tmp_i8 + (tmp_i12 + tmp_i7 * (int)tmp_l20 + tmp_i5 * (int)tmp_l19 + tmp_i6 * (int)tmp_l18
+      out_val_vertex[1] = cam_offset_y + (cam_space_y + local_z * (int)mat_12 + local_y * (int)mat_11 + local_x * (int)mat_10
 
-                           ) / tmp_i14;
-      tmp_pi10 = tmp_pi10 + 3;
-    } while (tmp_58 != 0);
+                           ) / proj_z;
+      out_val_vertex = out_val_vertex + 3;
+    } while (num_vertices != 0);
   }
 
   return 0;
@@ -4228,20 +4228,20 @@ void Lisa_InitOpcodeTable(void) {
   if (g_LisaDisableFiltering != 0) {
     if (g_LisaCamera->shading_mode == 0) {
       if (g_LisaShadingEnabled == 0) {
-        PTR_LAB_0049c924 = ((void *)0x0044c2e0);
+        g_LisaRenderTexturedOp11_FuncPtr = ((void *)0x0044c2e0);
       }
 
       else {
-        PTR_LAB_0049c924 = ((void *)0x0044c610);
+        g_LisaRenderTexturedOp11_FuncPtr = ((void *)0x0044c610);
       }
 
     }
 
     else {
-      PTR_LAB_0049c924 = ((void *)0x0044bb90);
+      g_LisaRenderTexturedOp11_FuncPtr = ((void *)0x0044bb90);
     }
 
-    PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15;
+    g_LisaRenderTexturedOp15_FuncPtr = Lisa_DrawTexturedTriangle_Op15;
     g_LisaCamera->active_draw_cmd = 0;
     *(int *)(idx + 0x6c) = 0;
     return;
@@ -4249,32 +4249,32 @@ void Lisa_InitOpcodeTable(void) {
 
   if (g_LisaCamera->shading_mode == 0) {
     if (g_LisaShadingEnabled == 0) {
-      PTR_LAB_0049c924 = ((void *)0x0044c2e0);
+      g_LisaRenderTexturedOp11_FuncPtr = ((void *)0x0044c2e0);
     }
 
     else {
-      PTR_LAB_0049c924 = Lisa_DrawTexturedTriangle_Op11_Unshaded;
+      g_LisaRenderTexturedOp11_FuncPtr = Lisa_DrawTexturedTriangle_Op11_Unshaded;
     }
 
   }
 
   else {
-    PTR_LAB_0049c924 = ((void *)0x0044bb90);
+    g_LisaRenderTexturedOp11_FuncPtr = ((void *)0x0044bb90);
 
     if (g_LisaShadingEnabled != 0) {
-      PTR_LAB_0049c924 = Lisa_DrawTexturedTriangle_Op11_Shaded;
+      g_LisaRenderTexturedOp11_FuncPtr = Lisa_DrawTexturedTriangle_Op11_Shaded;
     }
 
   }
 
   if (g_LisaShadingEnabled == 0) {
-    PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15;
+    g_LisaRenderTexturedOp15_FuncPtr = Lisa_DrawTexturedTriangle_Op15;
     g_LisaCamera->active_draw_cmd = 0;
     *(int *)(idx + 0x6c) = 0;
     return;
   }
 
-  PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15_Sub;
+  g_LisaRenderTexturedOp15_FuncPtr = Lisa_DrawTexturedTriangle_Op15_Sub;
   g_LisaCamera->active_draw_cmd = 0;
   *(int *)(idx + 0x6c) = 0;
   return;
