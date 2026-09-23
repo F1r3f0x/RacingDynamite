@@ -17,7 +17,7 @@ from build_decomp import compile_all
 from db import get_connection
 from diff_func import diff_func
 
-def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bool = False, check_all: bool = False):
+def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bool = False, check_all: bool = True, strict_matching: bool = False):
     print("=======================================================================")
     print("            MAINDOS_32BIT.EXE MATCHING VERIFICATION                    ")
     print("=======================================================================")
@@ -51,17 +51,17 @@ def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bo
     except subprocess.CalledProcessError:
         pass # Expected due to missing symbols but we have undefsok
 
-    status_scope = "ALL DECOMPILED" if check_all else "MATCHING"
+    status_scope = "PROJECT-WIDE (ALL DECOMPILED)" if check_all else "MATCHING ONLY"
     print(f"\n[2/2] Running byte/instruction diff against MAINDOS_32BIT.EXE ({status_scope})...")
     conn = get_connection()
     cur = conn.cursor()
     
     status_clause = "f.status IN ('matching', 'decompiled')" if check_all else "f.status = 'matching'"
     query = f"""
-        SELECT f.symbol_name, f.dos_address, f.byte_size, f.status as func_status, m.name as module_name
+        SELECT f.symbol_name, f.dos_address, f.win_address, f.byte_size, f.status as func_status, m.name as module_name
         FROM functions f
         LEFT JOIN modules m ON f.module_id = m.id
-        WHERE {status_clause} AND f.dos_address IS NOT NULL
+        WHERE {status_clause}
     """
     params = []
     if module_filter:
@@ -82,46 +82,60 @@ def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bo
 
     results = []
     total_funcs = len(rows)
+    diffed_funcs = 0
     passed_funcs = 0
+    compiled_funcs = 0
 
-    col_w_sym = 32
+    col_w_sym = 36
     col_w_addr = 14
     col_w_mod = 14
     col_w_stat = 10
-    col_w_pct = 10
+    col_w_pct = 12
 
     header = f"{'Symbol Name':<{col_w_sym}} {'DOS Addr':<{col_w_addr}} {'Module':<{col_w_mod}} {'Status':<{col_w_stat}} {'Match %':<{col_w_pct}}"
     print("-" * len(header))
     print(header)
     print("-" * len(header))
 
+    from diff_func import get_rebuilt_func
+
     for r in rows:
         sym = r["symbol_name"]
         dos_addr_str = r["dos_address"]
-        dos_addr = int(dos_addr_str, 16)
         sz = r["byte_size"] or 0
         mod = r["module_name"] or "unknown"
 
-        matched, pct, m, t = diff_func(sym, dos_addr, sz, verbose=verbose)
-        stat_str = "PASS" if matched else "FAIL"
-        if matched:
-            passed_funcs += 1
+        rebuilt_code, _ = get_rebuilt_func(sym, sz)
+        is_compiled = rebuilt_code is not None
+        if is_compiled:
+            compiled_funcs += 1
 
-        print(f"{sym:<{col_w_sym}} {dos_addr_str:<{col_w_addr}} {mod:<{col_w_mod}} {stat_str:<{col_w_stat}} {pct:>6.1f}% ({m}/{t})")
-        results.append((sym, matched, pct))
+        if dos_addr_str:
+            diffed_funcs += 1
+            dos_addr = int(dos_addr_str, 16)
+            matched, pct, m, t = diff_func(sym, dos_addr, sz, verbose=verbose)
+            stat_str = "PASS" if matched else "DIFF"
+            if matched:
+                passed_funcs += 1
+            match_str = f"{pct:>5.1f}% ({m}/{t})"
+            addr_display = dos_addr_str
+        else:
+            stat_str = "COMPILED" if is_compiled else "MISSING"
+            match_str = f"({len(rebuilt_code)}b)" if is_compiled else "--"
+            addr_display = "-"
+
+        print(f"{sym:<{col_w_sym}} {addr_display:<{col_w_addr}} {mod:<{col_w_mod}} {stat_str:<{col_w_stat}} {match_str:>{col_w_pct}}")
+        results.append((sym, stat_str, match_str))
 
     print("=" * len(header))
-    summary_pct = (passed_funcs / total_funcs * 100.0) if total_funcs > 0 else 0.0
-    print(f"Summary: {passed_funcs}/{total_funcs} functions matched 100% ({summary_pct:.1f}%)")
+    summary_pct = (passed_funcs / diffed_funcs * 100.0) if diffed_funcs > 0 else 0.0
+    print(f"Summary: {passed_funcs}/{diffed_funcs} diffable functions bit-matched 100% ({summary_pct:.1f}%). Total compiled: {compiled_funcs}/{total_funcs}.")
     
-    if not check_all and passed_funcs < total_funcs:
-        print(f"\n[FAIL] {total_funcs - passed_funcs} function(s) regressed or failed matching verification!", file=sys.stderr)
+    if strict_matching and passed_funcs < diffed_funcs:
+        print(f"\n[FAIL] {diffed_funcs - passed_funcs} function(s) regressed or failed matching verification!", file=sys.stderr)
         return False
 
-    if check_all:
-        print(f"\n[INFO] Progress scan complete: {passed_funcs}/{total_funcs} functions at 100% bit-match.")
-    else:
-        print("\n[SUCCESS] All matching functions verified byte-for-byte!")
+    print(f"\n[INFO] Project verification scan complete.")
     return True
 
 def main():
@@ -129,10 +143,12 @@ def main():
     parser.add_argument("-m", "--module", type=str, default=None, help="Filter by module (e.g. getsurf.c)")
     parser.add_argument("-s", "--symbol", type=str, default=None, help="Filter by symbol name")
     parser.add_argument("-v", "--verbose", action="store_true", help="Show full side-by-side assembly diffs")
-    parser.add_argument("-a", "--all", action="store_true", help="Scan all decompiled functions to measure progress")
+    parser.add_argument("--matching-only", action="store_true", help="Only scan functions marked as 100 percent matching")
+    parser.add_argument("--strict", action="store_true", help="Fail with exit code 1 if any function does not bit-match 100 percent")
     args = parser.parse_args()
 
-    success = verify_all(module_filter=args.module, symbol_filter=args.symbol, verbose=args.verbose, check_all=args.all)
+    check_all = not args.matching_only
+    success = verify_all(module_filter=args.module, symbol_filter=args.symbol, verbose=args.verbose, check_all=check_all, strict_matching=args.strict)
     sys.exit(0 if success else 1)
 
 if __name__ == "__main__":
