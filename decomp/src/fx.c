@@ -57,11 +57,7 @@ extern char s_FEL_VID_LI_MOVEOBJECT_WEATHER_0049948c[];
 extern char s_FEL_VID_LI_MOVEOBJECT_TRAN_SPRIT_004993b4[];
 extern char s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468[];
 #include <math.h>
-#define fsin sin
-#define fcos cos
-#define __ftol() (int)Math_RandomFloat()
-#define CONCAT44(high, low) ((((__int64)(high)) << 32) | (low))
-#include <math.h>
+#include <string.h>
 #define fsin sin
 #define fcos cos
 #define __ftol() (int)Math_RandomFloat()
@@ -6214,131 +6210,82 @@ void Car_UpdateDynamicObjects(int car_idx) {
  * @fidelity ADAPTED
  */
 int Video_SetGraphicsMode(void) {
-  int var_i1;
-  int var_i2;
-  int var_i3;
-  int out_ECX;
-  int extraout_ECX_00;
-  int extraout_ECX_01;
-  unsigned int var_u4;
-  unsigned int var_u5;
-  int *var_pu6;
-  __int64 var_u7;
-  if (DAT_00552fc0 == 0) {
-    g_ScreenWidth = 0x140;
-    g_ScreenHeight = 200;
-    g_ColorDepth = 8;
-    DAT_004ba6ec = 1;
-    var_i2 = Gfx_RestoreSurface();
-    if (var_i2 == 0) {
-      _sprintf(&DAT_006035f0,s_Cannot_use_this_graphics_mode__004989dc);
-      _DAT_0054f970 = 1;
-      return 0;
+    int i;
+    int *config;
+
+    if (g_GraphicsResolutionMode == 0) {
+        g_ScreenWidth = 320;
+        g_ScreenHeight = 200;
+        g_ColorDepth = 8;
+        g_VideoModeActive = 1;
+        if (!Gfx_RestoreSurface()) {
+            sprintf(g_ErrorMessageBuffer, "%s", s_Cannot_use_this_graphics_mode__004989dc);
+            g_GraphicsInitErrorFlag = 1;
+            return 0;
+        }
+        for (i = 0; i < g_NumRacers; i++) {
+            config = (int *)(g_VehicleConfigs + i * 200);
+            config[0x58 / 4] = 200;
+            config[0x5c / 4] = 164;
+            config[0x60 / 4] = 0;
+            config[100 / 4] = 0x40390000;
+        }
+        Lisa_ResetRasterizerContext();
+        if (g_WeatherActive[0] == 1 && g_IsSplitScreen == 0 &&
+            g_WeatherViewportCount == 1 && g_WeatherType == 1) {
+            Gfx_FreeSurface((int)Palette_AdjustRGB(0, g_pRainMesh_P2[1] >> 31, g_ActiveTrackPalette + 8));
+        }
+    } else if (g_GraphicsResolutionMode == 1) {
+        g_ScreenWidth = 640;
+        g_ScreenHeight = 480;
+        g_ColorDepth = 8;
+        g_VideoModeActive = 1;
+        if (!Gfx_RestoreSurface()) {
+            sprintf(g_ErrorMessageBuffer, "%s", s_Cannot_use_this_graphics_mode__004989dc);
+            g_GraphicsInitErrorFlag = 1;
+            return 0;
+        }
+        for (i = 0; i < g_NumRacers; i++) {
+            config = (int *)(g_VehicleConfigs + i * 200);
+            config[0x58 / 4] = 425;
+            config[0x5c / 4] = 425;
+            config[0x60 / 4] = 0;
+            config[100 / 4] = 0x40240000;
+        }
+        Lisa_ResetRasterizerContext();
+        if (g_WeatherActive[0] == 1 && g_IsSplitScreen == 0 &&
+            g_WeatherViewportCount == 1 && g_WeatherType == 1) {
+            Gfx_FreeSurface((int)Palette_AdjustRGB(0, g_pRainMesh_P2[1] >> 31, g_ActiveTrackPalette + 8));
+        }
+    } else if (g_GraphicsResolutionMode == 2) {
+        g_ScreenWidth = 800;
+        g_ScreenHeight = 600;
+        g_ColorDepth = 8;
+        g_VideoModeActive = 1;
+        if (!Gfx_RestoreSurface()) {
+            sprintf(g_ErrorMessageBuffer, "%s", s_Cannot_use_this_graphics_mode__004989dc);
+            g_GraphicsInitErrorFlag = 1;
+            return 0;
+        }
+        for (i = 0; i < g_NumRacers; i++) {
+            config = (int *)(g_VehicleConfigs + i * 200);
+            config[0x58 / 4] = 550;
+            config[0x5c / 4] = 550;
+            config[0x60 / 4] = 0;
+            config[100 / 4] = 0x40240000;
+        }
+        Lisa_ResetRasterizerContext();
+        if (g_WeatherActive[0] == 1 && g_IsSplitScreen == 0 &&
+            g_WeatherViewportCount == 1 && g_WeatherType == 1) {
+            Gfx_FreeSurface((int)Palette_AdjustRGB(0, g_pRainMesh_P2[1] >> 31, g_ActiveTrackPalette + 8));
+        }
     }
-    var_i2 = 0;
-    g_ScreenHeight = 200;
-    g_ScreenWidth = 0x140;
-    if (0 < g_NumRacers) {
-      var_i3 = 0;
-      do {
-        var_i2 = var_i2 + 1;
-        *(int *)(g_VehicleConfigs + 0x58 + var_i3) = 200;
-        *(int *)(g_VehicleConfigs + 0x5c + var_i3) = 0xa4;
-        var_i1 = g_VehicleConfigs;
-        *(int *)(g_VehicleConfigs + 0x60 + var_i3) = 0;
-        *(int *)(var_i1 + 100 + var_i3) = 0x40390000;
-        var_i3 = var_i3 + 200;
-      } while (var_i2 < g_NumRacers);
-    }
-    Lisa_ResetRasterizerContext();
-    if ((((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && (DAT_0054f98c == 1)) && (g_WeatherType == 1)
-       ) {
-      var_u7 = Palette_AdjustRGB(out_ECX,*(int *)(DAT_00563c34 + 4) >> 0x1f,g_ActiveTrackPalette + 8);
-      Gfx_FreeSurface((int)var_u7);
-    }
-  }
-  if (DAT_00552fc0 == 1) {
-    g_ScreenWidth = 0x280;
-    g_ScreenHeight = 0x1e0;
-    g_ColorDepth = 8;
-    DAT_004ba6ec = 1;
-    var_i2 = Gfx_RestoreSurface();
-    if (var_i2 == 0) {
-      _sprintf(&DAT_006035f0,s_Cannot_use_this_graphics_mode__004989dc);
-      _DAT_0054f970 = 1;
-      return 0;
-    }
-    var_i2 = 0;
-    g_ScreenWidth = 0x280;
-    g_ScreenHeight = 0x1e0;
-    if (0 < g_NumRacers) {
-      var_i3 = 0;
-      do {
-        var_i3 = var_i3 + 200;
-        *(int *)(g_VehicleConfigs + -0x70 + var_i3) = 0x1a9;
-        var_i2 = var_i2 + 1;
-        *(int *)(g_VehicleConfigs + -0x6c + var_i3) = 0x1a9;
-        var_i1 = g_VehicleConfigs;
-        *(int *)(g_VehicleConfigs + -0x68 + var_i3) = 0;
-        *(int *)(var_i1 + -100 + var_i3) = 0x40240000;
-      } while (var_i2 < g_NumRacers);
-    }
-    Lisa_ResetRasterizerContext();
-    if (((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && ((DAT_0054f98c == 1 && (g_WeatherType == 1)))
-       ) {
-      var_u7 = Palette_AdjustRGB(extraout_ECX_00,*(int *)(DAT_00563c34 + 4) >> 0x1f,g_ActiveTrackPalette + 8);
-      Gfx_FreeSurface((int)var_u7);
-    }
-  }
-  if (DAT_00552fc0 == 2) {
-    g_ScreenWidth = 800;
-    g_ScreenHeight = 600;
-    g_ColorDepth = 8;
-    DAT_004ba6ec = 1;
-    var_i2 = Gfx_RestoreSurface();
-    if (var_i2 == 0) {
-      _sprintf(&DAT_006035f0,s_Cannot_use_this_graphics_mode__004989dc);
-      _DAT_0054f970 = 1;
-      return 0;
-    }
-    var_i2 = 0;
-    g_ScreenWidth = 800;
-    g_ScreenHeight = 600;
-    if (0 < g_NumRacers) {
-      var_i3 = 0;
-      do {
-        var_i3 = var_i3 + 200;
-        *(int *)(g_VehicleConfigs + -0x70 + var_i3) = 0x226;
-        var_i2 = var_i2 + 1;
-        *(int *)(g_VehicleConfigs + -0x6c + var_i3) = 0x226;
-        var_i1 = g_VehicleConfigs;
-        *(int *)(g_VehicleConfigs + -0x68 + var_i3) = 0;
-        *(int *)(var_i1 + -100 + var_i3) = 0x40240000;
-      } while (var_i2 < g_NumRacers);
-    }
-    Lisa_ResetRasterizerContext();
-    if (((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && ((DAT_0054f98c == 1 && (g_WeatherType == 1)))
-       ) {
-      var_u7 = Palette_AdjustRGB(extraout_ECX_01,*(int *)(DAT_00563c34 + 4) >> 0x1f,g_ActiveTrackPalette + 8);
-      Gfx_FreeSurface((int)var_u7);
-    }
-  }
-  Gfx_SetRenderTarget(&g_VirtualFramebuffer,g_ScreenWidth,g_ScreenWidth,g_ScreenHeight,8);
-  var_u5 = g_ScreenWidth * g_ScreenHeight;
-  if (0 < (int)var_u5) {
-    var_pu6 = &g_VirtualFramebuffer;
-    for (var_u4 = var_u5 >> 2; var_u4 != 0; var_u4 = var_u4 - 1) {
-      *var_pu6 = 0;
-      var_pu6 = var_pu6 + 1;
-    }
-    for (var_u5 = var_u5 & 3; var_u5 != 0; var_u5 = var_u5 - 1) {
-      *(char *)var_pu6 = 0;
-      var_pu6 = (int *)((int)var_pu6 + 1);
-    }
-  }
-  Lisa_Init();
-  Timer_GetDeltaTime();
-  return 0;
+
+    Gfx_SetRenderTarget(&g_VirtualFramebuffer, g_ScreenWidth, g_ScreenWidth, g_ScreenHeight, 8);
+    memset(&g_VirtualFramebuffer, 0, g_ScreenWidth * g_ScreenHeight);
+    Lisa_Init();
+    Timer_GetDeltaTime();
+    return 0;
 }
 
 /**
@@ -6346,90 +6293,68 @@ int Video_SetGraphicsMode(void) {
  * @fidelity ADAPTED
  */
 void Lisa_Init(void) {
-  int var_i1;
-  int var_i2;
-  int var_i3;
-  int var_i4;
-  __int64 var_l5;
-  unsigned __int64 var_u6;
-  __int64 var_u7;
-  var_l5 = __ftol();
-  DAT_005285c4 = (int)var_l5;
-  var_l5 = __ftol();
-  DAT_00552f50 = (int)var_l5;
-  var_l5 = __ftol();
-  g_CameraFovScaleX = (int)var_l5;
-  var_l5 = __ftol();
-  g_CameraFovScaleY = (int)var_l5;
-  var_i2 = 0;
-  if ((g_IsSplitScreen == 0) || (DAT_00552f58 == 1)) {
-    var_i2 = 0;
-    var_i4 = 0;
-    if (0 < g_NumRacers) {
-      do {
-        var_i2 = var_i2 + 0x4c;
-        var_i4 = var_i4 + 1;
-        *(int *)(g_PlayerHUDState + -0x20 + var_i2) = (int)g_ScreenWidth / 2 - DAT_005285c4 / 2;
-        *(int *)(g_PlayerHUDState + -0x1c + var_i2) = g_ScreenHeight / 2 - DAT_00552f50 / 2;
-        *(int *)(g_PlayerHUDState + -0x18 + var_i2) = DAT_005285c4 / 2 + (int)g_ScreenWidth / 2;
-        *(int *)(g_PlayerHUDState + -0x14 + var_i2) = DAT_00552f50 / 2 + g_ScreenHeight / 2;
-      } while (var_i4 < g_NumRacers);
+    int i;
+
+    if (g_IsSplitScreen != 0 && g_SplitScreenMode != 1) {
+        g_CameraViewportWidth = (int)((double)g_ScreenWidth * g_ViewportScreenScaleTable[g_ScreenSizeSetting][0] * 0.5);
+    } else {
+        g_CameraViewportWidth = (int)((double)g_ScreenWidth * g_ViewportScreenScaleTable[g_ScreenSizeSetting][0]);
     }
-  }
-  else {
-    var_i4 = 0;
-    if (0 < g_NumRacers) {
-      var_i3 = 0;
-      do {
-        *(int *)(g_PlayerHUDState + 0x2c + var_i2) =
-             (((int)(g_ScreenWidth + ((int)g_ScreenWidth >> 0x1f & 3U)) >> 2) * 3 - DAT_005285c4 / 2)
-             + 1;
-        *(int *)(g_PlayerHUDState + 0x30 + var_i2) = g_ScreenHeight / 2 - DAT_00552f50 / 2;
-        *(int *)(g_PlayerHUDState + 0x34 + var_i2) =
-             ((int)(g_ScreenWidth + ((int)g_ScreenWidth >> 0x1f & 3U)) >> 2) * 3 + DAT_005285c4 / 2;
-        *(int *)(g_PlayerHUDState + 0x38 + var_i2) = DAT_00552f50 / 2 + g_ScreenHeight / 2;
-        *(int *)(g_VehicleConfigs + 0x58 + var_i3) = *(int *)(g_VehicleConfigs + 0x58);
-        *(int *)(g_VehicleConfigs + 0x5c + var_i3) = *(int *)(g_VehicleConfigs + 0x5c);
-        var_i1 = g_VehicleConfigs;
-        *(int *)(g_VehicleConfigs + 100 + var_i3) = *(int *)(g_VehicleConfigs + 100);
-        var_i3 = var_i3 + 200;
-        var_i2 = var_i2 + 0x4c;
-        var_i4 = var_i4 + 1;
-        *(int *)(var_i1 + -0x68 + var_i3) = *(int *)(var_i1 + 0x60);
-      } while (var_i4 < g_NumRacers);
+    g_CameraViewportHeight = (int)((double)g_ScreenHeight * g_ViewportScreenScaleTable[g_ScreenSizeSetting][1]);
+    g_CameraFovScaleX = (int)((double)g_ScreenWidth * 204.796875);
+    g_CameraFovScaleY = (int)((double)g_ScreenHeight * 327.675);
+
+    if (g_IsSplitScreen == 0 || g_SplitScreenMode == 1) {
+        for (i = 0; i < g_NumRacers; i++) {
+            int *hud_vp = (int *)(g_PlayerHUDState + i * 0x4c);
+            hud_vp[0x2c / 4] = g_ScreenWidth / 2 - g_CameraViewportWidth / 2;
+            hud_vp[0x30 / 4] = g_ScreenHeight / 2 - g_CameraViewportHeight / 2;
+            hud_vp[0x34 / 4] = g_ScreenWidth / 2 + g_CameraViewportWidth / 2;
+            hud_vp[0x38 / 4] = g_ScreenHeight / 2 + g_CameraViewportHeight / 2;
+        }
+    } else {
+        for (i = 0; i < g_NumRacers; i++) {
+            int *hud_vp = (int *)(g_PlayerHUDState + i * 0x4c);
+            int *cfg = (int *)(g_VehicleConfigs + i * 200);
+            int *cfg0 = (int *)g_VehicleConfigs;
+
+            hud_vp[0x2c / 4] = (g_ScreenWidth * 3 / 4) - g_CameraViewportWidth / 2 + 1;
+            hud_vp[0x30 / 4] = g_ScreenHeight / 2 - g_CameraViewportHeight / 2;
+            hud_vp[0x34 / 4] = (g_ScreenWidth * 3 / 4) + g_CameraViewportWidth / 2;
+            hud_vp[0x38 / 4] = g_ScreenHeight / 2 + g_CameraViewportHeight / 2;
+
+            cfg[0x58 / 4] = cfg0[0x58 / 4];
+            cfg[0x5c / 4] = cfg0[0x5c / 4];
+            cfg[100 / 4] = cfg0[100 / 4];
+            cfg[0x60 / 4] = cfg0[0x60 / 4];
+        }
+        *(int *)(g_PlayerHUDState + 0x78) = (g_ScreenWidth / 4) - g_CameraViewportWidth / 2;
+        *(int *)(g_PlayerHUDState + 0x7c) = g_ScreenHeight / 2 - g_CameraViewportHeight / 2;
+        *(int *)(g_PlayerHUDState + 0x80) = (g_ScreenWidth / 4) + g_CameraViewportWidth / 2 - 1;
+        *(int *)(g_PlayerHUDState + 0x84) = g_ScreenHeight / 2 + g_CameraViewportHeight / 2;
     }
-    *(int *)(g_PlayerHUDState + 0x78) =
-         ((int)(g_ScreenWidth + ((int)g_ScreenWidth >> 0x1f & 3U)) >> 2) - DAT_005285c4 / 2;
-    *(int *)(g_PlayerHUDState + 0x7c) = g_ScreenHeight / 2 - DAT_00552f50 / 2;
-    *(int *)(g_PlayerHUDState + 0x80) =
-         DAT_005285c4 / 2 + ((int)(g_ScreenWidth + ((int)g_ScreenWidth >> 0x1f & 3U)) >> 2) + -1;
-    *(int *)(g_PlayerHUDState + 0x84) = DAT_00552f50 / 2 + g_ScreenHeight / 2;
-  }
-  var_u6 = Lisa_SetCameraViewport();
-  g_ViewportMinX = 0;
-  g_ViewportMaxX = g_ScreenWidth - 1;
-  g_ViewportMinY = 0;
-  g_ViewportMaxY = g_ScreenHeight + -1;
-  var_u7 = Audio_LoadAssets(g_ScreenWidth,(unsigned int)(var_u6 >> 0x20));
-  if (-1 < (int)var_u7) {
-    _DAT_00498730 = g_pLisaDrawCommandQueue;
-    _DAT_0049873c = g_pActiveTAB;
-    _DAT_00498734 = &g_VirtualFramebuffer;
-    _DAT_00498738 = &g_VirtualFramebuffer;
-    Audio_StopSample();
-    var_u7 = Audio_LoadAssets(g_ScreenHeight,g_ScreenWidth);
-    if (-1 < (int)var_u7) {
-      _DAT_00498478 = g_CameraFovScaleX * 500;
-      _DAT_0049847c = g_CameraFovScaleY * 500;
-      return;
+
+    Lisa_SetCameraViewport();
+    g_ViewportMinX = 0;
+    g_ViewportMaxX = g_ScreenWidth - 1;
+    g_ViewportMinY = 0;
+    g_ViewportMaxY = g_ScreenHeight - 1;
+
+    if (Audio_LoadAssets(g_ScreenWidth, g_ScreenHeight) >= 0) {
+        g_pLisaCommandQueueMirror = g_pLisaDrawCommandQueue;
+        g_pLisaActiveTABMirror = g_pActiveTAB;
+        g_pLisaFramebufferMirror1 = &g_VirtualFramebuffer;
+        g_pLisaFramebufferMirror2 = &g_VirtualFramebuffer;
+        Audio_StopSample();
+        if (Audio_LoadAssets(g_ScreenHeight, g_ScreenWidth) >= 0) {
+            g_CameraFovHalfX = g_CameraFovScaleX * 500;
+            g_CameraFovHalfY = g_CameraFovScaleY * 500;
+            return;
+        }
     }
+
     Log_DebugPrintf(s_Error_while_initializing_lisaGM_004995c8);
-                    /* WARNING: Subroutine does not return */
     _exit(1);
-  }
-  Log_DebugPrintf(s_Error_while_initializing_lisaGM_004995c8);
-                    /* WARNING: Subroutine does not return */
-  _exit(1);
 }
 
 /**

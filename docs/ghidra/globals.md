@@ -162,5 +162,21 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x00553068` | `int32_t`    | `g_ShowSecondPlayerFlag` | Display toggle for Player 2 elements in split-screen menus. |
 | `0x00552fe0` | `int32_t`    | `g_FontId_Disabled` | Font resource ID for disabled / greyed-out menu options. |
 | `0x00494d94` | `char[]`     | `s_QUIT_00494d94` | Localized string table for 'QUIT' option in pause menu. |
+| `0x00552fc0` | `int32_t`    | `g_GraphicsResolutionMode` | Graphics resolution index (`0` = 320x200, `1` = 640x480, `2` = 800x600). |
+| `0x004ba6ec` | `int32_t`    | `g_VideoModeActive` | Flag indicating video graphics mode is actively set up. |
+| `0x006035f0` | `char[256]`  | `g_ErrorMessageBuffer` | Global error message string buffer. |
+| `0x0054f970` | `int32_t`    | `g_GraphicsInitErrorFlag` | Flag set to `1` when graphics mode initialization fails. |
+| `0x005285c4` | `int32_t`    | `g_CameraViewportWidth` | Calculated 3D camera viewport rendering width. |
+| `0x00552f50` | `int32_t`    | `g_CameraViewportHeight` | Calculated 3D camera viewport rendering height. |
+| `0x00552f58` | `int32_t`    | `g_SplitScreenMode` | Split-screen layout orientation: `1` = vertical, `0` = horizontal. |
+| `0x00527f28` | `int32_t`    | `g_ScreenSizeSetting` | In-game screen window scale setting index (0 to 3). |
+| `0x004949f0` | `double[4][2]`| `g_ViewportScreenScaleTable`| Scaling factors (X, Y) for the 4 in-game screen size modes. |
+| `0x00498730` | `void*`      | `g_pLisaCommandQueueMirror`| Mirror pointer for Lisa3D rasterizer command queue. |
+| `0x0049873c` | `void*`      | `g_pLisaActiveTABMirror` | Mirror pointer for active polygon table buffer. |
+| `0x00498734` | `void*`      | `g_pLisaFramebufferMirror1`| Primary Lisa3D display surface mirror pointer. |
+| `0x00498738` | `void*`      | `g_pLisaFramebufferMirror2`| Secondary Lisa3D display surface mirror pointer. |
+| `0x00498478` | `int32_t`    | `g_CameraFovHalfX` | Half horizontal field-of-view scale factor (`fov_x * 500`). |
+| `0x0049847c` | `int32_t`    | `g_CameraFovHalfY` | Half vertical field-of-view scale factor (`fov_y * 500`). |
+
 
 
