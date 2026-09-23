@@ -502,10 +502,10 @@ int Lisa_RenderScene(void);
 int * Lisa_InitEngineMemory(void);
 void Lisa_FreeEngineMemory(void);
 int Lisa_InitSpatialGrid(int grid_w, int grid_h, size_t max_objects);
-LisaReturn64 Lisa_CreateDynamicObject(int param_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9);
+LisaReturn64 Lisa_CreateDynamicObject(int obj_type, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int mesh_flag1, short mesh_flag2, short mesh_flag3, short base_elevation, short mesh_flag4);
 int Lisa_MoveDynamicObject(LisaEntityTransform *entity);
 int Lisa_UpdateObjectSpatialGrid(LisaEntityTransform *entity);
-LisaReturn64 Lisa_SetDynamicObjectMesh(int param_1, int param_2, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9);
+LisaReturn64 Lisa_SetDynamicObjectMesh(int obj_type, int render_flags, LisaEntityTransform *entity, MshSubmesh *mesh, int mesh_flag1, short mesh_flag2, short mesh_flag3, short base_elevation, short mesh_flag4);
 int Lisa_DeleteDynamicObject(LisaEntityTransform *entity);
 LisaReturn64 Lisa_SetCameraViewport(void);
 int Lisa_GenerateMipmaps(unsigned int *texture_data, int width, int height, int page_w, int page_h, int mip_count, int flag1, int flag2, char *name);
@@ -520,9 +520,9 @@ int Lisa_FrustumCullObjects(void);
 int Lisa_CullObjects(void);
 void Lisa_TransformVertices(void);
 int Lisa_TransformVerticesPanorama(void);
-int Lisa_ComputeObjectMatrix(int pos_x, int pos_y, int pos_z, int rot_y, int *out_matrix);
-int Lisa_TransformSubmeshVerticesPanorama(int pos_x, int pos_y, int pos_z, int rot_y, int *out_matrix);
-void Lisa_ComputeCameraRotationMatrix(int *out_matrix);
+int Lisa_ComputeObjectMatrix(int pos_x, int pos_y, int pos_z, int rot_y, int *out_val_matrix);
+int Lisa_TransformSubmeshVerticesPanorama(int pos_x, int pos_y, int pos_z, int rot_y, int *out_val_matrix);
+void Lisa_ComputeCameraRotationMatrix(int *out_val_matrix);
 void Lisa_InitOpcodeTable(void);
 int Lisa_SortDepthBuckets(void);
 void Lisa_DrawTriangle_Op0F(void);
@@ -832,15 +832,15 @@ int Lisa_RenderScene(void) {
  * @fidelity ADAPTED
  */
 int * Lisa_InitEngineMemory(void) {
-  void *pvVar1;
-  void *pvVar2;
-  void *pvVar3;
-  void *pvVar4;
-  int *var_pu5;
-  void *pvVar6;
-  int var_i7;
-  int var_i8;
-  double var_f9;
+  void *draw_cmd_buf;
+  void *alloc_bufs;
+  void *temp_ptr1;
+  void *cmd_tail;
+  int *pIntPtr;
+  void *shd_table;
+  int i;
+  int next_i;
+  double sin_val;
 
   
 
@@ -848,16 +848,16 @@ int * Lisa_InitEngineMemory(void) {
   g_LisaAllocatedBufferCount = 0;
   g_LisaVisibleObjects = calloc(0x5dc,4);
   g_LisaVisibleSubmeshes = calloc(3000,4);
-  var_pu5 = calloc(0x1838,4);
-  var_i7 = g_LisaActivePageCount + 2;
-  g_pLisaDepthBuckets = var_pu5;
-  g_LisaActivePageCount = var_i7;
-  *(int **)(&g_pLisaTexturePagePointers + var_i7 * 4) = var_pu5;
-  *(int *)(&g_LisaTexturePageSizes + var_i7 * 4) = 0x1a90;
+  pIntPtr = calloc(0x1838,4);
+  i = g_LisaActivePageCount + 2;
+  g_pLisaDepthBuckets = pIntPtr;
+  g_LisaActivePageCount = i;
+  *(int **)(&g_pLisaTexturePagePointers + i * 4) = pIntPtr;
+  *(int *)(&g_LisaTexturePageSizes + i * 4) = 0x1a90;
 
-  for (var_i7 = 6000; var_i7 != 0; var_i7 = var_i7 + -1) {
-    *var_pu5 = 0;
-    var_pu5 = var_pu5 + 1;
+  for (i = 6000; i != 0; i = i + -1) {
+    *pIntPtr = 0;
+    pIntPtr = pIntPtr + 1;
   }
 
   g_LisaCamera = (LisaCamera *)calloc(1, sizeof(LisaCamera));
@@ -869,38 +869,38 @@ int * Lisa_InitEngineMemory(void) {
   g_LisaActivePageCount = g_LisaActivePageCount + 2;
   g_LisaDrawCommands = g_LisaTransformedVertices;
   g_pLisaDrawCommandTail = calloc(150000,4);
-  pvVar6 = calloc(0x1fa4,4);
-  pvVar3 = g_LisaVisibleSubmeshes;
-  pvVar2 = g_pLisaAllocatedBuffers;
+  shd_table = calloc(0x1fa4,4);
+  temp_ptr1 = g_LisaVisibleSubmeshes;
+  alloc_bufs = g_pLisaAllocatedBuffers;
   g_LisaActivePageCount = g_LisaActivePageCount + 2;
-  g_LisaActiveShdSize = pvVar6;
-  *(void **)(&g_pLisaTexturePagePointers + g_LisaActivePageCount * 4) = pvVar6;
+  g_LisaActiveShdSize = shd_table;
+  *(void **)(&g_pLisaTexturePagePointers + g_LisaActivePageCount * 4) = shd_table;
   *(int *)(&g_LisaTexturePageSizes + g_LisaActivePageCount * 4) = 0x2a30;
-  *(void **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 3) * 4 + -0xc) = g_LisaVisibleObjects;
-  pvVar1 = g_LisaDrawCommandBuffer;
-  var_pu5 = g_pLisaDepthBuckets;
-  *(void **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 5) * 4 + -0x10) = pvVar3;
-  pvVar3 = g_LisaTransformedVertices;
-  *(int **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 5) * 4 + -0xc) = var_pu5;
-  pvVar4 = g_pLisaDrawCommandTail;
-  var_pu5 = g_LisaCamera;
-  *(int **)((int)pvVar2 + (g_LisaAllocatedBufferCount + 7) * 4 + -0x10) = g_LisaCamera;
-  var_i7 = g_LisaAllocatedBufferCount + 9;
-  g_LisaAllocatedBufferCount = var_i7;
-  *(void **)((int)pvVar2 + var_i7 * 4 + -0x14) = pvVar3;
-  *(void **)((int)pvVar2 + var_i7 * 4 + -0x10) = pvVar1;
-  pvVar1 = g_pLisaTextureSheets;
-  *(void **)((int)pvVar2 + var_i7 * 4 + -0xc) = g_pLisaTextureSheets;
-  *(void **)((int)pvVar2 + var_i7 * 4 + -8) = pvVar4;
-  *(void **)((int)pvVar2 + var_i7 * 4 + -4) = pvVar6;
+  *(void **)((int)alloc_bufs + (g_LisaAllocatedBufferCount + 3) * 4 + -0xc) = g_LisaVisibleObjects;
+  draw_cmd_buf = g_LisaDrawCommandBuffer;
+  pIntPtr = g_pLisaDepthBuckets;
+  *(void **)((int)alloc_bufs + (g_LisaAllocatedBufferCount + 5) * 4 + -0x10) = temp_ptr1;
+  temp_ptr1 = g_LisaTransformedVertices;
+  *(int **)((int)alloc_bufs + (g_LisaAllocatedBufferCount + 5) * 4 + -0xc) = pIntPtr;
+  cmd_tail = g_pLisaDrawCommandTail;
+  pIntPtr = (int *)g_LisaCamera;
+  *(LisaCamera **)((int)alloc_bufs + (g_LisaAllocatedBufferCount + 7) * 4 + -0x10) = g_LisaCamera;
+  i = g_LisaAllocatedBufferCount + 9;
+  g_LisaAllocatedBufferCount = i;
+  *(void **)((int)alloc_bufs + i * 4 + -0x14) = temp_ptr1;
+  *(void **)((int)alloc_bufs + i * 4 + -0x10) = draw_cmd_buf;
+  draw_cmd_buf = g_pLisaTextureSheets;
+  *(void **)((int)alloc_bufs + i * 4 + -0xc) = g_pLisaTextureSheets;
+  *(void **)((int)alloc_bufs + i * 4 + -8) = cmd_tail;
+  *(void **)((int)alloc_bufs + i * 4 + -4) = shd_table;
 
-  if (var_pu5 == (int *)0x0) {
+  if (pIntPtr == (int *)0x0) {
     return (int *)0x0;
   }
 
-  g_LisaActiveShdSize = pvVar6;
+  g_LisaActiveShdSize = shd_table;
 
-  if (pvVar3 == (void *)0x0) {
+  if (temp_ptr1 == (void *)0x0) {
     return (int *)0x0;
   }
 
@@ -920,60 +920,60 @@ int * Lisa_InitEngineMemory(void) {
     return (int *)0x0;
   }
 
-  if (pvVar6 == (void *)0x0) {
+  if (shd_table == (void *)0x0) {
     return (int *)0x0;
   }
 
-  if (pvVar1 == (void *)0x0) {
+  if (draw_cmd_buf == (void *)0x0) {
     return (int *)0x0;
   }
 
-  var_pu5[0xe] = 1;
-  var_pu5[0xf] = 1;
-  var_pu5[0x10] = 1;
-  var_pu5[0x11] = 1;
-  var_pu5[0x12] = 1;
-  var_pu5[0x13] = 1;
-  var_pu5[0x14] = 1;
-  var_pu5[0x15] = 1;
-  var_pu5[0x16] = 1;
-  var_pu5[0x23] = 1;
-  var_pu5[0x24] = 1;
-  var_pu5[0x25] = 1;
-  var_pu5[0x20] = 0xfd;
-  var_pu5[0x21] = 0xcf;
-  var_pu5[0x22] = 0x2c;
-  var_pu5[0x26] = 10;
-  var_pu5[6] = 0;
-  var_pu5[8] = 0;
-  var_pu5[7] = 0;
-  var_pu5[9] = 0;
-  var_pu5[10] = 0;
-  *var_pu5 = 0;
-  var_pu5[0xb] = 0;
-  var_pu5[1] = 0;
-  var_pu5[2] = 0;
-  var_pu5[4] = 0;
-  var_pu5[3] = 0;
-  var_pu5[5] = 0;
-  var_pu5[0xc] = 0;
-  var_pu5[0x29] = 0;
-  var_pu5[0x27] = 0xa0;
-  var_pu5[0xd] = 0x3ff00000;
-  var_pu5[0x28] = 100;
-  var_i7 = -0x708;
+  pIntPtr[0xe] = 1;
+  pIntPtr[0xf] = 1;
+  pIntPtr[0x10] = 1;
+  pIntPtr[0x11] = 1;
+  pIntPtr[0x12] = 1;
+  pIntPtr[0x13] = 1;
+  pIntPtr[0x14] = 1;
+  pIntPtr[0x15] = 1;
+  pIntPtr[0x16] = 1;
+  pIntPtr[0x23] = 1;
+  pIntPtr[0x24] = 1;
+  pIntPtr[0x25] = 1;
+  pIntPtr[0x20] = 0xfd;
+  pIntPtr[0x21] = 0xcf;
+  pIntPtr[0x22] = 0x2c;
+  pIntPtr[0x26] = 10;
+  pIntPtr[6] = 0;
+  pIntPtr[8] = 0;
+  pIntPtr[7] = 0;
+  pIntPtr[9] = 0;
+  pIntPtr[10] = 0;
+  *pIntPtr = 0;
+  pIntPtr[0xb] = 0;
+  pIntPtr[1] = 0;
+  pIntPtr[2] = 0;
+  pIntPtr[4] = 0;
+  pIntPtr[3] = 0;
+  pIntPtr[5] = 0;
+  pIntPtr[0xc] = 0;
+  pIntPtr[0x29] = 0;
+  pIntPtr[0x27] = 0xa0;
+  pIntPtr[0xd] = 0x3ff00000;
+  pIntPtr[0x28] = 100;
+  i = -0x708;
 
   while( 1 ) {
-    var_i8 = var_i7 + 1;
-    var_f9 = (double)fsin((double)var_i7 * (double)g_Const_0_1 * (double)g_Const_DegToRad);
-    if (0x189b < var_i8) break;
-    *(float *)((int)pvVar6 + var_i8 * 4 + 0x1c1c) = (float)var_f9;
-    var_i7 = var_i8;
+    next_i = i + 1;
+    sin_val = (double)fsin((double)i * (double)g_Const_0_1 * (double)g_Const_DegToRad);
+    if (0x189b < next_i) break;
+    *(float *)((int)shd_table + next_i * 4 + 0x1c1c) = (float)sin_val;
+    i = next_i;
   }
 
-  *(float *)((int)pvVar6 + var_i8 * 4 + 0x1c1c) = (float)var_f9;
-  g_LisaActiveTabSize = (int)pvVar6 + 0xe10;
-  return var_pu5;
+  *(float *)((int)shd_table + next_i * 4 + 0x1c1c) = (float)sin_val;
+  g_LisaActiveTabSize = (int)shd_table + 0xe10;
+  return pIntPtr;
 }
 
 /**
@@ -982,31 +982,31 @@ int * Lisa_InitEngineMemory(void) {
  */
 void Lisa_FreeEngineMemory(void) {
   void *_Memory;
-  int var_i1;
-  int var_i2;
-  int var_i3;
+  int allocated_count;
+  int i;
+  int offset;
 
   
 
-  var_i2 = 0;
+  i = 0;
 
   if (g_pLisaAllocatedBuffers != (void *)0x0) {
     _Memory = g_pLisaAllocatedBuffers;
 
     if (0 < g_LisaAllocatedBufferCount) {
-      var_i3 = 0;
-      var_i1 = g_LisaAllocatedBufferCount;
+      offset = 0;
+      allocated_count = g_LisaAllocatedBufferCount;
 
       do {
-        if (*(void **)(var_i3 + (int)_Memory) != (void *)0x0) {
-          _free(*(void **)(var_i3 + (int)_Memory));
+        if (*(void **)(offset + (int)_Memory) != (void *)0x0) {
+          _free(*(void **)(offset + (int)_Memory));
           _Memory = g_pLisaAllocatedBuffers;
-          var_i1 = g_LisaAllocatedBufferCount;
+          allocated_count = g_LisaAllocatedBufferCount;
         }
 
-        var_i3 = var_i3 + 4;
-        var_i2 = var_i2 + 1;
-      } while (var_i2 < var_i1);
+        offset = offset + 4;
+        i = i + 1;
+      } while (i < allocated_count);
     }
 
     _free(_Memory);
@@ -1074,7 +1074,7 @@ int Lisa_InitSpatialGrid(int grid_w, int grid_h, size_t max_objects) {
  * @original Lisa_CreateDynamicObject (IGN_WIN.EXE @ 0x00446d90, lisa3d.c)
  * @fidelity ADAPTED
  */
-LisaReturn64 Lisa_CreateDynamicObject(int param_1, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9) {
+LisaReturn64 Lisa_CreateDynamicObject(int obj_type, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int mesh_flag1, short mesh_flag2, short mesh_flag3, short base_elevation, short mesh_flag4) {
   LisaDynamicObject *obj;
   int max_dist;
   int i;
@@ -1092,17 +1092,17 @@ LisaReturn64 Lisa_CreateDynamicObject(int param_1, int object_id, LisaEntityTran
   
   obj->self_ptr = obj;
   obj->mesh_data = mesh;
-  obj->unknown_08 = param_5;
+  obj->unknown_08 = mesh_flag1;
   obj->pos_x = entity->pos_x;
   obj->pos_y = entity->pos_y;
   obj->pos_z = entity->pos_z;
   obj->rot_x = (short)entity->rot_x;
   obj->rot_y = (short)entity->rot_y;
   obj->rot_z = (short)entity->rot_z;
-  obj->unknown_1e = param_6;
-  obj->unknown_20 = param_7;
+  obj->unknown_1e = mesh_flag2;
+  obj->unknown_20 = mesh_flag3;
   obj->unknown_22 = base_elevation;
-  obj->unknown_24 = param_9;
+  obj->unknown_24 = mesh_flag4;
   obj->next_in_cell = NULL;
 
   entity->dyn_obj = obj;
@@ -1228,7 +1228,7 @@ int Lisa_UpdateObjectSpatialGrid(LisaEntityTransform *entity) {
  * @original Lisa_SetDynamicObjectMesh (IGN_WIN.EXE @ 0x00447070, lisa3d.c)
  * @fidelity ADAPTED
  */
-LisaReturn64 Lisa_SetDynamicObjectMesh(int param_1, int param_2, LisaEntityTransform *entity, MshSubmesh *mesh, int param_5, short param_6, short param_7, short base_elevation, short param_9) {
+LisaReturn64 Lisa_SetDynamicObjectMesh(int obj_type, int render_flags, LisaEntityTransform *entity, MshSubmesh *mesh, int mesh_flag1, short mesh_flag2, short mesh_flag3, short base_elevation, short mesh_flag4) {
   LisaDynamicObject *obj;
   int max_dist;
   int i;
@@ -1239,14 +1239,14 @@ LisaReturn64 Lisa_SetDynamicObjectMesh(int param_1, int param_2, LisaEntityTrans
 
   obj = entity->dyn_obj;
   
-  obj->unknown_1e = param_6;
+  obj->unknown_1e = mesh_flag2;
   obj->unknown_22 = base_elevation;
   obj->mesh_data = mesh;
-  obj->unknown_08 = param_5;
-  obj->unknown_20 = param_7;
-  obj->unknown_24 = param_9;
+  obj->unknown_08 = mesh_flag1;
+  obj->unknown_20 = mesh_flag3;
+  obj->unknown_24 = mesh_flag4;
   
-  ret_val = ((unsigned int)param_2 >> 16) | ((unsigned int)base_elevation << 16);
+  ret_val = ((unsigned int)render_flags >> 16) | ((unsigned int)base_elevation << 16);
 
   if (base_elevation == -1) {
     max_dist = -1000;
@@ -1312,180 +1312,180 @@ int Lisa_DeleteDynamicObject(LisaEntityTransform *entity) {
  * @fidelity ADAPTED
  */
 LisaReturn64 Lisa_SetCameraViewport(void) {
-  int var_i1;
-  int var_l2;
-  unsigned int var_u3;
+  int unused_val;
+  int cam_val;
+  unsigned int cam_val_u;
 
   
 
-  var_l2 = __ftol();
+  cam_val = __ftol();
   camera = g_LisaCamera;
-  g_LisaCamera->viewport_x = (int)var_l2;
-  var_l2 = __ftol();
-  camera->viewport_y = (int)var_l2;
-  var_l2 = __ftol();
-  camera->viewport_width = (int)var_l2;
-  var_l2 = __ftol();
-  camera->fov_x = (int)var_l2;
-  var_u3 = __ftol();
-  camera->fov_y = (int)var_u3;
-  { LisaReturn64 _r; _r.edx = var_u3; _r.eax = 0; return _r; }
+  g_LisaCamera->viewport_x = (int)cam_val;
+  cam_val = __ftol();
+  camera->viewport_y = (int)cam_val;
+  cam_val = __ftol();
+  camera->viewport_width = (int)cam_val;
+  cam_val = __ftol();
+  camera->fov_x = (int)cam_val;
+  cam_val_u = __ftol();
+  camera->fov_y = (int)cam_val_u;
+  { LisaReturn64 _r; _r.edx = cam_val_u; _r.eax = 0; return _r; }
 }
 
 /**
  * @original Lisa_GenerateMipmaps (IGN_WIN.EXE @ 0x00447280, lisa3d.c)
  * @fidelity ADAPTED
  */
-int Lisa_GenerateMipmaps(unsigned int *param_1,int param_2,int param_3,int param_4,int param_5,int param_6 ,int param_7,int param_8,char *param_9) {
-  char var_u1;
-  char *var_pu2;
-  char *var_pu3;
-  unsigned int *var_pu4;
-  unsigned int *var_pu5;
-  void *pvVar6;
-  byte *pbVar7;
-  int var_i8;
-  int var_i9;
-  int var_i10;
-  int var_i11;
-  byte *pbVar12;
-  byte *pbVar13;
-  unsigned int *var_pu14;
-  int var_b15;
-  int var_l16;
-  byte *var_440;
-  int var_438;
-  byte *var_428;
-  byte *var_424;
-  int var_414;
-  int var_40c;
-  char var_400 [1024];
+int Lisa_GenerateMipmaps(unsigned int *texture_data_ptr,int orig_width,int orig_height,int mip_levels,int page_width,int page_height ,int tex_height,int tex_width,char *tex_name) {
+  char name_char;
+  char *name_dst_ptr;
+  char *name_dst_end;
+  unsigned int *mip_array;
+  unsigned int *mip_span_table;
+  void *alloc_ptr;
+  byte *aligned_page_ptr;
+  int active_page_idx;
+  int loop_count;
+  int next_mip_idx;
+  int cur_mip_idx;
+  byte *dst_block_ptr;
+  byte *src_block_ptr;
+  unsigned int *fill_mip_ptr;
+  int filtering_enabled;
+  int ftol_val;
+  byte *cur_src_page;
+  int bucket_idx;
+  byte *dst_row_ptr;
+  byte *src_row_ptr;
+  int x_blocks;
+  int y_blocks;
+  char name_buffer [1024];
 
   
 
-  var_pu2 = var_400;
+  name_dst_ptr = name_buffer;
 
   do {
-    var_u1 = param_9[1];
-    *var_pu2 = *param_9;
-    var_pu2[1] = var_u1;
-    var_pu3 = var_pu2 + 4;
-    var_pu2[2] = param_9[2];
-    var_pu2 = var_pu3;
-    param_9 = param_9 + 3;
-  } while (var_pu3 < (unsigned int *)(var_400 + sizeof(var_400)));
-  var_pu4 = calloc(0x15,4);
+    name_char = tex_name[1];
+    *name_dst_ptr = *tex_name;
+    name_dst_ptr[1] = name_char;
+    name_dst_end = name_dst_ptr + 4;
+    name_dst_ptr[2] = tex_name[2];
+    name_dst_ptr = name_dst_end;
+    tex_name = tex_name + 3;
+  } while (name_dst_end < (unsigned int *)(name_buffer + sizeof(name_buffer)));
+  mip_array = calloc(0x15,4);
   g_LisaAllocatedBufferCount = g_LisaAllocatedBufferCount + 1;
-  *(unsigned int **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = var_pu4;
-  var_pu5 = var_pu4 + 5;
-  var_l16 = __ftol();
-  var_438 = 0;
+  *(unsigned int **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = mip_array;
+  mip_span_table = mip_array + 5;
+  ftol_val = __ftol();
+  bucket_idx = 0;
 
-  if (0 < (int)var_l16) {
+  if (0 < (int)ftol_val) {
     do {
-      if (5999 < var_438) break;
-      var_438 = var_438 + 1;
-    } while (var_438 < (int)var_l16);
+      if (5999 < bucket_idx) break;
+      bucket_idx = bucket_idx + 1;
+    } while (bucket_idx < (int)ftol_val);
   }
 
-  var_l16 = __ftol();
-  var_i9 = (int)var_l16;
-  var_440 = (byte *)*param_1;
-  *var_pu4 = (unsigned int)var_440;
-  var_pu4[1] = (unsigned int)var_440;
-  var_pu4[2] = (unsigned int)var_440;
-  var_pu4[3] = (unsigned int)var_440;
-  var_pu4[4] = (unsigned int)var_440;
-  *var_pu5 = (unsigned int)var_440;
-  var_i10 = 0;
+  ftol_val = __ftol();
+  loop_count = (int)ftol_val;
+  cur_src_page = (byte *)*texture_data_ptr;
+  *mip_array = (unsigned int)cur_src_page;
+  mip_array[1] = (unsigned int)cur_src_page;
+  mip_array[2] = (unsigned int)cur_src_page;
+  mip_array[3] = (unsigned int)cur_src_page;
+  mip_array[4] = (unsigned int)cur_src_page;
+  *mip_span_table = (unsigned int)cur_src_page;
+  next_mip_idx = 0;
 
-  if (0 < param_4 + -1) {
-    var_i11 = var_i10;
+  if (0 < mip_levels + -1) {
+    cur_mip_idx = next_mip_idx;
 
     do {
       g_LisaEnableMipmaps = 1;
       g_LisaShadingEnabled = 1;
-      pvVar6 = calloc(param_7 * 0x100 + 0xffff,1);
+      alloc_ptr = calloc(tex_height * 0x100 + 0xffff,1);
       g_LisaAllocatedBufferCount = g_LisaAllocatedBufferCount + 1;
-      *(void **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = pvVar6;
-      pbVar7 = (byte *)((int)pvVar6 + 0xffffU & 0xffff0000);
-      var_i8 = g_LisaActivePageCount + 2;
-      g_LisaActivePageCount = var_i8;
-      *(byte **)(&g_pLisaTexturePagePointers + var_i8 * 4) = pbVar7;
-      var_i10 = var_i11 + 1;
-      *(int *)(&g_LisaTexturePageSizes + var_i8 * 4) = param_7 << 8;
+      *(void **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = alloc_ptr;
+      aligned_page_ptr = (byte *)((int)alloc_ptr + 0xffffU & 0xffff0000);
+      active_page_idx = g_LisaActivePageCount + 2;
+      g_LisaActivePageCount = active_page_idx;
+      *(byte **)(&g_pLisaTexturePagePointers + active_page_idx * 4) = aligned_page_ptr;
+      next_mip_idx = cur_mip_idx + 1;
+      *(int *)(&g_LisaTexturePageSizes + active_page_idx * 4) = tex_height << 8;
 
-      if (var_i10 < 5) {
-        var_pu4[var_i11 + 1] = (unsigned int)pbVar7;
+      if (next_mip_idx < 5) {
+        mip_array[cur_mip_idx + 1] = (unsigned int)aligned_page_ptr;
       }
 
-      var_i8 = 0;
+      active_page_idx = 0;
 
-      if (0 < var_i9) {
+      if (0 < loop_count) {
         do {
-          if (5999 < var_438) break;
-          var_i8 = var_i8 + 1;
-          var_438 = var_438 + 1;
-        } while (var_i8 < var_i9);
+          if (5999 < bucket_idx) break;
+          active_page_idx = active_page_idx + 1;
+          bucket_idx = bucket_idx + 1;
+        } while (active_page_idx < loop_count);
       }
 
-      if (0 < param_7 / param_6) {
-        var_424 = var_440;
-        var_i9 = (int)(0x100 / (int)param_5);
-        var_428 = pbVar7;
-        var_40c = param_7 / param_6;
+      if (0 < tex_height / page_height) {
+        src_row_ptr = cur_src_page;
+        loop_count = (int)(0x100 / (int)page_width);
+        dst_row_ptr = aligned_page_ptr;
+        y_blocks = tex_height / page_height;
 
         do {
-          pbVar12 = var_428;
-          pbVar13 = var_424;
-          var_414 = var_i9;
+          dst_block_ptr = dst_row_ptr;
+          src_block_ptr = src_row_ptr;
+          x_blocks = loop_count;
 
-          if (0 < var_i9) {
+          if (0 < loop_count) {
             do {
-              if (var_i11 == 0) {
-                Lisa_DownsampleTextureMipmap(pbVar13,pbVar12,param_5,param_6,0x100,(int)var_400);
+              if (cur_mip_idx == 0) {
+                Lisa_DownsampleTextureMipmap(src_block_ptr,dst_block_ptr,page_width,page_height,0x100,(int)name_buffer);
               }
 
               else {
-                Lisa_FilterTextureBlock(pbVar13,(int)pbVar12,param_5,param_6,0x100,(int)var_400,param_8,
+                Lisa_FilterTextureBlock(src_block_ptr,(int)dst_block_ptr,page_width,page_height,0x100,(int)name_buffer,tex_width,
 
-                             var_i11);
+                             cur_mip_idx);
               }
 
-              var_414 = var_414 + -1;
-              pbVar12 = pbVar12 + param_5;
-              pbVar13 = pbVar13 + param_5;
-            } while (var_414 != 0);
+              x_blocks = x_blocks + -1;
+              dst_block_ptr = dst_block_ptr + page_width;
+              src_block_ptr = src_block_ptr + page_width;
+            } while (x_blocks != 0);
           }
 
-          var_428 = var_428 + param_6 * 0x100;
-          var_424 = var_424 + param_6 * 0x100;
-          var_40c = var_40c + -1;
-        } while (var_40c != 0);
+          dst_row_ptr = dst_row_ptr + page_height * 0x100;
+          src_row_ptr = src_row_ptr + page_height * 0x100;
+          y_blocks = y_blocks + -1;
+        } while (y_blocks != 0);
       }
 
-      var_l16 = __ftol();
-      var_i9 = (int)var_l16;
-      var_i11 = var_i10;
-      var_440 = pbVar7;
-    } while (var_i10 < param_4 + -1);
+      ftol_val = __ftol();
+      loop_count = (int)ftol_val;
+      cur_mip_idx = next_mip_idx;
+      cur_src_page = aligned_page_ptr;
+    } while (next_mip_idx < mip_levels + -1);
   }
 
-  if (var_i10 < 4) {
-    var_pu14 = var_pu4 + var_i10 + 1;
+  if (next_mip_idx < 4) {
+    fill_mip_ptr = mip_array + next_mip_idx + 1;
 
-    for (var_i9 = 4 - var_i10; var_i9 != 0; var_i9 = var_i9 + -1) {
-      *var_pu14 = (unsigned int)var_440;
-      var_pu14 = var_pu14 + 1;
+    for (loop_count = 4 - next_mip_idx; loop_count != 0; loop_count = loop_count + -1) {
+      *fill_mip_ptr = (unsigned int)cur_src_page;
+      fill_mip_ptr = fill_mip_ptr + 1;
     }
 
   }
 
-  var_b15 = g_LisaDisableFiltering == 0;
-  *param_1 = (unsigned int)var_pu5;
+  filtering_enabled = g_LisaDisableFiltering == 0;
+  *texture_data_ptr = (unsigned int)mip_span_table;
 
-  if ((var_b15) && (1 < param_4)) {
-    Lisa_GenerateTextureSpanTable(*var_pu4,(int)var_400,param_8,param_7,var_pu5);
+  if ((filtering_enabled) && (1 < mip_levels)) {
+    Lisa_GenerateTextureSpanTable(*mip_array,(int)name_buffer,tex_width,tex_height,mip_span_table);
   }
 
   return 0;
@@ -1497,62 +1497,62 @@ int Lisa_GenerateMipmaps(unsigned int *param_1,int param_2,int param_3,int param
  */
 void Lisa_GenerateTextureSpanTable(int src_tex_ptr,int palette_ptr,int dst_w,int dst_h,int *span_table) {
   unsigned int pixel_val;
-  int var_i2;
+  int temp_err;
   byte texel_color;
   unsigned int texel_b;
-  unsigned int var_u5;
+  unsigned int g00_temp;
   int i_counter;
   void *pvVar7;
-  unsigned int *var_pu8;
+  unsigned int *diag_texel;
   byte *pbVar9;
   unsigned int texel_r;
   byte row_texel;
   int *span_ptr;
-  int var_i13;
+  int err_idx;
   unsigned int texel_g;
   byte next_texel;
   unsigned int *table_entry;
-  unsigned int var_c4 [3];
+  unsigned int rgb_error_accum [3];
   unsigned int color_accum;
   int x_idx;
   unsigned int *table_ptr;
   unsigned int *cur_page_ptr;
   int vec_a [3];
-  int var_9c;
-  int *out_span;
+  int b11_scaled;
+  int *out_val_span;
   int y_offset;
   int row_offset;
   int y_idx;
   int *alloc_table;
-  int var_84;
-  int var_80;
-  int var_7c;
-  int var_78;
-  int var_74;
-  int var_70;
-  int var_6c;
-  int var_68;
-  int var_64;
-  int var_60;
-  int var_5c;
-  int var_58;
-  int var_54;
-  int var_50;
+  int r_interp_1;
+  int g_interp_1;
+  int b_interp_1;
+  int b10_scaled;
+  int g11_scaled;
+  int g10_scaled;
+  int r11_scaled;
+  int r10_scaled;
+  int b01_scaled;
+  int b00_scaled;
+  int g01_scaled;
+  int g00_scaled;
+  int r01_scaled;
+  int r00_scaled;
   unsigned int *page_start;
-  int var_44;
-  int var_40;
-  unsigned int var_3c;
-  unsigned int var_38;
-  unsigned int var_34;
-  unsigned int var_30;
-  unsigned int var_2c;
-  unsigned int var_28;
-  unsigned int var_24;
-  unsigned int var_20;
-  unsigned int var_1c;
-  unsigned int var_18;
-  unsigned int var_14;
-  unsigned int var_10;
+  int g_interp_0;
+  int b_interp_0;
+  unsigned int r10;
+  unsigned int g10;
+  unsigned int b10;
+  unsigned int r00;
+  unsigned int g00;
+  unsigned int b00;
+  unsigned int r11;
+  unsigned int g11;
+  unsigned int b11;
+  unsigned int r01;
+  unsigned int g01;
+  unsigned int b01;
   size_t page_size;
   int page_limit;
   int h_limit;
@@ -1569,7 +1569,7 @@ void Lisa_GenerateTextureSpanTable(int src_tex_ptr,int palette_ptr,int dst_w,int
     span_ptr = span_ptr + 5;
     i_counter = i_counter + -1;
   } while (i_counter != 0);
-  out_span = span_table;
+  out_val_span = span_table;
   page_size = dst_h * 0x400 + 0xffff;
   y_offset = 0;
   page_limit = dst_h << 10;
@@ -1578,22 +1578,22 @@ void Lisa_GenerateTextureSpanTable(int src_tex_ptr,int palette_ptr,int dst_w,int
     pvVar7 = calloc(page_size,1);
     g_LisaAllocatedBufferCount = g_LisaAllocatedBufferCount + 1;
     *(void **)(g_pLisaAllocatedBuffers + -4 + g_LisaAllocatedBufferCount * 4) = pvVar7;
-    var_pu8 = (unsigned int *)((int)pvVar7 + 0xffffU & 0xffff0000);
+    diag_texel = (unsigned int *)((int)pvVar7 + 0xffffU & 0xffff0000);
     i_counter = g_LisaActivePageCount + 2;
-    span_ptr = out_span + 4;
+    span_ptr = out_val_span + 4;
     g_LisaActivePageCount = i_counter;
-    *(unsigned int **)(&g_pLisaTexturePagePointers + i_counter * 4) = var_pu8;
+    *(unsigned int **)(&g_pLisaTexturePagePointers + i_counter * 4) = diag_texel;
     *(int *)(&g_LisaTexturePageSizes + i_counter * 4) = page_limit;
-    *out_span = var_pu8;
+    *out_val_span = diag_texel;
     y_idx = 0;
-    out_span[1] = var_pu8;
-    out_span[2] = var_pu8;
-    out_span[3] = var_pu8;
+    out_val_span[1] = diag_texel;
+    out_val_span[2] = diag_texel;
+    out_val_span[3] = diag_texel;
 
     if (0 < dst_h) {
       h_limit = dst_h + -1;
       row_offset = 0;
-      page_start = var_pu8;
+      page_start = diag_texel;
 
       do {
         vec_a[0] = 0;
@@ -1616,19 +1616,19 @@ void Lisa_GenerateTextureSpanTable(int src_tex_ptr,int palette_ptr,int dst_w,int
             next_texel = *pbVar9;
           }
 
-          var_9c = ((((unsigned int)((((unsigned int)(var_9c)) >> 8))) << 8) | ((unsigned char)(next_texel)));
+          b11_scaled = ((((unsigned int)((((unsigned int)(b11_scaled)) >> 8))) << 8) | ((unsigned char)(next_texel)));
 
           if (y_idx < h_limit) {
             row_texel = pbVar9[0x100];
 
             if (x_idx < 0x3f) {
-              var_pu8 = (unsigned int *)(unsigned int)pbVar9[0x101];
+              diag_texel = (unsigned int *)(unsigned int)pbVar9[0x101];
             }
 
             else {
 LAB_00447785:
 
-              var_pu8 = (unsigned int *)(unsigned int)row_texel;
+              diag_texel = (unsigned int *)(unsigned int)row_texel;
             }
 
           }
@@ -1636,178 +1636,178 @@ LAB_00447785:
           else {
             row_texel = *pbVar9;
             if (0x3e < x_idx) goto LAB_00447785;
-            var_pu8 = (unsigned int *)(unsigned int)pbVar9[1];
+            diag_texel = (unsigned int *)(unsigned int)pbVar9[1];
           }
 
           texel_r = (unsigned int)row_texel;
           texel_g = (unsigned int)next_texel;
           texel_b = (unsigned int)texel_color;
-          pixel_val = (((int)var_pu8 * 0x100 + texel_r) * 0x100 + texel_g) * 0x100 + texel_b;
+          pixel_val = (((int)diag_texel * 0x100 + texel_r) * 0x100 + texel_g) * 0x100 + texel_b;
           table_entry = alloc_table + ((pixel_val >> 0x11) + texel_r + texel_g + pixel_val & 0xffff) * 5;
-          table_ptr = var_pu8;
+          table_ptr = diag_texel;
 
           if (*table_entry != pixel_val) {
             *table_entry = pixel_val;
             color_accum = (unsigned int)((byte*)palette_ptr)[texel_b * 4];
             pixel_val = color_accum;
-            var_30 = color_accum;
+            r00 = color_accum;
             color_accum = (unsigned int)((byte*)palette_ptr)[1 + texel_b * 4];
-            var_u5 = color_accum;
-            var_2c = color_accum;
+            g00_temp = color_accum;
+            g00 = color_accum;
             color_accum = (unsigned int)((byte*)palette_ptr)[2 + texel_b * 4];
             texel_b = color_accum;
-            var_28 = color_accum;
-            var_3c = (unsigned int)*(byte *)(palette_ptr + texel_g * 4);
-            var_38 = (unsigned int)*(byte *)(palette_ptr + 1 + texel_g * 4);
-            var_34 = (unsigned int)*(byte *)(palette_ptr + 2 + texel_g * 4);
-            var_18 = (unsigned int)*(byte *)(palette_ptr + texel_r * 4);
-            var_14 = (unsigned int)*(byte *)(palette_ptr + 1 + texel_r * 4);
-            var_10 = (unsigned int)*(byte *)(palette_ptr + 2 + texel_r * 4);
-            var_24 = (unsigned int)*(byte *)(palette_ptr + (int)var_pu8 * 4);
-            var_20 = (unsigned int)*(byte *)(palette_ptr + 1 + (int)var_pu8 * 4);
+            b00 = color_accum;
+            r10 = (unsigned int)*(byte *)(palette_ptr + texel_g * 4);
+            g10 = (unsigned int)*(byte *)(palette_ptr + 1 + texel_g * 4);
+            b10 = (unsigned int)*(byte *)(palette_ptr + 2 + texel_g * 4);
+            r01 = (unsigned int)*(byte *)(palette_ptr + texel_r * 4);
+            g01 = (unsigned int)*(byte *)(palette_ptr + 1 + texel_r * 4);
+            b01 = (unsigned int)*(byte *)(palette_ptr + 2 + texel_r * 4);
+            r11 = (unsigned int)*(byte *)(palette_ptr + (int)diag_texel * 4);
+            g11 = (unsigned int)*(byte *)(palette_ptr + 1 + (int)diag_texel * 4);
             table_ptr = cur_page_ptr;
-            var_9c = 0;
-            var_74 = 0;
-            var_1c = (unsigned int)*(byte *)(palette_ptr + 2 + (int)var_pu8 * 4);
-            var_6c = 0;
-            var_78 = var_34 << 2;
-            var_64 = 0;
-            var_70 = var_38 << 2;
-            var_68 = var_3c << 2;
-            var_5c = 0;
-            var_54 = 0;
-            var_60 = color_accum << 2;
+            b11_scaled = 0;
+            g11_scaled = 0;
+            b11 = (unsigned int)*(byte *)(palette_ptr + 2 + (int)diag_texel * 4);
+            r11_scaled = 0;
+            b10_scaled = b10 << 2;
+            b01_scaled = 0;
+            g10_scaled = g10 << 2;
+            r10_scaled = r10 << 2;
+            g01_scaled = 0;
+            r01_scaled = 0;
+            b00_scaled = color_accum << 2;
             color_accum = 4;
-            var_58 = var_u5 * 4;
-            var_50 = pixel_val << 2;
-            var_pu8 = table_entry;
+            g00_scaled = g00_temp * 4;
+            r00_scaled = pixel_val << 2;
+            diag_texel = table_entry;
 
             do {
-              i_counter = (int)(var_54 + var_50 + (var_54 + var_50 >> 0x1f & 3U)) >> 2;
-              var_44 = (int)(var_5c + var_58 + (var_5c + var_58 >> 0x1f & 3U)) >> 2;
-              var_40 = (int)(var_64 + var_60 + (var_64 + var_60 >> 0x1f & 3U)) >> 2;
-              var_84 = (int)(var_6c + var_68 + (var_6c + var_68 >> 0x1f & 3U)) >> 2;
-              var_80 = (int)(var_74 + var_70 + (var_74 + var_70 >> 0x1f & 3U)) >> 2;
-              var_7c = (int)(var_9c + var_78 + (var_9c + var_78 >> 0x1f & 3U)) >> 2;
-              var_c4[0] = i_counter * 4;
-              var_i13 = 0;
-              var_c4[1] = var_44 << 2;
-              var_c4[2] = var_40 << 2;
+              i_counter = (int)(r01_scaled + r00_scaled + (r01_scaled + r00_scaled >> 0x1f & 3U)) >> 2;
+              g_interp_0 = (int)(g01_scaled + g00_scaled + (g01_scaled + g00_scaled >> 0x1f & 3U)) >> 2;
+              b_interp_0 = (int)(b01_scaled + b00_scaled + (b01_scaled + b00_scaled >> 0x1f & 3U)) >> 2;
+              r_interp_1 = (int)(r11_scaled + r10_scaled + (r11_scaled + r10_scaled >> 0x1f & 3U)) >> 2;
+              g_interp_1 = (int)(g11_scaled + g10_scaled + (g11_scaled + g10_scaled >> 0x1f & 3U)) >> 2;
+              b_interp_1 = (int)(b11_scaled + b10_scaled + (b11_scaled + b10_scaled >> 0x1f & 3U)) >> 2;
+              rgb_error_accum[0] = i_counter * 4;
+              err_idx = 0;
+              rgb_error_accum[1] = g_interp_0 << 2;
+              rgb_error_accum[2] = b_interp_0 << 2;
 
               do {
-                var_i2 = vec_a[var_i13 / 4] + 8 + var_c4[var_i13 / 4];
-                var_c4[var_i13 / 4] = var_i2;
+                temp_err = vec_a[err_idx / 4] + 8 + rgb_error_accum[err_idx / 4];
+                rgb_error_accum[err_idx / 4] = temp_err;
 
-                if (0x3ff < var_i2) {
-                  var_c4[var_i13 / 4] = 0x3ff;
+                if (0x3ff < temp_err) {
+                  rgb_error_accum[err_idx / 4] = 0x3ff;
                 }
 
-                if (var_c4[var_i13 / 4] < 0) {
-                  var_c4[var_i13 / 4] = 0;
+                if (rgb_error_accum[err_idx / 4] < 0) {
+                  rgb_error_accum[err_idx / 4] = 0;
                 }
 
-                var_i13 = var_i13 + 4;
-              } while (var_i13 < 0xc);
+                err_idx = err_idx + 4;
+              } while (err_idx < 0xc);
 
               texel_color = (&g_LisaObjectMatrix_22)
 
-                      [(var_c4[1] & 0x3f0) * 4 +
+                      [(rgb_error_accum[1] & 0x3f0) * 4 +
 
-                       ((var_c4[2] & 0x3f0) >> 4) + (var_c4[0] & 0x3f0) * 0x100];
+                       ((rgb_error_accum[2] & 0x3f0) >> 4) + (rgb_error_accum[0] & 0x3f0) * 0x100];
               texel_g = (unsigned int)texel_color;
-              *(byte *)(var_pu8 + 1) = texel_color;
+              *(byte *)(diag_texel + 1) = texel_color;
               next_texel = *(byte *)(palette_ptr + texel_g * 4);
               *(byte *)table_ptr = texel_color;
-              vec_a[0] = (int)(var_c4[0] + (unsigned int)next_texel * -4) / 2;
-              vec_a[1] = (int)(var_c4[1] + (unsigned int)*(byte *)(palette_ptr + 1 + texel_g * 4) * -4) / 2;
-              vec_a[2] = (int)(var_c4[2] + (unsigned int)*(byte *)(palette_ptr + 2 + texel_g * 4) * -4) / 2;
-              var_c4[0] = i_counter * 3 + var_84;
-              var_c4[1] = var_44 * 3 + var_80;
-              var_i13 = 0;
-              var_c4[2] = var_40 * 3 + var_7c;
+              vec_a[0] = (int)(rgb_error_accum[0] + (unsigned int)next_texel * -4) / 2;
+              vec_a[1] = (int)(rgb_error_accum[1] + (unsigned int)*(byte *)(palette_ptr + 1 + texel_g * 4) * -4) / 2;
+              vec_a[2] = (int)(rgb_error_accum[2] + (unsigned int)*(byte *)(palette_ptr + 2 + texel_g * 4) * -4) / 2;
+              rgb_error_accum[0] = i_counter * 3 + r_interp_1;
+              rgb_error_accum[1] = g_interp_0 * 3 + g_interp_1;
+              err_idx = 0;
+              rgb_error_accum[2] = b_interp_0 * 3 + b_interp_1;
 
               do {
-                var_i2 = vec_a[var_i13 / 4] + 8 + var_c4[var_i13 / 4];
-                var_c4[var_i13 / 4] = var_i2;
+                temp_err = vec_a[err_idx / 4] + 8 + rgb_error_accum[err_idx / 4];
+                rgb_error_accum[err_idx / 4] = temp_err;
 
-                if (0x3ff < var_i2) {
-                  var_c4[var_i13 / 4] = 0x3ff;
+                if (0x3ff < temp_err) {
+                  rgb_error_accum[err_idx / 4] = 0x3ff;
                 }
 
-                if (var_c4[var_i13 / 4] < 0) {
-                  var_c4[var_i13 / 4] = 0;
+                if (rgb_error_accum[err_idx / 4] < 0) {
+                  rgb_error_accum[err_idx / 4] = 0;
                 }
 
-                var_i13 = var_i13 + 4;
-              } while (var_i13 < 0xc);
+                err_idx = err_idx + 4;
+              } while (err_idx < 0xc);
 
               texel_g = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
 
-                                   [(var_c4[1] & 0x3f0) * 4 +
+                                   [(rgb_error_accum[1] & 0x3f0) * 4 +
 
-                                    ((var_c4[2] & 0x3f0) >> 4) + (var_c4[0] & 0x3f0) * 0x100];
+                                    ((rgb_error_accum[2] & 0x3f0) >> 4) + (rgb_error_accum[0] & 0x3f0) * 0x100];
 
-              *(char *)((int)var_pu8 + 5) =
+              *(char *)((int)diag_texel + 5) =
 
                    (&g_LisaObjectMatrix_22)
 
-                   [(var_c4[1] & 0x3f0) * 4 +
+                   [(rgb_error_accum[1] & 0x3f0) * 4 +
 
-                    ((var_c4[2] & 0x3f0) >> 4) + (var_c4[0] & 0x3f0) * 0x100];
-              vec_a[0] = (int)(var_c4[0] + (unsigned int)*(byte *)(palette_ptr + texel_g * 4) * -4) / 2;
-              vec_a[1] = (int)(var_c4[1] + (unsigned int)*(byte *)(palette_ptr + 1 + texel_g * 4) * -4) / 2;
-              vec_a[2] = (int)(var_c4[2] + (unsigned int)*(byte *)(palette_ptr + 2 + texel_g * 4) * -4) / 2;
-              var_c4[0] = (var_84 + i_counter) * 2;
-              var_c4[1] = (var_80 + var_44) * 2;
-              var_i13 = 0;
-              var_c4[2] = (var_7c + var_40) * 2;
+                    ((rgb_error_accum[2] & 0x3f0) >> 4) + (rgb_error_accum[0] & 0x3f0) * 0x100];
+              vec_a[0] = (int)(rgb_error_accum[0] + (unsigned int)*(byte *)(palette_ptr + texel_g * 4) * -4) / 2;
+              vec_a[1] = (int)(rgb_error_accum[1] + (unsigned int)*(byte *)(palette_ptr + 1 + texel_g * 4) * -4) / 2;
+              vec_a[2] = (int)(rgb_error_accum[2] + (unsigned int)*(byte *)(palette_ptr + 2 + texel_g * 4) * -4) / 2;
+              rgb_error_accum[0] = (r_interp_1 + i_counter) * 2;
+              rgb_error_accum[1] = (g_interp_1 + g_interp_0) * 2;
+              err_idx = 0;
+              rgb_error_accum[2] = (b_interp_1 + b_interp_0) * 2;
 
               do {
-                var_i2 = vec_a[var_i13 / 4] + 8 + var_c4[var_i13 / 4];
-                var_c4[var_i13 / 4] = var_i2;
+                temp_err = vec_a[err_idx / 4] + 8 + rgb_error_accum[err_idx / 4];
+                rgb_error_accum[err_idx / 4] = temp_err;
 
-                if (0x3ff < var_i2) {
-                  var_c4[var_i13 / 4] = 0x3ff;
+                if (0x3ff < temp_err) {
+                  rgb_error_accum[err_idx / 4] = 0x3ff;
                 }
 
-                if (var_c4[var_i13 / 4] < 0) {
-                  var_c4[var_i13 / 4] = 0;
+                if (rgb_error_accum[err_idx / 4] < 0) {
+                  rgb_error_accum[err_idx / 4] = 0;
                 }
 
-                var_i13 = var_i13 + 4;
-              } while (var_i13 < 0xc);
+                err_idx = err_idx + 4;
+              } while (err_idx < 0xc);
 
               texel_g = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
 
-                                   [(var_c4[1] & 0x3f0) * 4 +
+                                   [(rgb_error_accum[1] & 0x3f0) * 4 +
 
-                                    ((var_c4[2] & 0x3f0) >> 4) + (var_c4[0] & 0x3f0) * 0x100];
+                                    ((rgb_error_accum[2] & 0x3f0) >> 4) + (rgb_error_accum[0] & 0x3f0) * 0x100];
 
-              *(char *)((int)var_pu8 + 6) =
+              *(char *)((int)diag_texel + 6) =
 
                    (&g_LisaObjectMatrix_22)
 
-                   [(var_c4[1] & 0x3f0) * 4 +
+                   [(rgb_error_accum[1] & 0x3f0) * 4 +
 
-                    ((var_c4[2] & 0x3f0) >> 4) + (var_c4[0] & 0x3f0) * 0x100];
-              vec_a[0] = (int)(var_c4[0] + (unsigned int)*(byte *)(palette_ptr + texel_g * 4) * -4) / 2;
-              vec_a[1] = (int)(var_c4[1] + (unsigned int)*(byte *)(palette_ptr + 1 + texel_g * 4) * -4) / 2;
-              vec_a[2] = (int)(var_c4[2] + (unsigned int)*(byte *)(palette_ptr + 2 + texel_g * 4) * -4) / 2;
-              var_c4[0] = var_84 * 3 + i_counter;
+                    ((rgb_error_accum[2] & 0x3f0) >> 4) + (rgb_error_accum[0] & 0x3f0) * 0x100];
+              vec_a[0] = (int)(rgb_error_accum[0] + (unsigned int)*(byte *)(palette_ptr + texel_g * 4) * -4) / 2;
+              vec_a[1] = (int)(rgb_error_accum[1] + (unsigned int)*(byte *)(palette_ptr + 1 + texel_g * 4) * -4) / 2;
+              vec_a[2] = (int)(rgb_error_accum[2] + (unsigned int)*(byte *)(palette_ptr + 2 + texel_g * 4) * -4) / 2;
+              rgb_error_accum[0] = r_interp_1 * 3 + i_counter;
               i_counter = 0;
-              var_c4[1] = var_80 * 3 + var_44;
-              var_c4[2] = var_7c * 3 + var_40;
+              rgb_error_accum[1] = g_interp_1 * 3 + g_interp_0;
+              rgb_error_accum[2] = b_interp_1 * 3 + b_interp_0;
 
               do {
-                var_i13 = *(int *)((int)vec_a + i_counter) + 8 + *(int *)((int)var_c4 + i_counter);
-                *(int *)((int)var_c4 + i_counter) = var_i13;
+                err_idx = *(int *)((int)vec_a + i_counter) + 8 + *(int *)((int)rgb_error_accum + i_counter);
+                *(int *)((int)rgb_error_accum + i_counter) = err_idx;
 
-                if (0x3ff < var_i13) {
-                  *(int *)((int)var_c4 + i_counter) = 0x3ff;
+                if (0x3ff < err_idx) {
+                  *(int *)((int)rgb_error_accum + i_counter) = 0x3ff;
                 }
 
-                if (*(int *)((int)var_c4 + i_counter) < 0) {
-                  *(int *)((int)var_c4 + i_counter) = 0;
+                if (*(int *)((int)rgb_error_accum + i_counter) < 0) {
+                  *(int *)((int)rgb_error_accum + i_counter) = 0;
                 }
 
                 i_counter = i_counter + 4;
@@ -1815,35 +1815,35 @@ LAB_00447785:
 
               texel_g = (unsigned int)(byte)(&g_LisaObjectMatrix_22)
 
-                                   [(var_c4[1] & 0x3f0) * 4 +
+                                   [(rgb_error_accum[1] & 0x3f0) * 4 +
 
-                                    ((var_c4[2] & 0x3f0) >> 4) + (var_c4[0] & 0x3f0) * 0x100];
+                                    ((rgb_error_accum[2] & 0x3f0) >> 4) + (rgb_error_accum[0] & 0x3f0) * 0x100];
 
-              *(char *)((int)var_pu8 + 7) =
+              *(char *)((int)diag_texel + 7) =
 
                    (&g_LisaObjectMatrix_22)
 
-                   [(var_c4[1] & 0x3f0) * 4 +
+                   [(rgb_error_accum[1] & 0x3f0) * 4 +
 
-                    ((var_c4[2] & 0x3f0) >> 4) + (var_c4[0] & 0x3f0) * 0x100];
-              vec_a[0] = (int)(var_c4[0] + (unsigned int)*(byte *)(palette_ptr + texel_g * 4) * -4) / 2;
-              vec_a[1] = (int)(var_c4[1] + (unsigned int)*(byte *)(palette_ptr + 1 + texel_g * 4) * -4) / 2;
+                    ((rgb_error_accum[2] & 0x3f0) >> 4) + (rgb_error_accum[0] & 0x3f0) * 0x100];
+              vec_a[0] = (int)(rgb_error_accum[0] + (unsigned int)*(byte *)(palette_ptr + texel_g * 4) * -4) / 2;
+              vec_a[1] = (int)(rgb_error_accum[1] + (unsigned int)*(byte *)(palette_ptr + 1 + texel_g * 4) * -4) / 2;
               table_ptr = table_ptr + 0x40;
-              vec_a[2] = (int)(var_c4[2] + (unsigned int)*(byte *)(palette_ptr + 2 + texel_g * 4) * -4) / 2;
-              var_9c = var_9c + var_1c;
-              var_78 = var_78 - var_34;
-              var_74 = var_74 + var_20;
-              var_70 = var_70 - var_38;
-              var_6c = var_6c + var_24;
-              var_68 = var_68 - var_3c;
-              var_64 = var_64 + var_10;
-              var_60 = var_60 - texel_b;
-              var_5c = var_5c + var_14;
-              var_58 = var_58 - var_u5;
-              var_54 = var_54 + var_18;
-              var_50 = var_50 - pixel_val;
+              vec_a[2] = (int)(rgb_error_accum[2] + (unsigned int)*(byte *)(palette_ptr + 2 + texel_g * 4) * -4) / 2;
+              b11_scaled = b11_scaled + b11;
+              b10_scaled = b10_scaled - b10;
+              g11_scaled = g11_scaled + g11;
+              g10_scaled = g10_scaled - g10;
+              r11_scaled = r11_scaled + r11;
+              r10_scaled = r10_scaled - r10;
+              b01_scaled = b01_scaled + b01;
+              b00_scaled = b00_scaled - texel_b;
+              g01_scaled = g01_scaled + g01;
+              g00_scaled = g00_scaled - g00_temp;
+              r01_scaled = r01_scaled + r01;
+              r00_scaled = r00_scaled - pixel_val;
               color_accum = color_accum + -1;
-              var_pu8 = var_pu8 + 1;
+              diag_texel = diag_texel + 1;
             } while (color_accum != 0);
             vec_a[0] = 0;
             vec_a[1] = 0;
@@ -1855,7 +1855,7 @@ LAB_00447785:
           vec_a[1] = 0;
           vec_a[0] = 0;
           pixel_val = table_entry[2];
-          var_pu8 = cur_page_ptr + 1;
+          diag_texel = cur_page_ptr + 1;
           x_idx = x_idx + 1;
           *cur_page_ptr = table_entry[1];
           texel_g = table_entry[3];
@@ -1863,7 +1863,7 @@ LAB_00447785:
           pixel_val = table_entry[4];
           cur_page_ptr[0x80] = texel_g;
           cur_page_ptr[0xc0] = pixel_val;
-          cur_page_ptr = var_pu8;
+          cur_page_ptr = diag_texel;
         } while (x_idx < 0x40);
         row_offset = row_offset + 0x100;
         page_start = page_start + 0x100;
@@ -1872,7 +1872,7 @@ LAB_00447785:
     }
 
     y_offset = y_offset + 0x40;
-    out_span = span_ptr;
+    out_val_span = span_ptr;
 
     if (0xff < y_offset) {
       _free(alloc_table);
@@ -1886,132 +1886,132 @@ LAB_00447785:
  * @original Lisa_DownsampleTextureMipmap (IGN_WIN.EXE @ 0x00447fb0, lisa3d.c)
  * @fidelity ADAPTED
  */
-void Lisa_DownsampleTextureMipmap(byte *param_1,byte *param_2,int param_3,int param_4,int param_5,int param_6) {
-  int var_i1;
-  byte var_b2;
-  int var_i3;
-  unsigned int *var_pu4;
-  unsigned int var_u5;
-  unsigned int var_u6;
-  int var_i7;
-  int var_i8;
-  int var_i9;
-  int var_2c;
-  int var_24;
-  unsigned int var_1c [4];
-  int var_c [3];
+void Lisa_DownsampleTextureMipmap(byte *prm_1,byte *prm_2,int prm_3,int prm_4,int prm_5,int prm_6) {
+  int tmp_i1;
+  byte tmp_b2;
+  int tmp_i3;
+  unsigned int *tmp_pu4;
+  unsigned int tmp_u5;
+  unsigned int tmp_u6;
+  int tmp_i7;
+  int tmp_i8;
+  int tmp_i9;
+  int tmp_2c;
+  int tmp_24;
+  unsigned int tmp_1c [4];
+  int tmp_c [3];
 
   
 
-  var_24 = 0;
+  tmp_24 = 0;
 
-  if (0 < param_4) {
+  if (0 < prm_4) {
     do {
-      var_2c = 0;
-      var_c[0] = 0;
-      var_c[1] = 0;
-      var_c[2] = 0;
+      tmp_2c = 0;
+      tmp_c[0] = 0;
+      tmp_c[1] = 0;
+      tmp_c[2] = 0;
 
-      if (0 < param_3) {
-        var_i3 = param_3 + -1;
+      if (0 < prm_3) {
+        tmp_i3 = prm_3 + -1;
 
         do {
-          var_i7 = 0;
-          var_pu4 = var_1c;
-          var_b2 = *param_1;
+          tmp_i7 = 0;
+          tmp_pu4 = tmp_1c;
+          tmp_b2 = *prm_1;
 
           do {
-            var_u6 = (unsigned int)*(byte *)((unsigned int)var_b2 * 4 + var_i7 + param_6);
-            *var_pu4 = var_u6;
+            tmp_u6 = (unsigned int)*(byte *)((unsigned int)tmp_b2 * 4 + tmp_i7 + prm_6);
+            *tmp_pu4 = tmp_u6;
 
-            if (var_2c < var_i3) {
-              var_u5 = *(byte *)(var_i7 + (unsigned int)param_1[1] * 4 + param_6) + var_u6;
+            if (tmp_2c < tmp_i3) {
+              tmp_u5 = *(byte *)(tmp_i7 + (unsigned int)prm_1[1] * 4 + prm_6) + tmp_u6;
             }
 
             else {
-              var_u5 = var_u6 * 2;
+              tmp_u5 = tmp_u6 * 2;
             }
 
-            *var_pu4 = var_u5;
+            *tmp_pu4 = tmp_u5;
 
-            if (var_24 < param_4 + -1) {
-              var_u6 = (unsigned int)*(byte *)(var_i7 + (unsigned int)param_1[param_5] * 4 + param_6);
-              var_u5 = *var_pu4 + var_u6;
-              *var_pu4 = var_u5;
+            if (tmp_24 < prm_4 + -1) {
+              tmp_u6 = (unsigned int)*(byte *)(tmp_i7 + (unsigned int)prm_1[prm_5] * 4 + prm_6);
+              tmp_u5 = *tmp_pu4 + tmp_u6;
+              *tmp_pu4 = tmp_u5;
 
-              if (var_2c < var_i3) {
-                *var_pu4 = *(byte *)(var_i7 + (unsigned int)param_1[param_5 + 1] * 4 + param_6) + var_u5;
+              if (tmp_2c < tmp_i3) {
+                *tmp_pu4 = *(byte *)(tmp_i7 + (unsigned int)prm_1[prm_5 + 1] * 4 + prm_6) + tmp_u5;
               }
 
               else {
-                *var_pu4 = var_u6 + var_u5;
+                *tmp_pu4 = tmp_u6 + tmp_u5;
               }
 
             }
 
             else {
-              var_u5 = *var_pu4 + var_u6;
-              *var_pu4 = var_u5;
+              tmp_u5 = *tmp_pu4 + tmp_u6;
+              *tmp_pu4 = tmp_u5;
 
-              if (var_2c < var_i3) {
-                *var_pu4 = *(byte *)(var_i7 + (unsigned int)param_1[1] * 4 + param_6) + var_u5;
+              if (tmp_2c < tmp_i3) {
+                *tmp_pu4 = *(byte *)(tmp_i7 + (unsigned int)prm_1[1] * 4 + prm_6) + tmp_u5;
               }
 
               else {
-                *var_pu4 = var_u5 + var_u6;
+                *tmp_pu4 = tmp_u5 + tmp_u6;
               }
 
             }
 
-            var_pu4 = var_pu4 + 1;
-            var_i7 = var_i7 + 1;
-          } while (var_pu4 < var_1c + 3);
-          var_i7 = 0;
+            tmp_pu4 = tmp_pu4 + 1;
+            tmp_i7 = tmp_i7 + 1;
+          } while (tmp_pu4 < tmp_1c + 3);
+          tmp_i7 = 0;
 
           do {
-            var_i9 = *(int *)((int)var_c + var_i7) + 8 + *(int *)((int)var_1c + var_i7);
-            *(int *)((int)var_1c + var_i7) = var_i9;
+            tmp_i9 = *(int *)((int)tmp_c + tmp_i7) + 8 + *(int *)((int)tmp_1c + tmp_i7);
+            *(int *)((int)tmp_1c + tmp_i7) = tmp_i9;
 
-            if (0x3ff < var_i9) {
-              *(int *)((int)var_1c + var_i7) = 0x3ff;
+            if (0x3ff < tmp_i9) {
+              *(int *)((int)tmp_1c + tmp_i7) = 0x3ff;
             }
 
-            if (*(int *)((int)var_1c + var_i7) < 0) {
-              *(int *)((int)var_1c + var_i7) = 0;
+            if (*(int *)((int)tmp_1c + tmp_i7) < 0) {
+              *(int *)((int)tmp_1c + tmp_i7) = 0;
             }
 
-            var_i7 = var_i7 + 4;
-          } while (var_i7 < 0xc);
-          var_i9 = 0;
+            tmp_i7 = tmp_i7 + 4;
+          } while (tmp_i7 < 0xc);
+          tmp_i9 = 0;
 
-          var_b2 = (&g_LisaObjectMatrix_22)
+          tmp_b2 = (&g_LisaObjectMatrix_22)
 
-                  [(var_1c[1] & 0x3f0) * 4 +
+                  [(tmp_1c[1] & 0x3f0) * 4 +
 
-                   ((var_1c[2] & 0x3f0) >> 4) + (var_1c[0] & 0x3f0) * 0x100];
-          *param_2 = var_b2;
-          var_i7 = 0;
+                   ((tmp_1c[2] & 0x3f0) >> 4) + (tmp_1c[0] & 0x3f0) * 0x100];
+          *prm_2 = tmp_b2;
+          tmp_i7 = 0;
 
           do {
-            var_i8 = var_i7 + 4;
-            var_i1 = var_i9 + (unsigned int)var_b2 * 4;
-            var_i9 = var_i9 + 1;
+            tmp_i8 = tmp_i7 + 4;
+            tmp_i1 = tmp_i9 + (unsigned int)tmp_b2 * 4;
+            tmp_i9 = tmp_i9 + 1;
 
-            *(int *)((int)var_c + var_i7) =
+            *(int *)((int)tmp_c + tmp_i7) =
 
-                 (int)(*(int *)((int)var_1c + var_i7) + (unsigned int)*(byte *)(var_i1 + param_6) * -4) / 2;
-            var_i7 = var_i8;
-          } while (var_i8 < 0xc);
-          param_2 = param_2 + 1;
-          param_1 = param_1 + 1;
-          var_2c = var_2c + 1;
-        } while (var_2c < param_3);
+                 (int)(*(int *)((int)tmp_1c + tmp_i7) + (unsigned int)*(byte *)(tmp_i1 + prm_6) * -4) / 2;
+            tmp_i7 = tmp_i8;
+          } while (tmp_i8 < 0xc);
+          prm_2 = prm_2 + 1;
+          prm_1 = prm_1 + 1;
+          tmp_2c = tmp_2c + 1;
+        } while (tmp_2c < prm_3);
       }
 
-      param_1 = param_1 + (param_5 - param_3);
-      var_24 = var_24 + 1;
-      param_2 = param_2 + (param_5 - param_3);
-    } while (var_24 < param_4);
+      prm_1 = prm_1 + (prm_5 - prm_3);
+      tmp_24 = tmp_24 + 1;
+      prm_2 = prm_2 + (prm_5 - prm_3);
+    } while (tmp_24 < prm_4);
   }
 
   return;
@@ -2467,46 +2467,46 @@ void Lisa_LoadOrCreateShadingTable(int shade_level,int palette_ptr) {
  * @original Lisa_FindClosestPaletteColor (IGN_WIN.EXE @ 0x00448860, lisa3d.c)
  * @fidelity ADAPTED
  */
-unsigned int Lisa_FindClosestPaletteColor(int *param_1,int param_2) {
-  unsigned int var_u1;
-  int var_i2;
-  int var_i3;
-  unsigned int var_c;
-  int var_8;
-  unsigned int var_4;
+unsigned int Lisa_FindClosestPaletteColor(int *target_rgb,int palette_ptr) {
+  unsigned int best_index;
+  int color_offset;
+  int dist_sq;
+  unsigned int pal_color;
+  int min_dist_sq;
+  unsigned int color_index;
 
   
 
-  var_8 = 0x7f000000;
-  var_i2 = 0;
-  var_4 = 0;
-  var_u1 = var_c;
+  min_dist_sq = 0x7f000000;
+  color_offset = 0;
+  color_index = 0;
+  best_index = pal_color;
 
   do {
-    var_i3 = *param_1 - (unsigned int)*(byte *)(param_2 + var_i2);
-    var_i3 = var_i3 * var_i3;
+    dist_sq = *target_rgb - (unsigned int)*(byte *)(palette_ptr + color_offset);
+    dist_sq = dist_sq * dist_sq;
 
-    if (var_i3 < var_8) {
-      var_c = (unsigned int)*(byte *)(param_2 + 1 + var_i2);
-      var_i3 = var_i3 + (param_1[1] - var_c) * (param_1[1] - var_c);
+    if (dist_sq < min_dist_sq) {
+      pal_color = (unsigned int)*(byte *)(palette_ptr + 1 + color_offset);
+      dist_sq = dist_sq + (target_rgb[1] - pal_color) * (target_rgb[1] - pal_color);
 
-      if (var_i3 < var_8) {
-        var_c = (unsigned int)*(byte *)(param_2 + 2 + var_i2);
-        var_i3 = var_i3 + (param_1[2] - var_c) * (param_1[2] - var_c);
+      if (dist_sq < min_dist_sq) {
+        pal_color = (unsigned int)*(byte *)(palette_ptr + 2 + color_offset);
+        dist_sq = dist_sq + (target_rgb[2] - pal_color) * (target_rgb[2] - pal_color);
 
-        if (var_i3 < var_8) {
-          var_u1 = var_4;
-          var_8 = var_i3;
+        if (dist_sq < min_dist_sq) {
+          best_index = color_index;
+          min_dist_sq = dist_sq;
         }
 
       }
 
     }
 
-    var_i2 = var_i2 + 3;
-    var_4 = var_4 + 1;
-  } while ((int)var_4 < 0x100);
-  return var_u1;
+    color_offset = color_offset + 3;
+    color_index = color_index + 1;
+  } while ((int)color_index < 0x100);
+  return best_index;
 }
 
 /**
@@ -2514,64 +2514,64 @@ unsigned int Lisa_FindClosestPaletteColor(int *param_1,int param_2) {
  * @fidelity ADAPTED
  */
 LisaReturn64 Lisa_RenderSkyBackdrop(void) {
-  float var_f1;
-  int var_i2;
-  int var_i3;
-  int var_i4;
-  int var_i5;
-  unsigned int var_u6;
-  double out_ST0;
-  double out_ST1;
-  int var_l7;
-  unsigned int var_u8;
+  float horiz_dist;
+  int camera_ptr;
+  int dir_x;
+  int dir_z;
+  int dir_y;
+  unsigned int pitch_val;
+  double vec_x;
+  double vec_y;
+  int pitch_angle;
+  unsigned int yaw_angle;
 
   
 
-  var_i2 = g_LisaCamera;
-  var_l7 = __ftol();
-  var_i3 = (int)var_l7;
-  var_l7 = __ftol();
-  var_i4 = (int)var_l7;
-  var_l7 = __ftol();
-  var_u6 = (unsigned int)((unsigned int)var_l7 >> 0);
-  var_i5 = (int)var_l7;
-  var_f1 = (float)SQRT(out_ST1 * out_ST1 + out_ST0 * out_ST0);
+  camera_ptr = g_LisaCamera;
+  pitch_angle = __ftol();
+  dir_x = (int)pitch_angle;
+  pitch_angle = __ftol();
+  dir_z = (int)pitch_angle;
+  pitch_angle = __ftol();
+  pitch_val = (unsigned int)((unsigned int)pitch_angle >> 0);
+  dir_y = (int)pitch_angle;
+  horiz_dist = (float)SQRT(vec_y * vec_y + vec_x * vec_x);
 
-  if ((var_i4 < 1) || ((int)var_f1 < 1)) {
-    if ((var_i4 < 0) && (0 < (int)var_f1)) {
-      fpatan((double)var_f1 / (double)-var_i4,(double)1);
-      var_l7 = __ftol();
-      *(double *)(var_i2 + 0x18) = (double)(int)var_l7;
+  if ((dir_z < 1) || ((int)horiz_dist < 1)) {
+    if ((dir_z < 0) && (0 < (int)horiz_dist)) {
+      fpatan((double)horiz_dist / (double)-dir_z,(double)1);
+      pitch_angle = __ftol();
+      *(double *)(camera_ptr + 0x18) = (double)(int)pitch_angle;
     }
 
-    else if (var_i4 == 0) {
-      *(int *)(var_i2 + 0x18) = 0;
-      *(int *)(var_i2 + 0x1c) = 0;
-      var_l7 = (unsigned int)var_u6 << 0;
+    else if (dir_z == 0) {
+      *(int *)(camera_ptr + 0x18) = 0;
+      *(int *)(camera_ptr + 0x1c) = 0;
+      pitch_angle = (unsigned int)pitch_val << 0;
     }
 
-    else if ((var_i4 == 0) && (ABS(var_f1) == 0.0)) {
-      *(int *)(var_i2 + 0x18) = 0;
-      *(int *)(var_i2 + 0x1c) = 0;
-      var_l7 = (unsigned int)var_u6 << 0;
+    else if ((dir_z == 0) && (ABS(horiz_dist) == 0.0)) {
+      *(int *)(camera_ptr + 0x18) = 0;
+      *(int *)(camera_ptr + 0x1c) = 0;
+      pitch_angle = (unsigned int)pitch_val << 0;
     }
 
-    else if ((var_i4 < 0) && (ABS(var_f1) == 0.0)) {
-      *(int *)(var_i2 + 0x18) = 0;
-      *(int *)(var_i2 + 0x1c) = 0x40a51800;
-      var_l7 = (((int)(var_u6) << 0) | ((unsigned int)(var_f1)));
+    else if ((dir_z < 0) && (ABS(horiz_dist) == 0.0)) {
+      *(int *)(camera_ptr + 0x18) = 0;
+      *(int *)(camera_ptr + 0x1c) = 0x40a51800;
+      pitch_angle = (((int)(pitch_val) << 0) | ((unsigned int)(horiz_dist)));
     }
 
     else {
-      var_l7 = (unsigned int)var_u6 << 0;
+      pitch_angle = (unsigned int)pitch_val << 0;
 
-      if (0 < var_i4) {
-        var_l7 = (((int)(var_u6) << 0) | ((unsigned int)(var_f1)));
+      if (0 < dir_z) {
+        pitch_angle = (((int)(pitch_val) << 0) | ((unsigned int)(horiz_dist)));
 
-        if (ABS(var_f1) == 0.0) {
-          *(int *)(var_i2 + 0x18) = 0;
-          *(int *)(var_i2 + 0x1c) = 0x408c2000;
-          var_l7 = (((int)(var_u6) << 0) | ((unsigned int)(var_f1)));
+        if (ABS(horiz_dist) == 0.0) {
+          *(int *)(camera_ptr + 0x18) = 0;
+          *(int *)(camera_ptr + 0x1c) = 0x408c2000;
+          pitch_angle = (((int)(pitch_val) << 0) | ((unsigned int)(horiz_dist)));
         }
 
       }
@@ -2581,57 +2581,57 @@ LisaReturn64 Lisa_RenderSkyBackdrop(void) {
   }
 
   else {
-    fpatan((double)var_i4 / (double)var_f1,(double)1);
-    var_l7 = __ftol();
-    *(double *)(var_i2 + 0x18) = (double)(int)var_l7;
+    fpatan((double)dir_z / (double)horiz_dist,(double)1);
+    pitch_angle = __ftol();
+    *(double *)(camera_ptr + 0x18) = (double)(int)pitch_angle;
   }
 
-  var_u6 = (unsigned int)((unsigned int)var_l7 >> 0);
+  pitch_val = (unsigned int)((unsigned int)pitch_angle >> 0);
 
-  if ((var_i3 < 1) || (var_i5 < 1)) {
-    if ((var_i5 < 0) && (0 < var_i3)) {
-      fpatan((double)-var_i5 / (double)var_i3,(double)1);
-      var_u8 = __ftol();
-      *(double *)(var_i2 + 0x20) = (double)(int)var_u8;
+  if ((dir_x < 1) || (dir_y < 1)) {
+    if ((dir_y < 0) && (0 < dir_x)) {
+      fpatan((double)-dir_y / (double)dir_x,(double)1);
+      yaw_angle = __ftol();
+      *(double *)(camera_ptr + 0x20) = (double)(int)yaw_angle;
     }
 
-    else if ((var_i3 < 0) && (var_i5 < 0)) {
-      fpatan((double)var_i3 / (double)var_i5,(double)1);
-      var_u8 = __ftol();
-      *(double *)(var_i2 + 0x20) = (double)(int)var_u8;
+    else if ((dir_x < 0) && (dir_y < 0)) {
+      fpatan((double)dir_x / (double)dir_y,(double)1);
+      yaw_angle = __ftol();
+      *(double *)(camera_ptr + 0x20) = (double)(int)yaw_angle;
     }
 
-    else if ((var_i5 < 1) || (-1 < var_i3)) {
-      if (var_i3 == 0) {
-        if (0 < var_i5) {
-          *(int *)(var_i2 + 0x20) = 0;
-          *(int *)(var_i2 + 0x24) = 0;
-          var_u8 = (unsigned int)var_u6 << 0;
+    else if ((dir_y < 1) || (-1 < dir_x)) {
+      if (dir_x == 0) {
+        if (0 < dir_y) {
+          *(int *)(camera_ptr + 0x20) = 0;
+          *(int *)(camera_ptr + 0x24) = 0;
+          yaw_angle = (unsigned int)pitch_val << 0;
           goto LAB_00448c11;
         }
 
-        if (var_i5 < 0) {
-          *(int *)(var_i2 + 0x20) = 0;
-          *(int *)(var_i2 + 0x24) = 0x409c2000;
-          var_u8 = (unsigned int)var_u6 << 0;
+        if (dir_y < 0) {
+          *(int *)(camera_ptr + 0x20) = 0;
+          *(int *)(camera_ptr + 0x24) = 0x409c2000;
+          yaw_angle = (unsigned int)pitch_val << 0;
           goto LAB_00448c11;
         }
 
       }
 
-      if ((var_i5 == 0) && (0 < var_i3)) {
-        *(int *)(var_i2 + 0x20) = 0;
-        *(int *)(var_i2 + 0x24) = 0x408c2000;
-        var_u8 = (unsigned int)var_u6 << 0;
+      if ((dir_y == 0) && (0 < dir_x)) {
+        *(int *)(camera_ptr + 0x20) = 0;
+        *(int *)(camera_ptr + 0x24) = 0x408c2000;
+        yaw_angle = (unsigned int)pitch_val << 0;
       }
 
       else {
-        var_u8 = (unsigned int)var_u6 << 0;
+        yaw_angle = (unsigned int)pitch_val << 0;
 
-        if ((var_i5 == 0) && (var_u8 = (unsigned int)var_u6 << 0, var_i3 < 0)) {
-          *(int *)(var_i2 + 0x20) = 0;
-          *(int *)(var_i2 + 0x24) = 0x40a51800;
-          var_u8 = (unsigned int)var_u6 << 0;
+        if ((dir_y == 0) && (yaw_angle = (unsigned int)pitch_val << 0, dir_x < 0)) {
+          *(int *)(camera_ptr + 0x20) = 0;
+          *(int *)(camera_ptr + 0x24) = 0x40a51800;
+          yaw_angle = (unsigned int)pitch_val << 0;
         }
 
       }
@@ -2639,23 +2639,23 @@ LisaReturn64 Lisa_RenderSkyBackdrop(void) {
     }
 
     else {
-      fpatan((double)var_i5 / (double)-var_i3,(double)1);
-      var_u8 = __ftol();
-      *(double *)(var_i2 + 0x20) = (double)(int)var_u8;
+      fpatan((double)dir_y / (double)-dir_x,(double)1);
+      yaw_angle = __ftol();
+      *(double *)(camera_ptr + 0x20) = (double)(int)yaw_angle;
     }
 
   }
 
   else {
-    fpatan((double)var_i3 / (double)var_i5,(double)1);
-    var_u8 = __ftol();
-    *(double *)(var_i2 + 0x20) = (double)(int)var_u8;
+    fpatan((double)dir_x / (double)dir_y,(double)1);
+    yaw_angle = __ftol();
+    *(double *)(camera_ptr + 0x20) = (double)(int)yaw_angle;
   }
 
 LAB_00448c11:
 
-  *(double *)(var_i2 + 0x28) = (double)*(int *)(var_i2 + 0x7c);
-  return var_u8 & 0xffffffff00000000;
+  *(double *)(camera_ptr + 0x28) = (double)*(int *)(camera_ptr + 0x7c);
+  return yaw_angle & 0xffffffff00000000;
 }
 
 /**
@@ -2674,7 +2674,7 @@ int Lisa_CullObjectsOrthographic(void) {
     int cam_z_int;
     int cam_x_int;
     int cam_y_int;
-    int param_idx;
+    int cell_idx;
     int count;
 
     g_LisaCamera->visible_obj_count = 0;
@@ -2691,7 +2691,7 @@ int Lisa_CullObjectsOrthographic(void) {
              
     cam_z_int = __ftol();
     visible_array = (LisaDynamicObject **)g_LisaVisibleObjects;
-    param_idx = 3;
+    cell_idx = 3;
 
     // Final grid pointer offset
     grid_index = (int)g_pLisaGridCells +
@@ -2702,7 +2702,7 @@ int Lisa_CullObjectsOrthographic(void) {
 
     if (g_pLisaAllocatedBuffersEnd == 0) {
         while (grid_offset_z != -5000) {
-            grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
+            grid_offset_z = *(int *)(cell_idx * 4 + 0x499fa0);
 
             if (0 < grid_offset_z) {
                 do {
@@ -2715,14 +2715,14 @@ int Lisa_CullObjectsOrthographic(void) {
                         visible_array[obj_count - 1] = obj_ptr;
 
                         if (obj_ptr->next_in_cell != NULL) {
-                            LisaDynamicObject **out_ptr = &visible_array[obj_count];
+                            LisaDynamicObject **out_val_ptr = &visible_array[obj_count];
 
                             do {
                                 obj_ptr = obj_ptr->next_in_cell;
 
                                 if (obj_ptr->self_ptr == obj_ptr) {
-                                    *out_ptr = obj_ptr;
-                                    out_ptr++;
+                                    *out_val_ptr = obj_ptr;
+                                    out_val_ptr++;
                                     g_LisaCamera->visible_obj_count++;
                                 }
 
@@ -2733,14 +2733,14 @@ int Lisa_CullObjectsOrthographic(void) {
                 } while (grid_offset_z != 0);
             }
 
-            grid_offset_z = param_idx + 1;
-            param_idx += 2;
+            grid_offset_z = cell_idx + 1;
+            cell_idx += 2;
             grid_index += (*(int *)(grid_offset_z * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-            grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
+            grid_offset_z = *(int *)(cell_idx * 4 + 0x499fa0);
         }
     } else {
         while (grid_offset_z != -5000) {
-            count = *(int *)(param_idx * 4 + 0x499fa0);
+            count = *(int *)(cell_idx * 4 + 0x499fa0);
 
             if (0 < count) {
                 do {
@@ -2755,15 +2755,15 @@ int Lisa_CullObjectsOrthographic(void) {
                         }
 
                         if (obj_ptr->next_in_cell != NULL) {
-                            LisaDynamicObject **out_ptr = &visible_array[g_LisaCamera->visible_obj_count];
+                            LisaDynamicObject **out_val_ptr = &visible_array[g_LisaCamera->visible_obj_count];
 
                             do {
                                 obj_ptr = obj_ptr->next_in_cell;
 
                                 if ((obj_ptr->self_ptr == obj_ptr) &&
                                    ((obj_ptr->unknown_24 == 0 || obj_ptr->unknown_24 == g_pLisaAllocatedBuffersEnd))) {
-                                    *out_ptr = obj_ptr;
-                                    out_ptr++;
+                                    *out_val_ptr = obj_ptr;
+                                    out_val_ptr++;
                                     g_LisaCamera->visible_obj_count++;
                                 }
 
@@ -2774,10 +2774,10 @@ int Lisa_CullObjectsOrthographic(void) {
                 } while (count != 0);
             }
 
-            grid_offset_z = param_idx + 1;
-            param_idx += 2;
+            grid_offset_z = cell_idx + 1;
+            cell_idx += 2;
             grid_index += (*(int *)(grid_offset_z * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-            grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
+            grid_offset_z = *(int *)(cell_idx * 4 + 0x499fa0);
         }
     }
 
@@ -2793,21 +2793,21 @@ int Lisa_FrustumCullObjects(void) {
     LisaCamera *camera;
     LisaDynamicObject *obj_ptr;
     LisaDynamicObject **visible_array;
-    LisaDynamicObject **out_ptr;
+    LisaDynamicObject **out_val_ptr;
     
     int obj_count;
     int next_obj_count;
     int grid_offset_z;
     int cell_index;
     int grid_index;
-    int param_idx;
+    int cell_idx;
     int count;
     int layer_id;
     int grid_stride;
     int submesh_count;
     
     int cam_val1, cam_val2, cam_val3;
-    double out_ST1;
+    double out_val_ST1;
 
     // Viewport and rotation vars
     int vp_center_x, vp_center_y, fov_x, fov_y;
@@ -2834,7 +2834,7 @@ int Lisa_FrustumCullObjects(void) {
         cam_val1 = __ftol();
         layer_id = (int)g_pLisaAllocatedBuffersEnd;
         visible_array = (LisaDynamicObject **)g_LisaVisibleObjects;
-        param_idx = 3;
+        cell_idx = 3;
 
         grid_index = (int)g_pLisaGridCells +
                 (cell_index + ((int)((int)cam_val1 + ((int)cam_val1 >> 31 & 0xffU)) >> 8) +
@@ -2844,7 +2844,7 @@ int Lisa_FrustumCullObjects(void) {
 
         if (g_pLisaAllocatedBuffersEnd == 0) {
             while (grid_offset_z != -5000) {
-                grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
+                grid_offset_z = *(int *)(cell_idx * 4 + 0x499fa0);
 
                 if (0 < grid_offset_z) {
                     do {
@@ -2858,12 +2858,12 @@ int Lisa_FrustumCullObjects(void) {
                             visible_array[obj_count] = obj_ptr;
 
                             if (obj_ptr->next_in_cell != NULL) {
-                                out_ptr = visible_array + next_obj_count;
+                                out_val_ptr = visible_array + next_obj_count;
                                 do {
                                     obj_ptr = obj_ptr->next_in_cell;
                                     if (obj_ptr->self_ptr == obj_ptr) {
-                                        *out_ptr = obj_ptr;
-                                        out_ptr++;
+                                        *out_val_ptr = obj_ptr;
+                                        out_val_ptr++;
                                         camera->visible_obj_count++;
                                     }
                                 } while (obj_ptr->next_in_cell != NULL);
@@ -2873,14 +2873,14 @@ int Lisa_FrustumCullObjects(void) {
                     } while (grid_offset_z != 0);
                 }
 
-                grid_offset_z = param_idx + 1;
-                param_idx += 2;
+                grid_offset_z = cell_idx + 1;
+                cell_idx += 2;
                 grid_index += (*(int *)(grid_offset_z * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-                grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
+                grid_offset_z = *(int *)(cell_idx * 4 + 0x499fa0);
             }
         } else {
             while (grid_offset_z != -5000) {
-                count = *(int *)(param_idx * 4 + 0x499fa0);
+                count = *(int *)(cell_idx * 4 + 0x499fa0);
 
                 if (0 < count) {
                     do {
@@ -2895,13 +2895,13 @@ int Lisa_FrustumCullObjects(void) {
                             }
 
                             if (obj_ptr->next_in_cell != NULL) {
-                                out_ptr = visible_array + camera->visible_obj_count;
+                                out_val_ptr = visible_array + camera->visible_obj_count;
                                 do {
                                     obj_ptr = obj_ptr->next_in_cell;
                                     if ((obj_ptr->self_ptr == obj_ptr) &&
                                        ((obj_ptr->unknown_24 == 0 || obj_ptr->unknown_24 == layer_id))) {
-                                        *out_ptr = obj_ptr;
-                                        out_ptr++;
+                                        *out_val_ptr = obj_ptr;
+                                        out_val_ptr++;
                                         camera->visible_obj_count++;
                                     }
                                 } while (obj_ptr->next_in_cell != NULL);
@@ -2911,10 +2911,10 @@ int Lisa_FrustumCullObjects(void) {
                     } while (count != 0);
                 }
 
-                grid_offset_z = param_idx + 1;
-                param_idx += 2;
+                grid_offset_z = cell_idx + 1;
+                cell_idx += 2;
                 grid_index += (*(int *)(grid_offset_z * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-                grid_offset_z = *(int *)(param_idx * 4 + 0x499fa0);
+                grid_offset_z = *(int *)(cell_idx * 4 + 0x499fa0);
             }
         }
     } else {
@@ -2923,7 +2923,7 @@ int Lisa_FrustumCullObjects(void) {
         grid_stride = camera->projection_type / 2;
         cam_val1 = __ftol();
         cam_val2 = __ftol();
-        fsin(out_ST1);
+        fsin(out_val_ST1);
 
         layer_id = (((int)cam_val1 + ((int)((int)cam_val2 + ((int)cam_val2 >> 31 & 0xffU)) >> 8)) - grid_stride) * g_LisaGridCellsX;
         cam_val1 = __ftol();
@@ -2938,8 +2938,8 @@ int Lisa_FrustumCullObjects(void) {
 
         if (g_pLisaAllocatedBuffersEnd == 0) {
             if (0 < camera->projection_type) {
-                param_idx = camera->projection_type;
-                cell_index = g_LisaGridCellsX - param_idx;
+                cell_idx = camera->projection_type;
+                cell_index = g_LisaGridCellsX - cell_idx;
 
                 do {
                     grid_stride = camera->projection_type;
@@ -2954,12 +2954,12 @@ int Lisa_FrustumCullObjects(void) {
                                 visible_array[obj_count] = obj_ptr;
 
                                 if (obj_ptr->next_in_cell != NULL) {
-                                    out_ptr = visible_array + next_obj_count;
+                                    out_val_ptr = visible_array + next_obj_count;
                                     do {
                                         obj_ptr = obj_ptr->next_in_cell;
                                         if (obj_ptr->self_ptr == obj_ptr) {
-                                            *out_ptr = obj_ptr;
-                                            out_ptr++;
+                                            *out_val_ptr = obj_ptr;
+                                            out_val_ptr++;
                                             camera->visible_obj_count++;
                                         }
                                     } while (obj_ptr->next_in_cell != NULL);
@@ -2970,16 +2970,16 @@ int Lisa_FrustumCullObjects(void) {
                         } while (grid_stride != 0);
                     }
                     grid_cells += cell_index;
-                    param_idx--;
-                } while (param_idx != 0);
+                    cell_idx--;
+                } while (cell_idx != 0);
             }
         } else if (0 < camera->projection_type) {
             count = camera->projection_type;
             grid_stride = g_LisaGridCellsX - count;
 
             do {
-                param_idx = camera->projection_type;
-                if (0 < param_idx) {
+                cell_idx = camera->projection_type;
+                if (0 < cell_idx) {
                     do {
                         obj_ptr = *grid_cells;
                         if ((obj_ptr != NULL) && (obj_ptr->self_ptr == obj_ptr)) {
@@ -2990,21 +2990,21 @@ int Lisa_FrustumCullObjects(void) {
                             }
 
                             if (obj_ptr->next_in_cell != NULL) {
-                                out_ptr = visible_array + camera->visible_obj_count;
+                                out_val_ptr = visible_array + camera->visible_obj_count;
                                 do {
                                     obj_ptr = obj_ptr->next_in_cell;
                                     if ((obj_ptr->self_ptr == obj_ptr) &&
                                        ((obj_ptr->unknown_24 == 0 || obj_ptr->unknown_24 == cell_index))) {
-                                        *out_ptr = obj_ptr;
-                                        out_ptr++;
+                                        *out_val_ptr = obj_ptr;
+                                        out_val_ptr++;
                                         camera->visible_obj_count++;
                                     }
                                 } while (obj_ptr->next_in_cell != NULL);
                             }
                         }
                         grid_cells++;
-                        param_idx--;
-                    } while (param_idx != 0);
+                        cell_idx--;
+                    } while (cell_idx != 0);
                 }
                 grid_cells += grid_stride;
                 count--;
@@ -3046,7 +3046,7 @@ int Lisa_FrustumCullObjects(void) {
             
             obj_radius = obj_ptr->unknown_22; // Offset 0x22 (34) -> unknown_22
             
-            // Matrix multiply: rot_matrix[6, 7, 8] are var_4, var_8, var_c
+            // Matrix multiply: rot_matrix[6, 7, 8] are tmp_val2, tmp_val1, tmp_val3
             z_depth = ((obj_z * rot_matrix[6] + obj_y * rot_matrix[7] + obj_x * rot_matrix[8]) >> 15) + vp_center_y;
 
             if (-1 < z_depth + obj_radius) {
@@ -3092,7 +3092,7 @@ int Lisa_CullObjects(void) {
   float temp_f8;
   int grid_offset;
   int *sub_out_ptr;
-  LisaDynamicObject **out_ptr;
+  LisaDynamicObject **out_val_ptr;
   unsigned int plane_idx;
   unsigned int cull_flag;
   LisaDynamicObject *obj_ptr;
@@ -3115,7 +3115,7 @@ int Lisa_CullObjects(void) {
   int cam_val1;
   int cam_val2;
   int cam_val3;
-  int param_idx;
+  int cell_idx;
   int *submesh_count_ptr;
   int cell_limit;
   int *dst_array;
@@ -3145,7 +3145,7 @@ int Lisa_CullObjects(void) {
     cam_val1 = __ftol();
     layer_id = g_pLisaAllocatedBuffersEnd;
     visible_array = g_LisaVisibleObjects;
-    param_idx = 3;
+    cell_idx = 3;
 
     proj_type = (int)g_pLisaGridCells +
 
@@ -3156,7 +3156,7 @@ int Lisa_CullObjects(void) {
 
     if (g_pLisaAllocatedBuffersEnd == 0) {
       while (grid_offset != -5000) {
-        grid_offset = *(int *)(param_idx * 4 + 0x499fa0);
+        grid_offset = *(int *)(cell_idx * 4 + 0x499fa0);
 
         if (0 < grid_offset) {
           do {
@@ -3170,14 +3170,14 @@ int Lisa_CullObjects(void) {
               *grid_index = layer_id;
 
               if ((int)obj_ptr->next_in_cell != 0) {
-                out_ptr = visible_array + layer_id;
+                out_val_ptr = visible_array + layer_id;
 
                 do {
                   obj_ptr = obj_ptr->next_in_cell;
 
                   if (obj_ptr->self_ptr == obj_ptr) {
-                    *out_ptr = (int)obj_ptr;
-                    out_ptr = out_ptr + 1;
+                    *out_val_ptr = (int)obj_ptr;
+                    out_val_ptr = out_val_ptr + 1;
                     *grid_index = *grid_index + 1;
                   }
 
@@ -3190,17 +3190,17 @@ int Lisa_CullObjects(void) {
           } while (grid_offset != 0);
         }
 
-        grid_offset = param_idx + 1;
-        param_idx = param_idx + 2;
+        grid_offset = cell_idx + 1;
+        cell_idx = cell_idx + 2;
         proj_type = proj_type + (*(int *)(grid_offset * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-        grid_offset = *(int *)(param_idx * 4 + 0x499fa0);
+        grid_offset = *(int *)(cell_idx * 4 + 0x499fa0);
       }
 
     }
 
     else {
       while (grid_offset != -5000) {
-        frustum_matrix[0] = *(float *)(param_idx * 4 + 0x499fa0);
+        frustum_matrix[0] = *(float *)(cell_idx * 4 + 0x499fa0);
 
         if (0 < (int)frustum_matrix[0]) {
           do {
@@ -3215,7 +3215,7 @@ int Lisa_CullObjects(void) {
               }
 
               if ((int)obj_ptr->next_in_cell != 0) {
-                out_ptr = visible_array + *grid_index;
+                out_val_ptr = visible_array + *grid_index;
 
                 do {
                   obj_ptr = obj_ptr->next_in_cell;
@@ -3223,8 +3223,8 @@ int Lisa_CullObjects(void) {
                   if ((obj_ptr->self_ptr == obj_ptr) &&
 
                      ((obj_ptr->unknown_24 == 0 || (obj_ptr->unknown_24 == layer_id)))) {
-                    *out_ptr = (int)obj_ptr;
-                    out_ptr = out_ptr + 1;
+                    *out_val_ptr = (int)obj_ptr;
+                    out_val_ptr = out_val_ptr + 1;
                     *grid_index = *grid_index + 1;
                   }
 
@@ -3237,10 +3237,10 @@ int Lisa_CullObjects(void) {
           } while (frustum_matrix[0] != 0.0);
         }
 
-        grid_offset = param_idx + 1;
-        param_idx = param_idx + 2;
+        grid_offset = cell_idx + 1;
+        cell_idx = cell_idx + 2;
         proj_type = proj_type + (*(int *)(grid_offset * 4 + 0x499fa0) + g_LisaGridCellsX) * 4;
-        grid_offset = *(int *)(param_idx * 4 + 0x499fa0);
+        grid_offset = *(int *)(cell_idx * 4 + 0x499fa0);
       }
 
     }
@@ -3281,27 +3281,27 @@ int Lisa_CullObjects(void) {
 
           if (0 < proj_type) {
             do {
-              out_ptr = (int *)*grid_index;
+              out_val_ptr = (int *)*grid_index;
 
-              if ((out_ptr != (int *)0x0) && ((int *)*out_ptr == out_ptr)) {
+              if ((out_val_ptr != (int *)0x0) && ((int *)*out_val_ptr == out_val_ptr)) {
                 visible_idx = *obj_ptr;
-                visible_array[visible_idx] = (int)out_ptr;
+                visible_array[visible_idx] = (int)out_val_ptr;
                 visible_idx = visible_idx + 1;
                 *obj_ptr = visible_idx;
 
-                if (*(int *)((int)out_ptr + 0x26) != 0) {
+                if (*(int *)((int)out_val_ptr + 0x26) != 0) {
                   sub_out_ptr = visible_array + visible_idx;
 
                   do {
-                    out_ptr = *(int **)((int)out_ptr + 0x26);
+                    out_val_ptr = *(int **)((int)out_val_ptr + 0x26);
 
-                    if ((int *)*out_ptr == out_ptr) {
-                      *sub_out_ptr = (int)out_ptr;
+                    if ((int *)*out_val_ptr == out_val_ptr) {
+                      *sub_out_ptr = (int)out_val_ptr;
                       sub_out_ptr = sub_out_ptr + 1;
                       *obj_ptr = *obj_ptr + 1;
                     }
 
-                  } while (*(int *)((int)out_ptr + 0x26) != 0);
+                  } while (*(int *)((int)out_val_ptr + 0x26) != 0);
                 }
 
               }
@@ -3326,30 +3326,30 @@ int Lisa_CullObjects(void) {
 
         if (0 < proj_type) {
           do {
-            out_ptr = (int *)*grid_index;
+            out_val_ptr = (int *)*grid_index;
 
-            if ((out_ptr != (int *)0x0) && ((int *)*out_ptr == out_ptr)) {
-              if (((short)out_ptr[9] == 0) || ((short)out_ptr[9] == grid_offset)) {
+            if ((out_val_ptr != (int *)0x0) && ((int *)*out_val_ptr == out_val_ptr)) {
+              if (((short)out_val_ptr[9] == 0) || ((short)out_val_ptr[9] == grid_offset)) {
                 visible_idx = *obj_ptr;
-                visible_array[visible_idx] = (int)out_ptr;
+                visible_array[visible_idx] = (int)out_val_ptr;
                 *obj_ptr = visible_idx + 1;
               }
 
-              if (*(int *)((int)out_ptr + 0x26) != 0) {
+              if (*(int *)((int)out_val_ptr + 0x26) != 0) {
                 sub_out_ptr = visible_array + *obj_ptr;
 
                 do {
-                  out_ptr = *(int **)((int)out_ptr + 0x26);
+                  out_val_ptr = *(int **)((int)out_val_ptr + 0x26);
 
-                  if (((int *)*out_ptr == out_ptr) &&
+                  if (((int *)*out_val_ptr == out_val_ptr) &&
 
-                     (((short)out_ptr[9] == 0 || ((short)out_ptr[9] == grid_offset)))) {
-                    *sub_out_ptr = (int)out_ptr;
+                     (((short)out_val_ptr[9] == 0 || ((short)out_val_ptr[9] == grid_offset)))) {
+                    *sub_out_ptr = (int)out_val_ptr;
                     sub_out_ptr = sub_out_ptr + 1;
                     *obj_ptr = *obj_ptr + 1;
                   }
 
-                } while (*(int *)((int)out_ptr + 0x26) != 0);
+                } while (*(int *)((int)out_val_ptr + 0x26) != 0);
               }
 
             }
@@ -3497,8 +3497,8 @@ int Lisa_CullObjects(void) {
   cam_val1 = __ftol();
   cam_val2 = __ftol();
   cam_val3 = __ftol();
-  param_idx = *submesh_count_ptr;
-  g_LisaCamera->submesh_count = param_idx;
+  cell_idx = *submesh_count_ptr;
+  g_LisaCamera->submesh_count = cell_idx;
   *submesh_count_ptr = 0;
   matrix_ptr = frustum_matrix + 3;
 
@@ -3512,7 +3512,7 @@ int Lisa_CullObjects(void) {
   } while (matrix_ptr_next < &matrix_end);
   dst_array = visible_array;
 
-  if (0 < param_idx) {
+  if (0 < cell_idx) {
     do {
       proj_type = *visible_array;
       cull_flag = 0;
@@ -3537,8 +3537,8 @@ int Lisa_CullObjects(void) {
       }
 
       visible_array = visible_array + 1;
-      param_idx = param_idx + -1;
-    } while (param_idx != 0);
+      cell_idx = cell_idx + -1;
+    } while (cell_idx != 0);
   }
 
   return 0;
@@ -3728,183 +3728,183 @@ void Lisa_TransformVertices(void) {
  * @fidelity ADAPTED
  */
 int Lisa_TransformVerticesPanorama(void) {
-  float var_f1;
-  int *var_pi2;
-  float var_f3;
-  float var_f4;
-  int var_i5;
-  int var_i6;
-  int var_i7;
-  int var_i8;
-  int var_i9;
-  int var_i10;
-  int *var_pi11;
-  int var_i12;
-  int var_i13;
-  int var_i14;
-  double var_f15;
-  double var_f16;
-  double var_f17;
-  double var_f18;
-  double var_f19;
-  double var_f20;
-  int var_l21;
-  int var_l22;
-  int var_l23;
-  int var_l24;
-  int var_20;
-  int var_1c;
-  int var_10;
-  int var_c;
+  float f_cos_roll;
+  int *p_submesh_verts;
+  float f_scale_x;
+  float f_scale_y;
+  int tmp_world_y;
+  int tmp_cam_ptr;
+  int obj_pos_x;
+  int obj_pos_z;
+  int vert_pos_x;
+  int vert_pos_z;
+  int *p_out_verts;
+  int vert_pos_y;
+  int vert_view_y;
+  int tmp_view_z;
+  double d_pitch_sin;
+  double d_pitch_cos;
+  double d_yaw_sin;
+  double d_yaw_cos;
+  double d_roll_sin;
+  double d_roll_cos;
+  int l_cam_pos_x;
+  int l_cam_pos_y;
+  int l_cam_pos_z;
+  int l_cam_pos_w;
+  int num_vertices;
+  int submesh_list_idx;
+  int vis_obj_idx;
+  int obj_iter;
 
   
 
-  var_i6 = g_LisaCamera;
+  tmp_cam_ptr = g_LisaCamera;
   g_LisaCameraFocalLength = g_LisaCamera->viewport_width << 2;
   g_LisaCamera->vertex_counter = 0;
-  var_f15 = (double)*(double *)(var_i6 + 0x18) * (double)g_Const_NegTenthDegToRad;
-  g_LisaCameraOffsetX = var_i6->fov_x << 8;
-  var_f16 = (double)fcos(var_f15);
-  g_LisaCameraOffsetY = var_i6->fov_y << 8;
-  var_f17 = (double)*(double *)(var_i6 + 0x20) * (double)g_Const_NegTenthDegToRad;
-  var_f18 = (double)fcos(var_f17);
-  var_f15 = (double)fsin(var_f15);
-  var_f19 = (double)*(double *)(var_i6 + 0x28) * (double)g_Const_NegTenthDegToRad;
-  var_f17 = (double)fsin(var_f17);
-  var_f20 = (double)fcos(var_f19);
-  var_f19 = (double)fsin(var_f19);
-  var_f1 = (float)var_f20;
-  var_f3 = (float)-*(int *)(var_i6 + 0x80) * (float)*(double *)(var_i6 + 0x30) * (float)g_Const_256;
-  var_f4 = (float)-var_i6->viewport_y * (float)g_Const_256;
+  d_pitch_sin = (double)*(double *)(tmp_cam_ptr + 0x18) * (double)g_Const_NegTenthDegToRad;
+  g_LisaCameraOffsetX = tmp_cam_ptr->fov_x << 8;
+  d_pitch_cos = (double)fcos(d_pitch_sin);
+  g_LisaCameraOffsetY = tmp_cam_ptr->fov_y << 8;
+  d_yaw_sin = (double)*(double *)(tmp_cam_ptr + 0x20) * (double)g_Const_NegTenthDegToRad;
+  d_yaw_cos = (double)fcos(d_yaw_sin);
+  d_pitch_sin = (double)fsin(d_pitch_sin);
+  d_roll_sin = (double)*(double *)(tmp_cam_ptr + 0x28) * (double)g_Const_NegTenthDegToRad;
+  d_yaw_sin = (double)fsin(d_yaw_sin);
+  d_roll_cos = (double)fcos(d_roll_sin);
+  d_roll_sin = (double)fsin(d_roll_sin);
+  f_cos_roll = (float)d_roll_cos;
+  f_scale_x = (float)-*(int *)(tmp_cam_ptr + 0x80) * (float)*(double *)(tmp_cam_ptr + 0x30) * (float)g_Const_256;
+  f_scale_y = (float)-tmp_cam_ptr->viewport_y * (float)g_Const_256;
 
   g_LisaObjMat_CosPitch =
 
-       (float)(((double)var_f1 * var_f18 - (double)(float)(var_f15 * var_f17) * var_f19) *
+       (float)(((double)f_cos_roll * d_yaw_cos - (double)(float)(d_pitch_sin * d_yaw_sin) * d_roll_sin) *
 
-              (double)var_f3);
-  g_LisaObjMat_SinPitch = (float)-((double)var_f3 * var_f16 * var_f19);
+              (double)f_scale_x);
+  g_LisaObjMat_SinPitch = (float)-((double)f_scale_x * d_pitch_cos * d_roll_sin);
 
   g_LisaObjMat_CosRoll =
 
-       (float)(((double)(float)(var_f15 * var_f18) * var_f19 + (double)var_f1 * var_f17) *
+       (float)(((double)(float)(d_pitch_sin * d_yaw_cos) * d_roll_sin + (double)f_cos_roll * d_yaw_sin) *
 
-              (double)var_f3);
+              (double)f_scale_x);
 
   g_LisaObjMat_SinRoll =
 
-       (float)(((double)var_f1 * (double)(float)(var_f15 * var_f17) + var_f18 * var_f19) *
+       (float)(((double)f_cos_roll * (double)(float)(d_pitch_sin * d_yaw_sin) + d_yaw_cos * d_roll_sin) *
 
-              (double)var_f4);
-  g_LisaObjMat_Tmp1 = (float)((double)var_f4 * var_f16 * (double)var_f1);
-  g_LisaObjMat_Tmp4 = (float)(var_f15 * (double)g_Const_262144);
-  g_LisaObjMat_Tmp3 = (float)(-(var_f16 * var_f17) * (double)g_Const_262144);
+              (double)f_scale_y);
+  g_LisaObjMat_Tmp1 = (float)((double)f_scale_y * d_pitch_cos * (double)f_cos_roll);
+  g_LisaObjMat_Tmp4 = (float)(d_pitch_sin * (double)g_Const_262144);
+  g_LisaObjMat_Tmp3 = (float)(-(d_pitch_cos * d_yaw_sin) * (double)g_Const_262144);
 
   g_LisaObjMat_Tmp2 =
 
-       (float)((var_f17 * var_f19 - (double)var_f1 * (double)(float)(var_f15 * var_f18)) *
+       (float)((d_yaw_sin * d_roll_sin - (double)f_cos_roll * (double)(float)(d_pitch_sin * d_yaw_cos)) *
 
-              (double)var_f4);
-  g_LisaObjMat_Tmp5 = (float)(var_f18 * var_f16 * (double)g_Const_262144);
-  var_l21 = __ftol();
-  g_LisaCameraMatrix_00 = (int)var_l21;
-  var_l21 = __ftol();
-  g_LisaCameraMatrix_01 = (int)var_l21;
-  var_l21 = __ftol();
-  g_LisaCameraMatrix_02 = (int)var_l21;
-  var_l21 = __ftol();
-  g_LisaCameraMatrix_10 = (int)var_l21;
-  var_l21 = __ftol();
-  g_LisaCameraMatrix_11 = (int)var_l21;
-  var_l21 = __ftol();
-  g_LisaCameraMatrix_12 = (int)var_l21;
-  var_l21 = __ftol();
-  g_LisaCameraMatrix_20 = (int)var_l21;
-  var_l21 = __ftol();
-  g_LisaCameraMatrix_21 = (int)var_l21;
-  var_l21 = __ftol();
-  g_LisaCameraMatrix_22 = (int)var_l21;
-  var_l21 = __ftol();
-  var_l22 = __ftol();
-  var_i6 = (int)var_l22;
-  var_l22 = __ftol();
-  var_l23 = __ftol();
-  var_i14 = (int)var_l23;
-  var_l23 = __ftol();
-  var_l24 = __ftol();
-  var_i7 = (int)var_l24;
-  var_i5 = g_LisaCameraMatrix_00 * var_i6 + g_LisaCameraMatrix_02 * var_i7 + g_LisaCameraMatrix_01 * var_i14;
-  g_LisaSubmeshCenterWorldX = (int)(var_i5 + (var_i5 >> 0x1f & 0xfffU)) >> 0xc;
-  var_i5 = g_LisaCameraMatrix_10 * var_i6 + g_LisaCameraMatrix_12 * var_i7 + g_LisaCameraMatrix_11 * var_i14;
-  g_LisaSubmeshCenterWorldZ = (int)(var_i5 + (var_i5 >> 0x1f & 0xfffU)) >> 0xc;
-  var_i6 = g_LisaCameraMatrix_20 * var_i6 + g_LisaCameraMatrix_22 * var_i7 + g_LisaCameraMatrix_21 * var_i14;
-  var_c = 0;
-  g_LisaSubmeshDepthOffset = (int)(var_i6 + (var_i6 >> 0x1f & 0xfffU)) >> 0xc;
+              (double)f_scale_y);
+  g_LisaObjMat_Tmp5 = (float)(d_yaw_cos * d_pitch_cos * (double)g_Const_262144);
+  l_cam_pos_x = __ftol();
+  g_LisaCameraMatrix_00 = (int)l_cam_pos_x;
+  l_cam_pos_x = __ftol();
+  g_LisaCameraMatrix_01 = (int)l_cam_pos_x;
+  l_cam_pos_x = __ftol();
+  g_LisaCameraMatrix_02 = (int)l_cam_pos_x;
+  l_cam_pos_x = __ftol();
+  g_LisaCameraMatrix_10 = (int)l_cam_pos_x;
+  l_cam_pos_x = __ftol();
+  g_LisaCameraMatrix_11 = (int)l_cam_pos_x;
+  l_cam_pos_x = __ftol();
+  g_LisaCameraMatrix_12 = (int)l_cam_pos_x;
+  l_cam_pos_x = __ftol();
+  g_LisaCameraMatrix_20 = (int)l_cam_pos_x;
+  l_cam_pos_x = __ftol();
+  g_LisaCameraMatrix_21 = (int)l_cam_pos_x;
+  l_cam_pos_x = __ftol();
+  g_LisaCameraMatrix_22 = (int)l_cam_pos_x;
+  l_cam_pos_x = __ftol();
+  l_cam_pos_y = __ftol();
+  tmp_cam_ptr = (int)l_cam_pos_y;
+  l_cam_pos_y = __ftol();
+  l_cam_pos_z = __ftol();
+  tmp_view_z = (int)l_cam_pos_z;
+  l_cam_pos_z = __ftol();
+  l_cam_pos_w = __ftol();
+  obj_pos_x = (int)l_cam_pos_w;
+  tmp_world_y = g_LisaCameraMatrix_00 * tmp_cam_ptr + g_LisaCameraMatrix_02 * obj_pos_x + g_LisaCameraMatrix_01 * tmp_view_z;
+  g_LisaSubmeshCenterWorldX = (int)(tmp_world_y + (tmp_world_y >> 0x1f & 0xfffU)) >> 0xc;
+  tmp_world_y = g_LisaCameraMatrix_10 * tmp_cam_ptr + g_LisaCameraMatrix_12 * obj_pos_x + g_LisaCameraMatrix_11 * tmp_view_z;
+  g_LisaSubmeshCenterWorldZ = (int)(tmp_world_y + (tmp_world_y >> 0x1f & 0xfffU)) >> 0xc;
+  tmp_cam_ptr = g_LisaCameraMatrix_20 * tmp_cam_ptr + g_LisaCameraMatrix_22 * obj_pos_x + g_LisaCameraMatrix_21 * tmp_view_z;
+  obj_iter = 0;
+  g_LisaSubmeshDepthOffset = (int)(tmp_cam_ptr + (tmp_cam_ptr >> 0x1f & 0xfffU)) >> 0xc;
 
   if (0 < g_LisaCamera->visible_obj_count) {
-    var_1c = 0;
-    var_10 = 0;
+    submesh_list_idx = 0;
+    vis_obj_idx = 0;
 
     do {
-      var_i14 = g_LisaCamera;
-      var_i6 = *(int *)(g_LisaVisibleObjects + var_10);
-      var_pi2 = *(int **)(var_i6 + 4);
-      *(int **)(g_LisaVisibleSubmeshes + var_1c) = var_pi2;
-      var_i14 = *(int *)(var_i14 + 0x5c);
-      var_pi11 = (int *)(g_LisaTransformedVertices + var_i14 * 0xc);
-      *(int **)(g_LisaVisibleSubmeshes + 4 + var_1c) = var_pi11;
-      var_i7 = *(int *)(var_i6 + 0xc) - (int)var_l21;
-      var_i5 = *(int *)(var_i6 + 0x10) - (int)var_l22;
-      var_i8 = *(int *)(var_i6 + 0x14) - (int)var_l23;
+      tmp_view_z = g_LisaCamera;
+      tmp_cam_ptr = *(int *)(g_LisaVisibleObjects + vis_obj_idx);
+      p_submesh_verts = *(int **)(tmp_cam_ptr + 4);
+      *(int **)(g_LisaVisibleSubmeshes + submesh_list_idx) = p_submesh_verts;
+      tmp_view_z = *(int *)(tmp_view_z + 0x5c);
+      p_out_verts = (int *)(g_LisaTransformedVertices + tmp_view_z * 0xc);
+      *(int **)(g_LisaVisibleSubmeshes + 4 + submesh_list_idx) = p_out_verts;
+      obj_pos_x = *(int *)(tmp_cam_ptr + 0xc) - (int)l_cam_pos_x;
+      tmp_world_y = *(int *)(tmp_cam_ptr + 0x10) - (int)l_cam_pos_y;
+      obj_pos_z = *(int *)(tmp_cam_ptr + 0x14) - (int)l_cam_pos_z;
 
-      if ((*(short *)(var_i6 + 0x18) == 0 && *(short *)(var_i6 + 0x1a) == 0) &&
+      if ((*(short *)(tmp_cam_ptr + 0x18) == 0 && *(short *)(tmp_cam_ptr + 0x1a) == 0) &&
 
-          *(short *)(var_i6 + 0x1c) == 0) {
-        var_20 = *var_pi2;
+          *(short *)(tmp_cam_ptr + 0x1c) == 0) {
+        num_vertices = *p_submesh_verts;
 
-        if (0 < var_20) {
-          g_LisaCamera->vertex_counter = var_i14 + var_20;
-          var_i6 = 2;
+        if (0 < num_vertices) {
+          g_LisaCamera->vertex_counter = tmp_view_z + num_vertices;
+          tmp_cam_ptr = 2;
 
           do {
-            var_i9 = var_i7 + var_pi2[var_i6];
-            var_i12 = var_i5 - var_pi2[var_i6 + 1];
-            var_i10 = var_i8 + var_pi2[var_i6 + 2];
+            vert_pos_x = obj_pos_x + p_submesh_verts[tmp_cam_ptr];
+            vert_pos_y = tmp_world_y - p_submesh_verts[tmp_cam_ptr + 1];
+            vert_pos_z = obj_pos_z + p_submesh_verts[tmp_cam_ptr + 2];
 
-            var_i13 = (g_LisaCameraMatrix_12 * var_i10 + g_LisaCameraMatrix_11 * var_i12 + g_LisaCameraMatrix_10 * var_i9) -
+            vert_view_y = (g_LisaCameraMatrix_12 * vert_pos_z + g_LisaCameraMatrix_11 * vert_pos_y + g_LisaCameraMatrix_10 * vert_pos_x) -
 
                      g_LisaSubmeshCenterWorldZ;
 
-            var_i14 = ((g_LisaCameraMatrix_22 * var_i10 + g_LisaCameraMatrix_21 * var_i12 + g_LisaCameraMatrix_20 * var_i9) -
+            tmp_view_z = ((g_LisaCameraMatrix_22 * vert_pos_z + g_LisaCameraMatrix_21 * vert_pos_y + g_LisaCameraMatrix_20 * vert_pos_x) -
 
                       g_LisaSubmeshDepthOffset >> 0x10) + g_LisaCameraFocalLength;
 
-            if (var_i14 < g_LisaCameraFocalLength) {
-              var_i14 = g_LisaCameraFocalLength;
+            if (tmp_view_z < g_LisaCameraFocalLength) {
+              tmp_view_z = g_LisaCameraFocalLength;
             }
 
-            *var_pi11 = g_LisaCameraOffsetX +
+            *p_out_verts = g_LisaCameraOffsetX +
 
-                       (((g_LisaCameraMatrix_02 * var_i10 + g_LisaCameraMatrix_01 * var_i12 + g_LisaCameraMatrix_00 * var_i9) -
+                       (((g_LisaCameraMatrix_02 * vert_pos_z + g_LisaCameraMatrix_01 * vert_pos_y + g_LisaCameraMatrix_00 * vert_pos_x) -
 
-                        g_LisaSubmeshCenterWorldX) / var_i14) * 4;
-            var_20 = var_20 + -1;
-            var_pi11[2] = var_i14;
-            var_pi11[1] = g_LisaCameraOffsetY + (var_i13 / var_i14) * 4;
-            var_pi11 = var_pi11 + 3;
-            var_i6 = var_i6 + 3;
-          } while (var_20 != 0);
+                        g_LisaSubmeshCenterWorldX) / tmp_view_z) * 4;
+            num_vertices = num_vertices + -1;
+            p_out_verts[2] = tmp_view_z;
+            p_out_verts[1] = g_LisaCameraOffsetY + (vert_view_y / tmp_view_z) * 4;
+            p_out_verts = p_out_verts + 3;
+            tmp_cam_ptr = tmp_cam_ptr + 3;
+          } while (num_vertices != 0);
         }
 
       }
 
       else {
-        Lisa_TransformSubmeshVerticesPanorama(var_i7,var_i5,var_i8,var_i6,var_pi2);
+        Lisa_TransformSubmeshVerticesPanorama(obj_pos_x,tmp_world_y,obj_pos_z,tmp_cam_ptr,p_submesh_verts);
       }
 
-      var_1c = var_1c + 8;
-      var_10 = var_10 + 4;
-      var_c = var_c + 1;
-    } while (var_c < g_LisaCamera->visible_obj_count);
+      submesh_list_idx = submesh_list_idx + 8;
+      vis_obj_idx = vis_obj_idx + 4;
+      obj_iter = obj_iter + 1;
+    } while (obj_iter < g_LisaCamera->visible_obj_count);
   }
 
   return 0;
@@ -3914,128 +3914,128 @@ int Lisa_TransformVerticesPanorama(void) {
  * @original Lisa_ComputeObjectMatrix (IGN_WIN.EXE @ 0x0044a900, lisa3d.c)
  * @fidelity ADAPTED
  */
-int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int *param_5) {
-  ushort var_u1;
-  ushort var_u2;
-  ushort var_u3;
+int Lisa_ComputeObjectMatrix(int prm_1,int prm_2,int prm_3,int prm_4,int *prm_5) {
+  ushort tmp_u1;
+  ushort tmp_u2;
+  ushort tmp_u3;
   short sVar4;
-  int var_i5;
-  int var_i6;
-  int var_i7;
-  int var_i8;
-  int var_i9;
-  int *var_pi10;
-  int var_i11;
-  int var_i12;
-  int var_i13;
-  int var_i14;
-  int var_l15;
-  int var_l16;
-  int var_l17;
-  int var_l18;
-  int var_l19;
-  int var_l20;
-  int var_l21;
-  int var_l22;
-  int var_l23;
-  int var_58;
+  int tmp_i5;
+  int tmp_i6;
+  int tmp_i7;
+  int tmp_i8;
+  int tmp_i9;
+  int *tmp_pi10;
+  int tmp_i11;
+  int tmp_i12;
+  int tmp_i13;
+  int tmp_i14;
+  int tmp_l15;
+  int tmp_l16;
+  int tmp_l17;
+  int tmp_l18;
+  int tmp_l19;
+  int tmp_l20;
+  int tmp_l21;
+  int tmp_l22;
+  int tmp_l23;
+  int tmp_58;
 
   
 
-  var_i11 = (g_LisaCameraMatrix_02 * param_3 + g_LisaCameraMatrix_01 * param_2 + g_LisaCameraMatrix_00 * param_1) - g_LisaSubmeshCenterWorldX
+  tmp_i11 = (g_LisaCameraMatrix_02 * prm_3 + g_LisaCameraMatrix_01 * prm_2 + g_LisaCameraMatrix_00 * prm_1) - g_LisaSubmeshCenterWorldX
 
   ;
 
-  var_i12 = (g_LisaCameraMatrix_12 * param_3 + g_LisaCameraMatrix_11 * param_2 + g_LisaCameraMatrix_10 * param_1) - g_LisaSubmeshCenterWorldZ
+  tmp_i12 = (g_LisaCameraMatrix_12 * prm_3 + g_LisaCameraMatrix_11 * prm_2 + g_LisaCameraMatrix_10 * prm_1) - g_LisaSubmeshCenterWorldZ
 
   ;
 
-  var_i13 = (g_LisaCameraMatrix_22 * param_3 + g_LisaCameraMatrix_21 * param_2 + g_LisaCameraMatrix_20 * param_1) - g_LisaSubmeshDepthOffset
+  tmp_i13 = (g_LisaCameraMatrix_22 * prm_3 + g_LisaCameraMatrix_21 * prm_2 + g_LisaCameraMatrix_20 * prm_1) - g_LisaSubmeshDepthOffset
 
   ;
-  var_u1 = *(ushort *)(param_4 + 0x1a);
-  var_u2 = *(ushort *)(param_4 + 0x18);
-  var_u3 = *(ushort *)(param_4 + 0x1c);
+  tmp_u1 = *(ushort *)(prm_4 + 0x1a);
+  tmp_u2 = *(ushort *)(prm_4 + 0x18);
+  tmp_u3 = *(ushort *)(prm_4 + 0x1c);
 
-  if (0xe10 < (ushort)(var_u2 | var_u1 | var_u3)) {
-    if ((short)var_u2 < 0) {
-      *(ushort *)(param_4 + 0x18) = ((ushort)(0xe0f - var_u2) / 0xe10) * 0xe10 + var_u2;
+  if (0xe10 < (ushort)(tmp_u2 | tmp_u1 | tmp_u3)) {
+    if ((short)tmp_u2 < 0) {
+      *(ushort *)(prm_4 + 0x18) = ((ushort)(0xe0f - tmp_u2) / 0xe10) * 0xe10 + tmp_u2;
     }
 
-    if ((short)var_u1 < 0) {
-      *(ushort *)(param_4 + 0x1a) = ((ushort)(0xe0f - var_u1) / 0xe10) * 0xe10 + var_u1;
+    if ((short)tmp_u1 < 0) {
+      *(ushort *)(prm_4 + 0x1a) = ((ushort)(0xe0f - tmp_u1) / 0xe10) * 0xe10 + tmp_u1;
     }
 
-    if ((short)var_u3 < 0) {
-      *(ushort *)(param_4 + 0x1c) = ((ushort)(0xe0f - var_u3) / 0xe10) * 0xe10 + var_u3;
+    if ((short)tmp_u3 < 0) {
+      *(ushort *)(prm_4 + 0x1c) = ((ushort)(0xe0f - tmp_u3) / 0xe10) * 0xe10 + tmp_u3;
     }
 
-    sVar4 = *(short *)(param_4 + 0x18);
+    sVar4 = *(short *)(prm_4 + 0x18);
 
     if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x18) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+      *(ushort *)(prm_4 + 0x18) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
     }
 
-    sVar4 = *(short *)(param_4 + 0x1a);
+    sVar4 = *(short *)(prm_4 + 0x1a);
 
     if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x1a) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+      *(ushort *)(prm_4 + 0x1a) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
     }
 
-    sVar4 = *(short *)(param_4 + 0x1c);
+    sVar4 = *(short *)(prm_4 + 0x1c);
 
     if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x1c) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+      *(ushort *)(prm_4 + 0x1c) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
     }
 
   }
 
-  var_l15 = __ftol();
-  var_l16 = __ftol();
-  var_l17 = __ftol();
-  var_l18 = __ftol();
-  var_l19 = __ftol();
-  var_l20 = __ftol();
-  var_l21 = __ftol();
-  var_l22 = __ftol();
-  var_l23 = __ftol();
-  var_i6 = g_LisaTransformedVertices;
-  var_i9 = 2;
-  var_58 = *param_5;
+  tmp_l15 = __ftol();
+  tmp_l16 = __ftol();
+  tmp_l17 = __ftol();
+  tmp_l18 = __ftol();
+  tmp_l19 = __ftol();
+  tmp_l20 = __ftol();
+  tmp_l21 = __ftol();
+  tmp_l22 = __ftol();
+  tmp_l23 = __ftol();
+  tmp_i6 = g_LisaTransformedVertices;
+  tmp_i9 = 2;
+  tmp_58 = *prm_5;
 
-  if (0 < var_58) {
-    var_i5 = g_LisaCamera->vertex_counter;
-    g_LisaCamera->vertex_counter = var_i5 + var_58;
-    var_pi10 = (int *)(var_i6 + var_i5 * 0xc);
+  if (0 < tmp_58) {
+    tmp_i5 = g_LisaCamera->vertex_counter;
+    g_LisaCamera->vertex_counter = tmp_i5 + tmp_58;
+    tmp_pi10 = (int *)(tmp_i6 + tmp_i5 * 0xc);
 
     do {
-      var_i6 = param_5[var_i9];
-      var_i5 = param_5[var_i9 + 1];
-      var_i7 = param_5[var_i9 + 2];
-      var_i9 = var_i9 + 3;
+      tmp_i6 = prm_5[tmp_i9];
+      tmp_i5 = prm_5[tmp_i9 + 1];
+      tmp_i7 = prm_5[tmp_i9 + 2];
+      tmp_i9 = tmp_i9 + 3;
 
-      var_i14 = g_LisaCameraFocalLength +
+      tmp_i14 = g_LisaCameraFocalLength +
 
-               (var_i7 * (int)var_l23 + var_i5 * (int)var_l22 + var_i6 * (int)var_l21 + var_i13 >> 0x10);
+               (tmp_i7 * (int)tmp_l23 + tmp_i5 * (int)tmp_l22 + tmp_i6 * (int)tmp_l21 + tmp_i13 >> 0x10);
 
-      if (var_i14 < g_LisaCameraFocalLength) {
-        var_i14 = g_LisaCameraFocalLength;
+      if (tmp_i14 < g_LisaCameraFocalLength) {
+        tmp_i14 = g_LisaCameraFocalLength;
       }
 
-      *var_pi10 = g_LisaCameraOffsetX +
+      *tmp_pi10 = g_LisaCameraOffsetX +
 
-                 (var_i11 + var_i7 * (int)var_l17 + var_i5 * (int)var_l16 + var_i6 * (int)var_l15) / var_i14
+                 (tmp_i11 + tmp_i7 * (int)tmp_l17 + tmp_i5 * (int)tmp_l16 + tmp_i6 * (int)tmp_l15) / tmp_i14
 
       ;
-      var_i8 = g_LisaCameraOffsetY;
-      var_pi10[2] = var_i14;
-      var_58 = var_58 + -1;
+      tmp_i8 = g_LisaCameraOffsetY;
+      tmp_pi10[2] = tmp_i14;
+      tmp_58 = tmp_58 + -1;
 
-      var_pi10[1] = var_i8 + (var_i12 + var_i7 * (int)var_l20 + var_i5 * (int)var_l19 + var_i6 * (int)var_l18
+      tmp_pi10[1] = tmp_i8 + (tmp_i12 + tmp_i7 * (int)tmp_l20 + tmp_i5 * (int)tmp_l19 + tmp_i6 * (int)tmp_l18
 
-                           ) / var_i14;
-      var_pi10 = var_pi10 + 3;
-    } while (var_58 != 0);
+                           ) / tmp_i14;
+      tmp_pi10 = tmp_pi10 + 3;
+    } while (tmp_58 != 0);
   }
 
   return 0;
@@ -4045,128 +4045,127 @@ int Lisa_ComputeObjectMatrix(int param_1,int param_2,int param_3,int param_4,int
  * @original Lisa_TransformSubmeshVerticesPanorama (IGN_WIN.EXE @ 0x0044ae20, lisa3d.c)
  * @fidelity ADAPTED
  */
-int Lisa_TransformSubmeshVerticesPanorama(int param_1,int param_2,int param_3,int param_4,int *param_5) {
-  ushort var_u1;
-  ushort var_u2;
-  ushort var_u3;
-  short sVar4;
-  int var_i5;
-  int var_i6;
-  int var_i7;
-  int var_i8;
-  int var_i9;
-  int *var_pi10;
-  int var_i11;
-  int var_i12;
-  int var_i13;
-  int var_l14;
-  int var_l15;
-  int var_l16;
-  int var_l17;
-  int var_l18;
-  int var_l19;
-  int var_l20;
-  int var_l21;
-  int var_l22;
-  int var_58;
+int Lisa_TransformSubmeshVerticesPanorama(int pos_x,int pos_y,int pos_z,int submesh_ptr,int *vertex_array) {
+  ushort rot_y;
+  ushort rot_x;
+  ushort rot_z;
+  short temp_rot;
+  int local_y;
+  int local_x;
+  int local_z;
+  int vertex_idx;
+  int proj_z;
+  int *out_val_vertex;
+  int cam_space_x;
+  int cam_space_y;
+  int cam_space_z;
+  int mat_00;
+  int mat_01;
+  int mat_02;
+  int mat_10;
+  int mat_11;
+  int mat_12;
+  int mat_20;
+  int mat_21;
+  int mat_22;
+  int num_vertices;
 
   
 
-  var_i11 = (g_LisaCameraMatrix_02 * param_3 + g_LisaCameraMatrix_01 * param_2 + g_LisaCameraMatrix_00 * param_1) - g_LisaSubmeshCenterWorldX
+  cam_space_x = (g_LisaCameraMatrix_02 * pos_z + g_LisaCameraMatrix_01 * pos_y + g_LisaCameraMatrix_00 * pos_x) - g_LisaSubmeshCenterWorldX
 
   ;
 
-  var_i12 = (g_LisaCameraMatrix_12 * param_3 + g_LisaCameraMatrix_11 * param_2 + g_LisaCameraMatrix_10 * param_1) - g_LisaSubmeshCenterWorldZ
+  cam_space_y = (g_LisaCameraMatrix_12 * pos_z + g_LisaCameraMatrix_11 * pos_y + g_LisaCameraMatrix_10 * pos_x) - g_LisaSubmeshCenterWorldZ
 
   ;
 
-  var_i13 = (g_LisaCameraMatrix_22 * param_3 + g_LisaCameraMatrix_21 * param_2 + g_LisaCameraMatrix_20 * param_1) - g_LisaSubmeshDepthOffset
+  cam_space_z = (g_LisaCameraMatrix_22 * pos_z + g_LisaCameraMatrix_21 * pos_y + g_LisaCameraMatrix_20 * pos_x) - g_LisaSubmeshDepthOffset
 
   ;
-  var_u1 = *(ushort *)(param_4 + 0x1a);
-  var_u2 = *(ushort *)(param_4 + 0x18);
-  var_u3 = *(ushort *)(param_4 + 0x1c);
+  rot_y = *(ushort *)(submesh_ptr + 0x1a);
+  rot_x = *(ushort *)(submesh_ptr + 0x18);
+  rot_z = *(ushort *)(submesh_ptr + 0x1c);
 
-  if (0xe10 < (ushort)(var_u2 | var_u1 | var_u3)) {
-    if ((short)var_u2 < 0) {
-      *(ushort *)(param_4 + 0x18) = ((ushort)(0xe0f - var_u2) / 0xe10) * 0xe10 + var_u2;
+  if (0xe10 < (ushort)(rot_x | rot_y | rot_z)) {
+    if ((short)rot_x < 0) {
+      *(ushort *)(submesh_ptr + 0x18) = ((ushort)(0xe0f - rot_x) / 0xe10) * 0xe10 + rot_x;
     }
 
-    if ((short)var_u1 < 0) {
-      *(ushort *)(param_4 + 0x1a) = ((ushort)(0xe0f - var_u1) / 0xe10) * 0xe10 + var_u1;
+    if ((short)rot_y < 0) {
+      *(ushort *)(submesh_ptr + 0x1a) = ((ushort)(0xe0f - rot_y) / 0xe10) * 0xe10 + rot_y;
     }
 
-    if ((short)var_u3 < 0) {
-      *(ushort *)(param_4 + 0x1c) = ((ushort)(0xe0f - var_u3) / 0xe10) * 0xe10 + var_u3;
+    if ((short)rot_z < 0) {
+      *(ushort *)(submesh_ptr + 0x1c) = ((ushort)(0xe0f - rot_z) / 0xe10) * 0xe10 + rot_z;
     }
 
-    sVar4 = *(short *)(param_4 + 0x18);
+    temp_rot = *(short *)(submesh_ptr + 0x18);
 
-    if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x18) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+    if (0xe10 < temp_rot) {
+      *(ushort *)(submesh_ptr + 0x18) = ((ushort)(temp_rot - 1U) / 0xe10) * -0xe10 + temp_rot;
     }
 
-    sVar4 = *(short *)(param_4 + 0x1a);
+    temp_rot = *(short *)(submesh_ptr + 0x1a);
 
-    if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x1a) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+    if (0xe10 < temp_rot) {
+      *(ushort *)(submesh_ptr + 0x1a) = ((ushort)(temp_rot - 1U) / 0xe10) * -0xe10 + temp_rot;
     }
 
-    sVar4 = *(short *)(param_4 + 0x1c);
+    temp_rot = *(short *)(submesh_ptr + 0x1c);
 
-    if (0xe10 < sVar4) {
-      *(ushort *)(param_4 + 0x1c) = ((ushort)(sVar4 - 1U) / 0xe10) * -0xe10 + sVar4;
+    if (0xe10 < temp_rot) {
+      *(ushort *)(submesh_ptr + 0x1c) = ((ushort)(temp_rot - 1U) / 0xe10) * -0xe10 + temp_rot;
     }
-
   }
 
-  var_l14 = __ftol();
-  var_l15 = __ftol();
-  var_l16 = __ftol();
-  var_l17 = __ftol();
-  var_l18 = __ftol();
-  var_l19 = __ftol();
-  var_l20 = __ftol();
-  var_l21 = __ftol();
-  var_l22 = __ftol();
-  var_i6 = g_LisaTransformedVertices;
-  var_58 = *param_5;
+  mat_00 = __ftol();
+  mat_01 = __ftol();
+  mat_02 = __ftol();
+  mat_10 = __ftol();
+  mat_11 = __ftol();
+  mat_12 = __ftol();
+  mat_20 = __ftol();
+  mat_21 = __ftol();
+  mat_22 = __ftol();
+  local_x = g_LisaTransformedVertices;
+  num_vertices = *vertex_array;
 
-  if (0 < var_58) {
-    var_i5 = g_LisaCamera->vertex_counter;
-    g_LisaCamera->vertex_counter = var_i5 + var_58;
-    var_i8 = 2;
-    var_pi10 = (int *)(var_i6 + var_i5 * 0xc);
+  if (0 < num_vertices) {
+    local_y = g_LisaCamera->vertex_counter;
+    g_LisaCamera->vertex_counter = local_y + num_vertices;
+    vertex_idx = 2;
+    out_val_vertex = (int *)(local_x + local_y * 0xc);
 
     do {
-      var_i6 = param_5[var_i8];
-      var_i5 = param_5[var_i8 + 1];
-      var_i7 = param_5[var_i8 + 2];
+      local_x = vertex_array[vertex_idx];
+      local_y = vertex_array[vertex_idx + 1];
+      local_z = vertex_array[vertex_idx + 2];
 
-      var_i9 = (var_i5 * (int)var_l21 + var_i7 * (int)var_l22 + var_i6 * (int)var_l20 + var_i13 >> 0x10) +
+      proj_z = (local_y * (int)mat_21 + local_z * (int)mat_22 + local_x * (int)mat_20 + cam_space_z >> 0x10) +
 
               g_LisaCameraFocalLength;
 
-      if (var_i9 < g_LisaCameraFocalLength) {
-        var_i9 = g_LisaCameraFocalLength;
+      if (proj_z < g_LisaCameraFocalLength) {
+        proj_z = g_LisaCameraFocalLength;
       }
 
-      *var_pi10 = g_LisaCameraOffsetX +
+      *out_val_vertex = g_LisaCameraOffsetX +
 
-                 ((var_i11 + var_i5 * (int)var_l15 + var_i7 * (int)var_l16 + var_i6 * (int)var_l14) / var_i9
+                 ((cam_space_x + local_y * (int)mat_01 + local_z * (int)mat_02 + local_x * (int)mat_00) / proj_z
 
                  ) * 4;
-      var_58 = var_58 + -1;
-      var_pi10[2] = var_i9;
+      num_vertices = num_vertices + -1;
+      out_val_vertex[2] = proj_z;
 
-      var_pi10[1] = g_LisaCameraOffsetY +
+      out_val_vertex[1] = g_LisaCameraOffsetY +
 
-                   ((var_i12 + var_i7 * (int)var_l19 + var_i5 * (int)var_l18 + var_i6 * (int)var_l17) /
+                   ((cam_space_y + local_z * (int)mat_12 + local_y * (int)mat_11 + local_x * (int)mat_10) /
 
-                   var_i9) * 4;
-      var_i8 = var_i8 + 3;
-      var_pi10 = var_pi10 + 3;
-    } while (var_58 != 0);
+                   proj_z) * 4;
+      vertex_idx = vertex_idx + 3;
+      out_val_vertex = out_val_vertex + 3;
+    } while (num_vertices != 0);
   }
 
   return 0;
@@ -4176,40 +4175,40 @@ int Lisa_TransformSubmeshVerticesPanorama(int param_1,int param_2,int param_3,in
  * @original Lisa_ComputeCameraRotationMatrix (IGN_WIN.EXE @ 0x0044b340, lisa3d.c)
  * @fidelity ADAPTED
  */
-void Lisa_ComputeCameraRotationMatrix(int *param_1) {
-  double var_f1;
-  double var_f2;
-  int var_l3;
+void Lisa_ComputeCameraRotationMatrix(int *out_val_matrix) {
+  double rot_val1;
+  double rot_val2;
+  int matrix_val;
 
   
 
-  var_f1 = (double)g_LisaCamera->rot_x * (double)g_Const_NegTenthDegToRad;
-  fcos(var_f1);
-  var_f2 = (double)g_LisaCamera->rot_y * (double)g_Const_NegTenthDegToRad;
-  fcos(var_f2);
-  fsin(var_f1);
-  var_f1 = (double)g_LisaCamera->rot_z * (double)g_Const_NegTenthDegToRad;
-  fsin(var_f2);
-  fcos(var_f1);
-  fsin(var_f1);
-  var_l3 = __ftol();
-  *param_1 = (int)var_l3;
-  var_l3 = __ftol();
-  param_1[1] = (int)var_l3;
-  var_l3 = __ftol();
-  param_1[2] = (int)var_l3;
-  var_l3 = __ftol();
-  param_1[3] = (int)var_l3;
-  var_l3 = __ftol();
-  param_1[4] = (int)var_l3;
-  var_l3 = __ftol();
-  param_1[5] = (int)var_l3;
-  var_l3 = __ftol();
-  param_1[6] = (int)var_l3;
-  var_l3 = __ftol();
-  param_1[7] = (int)var_l3;
-  var_l3 = __ftol();
-  param_1[8] = (int)var_l3;
+  rot_val1 = (double)g_LisaCamera->rot_x * (double)g_Const_NegTenthDegToRad;
+  fcos(rot_val1);
+  rot_val2 = (double)g_LisaCamera->rot_y * (double)g_Const_NegTenthDegToRad;
+  fcos(rot_val2);
+  fsin(rot_val1);
+  rot_val1 = (double)g_LisaCamera->rot_z * (double)g_Const_NegTenthDegToRad;
+  fsin(rot_val2);
+  fcos(rot_val1);
+  fsin(rot_val1);
+  matrix_val = __ftol();
+  *out_val_matrix = (int)matrix_val;
+  matrix_val = __ftol();
+  out_val_matrix[1] = (int)matrix_val;
+  matrix_val = __ftol();
+  out_val_matrix[2] = (int)matrix_val;
+  matrix_val = __ftol();
+  out_val_matrix[3] = (int)matrix_val;
+  matrix_val = __ftol();
+  out_val_matrix[4] = (int)matrix_val;
+  matrix_val = __ftol();
+  out_val_matrix[5] = (int)matrix_val;
+  matrix_val = __ftol();
+  out_val_matrix[6] = (int)matrix_val;
+  matrix_val = __ftol();
+  out_val_matrix[7] = (int)matrix_val;
+  matrix_val = __ftol();
+  out_val_matrix[8] = (int)matrix_val;
   return;
 }
 
@@ -4218,7 +4217,7 @@ void Lisa_ComputeCameraRotationMatrix(int *param_1) {
  * @fidelity ADAPTED
  */
 void Lisa_InitOpcodeTable(void) {
-  int var_i1;
+  int idx;
 
   
 
@@ -4244,7 +4243,7 @@ void Lisa_InitOpcodeTable(void) {
 
     PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15;
     g_LisaCamera->active_draw_cmd = 0;
-    *(int *)(var_i1 + 0x6c) = 0;
+    *(int *)(idx + 0x6c) = 0;
     return;
   }
 
@@ -4271,13 +4270,13 @@ void Lisa_InitOpcodeTable(void) {
   if (g_LisaShadingEnabled == 0) {
     PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15;
     g_LisaCamera->active_draw_cmd = 0;
-    *(int *)(var_i1 + 0x6c) = 0;
+    *(int *)(idx + 0x6c) = 0;
     return;
   }
 
   PTR_Lisa_DrawTexturedTriangle_Op15_0049c934 = Lisa_DrawTexturedTriangle_Op15_Sub;
   g_LisaCamera->active_draw_cmd = 0;
-  *(int *)(var_i1 + 0x6c) = 0;
+  *(int *)(idx + 0x6c) = 0;
   return;
 }
 
@@ -5386,57 +5385,57 @@ void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
  * @original Lisa_InitRasterizerTables (IGN_WIN.EXE @ 0x0044f070, lisa3d.c)
  * @fidelity ADAPTED
  */
-LisaReturn64 Lisa_InitRasterizerTables(int param_1,unsigned int param_2) {
+LisaReturn64 Lisa_InitRasterizerTables(int screen_pitch,unsigned int flags) {
   int in_EAX;
   short sVar1;
   int unaff_EBX;
-  unsigned int var_u2;
-  int var_i3;
+  unsigned int idx;
+  int accum_pitch;
   int unaff_ESI;
-  int *var_pi4;
+  int *table_ptr;
   char **ppuVar5;
 
   
 
   if ((in_EAX < 0x579) && (unaff_EBX < 0x259)) {
-    var_pi4 = &g_LisaActiveTextureID;
-    var_u2 = 1;
+    table_ptr = &g_LisaActiveTextureID;
+    idx = 1;
     g_LisaScanlinePitch = in_EAX;
     g_LisaAspectScale = unaff_EBX;
 
     do {
-      *var_pi4 = (int)(0x10000 / (unsigned int)var_u2) + -1;
-      var_pi4 = var_pi4 + 1;
-      var_u2 = var_u2 + 1;
-    } while (var_u2 != 0x3a9b);
+      *table_ptr = (int)(0x10000 / (unsigned int)idx) + -1;
+      table_ptr = table_ptr + 1;
+      idx = idx + 1;
+    } while (idx != 0x3a9b);
 
     for (ppuVar5 = (char **)g_pLisaShutdownCallbacks; *ppuVar5 != (char *)0x0; ppuVar5 = ppuVar5 + 1) {
       (*(void (*)())*ppuVar5)(ppuVar5,unaff_ESI,unaff_EBX);
     }
 
-    var_pi4 = &g_LisaScreenPitch;
-    var_i3 = 0;
+    table_ptr = &g_LisaScreenPitch;
+    accum_pitch = 0;
     sVar1 = 600;
 
     do {
-      *var_pi4 = var_i3;
-      var_pi4 = var_pi4 + 1;
-      var_i3 = var_i3 + in_EAX;
+      *table_ptr = accum_pitch;
+      table_ptr = table_ptr + 1;
+      accum_pitch = accum_pitch + in_EAX;
       sVar1 = sVar1 + -1;
     } while (sVar1 != 0);
-    { LisaReturn64 _r; _r.edx = param_2; _r.eax = 0; return _r; }
+    { LisaReturn64 _r; _r.edx = flags; _r.eax = 0; return _r; }
   }
 
-  { LisaReturn64 _r; _r.edx = param_2; _r.eax = 0xffffffff; return _r; }
+  { LisaReturn64 _r; _r.edx = flags; _r.eax = 0xffffffff; return _r; }
 }
 
 /**
  * @original Lisa_ExecuteRasterizerCommands (IGN_WIN.EXE @ 0x0044f0e9, lisa3d.c)
  * @fidelity ADAPTED
  */
-LisaReturn64 Lisa_ExecuteRasterizerCommands(int param_1,unsigned int param_2) {
+LisaReturn64 Lisa_ExecuteRasterizerCommands(int mode,unsigned int flags) {
   int *unaff_ESI;
-  LisaReturn64 var_l1;
+  LisaReturn64 ret_val;
 
   
 
@@ -5463,10 +5462,10 @@ LisaReturn64 Lisa_ExecuteRasterizerCommands(int param_1,unsigned int param_2) {
   g_pLisaEdgeBuffer = (int *)*g_pLisaSpanBuffer;
 
   if (g_pLisaEdgeBuffer != (int *)0x0) {
-    var_l1 = (*(LisaReturn64 (*)())(((void **)g_LisaRasterizerJmpTable)[*g_pLisaEdgeBuffer]))();
-    return var_l1;
+    ret_val = (*(LisaReturn64 (*)())(((void **)g_LisaRasterizerJmpTable)[*g_pLisaEdgeBuffer]))();
+    return ret_val;
   }
 
-  { LisaReturn64 _r; _r.edx = param_2; _r.eax = 0; return _r; }
+  { LisaReturn64 _r; _r.edx = flags; _r.eax = 0; return _r; }
 }
 
