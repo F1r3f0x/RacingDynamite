@@ -430,6 +430,14 @@ def main():
     
     subparsers.add_parser("dashboard", help="Generate interactive HTML decompilation progress dashboard")
 
+    ghidra_p = subparsers.add_parser("sync-ghidra", help="Sync decomp.db symbols and comments into active Ghidra session")
+    ghidra_p.add_argument("--url", default="http://127.0.0.1:8080", help="Ghidra MCP HTTP URL")
+    ghidra_p.add_argument("--target", choices=["auto", "win", "dos"], default="auto", help="Target binary (default: auto)")
+    ghidra_p.add_argument("--no-functions", action="store_true", help="Skip function renames")
+    ghidra_p.add_argument("--no-globals", action="store_true", help="Skip global variable renames")
+    ghidra_p.add_argument("--no-comments", action="store_true", help="Skip comments")
+    ghidra_p.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+
     args = parser.parse_args()
     if args.command == "init":
         init_db()
@@ -444,6 +452,16 @@ def main():
     elif args.command == "dashboard":
         from generate_dashboard import main as gen_main
         gen_main(argv=[])
+    elif args.command == "sync-ghidra":
+        from sync_ghidra import sync_ghidra
+        sync_ghidra(
+            server_url=args.url,
+            target=args.target,
+            sync_functions=not args.no_functions,
+            sync_globals=not args.no_globals,
+            sync_comments=not args.no_comments,
+            verbose=args.verbose,
+        )
     elif args.command == "query":
         query(args.sql)
     elif args.command == "link":
