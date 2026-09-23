@@ -101,20 +101,13 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x00494990` | `int32_t`    | `g_IsDemoMode` | Attract / demo replay playback mode flag. |
 | `0x00553780` | `uint8_t*`   | `g_SpeedoConfig` | HUD speedometer dial and needle coordinate configuration. |
 | `0x00553770` | `uint8_t*`   | `g_SpeedoPosition` | Speedometer display screen offset. |
-| `0x00553774` | `int32_t`    | `g_HudEnabled` | HUD instrumentation rendering enable toggle. |
+| `0x00553774` | `int32_t`    | `g_WeatherType` | Active weather effect mode: `1` = Rain, `2` = Snow, `3` = Storm/Night. |
 | `0x005285ec` | `void*`      | `g_pSpeedoGaugeSprite` | Pointer to loaded speedometer gauge background sprite. |
 | `0x005285f0` | `void*`      | `g_pSpeedoNeedleSprite` | Pointer to loaded speedometer needle sprite. |
 | `0x00552f24` | `HUDMessage[5]` | `g_HudFloatingMessages` | Table of 5 active on-screen floating banner messages. |
 | `0x00639330` | `SceneryParticle` | `g_ActiveParticle` | Scratch particle struct populated during effect dispatch. |
 | `0x0063c5f0` | `double[20]` | `g_pActiveCamera` | Active camera position, direction, and projection matrix array. |
-
-| `0x0054f980` | `double` | `g_RaceTimer` | Active race timer logic variable. |
-| `0x0063f2d8` | `int32_t*` | `g_pActiveDrawBuffer` | Pointer to the active draw buffer. |
-| `0x0054f994` | `LisaEntityTransform*`| `g_pFXTransforms` | Array of dynamic object transforms for VFX and debris. |
-| `0x00563d54` | `struct*` | `g_VehicleCameraStates`| Camera state structure per vehicle. |
-| `0x00553280` | `int32_t` | `g_LapsTotal` | Number of laps for the current race. |
-| `0x004920e8` | `char*` | `g_Format_Str_s` | Format string `"%s"`. |
-| `0x00493c78` | `char*` | `g_Format_Str_d` | Format string `"%d"`. |
+| `0x0063c64c` | `double[20]` | `g_pActiveCamera_P2` | Player 2 active camera position, direction, and matrix array (splitscreen). |
 | `0x0054f980` | `double` | `g_RaceTimer` | Active race timer logic variable. |
 | `0x0063f2d8` | `int32_t*` | `g_pActiveDrawBuffer` | Pointer to the active draw buffer. |
 | `0x0054f994` | `LisaEntityTransform*`| `g_pFXTransforms` | Array of dynamic object transforms for VFX and debris. |
@@ -127,3 +120,32 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x0054f930` | `int32_t` | `g_DynamicObjectsPaused` | Flag to freeze dynamic object creation/destruction. |
 | `0x005db02c` | `LisaDynamicObject*`| `g_DynamicObjectArray1`| Array of dynamic objects used in VFX. |
 | `0x00552f20` | `LisaDynamicObject*`| `g_DynamicObjectArray2`| Array of dynamic objects used in VFX. |
+| `0x00552f30` | `int32_t[2]` | `g_WeatherActive` | Weather precipitation active flag per viewport (`[0]` = P1, `[1]` = P2). |
+| `0x00563c30` | `int32_t*`   | `g_pRainMesh_P1` | Dynamic vertex/triangle mesh buffer for Viewport 2 precipitation. |
+| `0x00563c34` | `int32_t*`   | `g_pRainMesh_P2` | Dynamic vertex/triangle mesh buffer for Viewport 1 precipitation. |
+| `0x0054f98c` | `int32_t`    | `g_WeatherViewportCount` | Number of active viewports for weather rendering (1 = single, 2 = split). |
+| `0x00553084` | `int32_t`    | `g_LightningEnabled` | Lightning strike flash and thunder effect enable toggle. |
+| `0x00563d28` | `int32_t[2]` | `g_WeatherDropOffsetX` | Horizontal drop/sway displacement offset per viewport. |
+| `0x00563d38` | `int32_t[2]` | `g_WeatherDropOffsetY` | Vertical drop fall offset per viewport (resets at -800). |
+| `0x00525e30` | `double[2]`  | `g_SnowflakeAngle` | Angular phase accumulator for sinusoidal snowflake oscillation. |
+| `0x00553030` | `uint8_t[576]`| `g_WeatherGridObjects` | 3x3 spatial grid dynamic objects for weather volume placement. |
+| `0x00525e50` | `int32_t[2]` | `g_WeatherAudioVoices` | Audio voice channel handles for weather ambient loops per player. |
+| `0x00563cf4` | `int32_t`    | `g_WeatherAnimTick` | Weather animation tick timer (updates every 2 frames). |
+| `0x005285d8` | `int32_t`    | `g_GlobalFrameCount` | Master engine frame/tick counter. |
+| `0x00527f74` | `int32_t`    | `g_RainTextureId` | Texture page ID for rain streak rendering. |
+| `0x00498480` | `int32_t[7]` | `g_TrackPathIntervalTable` | Moving path node update intervals per track. |
+| `0x00563d64` | `float`      | `g_TrackPathTimer` | Floating accumulator for moving path node updates. |
+| `0x004986e0` | `int32_t[12]`| `g_ParticlePriorityTable` | Priority ranking table for particle pool slot eviction. |
+| `0x004949bc` | `int32_t`    | `g_ShowDebugCoords` | Debug on-screen camera position and angle text toggle. |
+| `0x005532c0` | `double`     | `g_CameraPosX` | Camera X world coordinate in floating-point units. |
+| `0x005532b8` | `double`     | `g_CameraPosY` | Camera Y world coordinate in floating-point units. |
+| `0x00553288` | `double`     | `g_CameraPosZ` | Camera Z world coordinate in floating-point units. |
+| `0x006192f8` | `double`     | `g_CameraAngleX` | Camera pitch/yaw angle in radians. |
+| `0x00619318` | `double`     | `g_CameraAngleY` | Camera roll/yaw angle in radians. |
+| `0x005db038` | `int32_t`    | `g_TurboMeterFill` | Turbo gauge recharge accumulator (0 to 319). |
+| `0x006192a0` | `int32_t[20]`| `g_HudAnimTimers` | HUD digit/overlay animation timers (10 ints per player). |
+| `0x00563c60` | `int32_t`    | `g_IsGamePaused` | Pause status flag: `1` when race is actively paused. |
+| `0x00553090` | `double`     | `g_LapRecordSeconds` | Best lap time record in floating-point seconds. |
+| `0x00525e44` | `int32_t`    | `g_TargetLapTimeCents` | Target track record time in centiseconds. |
+| `0x00552f68` | `double`     | `g_HudAnimSinPhase` | Sinusoidal phase accumulator for animated HUD elements. |
+

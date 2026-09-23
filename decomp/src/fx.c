@@ -701,14 +701,14 @@ extern int DAT_004986e0[];
  * @original Audio_PlaySampleVol (IGN_WIN.EXE @ 0x0043e710, fx.c)
  * @fidelity ADAPTED
  */
-void Audio_PlaySampleVol(int param_1, int param_2, int param_3, int param_4, int param_5, int param_6, int param_7) {
-    g_AudioEventParam1 = param_1;
-    g_AudioEventParam2 = param_2;
-    g_AudioEventParam3 = param_3;
-    g_AudioEventParam4 = param_4;
+void Audio_PlaySampleVol(int channel, int sample_id, int sound_id, int pan, int volume, int pitch, int loop) {
+    g_AudioEventParam1 = channel;
+    g_AudioEventParam2 = sample_id;
+    g_AudioEventParam3 = sound_id;
+    g_AudioEventParam4 = pan;
     g_AudioEventParam5 = (int)Math_RandomFloat();
-    g_AudioEventParam6 = param_6;
-    g_AudioEventParam7 = param_7;
+    g_AudioEventParam6 = pitch;
+    g_AudioEventParam7 = loop;
     Audio_PlaySound(&g_AudioEventParam1);
 }
 
@@ -803,10 +803,10 @@ void FX_UpdateExplosionNode(SceneryParticle *p, int instance_idx) {
  * @original Audio_LoadAssets (IGN_WIN.EXE @ 0x0043e6a0, fx.c)
  * @fidelity ADAPTED
  */
-__int64 Audio_LoadAssets(int param_1, unsigned int param_2) {
-    __int64 var_l1;
-    var_l1 = Lisa_InitRasterizerTables(param_1, param_2);
-    return (((__int64)(var_l1 >> 32)) << 32) | 1;
+__int64 Audio_LoadAssets(int width, unsigned int height) {
+    __int64 result;
+    result = Lisa_InitRasterizerTables(width, height);
+    return (((__int64)(result >> 32)) << 32) | 1;
 }
 
 /**
@@ -814,16 +814,17 @@ __int64 Audio_LoadAssets(int param_1, unsigned int param_2) {
  * @fidelity ADAPTED
  */
 unsigned __int64 Audio_StopSample(void) {
-    int *var_pu1;
-    unsigned __int64 var_u2;
+    int *cmd_queue;
+    unsigned __int64 flush_result;
+
     g_pLisaDrawCommandQueue[0] = (int)g_LisaDrawCommandBuffer;
-    var_pu1 = g_pLisaDrawCommandQueue;
+    cmd_queue = g_pLisaDrawCommandQueue;
     g_pLisaDrawCommandQueue[1] = 0;
     g_LisaDrawCommandBuffer[0] = 0;
     g_LisaDrawCommandBuffer[1] = 0;
     g_LisaDrawCommandBuffer[2] = 0;
-    var_u2 = Lisa_FlushRasterizerCommands(0, (unsigned int)var_pu1);
-    return var_u2;
+    flush_result = Lisa_FlushRasterizerCommands(0, (unsigned int)cmd_queue);
+    return flush_result;
 }
 
 /**
@@ -831,18 +832,19 @@ unsigned __int64 Audio_StopSample(void) {
  * @fidelity ADAPTED
  */
 void FX_SpawnWeather(void) {
-    char var_20[32];
-    if (DAT_004949bc != 0) {
-        sprintf(var_20, "X: %f", DAT_005532c0, DAT_005532c4);
-        Font_PrintDirect(0, 0, var_20, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, 20);
-        sprintf(var_20, "Y: %f", DAT_005532b8, DAT_005532bc);
-        Font_PrintDirect(0, 10, var_20, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, 20);
-        sprintf(var_20, "Z: %f", DAT_00553288, DAT_0055328c);
-        Font_PrintDirect(0, 20, var_20, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, 20);
-        sprintf(var_20, "X VIN: %f", DAT_006192f8, DAT_006192fc);
-        Font_PrintDirect(0, 30, var_20, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, 20);
-        sprintf(var_20, "Y VIN: %f", DAT_00619318, DAT_0061931c);
-        Font_PrintDirect(0, 40, var_20, (void*)0x563db0, g_ScreenWidth, g_ScreenHeightAlt, 20);
+    char text_buf[32];
+
+    if (g_ShowDebugCoords != 0) {
+        sprintf(text_buf, "X: %f", g_CameraPosX);
+        Font_PrintDirect(0, 0, text_buf, (void *)g_VirtualFramebuffer, g_ScreenWidth, g_ScreenHeightAlt, 20);
+        sprintf(text_buf, "Y: %f", g_CameraPosY);
+        Font_PrintDirect(0, 10, text_buf, (void *)g_VirtualFramebuffer, g_ScreenWidth, g_ScreenHeightAlt, 20);
+        sprintf(text_buf, "Z: %f", g_CameraPosZ);
+        Font_PrintDirect(0, 20, text_buf, (void *)g_VirtualFramebuffer, g_ScreenWidth, g_ScreenHeightAlt, 20);
+        sprintf(text_buf, "X VIN: %f", g_CameraAngleX);
+        Font_PrintDirect(0, 30, text_buf, (void *)g_VirtualFramebuffer, g_ScreenWidth, g_ScreenHeightAlt, 20);
+        sprintf(text_buf, "Y VIN: %f", g_CameraAngleY);
+        Font_PrintDirect(0, 40, text_buf, (void *)g_VirtualFramebuffer, g_ScreenWidth, g_ScreenHeightAlt, 20);
     }
 }
 
@@ -870,57 +872,63 @@ unsigned int FX_SpawnParticle(SceneryParticle *p) {
             diff_z = pos_z - (int)g_pActiveCamera[2];
             if (abs(diff_z) <= 3500) {
                 should_spawn = 1;
-            } else if (DAT_0047a440 <= g_RaceTimer || g_ShowRollTelemetry == 1) {
+            } else if (g_RaceTimer >= 120.0 || g_ShowRollTelemetry == 1) {
                 should_spawn = 1;
             }
-        } else if (DAT_0047a440 <= g_RaceTimer || g_ShowRollTelemetry == 1) {
+        } else if (g_RaceTimer >= 120.0 || g_ShowRollTelemetry == 1) {
             should_spawn = 1;
         }
 
         if (g_IsSplitScreen == 1) {
-            diff_x = pos_x - (int)DAT_0063c64c[0];
+            diff_x = pos_x - (int)g_pActiveCamera_P2[0];
             if (abs(diff_x) < 2500) {
                 pos_z = p->pos_z / 1024;
-                diff_z = pos_z - (int)DAT_0063c64c[2];
+                diff_z = pos_z - (int)g_pActiveCamera_P2[2];
                 if (abs(diff_z) <= 2500) {
                     should_spawn = 1;
-                } else if (g_RaceTimer >= DAT_0047a440) {
+                } else if (g_RaceTimer >= 120.0) {
                     should_spawn = 1;
                 }
-            } else if (g_RaceTimer >= DAT_0047a440) {
+            } else if (g_RaceTimer >= 120.0) {
                 should_spawn = 1;
             }
         }
     }
 
-    if (!should_spawn) return 0xffffffff;
-    slot = (SceneryParticle *)0x5db040;
+    if (!should_spawn) {
+        return 0xffffffff;
+    }
+
+    slot = &g_SceneryParticles[0];
     index = 0;
-    while (slot < (SceneryParticle *)0x5dfe60) {
-        if (slot->type == 0) break;
+    while (index < 200) {
+        if (slot->type == 0) {
+            break;
+        }
         slot++;
         index++;
     }
 
-    if (index > 199) {
+    if (index >= 200) {
         min_prio = 100;
         best_idx = 0;
-        slot = (SceneryParticle *)0x5db040;
+        slot = &g_SceneryParticles[0];
         for (i = 0; i < 200; i++) {
-            if (DAT_004986e0[slot->type] < min_prio) {
+            if (g_ParticlePriorityTable[slot->type] < min_prio) {
                 best_idx = i;
-                min_prio = DAT_004986e0[slot->type];
+                min_prio = g_ParticlePriorityTable[slot->type];
             }
             slot++;
         }
-        if (min_prio < DAT_004986e0[p->type]) {
+        if (min_prio < g_ParticlePriorityTable[p->type]) {
             index = best_idx;
         }
-        if (index > 199) return 0xffffffff;
+        if (index >= 200) {
+            return 0xffffffff;
+        }
     }
 
-    slot = (SceneryParticle *)(0x5db040 + index * 0x64);
-    *slot = *p;
+    g_SceneryParticles[index] = *p;
     return index;
 }
 
@@ -1522,168 +1530,149 @@ LAB_00436c9c:
  * @fidelity ADAPTED
  */
 void FX_UpdateAllParticles(void) {
-  float var_f1;
-  int var_i2;
-  int *var_pi3;
-  int var_i4;
-  int var_i5;
-  var_pi3 = &g_SceneryParticles;
-  var_i5 = 0;
-  do {
-    if (*var_pi3 != 0) {
-      switch(*var_pi3) {
-      case 1:
-        FX_UpdateTransparentSpriteObject((SceneryParticle *)var_pi3,var_i5);
-        break;
-      case 2:
-        FX_UpdateHandlePlotObject((SceneryParticle *)var_pi3,var_i5);
-        break;
-      case 3:
-        Obstacle_SimulateDynamics((SceneryParticle *)var_pi3);
-        break;
-      case 4:
-        FX_UpdateTransparentSpriteObject2((SceneryParticle *)var_pi3,var_i5);
-        break;
-      case 5:
-        FX_UpdateFlyingParticles((SceneryParticle *)var_pi3,var_i5);
-        break;
-      case 6:
-        FX_UpdateExplosionNode((SceneryParticle *)var_pi3,var_i5);
-        break;
-      case 7:
-        FX_UpdateVehicleWreck(var_pi3);
-        break;
-      case 8:
-        FX_UpdateSuperPlotObject((SceneryParticle *)var_pi3,var_i5);
-        break;
-      case 9:
-        FX_UpdateDetachedWheel(var_pi3,var_i5);
-        break;
-      case 10:
-        FX_UpdateVehicleCrashSequence(var_pi3);
-        break;
-      case 0xb:
-        FX_UpdateCarDebris(var_pi3,var_i5);
-      }
+    float period;
+    int i;
+    SceneryParticle *p;
+    VehicleState *v;
+
+    p = &g_SceneryParticles[0];
+    for (i = 0; i < 200; i++, p++) {
+        if (p->type != 0) {
+            switch (p->type) {
+            case 1:
+                FX_UpdateTransparentSpriteObject(p, i);
+                break;
+            case 2:
+                FX_UpdateHandlePlotObject(p, i);
+                break;
+            case 3:
+                Obstacle_SimulateDynamics(p);
+                break;
+            case 4:
+                FX_UpdateTransparentSpriteObject2(p, i);
+                break;
+            case 5:
+                FX_UpdateFlyingParticles(p, i);
+                break;
+            case 6:
+                FX_UpdateExplosionNode(p, i);
+                break;
+            case 7:
+                FX_UpdateVehicleWreck((int *)p);
+                break;
+            case 8:
+                FX_UpdateSuperPlotObject(p, i);
+                break;
+            case 9:
+                FX_UpdateDetachedWheel((int *)p, i);
+                break;
+            case 10:
+                FX_UpdateVehicleCrashSequence((int *)p);
+                break;
+            case 11:
+                FX_UpdateCarDebris((int *)p, i);
+                break;
+            default:
+                break;
+            }
+        }
     }
-    var_pi3 = var_pi3 + 0x19;
-    var_i5 = var_i5 + 1;
-  } while (var_pi3 < &DAT_005dfe60);
-  _DAT_00563d64 = _DAT_00563d64 + _DAT_0047a430;
-  if ((float)*(int *)(&DAT_00498480 + g_CurrentTrackIndex * 4) <= _DAT_00563d64) {
-    Track_UpdateMovingPathNodes();
-    var_f1 = (float)*(int *)(&DAT_00498480 + g_CurrentTrackIndex * 4);
-    if ((float)*(int *)(&DAT_00498480 + g_CurrentTrackIndex * 4) <= _DAT_00563d64) {
-      do {
-        _DAT_00563d64 = _DAT_00563d64 - var_f1;
-      } while (var_f1 <= _DAT_00563d64);
+
+    g_TrackPathTimer += 1.0f;
+    period = (float)g_TrackPathIntervalTable[g_CurrentTrackIndex];
+    if (g_TrackPathTimer >= period) {
+        Track_UpdateMovingPathNodes();
+        while (g_TrackPathTimer >= period) {
+            g_TrackPathTimer -= period;
+        }
     }
-  }
-  if (0 < g_CheckpointCount) {
-    Track_UpdateDynamicObjects_Type1();
-  }
-  if (0 < DAT_00563cf0) {
-    Track_UpdateDynamicObjects_Type2();
-  }
-  if (0 < DAT_00563d78) {
-    Track_UpdateDynamicObjects_Type3();
-  }
-  if (0 < DAT_00552f78) {
-    Track_UpdateDynamicObjects_Type4();
-  }
-  if ((g_GameMode == 3) && (var_i5 = 0, 0 < g_NumRacers)) {
-    var_i4 = 0;
-    do {
-      var_i2 = g_Vehicles + var_i4;
-      if ((((*(int *)(var_i2 + 0x39c) == g_PlayerCarModel) && (g_RaceTimer_P2 < 0.0)) &&
-          (*(int *)(var_i2 + 0x354) == 0)) &&
-         (((*(int *)(var_i2 + 0x358) == 0 && (*(int *)(var_i2 + 0x35c) == 0)) &&
-          (*(int *)(var_i2 + 0x528) == 0)))) {
-        FX_SpawnAmbientTrackParticles();
-      }
-      var_i4 = var_i4 + 0x484c;
-      var_i5 = var_i5 + 1;
-    } while (var_i5 < g_NumRacers);
-  }
-  HUD_UpdateFloatingMessages();
-  return;
+
+    if (g_NumTrackDynamicObjects1 > 0) {
+        Track_UpdateDynamicObjects_Type1();
+    }
+    if (g_NumTrackDynamicObjects2 > 0) {
+        Track_UpdateDynamicObjects_Type2();
+    }
+    if (g_NumTrackDynamicObjects3 > 0) {
+        Track_UpdateDynamicObjects_Type3();
+    }
+    if (g_NumTrackDynamicObjects4 > 0) {
+        Track_UpdateDynamicObjects_Type4();
+    }
+
+    if (g_GameMode == 3) {
+        for (i = 0; i < g_NumRacers; i++) {
+            v = (VehicleState *)(g_Vehicles + i * 0x484c);
+            if (v->race_rank == g_PlayerCarModel && g_RaceTimer_P2 < 0.0 &&
+                v->crash_flag1 == 0 && v->crash_flag2 == 0 && v->crash_flag3 == 0 &&
+                v->turbo_active == 0) {
+                FX_SpawnAmbientTrackParticles();
+            }
+        }
+    }
+
+    HUD_UpdateFloatingMessages();
 }
+
 /**
  * @original FX_UpdateWeatherBounds (IGN_WIN.EXE @ 0x00434580, fx.c)
  * @fidelity ADAPTED
  */
 void FX_UpdateWeatherBounds(void) {
-  unsigned int var_u1;
-  int var_i2;
-  unsigned int var_u3;
-  if (g_HudEnabled == 1) {
-    if (((g_CurrentTrackIndex == 0) &&
-        (var_i2 = *(int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), 0x2d < var_i2)) &&
-       (var_i2 < 0x78)) {
-      if (g_ActiveVehicleIndex == 0) {
-        g_WeatherActive = 1;
-      }
-      else if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
-        _DAT_00552f34 = 1;
-      }
+    int node_idx;
+
+    if (g_WeatherType == 1) {
+        if (g_CurrentTrackIndex == 0) {
+            node_idx = *(int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c);
+            if (node_idx > 45 && node_idx < 120) {
+                if (g_ActiveVehicleIndex == 0) {
+                    g_WeatherActive[0] = 1;
+                } else if (g_ActiveVehicleIndex == 1 && g_IsSplitScreen == 1) {
+                    g_WeatherActive[1] = 1;
+                }
+            } else {
+                if (g_ActiveVehicleIndex == 0) {
+                    g_WeatherActive[0] = 0;
+                } else if (g_ActiveVehicleIndex == 1 && g_IsSplitScreen == 1) {
+                    g_WeatherActive[1] = 0;
+                }
+            }
+        }
+    } else if (g_WeatherType == 3) {
+        if (g_CurrentTrackIndex == 1) {
+            node_idx = abs(*(int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c));
+            if (node_idx > 0 && node_idx < 30) {
+                if (g_ActiveVehicleIndex == 0) {
+                    g_WeatherActive[0] = 1;
+                } else if (g_ActiveVehicleIndex == 1 && g_IsSplitScreen == 1) {
+                    g_WeatherActive[1] = 1;
+                }
+            } else {
+                if (g_ActiveVehicleIndex == 0) {
+                    g_WeatherActive[0] = 0;
+                } else if (g_ActiveVehicleIndex == 1 && g_IsSplitScreen == 1) {
+                    g_WeatherActive[1] = 0;
+                }
+            }
+        }
+    } else if (g_WeatherType == 2) {
+        if (g_CurrentTrackIndex == 4) {
+            node_idx = abs(*(int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c));
+            if (node_idx > 28 && node_idx < 100) {
+                if (g_ActiveVehicleIndex == 0) {
+                    g_WeatherActive[0] = 1;
+                } else if (g_ActiveVehicleIndex == 1 && g_IsSplitScreen == 1) {
+                    g_WeatherActive[1] = 1;
+                }
+            } else {
+                if (g_ActiveVehicleIndex == 0) {
+                    g_WeatherActive[0] = 0;
+                } else if (g_ActiveVehicleIndex == 1 && g_IsSplitScreen == 1) {
+                    g_WeatherActive[1] = 0;
+                }
+            }
+        }
     }
-    if ((g_CurrentTrackIndex == 0) &&
-       ((var_i2 = *(int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), var_i2 < 0x2e ||
-        (0x77 < var_i2)))) {
-      if (g_ActiveVehicleIndex == 0) {
-        g_WeatherActive = 0;
-      }
-      else if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
-        _DAT_00552f34 = 0;
-      }
-    }
-  }
-  if (g_HudEnabled == 3) {
-    if (((g_CurrentTrackIndex == 1) &&
-        (var_u1 = *(unsigned int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), var_u3 = (int)var_u1 >> 0x1f
-        , var_i2 = (var_u1 ^ var_u3) - var_u3, 0 < var_i2)) && (var_i2 < 0x1e)) {
-      if (g_ActiveVehicleIndex == 0) {
-        g_WeatherActive = 1;
-      }
-      else if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
-        _DAT_00552f34 = 1;
-      }
-    }
-    if ((g_CurrentTrackIndex == 1) &&
-       ((var_u1 = *(unsigned int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), var_u3 = (int)var_u1 >> 0x1f
-        , var_i2 = (var_u1 ^ var_u3) - var_u3, var_i2 < 1 || (0x1d < var_i2)))) {
-      if (g_ActiveVehicleIndex == 0) {
-        g_WeatherActive = 0;
-      }
-      else if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
-        _DAT_00552f34 = 0;
-      }
-    }
-  }
-  if (g_HudEnabled == 2) {
-    if (((g_CurrentTrackIndex == 4) &&
-        (var_u1 = *(unsigned int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), var_u3 = (int)var_u1 >> 0x1f
-        , var_i2 = (var_u1 ^ var_u3) - var_u3, 0x1c < var_i2)) && (var_i2 < 100)) {
-      if (g_ActiveVehicleIndex == 0) {
-        g_WeatherActive = 1;
-      }
-      else if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
-        _DAT_00552f34 = 1;
-      }
-    }
-    if ((g_CurrentTrackIndex == 4) &&
-       ((var_u1 = *(unsigned int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c), var_u3 = (int)var_u1 >> 0x1f
-        , var_i2 = (var_u1 ^ var_u3) - var_u3, var_i2 < 0x1d || (99 < var_i2)))) {
-      if (g_ActiveVehicleIndex == 0) {
-        g_WeatherActive = 0;
-        return;
-      }
-      if ((g_ActiveVehicleIndex == 1) && (g_IsSplitScreen == 1)) {
-        _DAT_00552f34 = 0;
-      }
-    }
-  }
-  return;
 }
 /**
  * @original FX_UpdateVehicleWreck (IGN_WIN.EXE @ 0x004307b0, fx.c)
@@ -3186,312 +3175,273 @@ void FX_SpawnTireSkidSmoke(void) {
  * @fidelity ADAPTED
  */
 void FX_UpdateWeatherGeometry(void) {
-  unsigned int var_u1;
-  int var_i2;
-  char *var_pu3;
-  int *var_pi4;
-  int *var_pi5;
-  int var_i6;
-  unsigned int var_u7;
-  int *var_pi8;
-  int var_i9;
-  int var_i10;
-  __int64 var_u11;
-  __int64 var_l12;
-  __int64 var_l13;
-  __int64 var_l14;
-  int var_18;
-  int var_10;
-  int var_c;
-  if (((*(int *)(g_Vehicles + 0x528) != 1) || (g_RaceTimer < _DAT_0047a448)) ||
-     ((g_HudEnabled != 1 && (g_HudEnabled != 2)))) {
-    if ((g_HudEnabled == 1) || (g_HudEnabled == 2)) {
-      var_18 = 0;
-      if (0 < DAT_0054f98c) {
-        do {
-          if (var_18 == 0) {
-            var_10 = g_MenuCursorPos;
-            var_pi4 = DAT_00563c34;
-          }
-          else {
-            var_10 = 1;
-            var_pi4 = DAT_00563c30;
-          }
-          if ((double)(DAT_00563cf4 + 2) < _DAT_005285d8) {
-            if (((((int*)&(g_WeatherActive))[var_18] == 1) && (g_RaceTimer < 0.0)) &&
-               (var_i9 = var_pi4[1], (double)var_i9 < _DAT_0047a458)) {
-              var_i10 = var_i9 / 2;
-              if ((DAT_0054f98c == 1) && (g_HudEnabled == 1)) {
-                var_u11 = Palette_AdjustRGB(var_i9,var_i9 >> 0x1f,g_ActiveTrackPalette + 8);
-                Gfx_FreeSurface((int)var_u11);
-              }
-              Math_RandomFloat0To1();
-              var_l12 = __ftol();
-              var_i9 = (int)var_l12;
-              Math_RandomFloat0To1();
-              var_l12 = __ftol();
-              var_i6 = (int)var_l12;
-              Math_RandomFloat0To1();
-              var_l12 = __ftol();
-              var_i2 = (int)var_l12;
-              if (g_HudEnabled == 1) {
-                *var_pi4 = *var_pi4 + 4;
-                var_pi4[1] = var_pi4[1] + 2;
-                var_pi4[var_i10 * 0xc + 2] = var_i9;
-                var_pi4[var_i10 * 0xc + 3] = -var_i6;
-                var_pi4[var_i10 * 0xc + 4] = var_i2;
-                var_pi4[var_i10 * 0xc + 5] = var_i9 + 4;
-                var_pi4[var_i10 * 0xc + 6] = 0x3c - var_i6;
-                var_pi4[var_i10 * 0xc + 7] = var_i2;
-                var_pi4[var_i10 * 0xc + 8] = var_i9;
-                var_pi4[var_i10 * 0xc + 9] = -800 - var_i6;
-                var_pi4[var_i10 * 0xc + 10] = var_i2;
-                var_pi4[var_i10 * 0xc + 0xb] = var_i9 + 4;
-                var_pi4[var_i10 * 0xc + 0xc] = -0x2e4 - var_i6;
-                var_pi4[var_i10 * 0xc + 0xd] = var_i2;
-              }
-              else if (g_HudEnabled == 2) {
-                *var_pi4 = *var_pi4 + 2;
-                var_pi4[1] = var_pi4[1] + 2;
-                var_pi4[var_i10 * 6 + 2] = var_i9;
-                var_pi4[var_i10 * 6 + 3] = -var_i6;
-                var_pi4[var_i10 * 6 + 4] = var_i2;
-                var_pi4[var_i10 * 6 + 5] = var_i9;
-                var_pi4[var_i10 * 6 + 6] = -800 - var_i6;
-                var_pi4[var_i10 * 6 + 7] = var_i2;
-              }
-              var_i9 = var_i10 * 2 + 2;
-              var_i6 = 0;
-              if (0 < var_i9) {
-                var_pi8 = var_pi4 + (var_i10 + 1) * 6 + 2;
-                var_pi5 = var_pi4 + (var_i10 + 1) * 0xc + 2;
-                var_i10 = 0;
-                do {
-                  if (g_HudEnabled == 1) {
-                    *var_pi5 = 0xd;
-                    var_pi5[1] = var_i10;
-                    var_pi5[2] = var_i10 + 1;
-                    var_pi5[3] = 0x7700;
-                    var_pi5[4] = 0x7b00;
-                    var_pi5[5] = DAT_00527f74;
-                  }
-                  else if (g_HudEnabled == 2) {
-                    *var_pi8 = 7;
-                    var_pi8[1] = var_i6;
-                    var_pi8[2] = 0;
-                    var_pi8[3] = 0x7500;
-                    var_pi8[4] = 0x1f00;
-                    var_pi8[5] = 0x9400;
-                    var_pi8[6] = 0;
-                    var_pi8[7] = g_CameraFovScaleX * 100;
-                    var_pi8[8] = g_CameraFovScaleY * 100;
-                  }
-                  var_pi8 = var_pi8 + 9;
-                  var_pi5 = var_pi5 + 6;
-                  var_i10 = var_i10 + 2;
-                  var_i6 = var_i6 + 1;
-                } while (var_i6 < var_i9);
-              }
+    int vp;
+    int vehicle_idx;
+    int *pMesh;
+    int pair_idx;
+    int num_pairs;
+    int total_verts;
+    int v_idx;
+    int cmd_idx;
+    int rand_x, rand_y, rand_z;
+    int *pCmdRain;
+    int *pCmdSnow;
+    int grid_x, grid_z;
+    int obj_idx;
+    char *pVoice;
+    int lightning_roll;
+    int road_node;
+    int road_idx;
+    int road_height;
+    unsigned int abs_node;
+
+    if ((*(int *)(g_Vehicles + 0x528) != 1 || g_RaceTimer < 120.0) ||
+        (g_WeatherType != 1 && g_WeatherType != 2)) {
+        if (g_WeatherType == 1 || g_WeatherType == 2) {
+            for (vp = 0; vp < g_WeatherViewportCount; vp++) {
+                if (vp == 0) {
+                    vehicle_idx = g_MenuCursorPos;
+                    pMesh = g_pRainMesh_P2;
+                } else {
+                    vehicle_idx = 1;
+                    pMesh = g_pRainMesh_P1;
+                }
+
+                if ((double)(g_WeatherAnimTick + 2) < (double)g_GlobalFrameCount) {
+                    if (g_WeatherActive[vp] == 1 && g_RaceTimer < 0.0 &&
+                        (double)pMesh[1] < 100.0) {
+                        pair_idx = pMesh[1] / 2;
+                        if (g_WeatherViewportCount == 1 && g_WeatherType == 1) {
+                            Palette_AdjustRGB(pMesh[1], pMesh[1] >> 31, g_ActiveTrackPalette + 8);
+                            Gfx_FreeSurface((int)pMesh);
+                        }
+
+                        rand_x = (int)Math_RandomFloat0To1();
+                        rand_y = (int)Math_RandomFloat0To1();
+                        rand_z = (int)Math_RandomFloat0To1();
+
+                        if (g_WeatherType == 1) {
+                            *pMesh += 4;
+                            pMesh[1] += 2;
+                            pMesh[pair_idx * 12 + 2] = rand_x;
+                            pMesh[pair_idx * 12 + 3] = -rand_y;
+                            pMesh[pair_idx * 12 + 4] = rand_z;
+                            pMesh[pair_idx * 12 + 5] = rand_x + 4;
+                            pMesh[pair_idx * 12 + 6] = 60 - rand_y;
+                            pMesh[pair_idx * 12 + 7] = rand_z;
+                            pMesh[pair_idx * 12 + 8] = rand_x;
+                            pMesh[pair_idx * 12 + 9] = -800 - rand_y;
+                            pMesh[pair_idx * 12 + 10] = rand_z;
+                            pMesh[pair_idx * 12 + 11] = rand_x + 4;
+                            pMesh[pair_idx * 12 + 12] = -740 - rand_y;
+                            pMesh[pair_idx * 12 + 13] = rand_z;
+                        } else if (g_WeatherType == 2) {
+                            *pMesh += 2;
+                            pMesh[1] += 2;
+                            pMesh[pair_idx * 6 + 2] = rand_x;
+                            pMesh[pair_idx * 6 + 3] = -rand_y;
+                            pMesh[pair_idx * 6 + 4] = rand_z;
+                            pMesh[pair_idx * 6 + 5] = rand_x;
+                            pMesh[pair_idx * 6 + 6] = -800 - rand_y;
+                            pMesh[pair_idx * 6 + 7] = rand_z;
+                        }
+
+                        total_verts = pair_idx * 2 + 2;
+                        if (total_verts > 0) {
+                            pCmdSnow = pMesh + (pair_idx + 1) * 6 + 2;
+                            pCmdRain = pMesh + (pair_idx + 1) * 12 + 2;
+                            v_idx = 0;
+                            for (cmd_idx = 0; cmd_idx < total_verts; cmd_idx++) {
+                                if (g_WeatherType == 1) {
+                                    pCmdRain[0] = 0xd;
+                                    pCmdRain[1] = v_idx;
+                                    pCmdRain[2] = v_idx + 1;
+                                    pCmdRain[3] = 0x7700;
+                                    pCmdRain[4] = 0x7b00;
+                                    pCmdRain[5] = g_RainTextureId;
+                                } else if (g_WeatherType == 2) {
+                                    pCmdSnow[0] = 7;
+                                    pCmdSnow[1] = cmd_idx;
+                                    pCmdSnow[2] = 0;
+                                    pCmdSnow[3] = 0x7500;
+                                    pCmdSnow[4] = 0x1f00;
+                                    pCmdSnow[5] = 0x9400;
+                                    pCmdSnow[6] = 0;
+                                    pCmdSnow[7] = g_CameraFovScaleX * 100;
+                                    pCmdSnow[8] = g_CameraFovScaleY * 100;
+                                }
+                                pCmdSnow += 9;
+                                pCmdRain += 6;
+                                v_idx += 2;
+                            }
+                        }
+                    }
+
+                    if ((g_WeatherActive[vp] == 0 || g_RaceTimer >= 0.0) && pMesh[1] > 0) {
+                        if (g_WeatherType == 1) {
+                            *pMesh -= 4;
+                            pMesh[1] -= 2;
+                        } else if (g_WeatherType == 2) {
+                            *pMesh -= 2;
+                            pMesh[1] -= 2;
+                        }
+
+                        num_pairs = pMesh[1] / 2;
+                        if (g_WeatherViewportCount == 1 && g_WeatherType == 1) {
+                            Palette_AdjustRGB(pMesh[1], pMesh[1] >> 31, g_ActiveTrackPalette + 8);
+                            Gfx_FreeSurface((int)pMesh);
+                        }
+
+                        if (num_pairs * 2 > 0) {
+                            pCmdSnow = pMesh + num_pairs * 6 + 2;
+                            pCmdRain = pMesh + num_pairs * 12 + 2;
+                            v_idx = 0;
+                            for (cmd_idx = 0; cmd_idx < num_pairs * 2; cmd_idx++) {
+                                if (g_WeatherType == 1) {
+                                    pCmdRain[0] = 0xd;
+                                    pCmdRain[1] = v_idx;
+                                    pCmdRain[2] = v_idx + 1;
+                                    pCmdRain[3] = 0x7700;
+                                    pCmdRain[4] = 0x7b00;
+                                    pCmdRain[5] = g_RainTextureId;
+                                } else if (g_WeatherType == 2) {
+                                    pCmdSnow[0] = 7;
+                                    pCmdSnow[1] = cmd_idx;
+                                    pCmdSnow[2] = 0;
+                                    pCmdSnow[3] = 0x7500;
+                                    pCmdSnow[4] = 0x1f00;
+                                    pCmdSnow[5] = 0x9400;
+                                    pCmdSnow[6] = 0;
+                                    pCmdSnow[7] = g_CameraFovScaleX * 100;
+                                    pCmdSnow[8] = g_CameraFovScaleY * 100;
+                                }
+                                pCmdSnow += 9;
+                                pCmdRain += 6;
+                                v_idx += 2;
+                            }
+                        }
+                    }
+                }
+
+                if (g_WeatherType == 1 && *pMesh > 0) {
+                    g_WeatherDropOffsetX[vp] += 5;
+                    g_WeatherDropOffsetY[vp] -= 25;
+                    if ((int)Math_RandomFloat0To1() == 0 && g_RaceTimer < 0.0) {
+                        Audio_PlaySampleVol(1, 0, 1, 0, 0x10000, 0, 0);
+                    }
+                } else if (g_WeatherType == 2 && *pMesh > 0) {
+                    g_SnowflakeAngle[vp] += 0.11781;
+                    if (g_SnowflakeAngle[vp] > 6.2831853071796) {
+                        g_SnowflakeAngle[vp] -= 6.2831853071796;
+                    }
+                    g_WeatherDropOffsetX[vp] = (int)sin(g_SnowflakeAngle[vp]);
+                    g_WeatherDropOffsetY[vp] -= 5;
+                    rand_x = (int)cos(*(double *)(g_Vehicles + 0x100 + vehicle_idx * 0x484c));
+                    rand_z = (int)sin(*(double *)(g_Vehicles + 0x100 + vehicle_idx * 0x484c));
+
+                    num_pairs = pMesh[1] / 2;
+                    if (num_pairs > 0) {
+                        int *pV = pMesh + 2;
+                        while (num_pairs != 0) {
+                            int nx = pV[0] + rand_x;
+                            int nz = pV[2] + rand_z;
+                            num_pairs--;
+                            pV[3] = nx;
+                            pV[5] = nz;
+                            pV[9] = nx;
+                            pV[11] = nz;
+                            pV += 6;
+                        }
+                    }
+                }
+
+                if (g_WeatherDropOffsetY[vp] < -800) {
+                    g_WeatherDropOffsetX[vp] = 0;
+                    g_WeatherDropOffsetY[vp] += 800;
+                }
+
+                obj_idx = vp * 0x120;
+                for (grid_z = 0; grid_z < 3; grid_z++) {
+                    for (grid_x = 0; grid_x < 3; grid_x++) {
+                        rand_x = (int)Math_RandomFloat0To1();
+                        rand_y = (int)Math_RandomFloat0To1();
+                        rand_z = (int)Math_RandomFloat0To1();
+
+                        *(int *)(g_WeatherGridObjects + 4 + obj_idx) =
+                            g_WeatherDropOffsetX[vp] + ((rand_x + grid_x) * 5 - 5) * 200;
+                        *(int *)(g_WeatherGridObjects + 8 + obj_idx) =
+                            g_WeatherDropOffsetY[vp] + rand_y;
+                        *(int *)(g_WeatherGridObjects + 0xc + obj_idx) =
+                            ((grid_z + rand_z) * 5 - 5) * 200;
+                        *(int *)(g_WeatherGridObjects + 0x10 + obj_idx) = 0;
+                        *(int *)(g_WeatherGridObjects + 0x14 + obj_idx) = 0;
+                        *(int *)(g_WeatherGridObjects + 0x18 + obj_idx) = 0;
+
+                        if (Lisa_UpdateObjectSpatialGrid((int *)(g_WeatherGridObjects + obj_idx)) != 0) {
+                            Log_DebugPrintf("FEL VID LI_MOVEOBJECT_WEATHER\n");
+                        }
+                        obj_idx += 0x20;
+                    }
+                }
+
+                pVoice = Audio_GetVoice(g_WeatherAudioVoices[vp]);
+                if (pVoice != NULL) {
+                    *(int *)(pVoice + 0xc) = (int)Math_RandomFloat0To1();
+                }
+
+                if (g_WeatherType == 1 && g_WeatherActive[vp] == 1 && g_LightningEnabled == 1) {
+                    if ((int)Math_RandomFloat0To1() == 0) {
+                        lightning_roll = (int)Math_RandomFloat0To1();
+                        abs_node = *(unsigned int *)(g_Vehicles + 0x364 + vehicle_idx * 0x484c);
+                        road_node = abs((int)abs_node) + lightning_roll;
+                        if (road_node < g_TrackRoadSequenceNodeCount) {
+                            road_idx = *(int *)(g_pTrackRoadSequence + road_node * 0x18);
+                        } else {
+                            road_idx = *(int *)(g_pTrackRoadSequence + lightning_roll * 0x18);
+                        }
+                        road_height = *(int *)(road_idx * 0x14 + g_pActivePLC + 0x10);
+
+                        g_ActiveParticle.type = 6;
+                        g_ActiveParticle.pos_x = (int)Math_RandomFloat0To1();
+                        g_ActiveParticle.pos_y = road_height * -1024;
+                        g_ActiveParticle.pos_z = (int)Math_RandomFloat0To1();
+                        g_ActiveParticle.vel_z = 6;
+                        g_ActiveParticle.vel_y = 0;
+                        g_ActiveParticle.vel_x = vehicle_idx;
+
+                        FX_SpawnParticle(&g_ActiveParticle);
+                        Audio_PlaySampleVol(1, 0, 2, 0, 0x10000, 0, 0);
+                    }
+                }
             }
-            if (((((int*)&(g_WeatherActive))[var_18] == 0) || (0.0 <= g_RaceTimer)) && (0 < var_pi4[1])) {
-              if (g_HudEnabled == 1) {
-                var_i9 = *var_pi4 + -4;
-LAB_00434c38:
-                *var_pi4 = var_i9;
-                var_pi4[1] = var_pi4[1] + -2;
-              }
-              else if (g_HudEnabled == 2) {
-                var_i9 = *var_pi4 + -2;
-                goto LAB_00434c38;
-              }
-              var_i9 = var_pi4[1] / 2;
-              if ((DAT_0054f98c == 1) && (g_HudEnabled == 1)) {
-                var_u11 = Palette_AdjustRGB(var_pi4,var_pi4[1] >> 0x1f,g_ActiveTrackPalette + 8);
-                Gfx_FreeSurface((int)var_u11);
-              }
-              var_i10 = 0;
-              if (0 < var_i9 * 2) {
-                var_pi8 = var_pi4 + var_i9 * 6 + 2;
-                var_pi5 = var_pi4 + var_i9 * 0xc + 2;
-                var_i6 = 0;
-                do {
-                  if (g_HudEnabled == 1) {
-                    *var_pi5 = 0xd;
-                    var_pi5[1] = var_i6;
-                    var_pi5[2] = var_i6 + 1;
-                    var_pi5[3] = 0x7700;
-                    var_pi5[4] = 0x7b00;
-                    var_pi5[5] = DAT_00527f74;
-                  }
-                  else if (g_HudEnabled == 2) {
-                    *var_pi8 = 7;
-                    var_pi8[1] = var_i10;
-                    var_pi8[2] = 0;
-                    var_pi8[3] = 0x7500;
-                    var_pi8[4] = 0x1f00;
-                    var_pi8[5] = 0x9400;
-                    var_pi8[6] = 0;
-                    var_pi8[7] = g_CameraFovScaleX * 100;
-                    var_pi8[8] = g_CameraFovScaleY * 100;
-                  }
-                  var_pi8 = var_pi8 + 9;
-                  var_pi5 = var_pi5 + 6;
-                  var_i6 = var_i6 + 2;
-                  var_i10 = var_i10 + 1;
-                } while (var_i10 < var_i9 * 2);
-              }
+
+            if ((double)(g_WeatherAnimTick + 2) < (double)g_GlobalFrameCount) {
+                g_WeatherAnimTick = (int)g_GlobalFrameCount;
             }
-          }
-          if ((g_HudEnabled == 1) && (0 < *var_pi4)) {
-            *(int *)(&DAT_00563d28 + var_18 * 4) = *(int *)(&DAT_00563d28 + var_18 * 4) + 5;
-            *(int *)(&DAT_00563d38 + var_18 * 4) = *(int *)(&DAT_00563d38 + var_18 * 4) + -0x19;
-            Math_RandomFloat0To1();
-            var_l12 = __ftol();
-            if (((int)var_l12 == 0) && (g_RaceTimer < 0.0)) {
-              __ftol();
-              __ftol();
-              Audio_PlaySampleVol(1,0,1,0,0x10000,0,0);
-            }
-          }
-          else if ((g_HudEnabled == 2) && (0 < *var_pi4)) {
-            *(double *)(&DAT_00525e30 + var_18 * 8) =
-                 *(double *)(&DAT_00525e30 + var_18 * 8) + _DAT_0047a480;
-            if (_DAT_0047a488 < *(double *)(&DAT_00525e30 + var_18 * 8)) {
-              *(double *)(&DAT_00525e30 + var_18 * 8) =
-                   *(double *)(&DAT_00525e30 + var_18 * 8) - _DAT_0047a488;
-            }
-            fsin((double)*(double *)(&DAT_00525e30 + var_18 * 8));
-            var_l12 = __ftol();
-            var_i9 = g_Vehicles;
-            *(int *)(&DAT_00563d28 + var_18 * 4) = (int)var_l12;
-            *(int *)(&DAT_00563d38 + var_18 * 4) = *(int *)(&DAT_00563d38 + var_18 * 4) + -5;
-            fcos((double)*(double *)(var_i9 + 0x100 + var_10 * 0x484c));
-            var_l12 = __ftol();
-            fsin((double)*(double *)(var_i9 + var_10 * 0x484c + 0x100));
-            var_l13 = __ftol();
-            var_i9 = var_pi4[1] / 2;
-            if (0 < var_i9) {
-              var_pi4 = var_pi4 + 2;
-              do {
-                var_i6 = *var_pi4 + (int)var_l12;
-                var_i10 = (int)var_l13 + var_pi4[2];
-                var_i9 = var_i9 + -1;
-                var_pi4[3] = var_i6;
-                var_pi4[5] = var_i10;
-                var_pi4[9] = var_i6;
-                var_pi4[0xb] = var_i10;
-                var_pi4 = var_pi4 + 6;
-              } while (var_i9 != 0);
-            }
-          }
-          var_pi4 = (int *)(&DAT_00563d38 + var_18 * 4);
-          if (*var_pi4 < -800) {
-            *(int *)(&DAT_00563d28 + var_18 * 4) = 0;
-            *var_pi4 = *var_pi4 + 800;
-          }
-          var_c = 0;
-          var_i9 = var_18 * 0x120;
-          do {
-            var_i10 = 0;
-            do {
-              var_l12 = __ftol();
-              var_l13 = __ftol();
-              var_l14 = __ftol();
-              *(int *)(DAT_00553030 + 4 + var_i9) =
-                   *(int *)(&DAT_00563d28 + var_18 * 4) + (((int)var_l14 + var_i10) * 5 + -5) * 200;
-              *(int *)(DAT_00553030 + 8 + var_i9) = *var_pi4 + (int)var_l12;
-              *(int *)(DAT_00553030 + 0xc + var_i9) = ((var_c + (int)var_l13) * 5 + -5) * 200;
-              *(int *)(DAT_00553030 + 0x10 + var_i9) = 0;
-              *(int *)(DAT_00553030 + 0x14 + var_i9) = 0;
-              *(int *)(DAT_00553030 + 0x18 + var_i9) = 0;
-              var_i6 = Lisa_UpdateObjectSpatialGrid((int *)(DAT_00553030 + var_i9));
-              if (var_i6 != 0) {
-                Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_WEATHER_0049948c);
-              }
-              var_i9 = var_i9 + 0x20;
-              var_i10 = var_i10 + 1;
-            } while (var_i10 < 3);
-            var_c = var_c + 1;
-          } while (var_c < 3);
-          var_pu3 = Audio_GetVoice(((int*)&(DAT_00525e50))[var_18]);
-          if (var_pu3 != (char *)0x0) {
-            var_l12 = __ftol();
-            *(int *)(var_pu3 + 0xc) = (int)var_l12;
-          }
-          if (((g_HudEnabled == 1) && (((int*)&(g_WeatherActive))[var_18] == 1)) && (DAT_00553084 == 1)) {
-            Math_RandomFloat0To1();
-            var_l12 = __ftol();
-            if ((int)var_l12 == 0) {
-              Math_RandomFloat0To1();
-              var_l12 = __ftol();
-              var_18 = (int)var_l12;
-              var_u1 = *(unsigned int *)(g_Vehicles + 0x364 + var_10 * 0x484c);
-              var_u7 = (int)var_u1 >> 0x1f;
-              var_i9 = ((var_u1 ^ var_u7) - var_u7) + var_18;
-              if (var_i9 < g_TrackRoadSequenceNodeCount) {
-                var_i9 = *(int *)(g_pTrackRoadSequence + var_i9 * 0x18);
-              }
-              else {
-                var_i9 = *(int *)(g_pTrackRoadSequence + var_18 * 0x18);
-              }
-              var_i9 = *(int *)(var_i9 * 0x14 + g_pActivePLC + 0x10);
-              g_ActiveParticle.type = 6;
-              Math_RandomFloat0To1();
-              var_l12 = __ftol();
-              g_ActiveParticle.pos_x = (int)var_l12;
-              g_ActiveParticle.pos_y = var_i9 * -0x400;
-              Math_RandomFloat0To1();
-              var_l12 = __ftol();
-              g_ActiveParticle.pos_z = (int)var_l12;
-              g_ActiveParticle.vel_z = 6;
-              g_ActiveParticle.vel_y = 0;
-              g_ActiveParticle.vel_x = var_10;
-              FX_SpawnParticle((SceneryParticle *)&g_ActiveParticle.type);
-              __ftol();
-              __ftol();
-              Audio_PlaySampleVol(1,0,2,0,0x10000,0,0);
-            }
-          }
-          var_18 = var_18 + 1;
-        } while (var_18 < DAT_0054f98c);
-      }
-      if ((double)(DAT_00563cf4 + 2) < _DAT_005285d8) {
-        var_l12 = __ftol();
-        DAT_00563cf4 = (int)var_l12;
-      }
-    }
-  }
-  else if (((0 < DAT_00563c34[1]) || (0 < DAT_00563c30[1])) &&
-          (((g_IsSplitScreen == 0 && (_DAT_0047a448 <= g_RaceTimer)) ||
-           (((g_IsSplitScreen == 1 && (*(int *)(g_Vehicles + 0x4d74) == 1)) &&
-            (_DAT_0047a448 <= g_RaceTimer)))))) {
-    Gfx_FreeSurface(g_ActiveTrackPalette + 8);
-    DAT_00563c34[1] = 0;
-    DAT_00563c30[1] = 0;
-  }
-  if ((g_HudEnabled == 1) || (g_HudEnabled == 3)) {
-    var_i9 = 0;
-    var_i10 = 0;
-    if (0 < DAT_0054f98c) {
-      do {
-        var_pu3 = Audio_GetVoice(*(int *)((int)&DAT_00525e50 + var_i9));
-        if (var_pu3 != (char *)0x0) {
-          if ((*(int *)((int)&g_WeatherActive + var_i9) == 1) && (*(int *)(var_pu3 + 0xc) < 30000)) {
-            *(int *)(var_pu3 + 0xc) = *(int *)(var_pu3 + 0xc) + 0x9c4;
-          }
-          else if ((*(int *)((int)&g_WeatherActive + var_i9) == 0) &&
-                  ((0 < *(int *)(var_pu3 + 0xc) &&
-                   (var_i6 = *(int *)(var_pu3 + 0xc) + -0x9c4, *(int *)(var_pu3 + 0xc) = var_i6,
-                   var_i6 < 0)))) {
-            *(int *)(var_pu3 + 0xc) = 0;
-          }
         }
-        var_i9 = var_i9 + 4;
-        var_i10 = var_i10 + 1;
-      } while (var_i10 < DAT_0054f98c);
+    } else if ((g_pRainMesh_P2[1] > 0 || g_pRainMesh_P1[1] > 0) &&
+               ((g_IsSplitScreen == 0 && g_RaceTimer >= 120.0) ||
+                (g_IsSplitScreen == 1 && *(int *)(g_Vehicles + 0x4d74) == 1 && g_RaceTimer >= 120.0))) {
+        Gfx_FreeSurface(g_ActiveTrackPalette + 8);
+        g_pRainMesh_P2[1] = 0;
+        g_pRainMesh_P1[1] = 0;
     }
-  }
-  return;
+
+    if (g_WeatherType == 1 || g_WeatherType == 3) {
+        for (vp = 0; vp < g_WeatherViewportCount; vp++) {
+            pVoice = Audio_GetVoice(g_WeatherAudioVoices[vp]);
+            if (pVoice != NULL) {
+                if (g_WeatherActive[vp] == 1 && *(int *)(pVoice + 0xc) < 30000) {
+                    *(int *)(pVoice + 0xc) += 2500;
+                } else if (g_WeatherActive[vp] == 0 && *(int *)(pVoice + 0xc) > 0) {
+                    *(int *)(pVoice + 0xc) -= 2500;
+                    if (*(int *)(pVoice + 0xc) < 0) {
+                        *(int *)(pVoice + 0xc) = 0;
+                    }
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -3499,83 +3449,77 @@ LAB_00434c38:
  * @fidelity ADAPTED
  */
 void FX_FrameTick(void) {
-  int var_i1;
-  double *var_pd2;
-  double var_d3;
-  int *var_pi4;
-  int *var_pi5;
-  double var_f6;
-  g_ActiveVehicleIndex = 0;
-  if (0 < g_NumRacers) {
-    do {
-      var_d3 = *(double *)(g_Vehicles + 0x108 + g_ActiveVehicleIndex * 0x484c) * g_Const_DegToRad;
-      var_i1 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-      if (*(int *)(g_Vehicles + 0x554 + g_ActiveVehicleIndex * 0x484c) == 0) {
-        *(double *)(var_i1 + 0x584) =
-             ((var_d3 + *(double *)(var_i1 + 0xb8)) * g_Const_0_05 - *(double *)(var_i1 + 0x584)) *
-             g_Const_0_1 + *(double *)(var_i1 + 0x584);
-        var_i1 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-        var_f6 = (double)Math_AngleMod(g_ActiveVehicleIndex * 0x909);
-        var_d3 = (double)var_f6;
-        if ((double)g_Const_Pi < var_f6) {
-          do {
-            var_d3 = var_d3 - g_Const_TwoPi;
-          } while (g_Const_Pi < var_d3);
+    int i;
+    VehicleState *v;
+    double pitch_rad;
+    double roll_deg;
+    double angle_step;
+
+    for (g_ActiveVehicleIndex = 0; g_ActiveVehicleIndex < g_NumRacers; g_ActiveVehicleIndex++) {
+        v = (VehicleState *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c);
+        pitch_rad = v->angle_pitch * g_Const_DegToRad;
+
+        if (v->suspension_override == 0) {
+            v->smooth_pitch = ((pitch_rad + *(double *)((char *)v + 0xb8)) * g_Const_0_05 - v->smooth_pitch) *
+                              g_Const_0_1 + v->smooth_pitch;
+            angle_step = (double)Math_AngleMod(g_ActiveVehicleIndex * 0x909);
+            roll_deg = angle_step;
+            while (roll_deg > g_Const_Pi) {
+                roll_deg -= g_Const_TwoPi;
+            }
+            while (roll_deg < g_Const_NegPi) {
+                roll_deg += g_Const_TwoPi;
+            }
+            v->smooth_roll = roll_deg * g_Const_0_1 + v->smooth_roll;
+        } else {
+            v->smooth_pitch = pitch_rad * g_Const_0_05;
+            v->smooth_roll = v->angle_roll * g_Const_DegToRad * g_Const_0_05;
         }
-        for (; var_d3 < g_Const_NegPi; var_d3 = var_d3 + g_Const_TwoPi) {
+
+        FX_SpawnWaterSplashes();
+
+        if (v->water_splash_accum > 0.0 && v->water_splash_accum < g_Const_0_05) {
+            v->water_splash_accum += k_SplashAccumIncrement;
         }
-        *(double *)(var_i1 + 0x58c) = var_d3 * g_Const_0_1 + *(double *)(var_i1 + 0x58c);
-      }
-      else {
-        *(double *)(var_i1 + 0x584) = var_d3 * g_Const_0_05;
-        *(double *)(g_Vehicles + 0x58c + g_ActiveVehicleIndex * 0x484c) =
-             *(double *)(g_Vehicles + 0x110 + g_ActiveVehicleIndex * 0x484c) * g_Const_DegToRad *
-             g_Const_0_05;
-      }
-      FX_SpawnWaterSplashes();
-      var_pd2 = (double *)(g_Vehicles + 0x60c + g_ActiveVehicleIndex * 0x484c);
-      if ((0.0 < *(double *)(g_Vehicles + 0x60c + g_ActiveVehicleIndex * 0x484c)) &&
-         (*var_pd2 < g_Const_0_05)) {
-        *var_pd2 = *var_pd2 + k_SplashAccumIncrement;
-      }
-      g_ActiveVehicleIndex = g_ActiveVehicleIndex + 1;
-    } while (g_ActiveVehicleIndex < g_NumRacers);
-  }
-  FX_UpdateWeatherGeometry();
-  if ((((g_IsSplitScreen == 0) && (*(int *)(g_Vehicles + 0x528) == 1)) ||
-      ((g_IsSplitScreen == 1 &&
-       ((*(int *)(g_Vehicles + 0x528) == 1 && (*(int *)(g_Vehicles + 0x4d74) == 1)))))) &&
-     ((k_TurboProgressMinTimer <= g_RaceTimer &&
-      ((DAT_00563c60 == 0 && (DAT_005db038 = DAT_005db038 + 10, 0x13f < DAT_005db038)))))) {
-    DAT_005db038 = 0x13f;
-    if (g_GameMode == 3) {
-      if (g_LapsTotal + -1 <= 5 - g_RacePosition) goto LAB_00435673;
-      g_RacePosition = g_RacePosition + -1;
     }
-    else {
-      if (g_RacePosition < g_LapsTotal + -1) {
-        DAT_005db038 = 0;
-        g_RacePosition = g_RacePosition + 1;
-      }
-      if (((_DAT_00553090 <= (double)(DAT_00525e44 / 100)) || (1 < g_RacePosition)) ||
-         (((*(int *)(g_Vehicles + 0x528) != 0 || (g_LapsTotal != 0)) &&
-          ((*(int *)(g_Vehicles + 0x528) != 1 || (g_LapsTotal != 1)))))) goto LAB_00435673;
-      g_RacePosition = g_RacePosition + 1;
+
+    FX_UpdateWeatherGeometry();
+
+    if (((g_IsSplitScreen == 0 && *(int *)(g_Vehicles + 0x528) == 1) ||
+         (g_IsSplitScreen == 1 && *(int *)(g_Vehicles + 0x528) == 1 && *(int *)(g_Vehicles + 0x4d74) == 1)) &&
+        (g_RaceTimer >= k_TurboProgressMinTimer && g_IsGamePaused == 0)) {
+        g_TurboMeterFill += 10;
+        if (g_TurboMeterFill > 319) {
+            g_TurboMeterFill = 319;
+            if (g_GameMode == 3) {
+                if (g_LapsTotal - 1 > 5 - g_RacePosition) {
+                    g_RacePosition--;
+                }
+            } else {
+                if (g_RacePosition < g_LapsTotal - 1) {
+                    g_TurboMeterFill = 0;
+                    g_RacePosition++;
+                }
+                if (g_LapRecordSeconds <= (double)(g_TargetLapTimeCents / 100) || g_RacePosition > 1 ||
+                    ((*(int *)(g_Vehicles + 0x528) != 0 || g_LapsTotal != 0) &&
+                     (*(int *)(g_Vehicles + 0x528) != 1 || g_LapsTotal != 1))) {
+                    /* skip */
+                } else {
+                    g_RacePosition++;
+                }
+                g_TurboMeterFill = 0;
+            }
+        }
     }
-    DAT_005db038 = 0;
-  }
-LAB_00435673:
-  var_pi4 = &DAT_006192a0;
-  do {
-    var_pi5 = var_pi4 + 1;
-    *var_pi4 = *var_pi4 + 1;
-    var_pi4[10] = var_pi4[10] + 1;
-    var_pi4 = var_pi5;
-  } while (var_pi5 < &DAT_006192c8);
-  if ((g_PlayerCarChoice == 7) && (_DAT_00552f68 < k_SpecialCarBonusLimit)) {
-    _DAT_00552f68 = _DAT_00552f68 + k_SpecialCarBonusStep;
-  }
-  return;
+
+    for (i = 0; i < 10; i++) {
+        g_HudAnimTimers[i]++;
+        g_HudAnimTimers[i + 10]++;
+    }
+
+    if (g_PlayerCarChoice == 7 && g_HudAnimSinPhase < k_SpecialCarBonusLimit) {
+        g_HudAnimSinPhase += k_SpecialCarBonusStep;
+    }
 }
 
 /**
@@ -6340,7 +6284,7 @@ int Video_SetGraphicsMode(void) {
       } while (var_i2 < g_NumRacers);
     }
     Lisa_ResetRasterizerContext();
-    if ((((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && (DAT_0054f98c == 1)) && (g_HudEnabled == 1)
+    if ((((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && (DAT_0054f98c == 1)) && (g_WeatherType == 1)
        ) {
       var_u7 = Palette_AdjustRGB(out_ECX,*(int *)(DAT_00563c34 + 4) >> 0x1f,g_ActiveTrackPalette + 8);
       Gfx_FreeSurface((int)var_u7);
@@ -6373,7 +6317,7 @@ int Video_SetGraphicsMode(void) {
       } while (var_i2 < g_NumRacers);
     }
     Lisa_ResetRasterizerContext();
-    if (((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && ((DAT_0054f98c == 1 && (g_HudEnabled == 1)))
+    if (((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && ((DAT_0054f98c == 1 && (g_WeatherType == 1)))
        ) {
       var_u7 = Palette_AdjustRGB(extraout_ECX_00,*(int *)(DAT_00563c34 + 4) >> 0x1f,g_ActiveTrackPalette + 8);
       Gfx_FreeSurface((int)var_u7);
@@ -6406,7 +6350,7 @@ int Video_SetGraphicsMode(void) {
       } while (var_i2 < g_NumRacers);
     }
     Lisa_ResetRasterizerContext();
-    if (((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && ((DAT_0054f98c == 1 && (g_HudEnabled == 1)))
+    if (((g_WeatherActive == 1) && (g_IsSplitScreen == 0)) && ((DAT_0054f98c == 1 && (g_WeatherType == 1)))
        ) {
       var_u7 = Palette_AdjustRGB(extraout_ECX_01,*(int *)(DAT_00563c34 + 4) >> 0x1f,g_ActiveTrackPalette + 8);
       Gfx_FreeSurface((int)var_u7);
