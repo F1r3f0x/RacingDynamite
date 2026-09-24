@@ -515,3 +515,13 @@ typedef struct VehicleConfig {
 } VehicleConfig;
 ```
 
+### `CinematicCameraWaypoint` (20 bytes / 0x14 bytes)
+```c
+typedef struct CinematicCameraWaypoint {
+    float pos_x;                       // 0x00: World X viewpoint position
+    float pos_y;                       // 0x04: World Y viewpoint elevation
+    float pos_z;                       // 0x08: World Z viewpoint position
+    float pitch;                       // 0x0C: Camera pitch angle (degrees)
+    float yaw;                         // 0x10: Camera yaw heading angle (degrees)
+} CinematicCameraWaypoint;
+```

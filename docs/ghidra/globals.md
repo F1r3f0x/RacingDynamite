@@ -195,6 +195,33 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x0063c5d8` | `int32_t`    | `g_ActiveTrackSegmentAttribute` | Active track segment visual / fog attribute passed to Lisa rasterizer. |
 | `0x00553784` | `int32_t*`   | `g_TrackChunkToNodeTable` | Lookup table mapping track placement chunks to spline road nodes (12 bytes per entry). |
 | `0x005db000` | `int32_t*`   | `g_pCarBaseMeshes` | Base unblemished mesh pointers for vehicle archetypes. |
+| `0x0054f92c` | `int32_t`    | `g_CameraFovWobbleActive` | Toggle flag for sinusoidal FOV/zoom camera oscillation. |
+| `0x00525e2c` | `float`      | `g_CameraFovWobblePhase` | Angular phase accumulator for camera FOV oscillation. |
+| `0x00498538` | `float[7][3][5]`| `g_TrackFlybyCameras` | Preset cinematic camera viewpoints (X, Y, Z, pitch, yaw) across 7 tracks. |
+| `0x00497ed8` | `int32_t[7]` | `g_TrackBackgroundColors` | Background viewport clear palette color index for each of the 7 tracks. |
+| `0x00527f40` | `int32_t`    | `g_ScreenShakeTimerP1` | Screen shake / collision impact decay timer for Player 1 (0 to 120 ticks). |
+| `0x00527f44` | `int32_t`    | `g_ScreenShakeTimerP2` | Screen shake / collision impact decay timer for Player 2 (0 to 120 ticks). |
+| `0x00563d20` | `int32_t`    | `g_CinematicCameraAngleState` | Post-race cinematic camera angle cycling state index (0 to 3). |
+| `0x00601664` | `int32_t`    | `g_CinematicFocusedVehicle` | Vehicle index currently being tracked by the post-race cinematic camera. |
+| `0x0054f960` | `void*`      | `g_ViewportBorderCornerTL` | Sprite graphic for top-left viewport corner border overlay. |
+| `0x0054f964` | `void*`      | `g_ViewportBorderCornerTR` | Sprite graphic for top-right viewport corner border overlay. |
+| `0x0054f968` | `void*`      | `g_ViewportBorderCornerBL` | Sprite graphic for bottom-left viewport corner border overlay. |
+| `0x0054f96c` | `void*`      | `g_ViewportBorderCornerBR` | Sprite graphic for bottom-right viewport corner border overlay. |
+| `0x00563c58` | `int32_t*`   | `g_ViewportBorderMetrics` | Viewport border sprite dimensions and layout metrics. |
+| `0x00563c60` | `int32_t`    | `g_GamePauseState` | Master game pause state toggle (1 = paused, 0 = active). |
+| `0x00563d88` | `int32_t`    | `g_PostRaceSequenceState` | Post-race results sequence state machine dispatcher. |
+| `0x00563c5c` | `int32_t`    | `g_TrackFlybyActiveTarget` | Target vehicle index followed during telemetry / flyby camera mode. |
+| `0x00563c48` | `double`     | `g_FlybyCameraOffsetX` | Camera follow offset X during vehicle chase telemetry mode. |
+| `0x00563c40` | `double`     | `g_FlybyCameraOffsetY` | Camera follow offset Y during vehicle chase telemetry mode. |
+| `0x00563c50` | `double`     | `g_FlybyCameraOffsetZ` | Camera follow offset Z during vehicle chase telemetry mode. |
+| `0x0054f9d8` | `int32_t`    | `g_FlybyLastCameraPosX` | Cached last camera world position X during flyby tracking. |
+| `0x0054f9dc` | `int32_t`    | `g_FlybyLastCameraPosY` | Cached last camera world position Y during flyby tracking. |
+| `0x0054f9e0` | `int32_t`    | `g_FlybyLastCameraPosZ` | Cached last camera world position Z during flyby tracking. |
+| `0x00553098` | `int32_t`    | `g_FlybyLastYaw` | Cached last camera heading yaw angle during flyby tracking. |
+| `0x005530a0` | `int32_t`    | `g_FlybyLastPitch` | Cached last camera pitch inclination angle during flyby tracking. |
+| `0x0055309c` | `int32_t`    | `g_FlybyLastRoll` | Cached last camera roll tilt angle during flyby tracking. |
+| `0x0054f934` | `int32_t`    | `g_SkyClearEnabled` | Viewport background sky clearing toggle flag. |
+| `0x00563c14` | `int32_t`    | `g_ShowRollTelemetry` | Debug roll telemetry / free camera mode toggle (0=Off, 1=Free, 2=Target). |
 
 
 

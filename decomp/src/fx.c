@@ -712,6 +712,38 @@ extern int DAT_004986e0[];
 #define s_TrackSurfaceMissing_004994cc ((const char *)&DAT_004994cc)
 #define g_ActiveTrackSegmentAttribute DAT_0063c5d8
 #define g_TrackSegmentTable ((int *)&DAT_00552e40)
+#define g_CameraFovWobbleActive DAT_0054f92c
+#define g_CameraFovWobblePhase (*(float *)&_DAT_00525e2c)
+#define g_TrackFlybyCameras ((float *)&DAT_00498538)
+#define g_TrackBackgroundColors ((int *)&DAT_00497ed8)
+#define g_ScreenShakeTimerP1 DAT_00527f40
+#define g_ScreenShakeTimerP2 DAT_00527f44
+#define g_CinematicCameraAngleState DAT_00563d20
+#define g_CinematicFocusedVehicle _DAT_00601664
+#define g_ViewportBorderCornerTL ((void *)DAT_0054f960)
+#define g_ViewportBorderCornerTR ((void *)DAT_0054f964)
+#define g_ViewportBorderCornerBL ((void *)DAT_0054f968)
+#define g_ViewportBorderCornerBR ((void *)DAT_0054f96c)
+#define g_ViewportBorderMetrics ((int *)&DAT_00563c58)
+#define g_GamePauseState DAT_00563c60
+#define g_PostRaceSequenceState DAT_00563d88
+#define g_TrackFlybyActiveTarget DAT_00563c5c
+#define g_FlybyCameraOffsetX (*(double *)&_DAT_00563c48)
+#define g_FlybyCameraOffsetY (*(double *)&_DAT_00563c40)
+#define g_FlybyCameraOffsetZ (*(double *)&_DAT_00563c50)
+#define g_FlybyLastCameraPosX _DAT_0054f9d8
+#define g_FlybyLastCameraPosY _DAT_0054f9dc
+#define g_FlybyLastCameraPosZ _DAT_0054f9e0
+#define g_FlybyLastYaw DAT_00553098
+#define g_FlybyLastPitch DAT_005530a0
+#define g_FlybyLastRoll DAT_0055309c
+#define g_SkyClearEnabled DAT_0054f934
+#define g_ShowRollTelemetry DAT_00563c14
+#define g_SplitScreenMode DAT_00552f58
+#define g_ScreenSizeSetting DAT_00527f28
+#define g_CameraPosX_Int DAT_005532c0
+#define g_CameraPosY_Int DAT_005532b8
+#define g_CameraPosZ_Int DAT_00553288
 
 /**
  * @original Audio_PlaySampleVol (IGN_WIN.EXE @ 0x0043e710, fx.c)
@@ -951,683 +983,503 @@ unsigned int FX_SpawnParticle(SceneryParticle *p) {
 /**
  * @original Race_RenderViewport (IGN_WIN.EXE @ 0x00436990, fx.c)
  * @fidelity ADAPTED
+ * @deviation DEV-004
+ * @fix_category FIX_CAT_CAMERA
  */
-void Race_RenderViewport(double param_1) {
-  double *var_pd1;
-  char var_u2;
-  int var_u3;
-  int var_i4;
-  int *var_pi5;
-  int *var_pi6;
-  unsigned int var_u7;
-  int var_i8;
-  int *var_pi9;
-  double *var_pd10;
-  int out_ECX;
-  int extraout_ECX_00;
-  unsigned int var_u11;
-  int var_i12;
-  int var_i13;
-  int var_i14;
-  int var_u15;
-  unsigned int out_EDX;
-  unsigned int extraout_EDX_00;
-  char *var_pu16;
-  int *var_pu17;
-  double var_f18;
-  double var_f19;
-  __int64 var_l20;
-  __int64 var_7c;
-  __int64 var_74;
-  __int64 var_6c;
-  __int64 var_64;
-  __int64 var_5c;
-  __int64 var_54;
-  __int64 var_4c;
-  __int64 var_44;
-  __int64 var_3c;
-  int var_34;
-  int var_30;
-  __int64 var_28;
-  double var_20;
-  double var_18;
-  double var_10;
-  double var_8;
-  if (DAT_0054f92c == 1) {
-    var_f18 = (double)_DAT_00525e2c;
-    _DAT_00525e2c = (float)(var_f18 + (double)_DAT_0047a578);
-    var_f18 = (double)fsin(var_f18 + (double)_DAT_0047a578);
-    g_pActiveCamera[6] = (double)var_f18;
-  }
-  if ((g_IsDemoMode == 1) && (var_u11 = g_ScreenWidth * g_ScreenHeight, 0 < (int)var_u11)) {
-    var_pu17 = &g_VirtualFramebuffer;
-    for (var_u7 = var_u11 >> 2; var_u7 != 0; var_u7 = var_u7 - 1) {
-      *var_pu17 = 0;
-      var_pu17 = var_pu17 + 1;
+void Race_RenderViewport(double delta_time) {
+    VehicleState *veh;
+    VehicleState *veh_p2;
+    VehicleConfig *config;
+    VehicleConfig *config_p2;
+    DynamicObjectTransform *ghost_transform;
+    DynamicObjectTransform *ghost_transform_p2;
+    double cam_pos_x, cam_pos_y, cam_pos_z;
+    double cam_pitch, cam_yaw;
+    double cam_p2_pos_x, cam_p2_pos_y, cam_p2_pos_z;
+    double cam_p2_pitch, cam_p2_yaw;
+    double cos_val, sin_val;
+    double wobble_sin;
+    double phase;
+    int camera_tilt_angle;
+    int chunk_idx;
+    int node_idx;
+    int track_waypoint_idx;
+    int border_pos[2];
+    int screen_w, screen_h;
+    int y, divider_x;
+    int top_band_height;
+    int cur_y, cur_x;
+    int fb_row;
+    int vp_y, vp_y2, vp_x1, vp_x2;
+    int p2_y, p2_y2, p2_x1, p2_x2;
+    uint8_t sky_color;
+    uint8_t *fb;
+
+    fb = (uint8_t *)&g_VirtualFramebuffer;
+
+    /* 1. Camera FOV wobble oscillation */
+    if (g_CameraFovWobbleActive == 1) {
+        phase = (double)g_CameraFovWobblePhase;
+        g_CameraFovWobblePhase = (float)(phase + 0.1);
+        wobble_sin = sin(phase + 0.1);
+        g_pActiveCamera[6] = wobble_sin;
     }
-    for (var_u11 = var_u11 & 3; var_u11 != 0; var_u11 = var_u11 - 1) {
-      *(char *)var_pu17 = 0;
-      var_pu17 = (int *)((int)var_pu17 + 1);
+
+    /* 2. Demo mode: clear virtual framebuffer */
+    if (g_IsDemoMode == 1) {
+        int total_pixels = g_ScreenWidth * g_ScreenHeight;
+        if (total_pixels > 0) {
+            memset(&g_VirtualFramebuffer, 0, total_pixels);
+        }
     }
-  }
-  if (g_CurrentTrackIndex == 5) {
-    var_i14 = *(int *)(g_Vehicles + 0x364 + g_MenuCursorPos * 0x484c);
-    if ((0x1b < var_i14) && (var_i14 < 0x46)) {
-      *(int *)((int)g_pActiveCamera + 0xa4) = 0x1e;
-      goto LAB_00436c9c;
-    }
-  }
-  else if (g_CurrentTrackIndex == 3) {
-    var_i14 = *(int *)(g_Vehicles + 0x364 + g_MenuCursorPos * 0x484c);
-    if ((0 < var_i14) && (var_i14 < 0x1e)) {
-      *(int *)((int)g_pActiveCamera + 0xa4) = 0x19;
-      goto LAB_00436c9c;
-    }
-    if ((0xbb < var_i14) && (var_i14 < 0xc5)) {
-      *(int *)((int)g_pActiveCamera + 0xa4) = 0x1e;
-      goto LAB_00436c9c;
-    }
-  }
-  else {
-    if (g_CurrentTrackIndex == 2) {
-      var_i8 = *(int *)(g_PlayerHUDState + 0x30 + g_MenuCursorPos * 0x4c);
-      var_i14 = g_PlayerHUDState + g_MenuCursorPos * 0x4c;
-      var_i4 = (g_ScreenHeight / 200) * 0x19;
-      if (var_i8 < var_i4 + var_i8) {
-        var_i13 = g_ScreenWidth * var_i8;
-        do {
-          var_i12 = *(int *)(var_i14 + 0x2c);
-          if (var_i12 < *(int *)(var_i14 + 0x34)) {
-            do {
-              *(char *)((int)&g_VirtualFramebuffer + var_i12 + var_i13) = 0x72;
-              var_i12 = var_i12 + 1;
-            } while (var_i12 < *(int *)(var_i14 + 0x34));
-          }
-          var_i8 = var_i8 + 1;
-          var_i13 = var_i13 + g_ScreenWidth;
-        } while (var_i8 < *(int *)(var_i14 + 0x30) + var_i4);
-      }
-      if ((g_IsSplitScreen == 1) && (DAT_00552f58 == 0)) {
-        var_i14 = *(int *)(g_PlayerHUDState + 0x7c);
-        var_pi6 = (int *)(g_PlayerHUDState + 0x7c);
-        if (var_i14 < var_i14 + var_i4) {
-          var_pi9 = (int *)(g_PlayerHUDState + 0x78);
-          var_pi5 = (int *)(g_PlayerHUDState + 0x80);
-          var_i8 = g_ScreenWidth * var_i14;
-          do {
-            var_i13 = *var_pi9;
-            if (var_i13 < *var_pi5) {
-              do {
-                *(char *)((int)&g_VirtualFramebuffer + var_i13 + var_i8) = 0x72;
-                var_i13 = var_i13 + 1;
-              } while (var_i13 < *var_pi5);
+
+    /* 3. Track-specific camera pitch/tilt override */
+    camera_tilt_angle = 0;
+    node_idx = *(int *)((uint8_t *)g_Vehicles + 0x364 + g_MenuCursorPos * 0x484c);
+
+    if (g_CurrentTrackIndex == 5) {
+        if (node_idx > 27 && node_idx < 70) {
+            camera_tilt_angle = 30;
+        }
+    } else if (g_CurrentTrackIndex == 3) {
+        if (node_idx > 0 && node_idx < 30) {
+            camera_tilt_angle = 25;
+        } else if (node_idx > 187 && node_idx < 197) {
+            camera_tilt_angle = 30;
+        }
+    } else if (g_CurrentTrackIndex == 2) {
+        top_band_height = (g_ScreenHeight / 200) * 25;
+        vp_y = *(int *)(g_PlayerHUDState + 0x30 + g_MenuCursorPos * 0x4c);
+        vp_x1 = *(int *)(g_PlayerHUDState + 0x2c + g_MenuCursorPos * 0x4c);
+        vp_x2 = *(int *)(g_PlayerHUDState + 0x34 + g_MenuCursorPos * 0x4c);
+
+        for (cur_y = vp_y; cur_y < vp_y + top_band_height; cur_y++) {
+            fb_row = cur_y * g_ScreenWidth;
+            for (cur_x = vp_x1; cur_x < vp_x2; cur_x++) {
+                fb[fb_row + cur_x] = 0x72;
             }
-            var_i14 = var_i14 + 1;
-            var_i8 = var_i8 + g_ScreenWidth;
-          } while (var_i14 < *var_pi6 + var_i4);
         }
-      }
-      goto LAB_00436c9c;
-    }
-    if (g_CurrentTrackIndex == 1) {
-      var_i14 = *(int *)(g_Vehicles + 0x364 + g_MenuCursorPos * 0x484c);
-      if ((-0x7c < var_i14) && (var_i14 < -0x71)) {
-        *(int *)((int)g_pActiveCamera + 0xa4) = 0x1e;
-        goto LAB_00436c9c;
-      }
-    }
-    else if (g_CurrentTrackIndex == 0) {
-      var_i14 = *(int *)(g_Vehicles + 0x364 + g_MenuCursorPos * 0x484c);
-      if ((0x24 < var_i14) && (var_i14 < 0x2e)) {
-        *(int *)((int)g_pActiveCamera + 0xa4) = 0x1e;
-        goto LAB_00436c9c;
-      }
-      if ((0x7c < var_i14) && (var_i14 < 0x8c)) {
-LAB_00436c7c:
-        *(int *)((int)g_pActiveCamera + 0xa4) = 0x23;
-        goto LAB_00436c9c;
-      }
-    }
-    else {
-      if (g_CurrentTrackIndex != 4) goto LAB_00436c9c;
-      var_i14 = *(int *)(g_Vehicles + 0x364 + g_MenuCursorPos * 0x484c);
-      if ((6 < var_i14) && (var_i14 < 0xe)) goto LAB_00436c7c;
-    }
-  }
-  *(int *)((int)g_pActiveCamera + 0xa4) = 0;
-LAB_00436c9c:
-  if (DAT_0054f934 == 1) {
-    var_i8 = *(int *)(g_PlayerHUDState + 0x30 + g_MenuCursorPos * 0x4c);
-    var_i14 = g_PlayerHUDState + g_MenuCursorPos * 0x4c;
-    if (var_i8 < *(int *)(g_PlayerHUDState + 0x38 + g_MenuCursorPos * 0x4c)) {
-      var_i4 = g_ScreenWidth * var_i8;
-      do {
-        var_i13 = *(int *)(var_i14 + 0x2c);
-        if (var_i13 < *(int *)(var_i14 + 0x34)) {
-          var_u2 = ((int*)&(DAT_00497ed8))[g_CurrentTrackIndex * 4];
-          do {
-            *(char *)((int)&g_VirtualFramebuffer + var_i13 + var_i4) = var_u2;
-            var_i13 = var_i13 + 1;
-          } while (var_i13 < *(int *)(var_i14 + 0x34));
+
+        if (g_IsSplitScreen == 1 && g_SplitScreenMode == 0) {
+            p2_y = *(int *)(g_PlayerHUDState + 0x7c);
+            p2_x1 = *(int *)(g_PlayerHUDState + 0x78);
+            p2_x2 = *(int *)(g_PlayerHUDState + 0x80);
+
+            for (cur_y = p2_y; cur_y < p2_y + top_band_height; cur_y++) {
+                fb_row = cur_y * g_ScreenWidth;
+                for (cur_x = p2_x1; cur_x < p2_x2; cur_x++) {
+                    fb[fb_row + cur_x] = 0x72;
+                }
+            }
         }
-        var_i8 = var_i8 + 1;
-        var_i4 = var_i4 + g_ScreenWidth;
-      } while (var_i8 < *(int *)(var_i14 + 0x38));
-    }
-    if ((g_IsSplitScreen == 1) && (DAT_00552f58 == 0)) {
-      var_i14 = *(int *)(g_PlayerHUDState + 0x7c);
-      var_pi6 = (int *)(g_PlayerHUDState + 0x84);
-      if (var_i14 < *(int *)(g_PlayerHUDState + 0x84)) {
-        var_pi5 = (int *)(g_PlayerHUDState + 0x78);
-        var_i8 = g_ScreenWidth * var_i14;
-        var_pi9 = (int *)(g_PlayerHUDState + 0x80);
-        do {
-          var_i4 = *var_pi5;
-          if (var_i4 < *var_pi9) {
-            var_u2 = ((int*)&(DAT_00497ed8))[g_CurrentTrackIndex * 4];
-            do {
-              *(char *)((int)&g_VirtualFramebuffer + var_i4 + var_i8) = var_u2;
-              var_i4 = var_i4 + 1;
-            } while (var_i4 < *var_pi9);
-          }
-          var_i14 = var_i14 + 1;
-          var_i8 = var_i8 + g_ScreenWidth;
-        } while (var_i14 < *var_pi6);
-      }
-    }
-  }
-  var_pd10 = (double *)(g_Vehicles + g_MenuCursorPos * 0x484c);
-  var_pd1 = (double *)(g_VehicleConfigs + g_MenuCursorPos * 200);
-  if (*(int *)(g_Vehicles + 0x5a4 + g_MenuCursorPos * 0x484c) == 0) {
-    var_5c = var_pd1[7] + *var_pd1;
-    var_6c = var_pd1[0xf];
-    var_54 = var_pd1[9] + var_pd1[8] + var_pd1[6];
-    var_64 = var_pd1[0x11];
-    var_u3 = *(int *)((int)var_pd1 + 0x6c);
-    var_u15 = *(int *)(var_pd1 + 0xd);
-  }
-  else {
-    var_5c = var_pd1[7] + *var_pd1;
-    var_6c = var_pd1[0x12];
-    var_54 = var_pd1[9] + var_pd1[8] + var_pd1[6];
-    var_64 = var_pd1[0x14];
-    var_u3 = *(int *)((int)var_pd1 + 0x74);
-    var_u15 = *(int *)(var_pd1 + 0xe);
-  }
-  var_7c = (double)CONCAT44(var_u3,var_u15);
-  if (DAT_0054f934 == 1) {
-    var_f18 = (double)fcos((double)var_pd10[0x1f]);
-    var_5c = var_pd10[1] + _DAT_0047a588;
-    var_f19 = (double)fsin((double)var_pd10[0x1f]);
-    var_54 = 150.0;
-    var_6c = (double)(var_f18 * (double)_DAT_0047a580 + (double)*var_pd10);
-    var_64 = (double)(var_f19 * (double)_DAT_0047a580 + (double)var_pd10[2]);
-    for (var_7c = var_pd10[0x1f] * _DAT_0047a598 + _DAT_0047a5a0; var_7c < _DAT_0047a5a8;
-        var_7c = var_7c + _DAT_0047a5b0) {
-    }
-    for (; _DAT_0047a5b8 < var_7c; var_7c = var_7c - _DAT_0047a5b0) {
-    }
-  }
-  if ((g_IsSplitScreen == 1) && (DAT_00552f58 == 0)) {
-    if (*(int *)(g_Vehicles + 0x4df0) == 0) {
-      var_28 = *(double *)(g_VehicleConfigs + 200) + *(double *)(g_VehicleConfigs + 0x100);
-      var_4c = *(double *)(g_VehicleConfigs + 0x140);
-      var_3c = *(double *)(g_VehicleConfigs + 0x108) + *(double *)(g_VehicleConfigs + 0xf8) +
-                 *(double *)(g_VehicleConfigs + 0x110);
-      var_44 = *(double *)(g_VehicleConfigs + 0x150);
-      var_74 = *(double *)(g_VehicleConfigs + 0x130);
-    }
-    else {
-      var_28 = *(double *)(g_VehicleConfigs + 200) + *(double *)(g_VehicleConfigs + 0x100);
-      var_4c = *(double *)(g_VehicleConfigs + 0x158);
-      var_44 = *(double *)(g_VehicleConfigs + 0x168);
-      var_74 = *(double *)(g_VehicleConfigs + 0x138);
-      var_3c = *(double *)(g_VehicleConfigs + 0x108) + *(double *)(g_VehicleConfigs + 0xf8) +
-                 *(double *)(g_VehicleConfigs + 0x110);
-    }
-    if (DAT_0054f934 == 1) {
-      var_pd10 = (double *)(g_Vehicles + 0x4944);
-      var_f18 = (double)fcos((double)*var_pd10);
-      var_28 = *(double *)(g_Vehicles + 0x4854) + _DAT_0047a588;
-      var_f19 = (double)fsin((double)*var_pd10);
-      var_3c = 150.0;
-      var_4c = (double)(var_f18 * (double)_DAT_0047a580 +
-                         (double)*(double *)(g_Vehicles + 0x484c));
-      var_44 = (double)(var_f19 * (double)_DAT_0047a580 +
-                         (double)*(double *)(g_Vehicles + 0x485c));
-      for (var_74 = *var_pd10 * _DAT_0047a598 + _DAT_0047a5a0; var_74 < _DAT_0047a5a8;
-          var_74 = var_74 + _DAT_0047a5b0) {
-      }
-      for (; _DAT_0047a5b8 < var_74; var_74 = var_74 - _DAT_0047a5b0) {
-      }
-    }
-  }
-  if ((-1 < DAT_00527f40) && (DAT_00527f40 < 0x78)) {
-    var_l20 = __ftol();
-    DAT_00527f40 = (int)var_l20;
-  }
-  if ((-1 < DAT_00527f44) && (DAT_00527f44 < 0x78)) {
-    var_l20 = __ftol();
-    DAT_00527f44 = (int)var_l20;
-  }
-  if (((0.0 <= g_RaceTimer) && (g_RaceTimer < _DAT_0047a5c0)) || (g_PlayerCarChoice == 7)) {
-    g_RaceTimer = g_RaceTimer + param_1;
-    if ((*(int *)(g_Vehicles + 0x528) == 1) &&
-       (var_pu17 = (int *)(g_Vehicles + 0x5d4), *(int *)(g_Vehicles + 0x5d4) < 0x19)) {
-      var_l20 = __ftol();
-      *var_pu17 = (int)var_l20;
-    }
-    if ((*(int *)(g_Vehicles + 0x4d74) == 1) &&
-       (var_pu17 = (int *)(g_Vehicles + 20000), *(int *)(g_Vehicles + 20000) < 0x19)) {
-      var_l20 = __ftol();
-      *var_pu17 = (int)var_l20;
-    }
-  }
-  else if ((_DAT_0047a5c0 <= g_RaceTimer) &&
-          (((g_IsSplitScreen == 0 && (*(int *)(g_Vehicles + 0x528) == 1)) ||
-           ((g_IsSplitScreen == 1 &&
-            ((*(int *)(g_Vehicles + 0x528) == 1 && (*(int *)(g_Vehicles + 0x4d74) == 1)))))))) {
-    if (DAT_00563d20 == 3) {
-      _DAT_00601664 = Race_FindFocusedVehicle();
-      if (g_NumRacers - _DAT_00601664 == -1) {
-        DAT_00563d20 = 0;
-        g_MenuCursorPos = 0;
-        var_i14 = g_CurrentTrackIndex * 0x3c;
-        var_6c = (double)*(float *)(&DAT_00498538 + g_CurrentTrackIndex * 0x3c);
-        var_f18 = (double)fsin((double)_DAT_005285d8 * (double)_DAT_0047a5c8);
-        var_64 = (double)*(float *)(&DAT_00498540 + var_i14);
-        var_5c = (double)(var_f18 * (double)_DAT_0047a5d0 +
-                           (double)*(float *)(&DAT_0049853c + var_i14));
-        var_54 = (double)(*(float *)(&DAT_00498544 + var_i14) * _DAT_0047a5d8 *
-                           (float)_DAT_0047a5e0);
-        var_7c = (double)(*(float *)(&DAT_00498548 + var_i14) * _DAT_0047a5d8 *
-                           (float)_DAT_0047a5e0);
-        var_20 = var_5c;
-        var_18 = var_64;
-        var_10 = var_54;
-        var_8 = var_7c;
-        if ((g_IsSplitScreen == 1) && (DAT_00552f58 == 0)) {
-          var_74 = var_7c;
-          var_4c = var_6c;
-          var_44 = var_64;
-          var_3c = var_54;
-          var_28 = var_5c;
+    } else if (g_CurrentTrackIndex == 1) {
+        if (node_idx > -124 && node_idx < -113) {
+            camera_tilt_angle = 30;
         }
-      }
-      else {
-        var_5c = *(double *)(g_VehicleConfigs + 0x38 + g_MenuCursorPos * 200) +
-                   *(double *)(g_VehicleConfigs + g_MenuCursorPos * 200);
-        var_i14 = g_VehicleConfigs + g_MenuCursorPos * 200;
-        var_6c = (double)CONCAT44(*(int *)(g_VehicleConfigs + 0x94 + g_MenuCursorPos * 200),
-                                    *(int *)(var_i14 + 0x90));
-        var_64 = (double)CONCAT44(*(int *)(g_VehicleConfigs + 0xa4 + g_MenuCursorPos * 200),
-                                    *(int *)(var_i14 + 0xa0));
-        var_54 = *(double *)(var_i14 + 0x48) + *(double *)(var_i14 + 0x40) +
-                   *(double *)(var_i14 + 0x30);
-        var_7c = *(double *)(var_i14 + 0x70);
-      }
+    } else if (g_CurrentTrackIndex == 0) {
+        if (node_idx > 36 && node_idx < 46) {
+            camera_tilt_angle = 30;
+        } else if (node_idx > 124 && node_idx < 140) {
+            camera_tilt_angle = 35;
+        }
+    } else if (g_CurrentTrackIndex == 4) {
+        if (node_idx > 6 && node_idx < 14) {
+            camera_tilt_angle = 35;
+        }
     }
-    else {
-      var_i14 = g_CurrentTrackIndex * 3 + DAT_00563d20;
-      var_6c = (double)*(float *)(&DAT_00498538 + var_i14 * 0x14);
-      var_f18 = (double)fsin((double)_DAT_005285d8 * (double)_DAT_0047a5c8);
-      var_i14 = var_i14 * 0x14;
-      var_64 = (double)*(float *)(&DAT_00498540 + var_i14);
-      var_54 = (double)(*(float *)(&DAT_00498544 + var_i14) * _DAT_0047a5d8 * (float)_DAT_0047a5e0)
-      ;
-      var_5c = (double)(var_f18 * (double)_DAT_0047a5d0 +
-                         (double)*(float *)(&DAT_0049853c + var_i14));
-      var_7c = (double)(*(float *)(&DAT_00498548 + var_i14) * _DAT_0047a5d8 * (float)_DAT_0047a5e0)
-      ;
-      if ((g_IsSplitScreen == 1) && (DAT_00552f58 == 0)) {
-        var_4c = (double)*(float *)(&DAT_00498538 + g_CurrentTrackIndex * 0x3c);
-        var_44 = (double)*(float *)(&DAT_00498540 + g_CurrentTrackIndex * 0x3c);
-        var_28 = (double)(*(float *)(&DAT_0049853c + g_CurrentTrackIndex * 0x3c) +
-                           (float)(var_f18 * (double)_DAT_0047a5d0));
-        var_3c = (double)(*(float *)(&DAT_00498544 + g_CurrentTrackIndex * 0x3c) * _DAT_0047a5d8 *
-                           (float)_DAT_0047a5e0);
-        var_74 = (double)(*(float *)(&DAT_00498548 + g_CurrentTrackIndex * 0x3c) * _DAT_0047a5d8 *
-                           (float)_DAT_0047a5e0);
-      }
+    *(int *)((uint8_t *)g_pActiveCamera + 0xa4) = camera_tilt_angle;
+
+    /* 4. Viewport background sky clearing */
+    if (g_SkyClearEnabled == 1) {
+        sky_color = (uint8_t)g_TrackBackgroundColors[g_CurrentTrackIndex];
+        vp_y = *(int *)(g_PlayerHUDState + 0x30 + g_MenuCursorPos * 0x4c);
+        vp_y2 = *(int *)(g_PlayerHUDState + 0x38 + g_MenuCursorPos * 0x4c);
+        vp_x1 = *(int *)(g_PlayerHUDState + 0x2c + g_MenuCursorPos * 0x4c);
+        vp_x2 = *(int *)(g_PlayerHUDState + 0x34 + g_MenuCursorPos * 0x4c);
+
+        for (cur_y = vp_y; cur_y < vp_y2; cur_y++) {
+            fb_row = cur_y * g_ScreenWidth;
+            for (cur_x = vp_x1; cur_x < vp_x2; cur_x++) {
+                fb[fb_row + cur_x] = sky_color;
+            }
+        }
+
+        if (g_IsSplitScreen == 1 && g_SplitScreenMode == 0) {
+            p2_y = *(int *)(g_PlayerHUDState + 0x7c);
+            p2_y2 = *(int *)(g_PlayerHUDState + 0x84);
+            p2_x1 = *(int *)(g_PlayerHUDState + 0x78);
+            p2_x2 = *(int *)(g_PlayerHUDState + 0x80);
+
+            for (cur_y = p2_y; cur_y < p2_y2; cur_y++) {
+                fb_row = cur_y * g_ScreenWidth;
+                for (cur_x = p2_x1; cur_x < p2_x2; cur_x++) {
+                    fb[fb_row + cur_x] = sky_color;
+                }
+            }
+        }
     }
-  }
-  if (g_ShowRollTelemetry == 1) {
-    var_6c = DAT_005532c0;
-    var_54 = _DAT_006192f8 * _DAT_0047a5e8;
-    var_7c = _DAT_00619318 * _DAT_0047a5e8;
-    var_5c = DAT_005532b8;
-    var_64 = DAT_00553288;
-  }
-  *(int *)(g_pActiveCamera + 7) = 0;
-  var_pd10 = g_pActiveCamera;
-  *(int *)((int)g_pActiveCamera + 4) = ((int*)&var_6c)[1];
-  *(int *)var_pd10 = (int)var_6c;
-  var_pd10 = g_pActiveCamera;
-  *(int *)((int)g_pActiveCamera + 0xc) = ((int*)&var_5c)[1];
-  *(int *)(var_pd10 + 1) = (int)var_5c;
-  var_pd10 = g_pActiveCamera;
-  *(int *)((int)g_pActiveCamera + 0x14) = ((int*)&var_64)[1];
-  *(int *)(var_pd10 + 2) = (int)var_64;
-  var_pd10 = g_pActiveCamera;
-  *(int *)((int)g_pActiveCamera + 0x1c) = ((int*)&var_54)[1];
-  *(int *)(var_pd10 + 3) = (int)var_54;
-  var_pd10 = g_pActiveCamera;
-  *(int *)((int)g_pActiveCamera + 0x24) = ((int*)&var_7c)[1];
-  *(int *)(var_pd10 + 4) = (int)var_7c;
-  var_pd10 = g_pActiveCamera;
-  *(int *)(g_pActiveCamera + 5) = 0;
-  *(int *)((int)var_pd10 + 0x2c) = 0;
-  *(int *)((int)g_pActiveCamera + 0x7c) = 0;
-  *(int *)(g_pActiveCamera + 0x10) = *(int *)(g_VehicleConfigs + 0x58 + g_MenuCursorPos * 200);
-  *(int *)((int)g_pActiveCamera + 0x84) =
-       *(int *)(g_VehicleConfigs + 0x5c + g_MenuCursorPos * 200);
-  var_l20 = __ftol();
-  *(int *)(g_pActiveCamera + 0x11) = (int)var_l20;
-  if (g_IsSplitScreen == 0) {
-    *(int *)((int)g_pActiveCamera + 0x9c) = g_ScreenWidth / 2;
-  }
-  else if (g_IsSplitScreen == 1) {
-    *(int *)((int)g_pActiveCamera + 0x9c) =
-         ((int)(g_ScreenWidth + (g_ScreenWidth >> 0x1f & 3U)) >> 2) * 3;
-  }
-  if (DAT_00552f58 == 1) {
-    *(int *)((int)g_pActiveCamera + 0x9c) = g_ScreenWidth / 2;
-  }
-  if (g_ShowRollTelemetry == 1) {
-    *(int *)((int)g_pActiveCamera + 0x7c) = g_TelemetryRollAngle;
-    if (DAT_00563c14 == 1) {
-      *(int *)(g_pActiveCamera + 7) = 1;
-      var_l20 = __ftol();
-      *(int *)(g_pActiveCamera + 0xe) = (int)var_l20;
-      var_l20 = __ftol();
-      *(int *)((int)g_pActiveCamera + 0x74) = (int)var_l20;
-      var_l20 = __ftol();
-      *(int *)(g_pActiveCamera + 0xf) = (int)var_l20;
+
+    /* 5. Player 1 camera calculation */
+    veh = (VehicleState *)(g_Vehicles + g_MenuCursorPos * 0x484c);
+    config = (VehicleConfig *)(g_VehicleConfigs + g_MenuCursorPos * 200);
+
+    if (*(int *)((uint8_t *)veh + 0x5a4) == 0) {
+        cam_pos_y = config->target_pos_x + config->cam_height;
+        cam_pos_x = config->cam_pos_x;
+        cam_pitch = config->pitch_offset + *(double *)((uint8_t *)config + 0x40) + config->chase_cam_dist_factor;
+        cam_pos_z = config->cam_pos_z;
+        cam_yaw = config->yaw_lag_angle;
+    } else {
+        cam_pos_y = config->target_pos_x + config->cam_height;
+        cam_pos_x = config->cam_pos_y;
+        cam_pitch = config->pitch_offset + *(double *)((uint8_t *)config + 0x40) + config->chase_cam_dist_factor;
+        cam_pos_z = config->vehicle_yaw;
+        cam_yaw = config->pitch_lag_angle;
     }
-    if (DAT_00563c14 == 2) {
-      var_i14 = g_Vehicles + DAT_00563c5c * 0x484c;
-      if (((*(int *)(g_Vehicles + 0x354 + DAT_00563c5c * 0x484c) == 0) &&
-          (*(int *)(var_i14 + 0x358) == 0)) && (*(int *)(var_i14 + 0x35c) == 0)) {
-        *(int *)(g_pActiveCamera + 7) = 1;
-        *g_pActiveCamera = *(double *)(g_Vehicles + DAT_00563c5c * 0x484c) + _DAT_00563c48;
-        DAT_005532c4 = *(int *)((int)g_pActiveCamera + 4);
-        DAT_005532c0 = *(int *)g_pActiveCamera;
-        g_pActiveCamera[1] = *(double *)(g_Vehicles + 8 + DAT_00563c5c * 0x484c) + _DAT_00563c40;
-        DAT_005532bc = *(int *)((int)g_pActiveCamera + 0xc);
-        DAT_005532b8 = *(int *)(g_pActiveCamera + 1);
-        g_pActiveCamera[2] = *(double *)(g_Vehicles + 0x10 + DAT_00563c5c * 0x484c) + _DAT_00563c50;
-        DAT_0055328c = *(int *)((int)g_pActiveCamera + 0x14);
-        DAT_00553288 = *(int *)(g_pActiveCamera + 2);
-        var_l20 = __ftol();
-        *(int *)(g_pActiveCamera + 0xe) = (int)var_l20;
-        var_l20 = __ftol();
-        *(int *)((int)g_pActiveCamera + 0x74) = (int)var_l20;
-        var_l20 = __ftol();
-        *(int *)(g_pActiveCamera + 0xf) = (int)var_l20;
-        var_l20 = __ftol();
-        _DAT_0054f9d8 = (int)var_l20;
-        var_l20 = __ftol();
-        _DAT_0054f9dc = (int)var_l20;
-        var_l20 = __ftol();
-        _DAT_0054f9e0 = (int)var_l20;
-        DAT_00553098 = *(int *)(g_pActiveCamera + 0xe);
-        DAT_005530a0 = *(int *)(g_pActiveCamera + 0xe);
-        DAT_0055309c = *(int *)(g_pActiveCamera + 0xe);
-      }
-      else {
-        *(int *)(g_pActiveCamera + 7) = 1;
-        *g_pActiveCamera = (double)_DAT_0054f9d8;
-        g_pActiveCamera[1] = (double)_DAT_0054f9d8;
-        g_pActiveCamera[2] = (double)_DAT_0054f9d8;
-        *(int *)(g_pActiveCamera + 0xe) = DAT_00553098;
-        *(int *)((int)g_pActiveCamera + 0x74) = DAT_005530a0;
-        *(int *)(g_pActiveCamera + 0xf) = DAT_0055309c;
-      }
+
+    if (g_SkyClearEnabled == 1) {
+        cos_val = cos(veh->angle_yaw);
+        sin_val = sin(veh->angle_yaw);
+        cam_pos_y = veh->pos_y + 100.0;
+        cam_pitch = 150.0;
+        cam_pos_x = cos_val * (-150.0) + veh->pos_x;
+        cam_pos_z = sin_val * (-150.0) + veh->pos_z;
+        cam_yaw = veh->angle_yaw * (-572.95779513) + 900.0;
+        while (cam_yaw < 0.0) {
+            cam_yaw += 3600.0;
+        }
+        while (cam_yaw > 3599.0) {
+            cam_yaw -= 3600.0;
+        }
     }
-  }
-  if ((_DAT_0047a5f0 <= g_RaceTimer_P2) && (g_RaceTimer_P2 < _DAT_0047a5f8)) {
-    var_l20 = __ftol();
-    var_u11 = (int)(unsigned int)var_l20 >> 0x1f;
-    if (((((unsigned int)var_l20 ^ var_u11) - var_u11 & 1 ^ var_u11) == var_u11) &&
-       (var_pi6 = (int *)(g_NumRacers * 0x20 + g_pCarGhostTransforms), var_pi6[7] == 0)) {
-      Lisa_MoveDynamicObject(var_pi6);
+
+    /* 6. Player 2 camera calculation (split-screen) */
+    cam_p2_pos_x = 0.0;
+    cam_p2_pos_y = 0.0;
+    cam_p2_pos_z = 0.0;
+    cam_p2_pitch = 0.0;
+    cam_p2_yaw = 0.0;
+    veh_p2 = (VehicleState *)(g_Vehicles + 0x484c);
+
+    if (g_IsSplitScreen == 1 && g_SplitScreenMode == 0) {
+        config_p2 = (VehicleConfig *)(g_VehicleConfigs + 200);
+
+        if (*(int *)((uint8_t *)veh_p2 + 0x5a4) == 0) {
+            cam_p2_pos_y = config_p2->target_pos_x + config_p2->cam_height;
+            cam_p2_pos_x = config_p2->cam_pos_x;
+            cam_p2_pitch = config_p2->pitch_offset + *(double *)((uint8_t *)config_p2 + 0x40) + config_p2->chase_cam_dist_factor;
+            cam_p2_pos_z = config_p2->cam_pos_z;
+            cam_p2_yaw = config_p2->yaw_lag_angle;
+        } else {
+            cam_p2_pos_y = config_p2->target_pos_x + config_p2->cam_height;
+            cam_p2_pos_x = config_p2->cam_pos_y;
+            cam_p2_pitch = config_p2->pitch_offset + *(double *)((uint8_t *)config_p2 + 0x40) + config_p2->chase_cam_dist_factor;
+            cam_p2_pos_z = config_p2->vehicle_yaw;
+            cam_p2_yaw = config_p2->pitch_lag_angle;
+        }
+
+        if (g_SkyClearEnabled == 1) {
+            cos_val = cos(veh_p2->angle_yaw);
+            sin_val = sin(veh_p2->angle_yaw);
+            cam_p2_pos_y = veh_p2->pos_y + 100.0;
+            cam_p2_pitch = 150.0;
+            cam_p2_pos_x = cos_val * (-150.0) + veh_p2->pos_x;
+            cam_p2_pos_z = sin_val * (-150.0) + veh_p2->pos_z;
+            cam_p2_yaw = veh_p2->angle_yaw * (-572.95779513) + 900.0;
+            while (cam_p2_yaw < 0.0) {
+                cam_p2_yaw += 3600.0;
+            }
+            while (cam_p2_yaw > 3599.0) {
+                cam_p2_yaw -= 3600.0;
+            }
+        }
     }
-  }
-  _DAT_00498730 = g_pLisaDrawCommandQueue;
-  _DAT_00498738 = &g_VirtualFramebuffer;
-  _DAT_0049873c = g_pActiveTAB;
-  _DAT_00498734 = &g_VirtualFramebuffer;
-  g_ViewportMinX = *(int *)(g_PlayerHUDState + 0x2c + g_MenuCursorPos * 0x4c);
-  var_i14 = g_PlayerHUDState + g_MenuCursorPos * 0x4c;
-  g_ViewportMinY = *(int *)(var_i14 + 0x30);
-  g_ViewportMaxX = *(int *)(var_i14 + 0x34) + -1;
-  g_ViewportMaxY = *(int *)(var_i14 + 0x38) + -1;
-  var_u11 = *(unsigned int *)(g_Vehicles + 0x364 + g_MenuCursorPos * 0x484c);
-  if ((int)var_u11 < 0) {
-    var_i14 = *(int *)(g_pTrackRoadSequence + 0xc +
-                     ((var_u11 ^ (int)var_u11 >> 0x1f) - ((int)var_u11 >> 0x1f)) * 0x18);
-  }
-  else {
-    var_i14 = *(int *)(g_pTrackRoadSequence + var_u11 * 0x18);
-  }
-  if (_DAT_0047a5c0 <= g_RaceTimer) {
-    DAT_0063c5d8 = 0;
-  }
-  else {
-    DAT_0063c5d8 = *(int *)(DAT_00552e40 + var_i14 * 0xc);
-  }
-  Lisa_RenderScene();
-  Lisa_FlushRasterizerCommands(out_ECX,out_EDX);
-  var_pi6 = (int *)(g_NumRacers * 0x20 + g_pCarGhostTransforms);
-  if (var_pi6[7] == 1) {
-    Lisa_DeleteDynamicObject(var_pi6);
-  }
-  if (((*(int *)(g_Vehicles + 0x528) == 0) || (g_RaceTimer <= _DAT_0047a5c0)) &&
-     (g_ShowRollTelemetry == 0)) {
-    HUD_RenderPlayerElements(g_MenuCursorPos);
-  }
-  if ((g_IsSplitScreen == 1) && (DAT_00552f58 == 0)) {
-    *(int *)(g_pActiveCamera + 7) = 0;
-    var_pd10 = g_pActiveCamera;
-    *(int *)((int)g_pActiveCamera + 4) = ((int*)&var_4c)[1];
-    *(int *)var_pd10 = (int)var_4c;
-    var_pd10 = g_pActiveCamera;
-    *(int *)((int)g_pActiveCamera + 0xc) = ((int*)&var_28)[1];
-    *(int *)(var_pd10 + 1) = (int)var_28;
-    var_pd10 = g_pActiveCamera;
-    *(int *)((int)g_pActiveCamera + 0x14) = ((int*)&var_44)[1];
-    *(int *)(var_pd10 + 2) = (int)var_44;
-    var_pd10 = g_pActiveCamera;
-    *(int *)((int)g_pActiveCamera + 0x1c) = ((int*)&var_3c)[1];
-    *(int *)(var_pd10 + 3) = (int)var_3c;
-    var_pd10 = g_pActiveCamera;
-    *(int *)((int)g_pActiveCamera + 0x24) = ((int*)&var_74)[1];
-    *(int *)(var_pd10 + 4) = (int)var_74;
-    var_pd10 = g_pActiveCamera;
-    *(int *)(g_pActiveCamera + 5) = 0;
-    *(int *)((int)var_pd10 + 0x2c) = 0;
-    *(int *)((int)g_pActiveCamera + 0x7c) = 0;
-    *(int *)(g_pActiveCamera + 0x10) = *(int *)(g_VehicleConfigs + 0x120);
-    *(int *)((int)g_pActiveCamera + 0x84) = *(int *)(g_VehicleConfigs + 0x124);
-    var_l20 = __ftol();
-    *(int *)(g_pActiveCamera + 0x11) = (int)var_l20;
-    *(int *)((int)g_pActiveCamera + 0x9c) = g_ScreenWidth / (g_IsSplitScreen * 2 + 2);
-    _DAT_00498730 = g_pLisaDrawCommandQueue;
-    _DAT_00498734 = &g_VirtualFramebuffer;
-    _DAT_00498738 = &g_VirtualFramebuffer;
-    _DAT_0049873c = g_pActiveTAB;
-    g_ViewportMinX = *(int *)(g_PlayerHUDState + 0x78);
-    g_ViewportMinY = *(int *)(g_PlayerHUDState + 0x7c);
-    g_ViewportMaxX = *(int *)(g_PlayerHUDState + 0x80) + -1;
-    g_ViewportMaxY = *(int *)(g_PlayerHUDState + 0x84) + -1;
-    if ((_DAT_0047a5f0 <= g_RaceTimer_P2) && (g_RaceTimer_P2 < _DAT_0047a5f8)) {
-      var_l20 = __ftol();
-      var_u11 = (int)(unsigned int)var_l20 >> 0x1f;
-      if (((((unsigned int)var_l20 ^ var_u11) - var_u11 & 1 ^ var_u11) == var_u11) &&
-         (var_i14 = g_NumRacers * 0x20 + g_pCarGhostTransforms, *(int *)(var_i14 + 0x3c) == 0)) {
-        Lisa_MoveDynamicObject((int *)(var_i14 + 0x20));
-      }
+
+    /* 7. Screen shake timer updates */
+    if (g_ScreenShakeTimerP1 > -1 && g_ScreenShakeTimerP1 < 120) {
+        g_ScreenShakeTimerP1--;
     }
-    var_u11 = *(unsigned int *)(g_Vehicles + 0x4bb0);
-    if ((int)var_u11 < 0) {
-      var_i14 = *(int *)(g_pTrackRoadSequence + 0xc +
-                       ((var_u11 ^ (int)var_u11 >> 0x1f) - ((int)var_u11 >> 0x1f)) * 0x18);
+    if (g_ScreenShakeTimerP2 > -1 && g_ScreenShakeTimerP2 < 120) {
+        g_ScreenShakeTimerP2--;
     }
-    else {
-      var_i14 = *(int *)(g_pTrackRoadSequence + var_u11 * 0x18);
+
+    /* 8. Race timer advance and turbo countdown */
+    if ((g_RaceTimer >= 0.0 && g_RaceTimer < 120.0) || g_PlayerCarChoice == 7) {
+        g_RaceTimer += delta_time;
+        if (veh->turbo_active == 1 && *(int *)((uint8_t *)veh + 0x5d4) < 25) {
+            (*(int *)((uint8_t *)veh + 0x5d4))++;
+        }
+        if (g_IsSplitScreen == 1 && veh_p2->turbo_active == 1 && *(int *)((uint8_t *)veh_p2 + 0x5d4) < 25) {
+            (*(int *)((uint8_t *)veh_p2 + 0x5d4))++;
+        }
+    } else if (g_RaceTimer >= 120.0 &&
+               ((g_IsSplitScreen == 0 && veh->turbo_active == 1) ||
+                (g_IsSplitScreen == 1 && veh->turbo_active == 1 && veh_p2->turbo_active == 1))) {
+        /* Post-race fly-by cameras */
+        if (g_CinematicCameraAngleState == 3) {
+            g_CinematicFocusedVehicle = Race_FindFocusedVehicle();
+            if (g_NumRacers - g_CinematicFocusedVehicle == -1) {
+                g_CinematicCameraAngleState = 0;
+                g_MenuCursorPos = 0;
+                track_waypoint_idx = g_CurrentTrackIndex * 15;
+                cam_pos_x = g_TrackFlybyCameras[track_waypoint_idx + 0];
+                cam_pos_z = g_TrackFlybyCameras[track_waypoint_idx + 2];
+                cam_pos_y = sin((double)g_GlobalFrameCount * 0.05) * 8.0 + g_TrackFlybyCameras[track_waypoint_idx + 1];
+                cam_pitch = g_TrackFlybyCameras[track_waypoint_idx + 3] * 57.2957795;
+                cam_yaw = g_TrackFlybyCameras[track_waypoint_idx + 4] * 57.2957795;
+
+                if (g_IsSplitScreen == 1 && g_SplitScreenMode == 0) {
+                    cam_p2_pos_x = cam_pos_x;
+                    cam_p2_pos_y = cam_pos_y;
+                    cam_p2_pos_z = cam_pos_z;
+                    cam_p2_pitch = cam_pitch;
+                    cam_p2_yaw = cam_yaw;
+                }
+            } else {
+                VehicleConfig *focus_cfg = (VehicleConfig *)(g_VehicleConfigs + g_MenuCursorPos * 200);
+                cam_pos_y = focus_cfg->cam_param1 + focus_cfg->cam_height;
+                cam_pos_x = focus_cfg->cam_pos_x;
+                cam_pos_z = focus_cfg->cam_pos_z;
+                cam_pitch = focus_cfg->pitch_offset + *(double *)((uint8_t *)focus_cfg + 0x40) + focus_cfg->chase_cam_dist_factor;
+                cam_yaw = focus_cfg->pitch_lag_angle;
+            }
+        } else {
+            track_waypoint_idx = (g_CurrentTrackIndex * 3 + g_CinematicCameraAngleState) * 5;
+            cam_pos_x = g_TrackFlybyCameras[track_waypoint_idx + 0];
+            cam_pos_z = g_TrackFlybyCameras[track_waypoint_idx + 2];
+            cam_pos_y = sin((double)g_GlobalFrameCount * 0.05) * 8.0 + g_TrackFlybyCameras[track_waypoint_idx + 1];
+            cam_pitch = g_TrackFlybyCameras[track_waypoint_idx + 3] * 57.2957795;
+            cam_yaw = g_TrackFlybyCameras[track_waypoint_idx + 4] * 57.2957795;
+
+            if (g_IsSplitScreen == 1 && g_SplitScreenMode == 0) {
+                int p2_waypoint = g_CurrentTrackIndex * 15;
+                cam_p2_pos_x = g_TrackFlybyCameras[p2_waypoint + 0];
+                cam_p2_pos_z = g_TrackFlybyCameras[p2_waypoint + 2];
+                cam_p2_pos_y = sin((double)g_GlobalFrameCount * 0.05) * 8.0 + g_TrackFlybyCameras[p2_waypoint + 1];
+                cam_p2_pitch = g_TrackFlybyCameras[p2_waypoint + 3] * 57.2957795;
+                cam_p2_yaw = g_TrackFlybyCameras[p2_waypoint + 4] * 57.2957795;
+            }
+        }
     }
-    DAT_0063c5d8 = *(int *)(DAT_00552e40 + var_i14 * 0xc);
+
+    /* 9. Debug telemetry camera coordinates override */
+    if (g_ShowRollTelemetry == 1) {
+        cam_pos_x = g_CameraPosX;
+        cam_pos_y = g_CameraPosY;
+        cam_pos_z = g_CameraPosZ;
+        cam_pitch = g_CameraAngleX * 572.957795;
+        cam_yaw = g_CameraAngleY * 572.957795;
+    }
+
+    /* 10. Load camera matrix and parameters for Player 1 */
+    *(int *)((uint8_t *)g_pActiveCamera + 0x38) = 0;
+    g_pActiveCamera[0] = cam_pos_x;
+    g_pActiveCamera[1] = cam_pos_y;
+    g_pActiveCamera[2] = cam_pos_z;
+    g_pActiveCamera[3] = cam_pitch;
+    g_pActiveCamera[4] = cam_yaw;
+    g_pActiveCamera[5] = 0.0;
+    *(int *)((uint8_t *)g_pActiveCamera + 0x7c) = 0;
+    *(int *)((uint8_t *)g_pActiveCamera + 0x80) = config->viewport_h;
+    *(int *)((uint8_t *)g_pActiveCamera + 0x84) = config->viewport_w;
+    *(int *)((uint8_t *)g_pActiveCamera + 0x88) = config->viewport_h;
+
+    if (g_IsSplitScreen == 0) {
+        *(int *)((uint8_t *)g_pActiveCamera + 0x9c) = g_ScreenWidth / 2;
+    } else if (g_IsSplitScreen == 1) {
+        *(int *)((uint8_t *)g_pActiveCamera + 0x9c) = (g_ScreenWidth * 3) / 4;
+    }
+    if (g_SplitScreenMode == 1) {
+        *(int *)((uint8_t *)g_pActiveCamera + 0x9c) = g_ScreenWidth / 2;
+    }
+
+    if (g_ShowRollTelemetry == 1) {
+        *(int *)((uint8_t *)g_pActiveCamera + 0x7c) = g_TelemetryRollAngle;
+        if (g_ShowRollTelemetry == 1) {
+            *(int *)((uint8_t *)g_pActiveCamera + 0x38) = 1;
+            *(int *)((uint8_t *)g_pActiveCamera + 0x70) = (int)cam_pos_x;
+            *(int *)((uint8_t *)g_pActiveCamera + 0x74) = (int)cam_pos_y;
+            *(int *)((uint8_t *)g_pActiveCamera + 0x78) = (int)cam_pos_z;
+        }
+        if (g_ShowRollTelemetry == 2) {
+            VehicleState *target_v = (VehicleState *)(g_Vehicles + g_TrackFlybyActiveTarget * 0x484c);
+            if (target_v->crash_flag1 == 0 && target_v->crash_flag2 == 0 && target_v->crash_flag3 == 0) {
+                *(int *)((uint8_t *)g_pActiveCamera + 0x38) = 1;
+                g_pActiveCamera[0] = target_v->pos_x + g_FlybyCameraOffsetX;
+                g_CameraPosX_Int = (int)g_pActiveCamera[0];
+                g_pActiveCamera[1] = target_v->pos_y + g_FlybyCameraOffsetY;
+                g_CameraPosY_Int = (int)g_pActiveCamera[1];
+                g_pActiveCamera[2] = target_v->pos_z + g_FlybyCameraOffsetZ;
+                g_CameraPosZ_Int = (int)g_pActiveCamera[2];
+
+                *(int *)((uint8_t *)g_pActiveCamera + 0x70) = (int)g_pActiveCamera[0];
+                *(int *)((uint8_t *)g_pActiveCamera + 0x74) = (int)g_pActiveCamera[1];
+                *(int *)((uint8_t *)g_pActiveCamera + 0x78) = (int)g_pActiveCamera[2];
+                g_FlybyLastCameraPosX = (int)g_pActiveCamera[0];
+                g_FlybyLastCameraPosY = (int)g_pActiveCamera[1];
+                g_FlybyLastCameraPosZ = (int)g_pActiveCamera[2];
+                g_FlybyLastYaw = *(int *)((uint8_t *)g_pActiveCamera + 0x70);
+                g_FlybyLastPitch = *(int *)((uint8_t *)g_pActiveCamera + 0x70);
+                g_FlybyLastRoll = *(int *)((uint8_t *)g_pActiveCamera + 0x70);
+            } else {
+                *(int *)((uint8_t *)g_pActiveCamera + 0x38) = 1;
+                g_pActiveCamera[0] = (double)g_FlybyLastCameraPosX;
+                g_pActiveCamera[1] = (double)g_FlybyLastCameraPosY;
+                g_pActiveCamera[2] = (double)g_FlybyLastCameraPosZ;
+                *(int *)((uint8_t *)g_pActiveCamera + 0x70) = g_FlybyLastYaw;
+                *(int *)((uint8_t *)g_pActiveCamera + 0x74) = g_FlybyLastPitch;
+                *(int *)((uint8_t *)g_pActiveCamera + 0x78) = g_FlybyLastRoll;
+            }
+        }
+    }
+
+    /* 11. Ghost replay car movement */
+    if (g_RaceTimer_P2 >= 60.0 && g_RaceTimer_P2 < 130.0) {
+        ghost_transform = &g_CarGhostTransforms[g_NumRacers];
+        if (((int)g_RaceTimer_P2 & 1) == 0 && ghost_transform->is_placed == 0) {
+            Lisa_MoveDynamicObject(ghost_transform);
+        }
+    }
+
+    /* 12. Submit rasterizer draw queues and clip rects for Player 1 */
+    g_pLisaCommandQueueMirror = g_pLisaDrawCommandQueue;
+    g_pLisaFramebufferMirror1 = &g_VirtualFramebuffer;
+    g_pLisaFramebufferMirror2 = &g_VirtualFramebuffer;
+    g_pLisaActiveTABMirror = (void *)g_pActiveTAB;
+
+    g_ViewportMinX = *(int *)(g_PlayerHUDState + 0x2c + g_MenuCursorPos * 0x4c);
+    g_ViewportMinY = *(int *)(g_PlayerHUDState + 0x30 + g_MenuCursorPos * 0x4c);
+    g_ViewportMaxX = *(int *)(g_PlayerHUDState + 0x34 + g_MenuCursorPos * 0x4c) - 1;
+    g_ViewportMaxY = *(int *)(g_PlayerHUDState + 0x38 + g_MenuCursorPos * 0x4c) - 1;
+
+    node_idx = *(int *)((uint8_t *)veh + 0x364);
+    if (node_idx < 0) {
+        chunk_idx = *(int *)(g_pTrackRoadSequence + 0xc + (-node_idx) * 0x18);
+    } else {
+        chunk_idx = *(int *)(g_pTrackRoadSequence + node_idx * 0x18);
+    }
+
+    if (g_RaceTimer >= 120.0) {
+        g_ActiveTrackSegmentAttribute = 0;
+    } else {
+        g_ActiveTrackSegmentAttribute = g_TrackSegmentTable[chunk_idx * 3];
+    }
+
     Lisa_RenderScene();
-    Lisa_FlushRasterizerCommands(extraout_ECX_00,extraout_EDX_00);
-    var_i14 = g_NumRacers * 0x20 + g_pCarGhostTransforms;
-    if (*(int *)(var_i14 + 0x3c) == 1) {
-      Lisa_DeleteDynamicObject((int *)(var_i14 + 0x20));
-    }
-    if ((*(int *)(g_Vehicles + 0x4d74) == 0) || (g_RaceTimer <= _DAT_0047a5c0)) {
-      HUD_RenderPlayerElements(1);
-    }
-  }
-  FX_SpawnWeather();
-  if ((0.0 <= g_RaceTimer_P2) && (g_RaceTimer_P2 < _DAT_0047a588)) {
-    __ftol();
-    Lisa_RenderPanorama();
-  }
-  if (((((g_IsSplitScreen == 0) && (*(int *)(g_Vehicles + 0x528) == 1)) ||
-       ((g_IsSplitScreen == 1 &&
-        ((*(int *)(g_Vehicles + 0x528) == 1 && (*(int *)(g_Vehicles + 0x4d74) == 1)))))) &&
-      (_DAT_0047a5c0 <= g_RaceTimer)) && ((DAT_00563c60 == 0 && (g_ShowRollTelemetry == 0)))) {
-    HUD_RenderTrackResults();
-  }
-  var_i14 = *(int *)(g_PlayerHUDState + 0x38);
-  var_i8 = *(int *)(g_PlayerHUDState + 0x34);
-  if ((DAT_00527f28 == 0) && ((g_IsSplitScreen == 0 || (DAT_00552f58 == 1)))) {
-    var_34 = 0;
-    var_30 = 0;
-    Gfx_DrawSprite(DAT_0054f960,&var_34,0);
-    var_30 = 0;
-    var_34 = (var_i8 - *(int *)(DAT_00563c58 + 8)) * 0x100;
-    Gfx_DrawSprite(DAT_0054f964,&var_34,0);
-    var_34 = 0;
-    var_30 = (var_i14 - *(int *)(DAT_00563c58 + 0xc)) * 0x100;
-    Gfx_DrawSprite(DAT_0054f968,&var_34,0);
-    var_34 = (var_i8 - *(int *)(DAT_00563c58 + 8)) * 0x100;
-    var_30 = (var_i14 - *(int *)(DAT_00563c58 + 0xc)) * 0x100;
-    Gfx_DrawSprite(DAT_0054f96c,&var_34,0);
-  }
-  if (DAT_00563c60 == 1) {
-    var_l20 = __ftol();
-    g_MasterMusicVolume = (int)var_l20;
-    if (g_MasterMusicVolume < 1) {
-      Ghost_SaveGhostData();
-      DAT_00563d88 = 2;
-    }
-    Lisa_RenderPanorama();
-  }
-  if ((g_IsSplitScreen == 1) && (DAT_00552f58 == 0)) {
-    var_i4 = g_ScreenWidth / 2;
-    var_i8 = g_ScreenHeight;
-    for (var_i14 = var_i4 + -1; g_ScreenHeight = var_i8, var_i14 < var_i4 + 1; var_i14 = var_i14 + 1) {
-      if (0 < var_i8) {
-        var_pu16 = (char *)((int)&g_VirtualFramebuffer + var_i14);
-        do {
-          var_i13 = g_ScreenWidth;
-          *var_pu16 = 0;
-          var_pu16 = var_pu16 + var_i13;
-          var_i8 = var_i8 + -1;
-        } while (var_i8 != 0);
-      }
-      var_i8 = g_ScreenHeight;
-    }
-  }
-  return;
-}
-/**
- * @original FX_UpdateAllParticles (IGN_WIN.EXE @ 0x00434190, fx.c)
- * @fidelity ADAPTED
- */
-void FX_UpdateAllParticles(void) {
-    float period;
-    int i;
-    SceneryParticle *p;
-    VehicleState *v;
+    Lisa_FlushRasterizerCommands(0, 0);
 
-    p = &g_SceneryParticles[0];
-    for (i = 0; i < 200; i++, p++) {
-        if (p->type != 0) {
-            switch (p->type) {
-            case 1:
-                FX_UpdateTransparentSpriteObject(p, i);
-                break;
-            case 2:
-                FX_UpdateHandlePlotObject(p, i);
-                break;
-            case 3:
-                Obstacle_SimulateDynamics(p);
-                break;
-            case 4:
-                FX_UpdateTransparentSpriteObject2(p, i);
-                break;
-            case 5:
-                FX_UpdateFlyingParticles(p, i);
-                break;
-            case 6:
-                FX_UpdateExplosionNode(p, i);
-                break;
-            case 7:
-                FX_UpdateVehicleWreck((int *)p);
-                break;
-            case 8:
-                FX_UpdateSuperPlotObject(p, i);
-                break;
-            case 9:
-                FX_UpdateDetachedWheel((int *)p, i);
-                break;
-            case 10:
-                FX_UpdateVehicleCrashSequence((int *)p);
-                break;
-            case 11:
-                FX_UpdateCarDebris((int *)p, i);
-                break;
-            default:
-                break;
+    ghost_transform = &g_CarGhostTransforms[g_NumRacers];
+    if (ghost_transform->is_placed == 1) {
+        Lisa_DeleteDynamicObject(ghost_transform);
+    }
+
+    if ((veh->turbo_active == 0 || g_RaceTimer <= 120.0) && g_ShowRollTelemetry == 0) {
+        HUD_RenderPlayerElements(g_MenuCursorPos);
+    }
+
+    /* 13. Split-screen Player 2 rendering */
+    if (g_IsSplitScreen == 1 && g_SplitScreenMode == 0) {
+        *(int *)((uint8_t *)g_pActiveCamera + 0x38) = 0;
+        g_pActiveCamera[0] = cam_p2_pos_x;
+        g_pActiveCamera[1] = cam_p2_pos_y;
+        g_pActiveCamera[2] = cam_p2_pos_z;
+        g_pActiveCamera[3] = cam_p2_pitch;
+        g_pActiveCamera[4] = cam_p2_yaw;
+        g_pActiveCamera[5] = 0.0;
+        *(int *)((uint8_t *)g_pActiveCamera + 0x7c) = 0;
+        *(int *)((uint8_t *)g_pActiveCamera + 0x80) = *(int *)(g_VehicleConfigs + 0x120);
+        *(int *)((uint8_t *)g_pActiveCamera + 0x84) = *(int *)(g_VehicleConfigs + 0x124);
+        *(int *)((uint8_t *)g_pActiveCamera + 0x88) = *(int *)(g_VehicleConfigs + 0x120);
+        *(int *)((uint8_t *)g_pActiveCamera + 0x9c) = g_ScreenWidth / (g_IsSplitScreen * 2 + 2);
+
+        g_pLisaCommandQueueMirror = g_pLisaDrawCommandQueue;
+        g_pLisaFramebufferMirror1 = &g_VirtualFramebuffer;
+        g_pLisaFramebufferMirror2 = &g_VirtualFramebuffer;
+        g_pLisaActiveTABMirror = (void *)g_pActiveTAB;
+
+        g_ViewportMinX = *(int *)(g_PlayerHUDState + 0x78);
+        g_ViewportMinY = *(int *)(g_PlayerHUDState + 0x7c);
+        g_ViewportMaxX = *(int *)(g_PlayerHUDState + 0x80) - 1;
+        g_ViewportMaxY = *(int *)(g_PlayerHUDState + 0x84) - 1;
+
+        if (g_RaceTimer_P2 >= 60.0 && g_RaceTimer_P2 < 130.0) {
+            ghost_transform_p2 = &g_CarGhostTransforms[g_NumRacers + 1];
+            if (((int)g_RaceTimer_P2 & 1) == 0 && ghost_transform_p2->is_placed == 0) {
+                Lisa_MoveDynamicObject(ghost_transform_p2);
             }
         }
-    }
 
-    g_TrackPathTimer += 1.0f;
-    period = (float)g_TrackPathIntervalTable[g_CurrentTrackIndex];
-    if (g_TrackPathTimer >= period) {
-        Track_UpdateMovingPathNodes();
-        while (g_TrackPathTimer >= period) {
-            g_TrackPathTimer -= period;
+        node_idx = *(int *)(g_Vehicles + 0x4bb0);
+        if (node_idx < 0) {
+            chunk_idx = *(int *)(g_pTrackRoadSequence + 0xc + (-node_idx) * 0x18);
+        } else {
+            chunk_idx = *(int *)(g_pTrackRoadSequence + node_idx * 0x18);
+        }
+
+        g_ActiveTrackSegmentAttribute = g_TrackSegmentTable[chunk_idx * 3];
+
+        Lisa_RenderScene();
+        Lisa_FlushRasterizerCommands(0, 0);
+
+        ghost_transform_p2 = &g_CarGhostTransforms[g_NumRacers + 1];
+        if (ghost_transform_p2->is_placed == 1) {
+            Lisa_DeleteDynamicObject(ghost_transform_p2);
+        }
+
+        if (veh_p2->turbo_active == 0 || g_RaceTimer <= 120.0) {
+            HUD_RenderPlayerElements(1);
         }
     }
 
-    if (g_NumTrackDynamicObjects1 > 0) {
-        Track_UpdateDynamicObjects_Type1();
-    }
-    if (g_NumTrackDynamicObjects2 > 0) {
-        Track_UpdateDynamicObjects_Type2();
-    }
-    if (g_NumTrackDynamicObjects3 > 0) {
-        Track_UpdateDynamicObjects_Type3();
-    }
-    if (g_NumTrackDynamicObjects4 > 0) {
-        Track_UpdateDynamicObjects_Type4();
+    /* 14. Weather, Panorama, Results, and Borders */
+    FX_SpawnWeather();
+
+    if (g_RaceTimer_P2 >= 0.0 && g_RaceTimer_P2 < 100.0) {
+        Lisa_RenderPanorama();
     }
 
-    if (g_GameMode == 3) {
-        for (i = 0; i < g_NumRacers; i++) {
-            v = (VehicleState *)(g_Vehicles + i * 0x484c);
-            if (v->race_rank == g_PlayerCarModel && g_RaceTimer_P2 < 0.0 &&
-                v->crash_flag1 == 0 && v->crash_flag2 == 0 && v->crash_flag3 == 0 &&
-                v->turbo_active == 0) {
-                FX_SpawnAmbientTrackParticles();
-            }
+    if (((g_IsSplitScreen == 0 && veh->turbo_active == 1) ||
+         (g_IsSplitScreen == 1 && veh->turbo_active == 1 && veh_p2->turbo_active == 1)) &&
+        g_RaceTimer >= 120.0 && g_GamePauseState == 0 && g_ShowRollTelemetry == 0) {
+        HUD_RenderTrackResults();
+    }
+
+    screen_w = *(int *)(g_PlayerHUDState + 0x34);
+    screen_h = *(int *)(g_PlayerHUDState + 0x38);
+
+    if (g_ScreenSizeSetting == 0 && (g_IsSplitScreen == 0 || g_SplitScreenMode == 1)) {
+        border_pos[0] = 0;
+        border_pos[1] = 0;
+        Gfx_DrawSprite(g_ViewportBorderCornerTL, border_pos, 0);
+
+        border_pos[0] = (screen_w - g_ViewportBorderMetrics[2]) * 256;
+        border_pos[1] = 0;
+        Gfx_DrawSprite(g_ViewportBorderCornerTR, border_pos, 0);
+
+        border_pos[0] = 0;
+        border_pos[1] = (screen_h - g_ViewportBorderMetrics[3]) * 256;
+        Gfx_DrawSprite(g_ViewportBorderCornerBL, border_pos, 0);
+
+        border_pos[0] = (screen_w - g_ViewportBorderMetrics[2]) * 256;
+        border_pos[1] = (screen_h - g_ViewportBorderMetrics[3]) * 256;
+        Gfx_DrawSprite(g_ViewportBorderCornerBR, border_pos, 0);
+    }
+
+    if (g_GamePauseState == 1) {
+        if (g_MasterMusicVolume < 1) {
+            Ghost_SaveGhostData();
+            g_PostRaceSequenceState = 2;
+        }
+        Lisa_RenderPanorama();
+    }
+
+    if (g_IsSplitScreen == 1 && g_SplitScreenMode == 0) {
+        divider_x = g_ScreenWidth / 2;
+        for (y = 0; y < g_ScreenHeight; y++) {
+            fb[y * g_ScreenWidth + divider_x - 1] = 0;
+            fb[y * g_ScreenWidth + divider_x] = 0;
         }
     }
-
-    HUD_UpdateFloatingMessages();
 }
 
 /**
