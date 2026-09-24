@@ -693,6 +693,21 @@ extern int g_RaceTimer;
 extern int DAT_0047a440;
 extern int DAT_004986e0[];
 
+#define g_CameraShakeActive _DAT_004949e0
+#define g_TrackSegmentTable ((int *)&DAT_00552e40)
+#define g_CarShadowVertices ((int *)&DAT_00603718)
+#define g_CarTransforms ((DynamicObjectTransform *)&g_pCarTransforms)
+#define g_WheelTransforms ((DynamicObjectTransform *)&g_pWheelTransforms)
+#define g_CarReflectionTransforms ((DynamicObjectTransform *)&g_pCarReflectionTransforms)
+#define g_CarShadowTransforms ((DynamicObjectTransform *)&g_pCarShadowTransforms)
+#define g_CarGhostTransforms ((DynamicObjectTransform *)&g_pCarGhostTransforms)
+#define g_pParticleArray1 ((int *)&g_ParticleArray1)
+#define g_pParticleArray2 ((int *)&g_ParticleArray2)
+#define g_pParticleCount1 ((int *)&g_ParticleCount1)
+#define g_ParticleTemplateX ((int *)&DAT_00552e60)
+#define g_ParticleTemplateY ((int *)&DAT_005533b0)
+#define g_ParticleTemplateZ ((int *)&DAT_00553300)
+
 /**
  * @original Audio_PlaySampleVol (IGN_WIN.EXE @ 0x0043e710, fx.c)
  * @fidelity ADAPTED
@@ -5763,260 +5778,167 @@ layout_racers:
  * @fidelity ADAPTED
  */
 void Camera_UpdateChase(void) {
-  int var_i1;
-  unsigned int var_u2;
-  double var_d3;
-  int var_i4;
-  double *var_pd5;
-  int var_i6;
-  unsigned int var_u7;
-  double var_f8;
-  __int64 var_l9;
-  __int64 var_20;
-  unsigned int uStack_14;
-  unsigned int uStack_c;
-  double var_8;
-  if (0.0 <= g_RaceTimer_P2) {
-    uStack_c = 0x40390000;
-  }
-  else {
-    uStack_c = 0x40240000;
-  }
-  var_pd5 = (double *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c);
-  if (*(int *)(g_Vehicles + 0x528 + g_ActiveVehicleIndex * 0x484c) == 0) {
-    var_f8 = (double)fcos((double)*(double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200));
-    *(double *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200 + 0x78) =
-         (double)(var_f8 * (double)*(int *)(g_VehicleConfigs + 0x54 + g_ActiveVehicleIndex * 200) *
-                  (double)_DAT_0047a6e0 + (double)*var_pd5);
-    var_i4 = g_Vehicles;
-    var_i6 = g_VehicleConfigs;
-    var_i1 = g_ActiveVehicleIndex;
-    *(int *)(g_VehicleConfigs + 0x84 + g_ActiveVehicleIndex * 200) =
-         *(int *)(g_Vehicles + 0xc + g_ActiveVehicleIndex * 0x484c);
-    *(int *)(var_i6 + 0x80 + var_i1 * 200) = *(int *)(var_i4 + 8 + var_i1 * 0x484c);
-    var_f8 = (double)fsin((double)*(double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200));
-    *(double *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200 + 0x88) =
-         (double)(var_f8 * (double)*(int *)(g_VehicleConfigs + 0x54 + g_ActiveVehicleIndex * 200) *
-                  (double)_DAT_0047a6e0 +
-                 (double)*(double *)(g_Vehicles + 0x10 + g_ActiveVehicleIndex * 0x484c));
-    var_i4 = g_Vehicles;
-    var_i6 = g_VehicleConfigs;
-    var_i1 = g_ActiveVehicleIndex;
-    *(int *)(g_VehicleConfigs + 0xac + g_ActiveVehicleIndex * 200) =
-         *(int *)(g_Vehicles + 0xfc + g_ActiveVehicleIndex * 0x484c);
-    *(int *)(var_i6 + 0xa8 + var_i1 * 200) = *(int *)(var_i4 + 0xf8 + var_i1 * 0x484c);
-    var_i4 = g_VehicleConfigs;
-    var_i6 = g_ActiveVehicleIndex;
-    var_i1 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-    if (*(int *)(g_Vehicles + 0x554 + g_ActiveVehicleIndex * 0x484c) == 0) {
-      *(int *)(g_VehicleConfigs + 0xb4 + g_ActiveVehicleIndex * 200) = *(int *)(var_i1 + 0x114);
-      *(int *)(var_i4 + 0xb0 + var_i6 * 200) = *(int *)(var_i1 + 0x110);
+    VehicleState *veh;
+    VehicleConfig *config;
+    double smooth_divisor;
+    double cos_yaw;
+    double sin_yaw;
+    double yaw_diff;
+    double pitch_diff;
+    double track_pitch;
+    double pitch_offset;
+    double incline_term;
+    double road_incline_target;
+    double min_height;
+    int road_node;
+    int node_idx;
+    int road_type;
+
+    smooth_divisor = (g_RaceTimer_P2 >= 0.0) ? 25.0 : 10.0;
+    veh = (VehicleState *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c);
+    config = (VehicleConfig *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200);
+
+    if (veh->turbo_active == 0 || *(int *)((uint8_t *)veh + 0x604) == 1) {
+        cos_yaw = cos(config->camera_yaw);
+        config->target_pos_x = cos_yaw * (double)config->chase_camera_distance * (-0.5) + veh->pos_x;
+        config->target_pos_y = veh->pos_y;
+        sin_yaw = sin(config->camera_yaw);
+        config->target_pos_z = sin_yaw * (double)config->chase_camera_distance * (-0.5) + veh->pos_z;
+        config->vehicle_yaw = veh->angle_yaw;
+        if (*(int *)((uint8_t *)veh + 0x554) == 0) {
+            config->vehicle_pitch = veh->angle_pitch;
+        }
     }
-  }
-  else {
-    if (*(int *)((int)var_pd5 + 0x604) != 1) goto LAB_0043cd2c;
-    var_f8 = (double)fcos((double)*(double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200));
-    *(double *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200 + 0x78) =
-         (double)(var_f8 * (double)*(int *)(g_VehicleConfigs + 0x54 + g_ActiveVehicleIndex * 200) *
-                  (double)_DAT_0047a6e0 + (double)*var_pd5);
-    var_i4 = g_Vehicles;
-    var_i6 = g_VehicleConfigs;
-    var_i1 = g_ActiveVehicleIndex;
-    *(int *)(g_VehicleConfigs + 0x84 + g_ActiveVehicleIndex * 200) =
-         *(int *)(g_Vehicles + 0xc + g_ActiveVehicleIndex * 0x484c);
-    *(int *)(var_i6 + 0x80 + var_i1 * 200) = *(int *)(var_i4 + 8 + var_i1 * 0x484c);
-    var_f8 = (double)fsin((double)*(double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200));
-    *(double *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200 + 0x88) =
-         (double)(var_f8 * (double)*(int *)(g_VehicleConfigs + 0x54 + g_ActiveVehicleIndex * 200) *
-                  (double)_DAT_0047a6e0 +
-                 (double)*(double *)(g_Vehicles + 0x10 + g_ActiveVehicleIndex * 0x484c));
-    var_i4 = g_Vehicles;
-    var_i6 = g_VehicleConfigs;
-    var_i1 = g_ActiveVehicleIndex;
-    *(int *)(g_VehicleConfigs + 0xac + g_ActiveVehicleIndex * 200) =
-         *(int *)(g_Vehicles + 0xfc + g_ActiveVehicleIndex * 0x484c);
-    *(int *)(var_i6 + 0xa8 + var_i1 * 200) = *(int *)(var_i4 + 0xf8 + var_i1 * 0x484c);
-    var_i4 = g_VehicleConfigs;
-    var_i6 = g_ActiveVehicleIndex;
-    var_i1 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-    if (*(int *)(g_Vehicles + 0x554 + g_ActiveVehicleIndex * 0x484c) == 0) {
-      *(int *)(g_VehicleConfigs + 0xb4 + g_ActiveVehicleIndex * 200) = *(int *)(var_i1 + 0x114);
-      *(int *)(var_i4 + 0xb0 + var_i6 * 200) = *(int *)(var_i1 + 0x110);
+
+    cos_yaw = cos(config->camera_yaw);
+    config->cam_pos_x = cos_yaw * (double)config->chase_camera_distance * 0.5 + veh->pos_x;
+    config->cam_pos_y = veh->pos_y;
+    sin_yaw = sin(config->camera_yaw);
+    config->cam_pos_z = sin_yaw * (double)config->chase_camera_distance * 0.5 + veh->pos_z;
+    config->camera_yaw_desired = veh->angle_yaw + 3.141592654;
+
+    /* Camera zoom distance factor easing */
+    if (veh->crash_flag1 == 0 && veh->crash_flag2 == 0 && veh->crash_flag3 == 0) {
+        config->chase_cam_dist_factor *= 0.98;
+    } else {
+        config->chase_cam_dist_factor += (150.0 - config->chase_cam_dist_factor) * 0.03333333333;
     }
-  }
-  var_f8 = (double)fcos((double)*(double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200));
-  *(double *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200 + 0x90) =
-       (double)(var_f8 * (double)*(int *)(g_VehicleConfigs + 0x54 + g_ActiveVehicleIndex * 200) *
-                (double)_DAT_0047a6e8 + (double)*(double *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c))
-  ;
-  var_i4 = g_Vehicles;
-  var_i6 = g_VehicleConfigs;
-  var_i1 = g_ActiveVehicleIndex;
-  *(int *)(g_VehicleConfigs + 0x9c + g_ActiveVehicleIndex * 200) =
-       *(int *)(g_Vehicles + 0xc + g_ActiveVehicleIndex * 0x484c);
-  *(int *)(var_i6 + 0x98 + var_i1 * 200) = *(int *)(var_i4 + 8 + var_i1 * 0x484c);
-  var_f8 = (double)fsin((double)*(double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200));
-  *(double *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200 + 0xa0) =
-       (double)(var_f8 * (double)*(int *)(g_VehicleConfigs + 0x54 + g_ActiveVehicleIndex * 200) *
-                (double)_DAT_0047a6e8 +
-               (double)*(double *)(g_Vehicles + 0x10 + g_ActiveVehicleIndex * 0x484c));
-  *(double *)(g_VehicleConfigs + 0xb8 + g_ActiveVehicleIndex * 200) =
-       *(double *)(g_Vehicles + 0xf8 + g_ActiveVehicleIndex * 0x484c) + _DAT_0047a6f0;
-LAB_0043cd2c:
-  var_i1 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-  if (((*(int *)(g_Vehicles + 0x354 + g_ActiveVehicleIndex * 0x484c) == 0) &&
-      (*(int *)(var_i1 + 0x358) == 0)) && (*(int *)(var_i1 + 0x35c) == 0)) {
-    var_d3 = *(double *)(g_VehicleConfigs + 0x30 + g_ActiveVehicleIndex * 200) * _DAT_0047a6f8;
-    var_pd5 = (double *)(g_VehicleConfigs + 0x30 + g_ActiveVehicleIndex * 200);
-  }
-  else {
-    var_pd5 = (double *)(g_VehicleConfigs + 0x30 + g_ActiveVehicleIndex * 200);
-    var_d3 = (_DAT_0047a700 - *(double *)(g_VehicleConfigs + 0x30 + g_ActiveVehicleIndex * 200)) * _DAT_0047a708
-            + *var_pd5;
-  }
-  *var_pd5 = var_d3;
-  var_20 = *(double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200) -
-             *(double *)(g_VehicleConfigs + 0xa8 + g_ActiveVehicleIndex * 200);
-  var_i1 = g_VehicleConfigs + g_ActiveVehicleIndex * 200;
-  if (_DAT_0047a6f0 < var_20) {
-    var_20 = var_20 - _DAT_0047a710;
-  }
-  if (var_20 < _DAT_0047a718) {
-    var_20 = var_20 + _DAT_0047a710;
-  }
-  *(double *)(var_i1 + 8) = var_20 * _DAT_0047a720 + *(double *)(var_i1 + 8);
-  var_pd5 = (double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200);
-  if (_DAT_0047a710 <= *(double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200)) {
-    *var_pd5 = *var_pd5 - _DAT_0047a710;
-  }
-  var_pd5 = (double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200);
-  if (*(double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200) <= 0.0) {
-    *var_pd5 = *var_pd5 + _DAT_0047a710;
-  }
-  *(double *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200 + 0x68) =
-       *(double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200) * _DAT_0047a728 + _DAT_0047a730;
-  var_pd5 = (double *)(g_VehicleConfigs + 0x68 + g_ActiveVehicleIndex * 200);
-  if (*(double *)(g_VehicleConfigs + 0x68 + g_ActiveVehicleIndex * 200) < 0.0) {
-    *var_pd5 = *var_pd5 + _DAT_0047a738;
-  }
-  var_pd5 = (double *)(g_VehicleConfigs + 0x68 + g_ActiveVehicleIndex * 200);
-  if (_DAT_0047a740 < *(double *)(g_VehicleConfigs + 0x68 + g_ActiveVehicleIndex * 200)) {
-    *var_pd5 = *var_pd5 - _DAT_0047a738;
-  }
-  var_20 = *(double *)(g_VehicleConfigs + 0x28 + g_ActiveVehicleIndex * 200) -
-             *(double *)(g_VehicleConfigs + 0xb8 + g_ActiveVehicleIndex * 200);
-  var_i1 = g_VehicleConfigs + g_ActiveVehicleIndex * 200;
-  if (_DAT_0047a6f0 < var_20) {
-    var_20 = var_20 - _DAT_0047a710;
-  }
-  if (var_20 < _DAT_0047a718) {
-    var_20 = var_20 + _DAT_0047a710;
-  }
-  *(double *)(var_i1 + 0x28) = var_20 * _DAT_0047a720 + *(double *)(var_i1 + 0x28);
-  var_pd5 = (double *)(g_VehicleConfigs + 0x28 + g_ActiveVehicleIndex * 200);
-  if (_DAT_0047a710 <= *(double *)(g_VehicleConfigs + 0x28 + g_ActiveVehicleIndex * 200)) {
-    *var_pd5 = *var_pd5 - _DAT_0047a710;
-  }
-  var_pd5 = (double *)(g_VehicleConfigs + 0x28 + g_ActiveVehicleIndex * 200);
-  if (*(double *)(g_VehicleConfigs + 0x28 + g_ActiveVehicleIndex * 200) <= 0.0) {
-    *var_pd5 = *var_pd5 + _DAT_0047a710;
-  }
-  *(double *)(g_VehicleConfigs + 0x70 + g_ActiveVehicleIndex * 200) =
-       *(double *)(g_VehicleConfigs + 0x28 + g_ActiveVehicleIndex * 200) * _DAT_0047a728 + _DAT_0047a730;
-  var_pd5 = (double *)(g_VehicleConfigs + 0x70 + g_ActiveVehicleIndex * 200);
-  if (*(double *)(g_VehicleConfigs + 0x70 + g_ActiveVehicleIndex * 200) < 0.0) {
-    *var_pd5 = *var_pd5 + _DAT_0047a738;
-  }
-  var_pd5 = (double *)(g_VehicleConfigs + 0x70 + g_ActiveVehicleIndex * 200);
-  if (_DAT_0047a740 < *(double *)(g_VehicleConfigs + 0x70 + g_ActiveVehicleIndex * 200)) {
-    *var_pd5 = *var_pd5 - _DAT_0047a738;
-  }
-  var_i1 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-  var_u2 = *(unsigned int *)(var_i1 + 0x364);
-  var_u7 = (int)var_u2 >> 0x1f;
-  if (*(int *)(g_Vehicles + 0x36c + g_ActiveVehicleIndex * 0x484c) == 3) {
-    var_i6 = (var_u2 ^ var_u7) - var_u7;
-    var_20 = (*(double *)(g_pTrackRoadSequence + 4 + var_i6 * 0x18) +
-               *(double *)(g_pTrackRoadSequence + 0x10 + var_i6 * 0x18)) * _DAT_0047a6e8;
-  }
-  else if ((int)var_u2 < 0) {
-    var_i6 = (var_u2 ^ var_u7) - var_u7;
-    var_20 = (double)CONCAT44(*(int *)(g_pTrackRoadSequence + 0x14 + var_i6 * 0x18),
-                                *(int *)(g_pTrackRoadSequence + 0x10 + var_i6 * 0x18));
-  }
-  else {
-    var_20 = (double)CONCAT44(*(int *)(g_pTrackRoadSequence + 8 + var_u2 * 0x18),
-                                *(int *)(g_pTrackRoadSequence + 4 + var_u2 * 0x18));
-  }
-  if (*(int *)(var_i1 + 0x528) == 0) {
-    var_f8 = (double)fcos((((double)*(double *)(g_VehicleConfigs + 8 + g_ActiveVehicleIndex * 200) -
-                           (double)var_20) - (double)_DAT_0047a748) * (double)_DAT_0047a750 +
-                          (double)_DAT_0047a6f0);
-    var_8 = (double)((var_f8 + (double)_DAT_0047a758) * (double)_DAT_0047a760);
-  }
-  else {
-    var_8 = 0.0;
-  }
-  if (*(int *)(var_i1 + 0x35c) == 0) {
-    var_20 = *(double *)(g_VehicleConfigs + 0xb0 + g_ActiveVehicleIndex * 200) * _DAT_0047a768;
-  }
-  else {
-    var_20 = 0.0;
-  }
-  var_pd5 = (double *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200);
-  if ((_DAT_0047a738 < *(double *)(g_VehicleConfigs + 0x48 + g_ActiveVehicleIndex * 200)) ||
-     (var_pd5[9] < _DAT_0047a770)) {
-    _DAT_004949e0 = 0;
-  }
-  var_pd5[9] = ((((*var_pd5 - (double)*(int *)(var_pd5 + 10)) - var_pd5[0x10]) * _DAT_0047a6e8 +
-                var_8 * _DAT_0047a778 + var_20) - var_pd5[9]) /
-              (double)((unsigned __int64)uStack_c << 0x20) + var_pd5[9];
-  var_i1 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-  uStack_14 = 0x40240000;
-  if (0.0 <= g_RaceTimer_P2) {
-    uStack_14 = uStack_c;
-  }
-  var_u2 = *(unsigned int *)(var_i1 + 0x364);
-  if ((int)var_u2 < 0) {
-    var_i6 = *(int *)(g_pTrackRoadSequence + 0xc +
-                    ((var_u2 ^ (int)var_u2 >> 0x1f) - ((int)var_u2 >> 0x1f)) * 0x18);
-  }
-  else {
-    var_i6 = *(int *)(g_pTrackRoadSequence + var_u2 * 0x18);
-  }
-  var_i6 = *(int *)(DAT_00552e40 + 4 + var_i6 * 0xc);
-  if (var_i6 < 1) {
-    var_20 = 0.0;
-  }
-  else if (var_i6 < 0xb) {
-    var_20 = (double)(var_i6 * -0x32);
-  }
-  else if ((10 < var_i6) && (var_i6 < 0x15)) {
-    var_20 = (double)((var_i6 * 5 + -0x32) * 10);
-  }
-  var_pd5 = (double *)(g_VehicleConfigs + 0xc0 + g_ActiveVehicleIndex * 200);
-  if (*(double *)(g_VehicleConfigs + 0xc0 + g_ActiveVehicleIndex * 200) < var_20) {
-    *var_pd5 = *(double *)(var_i1 + 0x118) * _DAT_0047a780 + *var_pd5;
-  }
-  var_pd5 = (double *)(g_VehicleConfigs + 0xc0 + g_ActiveVehicleIndex * 200);
-  if (var_20 < *(double *)(g_VehicleConfigs + 0xc0 + g_ActiveVehicleIndex * 200)) {
-    *var_pd5 = *(double *)(g_Vehicles + 0x118 + g_ActiveVehicleIndex * 0x484c) * _DAT_0047a788 + *var_pd5;
-  }
-  var_pd5 = (double *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200);
-  *var_pd5 = ((double)*(int *)(g_VehicleConfigs + 0x50 + g_ActiveVehicleIndex * 200) -
-            ((var_8 * _DAT_0047a790 - *(double *)(g_VehicleConfigs + 0x80 + g_ActiveVehicleIndex * 200)) +
-             *(double *)(g_VehicleConfigs + 0xc0 + g_ActiveVehicleIndex * 200) + *var_pd5)) /
-            (double)((unsigned __int64)uStack_14 << 0x20) + *var_pd5;
-  var_d3 = *(double *)(g_VehicleConfigs + 0x80 + g_ActiveVehicleIndex * 200) + _DAT_0047a798;
-  var_pd5 = (double *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200);
-  if (*var_pd5 < var_d3) {
-    *var_pd5 = var_d3;
-  }
-  var_i1 = g_VehicleConfigs + 0x54;
-  var_i6 = g_ActiveVehicleIndex * 200;
-  var_l9 = __ftol();
-  *(int *)(var_i1 + var_i6) = (int)var_l9;
-  return;
+
+    /* Camera yaw lag */
+    yaw_diff = config->camera_yaw - config->vehicle_yaw;
+    if (yaw_diff > 3.141592654) {
+        yaw_diff -= 6.283185307;
+    }
+    if (yaw_diff < -3.141592654) {
+        yaw_diff += 6.283185307;
+    }
+    config->camera_yaw += yaw_diff * (-0.125);
+    if (config->camera_yaw >= 6.283185307) {
+        config->camera_yaw -= 6.283185307;
+    }
+    if (config->camera_yaw <= 0.0) {
+        config->camera_yaw += 6.283185307;
+    }
+
+    config->yaw_lag_angle = config->camera_yaw * (-572.9577951) + 900.0;
+    if (config->yaw_lag_angle < 0.0) {
+        config->yaw_lag_angle += 3600.0;
+    }
+    if (config->yaw_lag_angle > 3599.0) {
+        config->yaw_lag_angle -= 3600.0;
+    }
+
+    /* Camera pitch lag */
+    pitch_diff = config->camera_pitch - config->camera_yaw_desired;
+    if (pitch_diff > 3.141592654) {
+        pitch_diff -= 6.283185307;
+    }
+    if (pitch_diff < -3.141592654) {
+        pitch_diff += 6.283185307;
+    }
+    config->camera_pitch += pitch_diff * (-0.125);
+    if (config->camera_pitch >= 6.283185307) {
+        config->camera_pitch -= 6.283185307;
+    }
+    if (config->camera_pitch <= 0.0) {
+        config->camera_pitch += 6.283185307;
+    }
+
+    config->pitch_lag_angle = config->camera_pitch * (-572.9577951) + 900.0;
+    if (config->pitch_lag_angle < 0.0) {
+        config->pitch_lag_angle += 3600.0;
+    }
+    if (config->pitch_lag_angle > 3599.0) {
+        config->pitch_lag_angle -= 3600.0;
+    }
+
+    /* Track road pitch */
+    road_node = *(int *)((uint8_t *)veh + 0x364);
+    node_idx = (road_node < 0) ? ~road_node : road_node;
+
+    if (*(int *)((uint8_t *)veh + 0x36c) == 3) {
+        track_pitch = (*(double *)(g_pTrackRoadSequence + 4 + node_idx * 0x18) +
+                       *(double *)(g_pTrackRoadSequence + 0x10 + node_idx * 0x18)) * 0.5;
+    } else if (road_node < 0) {
+        track_pitch = *(double *)(g_pTrackRoadSequence + 0x10 + node_idx * 0x18);
+    } else {
+        track_pitch = *(double *)(g_pTrackRoadSequence + 4 + road_node * 0x18);
+    }
+
+    if (veh->turbo_active == 0) {
+        cos_yaw = cos(((config->camera_yaw - track_pitch) - 1.570796327) * 2.0 + 3.141592654);
+        pitch_offset = (cos_yaw + 1.0) * 50.0;
+    } else {
+        pitch_offset = 0.0;
+    }
+
+    if (veh->crash_flag3 == 0) {
+        incline_term = config->vehicle_pitch * 114.591559;
+    } else {
+        incline_term = 0.0;
+    }
+
+    if (config->pitch_offset > 3600.0 || config->pitch_offset < -3600.0) {
+        g_CameraShakeActive = 0;
+    }
+
+    /* Elevation offset smoothing */
+    config->pitch_offset = ((((config->cam_height - (double)config->chase_target_height) - config->target_pos_y) * 0.5 +
+                            pitch_offset * 3.0 + incline_term) - config->pitch_offset) / smooth_divisor + config->pitch_offset;
+
+    /* Road incline response */
+    if (road_node < 0) {
+        road_type = *(int *)(g_pTrackRoadSequence + 0xc + node_idx * 0x18);
+    } else {
+        road_type = *(int *)(g_pTrackRoadSequence + road_node * 0x18);
+    }
+    road_type = *(int *)(g_TrackSegmentTable + 4 + road_type * 0xc);
+
+    road_incline_target = 0.0;
+    if (road_type >= 1 && road_type < 11) {
+        road_incline_target = (double)(road_type * -50);
+    } else if (road_type > 10 && road_type < 21) {
+        road_incline_target = (double)((road_type * 5 - 50) * 10);
+    }
+
+    if (config->elevation_smooth_offset < road_incline_target) {
+        config->elevation_smooth_offset += *(double *)((uint8_t *)veh + 0x118) * 0.3333333333;
+    }
+    if (road_incline_target < config->elevation_smooth_offset) {
+        config->elevation_smooth_offset += *(double *)((uint8_t *)veh + 0x118) * (-0.3333333333);
+    }
+
+    /* Target elevation */
+    config->cam_height = ((double)config->chase_target_height -
+                         ((pitch_offset * -2.0 - config->target_pos_y) + config->elevation_smooth_offset + config->cam_height)) /
+                         smooth_divisor + config->cam_height;
+
+    min_height = config->target_pos_y + 200.0;
+    if (config->cam_height < min_height) {
+        config->cam_height = min_height;
+    }
+
+    config->chase_camera_distance += (int)((400.0 - (double)config->chase_camera_distance) * 0.1);
 }
 
 /**
@@ -6024,185 +5946,185 @@ LAB_0043cd2c:
  * @fidelity ADAPTED
  */
 void Car_UpdateDynamicObjects(int car_idx) {
-  int var_i1;
-  int var_i2;
-  int var_i3;
-  int *var_pu4;
-  int var_i5;
-  int *var_pi6;
-  double var_f7;
-  __int64 var_l8;
-  int *var_20;
-  int var_c;
-  var_i3 = car_idx * 0x20;
-  var_l8 = __ftol();
-  *(int *)(g_pCarTransforms + 4 + var_i3) = (int)var_l8;
-  var_l8 = __ftol();
-  *(int *)(g_pCarTransforms + 8 + var_i3) = (int)var_l8;
-  var_l8 = __ftol();
-  *(int *)(g_pCarTransforms + 0xc + var_i3) = (int)var_l8;
-  var_l8 = __ftol();
-  *(int *)(g_pCarTransforms + 0x10 + var_i3) = (int)var_l8;
-  var_l8 = __ftol();
-  *(int *)(g_pCarTransforms + 0x14 + var_i3) = (int)var_l8;
-  var_l8 = __ftol();
-  *(int *)(g_pCarTransforms + 0x18 + var_i3) = (int)var_l8;
-  if ((g_DynamicObjectsPaused == 0) && (var_i1 = Lisa_UpdateObjectSpatialGrid((int *)(g_pCarTransforms + var_i3)), var_i1 != 0)) {
-    Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4);
-  }
-  var_i1 = g_Vehicles + car_idx * 0x484c;
-  var_f7 = (double)*(double *)(var_i1 + 0xb0) * (double)_DAT_0047a7e0;
-  var_i5 = 0;
-  fcos(var_f7);
-  fsin(var_f7);
-  if (*(int *)(var_i1 + 0x558) == 0) {
-    var_pi6 = (int *)(g_PlayerHUDState + car_idx * 0x4c);
-    if (0 < *(int *)(*var_pi6 * 0x30 + g_ParticleCount1)) {
-      var_pu4 = &g_ParticleArray1 + car_idx * 0x820;
-      do {
-        var_i5 = var_i5 + 1;
-        var_l8 = __ftol();
-        *var_pu4 = (int)var_l8;
-        var_l8 = __ftol();
-        var_i1 = g_ParticleCount1;
-        var_pu4[2] = (int)var_l8;
-        var_pu4 = var_pu4 + 3;
-      } while (var_i5 < *(int *)(*var_pi6 * 0x30 + var_i1));
+    VehicleState *veh;
+    DynamicObjectTransform *car_xform;
+    DynamicObjectTransform *wheel_xform;
+    DynamicObjectTransform *refl_xform;
+    DynamicObjectTransform *shadow_xform;
+    DynamicObjectTransform *ghost_xform;
+    int *shadow_quad;
+    double angle_rad;
+    double cos_ang;
+    double sin_ang;
+    double shadow_x;
+    double shadow_z;
+    double diff_pos;
+    int car_model;
+    int i;
+    int emitter_idx;
+    int count;
+    int *out_emitter;
+    int *player_hud;
+
+    veh = (VehicleState *)(g_Vehicles + car_idx * 0x484c);
+    player_hud = (int *)(g_PlayerHUDState + car_idx * 0x4c);
+    car_model = *player_hud;
+
+    /* Primary car transform */
+    car_xform = &g_CarTransforms[car_idx];
+    car_xform->pos_x = (int)veh->pos_x;
+    car_xform->pos_y = (int)veh->pos_y;
+    car_xform->pos_z = (int)veh->pos_z;
+    car_xform->rot_x = (int)*(double *)((uint8_t *)veh + 0x584);
+    car_xform->rot_y = (int)(veh->angle_yaw * 572.9577951);
+    car_xform->rot_z = (int)*(double *)((uint8_t *)veh + 0x58c);
+
+    if (g_DynamicObjectsPaused == 0) {
+        if (Lisa_UpdateObjectSpatialGrid(car_xform) != 0) {
+            Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4);
+        }
     }
-    var_i1 = 0;
-    if (0 < *(int *)(*var_pi6 * 0x30 + 0xc + g_ParticleCount1)) {
-      var_pu4 = (int *)(&g_ParticleArray2 + car_idx * 0x2080);
-      do {
-        var_i1 = var_i1 + 1;
-        var_l8 = __ftol();
-        *var_pu4 = (int)var_l8;
-        var_l8 = __ftol();
-        var_i5 = g_ParticleCount1;
-        var_pu4[2] = (int)var_l8;
-        var_pu4 = var_pu4 + 3;
-      } while (var_i1 < *(int *)(*var_pi6 * 0x30 + 0xc + var_i5));
+
+    /* Particle emitter coordinate transforms */
+    angle_rad = *(double *)((uint8_t *)veh + 0xb0) * 0.01745329252;
+    cos_ang = cos(angle_rad);
+    sin_ang = sin(angle_rad);
+
+    if (*(int *)((uint8_t *)veh + 0x558) == 0) {
+        count = *(int *)(g_pParticleCount1 + car_model * 0x30 / 4);
+        if (count > 0) {
+            out_emitter = &g_pParticleArray1[car_idx * 0x820 / 4];
+            for (i = 0; i < count; i++) {
+                double tmpl_x = (double)*(int *)(g_ParticleTemplateX + car_model * 4 + i);
+                double tmpl_y = (double)*(int *)(g_ParticleTemplateY + car_model * 4 + i);
+                double tmpl_z = (double)*(int *)(g_ParticleTemplateZ + car_model * 4 + i);
+                out_emitter[0] = (int)(tmpl_x * cos_ang - tmpl_y * sin_ang);
+                out_emitter[2] = (int)tmpl_z;
+                out_emitter += 3;
+            }
+        }
+
+        count = *(int *)(g_pParticleCount1 + (car_model * 0x30 + 0xc) / 4);
+        if (count > 0) {
+            out_emitter = &g_pParticleArray2[car_idx * 0x2080 / 4];
+            for (i = 0; i < count; i++) {
+                double tmpl_x = (double)*(int *)(g_ParticleTemplateX + car_model * 4 + i);
+                double tmpl_y = (double)*(int *)(g_ParticleTemplateY + car_model * 4 + i);
+                double tmpl_z = (double)*(int *)(g_ParticleTemplateZ + car_model * 4 + i);
+                out_emitter[0] = (int)(tmpl_x * cos_ang - tmpl_y * sin_ang);
+                out_emitter[2] = (int)tmpl_z;
+                out_emitter += 3;
+            }
+        }
+    } else {
+        out_emitter = &g_pParticleArray1[car_idx * 0x820 / 4];
+        for (emitter_idx = 0; emitter_idx < 4; emitter_idx++) {
+            count = *(int *)(g_pParticleCount1 + (emitter_idx + car_model * 4) * 3);
+            if (count > 0) {
+                for (i = 0; i < count; i++) {
+                    double tmpl_x = (double)*(int *)(g_ParticleTemplateX + (emitter_idx + car_model * 4) * 4 + i);
+                    double tmpl_y = (double)*(int *)(g_ParticleTemplateY + (emitter_idx + car_model * 4) * 4 + i);
+                    double tmpl_z = (double)*(int *)(g_ParticleTemplateZ + (emitter_idx + car_model * 4) * 4 + i);
+                    out_emitter[0] = (int)(tmpl_x * cos_ang - tmpl_y * sin_ang);
+                    out_emitter[1] = (int)(tmpl_x * sin_ang + tmpl_y * cos_ang);
+                    out_emitter[2] = (int)(tmpl_z * 1.5);
+                    out_emitter += 3;
+                }
+            }
+            out_emitter += 0x208 / 4;
+        }
     }
-  }
-  else {
-    var_i1 = 0;
-    var_20 = &g_ParticleArray1 + car_idx * 0x820;
-    var_pi6 = (int *)(g_PlayerHUDState + car_idx * 0x4c);
-    do {
-      var_i5 = 0;
-      var_pu4 = var_20;
-      if (0 < *(int *)(g_ParticleCount1 + (var_i1 + *var_pi6 * 4) * 0xc)) {
-        do {
-          var_l8 = __ftol();
-          *var_pu4 = (int)var_l8;
-          var_l8 = __ftol();
-          var_pu4[1] = (int)var_l8;
-          var_l8 = __ftol();
-          var_pu4[2] = (int)var_l8;
-          var_i5 = var_i5 + 1;
-          var_pu4 = var_pu4 + 3;
-        } while (var_i5 < *(int *)(g_ParticleCount1 + (var_i1 + *var_pi6 * 4) * 0xc));
-      }
-      var_i1 = var_i1 + 1;
-      var_20 = var_20 + 0x208;
-    } while (var_i1 < 4);
-  }
-  var_c = car_idx * 0x4c;
-  var_i1 = 4;
-  var_i5 = car_idx << 7;
-  do {
-    var_l8 = __ftol();
-    *(int *)(g_pWheelTransforms + 4 + var_i5) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(g_pWheelTransforms + 8 + var_i5) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(g_pWheelTransforms + 0xc + var_i5) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(g_pWheelTransforms + 0x10 + var_i5) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(g_pWheelTransforms + 0x14 + var_i5) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(g_pWheelTransforms + 0x18 + var_i5) = (int)var_l8;
-    var_i2 = Lisa_UpdateObjectSpatialGrid((int *)(g_pWheelTransforms + var_i5));
-    if (var_i2 != 0) {
-      Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_WHE_00499580);
+
+    /* 4 Wheel transforms */
+    for (i = 0; i < 4; i++) {
+        wheel_xform = &g_WheelTransforms[car_idx * 4 + i];
+        wheel_xform->pos_x = (int)veh->pos_x;
+        wheel_xform->pos_y = (int)veh->pos_y;
+        wheel_xform->pos_z = (int)veh->pos_z;
+        wheel_xform->rot_x = (int)(*(double *)((uint8_t *)veh + 0x108) * 572.9577951);
+        wheel_xform->rot_y = (int)(veh->angle_yaw * 572.9577951);
+        wheel_xform->rot_z = (int)(*(double *)((uint8_t *)veh + 0x110) * 572.9577951);
+
+        if (Lisa_UpdateObjectSpatialGrid(wheel_xform) != 0) {
+            Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_WHE_00499580);
+        }
     }
-    var_i5 = var_i5 + 0x20;
-    var_i1 = var_i1 + -1;
-  } while (var_i1 != 0);
-  if ((*(int *)(g_PlayerHUDState + var_c) == 7) && (g_DynamicObjectsPaused == 0)) {
-    var_l8 = __ftol();
-    *(int *)(var_i3 + 4 + g_pCarReflectionTransforms) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(var_i3 + 8 + g_pCarReflectionTransforms) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(var_i3 + 0xc + g_pCarReflectionTransforms) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(var_i3 + 0x10 + g_pCarReflectionTransforms) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(var_i3 + 0x14 + g_pCarReflectionTransforms) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(var_i3 + 0x18 + g_pCarReflectionTransforms) = (int)var_l8;
-    if ((g_DynamicObjectsPaused == 0) && (var_i1 = Lisa_UpdateObjectSpatialGrid((int *)(g_pCarReflectionTransforms + var_i3)), var_i1 != 0)) {
-      Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4);
+
+    /* Police car reflection (car model 7) */
+    if (car_model == 7 && g_DynamicObjectsPaused == 0) {
+        refl_xform = &g_CarReflectionTransforms[car_idx];
+        refl_xform->pos_x = (int)veh->pos_x;
+        refl_xform->pos_y = (int)veh->pos_y;
+        refl_xform->pos_z = (int)veh->pos_z;
+        refl_xform->rot_x = (int)*(double *)((uint8_t *)veh + 0x584);
+        refl_xform->rot_y = (int)(veh->angle_yaw * 572.9577951);
+        refl_xform->rot_z = (int)*(double *)((uint8_t *)veh + 0x58c);
+
+        if (Lisa_UpdateObjectSpatialGrid(refl_xform) != 0) {
+            Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4);
+        }
     }
-  }
-  var_l8 = __ftol();
-  ((int*)&(DAT_00603718))[car_idx * 0x1e] = (int)var_l8;
-  var_l8 = __ftol();
-  ((int*)&(DAT_00603720))[car_idx * 0x1e] = (int)var_l8;
-  var_l8 = __ftol();
-  ((int*)&(DAT_00603724))[car_idx * 0x1e] = (int)var_l8;
-  var_l8 = __ftol();
-  ((int*)&(DAT_0060372c))[car_idx * 0x1e] = (int)var_l8;
-  var_l8 = __ftol();
-  ((int*)&(DAT_00603730))[car_idx * 0x1e] = (int)var_l8;
-  var_l8 = __ftol();
-  ((int*)&(DAT_00603738))[car_idx * 0x1e] = (int)var_l8;
-  var_l8 = __ftol();
-  ((int*)&(DAT_0060373c))[car_idx * 0x1e] = (int)var_l8;
-  var_l8 = __ftol();
-  ((int*)&(DAT_00603744))[car_idx * 0x1e] = (int)var_l8;
-  var_l8 = __ftol();
-  *(int *)(g_pCarShadowTransforms + 4 + var_i3) = (int)var_l8;
-  var_l8 = __ftol();
-  *(int *)(g_pCarShadowTransforms + 8 + var_i3) = (int)var_l8;
-  var_l8 = __ftol();
-  *(int *)(g_pCarShadowTransforms + 0xc + var_i3) = (int)var_l8;
-  var_l8 = __ftol();
-  *(int *)(g_pCarShadowTransforms + 0x10 + var_i3) = (int)var_l8;
-  var_l8 = __ftol();
-  *(int *)(g_pCarShadowTransforms + 0x14 + var_i3) = (int)var_l8;
-  var_l8 = __ftol();
-  *(int *)(g_pCarShadowTransforms + 0x18 + var_i3) = (int)var_l8;
-  if ((g_DynamicObjectsPaused == 0) && (var_i1 = Lisa_UpdateObjectSpatialGrid((int *)(g_pCarShadowTransforms + var_i3)), var_i1 != 0)) {
-    Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_SHA_00499558);
-  }
-  if ((*(int *)(g_PlayerHUDState + 4 + var_c) == 2) && (car_idx != 0)) {
-    var_l8 = __ftol();
-    *(int *)(g_pCarGhostTransforms + 4 + var_i3) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(g_pCarGhostTransforms + 8 + var_i3) = (int)var_l8;
-    var_l8 = __ftol();
-    *(int *)(g_pCarGhostTransforms + 0xc + var_i3) = (int)var_l8;
-    *(int *)(g_pCarGhostTransforms + 0x10 + var_i3) = 0;
-    *(int *)(g_pCarGhostTransforms + 0x14 + var_i3) = 0;
-    *(int *)(g_pCarGhostTransforms + 0x18 + var_i3) = 0;
-    var_pi6 = (int *)(g_pCarGhostTransforms + var_i3);
-    if (var_pi6[7] == 1) {
-      var_i3 = Lisa_UpdateObjectSpatialGrid(var_pi6);
-      if (var_i3 != 0) {
-        Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_00499530);
-        return;
-      }
+
+    /* Shadow quad geometry vertices */
+    shadow_quad = &g_CarShadowVertices[car_idx * 30];
+    shadow_quad[0] = (int)*(double *)((uint8_t *)veh + 0x30c);
+    shadow_quad[2] = (int)(*(double *)((uint8_t *)veh + 0x32c) * 1.2);
+    shadow_quad[3] = (int)*(double *)((uint8_t *)veh + 0x314);
+    shadow_quad[5] = (int)(*(double *)((uint8_t *)veh + 0x334) * 1.2);
+    shadow_quad[6] = (int)*(double *)((uint8_t *)veh + 0x304);
+    shadow_quad[8] = (int)(*(double *)((uint8_t *)veh + 0x324) * 1.2);
+    shadow_quad[9] = (int)*(double *)((uint8_t *)veh + 0x2fc);
+    shadow_quad[11] = (int)(*(double *)((uint8_t *)veh + 0x31c) * 1.2);
+
+    /* Shadow dynamic object transform */
+    diff_pos = veh->pos_y - *(double *)((uint8_t *)veh + 0x120);
+    shadow_x = veh->pos_x + diff_pos;
+    shadow_z = veh->pos_z + diff_pos;
+    if (shadow_x <= 0.0 || shadow_x >= 50000.0) {
+        shadow_x = 28000.0;
     }
-    else {
-      var_i3 = Lisa_MoveDynamicObject(var_pi6);
-      if (var_i3 != 0) {
-        Log_DebugPrintf(s_FEL_VID_LI_PLACEOBJECT_HANDLE_CA_00499508);
-      }
+    if (veh->pos_y < -2500.0 || veh->pos_y > 2500.0) {
+        shadow_x = 0.0;
     }
-  }
-  return;
+    if (shadow_z <= 0.0 || shadow_z >= 50000.0) {
+        shadow_z = 28000.0;
+    }
+
+    shadow_xform = &g_CarShadowTransforms[car_idx];
+    shadow_xform->pos_x = (int)shadow_x;
+    shadow_xform->pos_y = (int)veh->pos_y;
+    shadow_xform->pos_z = (int)shadow_z;
+    shadow_xform->rot_x = (int)(*(double *)((uint8_t *)veh + 0x108) * 572.9577951);
+    shadow_xform->rot_y = (int)(veh->angle_yaw * 572.9577951);
+    shadow_xform->rot_z = (int)(*(double *)((uint8_t *)veh + 0x110) * 572.9577951);
+
+    if (g_DynamicObjectsPaused == 0) {
+        if (Lisa_UpdateObjectSpatialGrid(shadow_xform) != 0) {
+            Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_SHA_00499558);
+        }
+    }
+
+    /* Ghost car dynamic object transform */
+    if (player_hud[1] == 2 && car_idx != 0) {
+        ghost_xform = &g_CarGhostTransforms[car_idx];
+        ghost_xform->pos_x = (int)veh->pos_x;
+        ghost_xform->pos_y = (int)veh->pos_y;
+        ghost_xform->pos_z = (int)veh->pos_z;
+        ghost_xform->rot_x = 0;
+        ghost_xform->rot_y = 0;
+        ghost_xform->rot_z = 0;
+
+        if (ghost_xform->is_placed == 1) {
+            if (Lisa_UpdateObjectSpatialGrid(ghost_xform) != 0) {
+                Log_DebugPrintf(s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_00499530);
+                return;
+            }
+        } else {
+            if (Lisa_MoveDynamicObject(ghost_xform) != 0) {
+                Log_DebugPrintf(s_FEL_VID_LI_PLACEOBJECT_HANDLE_CA_00499508);
+            }
+        }
+    }
 }
 
 /**

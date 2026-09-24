@@ -177,6 +177,21 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x00498738` | `void*`      | `g_pLisaFramebufferMirror2`| Secondary Lisa3D display surface mirror pointer. |
 | `0x00498478` | `int32_t`    | `g_CameraFovHalfX` | Half horizontal field-of-view scale factor (`fov_x * 500`). |
 | `0x0049847c` | `int32_t`    | `g_CameraFovHalfY` | Half vertical field-of-view scale factor (`fov_y * 500`). |
+| `0x005db02c` | `DynamicObjectTransform*` | `g_pCarTransforms` | Pool of dynamic 3D object transforms for vehicles. |
+| `0x00552fbc` | `DynamicObjectTransform*` | `g_pWheelTransforms` | Pool of dynamic 3D object transforms for vehicle wheels (4 per vehicle). |
+| `0x00552f70` | `DynamicObjectTransform*` | `g_pCarReflectionTransforms` | Pool of dynamic 3D object transforms for vehicle mirror reflections (police car). |
+| `0x00552f20` | `DynamicObjectTransform*` | `g_pCarShadowTransforms` | Pool of dynamic 3D object transforms for vehicle ground shadows. |
+| `0x00553788` | `DynamicObjectTransform*` | `g_pCarGhostTransforms` | Pool of dynamic 3D object transforms for ghost vehicle replay. |
+| `0x0054f930` | `int32_t`    | `g_DynamicObjectsPaused` | Toggle flag: `1` when dynamic objects and entities are paused. |
+| `0x004949e0` | `int32_t`    | `g_CameraShakeActive` | Camera elevation clamp and shake toggle flag. |
+| `0x00552e40` | `int32_t*`   | `g_TrackSegmentTable` | Track segment properties table (12 bytes per record: flags, road type, curves). |
+| `0x00603718` | `int32_t*`   | `g_CarShadowVertices` | Calculated 4-point ground shadow quad vertex array (30 ints per vehicle). |
+| `0x00563da4` | `int32_t*`   | `g_ParticleCount1` | Particle emitter template vertex counts per vehicle model. |
+| `0x005537d8` | `int32_t*`   | `g_ParticleArray1` | Rotated primary particle emitter coordinates buffer. |
+| `0x00553db8` | `int32_t*`   | `g_ParticleArray2` | Rotated secondary particle emitter coordinates buffer. |
+| `0x00552e60` | `int32_t*`   | `g_ParticleTemplateX` | Local template X coordinates for vehicle particle emitters. |
+| `0x005533b0` | `int32_t*`   | `g_ParticleTemplateY` | Local template Y coordinates for vehicle particle emitters. |
+| `0x00553300` | `int32_t*`   | `g_ParticleTemplateZ` | Local template Z coordinates for vehicle particle emitters. |
 
 
 

@@ -48,15 +48,55 @@ typedef struct VehicleState {
     uint8_t gap_9a4[0x484c - 0x9a4];
 } VehicleState;
 
+/* Dynamic 3D Object Transform Record (0x20 = 32 bytes) */
+typedef struct DynamicObjectTransform {
+    int handle;                /* 0x00 */
+    int pos_x;                 /* 0x04 */
+    int pos_y;                 /* 0x08 */
+    int pos_z;                 /* 0x0c */
+    int rot_x;                 /* 0x10 */
+    int rot_y;                 /* 0x14 */
+    int rot_z;                 /* 0x18 */
+    int is_placed;             /* 0x1c */
+} DynamicObjectTransform;
+
+/* Track Road Sequence Spline Node (0x18 = 24 bytes) */
+typedef struct RoadSequenceNode {
+    int road_index;            /* 0x00 */
+    double pitch1;             /* 0x04 */
+    int road_index_rev;        /* 0x0c */
+    double pitch2;             /* 0x10 */
+} RoadSequenceNode;
+
 /* Vehicle Configuration / Metadata Entry (0xc8 = 200 bytes per vehicle) */
 typedef struct VehicleConfig {
-    uint8_t pad_00[0x38];
-    int cam_param1;            /* 0x38 */
-    int cam_param2;            /* 0x3c */
-    uint8_t pad_40[0x58 - 0x40];
-    int lookat_offset_x;       /* 0x58 */
-    int lookat_offset_y;       /* 0x5c */
-    uint8_t pad_60[0xc8 - 0x60];
+    double cam_height;             /* 0x00 */
+    double camera_yaw;             /* 0x08 */
+    uint8_t pad_10[0x28 - 0x10];   /* 0x10 */
+    double camera_pitch;           /* 0x28 */
+    double chase_cam_dist_factor;  /* 0x30 */
+    int cam_param1;                /* 0x38 */
+    int cam_param2;                /* 0x3c */
+    uint8_t pad_40[0x48 - 0x40];   /* 0x40 */
+    double pitch_offset;           /* 0x48 */
+    int chase_target_height;       /* 0x50 */
+    int chase_camera_distance;     /* 0x54 */
+    int viewport_h;                /* 0x58 */
+    int viewport_w;                /* 0x5c */
+    int unused_60;                 /* 0x60 */
+    float camera_fov_preset;       /* 0x64 */
+    double yaw_lag_angle;          /* 0x68 */
+    double pitch_lag_angle;        /* 0x70 */
+    double target_pos_x;           /* 0x78 */
+    double target_pos_y;           /* 0x80 */
+    double target_pos_z;           /* 0x88 */
+    double cam_pos_x;              /* 0x90 */
+    double cam_pos_y;              /* 0x98 */
+    double cam_pos_z;              /* 0xa0 */
+    double vehicle_yaw;            /* 0xa8 */
+    double vehicle_pitch;          /* 0xb0 */
+    double camera_yaw_desired;     /* 0xb8 */
+    double elevation_smooth_offset;/* 0xc0 */
 } VehicleConfig;
 
 /* HUD Floating Message Record (0x78 = 120 bytes) */
@@ -231,6 +271,9 @@ int HUD_AddFloatingMessage(const char *msg, int x, int y, int duration);
 void HUD_UpdateFloatingMessages(void);
 void HUD_RenderFloatingMessages(void);
 void Lisa_ResetRasterizerContext(void);
+int Lisa_UpdateObjectSpatialGrid(void *obj);
+int Lisa_MoveDynamicObject(void *obj);
+int Lisa_DeleteDynamicObject(void *obj);
 
 void FX_SpawnAmbientTrackParticles(void);
 void Track_UpdateMovingPathNodes(void);

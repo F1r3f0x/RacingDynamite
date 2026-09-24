@@ -366,3 +366,64 @@ typedef struct {
 } Camera3D;
 ```
 
+---
+
+## 10. Dynamic Objects & Chase Camera (`fx.c`)
+
+### `DynamicObjectTransform` (32 bytes / 8 x `int32_t`)
+```c
+typedef struct DynamicObjectTransform {
+    int32_t handle;                    // 0x00: Engine entity / object handle
+    int32_t pos_x;                     // 0x04: World position X
+    int32_t pos_y;                     // 0x08: World position Y (elevation)
+    int32_t pos_z;                     // 0x0C: World position Z
+    int32_t rot_x;                     // 0x10: Pitch rotation (tenths of a degree)
+    int32_t rot_y;                     // 0x14: Yaw rotation (tenths of a degree)
+    int32_t rot_z;                     // 0x18: Roll rotation (tenths of a degree)
+    int32_t is_placed;                 // 0x1C: Active / placed status flag
+} DynamicObjectTransform;
+```
+
+### `RoadSequenceNode` (24 bytes)
+```c
+typedef struct RoadSequenceNode {
+    int32_t road_index;                // 0x00: Forward road chunk index
+    double  pitch1;                    // 0x04: Forward road pitch angle (radians)
+    int32_t road_index_rev;            // 0x0C: Reverse road chunk index
+    double  pitch2;                    // 0x10: Reverse road pitch angle (radians)
+} RoadSequenceNode;
+```
+
+### `VehicleConfig` (200 bytes / 0xC8 bytes)
+```c
+typedef struct VehicleConfig {
+    double  cam_height;                // 0x00: Camera height/elevation
+    double  camera_yaw;                // 0x08: Chase camera yaw angle (radians)
+    uint8_t pad_10[0x28 - 0x10];       // 0x10
+    double  camera_pitch;              // 0x28: Chase camera pitch angle (radians)
+    double  chase_cam_dist_factor;     // 0x30: Camera zoom/distance factor
+    int32_t cam_param1;                // 0x38: Secondary camera parameter 1
+    int32_t cam_param2;                // 0x3C: Secondary camera parameter 2
+    uint8_t pad_40[0x48 - 0x40];       // 0x40
+    double  pitch_offset;              // 0x48: Dynamic pitch/shake offset
+    int32_t chase_target_height;       // 0x50: Target camera height
+    int32_t chase_camera_distance;     // 0x54: Base camera distance
+    int32_t viewport_h;                // 0x58: Viewport height
+    int32_t viewport_w;                // 0x5C: Viewport width
+    int32_t unused_60;                 // 0x60
+    float   camera_fov_preset;         // 0x64: FOV preset
+    double  yaw_lag_angle;             // 0x68: Yaw in tenths of degrees (0-3599)
+    double  pitch_lag_angle;           // 0x70: Pitch in tenths of degrees (0-3599)
+    double  target_pos_x;              // 0x78: Interpolated lookat target X
+    double  target_pos_y;              // 0x80: Interpolated lookat target Y
+    double  target_pos_z;              // 0x88: Interpolated lookat target Z
+    double  cam_pos_x;                 // 0x90: Camera eye position X
+    double  cam_pos_y;                 // 0x98: Camera eye position Y
+    double  cam_pos_z;                 // 0xA0: Camera eye position Z
+    double  vehicle_yaw;               // 0xA8: Copied vehicle yaw (radians)
+    double  vehicle_pitch;             // 0xB0: Copied vehicle pitch (radians)
+    double  camera_yaw_desired;        // 0xB8: Desired camera yaw (vehicle_yaw + PI)
+    double  elevation_smooth_offset;   // 0xC0: Smoothed road elevation/incline offset
+} VehicleConfig;
+```
+
