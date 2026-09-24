@@ -4,16 +4,16 @@
 
 | DOS Addr | Win Addr | Ghidra Label | Symbol Name | Module | Status | Fidelity | Purpose |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `0x00060f40` | - | - | `File_ReadToBuffer` | `mem.c` | Matching | EXACT | Reads binary file directly into preallocated buffer |
-| `0x00061100` | - | - | `File_GetSize` | `mem.c` | Matching | EXACT | Seeks to end and returns binary file size |
-| `0x0006117c` | - | - | `File_Exists` | `mem.c` | Matching | EXACT | Tests if file exists by attempting fopen |
+| `0x00060f40` | - | `-` | `File_ReadToBuffer` | `mem.c` | Matching | EXACT | Reads binary file directly into preallocated buffer |
+| `0x00061100` | - | `-` | `File_GetSize` | `mem.c` | Matching | EXACT | Seeks to end and returns binary file size |
+| `0x0006117c` | - | `-` | `File_Exists` | `mem.c` | Matching | EXACT | Tests if file exists by attempting fopen |
 | - | `0x004029a0` | `FUN_004029a0` | `Menu_Init` | `main.c` | Decompiled | EXACT | Loads MENU.COL, MENU.TAB, .LFT fonts, and initializes menu options. |
 | - | `0x00402c00` | `FUN_00402c00` | `Menu_Tick` | `main.c` | Decompiled | ADAPTED | Handles menu input navigation (arrows, Enter, Esc), item highlight, and transitions. |
 | - | `0x0040e6b0` | `FUN_0040e6b0` | `Car_IntegratePosition` | `main.c` | Decompiled | EXACT | World coordinate velocity integrator with 21.76 scale factor and 72 Hz timestep. |
 | - | `0x004120a0` | `FUN_004120a0` | `WinMain` | `main.c` | Decompiled | ADAPTED | Main entry point; registers window class, queries timer, runs message/tick loop. |
 | - | `0x00412230` | `FUN_00412230` | `App_FrameTick` | `main.c` | Decompiled | EXACT | Main engine tick; dispatches Init (0), Main Loop (1), and Shutdown (2). |
 | - | `0x00412500` | `FUN_00412500` | `App_Init` | `main.c` | Decompiled | EXACT | Creates game window, initializes DirectDraw and DirectInput subsystems. |
-| - | `0x00412530` | `FUN_00412530` | `App_Shutdown` | `main.c` | Decompiled | EXACT | Releases DirectDraw surfaces, DirectSound, and window handles. |
+| `0x0002b51a` | `0x00412530` | `FUN_00412530` | `App_Shutdown` | `main.c` | Decompiled | EXACT | Releases DirectDraw surfaces, DirectSound, and window handles. |
 | - | `0x00412580` | `FUN_00412580` | `Cdp_OpenFile` | `lisa3d.c` | Decompiled | EXACT | Validates "CDP\0" header, dimensions, frame count, and embedded palette. |
 | - | `0x00412610` | `FUN_00412610` | `Cdp_DecodeFrame` | `lisa3d.c` | Decompiled | EXACT | Advances animation stream and triggers inter-frame delta decompression. |
 | `0x0001fee0` | `0x00412670` | `FUN_00412670` | `Surface_LoadSRF` | `getsurf.c` | Decompiled | ADAPTED | Loads .SRF track collision surface, converts relative offsets to pointers |
@@ -21,8 +21,8 @@
 | `0x00020814` | `0x00412fc0` | `FUN_00412fc0` | `Surface_Raycast` | `getsurf.c` | Decompiled | EXTENDED | Spatial grid query, candidate selection, cross product normal, world vertex transform |
 | `0x00020bbc` | `0x00413380` | `FUN_00413380` | `Surface_GetTriangleHeight` | `getsurf.c` | Decompiled | ADAPTED | Computes average elevation (y0 + y1 + y2) / -3 using vertex buffer indices from triangle. |
 | `0x00043d60` | `0x004133d0` | `FUN_004133d0` | `Font_DrawHUDText` | `geputget.c` | Decompiled | EXACT | 2D bitmap font rasterizer blitting characters from IGNITION.FNT directly to 8bpp framebuffer. |
-| `0x0000aea0` | `0x004134e0` | `FUN_004134e0` | `AI_FollowTrackSplines` | `main.c` | Decompiled | EXACT | Steering simulation updating AI vehicle heading, track spline waypoint progression, speed moderation, and obstacle evasion. |
-| `0x0000ce1c` | `0x00414e40` | `FUN_00414e40` | `Track_LoadSplines` | `main.c` | Decompiled | EXACT | Loads .TRI chunk indices, constructs left/right road boundary splines and AI waypoints. |
+| `0x1aea0` | `0x004134e0` | `FUN_004134e0` | `AI_FollowTrackSplines` | `main.c` | Decompiled | EXACT | Steering simulation updating AI vehicle heading, track spline waypoint progression, speed moderation, and obstacle evasion. |
+| `0x1ce1c` | `0x00414e40` | `FUN_00414e40` | `Track_LoadSplines` | `main.c` | Decompiled | EXACT | Loads .TRI chunk indices, constructs left/right road boundary splines and AI waypoints. |
 | - | `0x00416250` | `FUN_00416250` | `Mesh_InstantiatePlacedObjects` | `main.c` | Decompiled | ADAPTED | Applies .PLC world translation offsets to .MSH submesh vertices. |
 | - | `0x00417270` | `FUN_00417270` | `Game_Init` | `main.c` | Decompiled | EXACT | Sets initial game state flags, resets timers, initiates intro sequence. |
 | - | `0x004172b0` | `FUN_004172b0` | `Game_StateDispatcher` | `main.c` | Decompiled | ADAPTED | Top-level game loop state machine dispatcher (Intro -> Menus -> Race). |
@@ -34,90 +34,90 @@
 | `0x000240f4` | `0x0041ac40` | `FUN_0041ac40` | `Font_LoadHUDFonts` | `geputget.c` | Decompiled | EXACT | Loads HUD lettering glyphs (IGNITION.FNT, yellow.lft, speed.lft, etc.). |
 | `0x000243e0` | `0x0041af70` | `FUN_0041af70` | `Track_LoadOverlayGfx` | `geputget.c` | Decompiled | EXACT | Loads track sign textures and winner trophy bitmap (POKAL.PIC). |
 | - | `0x0041b360` | `FUN_0041b360` | `Track_PreprocessPlacements` | `main.c` | Decompiled | ADAPTED | Unpacks model_type bitfields (& 0xFFF) and extracts animation and flag channels. |
-| `0x0001489c` | `0x0041b470` | `FUN_0041b470` | `Race_InitSceneAndCars` | `main.c` | Decompiled | EXACT | Instantiates player and AI cars on starting grid, loads track surface, and binds collision and physics states. |
+| `0x2489c` | `0x0041b470` | `FUN_0041b470` | `Race_InitSceneAndCars` | `main.c` | Decompiled | EXACT | Instantiates player and AI cars on starting grid, loads track surface, and binds collision and physics states. |
 | - | `0x0041d190` | `FUN_0041d190` | `Car_UnpackMeshGeometry` | `lisa3d.c` | Decompiled | EXTENDED | Extracts CARS.MSH submesh vertices, finds bottom tire vertex $\max(v_y)$ for ground alignment, and scales by $21.76$. |
 | - | `0x0041f9b0` | `Sound_InitAndLoadPools` | `Sound_InitAndLoadPools` | `main.c` | Decompiled | ADAPTED | Initializes 32 DirectSound-compatible audio channels; loads SFX pools (ROLL, SKID, COLL, BOOST, DIV, KLICK, OK); loads track sounds; reads per-vehicle ENGINE.INF 800-byte curves into uint8_t[200] vol/pitch arrays at +0x658, +0x720, +0x7e8, +0x8b0. |
-| `0x0001a40e` | `0x00420090` | `FUN_00420090` | `Obstacle_TriggerAction` | `main.c` | Decompiled | EXACT | Evaluates type 0xFA (250) trigger obstacles and triggers associated actions. |
-| `0x0001a4ec` | `0x004200e0` | `FUN_004200e0` | `AI_InitSteeringConeLookup` | `main.c` | Decompiled | EXACT | Precomputes 800x405 lookahead steering cone and obstacle threat table. |
-| `0x0001a97a` | `0x00420240` | `FUN_00420240` | `Ghost_LoadCarAndPath` | `main.c` | Decompiled | EXACT | Loads recorded Time Attack ghost car trajectory from GHOSTS\%s.GST. |
-| `0x0001adf8` | `0x00420870` | `FUN_00420870` | `Track_LoadBinaryCache` | `main.c` | Decompiled | EXACT | Loads preprocessed level data cache (ign_win.btz / ign_dos.btz). |
-| `0x0001b42d` | `0x00420990` | `FUN_00420990` | `Sound_FreeAllSounds` | `main.c` | Decompiled | EXACT | Frees active level audio buffers and sample tables upon track unload. |
-| `0x0001b51a` | `0x00420b70` | `FUN_00420b70` | `Game_Shutdown` | `main.c` | Decompiled | EXACT | Releases all allocated game memory and shuts down engine subsystems cleanly. |
-| `0x0001b996` | `0x00420c00` | `FUN_00420c00` | `Timer_GetDeltaTime` | `main.c` | Decompiled | EXACT | Computes elapsed frame delta time using tick counter scaled by 0.036. Updates accumulator, frame counter, and clamps delta to max 10.8 ticks. |
-| `0x0001b9d3` | `0x00420d10` | `FUN_00420d10` | `Race_UpdateCountdownAndFinish` | `main.c` | Decompiled | EXACT | Updates start-line traffic light timer and checks race winner victory condition. |
-| `0x0001b9e4` | `0x00420e60` | `FUN_00420e60` | `HUD_UpdateRaceTimes` | `main.c` | Decompiled | EXACT | Updates player split times and current lap timer display on in-game HUD. |
-| `0x0001c5b8` | `0x00420eb0` | `FUN_00420eb0` | `Input_ProcessRaceHotkeys` | `main.c` | Decompiled | EXACT | Polls keyboard hotkeys during race: Pause (P), Escape menu, camera toggle, and volume. |
-| `0x0001ccc5` | `0x00421bc0` | `FUN_00421bc0` | `Input_PollPlayerVehicleControls` | `main.c` | Decompiled | EXACT | Reads keyboard / joystick axes and maps to vehicle steering, throttle, brake, and turbo. |
-| `0x0001cf5d` | `0x004222b0` | `FUN_004222b0` | `Ghost_SaveCarAndPath` | `main.c` | Decompiled | EXACT | Serializes recorded lap waypoint trajectory into GHOSTS\%s.GST. |
-| `0x0001cfbc` | `0x004225d0` | `FUN_004225d0` | `Track_SaveBinaryCache` | `main.c` | Decompiled | EXACT | Saves preprocessed level collision cache file. |
-| `0x0001d008` | `0x00422680` | `FUN_00422680` | `Race_ResolveVehicleCollisions` | `main.c` | Decompiled | EXACT | Inter-vehicle and scenery obstacle collision detection and impulse response. Fixed 72 Hz physics integration coordinator. |
-| `0x0001de2e` | `0x00423620` | `FUN_00423620` | `Car_HandleElimination` | `main.c` | Decompiled | EXACT | Checks trailing vehicle elimination condition in knock-out races. Marks vehicle blown (+0x354 = 1), sets race status, and logs elimination string. |
-| `0x0001e234` | `0x00423aa0` | `FUN_00423aa0` | `Car_VerticalDynamics` | `main.c` | Decompiled | EXACT | Gravity acceleration (-0.2/tick), rebound bounce on impact, and ride height equilibrium (+5.0). |
-| `0x0001e65e` | `0x00423ea0` | `FUN_00423ea0` | `Car_CheckLandingStatus` | `main.c` | Decompiled | EXACT | Checks if airborne car has touched ground (pos_y < ground_y + 5.0), clears airborne flag (+0x270) and asserts landing impact trigger (+0x278). |
-| `0x0001e6a2` | `0x00423f00` | `FUN_00423f00` | `Car_UpdateShadowTracking` | `main.c` | Decompiled | EXACT | Advances secondary position/shadow tracking for car. Integrates velocity at 72 Hz timestep (factor 1.0 / 72.0 = 0.013888889). |
-| `0x0001e6f6` | `0x00423f70` | `FUN_00423f70` | `Car_UpdateBodyVelocity` | `main.c` | Decompiled | EXACT | Computes local lateral and longitudinal acceleration from target waypoint error, rotates by vehicle heading, applies tire drag and clamps to max speed. |
-| `0x0001ea42` | `0x004242b0` | `FUN_004242b0` | `Car_SpawnExplosionEffects` | `main.c` | Decompiled | EXACT | Plays vehicle explosion audio sample (vol capped at 0x10000, sample 2, freq 22000) and emits 6 explosion/debris particle sprites. |
-| `0x0001ed00` | `0x00424570` | `Car_PhysicsTick` | `Car_PhysicsTick` | `main.c` | Decompiled | EXACT | Master fixed-timestep 72 Hz vehicle dynamics simulation: 4-wheel independent raycast suspension, lateral slip, steering, and traction. |
-| `0x00021856` | `0x004269a0` | `FUN_004269a0` | `Car_ChangeMesh` | `main.c` | Decompiled | EXACT | Swaps current vehicle 3D mesh representation to damaged or alternative model geometry in Lisa3D rasterizer instance table. |
-| `0x000219d6` | `0x00426b40` | `FUN_00426b40` | `Car_ApplyMeshDamage` | `main.c` | Decompiled | EXACT | Evaluates high-velocity collision impact against vehicle chassis, morphs vertex positions inward toward impact point, and emits impact sparks. |
-| `0x00022d8c` | `0x00427d70` | `FUN_00427d70` | `Car_UpdateAxleSpeeds` | `main.c` | Decompiled | EXACT | Averages left and right wheel velocities for front and rear axles with factor 0.5. |
-| `0x00022dc8` | `0x00427dc0` | `FUN_00427dc0` | `Collision_TestTrackTriangles` | `main.c` | Decompiled | EXACT | Iterates over track collision triangles from octree query, calculates closest point on triangle, plane distance, and penetration restitution. |
-| `0x0002383c` | `0x00428730` | `FUN_00428730` | `Collision_RaycastVehicleSphere` | `main.c` | Decompiled | EXACT | Sets up vertical collision query ray from vehicle center (pos_y + 500.0 downward 850 units) and invokes spatial partition octree query. |
-| `0x00023ee8` | `0x00428b90` | `FUN_00428b90` | `Collision_FilterTrackClearance` | `main.c` | Decompiled | EXACT | Filters candidate collision triangles according to track-specific ground clearance thresholds (Snake: 350, Moose: 200, Mountain: 450, Ski: 125, Default: 2500). |
-| `0x000246cc` | `0x004292c0` | `FUN_004292c0` | `Collision_TestLineIntersection` | `main.c` | Decompiled | EXACT | Tests 2D collision impulse transfer between two vehicles. Calculates contact lever arm distances, applies impulse restitution (-1.5), and updates both linear and angular velocities. |
-| `0x000249e5` | `0x004295e0` | `FUN_004295e0` | `Collision_TestPolygonOverlap` | `main.c` | Decompiled | EXACT | Tests pairwise edge crossings between two 2D convex vehicle polygons. Averages contact points to calculate centroid contact position and normal angle. |
-| `0x000250c9` | `0x00429a10` | `FUN_00429a10` | `Math_Signum` | `main.c` | Decompiled | EXACT | Standard 32-bit integer signum returning -1 for negative, 1 for positive, 0 for zero. |
-| `0x000250f0` | `0x00429a40` | `FUN_00429a40` | `Race_CheckCheckpointTriggers` | `main.c` | Decompiled | EXACT | Tests vehicle collision against type 150..154 split-time checkpoint gates and dynamic track scenery obstacles with 3D ballistic trajectory and ground bounce. |
-| `0x00025f38` | `0x0042a8d0` | `FUN_0042a8d0` | `Physics_ReflectVelocityOffNormal` | `main.c` | Decompiled | EXACT | Rotates 3D velocity into plane-aligned space via yaw and pitch of contact normal, reflects penetrating velocity, and transforms back into world space. |
-| `0x000260ed` | `0x0042aa00` | `FUN_0042aa00` | `Audio_UpdateDynamicDoppler` | `main.c` | Decompiled | EXACT | Updates sound pitch and volume for dynamic track ambient sources. |
-| `0x0002636c` | `0x0042acb0` | `FUN_0042acb0` | `Track_SpawnEnvironmentalParticles` | `main.c` | Decompiled | EXACT | Emits environmental smoke/dust from track waypoint emitters. |
-| `0x00026cdd` | `0x0042b5d0` | `FUN_0042b5d0` | `Track_SpawnWeatherParticles` | `main.c` | Decompiled | EXACT | Spawns rain and snow weather particles in viewport frustum. |
-| `0x000272d8` | `0x0042bc20` | `FUN_0042bc20` | `Car_UpdateEffects` | `main.c` | Decompiled | EXACT | Coordinates real-time vehicle visual effects (tire skid marks, turbo exhaust flames, engine damage smoke, and surface scraping sparks). |
-| `0x0002731c` | `0x0042bc80` | `FUN_0042bc80` | `FX_UpdateSkidMarks` | `main.c` | Decompiled | EXACT | Generates ground skidmarks behind slipping vehicle tires. |
-| `0x000298f8` | `0x0042e2e0` | `FUN_0042e2e0` | `FX_UpdateTransparentSpriteObject` | `main.c` | Decompiled | EXACT | Updates 3D world position and animation of transparent billboard sprites. |
-| `0x00029cf2` | `0x0042e5a0` | `FUN_0042e5a0` | `FX_UpdateTransparentSpriteObject2` | `main.c` | Decompiled | EXACT | Updates transparent billboard sprite instance variation. |
-| `0x00029d1a` | `0x0042e860` | `FUN_0042e860` | `FX_UpdateHandlePlotObject` | `main.c` | Decompiled | EXACT | Updates particle plot marker object positions in scene. |
-| `0x00029fe6` | `0x0042ea60` | `FUN_0042ea60` | `FX_UpdateSuperPlotObject` | `main.c` | Decompiled | EXACT | Updates high-intensity spark / super plot particle positions. |
-| `0x0002a2b1` | `0x0042ed60` | `FUN_0042ed60` | `Obstacle_SimulateDynamics` | `main.c` | Decompiled | EXACT | Performs dynamic physics integration (ballistic velocity, restitution, and world model transforms) for track scenery obstacles. |
-| `0x0002a785` | `0x0042fc80` | `FUN_0042fc80` | `FX_UpdateFlyingParticles` | `main.c` | Decompiled | EXACT | Updates ballistic trajectory and ground bounce for flying vehicle debris. |
-| - | `0x00430300` | - | `FX_UpdateExplosionNode` | `fx.c` | Decompiled | EXACT |  |
-| - | `0x004307b0` | - | `FX_UpdateVehicleWreck` | `fx.c` | Decompiled | ADAPTED | Particle type 7 vehicle catastrophic wreck simulator (unlinks 4 wheels, sets airborne flag, spawns flying wheel debris). |
-| - | `0x00431d00` | - | `FX_UpdateDetachedWheel` | `fx.c` | Decompiled | ADAPTED | Particle type 9 flying detached car wheel simulation with track bounce. |
-| - | `0x00432040` | - | `FX_UpdateVehicleCrashSequence` | `fx.c` | Decompiled | ADAPTED | Particle type 10 vehicle spin/flip crash sequence, tumbling airborne dynamics, and shrapnel explosion trigger. |
-| - | `0x00432bb0` | - | `FX_UpdateCarDebris` | `fx.c` | Decompiled | ADAPTED | Particle type 11 vehicle shrapnel/debris particle bouncing on collision surface. |
-| - | `0x00432f20` | - | `FX_SpawnWaterSplashes` | `fx.c` | Decompiled | ADAPTED | Water surface (type 0x5a) wheel contact detector emitting type 2 water splash particles. |
-| - | `0x004333e0` | - | `FX_SpawnTireDirtDebris` | `fx.c` | Decompiled | ADAPTED | Dirt, gravel, and grass wheel contact detector emitting type 8 rooster tail particles. |
-| - | `0x004338d0` | - | `FX_SpawnLandingDustPuffs` | `fx.c` | Decompiled | ADAPTED | Hard landing impact detector (+0x278) emitting left and right type 1 dust puffs. |
-| - | `0x00433f90` | - | `FX_SpawnTireSkidSmoke` | `fx.c` | Decompiled | ADAPTED | High-speed asphalt drifting/braking detector emitting type 1 smoke puffs. |
-| - | `0x00434190` | - | `FX_UpdateAllParticles` | `fx.c` | Decompiled | EXACT |  |
-| - | `0x00434380` | - | `FX_SpawnParticle` | `fx.c` | Decompiled | EXACT |  |
-| - | `0x00434580` | - | `FX_UpdateWeatherBounds` | `fx.c` | Decompiled | EXACT |  |
-| - | `0x00434840` | - | `FX_UpdateWeatherGeometry` | `fx.c` | Decompiled | ADAPTED | Dynamic 3D rain streak / snowflake geometry builder and lightning palette flasher. |
-| - | `0x00435350` | - | `FX_FrameTick` | `fx.c` | Decompiled | ADAPTED | Master visual effects coordinator updating body lean/pitch visuals, weather meshes, and skid timers. |
+| `0x2a40e` | `0x00420090` | `FUN_00420090` | `Obstacle_TriggerAction` | `main.c` | Decompiled | EXACT | Evaluates type 0xFA (250) trigger obstacles and triggers associated actions. |
+| `0x2a4ec` | `0x004200e0` | `FUN_004200e0` | `AI_InitSteeringConeLookup` | `main.c` | Decompiled | EXACT | Precomputes 800x405 lookahead steering cone and obstacle threat table. |
+| `0x2a97a` | `0x00420240` | `FUN_00420240` | `Ghost_LoadCarAndPath` | `main.c` | Decompiled | EXACT | Loads recorded Time Attack ghost car trajectory from GHOSTS\%s.GST. |
+| `0x2adf8` | `0x00420870` | `FUN_00420870` | `Track_LoadBinaryCache` | `main.c` | Decompiled | EXACT | Loads preprocessed level data cache (ign_win.btz / ign_dos.btz). |
+| `0x2b42d` | `0x00420990` | `FUN_00420990` | `Sound_FreeAllSounds` | `main.c` | Decompiled | EXACT | Frees active level audio buffers and sample tables upon track unload. |
+| `0x2b51a` | `0x00420b70` | `FUN_00420b70` | `Game_Shutdown` | `main.c` | Decompiled | EXACT | Releases all allocated game memory and shuts down engine subsystems cleanly. |
+| `0x3b996` | `0x00420c00` | `FUN_00420c00` | `Timer_GetDeltaTime` | `main.c` | Decompiled | EXACT | Computes elapsed frame delta time using tick counter scaled by 0.036. Updates accumulator, frame counter, and clamps delta to max 10.8 ticks. |
+| `0x2b9d3` | `0x00420d10` | `FUN_00420d10` | `Race_UpdateCountdownAndFinish` | `main.c` | Decompiled | EXACT | Updates start-line traffic light timer and checks race winner victory condition. |
+| `0x2b9e4` | `0x00420e60` | `FUN_00420e60` | `HUD_UpdateRaceTimes` | `main.c` | Decompiled | EXACT | Updates player split times and current lap timer display on in-game HUD. |
+| `0x2c5b8` | `0x00420eb0` | `FUN_00420eb0` | `Input_ProcessRaceHotkeys` | `main.c` | Decompiled | EXACT | Polls keyboard hotkeys during race: Pause (P), Escape menu, camera toggle, and volume. |
+| `0x2ccc5` | `0x00421bc0` | `FUN_00421bc0` | `Input_PollPlayerVehicleControls` | `main.c` | Decompiled | EXACT | Reads keyboard / joystick axes and maps to vehicle steering, throttle, brake, and turbo. |
+| `0x2cf5d` | `0x004222b0` | `FUN_004222b0` | `Ghost_SaveCarAndPath` | `main.c` | Decompiled | EXACT | Serializes recorded lap waypoint trajectory into GHOSTS\%s.GST. |
+| `0x2cfbc` | `0x004225d0` | `FUN_004225d0` | `Track_SaveBinaryCache` | `main.c` | Decompiled | EXACT | Saves preprocessed level collision cache file. |
+| `0x2d008` | `0x00422680` | `FUN_00422680` | `Race_ResolveVehicleCollisions` | `main.c` | Decompiled | EXACT | Inter-vehicle and scenery obstacle collision detection and impulse response. Fixed 72 Hz physics integration coordinator. |
+| `0x2de2e` | `0x00423620` | `FUN_00423620` | `Car_HandleElimination` | `main.c` | Decompiled | EXACT | Checks trailing vehicle elimination condition in knock-out races. Marks vehicle blown (+0x354 = 1), sets race status, and logs elimination string. |
+| `0x2e234` | `0x00423aa0` | `FUN_00423aa0` | `Car_VerticalDynamics` | `main.c` | Decompiled | EXACT | Gravity acceleration (-0.2/tick), rebound bounce on impact, and ride height equilibrium (+5.0). |
+| `0x2e65e` | `0x00423ea0` | `FUN_00423ea0` | `Car_CheckLandingStatus` | `main.c` | Decompiled | EXACT | Checks if airborne car has touched ground (pos_y < ground_y + 5.0), clears airborne flag (+0x270) and asserts landing impact trigger (+0x278). |
+| `0x2e6a2` | `0x00423f00` | `FUN_00423f00` | `Car_UpdateShadowTracking` | `main.c` | Decompiled | EXACT | Advances secondary position/shadow tracking for car. Integrates velocity at 72 Hz timestep (factor 1.0 / 72.0 = 0.013888889). |
+| `0x2e6f6` | `0x00423f70` | `FUN_00423f70` | `Car_UpdateBodyVelocity` | `main.c` | Decompiled | EXACT | Computes local lateral and longitudinal acceleration from target waypoint error, rotates by vehicle heading, applies tire drag and clamps to max speed. |
+| `0x2ea42` | `0x004242b0` | `FUN_004242b0` | `Car_SpawnExplosionEffects` | `main.c` | Decompiled | EXACT | Plays vehicle explosion audio sample (vol capped at 0x10000, sample 2, freq 22000) and emits 6 explosion/debris particle sprites. |
+| `0x2ed00` | `0x00424570` | `Car_PhysicsTick` | `Car_PhysicsTick` | `main.c` | Decompiled | EXACT | Master fixed-timestep 72 Hz vehicle dynamics simulation: 4-wheel independent raycast suspension, lateral slip, steering, and traction. |
+| `0x31856` | `0x004269a0` | `FUN_004269a0` | `Car_ChangeMesh` | `main.c` | Decompiled | EXACT | Swaps current vehicle 3D mesh representation to damaged or alternative model geometry in Lisa3D rasterizer instance table. |
+| `0x319d6` | `0x00426b40` | `FUN_00426b40` | `Car_ApplyMeshDamage` | `main.c` | Decompiled | EXACT | Evaluates high-velocity collision impact against vehicle chassis, morphs vertex positions inward toward impact point, and emits impact sparks. |
+| `0x32d8c` | `0x00427d70` | `FUN_00427d70` | `Car_UpdateAxleSpeeds` | `main.c` | Decompiled | EXACT | Averages left and right wheel velocities for front and rear axles with factor 0.5. |
+| `0x32dc8` | `0x00427dc0` | `FUN_00427dc0` | `Collision_TestTrackTriangles` | `main.c` | Decompiled | EXACT | Iterates over track collision triangles from octree query, calculates closest point on triangle, plane distance, and penetration restitution. |
+| `0x3383c` | `0x00428730` | `FUN_00428730` | `Collision_RaycastVehicleSphere` | `main.c` | Decompiled | EXACT | Sets up vertical collision query ray from vehicle center (pos_y + 500.0 downward 850 units) and invokes spatial partition octree query. |
+| `0x33ee8` | `0x00428b90` | `FUN_00428b90` | `Collision_FilterTrackClearance` | `main.c` | Decompiled | EXACT | Filters candidate collision triangles according to track-specific ground clearance thresholds (Snake: 350, Moose: 200, Mountain: 450, Ski: 125, Default: 2500). |
+| `0x346cc` | `0x004292c0` | `FUN_004292c0` | `Collision_TestLineIntersection` | `main.c` | Decompiled | EXACT | Tests 2D collision impulse transfer between two vehicles. Calculates contact lever arm distances, applies impulse restitution (-1.5), and updates both linear and angular velocities. |
+| `0x349e5` | `0x004295e0` | `FUN_004295e0` | `Collision_TestPolygonOverlap` | `main.c` | Decompiled | EXACT | Tests pairwise edge crossings between two 2D convex vehicle polygons. Averages contact points to calculate centroid contact position and normal angle. |
+| `0x350c9` | `0x00429a10` | `FUN_00429a10` | `Math_Signum` | `main.c` | Decompiled | EXACT | Standard 32-bit integer signum returning -1 for negative, 1 for positive, 0 for zero. |
+| `0x350f0` | `0x00429a40` | `FUN_00429a40` | `Race_CheckCheckpointTriggers` | `main.c` | Decompiled | EXACT | Tests vehicle collision against type 150..154 split-time checkpoint gates and dynamic track scenery obstacles with 3D ballistic trajectory and ground bounce. |
+| `0x35f38` | `0x0042a8d0` | `FUN_0042a8d0` | `Physics_ReflectVelocityOffNormal` | `main.c` | Decompiled | EXACT | Rotates 3D velocity into plane-aligned space via yaw and pitch of contact normal, reflects penetrating velocity, and transforms back into world space. |
+| `0x360ed` | `0x0042aa00` | `FUN_0042aa00` | `Audio_UpdateDynamicDoppler` | `main.c` | Decompiled | EXACT | Updates sound pitch and volume for dynamic track ambient sources. |
+| `0x3636c` | `0x0042acb0` | `FUN_0042acb0` | `Track_SpawnEnvironmentalParticles` | `main.c` | Decompiled | EXACT | Emits environmental smoke/dust from track waypoint emitters. |
+| `0x36cdd` | `0x0042b5d0` | `FUN_0042b5d0` | `Track_SpawnWeatherParticles` | `main.c` | Decompiled | EXACT | Spawns rain and snow weather particles in viewport frustum. |
+| `0x372d8` | `0x0042bc20` | `FUN_0042bc20` | `Car_UpdateEffects` | `main.c` | Decompiled | EXACT | Coordinates real-time vehicle visual effects (tire skid marks, turbo exhaust flames, engine damage smoke, and surface scraping sparks). |
+| `0x3731c` | `0x0042bc80` | `FUN_0042bc80` | `FX_UpdateSkidMarks` | `main.c` | Decompiled | EXACT | Generates ground skidmarks behind slipping vehicle tires. |
+| `0x398f8` | `0x0042e2e0` | `FUN_0042e2e0` | `FX_UpdateTransparentSpriteObject` | `main.c` | Decompiled | EXACT | Updates 3D world position and animation of transparent billboard sprites. |
+| `0x39cf2` | `0x0042e5a0` | `FUN_0042e5a0` | `FX_UpdateTransparentSpriteObject2` | `main.c` | Decompiled | EXACT | Updates transparent billboard sprite instance variation. |
+| `0x39d1a` | `0x0042e860` | `FUN_0042e860` | `FX_UpdateHandlePlotObject` | `main.c` | Decompiled | EXACT | Updates particle plot marker object positions in scene. |
+| `0x39040` | `0x0042ea60` | `FUN_0042ea60` | `FX_UpdateSuperPlotObject` | `main.c` | Decompiled | EXACT | Updates high-intensity spark / super plot particle positions. |
+| `0x39350` | `0x0042ed60` | `FUN_0042ed60` | `Obstacle_SimulateDynamics` | `main.c` | Decompiled | EXACT | Performs dynamic physics integration (ballistic velocity, restitution, and world model transforms) for track scenery obstacles. |
+| `0x3a280` | `0x0042fc80` | `FUN_0042fc80` | `FX_UpdateFlyingParticles` | `main.c` | Decompiled | EXACT | Updates ballistic trajectory and ground bounce for flying vehicle debris. |
+| - | `0x00430300` | `-` | `FX_UpdateExplosionNode` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x004307b0` | `-` | `FX_UpdateVehicleWreck` | `fx.c` | Decompiled | ADAPTED | Particle type 7 vehicle catastrophic wreck simulator (unlinks 4 wheels, sets airborne flag, spawns flying wheel debris). |
+| - | `0x00431d00` | `-` | `FX_UpdateDetachedWheel` | `fx.c` | Decompiled | ADAPTED | Particle type 9 flying detached car wheel simulation with track bounce. |
+| - | `0x00432040` | `-` | `FX_UpdateVehicleCrashSequence` | `fx.c` | Decompiled | ADAPTED | Particle type 10 vehicle spin/flip crash sequence, tumbling airborne dynamics, and shrapnel explosion trigger. |
+| - | `0x00432bb0` | `-` | `FX_UpdateCarDebris` | `fx.c` | Decompiled | ADAPTED | Particle type 11 vehicle shrapnel/debris particle bouncing on collision surface. |
+| - | `0x00432f20` | `-` | `FX_SpawnWaterSplashes` | `fx.c` | Decompiled | ADAPTED | Water surface (type 0x5a) wheel contact detector emitting type 2 water splash particles. |
+| - | `0x004333e0` | `-` | `FX_SpawnTireDirtDebris` | `fx.c` | Decompiled | ADAPTED | Dirt, gravel, and grass wheel contact detector emitting type 8 rooster tail particles. |
+| - | `0x004338d0` | `-` | `FX_SpawnLandingDustPuffs` | `fx.c` | Decompiled | ADAPTED | Hard landing impact detector (+0x278) emitting left and right type 1 dust puffs. |
+| - | `0x00433f90` | `-` | `FX_SpawnTireSkidSmoke` | `fx.c` | Decompiled | ADAPTED | High-speed asphalt drifting/braking detector emitting type 1 smoke puffs. |
+| - | `0x00434190` | `-` | `FX_UpdateAllParticles` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x00434380` | `-` | `FX_SpawnParticle` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x00434580` | `-` | `FX_UpdateWeatherBounds` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x00434840` | `-` | `FX_UpdateWeatherGeometry` | `fx.c` | Decompiled | ADAPTED | Dynamic 3D rain streak / snowflake geometry builder and lightning palette flasher. |
+| - | `0x00435350` | `-` | `FX_FrameTick` | `fx.c` | Decompiled | ADAPTED | Master visual effects coordinator updating body lean/pitch visuals, weather meshes, and skid timers. |
 | - | `0x004356d0` | `FUN_004356d0` | `Pos_InitAnimatedObjects` | `fx.c` | Decompiled | ADAPTED | Converts keyframe coordinates in .POS to relative displacement deltas. |
 | - | `0x004357a0` | `FUN_004357a0` | `Pos_UpdateAnimatedObjects` | `fx.c` | Decompiled | ADAPTED | Advances keyframe playheads and translates moving scenery objects via Lisa_MoveObject. |
-| - | `0x004358e0` | - | `Math_LookupTrigAngle` | `fx.c` | Decompiled | ADAPTED | Fixed-point trigonometric sine/cosine lookup in 1024-entry LUT (DAT_004944e0). |
-| - | `0x00435910` | - | `Camera_UpdateOverview` | `fx.c` | Decompiled | ADAPTED | Track aerial overview / flyby camera positioned relative to road sequence splines. |
+| - | `0x004358e0` | `-` | `Math_LookupTrigAngle` | `fx.c` | Decompiled | ADAPTED | Fixed-point trigonometric sine/cosine lookup in 1024-entry LUT (DAT_004944e0). |
+| - | `0x00435910` | `-` | `Camera_UpdateOverview` | `fx.c` | Decompiled | ADAPTED | Track aerial overview / flyby camera positioned relative to road sequence splines. |
 | - | `0x00436990` | `FUN_00436990` | `Race_RenderViewport` | `fx.c` | Decompiled | EXTENDED | Calculates camera transform, invokes scene renderer, draws HUD. |
-| - | `0x00438030` | - | `Lisa_FlushRasterizerCommands` | `fx.c` | Decompiled | ADAPTED | Direct dispatch wrapper invoking Lisa_ExecuteRasterizerCommands. |
-| - | `0x00438050` | - | `Race_FindFocusedVehicle` | `fx.c` | Decompiled | ADAPTED | Trailing/leading vehicle target selector for broadcast and chase cameras. |
+| - | `0x00438030` | `-` | `Lisa_FlushRasterizerCommands` | `fx.c` | Decompiled | ADAPTED | Direct dispatch wrapper invoking Lisa_ExecuteRasterizerCommands. |
+| - | `0x00438050` | `-` | `Race_FindFocusedVehicle` | `fx.c` | Decompiled | ADAPTED | Trailing/leading vehicle target selector for broadcast and chase cameras. |
 | - | `0x00438210` | `FUN_00438210` | `Lisa_RenderPanorama` | `fx.c` | Decompiled | ADAPTED | Cylindrical horizon background blitter sampling 64KB .PAN texture using camera yaw and pitch angles. |
-| - | `0x004383b0` | - | `HUD_RenderPauseMenu` | `fx.c` | Decompiled | ADAPTED | In-game pause menu renderer (Continue, Restart, Retire, CD Track selection). |
-| - | `0x00438880` | - | `HUD_RenderConfirmationPrompt` | `fx.c` | Decompiled | ADAPTED | In-game confirmation modal renderer (Restart Y/N, Quit Y/N). |
-| - | `0x00438a60` | - | `HUD_RenderTrackResults` | `fx.c` | Decompiled | ADAPTED | Post-race leaderboard, standings, split times, and multiplayer wait screen renderer. |
-| - | `0x0043c3c0` | - | `HUD_RenderPlayAgainPrompt` | `fx.c` | Decompiled | ADAPTED | Post-race Play Track Again? (Y/N) prompt dialog renderer. |
+| - | `0x004383b0` | `-` | `HUD_RenderPauseMenu` | `fx.c` | Decompiled | ADAPTED | In-game pause menu renderer (Continue, Restart, Retire, CD Track selection). |
+| - | `0x00438880` | `-` | `HUD_RenderConfirmationPrompt` | `fx.c` | Decompiled | ADAPTED | In-game confirmation modal renderer (Restart Y/N, Quit Y/N). |
+| `0x00037ee0` | `0x00438a60` | `-` | `HUD_RenderTrackResults` | `fx.c` | Decompiled | ADAPTED | Post-race leaderboard, standings, split times, and multiplayer wait screen renderer. |
+| - | `0x0043c3c0` | `-` | `HUD_RenderPlayAgainPrompt` | `fx.c` | Decompiled | ADAPTED | Post-race Play Track Again? (Y/N) prompt dialog renderer. |
 | - | `0x0043c910` | `FUN_0043c910` | `Camera_UpdateChase` | `fx.c` | Decompiled | EXTENDED | Multi-mode chase camera with velocity lookahead, 0.125 azimuth lag, slope adaptation (DEV-004). |
-| - | `0x0043d540` | - | `Car_UpdateDynamicObjects` | `fx.c` | Decompiled | ADAPTED | Transforms car body and wheel dynamic objects in Lisa 3D spatial grid. |
-| - | `0x0043dea0` | - | `Video_SetGraphicsMode` | `fx.c` | Decompiled | ADAPTED | Mode switch handler for 320x200, 640x480, and 800x600 display modes and viewport setup. |
+| - | `0x0043d540` | `-` | `Car_UpdateDynamicObjects` | `fx.c` | Decompiled | ADAPTED | Transforms car body and wheel dynamic objects in Lisa 3D spatial grid. |
+| - | `0x0043dea0` | `-` | `Video_SetGraphicsMode` | `fx.c` | Decompiled | ADAPTED | Mode switch handler for 320x200, 640x480, and 800x600 display modes and viewport setup. |
 | - | `0x0043e2a0` | `FUN_0043e2a0` | `Lisa_Init` | `fx.c` | Decompiled | ADAPTED | Initializes Lisa 2 rasterizer viewport, Z-buffer, and focal lengths. |
-| - | `0x0043e6a0` | - | `Audio_LoadAssets` | `fx.c` | Decompiled | EXACT |  |
-| - | `0x0043e6c0` | - | `Video_FlipScreen` | `fx.c` | Decompiled | ADAPTED | Virtual framebuffer blitter presenting backbuffer to DirectDraw surface. |
-| - | `0x0043e6d0` | - | `Audio_StopSample` | `fx.c` | Decompiled | EXACT |  |
-| - | `0x0043e710` | - | `Audio_PlaySampleVol` | `fx.c` | Decompiled | EXACT |  |
-| - | `0x0043e9c0` | - | `HUD_RenderTelemetryOverlay` | `fx.c` | Decompiled | ADAPTED | On-screen debug telemetry overlay (FPS, speed, pitch/roll, road index, diff). |
-| - | `0x0043ec70` | - | `FX_SpawnWeather` | `fx.c` | Decompiled | EXACT |  |
-| - | `0x0043edf0` | - | `HUD_CheckWrongWayHeading` | `fx.c` | Decompiled | ADAPTED | Evaluates car heading vs road chunk vector and manages the Wrong Way warning timer. |
-| `0x0003a725` | `0x0043ef30` | - | `HUD_RenderPlayerElements` | `fx.c` | Decompiled | ADAPTED | In-race player HUD renderer (tachometer, turbo bar, position indicator, lap splits). |
+| - | `0x0043e6a0` | `-` | `Audio_LoadAssets` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x0043e6c0` | `-` | `Video_FlipScreen` | `fx.c` | Decompiled | ADAPTED | Virtual framebuffer blitter presenting backbuffer to DirectDraw surface. |
+| - | `0x0043e6d0` | `-` | `Audio_StopSample` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x0043e710` | `-` | `Audio_PlaySampleVol` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x0043e9c0` | `-` | `HUD_RenderTelemetryOverlay` | `fx.c` | Decompiled | ADAPTED | On-screen debug telemetry overlay (FPS, speed, pitch/roll, road index, diff). |
+| - | `0x0043ec70` | `-` | `FX_SpawnWeather` | `fx.c` | Decompiled | EXACT |  |
+| - | `0x0043edf0` | `-` | `HUD_CheckWrongWayHeading` | `fx.c` | Decompiled | ADAPTED | Evaluates car heading vs road chunk vector and manages the Wrong Way warning timer. |
+| `0x0003a725` | `0x0043ef30` | `-` | `HUD_RenderPlayerElements` | `fx.c` | Decompiled | ADAPTED | In-race player HUD renderer (tachometer, turbo bar, position indicator, lap splits). |
 | - | `0x00442030` | `FUN_00442030` | `Car_ApplySteering` | `main.c` | Decompiled | EXACT | Speed-attenuated front wheel steering lock and smoothing filter. |
 | - | `0x00442670` | `FUN_00442670` | `Car_PowertrainUpdate` | `main.c` | Decompiled | EXACT | Engine propulsion, rolling and aerodynamic drag, transmission forward/reverse gear shifting. |
 | - | `0x004452c0` | `FUN_004452c0` | `Sound_SynthesizeEngineRPM` | `main.c` | Decompiled | EXTENDED | Computes RPM pitch modulation from 800-byte ENGINE.INF curve with DEV-006 protection. |

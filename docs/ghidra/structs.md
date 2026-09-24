@@ -200,17 +200,29 @@ typedef struct VehicleState {
     double lap_time;               // 0x03A4: Active lap time in seconds
     uint8_t gap_3ac[380];          // 0x03AC: Split times and AI telemetry
     int32_t turbo_active;          // 0x0528: Turbo boost activation flag
-    uint8_t gap_52c[44];           // 0x052C: Turbo recharge timers
+    uint8_t gap_52c[40];           // 0x052C: Turbo recharge timers
+    int32_t suspension_override;   // 0x0554: Fixes collision resolution elevation
     int32_t mesh_damage_flag;      // 0x0558: Mesh damage / deformation status flag
     int32_t detached_wheel_mask;   // 0x055C: Bitmask of detached / flying wheels
     int32_t wreck_debris_flag;     // 0x0560: Wreck debris emission trigger flag
     uint8_t gap_564[32];           // 0x0564: Damage kinematics state
-    double chassis_roll_spring;    // 0x0584: Body roll spring equilibrium angle
-    double chassis_pitch_spring;   // 0x058C: Body pitch spring equilibrium angle
+    union {
+        double chassis_roll_spring;// 0x0584: Body roll spring equilibrium angle
+        double smooth_pitch;       // 0x0584: Visual frame smoothing interpolation
+    };
+    union {
+        double chassis_pitch_spring;// 0x058C: Body pitch spring equilibrium angle
+        double smooth_roll;        // 0x058C: Visual frame smoothing interpolation
+    };
     uint8_t gap_594[24];           // 0x0594: Padding
     int32_t front_axle_offset;     // 0x05AC: Front axle longitudinal offset distance from center
     int32_t rear_axle_offset;      // 0x05B0: Rear axle longitudinal offset distance from center
-    uint8_t gap_5b4[1000];         // 0x05B4: Engine audio frequency & volume curves (ENGINE.INF)
+    uint8_t gap_5b4[88];           // 0x05B4: Padding
+    union {
+        int32_t water_splash_accum;// 0x060C: Water particle spawn threshold accumulator
+        int32_t elimination_timer; // 0x060C: Ticks until car is blown up in Knock-Out mode
+    };
+    uint8_t gap_610[908];          // 0x0610: Engine audio frequency & volume curves (ENGINE.INF)
     int32_t voice_engine;          // 0x099C: DirectSound audio channel voice handle for engine
     int32_t voice_skid;            // 0x09A0: DirectSound audio channel voice handle for tire skid
     uint8_t gap_9a4[16040];        // 0x09A4: Collision mesh bounding tree and geometry cache

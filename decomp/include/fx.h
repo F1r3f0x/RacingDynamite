@@ -86,20 +86,29 @@ typedef struct VehicleState {
     int car_model_id;              /* 0x039c */
     int race_rank;                 /* 0x03a0 */
     double lap_time;               /* 0x03a4 */
-    uint8_t gap_3ac[0x528 - 0x3ac];/* 0x03ac */
+    uint8_t gap_3ac[0x3bc - 0x3ac];/* 0x03ac */
+    double lap_split_times[3];     /* 0x03bc */
+    uint8_t gap_3d4[0x528 - 0x3d4];/* 0x03d4 */
     int is_finished;               /* 0x0528 */
     uint8_t gap_52c[0x534 - 0x52c];/* 0x052c */
     double turbo_charge;           /* 0x0534 */
     int turbo_active;              /* 0x053c */
     int turbo_flash_timer;         /* 0x0540 */
-    uint8_t gap_544[0x558 - 0x544];/* 0x0544 */
+    uint8_t gap_544[0x554 - 0x544];/* 0x0544 */
+    int suspension_override;       /* 0x0554 */
     int mesh_damage_flag;          /* 0x0558 */
     int detached_wheel_mask;       /* 0x055c */
     int wreck_debris_flag;         /* 0x0560 */
     uint8_t gap_564[0x580 - 0x564];/* 0x0564 */
     int wrong_way_timer;           /* 0x0580 */
-    double chassis_roll_spring;    /* 0x0584 */
-    double chassis_pitch_spring;   /* 0x058c */
+    union {
+        double chassis_roll_spring;/* 0x0584 */
+        double smooth_pitch;
+    };
+    union {
+        double chassis_pitch_spring;/* 0x058c */
+        double smooth_roll;
+    };
     uint8_t gap_594[0x5ac - 0x594];/* 0x0594 */
     int front_axle_offset;         /* 0x05ac */
     int rear_axle_offset;          /* 0x05b0 */
@@ -107,8 +116,13 @@ typedef struct VehicleState {
     int finish_banner_timer;       /* 0x05d4 */
     uint8_t gap_5d8[0x5f8 - 0x5d8];/* 0x05d8 */
     int turn_warning_timer;        /* 0x05f8 */
-    uint8_t gap_5fc[0x60c - 0x5fc];/* 0x05fc */
-    double elimination_timer;      /* 0x060c */
+    uint8_t gap_5fc[0x604 - 0x5fc];/* 0x05fc */
+    int podium_banner_active;      /* 0x0604 */
+    uint8_t gap_608[0x60c - 0x608];/* 0x0608 */
+    union {
+        double elimination_timer;  /* 0x060c */
+        double water_splash_accum;
+    };
     uint8_t gap_614[0x99c - 0x614];/* 0x0614 */
     int voice_engine;              /* 0x099c */
     int voice_skid;                /* 0x09a0 */
@@ -127,7 +141,7 @@ typedef struct PlayerHUDState {
     int vp_y1;                     /* 0x30 */
     int vp_x2;                     /* 0x34 */
     int vp_y2;                     /* 0x38 */
-    uint8_t gap_3c[0x4c - 0x3c];   /* 0x3c */
+    char driver_name[16];          /* 0x3c */
 } PlayerHUDState;
 
 /* Track Segment Attribute Record (12 bytes) */
@@ -338,9 +352,9 @@ extern double g_Const_0_0_B;
 
 /* --- External Function Prototypes --- */
 void Font_PrintDirect(int x, int y, const char *text, void *surface, int width, int height, int color);
-int Gfx_SetRenderTarget(int type, void *surface, int width, int height, int pitch);
+int Gfx_SetRenderTarget(void *surface, int width, int stride, int height, int bpp);
 int Gfx_SetClipRect(int x1, int y1, int x2, int y2);
-void Gfx_DrawSprite(void *sprite, void *coords, int flags);
+void Gfx_DrawSprite(void *sprite, void *coords, void *scale);
 void Gfx_FreeSurface(void *surface);
 int Gfx_RestoreSurface(void);
 void Gfx_BlitTransparentLUT(int src, int x, int y, int w, int h, int dst, int dx, int dy, void *lut, int spitch, int dpitch);
