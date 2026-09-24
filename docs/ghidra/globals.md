@@ -192,6 +192,9 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x00552e60` | `int32_t*`   | `g_ParticleTemplateX` | Local template X coordinates for vehicle particle emitters. |
 | `0x005533b0` | `int32_t*`   | `g_ParticleTemplateY` | Local template Y coordinates for vehicle particle emitters. |
 | `0x00553300` | `int32_t*`   | `g_ParticleTemplateZ` | Local template Z coordinates for vehicle particle emitters. |
+| `0x0063c5d8` | `int32_t`    | `g_ActiveTrackSegmentAttribute` | Active track segment visual / fog attribute passed to Lisa rasterizer. |
+| `0x00553784` | `int32_t*`   | `g_TrackChunkToNodeTable` | Lookup table mapping track placement chunks to spline road nodes (12 bytes per entry). |
+| `0x005db000` | `int32_t*`   | `g_pCarBaseMeshes` | Base unblemished mesh pointers for vehicle archetypes. |
 
 
 

@@ -707,6 +707,11 @@ extern int DAT_004986e0[];
 #define g_ParticleTemplateX ((int *)&DAT_00552e60)
 #define g_ParticleTemplateY ((int *)&DAT_005533b0)
 #define g_ParticleTemplateZ ((int *)&DAT_00553300)
+#define g_pCarBaseMeshes ((int *)&DAT_005db000)
+#define g_TrackChunkToNodeTable ((int *)&DAT_00553784)
+#define s_TrackSurfaceMissing_004994cc ((const char *)&DAT_004994cc)
+#define g_ActiveTrackSegmentAttribute DAT_0063c5d8
+#define g_TrackSegmentTable ((int *)&DAT_00552e40)
 
 /**
  * @original Audio_PlaySampleVol (IGN_WIN.EXE @ 0x0043e710, fx.c)
@@ -3649,404 +3654,297 @@ double Math_LookupTrigAngle(double angle) {
  * @fidelity ADAPTED
  */
 void Camera_UpdateOverview(void) {
-  int var_i1;
-  double *var_pd2;
-  int var_i3;
-  unsigned int var_u4;
-  unsigned int var_u5;
-  int var_i6;
-  int var_i7;
-  int var_i8;
-  int var_i9;
-  int var_i10;
-  int var_i11;
-  double var_d12;
-  int var_i13;
-  unsigned int var_u14;
-  int *var_pi15;
-  int var_i16;
-  int var_i17;
-  int *var_pi18;
-  int var_i19;
-  unsigned int *var_pu20;
-  int var_i21;
-  int *var_pi22;
-  double var_f23;
-  __int64 var_l24;
-  int var_34;
-  unsigned int var_2c;
-  int *var_28;
-  int var_24;
-  int var_20;
-  int uStack_1c;
-  __int64 var_18;
-  int var_10;
-  int var_4;
-  var_i16 = 0;
-  var_2c = 0;
-  var_10 = 0;
-  var_4 = 0;
-  var_u14 = *(unsigned int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c);
-  var_i13 = (var_u14 ^ (int)var_u14 >> 0x1f) - ((int)var_u14 >> 0x1f);
-  if (var_i13 + 2 < g_TrackRoadSequenceNodeCount) {
-    if ((int)var_u14 < 0) {
-      var_18 = *(double *)(g_pTrackRoadSequence + var_i13 * 6 + 0x10) - _DAT_0047a540;
-      var_pi15 = g_pTrackRoadSequence + var_i13 * 6 + 0xf;
-      var_24 = *var_pi15;
-      if (var_18 < _DAT_0047a548) {
-        var_18 = var_18 + _DAT_0047a550;
-      }
-      if (var_24 == 10000) {
-        var_18 = *(double *)(g_pTrackRoadSequence + var_u14 * 6 + 0xd) - _DAT_0047a540;
-        var_24 = g_pTrackRoadSequence[var_u14 * 6 + 0xc];
-        if (var_18 < _DAT_0047a548) {
-          var_18 = var_18 + _DAT_0047a550;
+    VehicleState *veh;
+    VehicleConfig *config;
+    uint8_t *cam_state;
+    int *seq_node_ptr;
+    int *lookahead_ptr;
+    uint8_t *plc_entry;
+    uint8_t *msh_entry;
+    unsigned int *poly_ptr;
+    int *vertex_data;
+    int *surf_data;
+    int *particle_dst;
+    int *particle_src;
+    int road_node;
+    int node_idx;
+    int chunk_idx;
+    int model_idx;
+    int poly_count;
+    int vertex_count;
+    int skip_count;
+    int plc_x, plc_y, plc_z;
+    int sum_x, sum_y, sum_z;
+    int avg_x, avg_y, avg_z;
+    int v0_idx, v1_idx, v2_idx;
+    int normal_x, normal_y, normal_z;
+    int p0_x, p0_y, p0_z;
+    int p1_x, p1_y, p1_z;
+    int emitter_idx, particle_idx, template_idx, particle_count;
+    int car_model;
+    int i, wheel_offset;
+    double track_yaw;
+    double ground_y;
+    double cos_val, sin_val;
+
+    veh = (VehicleState *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c);
+    config = (VehicleConfig *)(g_VehicleConfigs + g_ActiveVehicleIndex * 200);
+    cam_state = (uint8_t *)&g_VehicleCameraStates + g_ActiveVehicleIndex * 464;
+
+    sum_x = 0;
+    sum_y = 0;
+    sum_z = 0;
+    vertex_count = 0;
+
+    road_node = veh->current_node_idx;
+    node_idx = (road_node < 0) ? -road_node : road_node;
+
+    if (node_idx + 2 < g_TrackRoadSequenceNodeCount) {
+        if (road_node < 0) {
+            track_yaw = *(double *)(g_pTrackRoadSequence + node_idx * 6 + 0x10) - 0.0;
+            seq_node_ptr = g_pTrackRoadSequence + node_idx * 6 + 0xf;
+            chunk_idx = *seq_node_ptr;
+            if (track_yaw < 0.05) {
+                track_yaw += 0.2;
+            }
+            if (chunk_idx == 10000) {
+                track_yaw = *(double *)(g_pTrackRoadSequence + road_node * 6 + 0xd) - 0.0;
+                chunk_idx = g_pTrackRoadSequence[road_node * 6 + 0xc];
+                if (track_yaw < 0.05) {
+                    track_yaw += 0.2;
+                }
+            }
+            if (chunk_idx == -2) {
+                skip_count = 0;
+                do {
+                    lookahead_ptr = seq_node_ptr + 6;
+                    seq_node_ptr = seq_node_ptr + 6;
+                    skip_count++;
+                } while (*lookahead_ptr == -2);
+                track_yaw = *(double *)(g_pTrackRoadSequence + (skip_count + node_idx) * 6 + 0xd);
+                chunk_idx = g_pTrackRoadSequence[(skip_count + node_idx) * 6 + 0xc];
+            }
+        } else {
+            track_yaw = *(double *)(g_pTrackRoadSequence + road_node * 6 + 0xd);
+            chunk_idx = g_pTrackRoadSequence[road_node * 6 + 0xc];
         }
-      }
-      if (var_24 != -2) goto LAB_00435a9e;
-      var_i19 = 0;
-      do {
-        var_pi18 = var_pi15 + 6;
-        var_pi15 = var_pi15 + 6;
-        var_i19 = var_i19 + 1;
-      } while (*var_pi18 == -2);
-      var_18 = *(double *)(g_pTrackRoadSequence + (var_i19 + var_i13) * 6 + 0xd);
-      var_24 = g_pTrackRoadSequence[(var_i19 + var_i13) * 6 + 0xc];
+    } else {
+        track_yaw = *(double *)(g_pTrackRoadSequence + 1);
+        chunk_idx = *g_pTrackRoadSequence;
     }
-    else {
-      var_18 = *(double *)(g_pTrackRoadSequence + var_u14 * 6 + 0xd);
-      var_24 = g_pTrackRoadSequence[var_u14 * 6 + 0xc];
+
+    track_yaw -= 0.0;
+    if (track_yaw < 0.05) {
+        track_yaw += 0.2;
     }
-  }
-  else {
-    var_18 = *(double *)(g_pTrackRoadSequence + 1);
-    var_24 = *g_pTrackRoadSequence;
-  }
-  var_18 = var_18 - _DAT_0047a540;
-  if (var_18 < _DAT_0047a548) {
-    var_18 = var_18 + _DAT_0047a550;
-  }
-LAB_00435a9e:
-  var_i17 = var_24 * 0x14 + g_pActivePLC;
-  var_i19 = *(int *)(var_i17 + 0x10);
-  var_i13 = g_pActiveMSH + *(int *)(var_i17 + 4) * 4;
-  var_34 = *(int *)(var_i13 + 4);
-  var_pu20 = (unsigned int *)(var_i13 + 8 + *(int *)(g_pActiveMSH + *(int *)(var_i17 + 4) * 4) * 0xc);
-  if (0 < var_34) {
-    do {
-      var_u14 = var_pu20[1];
-      var_u4 = var_pu20[2];
-      var_u5 = var_pu20[3];
-      if ((*var_pu20 & 0xffff0000) < 0x280000) {
-        var_2c = var_2c +
-                   *(int *)(var_i13 + 8 + var_u14 * 0xc) + (*(int *)(var_i17 + 0xc) + 0x6400) * 3 +
-                   *(int *)(var_i13 + 8 + var_u4 * 0xc) + *(int *)(var_i13 + 8 + var_u5 * 0xc);
-        var_i16 = (((((var_i16 - *(int *)(var_i13 + 0xc + var_u14 * 0xc)) + var_i19) -
-                   *(int *)(var_i13 + 0xc + var_u4 * 0xc)) + var_i19) -
-                 *(int *)(var_i13 + 0xc + var_u5 * 0xc)) + var_i19;
-        var_10 = var_10 +
-                   *(int *)(var_i13 + 0x10 + var_u14 * 0xc) + (*(int *)(var_i17 + 0x14) + 0x6400) * 3 +
-                   *(int *)(var_i13 + 0x10 + var_u4 * 0xc) + *(int *)(var_i13 + 0x10 + var_u5 * 0xc);
-        var_4 = var_4 + 3;
-      }
-      var_pu20 = var_pu20 + 0xb;
-      var_34 = var_34 + -1;
-    } while (var_34 != 0);
-  }
-  var_2c = (int)var_2c / var_4;
-  var_10 = var_10 / var_4;
-  var_u14 = var_i16 / var_4 + 0xfa;
-  DAT_0063c5d8 = *(int *)(DAT_00552e40 + var_24 * 0xc);
-  *(int *)(g_pActiveCamera + 7) = 0;
-  *g_pActiveCamera = (double)(int)var_2c;
-  var_d12 = (double)var_10;
-  g_pActiveCamera[1] = (double)(var_i16 / var_4 + 0x2ee);
-  uStack_1c = (int)((unsigned __int64)var_d12 >> 0x20);
-  var_20 = SUB84(var_d12,0);
-  g_pActiveCamera[2] = var_d12;
-  var_pd2 = g_pActiveCamera;
-  *(int *)(g_pActiveCamera + 3) = 0;
-  *(int *)((int)var_pd2 + 0x1c) = 0x408a9000;
-  var_pd2 = g_pActiveCamera;
-  *(int *)(g_pActiveCamera + 4) = 0;
-  *(int *)((int)var_pd2 + 0x24) = 0;
-  var_pd2 = g_pActiveCamera;
-  *(int *)(g_pActiveCamera + 5) = 0;
-  *(int *)((int)var_pd2 + 0x2c) = 0;
-  *(int *)((int)g_pActiveCamera + 0x7c) = 0;
-  *(int *)(g_pActiveCamera + 0x10) = *(int *)(g_VehicleConfigs + 0x58 + g_ActiveVehicleIndex * 200);
-  *(int *)((int)g_pActiveCamera + 0x84) =
-       *(int *)(g_VehicleConfigs + 0x5c + g_ActiveVehicleIndex * 200);
-  var_l24 = __ftol();
-  *(int *)(g_pActiveCamera + 0x11) = (int)var_l24;
-  Lisa_CullObjectsOrthographic();
-  var_pi15 = Track_FindSurfaceHeight(var_2c,var_u14,var_10,-1,0x32);
-  if (*var_pi15 == -1) {
-    var_2c = var_2c - 0x14;
-    var_pi15 = Track_FindSurfaceHeight(var_2c,var_u14,var_10,-1,0x32);
-    if (*var_pi15 == -1) {
-      Log_DebugPrintf((const char *)&DAT_004994cc);
+
+    /* Compute centroid of road chunk drivable polygons */
+    plc_entry = (uint8_t *)g_pActivePLC + chunk_idx * 20;
+    plc_x = *(int *)(plc_entry + 0x0c);
+    plc_y = *(int *)(plc_entry + 0x10);
+    plc_z = *(int *)(plc_entry + 0x14);
+    model_idx = *(int *)(plc_entry + 4);
+
+    msh_entry = (uint8_t *)g_pActiveMSH + model_idx * 4;
+    poly_count = *(int *)(msh_entry + 4);
+    poly_ptr = (unsigned int *)(msh_entry + 8 + (*(int *)msh_entry) * 12);
+    vertex_data = (int *)(msh_entry + 8);
+
+    while (poly_count > 0) {
+        v0_idx = (int)poly_ptr[1];
+        v1_idx = (int)poly_ptr[2];
+        v2_idx = (int)poly_ptr[3];
+
+        if ((*poly_ptr & 0xffff0000) < 0x280000) {
+            sum_x += vertex_data[v0_idx * 3] + (plc_x + 25600) * 3 +
+                     vertex_data[v1_idx * 3] + vertex_data[v2_idx * 3];
+            sum_y += (((-vertex_data[v0_idx * 3 + 1] + plc_y) -
+                       vertex_data[v1_idx * 3 + 1] + plc_y) -
+                       vertex_data[v2_idx * 3 + 1]) + plc_y;
+            sum_z += vertex_data[v0_idx * 3 + 2] + (plc_z + 25600) * 3 +
+                     vertex_data[v1_idx * 3 + 2] + vertex_data[v2_idx * 3 + 2];
+            vertex_count += 3;
+        }
+        poly_ptr += 11;
+        poly_count--;
     }
-  }
-  var_i13 = 0;
-  do {
-    var_i16 = 0;
-    do {
-      var_pi18 = var_pi15 + var_i16;
-      var_i19 = g_ActiveVehicleIndex * 0x1213 + var_i16;
-      var_i16 = var_i16 + 1;
-      *(int *)(g_Vehicles + 0x170 + (var_i19 + var_i13) * 4) = *var_pi18;
-    } while (var_i16 < 0x10);
-    var_i13 = var_i13 + 0x10;
-  } while (var_i13 < 0x40);
-  var_i16 = var_pi15[2];
-  var_i6 = var_pi15[6];
-  var_i7 = var_pi15[4];
-  var_i8 = var_pi15[9];
-  var_i19 = var_pi15[3];
-  var_i9 = var_pi15[7];
-  var_i17 = var_pi15[1];
-  var_i10 = var_pi15[8];
-  var_i11 = var_pi15[5];
-  var_i3 = var_pi15[5];
-  var_i13 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-  if (*(int *)(var_i13 + 0x558) != 0) {
-    *(int *)(var_i13 + 0x55c) = 0;
-    if ((*(int *)(g_PlayerHUDState + 4 + g_ActiveVehicleIndex * 0x4c) != 2) || (g_ActiveVehicleIndex == 0)) {
-      *(int *)(g_Vehicles + 0x560 + g_ActiveVehicleIndex * 0x484c) = 0;
+
+    avg_x = sum_x / vertex_count;
+    avg_z = sum_z / vertex_count;
+    avg_y = sum_y / vertex_count + 250;
+
+    g_ActiveTrackSegmentAttribute = g_TrackSegmentTable[chunk_idx * 3];
+
+    /* Setup orthographic camera for track culling */
+    *(int *)((uint8_t *)g_pActiveCamera + 0x38) = 0;
+    g_pActiveCamera[0] = (double)avg_x;
+    g_pActiveCamera[1] = (double)(sum_y / vertex_count + 750);
+    g_pActiveCamera[2] = (double)avg_z;
+    g_pActiveCamera[3] = 850.0;
+    g_pActiveCamera[4] = 0.0;
+    g_pActiveCamera[5] = 0.0;
+    *(int *)((uint8_t *)g_pActiveCamera + 0x7c) = 0;
+    *(int *)((uint8_t *)g_pActiveCamera + 0x80) = config->viewport_h;
+    *(int *)((uint8_t *)g_pActiveCamera + 0x84) = config->viewport_w;
+    *(int *)((uint8_t *)g_pActiveCamera + 0x88) = avg_z;
+
+    Lisa_CullObjectsOrthographic();
+
+    /* Ground surface probe and snap */
+    surf_data = (int *)Track_FindSurfaceHeight(avg_x, avg_y, avg_z, -1, 50);
+    if (*surf_data == -1) {
+        avg_x -= 20;
+        surf_data = (int *)Track_FindSurfaceHeight(avg_x, avg_y, avg_z, -1, 50);
+        if (*surf_data == -1) {
+            Log_DebugPrintf(s_TrackSurfaceMissing_004994cc);
+        }
     }
-    var_l24 = Lisa_SetDynamicObjectMesh(*(int *)
-                           (&DAT_005db000 + *(int *)(g_PlayerHUDState + g_ActiveVehicleIndex * 0x4c) * 4),
-                          g_PlayerHUDState,(int *)(g_ActiveVehicleIndex * 0x20 + g_pCarTransforms),
-                          (int *)*(int *)
-                                  (&DAT_005db000 + *(int *)(g_PlayerHUDState + g_ActiveVehicleIndex * 0x4c) * 4)
-                          ,1,(short)g_ActiveVehicleIndex + 100,0,-1,0);
-    if ((int)var_l24 != 0) {
-      Log_DebugPrintf(s_Error_while_changing_car_mesh_00499248);
+
+    /* Copy surface probe info to all 4 wheels (16 ints = 64 bytes each) */
+    for (wheel_offset = 0; wheel_offset < 4; wheel_offset++) {
+        for (i = 0; i < 16; i++) {
+            veh->wheel_surface_info[wheel_offset * 16 + i] = surf_data[i];
+        }
     }
-    var_i13 = 0;
-    var_28 = &g_ParticleArray1 + g_ActiveVehicleIndex * 0x820;
-    var_pi15 = (int *)(g_PlayerHUDState + g_ActiveVehicleIndex * 0x4c);
-    do {
-      var_i21 = 0;
-      var_i1 = var_i13 + *var_pi15 * 4;
-      if (0 < *(int *)(g_ParticleCount1 + var_i1 * 0xc)) {
-        var_pi18 = var_28;
-        var_pi22 = (int *)(*(int *)(&DAT_00552e60 + var_i1 * 4) + 8);
-        do {
-          var_i21 = var_i21 + 1;
-          *var_pi18 = *(int *)(&DAT_005533b0 + (var_i13 + *var_pi15 * 4) * 4) + *var_pi22;
-          var_pi18[1] = var_pi22[1];
-          var_pi18[2] = *(int *)(&DAT_00553300 + (var_i13 + *var_pi15 * 4) * 4) + var_pi22[2];
-          var_pi18 = var_pi18 + 3;
-          var_pi22 = var_pi22 + 3;
-        } while (var_i21 < *(int *)(g_ParticleCount1 + (var_i13 + *var_pi15 * 4) * 0xc));
-      }
-      var_i13 = var_i13 + 1;
-      var_28 = var_28 + 0x208;
-    } while (var_i13 < 4);
-    *(int *)(g_Vehicles + 0x558 + g_ActiveVehicleIndex * 0x484c) = 0;
-  }
-  *(double *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c) = (double)(int)var_2c;
-  *(double *)(g_Vehicles + 8 + g_ActiveVehicleIndex * 0x484c) = (double)(int)var_u14;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x14 + g_ActiveVehicleIndex * 0x484c) = uStack_1c;
-  *(int *)(var_i1 + 0x10 + var_i13 * 0x484c) = var_20;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x18 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x1c + var_i13 * 0x484c) = 0;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x20 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x24 + var_i13 * 0x484c) = 0;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x28 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x2c + var_i13 * 0x484c) = 0;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x30 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x34 + var_i13 * 0x484c) = 0;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x38 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x3c + var_i13 * 0x484c) = 0;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x40 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x44 + var_i13 * 0x484c) = 0;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x108 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x10c + var_i13 * 0x484c) = 0;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0xfc + g_ActiveVehicleIndex * 0x484c) = ((int*)&var_18)[1];
-  *(int *)(var_i1 + 0xf8 + var_i13 * 0x484c) = (int)var_18;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x100 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x104 + var_i13 * 0x484c) = 0;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x110 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x114 + var_i13 * 0x484c) = 0;
-  var_f23 = (double)fcos((double)*(double *)(g_Vehicles + 0xf8 + g_ActiveVehicleIndex * 0x484c));
-  var_pd2 = (double *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c);
-  var_pd2[9] = (double)((double)*var_pd2 -
-                      var_f23 * (double)*(int *)(g_Vehicles + 0x5b0 + g_ActiveVehicleIndex * 0x484c));
-  var_f23 = (double)fsin((double)*(double *)(g_Vehicles + 0xf8 + g_ActiveVehicleIndex * 0x484c));
-  var_i13 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-  *(double *)(var_i13 + 0x50) =
-       (double)((double)*(double *)(var_i13 + 0x10) -
-               var_f23 * (double)*(int *)(g_Vehicles + 0x5b0 + g_ActiveVehicleIndex * 0x484c));
-  var_f23 = (double)fcos((double)*(double *)(g_Vehicles + 0xf8 + g_ActiveVehicleIndex * 0x484c));
-  var_pd2 = (double *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c);
-  var_pd2[0xd] = (double)(var_f23 * (double)*(int *)(g_Vehicles + 0x5ac + g_ActiveVehicleIndex * 0x484c) +
-                        (double)*var_pd2);
-  var_f23 = (double)fsin((double)*(double *)(g_Vehicles + 0xf8 + g_ActiveVehicleIndex * 0x484c));
-  var_i13 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-  *(double *)(var_i13 + 0x70) =
-       (double)(var_f23 * (double)*(int *)(g_Vehicles + 0x5ac + g_ActiveVehicleIndex * 0x484c) +
-               (double)*(double *)(var_i13 + 0x10));
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x58 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x5c + var_i13 * 0x484c) = 0;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x60 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 100 + var_i13 * 0x484c) = 0;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x78 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x7c + var_i13 * 0x484c) = 0;
-  var_i1 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x80 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i1 + 0x84 + var_i13 * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x150 + g_ActiveVehicleIndex * 0x484c) = 0xffffffff;
-  *(int *)(g_Vehicles + 0x154 + g_ActiveVehicleIndex * 0x484c) = 0xffffffff;
-  *(int *)(g_Vehicles + 0x158 + g_ActiveVehicleIndex * 0x484c) = 0xffffffff;
-  var_d12 = -((double)var_i3 +
-            ((double)(var_i10 - var_i11) * (double)var_i16 +
-            (double)var_i17 * ((double)(var_i9 - var_i7) - (double)(int)(var_2c - var_i7)) +
-            (double)var_i19 * ((double)(var_i8 - var_i6) - (double)(var_10 - var_i6))) /
-            (double)var_i16);
-  *(int *)(g_Vehicles + 0x15c + g_ActiveVehicleIndex * 0x484c) = 0xffffffff;
-  *(double *)(g_Vehicles + 0x120 + g_ActiveVehicleIndex * 0x484c) = var_d12;
-  *(double *)(g_Vehicles + 0x128 + g_ActiveVehicleIndex * 0x484c) = var_d12;
-  *(int *)(g_Vehicles + 0x270 + g_ActiveVehicleIndex * 0x484c) = 1;
-  *(int *)(g_Vehicles + 0x344 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x348 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x34c + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x27c + g_ActiveVehicleIndex * 0x484c) = 1;
-  *(int *)(g_PlayerHUDState + 0x10 + g_ActiveVehicleIndex * 0x4c) = 0;
-  *(int *)(g_Vehicles + 0x350 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x298 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x29c + g_ActiveVehicleIndex * 0x484c) = 0;
-  var_i16 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x118 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i16 + 0x11c + var_i13 * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x274 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x278 + g_ActiveVehicleIndex * 0x484c) = 0;
-  var_i16 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x288 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i16 + 0x28c + var_i13 * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x2f8 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x33c + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x344 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x348 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x34c + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c) =
-       *(int *)(DAT_00553784 + var_24 * 0xc);
-  *(int *)(g_Vehicles + 0x368 + g_ActiveVehicleIndex * 0x484c) =
-       *(int *)(g_Vehicles + 0x364 + g_ActiveVehicleIndex * 0x484c);
-  var_i16 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x88 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i16 + 0x8c + var_i13 * 0x484c) = 0;
-  var_i16 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x90 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i16 + 0x94 + var_i13 * 0x484c) = 0;
-  var_i16 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0x98 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i16 + 0x9c + var_i13 * 0x484c) = 0;
-  var_i16 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0xa0 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i16 + 0xa4 + var_i13 * 0x484c) = 0;
-  var_i16 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0xb0 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i16 + 0xb4 + var_i13 * 0x484c) = 0;
-  var_i16 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0xb8 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i16 + 0xbc + var_i13 * 0x484c) = 0;
-  var_i16 = g_Vehicles;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_Vehicles + 0xc0 + g_ActiveVehicleIndex * 0x484c) = 0;
-  *(int *)(var_i16 + 0xc4 + var_i13 * 0x484c) = 0;
-  var_i13 = g_Vehicles + g_ActiveVehicleIndex * 0x484c;
-  *(double *)(var_i13 + 0x584) =
-       (*(double *)(g_Vehicles + 0x108 + g_ActiveVehicleIndex * 0x484c) * _DAT_0047a560 +
-       *(double *)(var_i13 + 0xb8)) * _DAT_0047a568;
-  *(double *)(g_Vehicles + 0x58c + g_ActiveVehicleIndex * 0x484c) =
-       (*(double *)(g_Vehicles + 0x110 + g_ActiveVehicleIndex * 0x484c) * _DAT_0047a560 +
-       *(double *)(g_Vehicles + 0xc0 + g_ActiveVehicleIndex * 0x484c)) * _DAT_0047a568;
-  var_i16 = g_VehicleConfigs;
-  var_i13 = g_ActiveVehicleIndex;
-  *(int *)(g_VehicleConfigs + 0xc0 + g_ActiveVehicleIndex * 200) = 0;
-  *(int *)(var_i16 + 0xc4 + var_i13 * 200) = 0;
-  var_i19 = g_Vehicles;
-  var_i16 = g_VehicleCameraStates;
-  var_i13 = g_ActiveVehicleIndex;
-  var_i17 = g_ActiveVehicleIndex * 0x1d0;
-  *(int *)(var_i17 + 0x2c + g_VehicleCameraStates) =
-       *(int *)(g_Vehicles + 0xfc + g_ActiveVehicleIndex * 0x484c);
-  *(int *)(var_i17 + 0x28 + var_i16) = *(int *)(var_i19 + 0xf8 + var_i13 * 0x484c);
-  var_i13 = g_VehicleCameraStates;
-  var_i16 = g_ActiveVehicleIndex * 0x1d0;
-  *(int *)(var_i16 + 0x30 + g_VehicleCameraStates) = 0;
-  *(int *)(var_i16 + 0x34 + var_i13) = 0;
-  *(double *)(g_ActiveVehicleIndex * 0x1d0 + 0x68 + g_VehicleCameraStates) =
-       *(double *)(g_Vehicles + g_ActiveVehicleIndex * 0x484c) * _DAT_0047a570;
-  *(double *)(g_ActiveVehicleIndex * 0x1d0 + 0x70 + g_VehicleCameraStates) =
-       *(double *)(g_Vehicles + 0x10 + g_ActiveVehicleIndex * 0x484c) * _DAT_0047a570;
-  var_i13 = g_VehicleCameraStates;
-  var_i16 = g_ActiveVehicleIndex * 0x1d0;
-  *(int *)(var_i16 + 0x78 + g_VehicleCameraStates) = 0;
-  *(int *)(var_i16 + 0x7c + var_i13) = 0;
-  var_i13 = g_VehicleCameraStates;
-  var_i16 = g_ActiveVehicleIndex * 0x1d0;
-  *(int *)(var_i16 + 0x80 + g_VehicleCameraStates) = 0;
-  *(int *)(var_i16 + 0x84 + var_i13) = 0;
-  var_i13 = g_VehicleCameraStates;
-  var_i16 = g_ActiveVehicleIndex * 0x1d0;
-  *(int *)(var_i16 + 0x88 + g_VehicleCameraStates) = 0;
-  *(int *)(var_i16 + 0x8c + var_i13) = 0;
-  var_i13 = g_VehicleCameraStates;
-  var_i16 = g_ActiveVehicleIndex * 0x1d0;
-  *(int *)(var_i16 + 0x90 + g_VehicleCameraStates) = 0;
-  *(int *)(var_i16 + 0x94 + var_i13) = 0;
-  var_i13 = g_VehicleCameraStates;
-  var_i16 = g_ActiveVehicleIndex * 0x1d0;
-  *(int *)(var_i16 + 0x98 + g_VehicleCameraStates) = 0;
-  *(int *)(var_i16 + 0x9c + var_i13) = 0;
-  var_i13 = g_VehicleCameraStates;
-  var_i16 = g_ActiveVehicleIndex * 0x1d0;
-  *(int *)(var_i16 + 0xac + g_VehicleCameraStates) = 0;
-  *(int *)(var_i16 + 0xb0 + var_i13) = 0;
-  *(int *)(g_ActiveVehicleIndex * 0x1d0 + 0xd4 + g_VehicleCameraStates) = 0;
-  Car_UpdateDynamicObjects(g_ActiveVehicleIndex);
-  return;
+
+    normal_x = surf_data[1];
+    normal_y = surf_data[2];
+    normal_z = surf_data[3];
+    p0_x = surf_data[4];
+    p0_y = surf_data[5];
+    p0_z = surf_data[6];
+    p1_x = surf_data[7];
+    p1_y = surf_data[8];
+    p1_z = surf_data[9];
+
+    /* Reset car mesh and particles if car was damaged / wrecked */
+    if (veh->mesh_damage_flag != 0) {
+        veh->detached_wheel_mask = 0;
+        car_model = *(int *)(g_PlayerHUDState + g_ActiveVehicleIndex * 0x4c);
+        if (*(int *)(g_PlayerHUDState + 4 + g_ActiveVehicleIndex * 0x4c) != 2 || g_ActiveVehicleIndex == 0) {
+            veh->wreck_debris_flag = 0;
+        }
+
+        if (Lisa_SetDynamicObjectMesh(g_pCarBaseMeshes[car_model],
+                                      g_PlayerHUDState,
+                                      &g_pCarTransforms[g_ActiveVehicleIndex],
+                                      (void *)g_pCarBaseMeshes[car_model],
+                                      1,
+                                      (short)(g_ActiveVehicleIndex + 100),
+                                      0, -1, 0) != 0) {
+            Log_DebugPrintf(s_Error_while_changing_car_mesh_00499248);
+        }
+
+        particle_dst = g_pParticleArray1 + g_ActiveVehicleIndex * 0x820;
+        for (emitter_idx = 0; emitter_idx < 4; emitter_idx++) {
+            template_idx = emitter_idx + car_model * 4;
+            particle_count = *(int *)((uint8_t *)g_pParticleCount1 + template_idx * 12);
+            if (particle_count > 0) {
+                particle_src = (int *)(*(int *)((uint8_t *)g_ParticleTemplateX + template_idx * sizeof(int)) + 8);
+                for (particle_idx = 0; particle_idx < particle_count; particle_idx++) {
+                    particle_dst[particle_idx * 3] = *(int *)((uint8_t *)g_ParticleTemplateY + template_idx * sizeof(int)) + particle_src[particle_idx * 3];
+                    particle_dst[particle_idx * 3 + 1] = particle_src[particle_idx * 3 + 1];
+                    particle_dst[particle_idx * 3 + 2] = *(int *)((uint8_t *)g_ParticleTemplateZ + template_idx * sizeof(int)) + particle_src[particle_idx * 3 + 2];
+                }
+            }
+            particle_dst += 0x208;
+        }
+        veh->mesh_damage_flag = 0;
+    }
+
+    /* Reset vehicle transforms and linear velocity */
+    veh->pos_x = (double)avg_x;
+    veh->pos_y = (double)avg_y;
+    veh->pos_z = (double)avg_z;
+    veh->vel_x = 0.0;
+    veh->vel_y = 0.0;
+    veh->vel_z = 0.0;
+    veh->accel_x = 0.0;
+    veh->accel_y = 0.0;
+    veh->accel_z = 0.0;
+
+    veh->angle_yaw = track_yaw;
+    veh->angle_pitch = 0.0;
+    veh->angle_roll = 0.0;
+    veh->angular_vel_roll = 0.0;
+
+    /* Axle positions from wheelbase offsets */
+    cos_val = cos(veh->angle_yaw);
+    sin_val = sin(veh->angle_yaw);
+    veh->rear_axle_pos_x = veh->pos_x - cos_val * (double)veh->rear_axle_offset;
+    veh->rear_axle_pos_z = veh->pos_z - sin_val * (double)veh->rear_axle_offset;
+    veh->front_axle_pos_x = veh->pos_x + cos_val * (double)veh->front_axle_offset;
+    veh->front_axle_pos_z = veh->pos_z + sin_val * (double)veh->front_axle_offset;
+
+    veh->rear_axle_vel_x = 0.0;
+    veh->rear_axle_vel_z = 0.0;
+    veh->front_axle_vel_x = 0.0;
+    veh->front_axle_vel_z = 0.0;
+
+    /* Reset 4 wheel contact surface IDs to -1 */
+    veh->wheel_surface_id[0] = -1;
+    veh->wheel_surface_id[1] = -1;
+    veh->wheel_surface_id[2] = -1;
+    veh->wheel_surface_id[3] = -1;
+
+    /* Interpolate ground height from surface triangle normal */
+    ground_y = -((double)p0_y +
+                 ((double)(p1_y - p0_y) * (double)normal_y +
+                  (double)normal_x * ((double)(p1_x - p0_x) - (double)(avg_x - p0_x)) +
+                  (double)normal_z * ((double)(p1_z - p0_z) - (double)(avg_z - p0_z))) /
+                 (double)normal_y);
+
+    veh->ground_y = ground_y;
+    veh->ground_y_rear = ground_y;
+
+    veh->is_airborne = 1;
+    veh->checkpoint_pass1 = 0;
+    veh->checkpoint_pass2 = 0;
+    veh->checkpoint_pass3 = 0;
+    veh->current_gear = 1;
+    *(int *)(g_PlayerHUDState + 0x10 + g_ActiveVehicleIndex * 0x4c) = 0;
+    veh->checkpoint_counter = 0;
+    veh->throttle_input = 0;
+    veh->brake_input = 0;
+    veh->steering_angle = 0.0;
+    veh->landing_impact = 0;
+    veh->landing_flag = 0;
+    veh->target_rpm = 0.0;
+    veh->handbrake = 0;
+    veh->surface_type = 0;
+    veh->current_node_idx = g_TrackChunkToNodeTable[chunk_idx * 3];
+    veh->target_node_idx = veh->current_node_idx;
+
+    veh->angular_drag_x = 0.0;
+    veh->angular_drag_y = 0.0;
+    veh->angular_drag_z = 0.0;
+    veh->wheel_angle_fl = 0.0;
+    veh->wheel_angle_fr = 0.0;
+    veh->wheel_rot_vel_fl = 0.0;
+    veh->wheel_rot_vel_fr = 0.0;
+
+    /* Chassis roll/pitch equilibrium angles */
+    veh->chassis_roll_spring =
+        (veh->angular_vel_roll * 8.0 + veh->wheel_rot_vel_fl) * (-0.2);
+    veh->chassis_pitch_spring =
+        (veh->angle_roll * 8.0 + veh->wheel_rot_vel_fr) * (-0.2);
+
+    config->elevation_smooth_offset = 0.0;
+
+    /* Camera state snapshot */
+    *(double *)(cam_state + 0x28) = veh->angle_yaw;
+    *(double *)(cam_state + 0x30) = 0.0;
+    *(double *)(cam_state + 0x68) = veh->pos_x * 0.5;
+    *(double *)(cam_state + 0x70) = veh->pos_z * 0.5;
+    *(double *)(cam_state + 0x78) = 0.0;
+    *(double *)(cam_state + 0x80) = 0.0;
+    *(double *)(cam_state + 0x88) = 0.0;
+    *(double *)(cam_state + 0x90) = 0.0;
+    *(double *)(cam_state + 0x98) = 0.0;
+    *(double *)(cam_state + 0xac) = 0.0;
+    *(int *)(cam_state + 0xd4) = 0;
+
+    Car_UpdateDynamicObjects(g_ActiveVehicleIndex);
 }
 
 /**

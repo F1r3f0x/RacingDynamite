@@ -18,34 +18,88 @@
 
 /* Vehicle Physics & Gameplay State (0x484c = 18,508 bytes per vehicle) */
 typedef struct VehicleState {
-    uint32_t flags;            /* 0x0000 */
-    uint32_t active;           /* 0x0004 */
-    double pos_x;              /* 0x0008 */
-    double pos_y;              /* 0x0010 */
-    double pos_z;              /* 0x0018 */
-    double vel_x;              /* 0x0020 */
-    double vel_y;              /* 0x0028 */
-    double vel_z;              /* 0x0030 */
-    uint8_t gap_38[0x58 - 0x38];
-    double angle_yaw;          /* 0x0058 */
-    double angle_pitch;        /* 0x0060 */
-    uint8_t gap_68[0x288 - 0x68];
-    double target_rpm;         /* 0x0288 */
-    double engine_rpm;         /* 0x0290 */
-    uint8_t gap_298[0x354 - 0x298];
-    int crash_flag1;           /* 0x0354 */
-    int crash_flag2;           /* 0x0358 */
-    int crash_flag3;           /* 0x035c */
-    uint8_t gap_360[0x39c - 0x360];
-    int car_model_id;          /* 0x039c */
-    int race_rank;             /* 0x03a0 */
-    double lap_time;           /* 0x03a4 */
-    uint8_t gap_3ac[0x528 - 0x3ac];
-    int turbo_active;          /* 0x0528 */
-    uint8_t gap_52c[0x99c - 0x52c];
-    int voice_engine;          /* 0x099c */
-    int voice_skid;            /* 0x09a0 */
-    uint8_t gap_9a4[0x484c - 0x9a4];
+    double pos_x;                  /* 0x0000 */
+    double pos_y;                  /* 0x0008 */
+    double pos_z;                  /* 0x0010 */
+    double vel_x;                  /* 0x0018 */
+    double vel_y;                  /* 0x0020 */
+    double vel_z;                  /* 0x0028 */
+    double accel_x;                /* 0x0030 */
+    double accel_y;                /* 0x0038 */
+    double accel_z;                /* 0x0040 */
+    double rear_axle_pos_x;        /* 0x0048 */
+    double rear_axle_pos_z;        /* 0x0050 */
+    double rear_axle_vel_x;        /* 0x0058 */
+    double rear_axle_vel_z;        /* 0x0060 */
+    double front_axle_pos_x;       /* 0x0068 */
+    double front_axle_pos_z;       /* 0x0070 */
+    double front_axle_vel_x;       /* 0x0078 */
+    double front_axle_vel_z;       /* 0x0080 */
+    double angular_drag_x;         /* 0x0088 */
+    double angular_drag_y;         /* 0x0090 */
+    double angular_drag_z;         /* 0x0098 */
+    double wheel_angle_fl;         /* 0x00a0 */
+    uint8_t gap_a8[0xb0 - 0xa8];   /* 0x00a8 */
+    double wheel_angle_fr;         /* 0x00b0 */
+    double wheel_rot_vel_fl;       /* 0x00b8 */
+    double wheel_rot_vel_fr;       /* 0x00c0 */
+    uint8_t gap_c8[0xf8 - 0xc8];   /* 0x00c8 */
+    double angle_yaw;              /* 0x00f8 */
+    double angle_pitch;            /* 0x0100 */
+    double angular_vel_roll;       /* 0x0108 */
+    double angle_roll;             /* 0x0110 */
+    double steering_angle;         /* 0x0118 */
+    double ground_y;               /* 0x0120 */
+    double ground_y_rear;          /* 0x0128 */
+    uint8_t gap_130[0x150 - 0x130];/* 0x0130 */
+    int wheel_surface_id[4];       /* 0x0150 */
+    uint8_t gap_160[0x170 - 0x160];/* 0x0160 */
+    int wheel_surface_info[64];    /* 0x0170 (4 wheels x 16 ints) */
+    int is_airborne;               /* 0x0270 */
+    int landing_impact;            /* 0x0274 */
+    int landing_flag;              /* 0x0278 */
+    int current_gear;              /* 0x027c */
+    uint8_t gap_280[0x288 - 0x280];/* 0x0280 */
+    double target_rpm;             /* 0x0288 */
+    double engine_rpm;             /* 0x0290 */
+    int throttle_input;            /* 0x0298 */
+    int brake_input;               /* 0x029c */
+    uint8_t gap_2a0[0x2f8 - 0x2a0];/* 0x02a0 */
+    int handbrake;                 /* 0x02f8 */
+    uint8_t gap_2fc[0x33c - 0x2fc];/* 0x02fc */
+    int surface_type;              /* 0x033c */
+    uint8_t gap_340[0x344 - 0x340];/* 0x0340 */
+    int checkpoint_pass1;          /* 0x0344 */
+    int checkpoint_pass2;          /* 0x0348 */
+    int checkpoint_pass3;          /* 0x034c */
+    int checkpoint_counter;        /* 0x0350 */
+    int crash_flag1;               /* 0x0354 */
+    int crash_flag2;               /* 0x0358 */
+    int crash_flag3;               /* 0x035c */
+    uint8_t gap_360[0x364 - 0x360];/* 0x0360 */
+    int current_node_idx;          /* 0x0364 */
+    int target_node_idx;           /* 0x0368 */
+    int road_surface_node;         /* 0x036c */
+    uint8_t gap_370[0x39c - 0x370];/* 0x0370 */
+    int car_model_id;              /* 0x039c */
+    int race_rank;                 /* 0x03a0 */
+    double lap_time;               /* 0x03a4 */
+    uint8_t gap_3ac[0x528 - 0x3ac];/* 0x03ac */
+    int turbo_active;              /* 0x0528 */
+    uint8_t gap_52c[0x558 - 0x52c];/* 0x052c */
+    int mesh_damage_flag;          /* 0x0558 */
+    int detached_wheel_mask;       /* 0x055c */
+    int wreck_debris_flag;         /* 0x0560 */
+    uint8_t gap_564[0x584 - 0x564];/* 0x0564 */
+    double chassis_roll_spring;    /* 0x0584 */
+    double chassis_pitch_spring;   /* 0x058c */
+    uint8_t gap_594[0x5ac - 0x594];/* 0x0594 */
+    int front_axle_offset;         /* 0x05ac */
+    int rear_axle_offset;          /* 0x05b0 */
+    uint8_t gap_5b4[0x99c - 0x5b4];/* 0x05b4 */
+    int voice_engine;              /* 0x099c */
+    int voice_skid;                /* 0x09a0 */
+    uint8_t gap_9a4[0x484c - 0x9a4];/* 0x09a4 */
 } VehicleState;
 
 /* Dynamic 3D Object Transform Record (0x20 = 32 bytes) */
@@ -274,6 +328,8 @@ void Lisa_ResetRasterizerContext(void);
 int Lisa_UpdateObjectSpatialGrid(void *obj);
 int Lisa_MoveDynamicObject(void *obj);
 int Lisa_DeleteDynamicObject(void *obj);
+void Lisa_CullObjectsOrthographic(void);
+int Lisa_SetDynamicObjectMesh(int a, void *b, void *c, void *d, int e, short f, int g, int h, int i);
 
 void FX_SpawnAmbientTrackParticles(void);
 void Track_UpdateMovingPathNodes(void);
