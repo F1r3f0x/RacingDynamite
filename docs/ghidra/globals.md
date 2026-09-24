@@ -222,6 +222,38 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x0055309c` | `int32_t`    | `g_FlybyLastRoll` | Cached last camera roll tilt angle during flyby tracking. |
 | `0x0054f934` | `int32_t`    | `g_SkyClearEnabled` | Viewport background sky clearing toggle flag. |
 | `0x00563c14` | `int32_t`    | `g_ShowRollTelemetry` | Debug roll telemetry / free camera mode toggle (0=Off, 1=Free, 2=Target). |
+| `0x005285e0` | `void*`      | `g_pLapTimerPanelSprite` | Sprite graphic for lap timer background header panel. |
+| `0x005285e4` | `void*`      | `g_pLapSplitPanelSprite` | Sprite graphic for lap splits background panel. |
+| `0x005285e8` | `void*`      | `g_pRacePositionBadgeSprite` | Sprite graphic for current race position badge / border. |
+| `0x005285f4` | `void*[10]`  | `g_pGearDigitSprites` | Table of gear indicator digit sprites (N, 1, 2, 3, etc.). |
+| `0x00528618` | `void*`      | `g_pTurboGaugeBorderSprite` | Sprite graphic for turbo boost meter border and gauge frame. |
+| `0x0052861c` | `void*[2]`   | `g_pTurboIndicatorLightSprites` | Table of turbo indicator light sprites (0 = unlit/off, 1 = charged/on). |
+| `0x00528620` | `void*`      | `g_pTurboIndicatorLightOnSprite` | Flashing turbo indicator light active state sprite. |
+| `0x00528624` | `int32_t[4]` | `g_FontTextColorTable` | Font text color palette table for in-game HUD displays. |
+| `0x0052863c` | `int32_t[4]` | `g_FontPositionColorTable` | Font text color palette table for position rankings display. |
+| `0x00528654` | `void*`      | `g_pTrafficLightRedSprite` | Start traffic light red signal sprite graphic. |
+| `0x00528658` | `void*`      | `g_pTrafficLightYellow1Sprite` | Start traffic light first yellow signal sprite graphic. |
+| `0x0052865c` | `void*`      | `g_pTrafficLightYellow2Sprite` | Start traffic light second yellow signal sprite graphic. |
+| `0x00528660` | `void*`      | `g_pTrafficLightGreenSprite` | Start traffic light green signal sprite graphic. |
+| `0x00528664` | `void*[]`    | `g_pDirectionArrowSprites` | Road turn warning curve direction arrow sprites table. |
+| `0x00497d74` | `int32_t[]`  | `g_DirectionArrowLookupTable` | Direction arrow sprite index lookup table per track style and curve severity. |
+| `0x00563ce8` | `int32_t`    | `g_TrackStyle` | Active track graphic theme / visual style index (0 to 6). |
+| `0x005286a0` | `void*`      | `g_pWrongWayBannerSprite` | Sprite graphic for 'WRONG WAY' flashing warning overlay banner. |
+| `0x005287ec` | `void*`      | `g_pRadarProgressBarSprite_LowRes` | Mini-map / elimination progress radar bar sprite (320x200 low-res). |
+| `0x005287f0` | `void*`      | `g_pRadarProgressBarSprite_HighRes`| Mini-map / elimination progress radar bar sprite (640x480 high-res). |
+| `0x00528764` | `void*[8]`   | `g_pRadarCarBlipSprites` | Table of miniature car icon blips plotted along the track radar bar. |
+| `0x005287f4` | `void*`      | `g_pRadarLeaderArrowSprite` | Radar pointer arrow marking the current race leader. |
+| `0x0052873c` | `void*[10]`  | `g_pRadarEliminatedBlipSprites`| Radar animation frame blip sprites for eliminated / wrecked racers. |
+| `0x005285d8` | `double`     | `g_RaceStartTimer` | Countdown and race launch timer in floating-point ticks. |
+| `0x00563c38` | `int32_t`    | `g_CountdownBeepStep` | Audio countdown beep progression stage (0 to 3). |
+| `0x00528794` | `void*[8]`   | `g_pFinishPlaceSprites` | Finishing position victory banner sprites (1st, 2nd, 3rd, etc.). |
+| `0x005531c0` | `int32_t[2]` | `g_FinishFanfarePlayed` | Flag indicating finish victory jingle has played for Player 1 / Player 2. |
+| `0x00552d90` | `int32_t[20]`| `g_FinishSparklePosX` | X screen pixel positions for post-race celebration victory sparkles. |
+| `0x00552df0` | `int32_t[20]`| `g_FinishSparklePosY` | Y screen pixel positions for post-race celebration victory sparkles. |
+| `0x00563d70` | `float[2]`   | `g_SpriteScaleFactors` | Scaling factors (scale_x, rot) passed to sprite draw routines. |
+| `0x00563d80` | `double`     | `g_RpmNeedleDeltaScale`| Speedometer needle smoothing rate constant (0.5 to 1.0). |
+| `0x00563d8c` | `void*`      | `g_pScreenConfig` | Screen / viewport geometry configuration table. |
+
 
 
 

@@ -59,7 +59,7 @@ typedef struct VehicleState {
     int landing_impact;            /* 0x0274 */
     int landing_flag;              /* 0x0278 */
     int current_gear;              /* 0x027c */
-    uint8_t gap_280[0x288 - 0x280];/* 0x0280 */
+    double gear_display_val;       /* 0x0280 */
     double target_rpm;             /* 0x0288 */
     double engine_rpm;             /* 0x0290 */
     int throttle_input;            /* 0x0298 */
@@ -80,27 +80,68 @@ typedef struct VehicleState {
     int current_node_idx;          /* 0x0364 */
     int target_node_idx;           /* 0x0368 */
     int road_surface_node;         /* 0x036c */
-    uint8_t gap_370[0x39c - 0x370];/* 0x0370 */
+    int field_370;                 /* 0x0370 */
+    int lap_number;                /* 0x0374 */
+    uint8_t gap_378[0x39c - 0x378];/* 0x0378 */
     int car_model_id;              /* 0x039c */
     int race_rank;                 /* 0x03a0 */
     double lap_time;               /* 0x03a4 */
     uint8_t gap_3ac[0x528 - 0x3ac];/* 0x03ac */
-    int turbo_active;              /* 0x0528 */
-    uint8_t gap_52c[0x558 - 0x52c];/* 0x052c */
+    int is_finished;               /* 0x0528 */
+    uint8_t gap_52c[0x534 - 0x52c];/* 0x052c */
+    double turbo_charge;           /* 0x0534 */
+    int turbo_active;              /* 0x053c */
+    int turbo_flash_timer;         /* 0x0540 */
+    uint8_t gap_544[0x558 - 0x544];/* 0x0544 */
     int mesh_damage_flag;          /* 0x0558 */
     int detached_wheel_mask;       /* 0x055c */
     int wreck_debris_flag;         /* 0x0560 */
-    uint8_t gap_564[0x584 - 0x564];/* 0x0564 */
+    uint8_t gap_564[0x580 - 0x564];/* 0x0564 */
+    int wrong_way_timer;           /* 0x0580 */
     double chassis_roll_spring;    /* 0x0584 */
     double chassis_pitch_spring;   /* 0x058c */
     uint8_t gap_594[0x5ac - 0x594];/* 0x0594 */
     int front_axle_offset;         /* 0x05ac */
     int rear_axle_offset;          /* 0x05b0 */
-    uint8_t gap_5b4[0x99c - 0x5b4];/* 0x05b4 */
+    uint8_t gap_5b4[0x5d4 - 0x5b4];/* 0x05b4 */
+    int finish_banner_timer;       /* 0x05d4 */
+    uint8_t gap_5d8[0x5f8 - 0x5d8];/* 0x05d8 */
+    int turn_warning_timer;        /* 0x05f8 */
+    uint8_t gap_5fc[0x60c - 0x5fc];/* 0x05fc */
+    double elimination_timer;      /* 0x060c */
+    uint8_t gap_614[0x99c - 0x614];/* 0x0614 */
     int voice_engine;              /* 0x099c */
     int voice_skid;                /* 0x09a0 */
     uint8_t gap_9a4[0x484c - 0x9a4];/* 0x09a4 */
 } VehicleState;
+
+/* Player HUD & Viewport State Record (0x4c = 76 bytes) */
+typedef struct PlayerHUDState {
+    int racer_icon_idx;            /* 0x00 */
+    int field_04;                  /* 0x04 */
+    int field_08;                  /* 0x08 */
+    int field_0c;                  /* 0x0c */
+    int field_10;                  /* 0x10 */
+    uint8_t gap_14[0x2c - 0x14];   /* 0x14 */
+    int vp_x1;                     /* 0x2c */
+    int vp_y1;                     /* 0x30 */
+    int vp_x2;                     /* 0x34 */
+    int vp_y2;                     /* 0x38 */
+    uint8_t gap_3c[0x4c - 0x3c];   /* 0x3c */
+} PlayerHUDState;
+
+/* Track Segment Attribute Record (12 bytes) */
+typedef struct TrackSegmentAttribute {
+    int flags;                     /* 0x00 */
+    int surface_type;              /* 0x04 */
+    int curve_severity;            /* 0x08 */
+} TrackSegmentAttribute;
+
+/* Screen Configuration Record */
+typedef struct ScreenConfig {
+    uint8_t pad_00[0x228];         /* 0x000 */
+    int arrow_sprite_width;        /* 0x228 */
+} ScreenConfig;
 
 /* Dynamic 3D Object Transform Record (0x20 = 32 bytes) */
 typedef struct DynamicObjectTransform {

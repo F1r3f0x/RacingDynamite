@@ -525,3 +525,30 @@ typedef struct CinematicCameraWaypoint {
     float yaw;                         // 0x10: Camera yaw heading angle (degrees)
 } CinematicCameraWaypoint;
 ```
+
+### `PlayerHUDState` (76 bytes / 0x4C bytes)
+```c
+typedef struct PlayerHUDState {
+    int32_t racer_icon_idx;            // 0x00: Racer radar/blip icon sprite index
+    int32_t field_04;                  // 0x04: Secondary player state / splash count
+    int32_t field_08;                  // 0x08: Reserved / padding
+    int32_t field_0c;                  // 0x0C: Reserved / padding
+    int32_t field_10;                  // 0x10: Per-player animation flag
+    uint8_t gap_14[0x2c - 0x14];       // 0x14
+    int32_t vp_x1;                     // 0x2C: Viewport clip boundary left (X min)
+    int32_t vp_y1;                     // 0x30: Viewport clip boundary top (Y min)
+    int32_t vp_x2;                     // 0x34: Viewport clip boundary right (X max)
+    int32_t vp_y2;                     // 0x38: Viewport clip boundary bottom (Y max)
+    uint8_t gap_3c[0x4c - 0x3c];       // 0x3C
+} PlayerHUDState;
+```
+
+### `TrackSegmentAttribute` (12 bytes / 0x0C bytes)
+```c
+typedef struct TrackSegmentAttribute {
+    int32_t flags;                     // 0x00: Segment track flags
+    int32_t surface_type;              // 0x04: Surface physics material index
+    int32_t curve_severity;            // 0x08: Road turn curve severity (direction indicator)
+} TrackSegmentAttribute;
+```
+

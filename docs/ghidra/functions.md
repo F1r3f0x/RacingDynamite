@@ -117,7 +117,7 @@
 | - | `0x0043e9c0` | - | `HUD_RenderTelemetryOverlay` | `fx.c` | Decompiled | ADAPTED | On-screen debug telemetry overlay (FPS, speed, pitch/roll, road index, diff). |
 | - | `0x0043ec70` | - | `FX_SpawnWeather` | `fx.c` | Decompiled | EXACT |  |
 | - | `0x0043edf0` | - | `HUD_CheckWrongWayHeading` | `fx.c` | Decompiled | ADAPTED | Evaluates car heading vs road chunk vector and manages the Wrong Way warning timer. |
-| - | `0x0043ef30` | - | `HUD_RenderPlayerElements` | `fx.c` | Decompiled | ADAPTED | In-race player HUD renderer (tachometer, turbo bar, position indicator, lap splits). |
+| `0x0003a725` | `0x0043ef30` | - | `HUD_RenderPlayerElements` | `fx.c` | Decompiled | ADAPTED | In-race player HUD renderer (tachometer, turbo bar, position indicator, lap splits). |
 | - | `0x00442030` | `FUN_00442030` | `Car_ApplySteering` | `main.c` | Decompiled | EXACT | Speed-attenuated front wheel steering lock and smoothing filter. |
 | - | `0x00442670` | `FUN_00442670` | `Car_PowertrainUpdate` | `main.c` | Decompiled | EXACT | Engine propulsion, rolling and aerodynamic drag, transmission forward/reverse gear shifting. |
 | - | `0x004452c0` | `FUN_004452c0` | `Sound_SynthesizeEngineRPM` | `main.c` | Decompiled | EXTENDED | Computes RPM pitch modulation from 800-byte ENGINE.INF curve with DEV-006 protection. |
