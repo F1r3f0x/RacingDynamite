@@ -1315,12 +1315,11 @@ LisaReturn64 Lisa_SetCameraViewport(void) {
   int unused_val;
   int cam_val;
   unsigned int cam_val_u;
-
-  
+  LisaCamera *camera;
 
   cam_val = __ftol();
   camera = g_LisaCamera;
-  g_LisaCamera->viewport_x = (int)cam_val;
+  camera->viewport_x = (int)cam_val;
   cam_val = __ftol();
   camera->viewport_y = (int)cam_val;
   cam_val = __ftol();
@@ -2655,7 +2654,7 @@ LisaReturn64 Lisa_RenderSkyBackdrop(void) {
 LAB_00448c11:
 
   *(double *)(camera_ptr + 0x28) = (double)*(int *)(camera_ptr + 0x7c);
-  return yaw_angle & 0xffffffff00000000;
+  { LisaReturn64 _r; _r.eax = yaw_angle; _r.edx = 0; return _r; }
 }
 
 /**
@@ -3097,6 +3096,7 @@ int Lisa_CullObjects(void) {
   unsigned int cull_flag;
   LisaDynamicObject *obj_ptr;
   int *grid_index;
+  int *count_ptr;
   float *matrix_ptr_next;
   float *matrix_ptr;
   int layer_id;
@@ -3249,7 +3249,7 @@ int Lisa_CullObjects(void) {
 
   else {
     g_LisaCamera->visible_obj_count = 0;
-    obj_ptr = &camera->visible_obj_count;
+    count_ptr = &camera->visible_obj_count;
     cam_rot_y_ptr = &g_LisaCamera->rot_y;
     frustum_matrix[0] = (float)(proj_type / 3);
     fcos((double)*cam_rot_y_ptr * (double)g_Const_TenthDegToRad);
@@ -3284,10 +3284,10 @@ int Lisa_CullObjects(void) {
               out_val_ptr = (int *)*grid_index;
 
               if ((out_val_ptr != (int *)0x0) && ((int *)*out_val_ptr == out_val_ptr)) {
-                visible_idx = *obj_ptr;
+                visible_idx = *count_ptr;
                 visible_array[visible_idx] = (int)out_val_ptr;
                 visible_idx = visible_idx + 1;
-                *obj_ptr = visible_idx;
+                *count_ptr = visible_idx;
 
                 if (*(int *)((int)out_val_ptr + 0x26) != 0) {
                   sub_out_ptr = visible_array + visible_idx;
@@ -3298,7 +3298,7 @@ int Lisa_CullObjects(void) {
                     if ((int *)*out_val_ptr == out_val_ptr) {
                       *sub_out_ptr = (int)out_val_ptr;
                       sub_out_ptr = sub_out_ptr + 1;
-                      *obj_ptr = *obj_ptr + 1;
+                      *count_ptr = *count_ptr + 1;
                     }
 
                   } while (*(int *)((int)out_val_ptr + 0x26) != 0);
@@ -3330,13 +3330,13 @@ int Lisa_CullObjects(void) {
 
             if ((out_val_ptr != (int *)0x0) && ((int *)*out_val_ptr == out_val_ptr)) {
               if (((short)out_val_ptr[9] == 0) || ((short)out_val_ptr[9] == grid_offset)) {
-                visible_idx = *obj_ptr;
+                visible_idx = *count_ptr;
                 visible_array[visible_idx] = (int)out_val_ptr;
-                *obj_ptr = visible_idx + 1;
+                *count_ptr = visible_idx + 1;
               }
 
               if (*(int *)((int)out_val_ptr + 0x26) != 0) {
-                sub_out_ptr = visible_array + *obj_ptr;
+                sub_out_ptr = visible_array + *count_ptr;
 
                 do {
                   out_val_ptr = *(int **)((int)out_val_ptr + 0x26);
@@ -3346,7 +3346,7 @@ int Lisa_CullObjects(void) {
                      (((short)out_val_ptr[9] == 0 || ((short)out_val_ptr[9] == grid_offset)))) {
                     *sub_out_ptr = (int)out_val_ptr;
                     sub_out_ptr = sub_out_ptr + 1;
-                    *obj_ptr = *obj_ptr + 1;
+                    *count_ptr = *count_ptr + 1;
                   }
 
                 } while (*(int *)((int)out_val_ptr + 0x26) != 0);
@@ -3576,6 +3576,8 @@ void Lisa_TransformVertices(void) {
   int vert_idx;
   int i;
   int *verts;
+  LisaDynamicObject *obj;
+  MshSubmesh *mesh;
   LisaCamera *camera = g_LisaCamera;
   void **visible_submeshes = (void **)g_LisaVisibleSubmeshes;
   LisaDynamicObject **visible_objs = (LisaDynamicObject **)g_LisaVisibleObjects;
@@ -3663,8 +3665,8 @@ void Lisa_TransformVertices(void) {
   if (0 < camera->visible_obj_count) {
     do {
       temp_z = g_LisaTransformedVertices;
-      LisaDynamicObject *obj = visible_objs[i];
-      MshSubmesh *mesh = obj->mesh_data;
+      obj = visible_objs[i];
+      mesh = obj->mesh_data;
       trans_z = camera->vertex_counter;
       visible_submeshes[i * 2] = mesh;
       dst_vert_ptr = (int *)(temp_z + trans_z * 0xc);
@@ -3719,7 +3721,6 @@ void Lisa_TransformVertices(void) {
       i = i + 1;
     } while (i < camera->visible_obj_count);
   }
-}
   return;
 }
 
@@ -3760,25 +3761,22 @@ int Lisa_TransformVerticesPanorama(void) {
   
 
   tmp_cam_ptr = g_LisaCamera;
-  g_LisaCameraFocalLength = g_LisaCamera->viewport_width << 2;
+  
   g_LisaCamera->vertex_counter = 0;
-  d_pitch_sin = (double)*(double *)(tmp_cam_ptr + 0x18) * (double)g_Const_NegTenthDegToRad;
-  g_LisaCameraOffsetX = tmp_cam_ptr->fov_x << 8;
-  d_pitch_cos = (double)fcos(d_pitch_sin);
-  g_LisaCameraOffsetY = tmp_cam_ptr->fov_y << 8;
-  d_yaw_sin = (double)*(double *)(tmp_cam_ptr + 0x20) * (double)g_Const_NegTenthDegToRad;
-  d_yaw_cos = (double)fcos(d_yaw_sin);
+  d_pitch_sin = (double)g_LisaCamera->rot_x * (double)g_Const_NegTenthDegToRad;
+  g_LisaCameraOffsetX = g_LisaCamera->fov_x << 8;
+  g_LisaCameraOffsetY = g_LisaCamera->fov_y << 8;
+  d_yaw_sin = (double)g_LisaCamera->rot_y * (double)g_Const_NegTenthDegToRad;
   d_pitch_sin = (double)fsin(d_pitch_sin);
-  d_roll_sin = (double)*(double *)(tmp_cam_ptr + 0x28) * (double)g_Const_NegTenthDegToRad;
-  d_yaw_sin = (double)fsin(d_yaw_sin);
+  d_roll_sin = (double)g_LisaCamera->rot_z * (double)g_Const_NegTenthDegToRad;
   d_roll_cos = (double)fcos(d_roll_sin);
   d_roll_sin = (double)fsin(d_roll_sin);
   f_cos_roll = (float)d_roll_cos;
-  f_scale_x = (float)-*(int *)(tmp_cam_ptr + 0x80) * (float)*(double *)(tmp_cam_ptr + 0x30) * (float)g_Const_256;
-  f_scale_y = (float)-tmp_cam_ptr->viewport_y * (float)g_Const_256;
+  f_scale_x = (float)-g_LisaCamera->fov_y * (float)g_LisaCamera->zoom * (float)g_Const_256;
+  f_scale_y = (float)-g_LisaCamera->viewport_y * (float)g_Const_256;
 
-  g_LisaObjMat_CosPitch =
-
+  f_scale_x = (float)-g_LisaCamera->viewport_x * (float)g_LisaCamera->zoom * (float)g_Const_256;
+  f_scale_y = (float)-g_LisaCamera->viewport_y * (float)g_Const_256;
        (float)(((double)f_cos_roll * d_yaw_cos - (double)(float)(d_pitch_sin * d_yaw_sin) * d_roll_sin) *
 
               (double)f_scale_x);
@@ -4218,8 +4216,7 @@ void Lisa_ComputeCameraRotationMatrix(int *out_val_matrix) {
  */
 void Lisa_InitOpcodeTable(void) {
   int idx;
-
-  
+  LisaCamera *camera;
 
   camera = g_LisaCamera;
   g_LisaViewportQuarter = (g_LisaCamera->viewport_width >> 2) + 1;
@@ -4509,7 +4506,7 @@ int Lisa_RenderSubmeshes(void) {
             g_LisaTransformedVertices = ((int *)(g_LisaVisibleSubmeshes + submesh_offset))[1];
 
             for (g_LisaSubmeshPolyCount = submesh_data[1]; g_LisaSubmeshPolyCount > 0; g_LisaSubmeshPolyCount--) {
-                (*(void (*)(void))(&g_LisaOpcodeTable)[(char)*g_pLisaSubmeshPolygon])();
+                ((void (*)(void)) g_LisaOpcodeTable[(char)*g_pLisaSubmeshPolygon])();
             }
 
             obj_idx++;
