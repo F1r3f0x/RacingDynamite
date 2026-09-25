@@ -5466,3 +5466,51 @@ LisaReturn64 Lisa_ExecuteRasterizerCommands(int mode,unsigned int flags) {
   { LisaReturn64 _r; _r.edx = flags; _r.eax = 0; return _r; }
 }
 
+
+/**
+ * @original Car_UnpackMeshGeometry (IGN_WIN.EXE @ 0x0041d190, lisa3d.c)
+ * @fidelity STUB
+ */
+void Car_UnpackMeshGeometry(void) {}
+
+/**
+ * @original Lisa_DrawPolygon_Op12 (IGN_WIN.EXE @ 0x0044caa0, lisa3d.c)
+ * @fidelity STUB
+ */
+void Lisa_DrawPolygon_Op12(void) {}
+
+/**
+ * @original Lisa_DrawPolygon_Op13 (IGN_WIN.EXE @ 0x0044cac0, lisa3d.c)
+ * @fidelity STUB
+ */
+void Lisa_DrawPolygon_Op13(void) {}
+
+/**
+ * @original Lisa_DrawPolygon_Op16 (IGN_WIN.EXE @ 0x0044cae0, lisa3d.c)
+ * @fidelity STUB
+ */
+void Lisa_DrawPolygon_Op16(void) {}
+
+/**
+ * @original Lisa_DrawPolygon_Op17 (IGN_WIN.EXE @ 0x0044cb00, lisa3d.c)
+ * @fidelity STUB
+ */
+void Lisa_DrawPolygon_Op17(void) {}
+
+/**
+ * @original Lisa_RenderTexturedTriangle_Op11 (IGN_WIN.EXE @ 0x00452800, lisa3d.c)
+ * @fidelity STUB
+ */
+void Lisa_RenderTexturedTriangle_Op11(void) {}
+
+/**
+ * @original Lisa_DrawTexturedSpan_Op11 (IGN_WIN.EXE @ 0x004537dc, lisa3d.c)
+ * @fidelity STUB
+ */
+void Lisa_DrawTexturedSpan_Op11(void) {}
+
+/**
+ * @original Video_SetPalette (IGN_WIN.EXE @ 0x00456c40, lisa3d.c)
+ * @fidelity STUB
+ */
+void Video_SetPalette(void) {}
