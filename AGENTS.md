@@ -1,6 +1,6 @@
 # Ignition (1997) Reverse Engineering & Porting Rules
 
-**CURRENT PHASE:** 1:1 Assembly Byte-Matching of `MAINDOS_32BIT.EXE` using pure C (Open Watcom V2). The goal is to reach 100% `EXACT` fidelity.
+**CURRENT PHASE:** Functional Implementation of `MAINDOS_32BIT.EXE` using pure C (Open Watcom V2). The goal is to reach 100% `FUNCTIONAL` fidelity. Assembly byte-matching is no longer a strict requirement; logical and structural equivalence is what matters.
 
 
 ## 1. Decompilation Constraints (MAINDOS_32BIT.EXE)
@@ -10,12 +10,9 @@
   - **Variables:** Rename ALL register artifacts (e.g., `iVar1`, `param_1`) to meaningful semantic names.
   - **Globals:** Replace raw `DAT_XXXXXXXX` addresses with authentic globals (e.g., `g_ViewportMinX`) AND document them in `docs/ghidra/globals.md`.
   - **Functions:** Rename `FUN_XXXXXXXX` to semantic names in code, `docs/ghidra/functions.md`, AND `database/decomp.db`.
-- **ARCHITECTURE (DOOM-Style Fallbacks / RAW BYTE INJECTION):** For complex or heavily optimized functions where Watcom C cannot mathematically generate a 100% byte match, we adopt id Software's *DOOM* source release architecture:
-  1. **Assembly Target:** Extract the original, hand-written 1997 assembly into `decomp/src/asm/<module>.asm`. This guarantees the 1:1 byte match.
-     - *Raw Byte Injection:* If Watcom's `wasm` assembler produces encoding differences (e.g. `add eax, 8` as 3 bytes instead of 6 bytes) that ruin the byte-match, use Python scripts to extract the raw binary bytes from `MAINDOS_32BIT.EXE` and emit them as `db 0x...` arrays inside the `.asm` file. This achieves a 100% byte-match verification without fighting assembler optimizations.
-  2. **Pure C Fallback:** Write the clean, 100% functionally equivalent Pure C version in the `.c` file, but disable it via preprocessor directives (e.g., `#if 0`). This preserves portability for the modern source port while satisfying the immediate byte-matching goal.
-- **STYLE:** Use pure C89 (4-space indent). NEVER use inline assembly (`__asm`) in `.c` files. You MAY use `#pragma aux` in `.h` files or within `.c` files to force Watcom's register allocation and instruction generation for 100% byte-matching, **HOWEVER, every use of assembly or weird hacks MUST BE reviewed by the USER first. You must explain the problem, offer options to solve it, and wait for the USER to make the decision.**
-- **WORKFLOW:** `tools/unpack_dos_le.py` creates `wasm` stubs, linked via `wlink`. Run `uv run python tools/verify_matching.py` to verify.
+- **ARCHITECTURE (Pure C):** The project is strictly a Pure C implementation. Hand-written assembly fallbacks (`decomp/src/asm/*.asm`) are banned. If Watcom C fails to produce a 1:1 byte match due to optimization differences (e.g. instruction selection, floating point ops), it is fully acceptable as long as the logic is functionally exact and respects the original game architecture.
+- **STYLE:** Use pure C89 (4-space indent). NEVER use inline assembly (`__asm`) in `.c` files.
+- **WORKFLOW:** Run `uv run python tools/verify_matching.py` to verify. The tool still outputs matching percentages, but aim for a clean, warning-free build and logically equivalent implementation rather than agonizing over 100% instruction diffs.
 
 ## 2. Source Port & Fidelity Tracking
 - **STACK:** C11/SDL2 engine, Python tools (via `uv`), CMake build.

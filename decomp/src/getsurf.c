@@ -20,7 +20,6 @@ int g_SRF_CellSizeZ = 512;
 int g_SRF_GridStrideX = 0;
 int g_SRF_GridStrideZ = 0;
 
-#if 0
 /**
  * Surface_LoadSRF (MAINDOS @ 0x0001FEE0, IGN_WIN @ 0x00412670)
  * Loads .SRF track collision surface from disk and converts relative offsets to pointers.
@@ -84,9 +83,7 @@ int Surface_LoadSRF(const char *filename, void *scene_objects) {
     g_pSRF_Triangles = (SrfTriangle *)triangles;
     return 1;
 }
-#endif
 
-#if 0
 /**
  * Surface_FreeSRF (MAINDOS @ 0x0002002C, IGN_WIN @ 0x004127A0)
  * Frees the current active surface.
@@ -94,13 +91,11 @@ int Surface_LoadSRF(const char *filename, void *scene_objects) {
 void Surface_FreeSRF(void) {
     void *ptr = g_pActiveSRF;
     if (ptr != NULL) {
-        Mem_Free(ptr);
+        Mem_Free(0, ptr);
         g_pActiveSRF = NULL;
     }
 }
-#endif
 
-#if 0
 /**
  * Surface_GetTriangleHeight (MAINDOS @ 0x00020BBC, IGN_WIN @ 0x00413380)
  * Evaluates the triangle plane height at the apex: ((-y0 - y1 - y2) / 3) + obj->pos_y
@@ -117,18 +112,7 @@ int Surface_GetTriangleHeight(SurfaceHeightContext *ctx) {
     int avg_neg_y = ((-y0) + (-y1) + (-y2)) / 3;
     return avg_neg_y + obj->pos_y;
 }
-#endif
 
-#if 0
-/**
- * [ASM Fallback Active]
- * These functions are currently assembled and linked via decomp/src/asm/getsurf.asm
- * to provide byte-matching binaries. The reconstructed pure C versions below are preserved
- * for ongoing / future attempts to achieve a 100% byte match using Watcom C.
- *
- * Surface_TestTrianglePositiveDZ (MAINDOS @ 0x00020C18, IGN_WIN @ 0x00446578)
- * 2D trapezoidal slope span test for table2 triangles (dz >= 0).
- */
 void *Surface_TestTrianglePositiveDZ(int count, int qx, int qz, SrfTriangle **table, void *out_hits) {
     if (count != 0) {
         int *hits = (int *)out_hits;
@@ -184,7 +168,6 @@ void *Surface_TestTriangleNegativeDZ(int count, int qx, int qz, SrfTriangle **ta
     }
     return out_hits;
 }
-#endif
 
 /* Static hit buffer and scratch variables for raycasting (0x000eb900 - 0x000ebb54) */
 static SurfaceHeightContext s_hits[56];
@@ -212,7 +195,6 @@ static int s_scratch_obj_field0;
 static int s_scratch_obj_field20;
 static int s_scratch_obj_field1e;
 
-#if 0
 /**
  * Surface_Raycast (MAINDOS @ 0x00020814, IGN_WIN @ 0x00412fc0)
  * Evaluates spatial grid cell, queries triangle spans, selects best surface,
@@ -327,6 +309,5 @@ SurfaceRaycastResult *Surface_Raycast(int qx, int qy, int qz) {
 
     return &s_raycast_result;
 }
-#endif
 
 
