@@ -5,6 +5,7 @@
  */
 
 #include "getsurf.h"
+#include "mem.h"
 
 /* Global collision variables matching MAINDOS_32BIT.EXE memory */
 void *g_pActiveSRF = NULL;
@@ -19,6 +20,7 @@ int g_SRF_CellSizeZ = 512;
 int g_SRF_GridStrideX = 0;
 int g_SRF_GridStrideZ = 0;
 
+#if 0
 /**
  * Surface_LoadSRF (MAINDOS @ 0x0001FEE0, IGN_WIN @ 0x00412670)
  * Loads .SRF track collision surface from disk and converts relative offsets to pointers.
@@ -82,18 +84,36 @@ int Surface_LoadSRF(const char *filename, void *scene_objects) {
     g_pSRF_Triangles = (SrfTriangle *)triangles;
     return 1;
 }
+#endif
 
 /**
  * Surface_FreeSRF (MAINDOS @ 0x0002002C, IGN_WIN @ 0x004127A0)
  * Frees the active surface buffer if allocated.
  */
+/* 
+ * DEV-NOTE: We use a custom #pragma aux here to force 1:1 byte matching.
+ * The original compiler zeroed out `ebx` prior to the Mem_Free call, and 
+ * cleverly reused that 0 value in `ebx` to set `g_pActiveSRF = NULL` 
+ * after the call. We use `Mem_Free_Hack` to explicitly model this 
+ * register allocation behavior in Watcom C.
+ */
+extern void *Mem_Free_Hack(void *ptr);
+#pragma aux Mem_Free_Hack = \
+    "xor eax, eax" \
+    "xor ebx, ebx" \
+    "call Mem_Free" \
+    parm [edx] \
+    value [ebx] \
+    modify exact [eax ebx];
+
 void Surface_FreeSRF(void) {
-    if (g_pActiveSRF != NULL) {
-        free(g_pActiveSRF);
-        g_pActiveSRF = NULL;
+    void *ptr = g_pActiveSRF;
+    if (ptr != NULL) {
+        g_pActiveSRF = Mem_Free_Hack(ptr);
     }
 }
 
+#if 0
 /**
  * Surface_GetTriangleHeight (MAINDOS @ 0x00020BBC, IGN_WIN @ 0x00413380)
  * Evaluates the triangle plane height at the apex: ((-y0 - y1 - y2) / 3) + obj->pos_y
@@ -101,7 +121,7 @@ void Surface_FreeSRF(void) {
 int Surface_GetTriangleHeight(SurfaceHeightContext *ctx) {
     SurfaceObject *obj = ctx->obj;
     SurfacePolyTri *poly = ctx->poly;
-    SurfaceVertex *vbuf = obj->vertex_buffer;
+    SurfaceVertex *vbuf = (SurfaceVertex *)((char *)obj->vertex_buffer + 8);
 
     int y0 = vbuf[poly->v0_idx].y;
     int y1 = vbuf[poly->v1_idx].y;
@@ -110,8 +130,9 @@ int Surface_GetTriangleHeight(SurfaceHeightContext *ctx) {
     int avg_neg_y = ((-y0) + (-y1) + (-y2)) / 3;
     return avg_neg_y + obj->pos_y;
 }
+#endif
 
-/* #if 0 */
+#if 0
 /**
  * [ASM Fallback Active]
  * These functions are currently assembled and linked via decomp/src/asm/getsurf.asm
@@ -176,7 +197,7 @@ void *Surface_TestTriangleNegativeDZ(int count, int qx, int qz, SrfTriangle **ta
     }
     return out_hits;
 }
-/* #endif */
+#endif
 
 /* Static hit buffer and scratch variables for raycasting (0x000eb900 - 0x000ebb54) */
 static SurfaceHeightContext s_hits[56];
@@ -204,6 +225,7 @@ static int s_scratch_obj_field0;
 static int s_scratch_obj_field20;
 static int s_scratch_obj_field1e;
 
+#if 0
 /**
  * Surface_Raycast (MAINDOS @ 0x00020814, IGN_WIN @ 0x00412fc0)
  * Evaluates spatial grid cell, queries triangle spans, selects best surface,
@@ -318,5 +340,6 @@ SurfaceRaycastResult *Surface_Raycast(int qx, int qy, int qz) {
 
     return &s_raycast_result;
 }
+#endif
 
 
