@@ -2692,3 +2692,38 @@ void Sound_LoadPAT(void) {
 void Sound_LoadWAV(void) {
     /* TODO: Windows-specific or dead-code wrapper stub */
 }
+
+/* --- MS-DOS Entry Point --- */
+
+extern void Unknown_553a0(void);
+extern int Unknown_558d0(void);
+extern int Unknown_559e4(int a, int b);
+extern int Timer_Init(void);
+extern void Unknown_558ec(void);
+
+int g_MainFlag_E73B0 = 0;
+
+/**
+ * @original main (MAINDOS_32BIT.EXE @ 0x00010010, main.c)
+ * @fidelity EXACT
+ * @notes The actual C entry point for the MS-DOS executable.
+ */
+int main(int argc, char **argv) {
+    Unknown_553a0();
+    
+    if (Unknown_558d0() != 0) {
+        if (Unknown_559e4(0x15e, 0x46) != 0) {
+            g_MainFlag_E73B0 = 1;
+            
+            Timer_Init();
+            if (1) {
+                while (App_FrameTick() != 0) {
+                    /* Main game loop / race tick */
+                }
+                Unknown_558ec();
+            }
+        }
+    }
+    
+    return 0;
+}
