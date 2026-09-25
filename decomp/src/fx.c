@@ -5777,3 +5777,26 @@ void HUD_RenderPlayerElements(int player_idx) {
 
     HUD_RenderFloatingMessages();
 }
+/**
+ * @original FX_UpdateAllParticles (IGN_WIN.EXE @ 0x00434190, fx.c)
+ * @fidelity STUB
+ */
+void FX_UpdateAllParticles(void) {
+    /* TODO: Implement functional logic based on Windows reference */
+}
+
+/**
+ * @original Lisa_FlushRasterizerCommands (IGN_WIN.EXE @ 0x00438030, fx.c)
+ * @fidelity STUB
+ */
+int Lisa_FlushRasterizerCommands(void *cmd_queue, unsigned int flags) { return 0;
+    /* TODO: Implement functional logic based on Windows reference */
+}
+
+/**
+ * @original Video_FlipScreen (IGN_WIN.EXE @ 0x0043e6c0, fx.c)
+ * @fidelity STUB
+ */
+void Video_FlipScreen(void) {
+    /* TODO: Implement functional logic based on Windows reference */
+}
