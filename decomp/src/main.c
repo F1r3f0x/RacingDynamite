@@ -2605,12 +2605,37 @@ void Track_PreprocessPlacements(void) {
     /* TODO: Windows-specific or dead-code wrapper stub */
 }
 
+extern void Audio_Init(void);
+extern void FatalError(const char *msg);
+extern int Sound_LoadAsset(char *path, int type, int bank);
+
 /**
- * @original Sound_InitAndLoadPools (IGN_WIN.EXE, main.c)
- * @fidelity STUB
+ * @original Sound_InitAndLoadPools (MAINDOS_32BIT.EXE @ 0x0002a4f1, main.c)
+ * @fidelity ADAPTED
+ * @notes Inits audio and loads SKID, ROLL, COLL, BOOST, DIV, and level PAT.
  */
 void Sound_InitAndLoadPools(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
+    char path[128];
+    
+    Audio_Init();
+    
+    sprintf(path, "%sSOUND\\ROLL", g_TrackDir);
+    if (!Sound_LoadAsset(path, 0, 0)) FatalError("Error while loading sound\n");
+    
+    sprintf(path, "%sSOUND\\SKID", g_TrackDir);
+    if (!Sound_LoadAsset(path, 0, 1)) FatalError("Error while loading sound\n");
+    
+    sprintf(path, "%sSOUND\\COLL", g_TrackDir);
+    if (!Sound_LoadAsset(path, 0, 2)) FatalError("Error while loading sound\n");
+    
+    sprintf(path, "%sSOUND\\BOOST", g_TrackDir);
+    if (!Sound_LoadAsset(path, 0, 3)) FatalError("Error while loading sound\n");
+    
+    sprintf(path, "%sSOUND\\DIV", g_TrackDir);
+    if (!Sound_LoadAsset(path, 0, 4)) FatalError("Error while loading sound\n");
+    
+    sprintf(path, "LEVELS\\%sSOUND", g_TrackName);
+    if (!Sound_LoadAsset(path, 1, 0)) FatalError("Error while loading sound\n");
 }
 
 /**
