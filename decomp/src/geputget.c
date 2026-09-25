@@ -55,6 +55,7 @@ extern void Gfx_DrawSprite(void *handle, Point2D *pos, int flags);
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00061220. Initializes 30 font slots and registers subsystem callback.
  */
+#if 0
 int Font_InitSystem(void) {
     int i;
 
@@ -77,12 +78,14 @@ int Font_InitSystem(void) {
 
     return 1;
 }
+#endif
 
 /**
  * @original Font_Shutdown (IGN_WIN.EXE @ 0x00455610, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00061319. Shuts down font subsystem and unloads all active font slots.
  */
+#if 0
 int Font_Shutdown(void) {
     int i;
 
@@ -101,6 +104,7 @@ int Font_Shutdown(void) {
 
     return 1;
 }
+#endif
 
 /**
  * @original Font_Parse (IGN_WIN.EXE @ 0x00455670, geputget.c)
@@ -108,6 +112,7 @@ int Font_Shutdown(void) {
  * @notes MAINDOS @ 0x00061399. Validates LFT header, allocates a font slot, extracts 224 glyph
  *        metrics, registers sprite handles with Gfx_SpriteOp, and returns allocated font slot ID.
  */
+#if 0
 int Font_Parse(void *buffer, int unused) {
     uint8_t *hdr;
     uint8_t *pixel_base;
@@ -175,12 +180,14 @@ int Font_Parse(void *buffer, int unused) {
     g_fonts[slot].in_use = 1;
     return slot;
 }
+#endif
 
 /**
  * @original Font_Load (IGN_WIN.EXE @ 0x00455820, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000615eb. Loads a .LFT font from disk, creates glyph handles, and frees buffer.
  */
+#if 0
 int Font_Load(const char *filename, int unused) {
     void *buffer;
     int result;
@@ -195,12 +202,14 @@ int Font_Load(const char *filename, int unused) {
     Mem_Free(0, buffer);
     return result;
 }
+#endif
 
 /**
  * @original Font_Unload (IGN_WIN.EXE @ 0x00455870, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00061653. Frees all sprite handles for a font slot and marks the slot available.
  */
+#if 0
 int Font_Unload(int font_id) {
     int i;
 
@@ -214,6 +223,7 @@ int Font_Unload(int font_id) {
 
     return 1;
 }
+#endif
 
 /**
  * @original Font_GetTextWidth (IGN_WIN.EXE @ 0x004558d0, geputget.c)
@@ -221,6 +231,7 @@ int Font_Unload(int font_id) {
  * @notes MAINDOS @ 0x000616db. Computes string pixel width considering proportional flag, spacing,
  *        and space character sizing (height * 0.35).
  */
+#if 0
 int Font_GetTextWidth(const char *text, int font_id) {
     int total_width = 0;
     int unk_c = 0;
@@ -276,6 +287,7 @@ int Font_GetTextWidth(const char *text, int font_id) {
 
     return total_width - unk_c;
 }
+#endif
 
 /**
  * @original Font_DrawText (IGN_WIN.EXE @ 0x00456660, geputget.c)
@@ -283,6 +295,7 @@ int Font_GetTextWidth(const char *text, int font_id) {
  * @notes MAINDOS @ 0x00061959. Renders string to screen via Gfx_DrawSprite, taking into account
  *        text alignment (0=left, 1=center, 2=right), proportionality, and fixed-point coordinates.
  */
+#if 0
 int Font_DrawText(const char *text, int font_id, int x, int y) {
     int orig_x = x;
     int dummy_space;
@@ -400,6 +413,7 @@ int Font_DrawText(const char *text, int font_id, int x, int y) {
 
     return 1;
 }
+#endif
 
 /**
  * @original Font_DrawHUDText (IGN_WIN.EXE @ 0x004133d0, geputget.c)
@@ -407,6 +421,7 @@ int Font_DrawText(const char *text, int font_id, int x, int y) {
  * @notes MAINDOS @ 0x00043d60. Direct 8bpp bitmap font rasterizer blitting characters from IGNITION.FNT
  *        directly into the target framebuffer with stride, height, spacing, and color offset.
  */
+#if 0
 void Font_DrawHUDText(int x, int y, const char *text, uint8_t *framebuffer, int stride, const uint8_t *font_data, uint8_t color_offset) {
     int cur_y_stride;
     int max_y_stride;
@@ -460,11 +475,13 @@ void Font_DrawHUDText(int x, int y, const char *text, uint8_t *framebuffer, int 
         c = *p;
     } while (c != '\0');
 }
+#endif
 
 /**
  * @original Load_SystemGraphicsAndFonts (IGN_WIN.EXE @ 0x00418130)
  * @fidelity EXACT
  */
+#if 0
 void Load_SystemGraphicsAndFonts(void) {
     int i;
     
@@ -505,11 +522,13 @@ void Load_SystemGraphicsAndFonts(void) {
         g_fonts[font_id].field_08 = 1;
     }
 }
+#endif
 
 /**
  * @original Font_LoadHUDFonts (IGN_WIN.EXE @ 0x0041ac40)
  * @fidelity EXACT
  */
+#if 0
 void Font_LoadHUDFonts(void) {
     char path[64];
     int fd;
@@ -566,11 +585,13 @@ void Font_LoadHUDFonts(void) {
     g_hudFontSpeedHuge = Font_Load(path, 0);
     if (g_hudFontSpeedHuge == -1) { exit(-1); }
 }
+#endif
 
 /**
  * @original Track_LoadOverlayGfx (IGN_WIN.EXE @ 0x0041af70)
  * @fidelity EXACT
  */
+#if 0
 void Track_LoadOverlayGfx(void) {
     int fd;
     int size;
@@ -647,3 +668,4 @@ void Track_LoadOverlayGfx(void) {
     read(fd, g_pPokalPic, size);
     close(fd);
 }
+#endif
