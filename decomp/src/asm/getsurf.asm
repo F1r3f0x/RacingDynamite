@@ -1,19 +1,9 @@
-
-; ===========================================================================
-; getsurf.asm
-; 
-; DOOM-Style Assembly Fallbacks for Ignition (1997)
-; 
-; These routines contain the exact 1997 assembly instructions extracted 
-; from MAINDOS_32BIT.EXE. They are used to guarantee a 100% byte-match 
-; during the recompilation process. 
-;
-; The functionally equivalent pure C versions are preserved in getsurf.c 
-; (wrapped in #if 0) for use in modern, portable source ports.
-; ===========================================================================
-
+; DOOM-Style Assembly Fallback
 .386
+.387
 .model flat
+EXTRN File_LoadToMemory_:NEAR
+EXTRN g_pActiveSRF_:DWORD
 .code
 PUBLIC Surface_TestTrianglePositiveDZ_
 Surface_TestTrianglePositiveDZ_ PROC
@@ -130,7 +120,7 @@ Surface_LoadSRF_ PROC
     mov esi, dword ptr ds:[0ebaach]
     mov edi, dword ptr ds:[0ebaa0h]
     mov ebp, edx
-    call 60f9ch
+    call File_LoadToMemory_
     mov edx, dword ptr [eax]
     mov dword ptr ds:[0ebab4h], edx
     mov edx, dword ptr [eax + 4]
@@ -142,7 +132,7 @@ Surface_LoadSRF_ PROC
     mov edx, dword ptr [eax + 10h]
     mov dword ptr ds:[0eba9ch], edx
     mov edx, dword ptr [eax + 14h]
-    mov dword ptr ds:[0bfe80h], eax
+    mov dword ptr ds:[g_pActiveSRF_], eax
     mov dword ptr ds:[0eba98h], edx
     mov edx, dword ptr [eax + 18h]
     add eax, 24h
@@ -263,7 +253,7 @@ Surface_Raycast_ PROC
     mov esi, dword ptr [eax]
     sar ecx, 10h
     mov dword ptr ds:[0ebad4h], eax
-    call 20c18h
+    call Surface_TestTrianglePositiveDZ_
     mov eax, dword ptr ds:[0ebad4h]
     mov edx, dword ptr [esp + 10h]
     mov ebx, dword ptr [esp + 14h]
@@ -271,7 +261,7 @@ Surface_Raycast_ PROC
     mov esi, dword ptr [eax + 4]
     sar ecx, 10h
     mov dword ptr ds:[0ebacch], edi
-    call 20c81h
+    call Surface_TestTriangleNegativeDZ_
     mov dword ptr ds:[0ebacch], edi
     cmp edi, 0eb900h
     jne loc_208d4
@@ -296,7 +286,7 @@ loc_20907:
     mov edx, dword ptr [esp + 10h]
     mov eax, dword ptr ds:[0ebac4h]
     mov dword ptr ds:[0ebad0h], ebp
-    call 20bbch
+    call Surface_GetTriangleHeight_
     mov ebx, dword ptr [esp + 0ch]
     mov ebp, eax
     sub ebp, ebx
@@ -524,5 +514,22 @@ Surface_GetTriangleHeight_ PROC
     pop ecx
     ret 
 Surface_GetTriangleHeight_ ENDP
+
+PUBLIC Surface_FreeSRF_
+Surface_FreeSRF_ PROC
+    push ebx
+    push edx
+    mov edx, dword ptr ds:[g_pActiveSRF_]
+    test edx, edx
+    je loc_20047
+    xor eax, eax
+    xor ebx, ebx
+    call 0x650f8
+    mov dword ptr ds:[g_pActiveSRF_], ebx
+loc_20047:
+    pop edx
+    pop ebx
+    ret 
+Surface_FreeSRF_ ENDP
 
 end

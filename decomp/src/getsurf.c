@@ -86,32 +86,19 @@ int Surface_LoadSRF(const char *filename, void *scene_objects) {
 }
 #endif
 
+#if 0
 /**
  * Surface_FreeSRF (MAINDOS @ 0x0002002C, IGN_WIN @ 0x004127A0)
- * Frees the active surface buffer if allocated.
+ * Frees the current active surface.
  */
-/* 
- * DEV-NOTE: We use a custom #pragma aux here to force 1:1 byte matching.
- * The original compiler zeroed out `ebx` prior to the Mem_Free call, and 
- * cleverly reused that 0 value in `ebx` to set `g_pActiveSRF = NULL` 
- * after the call. We use `Mem_Free_Hack` to explicitly model this 
- * register allocation behavior in Watcom C.
- */
-extern void *Mem_Free_Hack(void *ptr);
-#pragma aux Mem_Free_Hack = \
-    "xor eax, eax" \
-    "xor ebx, ebx" \
-    "call Mem_Free" \
-    parm [edx] \
-    value [ebx] \
-    modify exact [eax ebx];
-
 void Surface_FreeSRF(void) {
     void *ptr = g_pActiveSRF;
     if (ptr != NULL) {
-        g_pActiveSRF = Mem_Free_Hack(ptr);
+        Mem_Free(ptr);
+        g_pActiveSRF = NULL;
     }
 }
+#endif
 
 #if 0
 /**
