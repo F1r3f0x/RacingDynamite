@@ -188,3 +188,6 @@
 | - | `0x0045b4f0` | `FUN_0045b4f0` | `Lisa_PrintVersion` | `lisa3d.c` | Decompiled | EXACT | Prints "Lisa 2 Development System" banner and build timestamp. |
 | - | `0x00469950` | `entry` | `CRT_Entry` | `MSVC CRT` | Analyzed | - | C Runtime startup entry point, parses command line, calls WinMain. |
 | - | `0x00499abc` | `FUN_00499abc` | `Cdp_DecompressRLE` | `lisa3d.c` | Decompiled | EXACT | Delta-skip RLE decompression modifying active frame buffer with opcode skip codes. |
+| `0x00010010` | `-` | `FUN_00010010` | `main` | `main.c` | Decompiled | EXACT | Main loop. Calls App_FrameTick inside a while loop until game exits. |
+| `0x00056034` | `-` | `FUN_00056034` | `CRT_Entry` | `crt.c` | Identified | ADAPTED | Watcom DOS/4GW entry point. Sets up segments, clear BSS, parses args, calls __cstart. |
+| `0x0006f549` | `-` | `FUN_0006f549` | `__cstart` | `crt.c` | Identified | ADAPTED | Watcom C-Runtime startup. Formats argc/argv and calls main(). |
