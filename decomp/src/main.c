@@ -2532,3 +2532,163 @@ void Track_SaveBinaryCache(void) {
         close(fd);
     }
 }
+
+/**
+ * @original Menu_Tick (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Menu_Tick(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Car_IntegratePosition (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Car_IntegratePosition(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original WinMain (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void WinMain(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Mesh_InstantiatePlacedObjects (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Mesh_InstantiatePlacedObjects(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Game_StateDispatcher (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Game_StateDispatcher(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Track_LoadPlacements (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Track_LoadPlacements(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Mesh_LoadTrackAndCars (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Mesh_LoadTrackAndCars(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Texture_LoadAllPages (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Texture_LoadAllPages(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Track_PreprocessPlacements (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Track_PreprocessPlacements(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Sound_InitAndLoadPools (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Sound_InitAndLoadPools(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Car_ApplySteering (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Car_ApplySteering(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Car_PowertrainUpdate (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Car_PowertrainUpdate(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Sound_SynthesizeEngineRPM (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Sound_SynthesizeEngineRPM(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Audio_MixCallback (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Audio_MixCallback(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Audio_StopVoice (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Audio_StopVoice(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Audio_PlayVoice (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Audio_PlayVoice(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Audio_SetVoiceParams (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Audio_SetVoiceParams(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Music_PlayTrack (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Music_PlayTrack(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Sound_LoadPAT (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Sound_LoadPAT(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
+
+/**
+ * @original Sound_LoadWAV (IGN_WIN.EXE, main.c)
+ * @fidelity STUB
+ */
+void Sound_LoadWAV(void) {
+    /* TODO: Windows-specific or dead-code wrapper stub */
+}
