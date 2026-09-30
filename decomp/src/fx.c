@@ -3432,10 +3432,6 @@ int Race_FindFocusedVehicle(void) {
     return top_rank;
 }
 
-/**
- * @original Lisa_RenderPanorama (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
- */
 
 /**
  * @original HUD_RenderPauseMenu (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
