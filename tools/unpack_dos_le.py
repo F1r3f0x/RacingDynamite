@@ -323,9 +323,11 @@ def generate_wlink_script(modules: list):
         "system dos4g",
         "name build/decomp/MAINDOS_REBUILT.EXE",
         "option quiet",
+        "option undefsok",
         "option map=build/decomp/MAINDOS_REBUILT.MAP",
     ]
-    for m in sorted(modules):
+    all_modules = sorted(list(set(modules + ["fx", "geputget", "getsurf", "lisa3d", "main", "mem"])))
+    for m in all_modules:
         lines.append(f"file build/decomp/{m}.obj")
         
     # Check for custom asm objects

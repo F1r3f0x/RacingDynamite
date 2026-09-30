@@ -124,69 +124,66 @@ def get_rebuilt_func(symbol_name: str, size: int):
         return None, None
     with open(map_path, "r", encoding="utf-8") as f:
         map_lines = f.readlines()
-    target_rva = None
     target_names = [symbol_name, f"{symbol_name}_", f"_{symbol_name}"]
-    rvas = []
+    syms = []
+    target_info = None
     for line in map_lines:
         parts = line.split()
         if len(parts) >= 2 and ":" in parts[0]:
-            addr_str = parts[0]
-            if addr_str.endswith("*") or addr_str.endswith("+"):
-                addr_str = addr_str[:-1]
+            addr_str = parts[0].rstrip("+*")
             seg_str, off_str = addr_str.split(":")
             if not off_str: continue
-            sym = parts[1]
             try:
                 seg = int(seg_str, 16)
                 off = int(off_str, 16)
-                
-                # Seg 1 is _TEXT (RVA 0x1000), Seg 2 is DGROUP (RVA 0x10000)
-                # ImageBase is 0x400000
-                if seg == 1:
-                    val = 0x400000 + 0x1000 + off
-                elif seg == 2:
-                    val = 0x400000 + 0x10000 + off
-                else:
-                    continue
             except ValueError:
                 continue
-            rvas.append((val, sym))
+            sym = parts[1]
+            syms.append((seg, off, sym))
             if sym in target_names:
-                target_rva = val
+                target_info = (seg, off, sym)
     
-    if target_rva is not None and size <= 0:
-        # Find next rva
-        rvas.sort(key=lambda x: x[0])
-        for idx, (v, s) in enumerate(rvas):
-            if v == target_rva:
-                if idx + 1 < len(rvas):
-                    size = rvas[idx+1][0] - target_rva
-                else:
-                    size = 0x100 # fallback
-                break
-    if target_rva is None:
+    if not target_info:
         return None, None
+        
+    t_seg, t_off, _ = target_info
+    if size <= 0:
+        same_seg = [s for s in syms if s[0] == t_seg and s[1] > t_off]
+        if same_seg:
+            same_seg.sort(key=lambda x: x[1])
+            size = same_seg[0][1] - t_off
+        else:
+            size = 0x100
+
     with open(exe_path, "rb") as f:
         data = f.read()
-    pe_hdr_off = int.from_bytes(data[0x3C:0x40], "little")
-    num_sections = int.from_bytes(data[pe_hdr_off+6:pe_hdr_off+8], "little")
-    opt_hdr_sz = int.from_bytes(data[pe_hdr_off+20:pe_hdr_off+22], "little")
-    sections_off = pe_hdr_off + 24 + opt_hdr_sz
-    raw_off = None
-    image_base = int.from_bytes(data[pe_hdr_off+52:pe_hdr_off+56], "little")
-    rva = target_rva - image_base
-    for i in range(num_sections):
-        sec = data[sections_off + i*40 : sections_off + (i+1)*40]
-        v_size = int.from_bytes(sec[8:12], "little")
-        v_addr = int.from_bytes(sec[12:16], "little")
-        raw_size = int.from_bytes(sec[16:20], "little")
-        raw_ptr = int.from_bytes(sec[20:24], "little")
-        if v_addr <= rva < v_addr + max(v_size, raw_size):
-            raw_off = raw_ptr + (rva - v_addr)
-            break
-    if raw_off is None:
-        return None, None
-    return data[raw_off : raw_off + size], target_rva
+
+    hdr_off = int.from_bytes(data[0x3C:0x40], "little")
+    if hdr_off + 2 <= len(data) and data[hdr_off:hdr_off+2] == b"LE":
+        data_pages_off = int.from_bytes(data[hdr_off+0x80:hdr_off+0x84], "little")
+        if t_seg == 1:
+            raw_off = data_pages_off + t_off
+            return data[raw_off : raw_off + size], 0x10000 + t_off
+
+    # PE fallback
+    pe_hdr_off = hdr_off
+    if pe_hdr_off + 4 <= len(data) and data[pe_hdr_off:pe_hdr_off+2] == b"PE":
+        num_sections = int.from_bytes(data[pe_hdr_off+6:pe_hdr_off+8], "little")
+        opt_hdr_sz = int.from_bytes(data[pe_hdr_off+20:pe_hdr_off+22], "little")
+        sections_off = pe_hdr_off + 24 + opt_hdr_sz
+        image_base = int.from_bytes(data[pe_hdr_off+52:pe_hdr_off+56], "little")
+        val = image_base + (0x1000 if t_seg == 1 else 0x10000) + t_off
+        rva = val - image_base
+        for i in range(num_sections):
+            sec = data[sections_off + i*40 : sections_off + (i+1)*40]
+            v_size = int.from_bytes(sec[8:12], "little")
+            v_addr = int.from_bytes(sec[12:16], "little")
+            raw_size = int.from_bytes(sec[16:20], "little")
+            raw_ptr = int.from_bytes(sec[20:24], "little")
+            if v_addr <= rva < v_addr + max(v_size, raw_size):
+                raw_off = raw_ptr + (rva - v_addr)
+                return data[raw_off : raw_off + size], val
+    return None, None
 
 def diff_func(symbol_name: str, dos_addr: int, size: int = 0, obj_file = None, verbose: bool = True):
     rebuilt_code, target_val = get_rebuilt_func(symbol_name, size)

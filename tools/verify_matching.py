@@ -44,11 +44,13 @@ def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bo
     env = os.environ.copy()
     watcom_dir = ROOT_DIR / "tools" / "WATCOM"
     env["WATCOM"] = str(watcom_dir)
-    env["PATH"] = str(watcom_dir / "BINNT") + ";" + env.get("PATH", "")
+    env["PATH"] = str(watcom_dir / "BINNT") + ";" + str(watcom_dir / "BINW") + ";" + env.get("PATH", "")
     wlink_exe = str(watcom_dir / "BINNT" / "wlink.exe")
+    log_path = ROOT_DIR / "build" / "decomp" / "wlink.log"
     try:
-        subprocess.run([wlink_exe, "@build/decomp/wlink.lnk"], env=env, check=True, cwd=str(ROOT_DIR))
-    except subprocess.CalledProcessError:
+        with open(log_path, "w", encoding="utf-8") as log_f:
+            subprocess.run([wlink_exe, "@build/decomp/wlink.lnk"], env=env, stdin=subprocess.DEVNULL, stdout=log_f, stderr=subprocess.STDOUT, cwd=str(ROOT_DIR))
+    except Exception:
         pass # Expected due to missing symbols but we have undefsok
 
     status_scope = "PROJECT-WIDE (ALL DECOMPILED)" if check_all else "MATCHING ONLY"

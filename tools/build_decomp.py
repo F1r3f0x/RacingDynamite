@@ -133,15 +133,18 @@ def link_rebuilt_binary():
         
     env = os.environ.copy()
     env["WATCOM"] = str(WATCOM_DIR)
-    env["PATH"] = f"{WLINK.parent};{env.get('PATH', '')}"
+    env["PATH"] = f"{WLINK.parent};{WATCOM_DIR / 'BINW'};{env.get('PATH', '')}"
     
     cmd = [str(WLINK), f"@{wlink_script}"]
     print(f"Linking objects with wlink ({wlink_script.name})...")
-    res = subprocess.run(cmd, env=env, capture_output=True, text=True)
-    if res.returncode != 0:
-        print(f"Link step note (partial binary links may report undefined symbols until all modules are linked):\n{res.stdout}\n{res.stderr}")
+    log_path = BUILD_DIR / "wlink.log"
+    with open(log_path, "w", encoding="utf-8") as log_f:
+        res = subprocess.run(cmd, env=env, stdin=subprocess.DEVNULL, stdout=log_f, stderr=subprocess.STDOUT)
+    rebuilt_exe = BUILD_DIR / "MAINDOS_REBUILT.EXE"
+    if not rebuilt_exe.exists():
+        print(f"Link step note (see {log_path} for details)")
         return False
-    print(f"Linking SUCCESS: {BUILD_DIR / 'MAINDOS_REBUILT.EXE'} generated successfully.")
+    print(f"Linking SUCCESS: {rebuilt_exe} generated successfully.")
     return True
 
 def main():
