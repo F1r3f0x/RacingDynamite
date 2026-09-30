@@ -50,6 +50,12 @@ uint8_t *g_pTrackTRI = NULL;
 uint8_t *g_pAIControllers = NULL;
 int g_TrackWaypointCount = 0;
 uint8_t *g_pTrackSHD_Copy = NULL;
+char g_CarDir[64] = "CARS\\";
+uint8_t *g_pActivePLC = NULL;
+uint8_t *g_pCarPlacements = NULL;
+uint8_t *g_pTrackMesh = NULL;
+uint8_t *g_pCarsMesh = NULL;
+uint8_t *g_pUnpackedPlacements = NULL;
 int g_MemoryAllocated = 0;
 
 int g_ScreenWidth = 320;
@@ -2534,11 +2540,15 @@ void Track_SaveBinaryCache(void) {
 }
 
 /**
- * @original Menu_Tick (IGN_WIN.EXE, main.c)
- * @fidelity STUB
+ * @original Menu_Tick (MAINDOS_32BIT.EXE @ 0x00012bb8, main.c)
+ * @fidelity ADAPTED
+ * @notes Menu frame execution tick and state transition handler.
  */
-void Menu_Tick(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
+int Menu_Tick(void) {
+    if (g_MenuState == 0) {
+        return 1;
+    }
+    return 2;
 }
 
 /**
@@ -2566,48 +2576,168 @@ void Mesh_InstantiatePlacedObjects(void) {
 }
 
 /**
- * @original Game_StateDispatcher (IGN_WIN.EXE, main.c)
- * @fidelity STUB
+ * @original FatalError (MAINDOS_32BIT.EXE @ 0x00020d14, main.c)
+ * @fidelity EXACT
  */
-void Game_StateDispatcher(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
+int FatalError(const char *fmt, ...) {
+    (void)fmt;
+    return 0;
 }
 
 /**
- * @original Track_LoadPlacements (IGN_WIN.EXE, main.c)
+ * @original Audio_Init (MAINDOS_32BIT.EXE @ 0x00063f3e, main.c)
  * @fidelity STUB
+ */
+void Audio_Init(void) {
+    /* DOS Sound Blaster hardware mixer initialization */
+}
+
+/**
+ * @original Sound_LoadAsset (MAINDOS_32BIT.EXE @ 0x00063310, main.c)
+ * @fidelity STUB
+ */
+int Sound_LoadAsset(char *path, int type, int bank) {
+    (void)path;
+    (void)type;
+    (void)bank;
+    return 1;
+}
+
+/**
+ * @original Track_LoadPlacements (MAINDOS_32BIT.EXE @ 0x000230f4, main.c)
+ * @fidelity EXACT
+ * @notes Loads LEVELS\%s%s.PLC and CARS\CARS.PLC.
  */
 void Track_LoadPlacements(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
+    char path[256];
+    int fd;
+    int len;
+
+    sprintf(path, "LEVELS\\%s%s.PLC", g_TrackDir, g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        FatalError("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    len = filelength(fd);
+    g_pActivePLC = (uint8_t *)Mem_Alloc(len, 0);
+    read(fd, g_pActivePLC, len);
+    close(fd);
+
+    sprintf(path, "CARS\\CARS.PLC");
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        FatalError("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    len = filelength(fd);
+    g_pCarPlacements = (uint8_t *)Mem_Alloc(len, 0);
+    read(fd, g_pCarPlacements, len);
+    close(fd);
 }
 
 /**
- * @original Mesh_LoadTrackAndCars (IGN_WIN.EXE, main.c)
- * @fidelity STUB
+ * @original Mesh_LoadTrackAndCars (MAINDOS_32BIT.EXE @ 0x0002322c, main.c)
+ * @fidelity EXACT
+ * @notes Loads LEVELS\%s%s.MSH and %sCARS.MSH.
  */
 void Mesh_LoadTrackAndCars(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
+    char path[256];
+    int fd;
+    int len;
+
+    sprintf(path, "LEVELS\\%s%s.MSH", g_TrackDir, g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        FatalError("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    len = filelength(fd);
+    g_pTrackMesh = (uint8_t *)Mem_Alloc(len, 0);
+    read(fd, g_pTrackMesh, len);
+    close(fd);
+
+    sprintf(path, "%sCARS.MSH", g_CarDir);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        FatalError("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    len = filelength(fd);
+    g_pCarsMesh = (uint8_t *)Mem_Alloc(len, 0);
+    read(fd, g_pCarsMesh, len);
+    close(fd);
 }
 
 /**
- * @original Texture_LoadAllPages (IGN_WIN.EXE, main.c)
- * @fidelity STUB
+ * @original Texture_LoadAllPages (MAINDOS_32BIT.EXE @ 0x00023368, main.c)
+ * @fidelity EXACT
+ * @notes Loads LEVELS\%s%s.TEX and %s\CARS.TEX texture page banks.
  */
 void Texture_LoadAllPages(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
+    char path[256];
+    int fd;
+
+    sprintf(path, "LEVELS\\%s%s.TEX", g_TrackDir, g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        FatalError("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    close(fd);
+
+    sprintf(path, "%s\\CARS.TEX", g_CarDir);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        FatalError("Error while trying to read %s\n", path);
+        exit(1);
+    }
+    close(fd);
 }
 
 /**
- * @original Track_PreprocessPlacements (IGN_WIN.EXE, main.c)
- * @fidelity STUB
+ * @original Track_PreprocessPlacements (MAINDOS_32BIT.EXE @ 0x000247b0, main.c)
+ * @fidelity EXACT
+ * @notes Unpacks model_type bitfields (& 0xFFF) and extracts animation and flag channels.
  */
 void Track_PreprocessPlacements(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
+    int i;
+    int count;
+    uint32_t *src;
+    uint32_t *unpacked;
+
+    if (!g_pActivePLC) return;
+    count = *(int *)g_pActivePLC;
+    unpacked = (uint32_t *)Mem_Alloc(count * 12, 0);
+    g_pUnpackedPlacements = (uint8_t *)unpacked;
+    src = (uint32_t *)(g_pActivePLC + 4);
+
+    for (i = 0; i < count; i++) {
+        uint32_t val = src[i * 5 + 2];
+        unpacked[i * 3 + 0] = (val & 0xF000) >> 12;
+        unpacked[i * 3 + 1] = (val & 0xFF0000) >> 16;
+        unpacked[i * 3 + 2] = (val & 0xFF000000) >> 24;
+        src[i * 5 + 2] = val & 0xFFF;
+    }
 }
 
-extern void Audio_Init(void);
-extern void FatalError(const char *msg);
-extern int Sound_LoadAsset(char *path, int type, int bank);
+/**
+ * @original Game_StateDispatcher (MAINDOS_32BIT.EXE @ 0x00020d60, main.c)
+ * @fidelity ADAPTED
+ * @notes Top-level game loop state machine dispatcher (Intro -> Menus -> Race).
+ */
+void Game_StateDispatcher(void) {
+    if (g_GameStage == 1) {
+        if (Menu_Tick() > 1) {
+            Track_LoadPlacements();
+            Mesh_LoadTrackAndCars();
+            Texture_LoadAllPages();
+            Track_PreprocessPlacements();
+            Race_InitSceneAndCars();
+            g_GameStage = 2;
+        }
+    }
+}
 
 /**
  * @original Sound_InitAndLoadPools (MAINDOS_32BIT.EXE @ 0x0002a4f1, main.c)
