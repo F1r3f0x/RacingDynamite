@@ -84,9 +84,11 @@ int File_ReadToBuffer(const char *filename, void *buffer, int size, int offset) 
         res = 2000;
         goto done;
     }
-    pos = offset;
-    fsetpos(fp, &pos);
+    if (offset > 0) {
+        fseek(fp, offset, SEEK_SET);
+    }
     if ((int)fread(buffer, 1, size, fp) != size) {
+        fclose(fp);
         return 2010;
     }
     fclose(fp);
@@ -103,7 +105,6 @@ void *File_LoadToMemory(const char *filename) {
     int file_size;
     void *buffer = NULL;
     FILE *fp;
-    fpos_t pos;
 
     if (File_Exists(filename) != 1) {
         g_fileErrorLine = 0x7ee;
@@ -128,10 +129,9 @@ void *File_LoadToMemory(const char *filename) {
         return NULL;
     }
 
-    pos = 0;
-    fsetpos(fp, &pos);
     if ((int)fread(buffer, 1, file_size, fp) != file_size) {
         g_fileErrorLine = 0x7da;
+        fclose(fp);
         return NULL;
     }
 

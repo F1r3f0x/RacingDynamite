@@ -461,6 +461,8 @@ void Font_DrawHUDText(int x, int y, const char *text, uint8_t *framebuffer, int 
     } while (c != '\0');
 }
 
+extern void BootLog(const char *msg);
+
 /**
  * @original Load_SystemGraphicsAndFonts (MAINDOS_32BIT.EXE @ 0x00418130)
  * @fidelity EXACT
@@ -468,24 +470,29 @@ void Font_DrawHUDText(int x, int y, const char *text, uint8_t *framebuffer, int 
 void Load_SystemGraphicsAndFonts(void) {
     int i;
     
+    BootLog("[MAINDOS] Load_SystemGraphicsAndFonts: Loading system assets...");
     g_pSysGfxPic = (uint8_t *)File_LoadToMemory("n_sysgfx.pic");
     if (!g_pSysGfxPic) {
+        BootLog("[MAINDOS] FATAL: Error while loading N_SYSGFX.PIC");
         printf("Error while loading N_SYSGFX.PIC\n");
         exit(1);
     }
     
     g_pSysG2Pic = (uint8_t *)File_LoadToMemory("n_sysg_2.pic");
     if (!g_pSysG2Pic) {
+        BootLog("[MAINDOS] FATAL: Error while loading N_SYSG_2.PIC");
         printf("Error while loading N_SYSG_2.PIC\n");
         exit(1);
     }
     
     g_pSysCol = (uint8_t *)File_LoadToMemory("sys.col");
     if (!g_pSysCol) {
+        BootLog("[MAINDOS] FATAL: Error while loading SYS.COL");
         printf("Error while loading SYS.COL\n");
         exit(1);
     }
     
+    BootLog("[MAINDOS] Load_SystemGraphicsAndFonts: Loading system fonts...");
     g_SystemFonts[0] = Font_Load("baltazar\\data\\red_dark.lft", 0);
     g_SystemFonts[1] = Font_Load("baltazar\\data\\red_lite.lft", 0);
     g_SystemFonts[2] = Font_Load("baltazar\\data\\bluedark.lft", 0);
@@ -498,12 +505,16 @@ void Load_SystemGraphicsAndFonts(void) {
     for (i = 0; i < 8; i++) {
         int font_id = g_SystemFonts[i];
         if (font_id == -1) {
+            char err[64];
+            sprintf(err, "[MAINDOS] FATAL: Font %d failed to load!", i);
+            BootLog(err);
             printf("Cannot use this graphics mode\n");
             exit(-1);
         }
         g_fonts[font_id].alignment = 1;
         g_fonts[font_id].field_08 = 1;
     }
+    BootLog("[MAINDOS] Load_SystemGraphicsAndFonts: All system assets & fonts loaded successfully.");
 }
 
 /**

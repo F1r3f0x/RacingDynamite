@@ -253,7 +253,14 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x00563d70` | `float[2]`   | `g_SpriteScaleFactors` | Scaling factors (scale_x, rot) passed to sprite draw routines. |
 | `0x00563d80` | `double`     | `g_RpmNeedleDeltaScale`| Speedometer needle smoothing rate constant (0.5 to 1.0). |
 | `0x00563d8c` | `void*`      | `g_pScreenConfig` | Screen / viewport geometry configuration table. |
-
-
-
-
+| `0x00011a3e` | `uint8_t*`   | `g_pPicFlaggor` | 38,796-byte sprite buffer for 6 language flags (FLAGGOR.PIC). |
+| `0x00011a72` | `uint8_t*`   | `g_pPicIgnLogo` | 9,861-byte sprite buffer for main title logo (IGN_LOGO.PIC). |
+| `0x00011ab4` | `uint8_t*`   | `g_pPicCarSel` | 18,870-byte sprite buffer for vehicle pedestal (CAR_SEL.PIC). |
+| `0x00011afb` | `uint8_t*`   | `g_pPicBilar` | 124,806-byte sprite buffer for 11 car stats cards (BILAR.PIC). |
+| `0x00011b06` | `uint8_t*`   | `g_pPicTrkSpr` | 79,695-byte sprite buffer for track selection cards (TRK_SPR.PIC). |
+| `0x0001aaf8` | `uint8_t*`   | `g_pMenuCarMsh` | 82,876-byte submesh geometry for rotating 3D menu cars (MENUCAR.MSH). |
+| `0x0001ab10` | `uint8_t*`   | `g_pMenuCarPlc` | 224-byte placement table mapping car IDs to mesh offsets (MENUCAR.PLC). |
+| `0x0001ab24` | `uint8_t*`   | `g_pMenuCarTex` | 393,280-byte texture bank for 3D menu cars (MENUCAR.TEX). |
+| `0x00016900` | `CdpFile[6]` | `g_MenuCdp` | Array of 6 CDP video playback streams for intro and background loop. |
+| `0x000bed00` | `char*[6]`   | `g_MenuVideoPaths` | File paths for the 6 CDP videos (IGN1, IGN2, IGN3_0..IGN3_3). |
+| `0x000a07bd` | `int32_t`    | `g_SelectedLanguage` | Active menu language index (0=EN, 1=DE, 2=IT, 3=ES, 4=SE, 5=FR). |

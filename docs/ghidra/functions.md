@@ -1,4 +1,4 @@
-# Master Function Registry (MAINDOS.EXE / MAINDOS_32BIT.EXE)
+# Master Function Registry (MAINDOS_32BIT.EXE)
 
 > Auto-generated from `database/decomp.db`. Edit via `tools/db.py`.
 
@@ -7,13 +7,23 @@
 | `0x00060f40` | - | `-` | `File_ReadToBuffer` | `mem.c` | Matching | EXACT | Reads binary file directly into preallocated buffer |
 | `0x00061100` | - | `-` | `File_GetSize` | `mem.c` | Matching | EXACT | Seeks to end and returns binary file size |
 | `0x0006117c` | - | `-` | `File_Exists` | `mem.c` | Matching | EXACT | Tests if file exists by attempting fopen |
-| - | `0x004029a0` | `FUN_004029a0` | `Menu_Init` | `main.c` | Decompiled | EXACT | Loads MENU.COL, MENU.TAB, .LFT fonts, and initializes menu options. |
-| - | `0x00402c00` | `FUN_00402c00` | `Menu_Tick` | `main.c` | Decompiled | ADAPTED | Handles menu input navigation (arrows, Enter, Esc), item highlight, and transitions. |
+| `0x10010` | - | - | `main` | `main.c` | Decompiled | EXACT |  |
+| `0x6f549` | - | - | `__cstart` | `MSVC CRT` | Decompiled | EXACT |  |
+| `0x10198` | - | - | `Timer_Init` | `main.c` | Decompiled | EXACT |  |
+| `0x1034c` | - | - | `Timer_GetPITCounter` | `main.c` | Decompiled | EXACT |  |
+| `0x10238` | - | - | `Timer_GetTime` | `main.c` | Decompiled | EXACT |  |
+| `0x63310` | - | - | `Sound_LoadAsset` | `main.c` | Decompiled | EXACT |  |
+| `0x63f3e` | - | - | `Audio_Init` | `main.c` | Decompiled | EXACT |  |
+| `0x20d14` | - | - | `FatalError` | `main.c` | Decompiled | EXACT |  |
+| `0x0001aaf8` | - | - | `Menu_InitCarViewport` | `menu.c` | Decompiled | EXACT | Loads menucar.plc, menucar.msh, menucar.tex for 3D car viewport |
+| `0x00015344` | - | - | `Menu_RenderCarViewport` | `menu.c` | Decompiled | EXACT | Renders 3D rotating car model onto pedestal in car select screen |
+| `0x00011504` | `0x004029a0` | `FUN_004029a0` | `Menu_Init` | `menu.c` | Decompiled | EXACT | Loads MENU.COL, MENU.TAB, .LFT fonts, and initializes menu options. |
+| `0x00012bb8` | `0x00402c00` | `FUN_00402c00` | `Menu_Tick` | `menu.c` | Decompiled | ADAPTED | Handles menu input navigation (arrows, Enter, Esc), item highlight, and transitions. |
 | - | `0x0040e6b0` | `FUN_0040e6b0` | `Car_IntegratePosition` | `main.c` | Decompiled | EXACT | World coordinate velocity integrator with 21.76 scale factor and 72 Hz timestep. |
 | - | `0x004120a0` | `FUN_004120a0` | `WinMain` | `main.c` | Decompiled | ADAPTED | Main entry point; registers window class, queries timer, runs message/tick loop. |
-| - | `0x00412230` | `FUN_00412230` | `App_FrameTick` | `main.c` | Decompiled | EXACT | Main engine tick; dispatches Init (0), Main Loop (1), and Shutdown (2). |
+| `0x10060` | `0x00412230` | `FUN_00412230` | `App_FrameTick` | `main.c` | Decompiled | EXACT | Main engine tick; dispatches Init (0), Main Loop (1), and Shutdown (2). |
 | - | `0x00412500` | `FUN_00412500` | `App_Init` | `main.c` | Decompiled | EXACT | Creates game window, initializes DirectDraw and DirectInput subsystems. |
-| `0x0002b51a` | `0x00412530` | `FUN_00412530` | `App_Shutdown` | `main.c` | Decompiled | EXACT | Releases DirectDraw surfaces, DirectSound, and window handles. |
+| `0x215c8` | `0x00412530` | `FUN_00412530` | `App_Shutdown` | `main.c` | Decompiled | EXACT | Releases DirectDraw surfaces, DirectSound, and window handles. |
 | - | `0x00412580` | `FUN_00412580` | `Cdp_OpenFile` | `lisa3d.c` | Decompiled | EXACT | Validates "CDP\0" header, dimensions, frame count, and embedded palette. |
 | - | `0x00412610` | `FUN_00412610` | `Cdp_DecodeFrame` | `lisa3d.c` | Decompiled | EXACT | Advances animation stream and triggers inter-frame delta decompression. |
 | `0x0001fee0` | `0x00412670` | `FUN_00412670` | `Surface_LoadSRF` | `getsurf.c` | Decompiled | ADAPTED | Loads .SRF track collision surface, converts relative offsets to pointers |
@@ -24,23 +34,23 @@
 | `0x1aea0` | `0x004134e0` | `FUN_004134e0` | `AI_FollowTrackSplines` | `main.c` | Decompiled | EXACT | Steering simulation updating AI vehicle heading, track spline waypoint progression, speed moderation, and obstacle evasion. |
 | `0x1ce1c` | `0x00414e40` | `FUN_00414e40` | `Track_LoadSplines` | `main.c` | Decompiled | EXACT | Loads .TRI chunk indices, constructs left/right road boundary splines and AI waypoints. |
 | - | `0x00416250` | `FUN_00416250` | `Mesh_InstantiatePlacedObjects` | `main.c` | Decompiled | ADAPTED | Applies .PLC world translation offsets to .MSH submesh vertices. |
-| - | `0x00417270` | `FUN_00417270` | `Game_Init` | `main.c` | Decompiled | EXACT | Sets initial game state flags, resets timers, initiates intro sequence. |
-| - | `0x004172b0` | `FUN_004172b0` | `Game_StateDispatcher` | `main.c` | Decompiled | ADAPTED | Top-level game loop state machine dispatcher (Intro -> Menus -> Race). |
+| `0x20d18` | `0x00417270` | `FUN_00417270` | `Game_Init` | `main.c` | Decompiled | EXACT | Sets initial game state flags, resets timers, initiates intro sequence. |
+| `0x20d60` | `0x004172b0` | `FUN_004172b0` | `Game_StateDispatcher` | `main.c` | Decompiled | ADAPTED | Top-level game loop state machine dispatcher (Intro -> Menus -> Race). |
 | `0x00021860` | `0x00418130` | `FUN_00418130` | `Load_SystemGraphicsAndFonts` | `geputget.c` | Decompiled | EXACT | Loads SYS.COL, N_SYSGFX.PIC, N_SYSG_2.PIC, and .LFT fonts. |
 | - | `0x00418dd0` | `FUN_00418dd0` | `Track_LoadAllAssets` | `main.c` | Decompiled | EXACT | Master track loader: loads .COL, .PAN, .PIC, .SHD, .TAB, .MSH, .TEX, .POS. |
-| - | `0x00419a90` | `FUN_00419a90` | `Track_LoadPlacements` | `main.c` | Decompiled | ADAPTED | Loads .PLC scenery object placement tables for level and cars. |
-| - | `0x00419bd0` | `FUN_00419bd0` | `Mesh_LoadTrackAndCars` | `main.c` | Decompiled | ADAPTED | Loads LEVELS/<TRACK>/<TRACK>.MSH and CARS/CARS.MSH into geometry memory. |
-| - | `0x00419d10` | `FUN_00419d10` | `Texture_LoadAllPages` | `main.c` | Decompiled | ADAPTED | Loads 1MB track .TEX, car .TEX, and 64KB aligned sprite pages. |
+| `0x230f4` | `0x00419a90` | `FUN_00419a90` | `Track_LoadPlacements` | `main.c` | Decompiled | ADAPTED | Loads .PLC scenery object placement tables for level and cars. |
+| `0x2322c` | `0x00419bd0` | `FUN_00419bd0` | `Mesh_LoadTrackAndCars` | `main.c` | Decompiled | ADAPTED | Loads LEVELS/<TRACK>/<TRACK>.MSH and CARS/CARS.MSH into geometry memory. |
+| `0x23368` | `0x00419d10` | `FUN_00419d10` | `Texture_LoadAllPages` | `main.c` | Decompiled | ADAPTED | Loads 1MB track .TEX, car .TEX, and 64KB aligned sprite pages. |
 | `0x000240f4` | `0x0041ac40` | `FUN_0041ac40` | `Font_LoadHUDFonts` | `geputget.c` | Decompiled | EXACT | Loads HUD lettering glyphs (IGNITION.FNT, yellow.lft, speed.lft, etc.). |
 | `0x000243e0` | `0x0041af70` | `FUN_0041af70` | `Track_LoadOverlayGfx` | `geputget.c` | Decompiled | EXACT | Loads track sign textures and winner trophy bitmap (POKAL.PIC). |
-| - | `0x0041b360` | `FUN_0041b360` | `Track_PreprocessPlacements` | `main.c` | Decompiled | ADAPTED | Unpacks model_type bitfields (& 0xFFF) and extracts animation and flag channels. |
+| `0x247b0` | `0x0041b360` | `FUN_0041b360` | `Track_PreprocessPlacements` | `main.c` | Decompiled | ADAPTED | Unpacks model_type bitfields (& 0xFFF) and extracts animation and flag channels. |
 | `0x2489c` | `0x0041b470` | `FUN_0041b470` | `Race_InitSceneAndCars` | `main.c` | Decompiled | EXACT | Instantiates player and AI cars on starting grid, loads track surface, and binds collision and physics states. |
 | - | `0x0041d190` | `FUN_0041d190` | `Car_UnpackMeshGeometry` | `lisa3d.c` | Decompiled | EXTENDED | Extracts CARS.MSH submesh vertices, finds bottom tire vertex $\max(v_y)$ for ground alignment, and scales by $21.76$. |
-| - | `0x0041f9b0` | `Sound_InitAndLoadPools` | `Sound_InitAndLoadPools` | `main.c` | Decompiled | ADAPTED | Initializes 32 DirectSound-compatible audio channels; loads SFX pools (ROLL, SKID, COLL, BOOST, DIV, KLICK, OK); loads track sounds; reads per-vehicle ENGINE.INF 800-byte curves into uint8_t[200] vol/pitch arrays at +0x658, +0x720, +0x7e8, +0x8b0. |
+| `0x2a4f1` | `0x0041f9b0` | `Sound_InitAndLoadPools` | `Sound_InitAndLoadPools` | `main.c` | Decompiled | ADAPTED | Initializes 32 DirectSound-compatible audio channels; loads SFX pools (ROLL, SKID, COLL, BOOST, DIV, KLICK, OK); loads track sounds; reads per-vehicle ENGINE.INF 800-byte curves into uint8_t[200] vol/pitch arrays at +0x658, +0x720, +0x7e8, +0x8b0. |
 | `0x2a40e` | `0x00420090` | `FUN_00420090` | `Obstacle_TriggerAction` | `main.c` | Decompiled | EXACT | Evaluates type 0xFA (250) trigger obstacles and triggers associated actions. |
 | `0x2a4ec` | `0x004200e0` | `FUN_004200e0` | `AI_InitSteeringConeLookup` | `main.c` | Decompiled | EXACT | Precomputes 800x405 lookahead steering cone and obstacle threat table. |
 | `0x2a97a` | `0x00420240` | `FUN_00420240` | `Ghost_LoadCarAndPath` | `main.c` | Decompiled | EXACT | Loads recorded Time Attack ghost car trajectory from GHOSTS\%s.GST. |
-| `0x2adf8` | `0x00420870` | `FUN_00420870` | `Track_LoadBinaryCache` | `main.c` | Decompiled | EXACT | Loads preprocessed level data cache (ign_dos.btz / ign_dos.btz). |
+| `0x2adf8` | `0x00420870` | `FUN_00420870` | `Track_LoadBinaryCache` | `main.c` | Decompiled | EXACT | Loads preprocessed level data cache (ign_win.btz / ign_dos.btz). |
 | `0x2b42d` | `0x00420990` | `FUN_00420990` | `Sound_FreeAllSounds` | `main.c` | Decompiled | EXACT | Frees active level audio buffers and sample tables upon track unload. |
 | `0x2b51a` | `0x00420b70` | `FUN_00420b70` | `Game_Shutdown` | `main.c` | Decompiled | EXACT | Releases all allocated game memory and shuts down engine subsystems cleanly. |
 | `0x3b996` | `0x00420c00` | `FUN_00420c00` | `Timer_GetDeltaTime` | `main.c` | Decompiled | EXACT | Computes elapsed frame delta time using tick counter scaled by 0.036. Updates accumulator, frame counter, and clamps delta to max 10.8 ticks. |
@@ -186,22 +196,5 @@
 | - | `0x004582b0` | `FUN_004582b0` | `Sound_LoadPAT` | `main.c` | Decompiled | ADAPTED | Loads Gravis UltraSound GF1 .PAT patch audio files and converts 8-bit/16-bit linear PCM to S16SYS format. |
 | - | `0x00458e00` | `FUN_00458e00` | `Sound_LoadWAV` | `main.c` | Decompiled | ADAPTED | Loads RIFF/WAVE PCM 8-bit/16-bit audio file and converts to S16SYS format. |
 | - | `0x0045b4f0` | `FUN_0045b4f0` | `Lisa_PrintVersion` | `lisa3d.c` | Decompiled | EXACT | Prints "Lisa 2 Development System" banner and build timestamp. |
-| - | `0x00469950` | `entry` | `CRT_Entry` | `MSVC CRT` | Analyzed | - | C Runtime startup entry point, parses command line, calls WinMain. |
+| `0x56034` | `0x00469950` | `entry` | `CRT_Entry` | `MSVC CRT` | Analyzed | - | C Runtime startup entry point, parses command line, calls WinMain. |
 | - | `0x00499abc` | `FUN_00499abc` | `Cdp_DecompressRLE` | `lisa3d.c` | Decompiled | EXACT | Delta-skip RLE decompression modifying active frame buffer with opcode skip codes. |
-| `0x00010010` | `-` | `FUN_00010010` | `main` | `main.c` | Decompiled | EXACT | Main loop. Calls App_FrameTick inside a while loop until game exits. |
-| `0x00056034` | `-` | `FUN_00056034` | `CRT_Entry` | `crt.c` | Identified | ADAPTED | Watcom DOS/4GW entry point. Sets up segments, clear BSS, parses args, calls __cstart. |
-| `0x0006f549` | `-` | `FUN_0006f549` | `__cstart` | `crt.c` | Identified | ADAPTED | Watcom C-Runtime startup. Formats argc/argv and calls main(). |
-| `0x00010198` | `-` | `FUN_00010198` | `Timer_Init` | `main.c` | Decompiled | EXACT | Configures PIT (Programmable Interval Timer) channel 0 for high-resolution profiling. |
-| `0x0001034c` | `-` | `FUN_0001034c` | `Timer_GetPITCounter` | `main.c` | Decompiled | EXACT | Reads the 16-bit hardware down-counter from PIT port 0x40. |
-| `0x00010238` | `-` | `FUN_00010238` | `Timer_GetTime` | `main.c` | Decompiled | EXACT | Combines BIOS int 0x1A Time of Day with PIT counter to return high-res double time. |
-| `0x00011504` | `-` | `FUN_00011504` | `Menu_Init` | `main.c` | Decompiled | EXACT | Loads menu.col, menu.tab, and ign_dos.btz; sets up main menu state. |
-| `0x00012bb8` | `-` | `FUN_00012bb8` | `Menu_Tick` | `main.c` | Decompiled | EXACT | Main execution loop for the game menus (GameStage == 1). |
-| `0x00020d14` | `-` | `FUN_00020d14` | `FatalError` | `main.c` | Identified | EXACT | Prints error message and terminates game. |
-| `0x00020d60` | `-` | `FUN_00020d60` | `Game_StateDispatcher` | `main.c` | Decompiled | ADAPTED | Top-level game loop state machine dispatcher (Intro -> Menus -> Race). |
-| `0x000230f4` | `-` | `FUN_000230f4` | `Track_LoadPlacements` | `main.c` | Decompiled | EXACT | Loads LEVELS\%s%s.PLC and CARS\CARS.PLC. |
-| `0x0002322c` | `-` | `FUN_0002322c` | `Mesh_LoadTrackAndCars` | `main.c` | Decompiled | EXACT | Loads LEVELS\%s%s.MSH and %sCARS.MSH. |
-| `0x00023368` | `-` | `FUN_00023368` | `Texture_LoadAllPages` | `main.c` | Decompiled | EXACT | Loads LEVELS\%s%s.TEX and %s\CARS.TEX texture page banks. |
-| `0x000247b0` | `-` | `FUN_000247b0` | `Track_PreprocessPlacements` | `main.c` | Decompiled | EXACT | Unpacks model_type bitfields (& 0xFFF) and extracts animation and flag channels. |
-| `0x0002a4f1` | `-` | `FUN_0002a4f1` | `Sound_InitAndLoadPools` | `main.c` | Decompiled | EXACT | Initializes audio system and loads .WAV/.PAT asset pools into memory. |
-| `0x00063310` | `-` | `FUN_00063310` | `Sound_LoadAsset` | `sound.c` | Identified | EXACT | Loads a .WAV or .PAT file into a specified sound bank slot. |
-| `0x00063f3e` | `-` | `FUN_00063f3e` | `Audio_Init` | `sound.c` | Identified | EXACT | Initializes underlying DOS audio hardware/Sound Blaster mixers. |
