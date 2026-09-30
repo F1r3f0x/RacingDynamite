@@ -326,7 +326,7 @@ def generate_wlink_script(modules: list):
         "option undefsok",
         "option map=build/decomp/MAINDOS_REBUILT.MAP",
     ]
-    all_modules = sorted(list(set(modules + ["fx", "geputget", "getsurf", "globals", "lisa3d", "main", "mem"])))
+    all_modules = sorted(list(set(modules + ["fx", "geputget", "getsurf", "globals", "lisa3d", "main", "mem", "menu"])))
     for m in all_modules:
         lines.append(f"file build/decomp/{m}.obj")
         

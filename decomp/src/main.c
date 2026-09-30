@@ -40,6 +40,16 @@ void VGA_SetPalette(const uint8_t *col_data) {
     }
 }
 
+void VGA_SetPaletteRaw(const uint8_t *pal) {
+    int i;
+    if (!pal) return;
+    outp(0x3C8, 0);
+    for (i = 0; i < 768; i++) {
+        outp(0x3C9, pal[i] >> 2);
+    }
+}
+
+
 #define VEHICLE_STRUCT_SIZE 0x484C
 
 uint8_t *g_pVehicleTable = NULL;

@@ -304,6 +304,10 @@ void Input_ProcessRaceHotkeys(void);
 void Input_PollPlayerVehicleControls(void);
 void Ghost_SaveCarAndPath(void);
 void Track_SaveBinaryCache(void);
+void VGA_SetPalette(const uint8_t *col_data);
+void VGA_SetPaletteRaw(const uint8_t *pal);
+int Menu_Init(void);
+int Menu_Tick(void);
 
 extern int FixedMul10(int a, int b);
 #pragma aux FixedMul10 = \
