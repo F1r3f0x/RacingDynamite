@@ -147,11 +147,37 @@ def link_rebuilt_binary():
     print(f"Linking SUCCESS: {rebuilt_exe} generated successfully.")
     return True
 
+def run_in_dosbox():
+    """Copies rebuilt binary to Ignition directory and launches DOSBox."""
+    rebuilt_exe = BUILD_DIR / "MAINDOS_REBUILT.EXE"
+    if not rebuilt_exe.exists():
+        if not link_rebuilt_binary():
+            return False
+
+    game_dir = ROOT_DIR / "Ignition" / "Ignition"
+    target_exe = game_dir / "MREBUILT.EXE"
+
+    import shutil
+    shutil.copy2(rebuilt_exe, target_exe)
+    print(f"[DOSBox] Copied {rebuilt_exe.name} -> {target_exe.name}")
+
+    dosbox_exe = game_dir / "DOSBOX" / "DOSBox.exe"
+    dosbox_conf = game_dir / "dosbox_rebuilt.conf"
+
+    if not dosbox_exe.exists():
+        print(f"Error: DOSBox executable not found at {dosbox_exe}", file=sys.stderr)
+        return False
+
+    print(f"[DOSBox] Launching {dosbox_exe.name} with config {dosbox_conf.name}...")
+    subprocess.run([str(dosbox_exe), "-conf", f"..\\{dosbox_conf.name}"], cwd=str(dosbox_exe.parent))
+    return True
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Build and link decompiled Watcom C files")
     parser.add_argument("sources", nargs="*", type=str, help="Specific source files to compile")
     parser.add_argument("--link", action="store_true", help="Link compiled objects with wlink")
+    parser.add_argument("--run", action="store_true", help="Build, link, and launch in DOSBox")
     parser.add_argument("--slice", action="store_true", help="Re-generate assembly stubs and objdiff.json")
     args = parser.parse_args()
 
@@ -166,8 +192,12 @@ def main():
         
     print("\nAll files compiled successfully.")
 
-    if args.link:
-        link_rebuilt_binary()
+    if args.link or args.run:
+        if not link_rebuilt_binary():
+            sys.exit(1)
+
+    if args.run:
+        run_in_dosbox()
 
 if __name__ == "__main__":
     main()
