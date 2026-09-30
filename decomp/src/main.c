@@ -143,18 +143,7 @@ double Math_RandomFloat(void) {
 #define M_PI 3.14159265358979323846
 #endif
 
-/**
- * @original Menu_Init (IGN_WIN.EXE @ 0x004029a0, main.c)
- * @fidelity EXACT
- * @notes Loads MENU.COL, MENU.TAB, configures fonts, and sets up main menu.
- */
-int Menu_Init(void) {
-    g_pMenuCol = (uint8_t *)File_LoadToMemory("BALTAZAR\\DATA\\MENU.COL");
-    g_pMenuTab = (uint8_t *)File_LoadToMemory("BALTAZAR\\DATA\\MENU.TAB");
-    g_MenuState = 0;
-    g_MenuSelection = 0;
-    return (g_pMenuCol != NULL && g_pMenuTab != NULL) ? 1 : 0;
-}
+
 
 /**
  * @original Game_Init (IGN_WIN.EXE @ 0x00417270, main.c)
@@ -2569,20 +2558,7 @@ void Track_SaveBinaryCache(void) {
     }
 }
 
-/**
- * @original Menu_Tick (MAINDOS_32BIT.EXE @ 0x00012bb8, main.c)
- * @fidelity ADAPTED
- * @notes Menu frame execution tick and state transition handler.
- */
-int Menu_Tick(void) {
-    static int ticks = 0;
-    ticks++;
-    if (ticks < 10) {
-        return 1;
-    }
-    BootLog("[MAINDOS] Menu sequence complete. Transitioning to track load...");
-    return 2;
-}
+
 
 /**
  * @original Car_IntegratePosition (IGN_WIN.EXE, main.c)
