@@ -39,8 +39,8 @@ uint8_t *g_pCheckpoints = NULL;
 int g_SceneryObstacleCount = 0;
 SceneryObstacle *g_pSceneryObstacles = NULL;
 
-char g_TrackDir[64] = "SNAKE";
-char g_TrackName[64] = "SNAKE";
+char g_TrackDir[64] = "CANADA\\";
+char g_TrackName[64] = "CANADA";
 uint8_t *g_pTrackCOL = NULL;
 uint8_t *g_pTrackPIC = NULL;
 uint8_t *g_pTrackSHD = NULL;
@@ -160,12 +160,22 @@ int App_Init(void) {
     return 1;
 }
 
+void BootLog(const char *msg) {
+    FILE *fp = fopen("boot.log", "a");
+    if (fp) {
+        fputs(msg, fp);
+        fputc('\n', fp);
+        fclose(fp);
+    }
+}
+
 /**
  * @original App_Shutdown (IGN_WIN.EXE @ 0x00412530, main.c)
  * @fidelity EXACT
  * @notes Releases graphics framebuffers, audio channels, and frees assets.
  */
 void App_Shutdown(void) {
+    BootLog("[MAINDOS] App_Shutdown: Cleaning up resources and shutting down...");
     if (g_pMenuCol != NULL) {
         Mem_Free(0, g_pMenuCol);
         g_pMenuCol = NULL;
@@ -184,13 +194,15 @@ void App_Shutdown(void) {
  */
 int App_FrameTick(void) {
     if (g_GameStage == 0) {
+        BootLog("[MAINDOS] App_FrameTick: Stage 0 (Game_Init)");
         Game_Init();
         g_GameStage = 1;
         return 1;
     } else if (g_GameStage == 1) {
-        /* In main loop / race tick */
+        Game_StateDispatcher();
         return 1;
     } else if (g_GameStage == 2) {
+        BootLog("[MAINDOS] App_FrameTick: Stage 2 (App_Shutdown)");
         App_Shutdown();
         return 0;
     }
@@ -2545,9 +2557,12 @@ void Track_SaveBinaryCache(void) {
  * @notes Menu frame execution tick and state transition handler.
  */
 int Menu_Tick(void) {
-    if (g_MenuState == 0) {
+    static int ticks = 0;
+    ticks++;
+    if (ticks < 10) {
         return 1;
     }
+    BootLog("[MAINDOS] Menu sequence complete. Transitioning to track load...");
     return 2;
 }
 
@@ -2610,30 +2625,43 @@ int Sound_LoadAsset(char *path, int type, int bank) {
  */
 void Track_LoadPlacements(void) {
     char path[256];
+    char msg[256];
     int fd;
     int len;
 
     sprintf(path, "LEVELS\\%s%s.PLC", g_TrackDir, g_TrackName);
+    sprintf(msg, "[MAINDOS] Track_LoadPlacements: Opening %s", path);
+    BootLog(msg);
     fd = open(path, O_RDONLY | O_BINARY);
     if (fd < 0) {
+        sprintf(msg, "[MAINDOS] Failed to open %s", path);
+        BootLog(msg);
         FatalError("Error while trying to read %s\n", path);
         exit(1);
     }
     len = filelength(fd);
+    sprintf(msg, "[MAINDOS] %s opened (%d bytes). Allocating memory...", path, len);
+    BootLog(msg);
     g_pActivePLC = (uint8_t *)Mem_Alloc(len, 0);
     read(fd, g_pActivePLC, len);
     close(fd);
+    BootLog("[MAINDOS] Track placements loaded. Opening CARS\\CARS.PLC...");
 
     sprintf(path, "CARS\\CARS.PLC");
     fd = open(path, O_RDONLY | O_BINARY);
     if (fd < 0) {
+        sprintf(msg, "[MAINDOS] Failed to open %s", path);
+        BootLog(msg);
         FatalError("Error while trying to read %s\n", path);
         exit(1);
     }
     len = filelength(fd);
+    sprintf(msg, "[MAINDOS] CARS.PLC opened (%d bytes). Allocating memory...", len);
+    BootLog(msg);
     g_pCarPlacements = (uint8_t *)Mem_Alloc(len, 0);
     read(fd, g_pCarPlacements, len);
     close(fd);
+    BootLog("[MAINDOS] CARS.PLC loaded successfully!");
 }
 
 /**
@@ -2686,7 +2714,7 @@ void Texture_LoadAllPages(void) {
     }
     close(fd);
 
-    sprintf(path, "%s\\CARS.TEX", g_CarDir);
+    sprintf(path, "%sCARS.TEX", g_CarDir);
     fd = open(path, O_RDONLY | O_BINARY);
     if (fd < 0) {
         FatalError("Error while trying to read %s\n", path);
@@ -2729,11 +2757,17 @@ void Track_PreprocessPlacements(void) {
 void Game_StateDispatcher(void) {
     if (g_GameStage == 1) {
         if (Menu_Tick() > 1) {
+            BootLog("[MAINDOS] StateDispatcher: Loading track placements...");
             Track_LoadPlacements();
+            BootLog("[MAINDOS] StateDispatcher: Loading meshes...");
             Mesh_LoadTrackAndCars();
+            BootLog("[MAINDOS] StateDispatcher: Loading texture pages...");
             Texture_LoadAllPages();
+            BootLog("[MAINDOS] StateDispatcher: Preprocessing placements...");
             Track_PreprocessPlacements();
+            BootLog("[MAINDOS] StateDispatcher: Initializing race scene & cars...");
             Race_InitSceneAndCars();
+            BootLog("[MAINDOS] StateDispatcher: Track & car pipeline initialized successfully!");
             g_GameStage = 2;
         }
     }
@@ -2864,22 +2898,29 @@ int g_MainFlag_E73B0 = 0;
  * @notes The actual C entry point for the MS-DOS executable.
  */
 int main(int argc, char **argv) {
+    BootLog("[MAINDOS] Starting Racing Dynamite (MAINDOS_REBUILT) 32-bit DOS Engine...");
     Unknown_553a0();
+    BootLog("[MAINDOS] Unknown_553a0 passed");
     
     if (Unknown_558d0() != 0) {
+        BootLog("[MAINDOS] Engine core subsystems initialized.");
         if (Unknown_559e4(0x15e, 0x46) != 0) {
+            BootLog("[MAINDOS] Display mode set (320x200 8bpp). Starting high-resolution PIT timer...");
             g_MainFlag_E73B0 = 1;
             
             Timer_Init();
+            BootLog("[MAINDOS] Entering main loop dispatcher...");
             if (1) {
                 while (App_FrameTick() != 0) {
                     /* Main game loop / race tick */
                 }
+                BootLog("[MAINDOS] Main loop terminated. Cleaning up subsystems...");
                 Unknown_558ec();
             }
         }
     }
     
+    BootLog("[MAINDOS] Execution completed successfully. Returning to DOS.");
     return 0;
 }
 

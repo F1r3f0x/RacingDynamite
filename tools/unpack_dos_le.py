@@ -326,15 +326,14 @@ def generate_wlink_script(modules: list):
         "option undefsok",
         "option map=build/decomp/MAINDOS_REBUILT.MAP",
     ]
-    all_modules = sorted(list(set(modules + ["fx", "geputget", "getsurf", "lisa3d", "main", "mem"])))
+    all_modules = sorted(list(set(modules + ["fx", "geputget", "getsurf", "globals", "lisa3d", "main", "mem"])))
     for m in all_modules:
         lines.append(f"file build/decomp/{m}.obj")
         
-    # Check for custom asm objects
-    asm_src_dir = ROOT_DIR / "decomp" / "src" / "asm"
-    if asm_src_dir.exists():
-        for f in asm_src_dir.glob("*.asm"):
-            lines.append(f"file build/decomp/{f.stem}_asm.obj")
+    # Watcom C runtime and math libraries
+    lines.append("libpath tools/watcom/lib386")
+    lines.append("libpath tools/watcom/lib386/dos")
+    lines.append("library clib3r, math387r, emu387")
             
     with open(wlink_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")

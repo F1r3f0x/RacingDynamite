@@ -27,13 +27,22 @@ extern uint8_t *g_pLisaTextureSheets;
 #define M_PI 3.14159265358979323846
 #endif
 
+#define fsin sin
+#define fcos cos
+#define fpatan(y, x) atan2(y, x)
+#define __ultoa ultoa
+
+static int __ftol(void) {
+    return 0;
+}
+
 /* Global active panorama backdrop buffer (64KB, 256x256 8bpp) */
 uint8_t *g_pActivePAN = NULL;
 uint8_t *g_pLisaTransparencyLUT = NULL;
 uint8_t *g_pVirtualFramebuffer = NULL;
 LisaCamera *g_LisaCamera = NULL;
-int g_ScreenWidth = 640;
-int g_ScreenHeight = 480;
+extern int g_ScreenWidth;
+extern int g_ScreenHeight;
 float g_CameraYaw = 0.0f;
 float g_CameraPitch = 0.0f;
 const LisaVertex *g_pLisaVertices = NULL;
@@ -999,7 +1008,7 @@ void Lisa_FreeEngineMemory(void) {
 
       do {
         if (*(void **)(offset + (int)_Memory) != (void *)0x0) {
-          _free(*(void **)(offset + (int)_Memory));
+          free(*(void **)(offset + (int)_Memory));
           _Memory = g_pLisaAllocatedBuffers;
           allocated_count = g_LisaAllocatedBufferCount;
         }
@@ -1009,7 +1018,7 @@ void Lisa_FreeEngineMemory(void) {
       } while (i < allocated_count);
     }
 
-    _free(_Memory);
+    free(_Memory);
   }
 
   g_pLisaAllocatedBuffers = (void *)0x0;
@@ -1874,7 +1883,7 @@ LAB_00447785:
     out_val_span = span_ptr;
 
     if (0xff < y_offset) {
-      _free(alloc_table);
+      free(alloc_table);
       return;
     }
 
@@ -2414,8 +2423,8 @@ void Lisa_LoadOrCreateShadingTable(int shade_level,int palette_ptr) {
   table_file = (FILE *)fopen(filename,(const char *)&s_rb);
 
   if (table_file != (FILE *)0x0) {
-    bytes_read = _fread(&g_LisaObjectMatrix_22,1,0x40000,table_file);
-    _fclose(table_file);
+    bytes_read = fread(&g_LisaObjectMatrix_22,1,0x40000,table_file);
+    fclose(table_file);
   }
 
   if (bytes_read != 0x40000) {
@@ -2453,8 +2462,8 @@ void Lisa_LoadOrCreateShadingTable(int shade_level,int palette_ptr) {
     table_file = (FILE *)fopen(filename,(const char *)&s_tab_tab);
 
     if (table_file != (FILE *)0x0) {
-      _fwrite(&g_LisaObjectMatrix_22,1,0x40000,table_file);
-      _fclose(table_file);
+      fwrite(&g_LisaObjectMatrix_22,1,0x40000,table_file);
+      fclose(table_file);
     }
 
   }

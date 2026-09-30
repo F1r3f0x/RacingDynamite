@@ -56,8 +56,10 @@ extern char s_FEL_VID_LI_MOVEOBJECT_ANIM_OBJ_004994ac[];
 extern char s_FEL_VID_LI_MOVEOBJECT_WEATHER_0049948c[];
 extern char s_FEL_VID_LI_MOVEOBJECT_TRAN_SPRIT_004993b4[];
 extern char s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468[];
+#include <stdio.h>
 #include <math.h>
 #include <string.h>
+#define _sprintf sprintf
 #define fsin sin
 #define fcos cos
 #define __ftol() (int)Math_RandomFloat()
@@ -3860,7 +3862,7 @@ int HUD_RenderTrackResults(void) {
                 g_ChampionshipAdvanceAllowed = 1;
             }
         } else {
-            _sprintf(text_buf, "%s", s_PRESS_RETURN_TO_CONTINUE_00495860 + g_LanguageId * 0x32);
+            sprintf(text_buf, "%s", s_PRESS_RETURN_TO_CONTINUE_00495860 + g_LanguageId * 0x32);
             Font_GetTextWidth(text_buf, g_FontId_Small);
             ((int *)&g_FontAlignMode)[g_FontId_Small * 400] = 1;
             Font_DrawText(text_buf, g_FontId_Small, 0xa0, 0x19c);

@@ -10,6 +10,33 @@
 int g_fileErrorLine = 0;
 
 /**
+ * Mem_Alloc (MAINDOS @ 0x00060E90)
+ * Allocates memory from the heap.
+ */
+void *Mem_Alloc(int pool_id, int size) {
+    size_t s;
+    if (size > 0) {
+        s = size;
+    } else if (pool_id > 0) {
+        s = pool_id;
+    } else {
+        s = 1024;
+    }
+    return malloc(s);
+}
+
+/**
+ * Mem_Free (MAINDOS @ 0x00060EC0)
+ * Releases memory back to the heap.
+ */
+void Mem_Free(int pool_id, void *ptr) {
+    (void)pool_id;
+    if (ptr) {
+        free(ptr);
+    }
+}
+
+/**
  * File_Exists (MAINDOS @ 0x0006117C)
  * Checks if a file exists by attempting to open it in binary read mode.
  */
@@ -32,6 +59,9 @@ int File_GetSize(const char *filename) {
     long size;
 
     fp = fopen(filename, "rb");
+    if (fp == NULL) {
+        return 0;
+    }
     old_pos = ftell(fp);
     fseek(fp, 0, SEEK_END);
     size = ftell(fp);

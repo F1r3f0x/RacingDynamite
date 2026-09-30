@@ -1,6 +1,6 @@
 # Ignition (1997) Reverse Engineering & Porting Rules
 
-**CURRENT PHASE:** Functional Implementation of `MAINDOS_32BIT.EXE` using pure C (Open Watcom V2). The goal is to reach 100% `FUNCTIONAL` fidelity. Assembly byte-matching is no longer a strict requirement; logical and structural equivalence is what matters.
+**CURRENT PHASE:** Functional Implementation of `MAINDOS_32BIT.EXE` using pure C (Open Watcom V2). The goal is to reach 100% `FUNCTIONAL` fidelity. Structural equivalence is what matters.
 
 
 ## 1. Decompilation Constraints (MAINDOS_32BIT.EXE)
