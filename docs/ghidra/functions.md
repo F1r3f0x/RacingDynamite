@@ -191,3 +191,17 @@
 | `0x00010010` | `-` | `FUN_00010010` | `main` | `main.c` | Decompiled | EXACT | Main loop. Calls App_FrameTick inside a while loop until game exits. |
 | `0x00056034` | `-` | `FUN_00056034` | `CRT_Entry` | `crt.c` | Identified | ADAPTED | Watcom DOS/4GW entry point. Sets up segments, clear BSS, parses args, calls __cstart. |
 | `0x0006f549` | `-` | `FUN_0006f549` | `__cstart` | `crt.c` | Identified | ADAPTED | Watcom C-Runtime startup. Formats argc/argv and calls main(). |
+| `0x00010198` | `-` | `FUN_00010198` | `Timer_Init` | `main.c` | Decompiled | EXACT | Configures PIT (Programmable Interval Timer) channel 0 for high-resolution profiling. |
+| `0x0001034c` | `-` | `FUN_0001034c` | `Timer_GetPITCounter` | `main.c` | Decompiled | EXACT | Reads the 16-bit hardware down-counter from PIT port 0x40. |
+| `0x00010238` | `-` | `FUN_00010238` | `Timer_GetTime` | `main.c` | Decompiled | EXACT | Combines BIOS int 0x1A Time of Day with PIT counter to return high-res double time. |
+| `0x00011504` | `-` | `FUN_00011504` | `Menu_Init` | `main.c` | Decompiled | EXACT | Loads menu.col, menu.tab, and ign_dos.btz; sets up main menu state. |
+| `0x00012bb8` | `-` | `FUN_00012bb8` | `Menu_Tick` | `main.c` | Decompiled | EXACT | Main execution loop for the game menus (GameStage == 1). |
+| `0x00020d14` | `-` | `FUN_00020d14` | `FatalError` | `main.c` | Identified | EXACT | Prints error message and terminates game. |
+| `0x00020d60` | `-` | `FUN_00020d60` | `Game_StateDispatcher` | `main.c` | Decompiled | ADAPTED | Top-level game loop state machine dispatcher (Intro -> Menus -> Race). |
+| `0x000230f4` | `-` | `FUN_000230f4` | `Track_LoadPlacements` | `main.c` | Decompiled | EXACT | Loads LEVELS\%s%s.PLC and CARS\CARS.PLC. |
+| `0x0002322c` | `-` | `FUN_0002322c` | `Mesh_LoadTrackAndCars` | `main.c` | Decompiled | EXACT | Loads LEVELS\%s%s.MSH and %sCARS.MSH. |
+| `0x00023368` | `-` | `FUN_00023368` | `Texture_LoadAllPages` | `main.c` | Decompiled | EXACT | Loads LEVELS\%s%s.TEX and %s\CARS.TEX texture page banks. |
+| `0x000247b0` | `-` | `FUN_000247b0` | `Track_PreprocessPlacements` | `main.c` | Decompiled | EXACT | Unpacks model_type bitfields (& 0xFFF) and extracts animation and flag channels. |
+| `0x0002a4f1` | `-` | `FUN_0002a4f1` | `Sound_InitAndLoadPools` | `main.c` | Decompiled | EXACT | Initializes audio system and loads .WAV/.PAT asset pools into memory. |
+| `0x00063310` | `-` | `FUN_00063310` | `Sound_LoadAsset` | `sound.c` | Identified | EXACT | Loads a .WAV or .PAT file into a specified sound bank slot. |
+| `0x00063f3e` | `-` | `FUN_00063f3e` | `Audio_Init` | `sound.c` | Identified | EXACT | Initializes underlying DOS audio hardware/Sound Blaster mixers. |
