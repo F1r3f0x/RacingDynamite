@@ -312,8 +312,8 @@ extern char g_TrackHighScoreNames[];
 extern double g_TrackHighScoreTimes[];
 
 /**
- * @original Audio_PlaySampleVol (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original Audio_PlaySampleVol (MAINDOS_32BIT.EXE @ 0x00049a8c, fx.c)
+ * @fidelity EXACT
  */
 void Audio_PlaySampleVol(int channel, int sample_id, int sound_id, int pan, int volume, int pitch, int loop) {
     g_AudioEventParam1 = channel;
@@ -327,7 +327,7 @@ void Audio_PlaySampleVol(int channel, int sample_id, int sound_id, int pan, int 
 }
 
 /**
- * @original FX_UpdateExplosionNode (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original FX_UpdateExplosionNode (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void FX_UpdateExplosionNode(SceneryParticle *p, int instance_idx) {
@@ -414,8 +414,8 @@ void FX_UpdateExplosionNode(SceneryParticle *p, int instance_idx) {
 }
 
 /**
- * @original Audio_LoadAssets (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original Audio_LoadAssets (MAINDOS_32BIT.EXE, fx.c)
+ * @fidelity EXACT
  */
 int Audio_LoadAssets(int width, unsigned int height) {
     int result;
@@ -424,8 +424,8 @@ int Audio_LoadAssets(int width, unsigned int height) {
 }
 
 /**
- * @original Audio_StopSample (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original Audio_StopSample (MAINDOS_32BIT.EXE, fx.c)
+ * @fidelity EXACT
  */
 int Audio_StopSample(void) {
     int *cmd_queue;
@@ -442,8 +442,8 @@ int Audio_StopSample(void) {
 }
 
 /**
- * @original FX_SpawnWeather (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original FX_SpawnWeather (MAINDOS_32BIT.EXE, fx.c)
+ * @fidelity EXACT
  */
 void FX_SpawnWeather(void) {
     char text_buf[32];
@@ -463,8 +463,8 @@ void FX_SpawnWeather(void) {
 }
 
 /**
- * @original FX_SpawnParticle (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original FX_SpawnParticle (MAINDOS_32BIT.EXE @ 0x0003fee8, fx.c)
+ * @fidelity EXACT
  */
 unsigned int FX_SpawnParticle(SceneryParticle *p) {
     int should_spawn = 1;
@@ -547,7 +547,7 @@ unsigned int FX_SpawnParticle(SceneryParticle *p) {
 }
 
 /**
- * @original Race_RenderViewport (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original Race_RenderViewport (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA
@@ -1049,7 +1049,7 @@ void Race_RenderViewport(double delta_time) {
 }
 
 /**
- * @original FX_UpdateWeatherBounds (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original FX_UpdateWeatherBounds (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void FX_UpdateWeatherBounds(void) {
@@ -1109,8 +1109,8 @@ void FX_UpdateWeatherBounds(void) {
     }
 }
 /**
- * @original FX_UpdateVehicleWreck (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original FX_UpdateVehicleWreck (MAINDOS_32BIT.EXE @ 0x0003c208, fx.c)
+ * @fidelity EXACT
  */
 void FX_UpdateVehicleWreck(int *wreck) {
   int *road_seq_ptr;
@@ -1725,7 +1725,7 @@ LAB_00431ab6:
 }
 
 /**
- * @original FX_UpdateDetachedWheel (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original FX_UpdateDetachedWheel (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void FX_UpdateDetachedWheel(int *wheel, int wheel_index) {
@@ -1849,8 +1849,8 @@ void FX_UpdateDetachedWheel(int *wheel, int wheel_index) {
 }
 
 /**
- * @original FX_UpdateVehicleCrashSequence (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original FX_UpdateVehicleCrashSequence (MAINDOS_32BIT.EXE @ 0x0003db4c, fx.c)
+ * @fidelity EXACT
  */
 void FX_UpdateVehicleCrashSequence(int *crash_seq) {
     int *road_seq_ptr;
@@ -2197,7 +2197,7 @@ LAB_CRASH_NEXT_TICK:
 }
 
 /**
- * @original FX_UpdateCarDebris (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original FX_UpdateCarDebris (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void FX_UpdateCarDebris(int *debris, int debris_idx) {
@@ -2307,8 +2307,8 @@ void FX_UpdateCarDebris(int *debris, int debris_idx) {
 }
 
 /**
- * @original FX_SpawnWaterSplashes (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original FX_SpawnWaterSplashes (MAINDOS_32BIT.EXE @ 0x0003d808, fx.c)
+ * @fidelity EXACT
  */
 void FX_SpawnWaterSplashes(void) {
     int car_base_offset;
@@ -2393,7 +2393,7 @@ void FX_SpawnWaterSplashes(void) {
 }
 
 /**
- * @original FX_SpawnTireDirtDebris (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original FX_SpawnTireDirtDebris (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void FX_SpawnTireDirtDebris(void) {
@@ -2487,7 +2487,7 @@ void FX_SpawnTireDirtDebris(void) {
 }
 
 /**
- * @original FX_SpawnLandingDustPuffs (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original FX_SpawnLandingDustPuffs (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void FX_SpawnLandingDustPuffs(void) {
@@ -2552,8 +2552,8 @@ void FX_SpawnLandingDustPuffs(void) {
 }
 
 /**
- * @original FX_SpawnTireSkidSmoke (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original FX_SpawnTireSkidSmoke (MAINDOS_32BIT.EXE @ 0x0003e6ec, fx.c)
+ * @fidelity EXACT
  */
 void FX_SpawnTireSkidSmoke(void) {
     int car_base_offset;
@@ -2612,7 +2612,7 @@ void FX_SpawnTireSkidSmoke(void) {
 }
 
 /**
- * @original FX_UpdateWeatherGeometry (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original FX_UpdateWeatherGeometry (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void FX_UpdateWeatherGeometry(void) {
@@ -2886,7 +2886,7 @@ void FX_UpdateWeatherGeometry(void) {
 }
 
 /**
- * @original FX_FrameTick (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original FX_FrameTick (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void FX_FrameTick(void) {
@@ -2964,7 +2964,7 @@ void FX_FrameTick(void) {
 }
 
 /**
- * @original Pos_InitAnimatedObjects (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original Pos_InitAnimatedObjects (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void Pos_InitAnimatedObjects(void) {
@@ -3008,8 +3008,8 @@ void Pos_InitAnimatedObjects(void) {
 }
 
 /**
- * @original Pos_UpdateAnimatedObjects (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original Pos_UpdateAnimatedObjects (MAINDOS_32BIT.EXE @ 0x000413fc, fx.c)
+ * @fidelity EXACT
  */
 void Pos_UpdateAnimatedObjects(void) {
     int keyframe_base;
@@ -3066,8 +3066,8 @@ void Pos_UpdateAnimatedObjects(void) {
 }
 
 /**
- * @original Math_LookupTrigAngle (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original Math_LookupTrigAngle (MAINDOS_32BIT.EXE, fx.c)
+ * @fidelity EXACT
  */
 double Math_LookupTrigAngle(double angle) {
     int index = (int)(angle * g_Const_200_0);
@@ -3075,8 +3075,8 @@ double Math_LookupTrigAngle(double angle) {
 }
 
 /**
- * @original Camera_UpdateOverview (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original Camera_UpdateOverview (MAINDOS_32BIT.EXE @ 0x00038e6d, fx.c)
+ * @fidelity EXACT
  */
 void Camera_UpdateOverview(void) {
     VehicleState *veh;
@@ -3372,8 +3372,8 @@ void Camera_UpdateOverview(void) {
     Car_UpdateDynamicObjects(g_ActiveVehicleIndex);
 }
 /**
- * @original Race_FindFocusedVehicle (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original Race_FindFocusedVehicle (MAINDOS_32BIT.EXE, fx.c)
+ * @fidelity EXACT
  */
 int Race_FindFocusedVehicle(void) {
     int top_rank;
@@ -3434,8 +3434,8 @@ int Race_FindFocusedVehicle(void) {
 
 
 /**
- * @original HUD_RenderPauseMenu (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original HUD_RenderPauseMenu (MAINDOS_32BIT.EXE @ 0x000534cc, fx.c)
+ * @fidelity EXACT
  */
 void HUD_RenderPauseMenu(void) {
     int text_w;
@@ -3542,8 +3542,8 @@ void HUD_RenderPauseMenu(void) {
 }
 
 /**
- * @original HUD_RenderConfirmationPrompt (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original HUD_RenderConfirmationPrompt (MAINDOS_32BIT.EXE @ 0x000539f8, fx.c)
+ * @fidelity EXACT
  */
 void HUD_RenderConfirmationPrompt(void) {
     int *prompt_surface;
@@ -3595,7 +3595,7 @@ void HUD_RenderConfirmationPrompt(void) {
 }
 
 /**
- * @original HUD_RenderTrackResults (MAINDOS_32BIT.EXE @ 0x00037ee0, fx.c)
+ * @original HUD_RenderTrackResults (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 int HUD_RenderTrackResults(void) {
@@ -4597,7 +4597,7 @@ int HUD_RenderTrackResults(void) {
 }
 
 /**
- * @original HUD_RenderPlayAgainPrompt (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original HUD_RenderPlayAgainPrompt (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void HUD_RenderPlayAgainPrompt(void) {
@@ -4716,8 +4716,8 @@ layout_racers:
 }
 
 /**
- * @original Camera_UpdateChase (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original Camera_UpdateChase (MAINDOS_32BIT.EXE @ 0x00037883, fx.c)
+ * @fidelity EXACT
  */
 void Camera_UpdateChase(void) {
     VehicleState *veh;
@@ -4884,8 +4884,8 @@ void Camera_UpdateChase(void) {
 }
 
 /**
- * @original Car_UpdateDynamicObjects (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original Car_UpdateDynamicObjects (MAINDOS_32BIT.EXE @ 0x00048a14, fx.c)
+ * @fidelity EXACT
  */
 void Car_UpdateDynamicObjects(int car_idx) {
     VehicleState *veh;
@@ -5070,8 +5070,8 @@ void Car_UpdateDynamicObjects(int car_idx) {
 }
 
 /**
- * @original Video_SetGraphicsMode (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
- * @fidelity ADAPTED
+ * @original Video_SetGraphicsMode (MAINDOS_32BIT.EXE @ 0x0006f2c4, fx.c)
+ * @fidelity EXACT
  */
 int Video_SetGraphicsMode(void) {
     int i;
@@ -5153,7 +5153,7 @@ int Video_SetGraphicsMode(void) {
 }
 
 /**
- * @original Lisa_Init (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original Lisa_Init (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void Lisa_Init(void) {
@@ -5221,7 +5221,7 @@ void Lisa_Init(void) {
     _exit(1);
 }
 /**
- * @original HUD_RenderTelemetryOverlay (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original HUD_RenderTelemetryOverlay (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void HUD_RenderTelemetryOverlay(void) {
@@ -5258,7 +5258,7 @@ void HUD_RenderTelemetryOverlay(void) {
 }
 
 /**
- * @original HUD_CheckWrongWayHeading (MAINDOS_32BIT.EXE [MISSING DOS ADDR], fx.c)
+ * @original HUD_CheckWrongWayHeading (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity ADAPTED
  */
 void HUD_CheckWrongWayHeading(int player_idx) {
@@ -5299,8 +5299,8 @@ void HUD_CheckWrongWayHeading(int player_idx) {
 }
 
 /**
- * @original HUD_RenderPlayerElements (MAINDOS_32BIT.EXE @ 0x0003a725, fx.c)
- * @fidelity ADAPTED
+ * @original HUD_RenderPlayerElements (MAINDOS_32BIT.EXE @ 0x0003a788, fx.c)
+ * @fidelity EXACT
  */
 void HUD_RenderPlayerElements(int player_idx) {
     PlayerHUDState *hud;
@@ -5768,7 +5768,7 @@ void HUD_RenderPlayerElements(int player_idx) {
     HUD_RenderFloatingMessages();
 }
 /**
- * @original FX_UpdateAllParticles (MAINDOS_32BIT.EXE @ 0x3636c, fx.c)
+ * @original FX_UpdateAllParticles (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity EXACT
  */
 void FX_UpdateAllParticles(void) {
@@ -5776,7 +5776,7 @@ void FX_UpdateAllParticles(void) {
 }
 
 /**
- * @original Lisa_FlushRasterizerCommands (MAINDOS_32BIT.EXE @ 0x4f0e9, fx.c)
+ * @original Lisa_FlushRasterizerCommands (MAINDOS_32BIT.EXE, fx.c)
  * @fidelity EXACT
  */
 int Lisa_FlushRasterizerCommands(void *cmd_queue, unsigned int flags) {
@@ -5787,7 +5787,7 @@ int Lisa_FlushRasterizerCommands(void *cmd_queue, unsigned int flags) {
 }
 
 /**
- * @original Video_FlipScreen (MAINDOS_32BIT.EXE @ 0x10060, fx.c)
+ * @original Video_FlipScreen (MAINDOS_32BIT.EXE @ 0x00010060, fx.c)
  * @fidelity EXACT
  */
 void Video_FlipScreen(void) {

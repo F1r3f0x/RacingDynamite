@@ -77,44 +77,44 @@
 | `0x39040` | - | `FUN_0042ea60` | `FX_UpdateSuperPlotObject` | `main.c` | Decompiled | EXACT | Updates high-intensity spark / super plot particle positions. |
 | `0x39350` | - | `FUN_0042ed60` | `Obstacle_SimulateDynamics` | `main.c` | Decompiled | EXACT | Performs dynamic physics integration (ballistic velocity, restitution, and world model transforms) for track scenery obstacles. |
 | `0x3a280` | - | `FUN_0042fc80` | `FX_UpdateFlyingParticles` | `main.c` | Decompiled | EXACT | Updates ballistic trajectory and ground bounce for flying vehicle debris. |
-| - | - | `-` | `FX_UpdateExplosionNode` | `fx.c` | Unidentified | - |  |
-| - | - | `-` | `FX_UpdateVehicleWreck` | `fx.c` | Unidentified | - | Particle type 7 vehicle catastrophic wreck simulator (unlinks 4 wheels, sets airborne flag, spawns flying wheel debris). |
-| - | - | `-` | `FX_UpdateDetachedWheel` | `fx.c` | Unidentified | - | Particle type 9 flying detached car wheel simulation with track bounce. |
-| - | - | `-` | `FX_UpdateVehicleCrashSequence` | `fx.c` | Unidentified | - | Particle type 10 vehicle spin/flip crash sequence, tumbling airborne dynamics, and shrapnel explosion trigger. |
-| - | - | `-` | `FX_UpdateCarDebris` | `fx.c` | Unidentified | - | Particle type 11 vehicle shrapnel/debris particle bouncing on collision surface. |
-| - | - | `-` | `FX_SpawnWaterSplashes` | `fx.c` | Unidentified | - | Water surface (type 0x5a) wheel contact detector emitting type 2 water splash particles. |
-| - | - | `-` | `FX_SpawnTireDirtDebris` | `fx.c` | Unidentified | - | Dirt, gravel, and grass wheel contact detector emitting type 8 rooster tail particles. |
-| - | - | `-` | `FX_SpawnLandingDustPuffs` | `fx.c` | Unidentified | - | Hard landing impact detector (+0x278) emitting left and right type 1 dust puffs. |
-| - | - | `-` | `FX_SpawnTireSkidSmoke` | `fx.c` | Unidentified | - | High-speed asphalt drifting/braking detector emitting type 1 smoke puffs. |
-| `0x0003636c` | - | `-` | `FX_UpdateAllParticles` | `fx.c` | Decompiled | EXACT |  |
-| - | - | `-` | `FX_SpawnParticle` | `fx.c` | Unidentified | - |  |
-| - | - | `-` | `FX_UpdateWeatherBounds` | `fx.c` | Unidentified | - |  |
-| - | - | `-` | `FX_UpdateWeatherGeometry` | `fx.c` | Unidentified | - | Dynamic 3D rain streak / snowflake geometry builder and lightning palette flasher. |
-| - | - | `-` | `FX_FrameTick` | `fx.c` | Unidentified | - | Master visual effects coordinator updating body lean/pitch visuals, weather meshes, and skid timers. |
-| - | - | `FUN_004356d0` | `Pos_InitAnimatedObjects` | `fx.c` | Unidentified | - | Converts keyframe coordinates in .POS to relative displacement deltas. |
-| - | - | `FUN_004357a0` | `Pos_UpdateAnimatedObjects` | `fx.c` | Unidentified | - | Advances keyframe playheads and translates moving scenery objects via Lisa_MoveObject. |
-| - | - | `-` | `Math_LookupTrigAngle` | `fx.c` | Unidentified | - | Fixed-point trigonometric sine/cosine lookup in 1024-entry LUT (DAT_004944e0). |
-| - | - | `-` | `Camera_UpdateOverview` | `fx.c` | Unidentified | - | Track aerial overview / flyby camera positioned relative to road sequence splines. |
-| - | - | `FUN_00436990` | `Race_RenderViewport` | `fx.c` | Unidentified | - | Calculates camera transform, invokes scene renderer, draws HUD. |
-| `0x0004f0e9` | - | `-` | `Lisa_FlushRasterizerCommands` | `fx.c` | Decompiled | EXACT | Direct dispatch wrapper invoking Lisa_ExecuteRasterizerCommands. |
-| - | - | `-` | `Race_FindFocusedVehicle` | `fx.c` | Unidentified | - | Trailing/leading vehicle target selector for broadcast and chase cameras. |
+| - | - | `-` | `FX_UpdateExplosionNode` | `fx.c` | Decompiled | ADAPTED | Animates fireball expansion and debris dispersion for destroyed vehicles |
+| `0x0003c208` | - | `-` | `FX_UpdateVehicleWreck` | `fx.c` | Decompiled | EXACT | Detaches wheels, triggers fire/smoke emitters, and disables physics on wrecked car |
+| - | - | `-` | `FX_UpdateDetachedWheel` | `fx.c` | Decompiled | ADAPTED | Simulates ballistic bouncing physics for tires sheared off during collisions |
+| `0x0003db4c` | - | `-` | `FX_UpdateVehicleCrashSequence` | `fx.c` | Decompiled | EXACT | Multi-frame rollover and flip crash trajectory integration |
+| - | - | `-` | `FX_UpdateCarDebris` | `fx.c` | Decompiled | ADAPTED | Simulates tumbling body panel fragments and glass shards |
+| `0x0003d808` | - | `-` | `FX_SpawnWaterSplashes` | `fx.c` | Decompiled | EXACT | Generates animated water splash spray sprites when car enters water surfaces |
+| - | - | `-` | `FX_SpawnTireDirtDebris` | `fx.c` | Decompiled | ADAPTED | Emits dirt and gravel kick-up particles behind spinning tires |
+| - | - | `-` | `FX_SpawnLandingDustPuffs` | `fx.c` | Decompiled | ADAPTED | Spawns impact dust clouds when car suspension compresses upon landing |
+| `0x0003e6ec` | - | `-` | `FX_SpawnTireSkidSmoke` | `fx.c` | Decompiled | EXACT | Spawns tire friction smoke particles when vehicle drifts or brakes aggressively |
+| - | - | `-` | `FX_UpdateAllParticles` | `fx.c` | Decompiled | EXACT | Wrapper dispatching particle simulation frame tick |
+| `0x0003fee8` | - | `-` | `FX_SpawnParticle` | `fx.c` | Decompiled | EXACT | Allocates active scenery particle slot with priority preemption |
+| - | - | `-` | `FX_UpdateWeatherBounds` | `fx.c` | Decompiled | ADAPTED | Updates weather volume boundary box around active camera view |
+| - | - | `-` | `FX_UpdateWeatherGeometry` | `fx.c` | Decompiled | ADAPTED | Transforms rain streak / snow flake vertices relative to camera motion |
+| - | - | `-` | `FX_FrameTick` | `fx.c` | Decompiled | ADAPTED | Master particle simulation tick updating all emitters and active effects |
+| - | - | `FUN_004356d0` | `Pos_InitAnimatedObjects` | `fx.c` | Decompiled | ADAPTED | Initializes keyframed trackside animated obstacle nodes from POS asset |
+| `0x000413fc` | - | `FUN_004357a0` | `Pos_UpdateAnimatedObjects` | `fx.c` | Decompiled | EXACT | Steps keyframed vertex animation for moving trackside obstacles |
+| - | - | `-` | `Math_LookupTrigAngle` | `fx.c` | Decompiled | EXACT | Computes arctangent angle lookup |
+| `0x00038e6d` | - | `-` | `Camera_UpdateOverview` | `fx.c` | Decompiled | EXACT | Simulates blimp overview camera following leading vehicles |
+| - | - | `FUN_00436990` | `Race_RenderViewport` | `fx.c` | Decompiled | ADAPTED | Renders single/splitscreen 3D scene viewport with HUD elements |
+| - | - | `-` | `Lisa_FlushRasterizerCommands` | `fx.c` | Decompiled | EXACT | Command queue flush dispatcher calling Lisa_ExecuteRasterizerCommands |
+| - | - | `-` | `Race_FindFocusedVehicle` | `fx.c` | Decompiled | EXACT | Identifies primary racer or human player to orient camera focus |
 | - | - | `FUN_00438210` | `Lisa_RenderPanorama` | `lisa3d.c` | Decompiled | ADAPTED | Panoramic backdrop sky blitter sampling active .PAN texture |
-| - | - | `-` | `HUD_RenderPauseMenu` | `fx.c` | Unidentified | - | In-game pause menu renderer (Continue, Restart, Retire, CD Track selection). |
-| - | - | `-` | `HUD_RenderConfirmationPrompt` | `fx.c` | Unidentified | - | In-game confirmation modal renderer (Restart Y/N, Quit Y/N). |
-| `0x00037ee0` | - | `-` | `HUD_RenderTrackResults` | `fx.c` | Decompiled | ADAPTED | Post-race leaderboard, standings, split times, and multiplayer wait screen renderer. |
-| - | - | `-` | `HUD_RenderPlayAgainPrompt` | `fx.c` | Unidentified | - | Post-race Play Track Again? (Y/N) prompt dialog renderer. |
-| - | - | `FUN_0043c910` | `Camera_UpdateChase` | `fx.c` | Unidentified | - | Multi-mode chase camera with velocity lookahead, 0.125 azimuth lag, slope adaptation (DEV-004). |
-| - | - | `-` | `Car_UpdateDynamicObjects` | `fx.c` | Unidentified | - | Transforms car body and wheel dynamic objects in Lisa 3D spatial grid. |
-| - | - | `-` | `Video_SetGraphicsMode` | `fx.c` | Unidentified | - | Mode switch handler for 320x200, 640x480, and 800x600 display modes and viewport setup. |
-| - | - | `FUN_0043e2a0` | `Lisa_Init` | `fx.c` | Unidentified | - | Initializes Lisa 2 rasterizer viewport, Z-buffer, and focal lengths. |
-| - | - | `-` | `Audio_LoadAssets` | `fx.c` | Unidentified | - |  |
-| `0x00010060` | - | `-` | `Video_FlipScreen` | `fx.c` | Decompiled | EXACT | Virtual framebuffer blitter presenting backbuffer to DirectDraw surface. |
-| - | - | `-` | `Audio_StopSample` | `fx.c` | Unidentified | - |  |
-| - | - | `-` | `Audio_PlaySampleVol` | `fx.c` | Unidentified | - |  |
-| - | - | `-` | `HUD_RenderTelemetryOverlay` | `fx.c` | Unidentified | - | On-screen debug telemetry overlay (FPS, speed, pitch/roll, road index, diff). |
-| - | - | `-` | `FX_SpawnWeather` | `fx.c` | Unidentified | - |  |
-| - | - | `-` | `HUD_CheckWrongWayHeading` | `fx.c` | Unidentified | - | Evaluates car heading vs road chunk vector and manages the Wrong Way warning timer. |
-| `0x0003a725` | - | `-` | `HUD_RenderPlayerElements` | `fx.c` | Decompiled | ADAPTED | In-race player HUD renderer (tachometer, turbo bar, position indicator, lap splits). |
+| `0x000534cc` | - | `-` | `HUD_RenderPauseMenu` | `fx.c` | Decompiled | EXACT | Renders in-race pause menu overlay and handles Continue / Restart / Quit navigation |
+| `0x000539f8` | - | `-` | `HUD_RenderConfirmationPrompt` | `fx.c` | Decompiled | EXACT | Renders modal confirmation prompt for race restart and exit confirmation |
+| - | - | `-` | `HUD_RenderTrackResults` | `fx.c` | Decompiled | ADAPTED | Renders end-of-race leaderboard standings, split times, and championship points |
+| - | - | `-` | `HUD_RenderPlayAgainPrompt` | `fx.c` | Decompiled | ADAPTED | Displays play-again / next-track prompt following race completion |
+| `0x00037883` | - | `FUN_0043c910` | `Camera_UpdateChase` | `fx.c` | Decompiled | EXACT | 3rd-person chase camera dynamics, yaw smoothing, and road pitch tracking |
+| `0x00048a14` | - | `-` | `Car_UpdateDynamicObjects` | `fx.c` | Decompiled | EXACT | Synchronizes vehicle chassis, wheel meshes, shadows, and name tags with spatial grid |
+| `0x0006f2c4` | - | `-` | `Video_SetGraphicsMode` | `fx.c` | Decompiled | EXACT | Configures VGA Mode 13h (320x200 8bpp) display mode |
+| - | - | `FUN_0043e2a0` | `Lisa_Init` | `fx.c` | Decompiled | ADAPTED | Calculates camera viewports and FOV scaling tables for current screen resolution |
+| - | - | `-` | `Audio_LoadAssets` | `fx.c` | Decompiled | EXACT | Loads all sound bank pools and sample assets |
+| `0x00010060` | - | `-` | `Video_FlipScreen` | `fx.c` | Decompiled | EXACT | Blits virtual double buffer to VGA 0xA0000 video memory |
+| - | - | `-` | `Audio_StopSample` | `fx.c` | Decompiled | EXACT | Stops currently active sound voice on specified channel |
+| `0x00049a8c` | - | `-` | `Audio_PlaySampleVol` | `fx.c` | Decompiled | EXACT | Plays sound sample with channel, volume, panning and pitch parameters |
+| - | - | `-` | `HUD_RenderTelemetryOverlay` | `fx.c` | Decompiled | ADAPTED | Displays optional race debug telemetry, speedometer, and engine RPM indicators |
+| - | - | `-` | `FX_SpawnWeather` | `fx.c` | Decompiled | EXACT | Spawns rain, snow, or fog particle effects according to track weather settings |
+| - | - | `-` | `HUD_CheckWrongWayHeading` | `fx.c` | Decompiled | ADAPTED | Compares vehicle velocity vector against track spline tangent to detect wrong-way driving |
+| `0x0003a788` | - | `-` | `HUD_RenderPlayerElements` | `fx.c` | Decompiled | EXACT | Renders in-game dashboard HUD: tachometer, mini-map, position, lap timer, and turbo gauge |
 | `0x00020c18` | - | `FUN_00446578` | `Surface_TestTrianglePositiveDZ` | `getsurf.c` | Decompiled | EXACT | 2D trapezoidal slope span test for table2 triangles ($dz \ge 0$). |
 | `0x00020c81` | - | `FUN_004465e1` | `Surface_TestTriangleNegativeDZ` | `getsurf.c` | Decompiled | EXACT | 2D trapezoidal slope span test for table1 triangles ($dz < 0$). |
 | `0x00056410` | - | `FUN_004466d0` | `Lisa_RenderScene` | `lisa3d.c` | Decompiled | EXACT | Master scene rendering loop: frustum culling, vertex transform, depth sorting, and rasterization |
