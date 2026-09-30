@@ -217,22 +217,50 @@ void Lisa_RenderPanorama(void) {
 
     /* Compute vertical horizon screen line from camera pitch */
     horizon_y = half_h + (int)((g_CameraPitch / 90.0f) * 64.0f);
-    if (horizon_y < 0) horizon_y = 0;
-    if (horizon_y > g_ScreenHeight) horizon_y = g_ScreenHeight;
+    if (horizon_y < 20) horizon_y = 20;
+    if (horizon_y > g_ScreenHeight - 20) horizon_y = g_ScreenHeight - 20;
 
-    /* Render top sky/horizon rows */
-    for (y = 0; y < horizon_y; y++) {
-        int v = 128 - (horizon_y - y);
-        uint8_t *pan_row;
-        uint8_t *fb_row;
-        if (v < 0) v = 0;
-        if (v > 255) v = 255;
-        pan_row = &g_pActivePAN[v * 256];
-        fb_row = &g_pVirtualFramebuffer[y * g_ScreenWidth];
+    /* Render sky gradient (rows 180..195 of PAN) */
+    for (y = 0; y < horizon_y - 16; y++) {
+        int sky_v = 180 + (y * 15) / (horizon_y > 16 ? (horizon_y - 16) : 1);
+        uint8_t *fb_row = &g_pVirtualFramebuffer[y * g_ScreenWidth];
+        memset(fb_row, g_pActivePAN[sky_v * 256], g_ScreenWidth);
+    }
+
+    /* Render mountains silhouette (rows 0..15 in PAN) */
+    for (y = horizon_y - 16; y < horizon_y; y++) {
+        int v = y - (horizon_y - 16);
+        uint8_t *pan_row = &g_pActivePAN[v * 256];
+        uint8_t *fb_row = &g_pVirtualFramebuffer[y * g_ScreenWidth];
 
         for (x = 0; x < g_ScreenWidth; x++) {
             int u = (base_u + (x * 256) / g_ScreenWidth) % 256;
             fb_row[x] = pan_row[u];
+        }
+    }
+
+    /* Render ground below horizon: perspective track & terrain */
+    for (y = horizon_y; y < g_ScreenHeight; y++) {
+        int ground_v = 200 + ((y - horizon_y) * 20) / (g_ScreenHeight - horizon_y);
+        uint8_t *fb_row = &g_pVirtualFramebuffer[y * g_ScreenWidth];
+        uint8_t ground_color = g_pActivePAN[ground_v * 256];
+        int road_center = g_ScreenWidth / 2;
+        int road_width = ((y - horizon_y) * 180) / (g_ScreenHeight - horizon_y);
+
+        for (x = 0; x < g_ScreenWidth; x++) {
+            if (x >= road_center - road_width && x <= road_center + road_width) {
+                int is_curb = (x < road_center - road_width + 5) || (x > road_center + road_width - 5);
+                int is_centerline = (abs(x - road_center) < 2) && (((y + (int)(g_CameraYaw * 60.0f)) / 4) % 2 == 0);
+                if (is_centerline) {
+                    fb_row[x] = 250;
+                } else if (is_curb) {
+                    fb_row[x] = (((y + (int)(g_CameraYaw * 60.0f)) / 4) % 2 == 0) ? 160 : 250;
+                } else {
+                    fb_row[x] = 236;
+                }
+            } else {
+                fb_row[x] = ground_color;
+            }
         }
     }
 }

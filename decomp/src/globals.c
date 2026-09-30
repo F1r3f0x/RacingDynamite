@@ -3,9 +3,17 @@
  */
 #include <stddef.h>
 #include <stdint.h>
+#include <i86.h>
+#include <conio.h>
 
 /* --- Engine Subsystem Callbacks & Stubs --- */
-int App_SetVideoMode(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
+int App_SetVideoMode(void *a, void *b, void *c, void *d) {
+    union REGS r;
+    (void)a; (void)b; (void)c; (void)d;
+    r.w.ax = 0x0013; /* Set 320x200 256-color Mode 13h */
+    int386(0x10, &r, &r);
+    return 1;
+}
 int Audio_GetChannel(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Audio_GetVoice(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Audio_PlaySample(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
@@ -54,8 +62,20 @@ int Track_FindSurfaceHeight(void *a, void *b, void *c, void *d) { (void)a; (void
 int Track_LoadPlacementsAndCars(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Unknown_553a0(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Unknown_558d0(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 1; }
-int Unknown_558ec(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
-int Unknown_559e4(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 1; }
+int Unknown_558ec(void *a, void *b, void *c, void *d) {
+    union REGS r;
+    (void)a; (void)b; (void)c; (void)d;
+    r.w.ax = 0x0003; /* Restore 80x25 standard text mode */
+    int386(0x10, &r, &r);
+    return 0;
+}
+int Unknown_559e4(void *a, void *b, void *c, void *d) {
+    union REGS r;
+    (void)a; (void)b; (void)c; (void)d;
+    r.w.ax = 0x0013; /* Set 320x200 256-color VGA mode */
+    int386(0x10, &r, &r);
+    return 1;
+}
 #pragma aux _wstart2_ "_wstart2_";
 void _wstart2_(void) {}
 

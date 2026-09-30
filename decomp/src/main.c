@@ -21,6 +21,24 @@ typedef unsigned short ushort;
 #include <io.h>
 #include <fcntl.h>
 #include <math.h>
+#include <i86.h>
+#include <conio.h>
+#include <string.h>
+
+extern uint8_t *g_pVirtualFramebuffer;
+extern uint8_t *g_pActivePAN;
+extern float g_CameraYaw;
+extern float g_CameraPitch;
+extern void Lisa_RenderPanorama(void);
+
+void VGA_SetPalette(const uint8_t *col_data) {
+    int i;
+    const uint8_t *pal = col_data + 8;
+    outp(0x3C8, 0);
+    for (i = 0; i < 768; i++) {
+        outp(0x3C9, pal[i] >> 2);
+    }
+}
 
 #define VEHICLE_STRUCT_SIZE 0x484C
 
@@ -2629,6 +2647,35 @@ void Track_LoadPlacements(void) {
     int fd;
     int len;
 
+    /* Load LEVELS\CANADA\CANADA.COL palette */
+    sprintf(path, "LEVELS\\%s%s.COL", g_TrackDir, g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd >= 0) {
+        len = filelength(fd);
+        g_pTrackCOL = (uint8_t *)Mem_Alloc(len, 0);
+        read(fd, g_pTrackCOL, len);
+        close(fd);
+        BootLog("[MAINDOS] Setting VGA palette from CANADA.COL...");
+        VGA_SetPalette(g_pTrackCOL);
+    }
+
+    /* Load LEVELS\CANADA\CANADA.PAN horizon */
+    sprintf(path, "LEVELS\\%s%s.PAN", g_TrackDir, g_TrackName);
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd >= 0) {
+        len = filelength(fd);
+        g_pActivePAN = (uint8_t *)Mem_Alloc(len, 0);
+        read(fd, g_pActivePAN, len);
+        close(fd);
+        BootLog("[MAINDOS] Loaded CANADA.PAN horizon texture");
+    }
+
+    /* Allocate virtual double buffer */
+    if (!g_pVirtualFramebuffer) {
+        g_pVirtualFramebuffer = (uint8_t *)Mem_Alloc(320 * 200, 0);
+        BootLog("[MAINDOS] Allocated 320x200 virtual framebuffer");
+    }
+
     sprintf(path, "LEVELS\\%s%s.PLC", g_TrackDir, g_TrackName);
     sprintf(msg, "[MAINDOS] Track_LoadPlacements: Opening %s", path);
     BootLog(msg);
@@ -2756,19 +2803,52 @@ void Track_PreprocessPlacements(void) {
  */
 void Game_StateDispatcher(void) {
     if (g_GameStage == 1) {
-        if (Menu_Tick() > 1) {
-            BootLog("[MAINDOS] StateDispatcher: Loading track placements...");
-            Track_LoadPlacements();
-            BootLog("[MAINDOS] StateDispatcher: Loading meshes...");
-            Mesh_LoadTrackAndCars();
-            BootLog("[MAINDOS] StateDispatcher: Loading texture pages...");
-            Texture_LoadAllPages();
-            BootLog("[MAINDOS] StateDispatcher: Preprocessing placements...");
-            Track_PreprocessPlacements();
-            BootLog("[MAINDOS] StateDispatcher: Initializing race scene & cars...");
-            Race_InitSceneAndCars();
-            BootLog("[MAINDOS] StateDispatcher: Track & car pipeline initialized successfully!");
-            g_GameStage = 2;
+        if (!g_InRace) {
+            if (Menu_Tick() > 1) {
+                BootLog("[MAINDOS] StateDispatcher: Loading track placements...");
+                Track_LoadPlacements();
+                BootLog("[MAINDOS] StateDispatcher: Loading meshes...");
+                Mesh_LoadTrackAndCars();
+                BootLog("[MAINDOS] StateDispatcher: Loading texture pages...");
+                Texture_LoadAllPages();
+                BootLog("[MAINDOS] StateDispatcher: Preprocessing placements...");
+                Track_PreprocessPlacements();
+                BootLog("[MAINDOS] StateDispatcher: Initializing race scene & cars...");
+                Race_InitSceneAndCars();
+                BootLog("[MAINDOS] StateDispatcher: Track & car pipeline initialized successfully!");
+                BootLog("[MAINDOS] Starting interactive 3D race render loop...");
+                g_InRace = 1;
+            }
+        } else {
+            static int frame_count = 0;
+            static float yaw = 0.0f;
+            yaw += 0.02f;
+            if (yaw > 6.2831853f) yaw -= 6.2831853f;
+            g_CameraYaw = yaw;
+            g_CameraPitch = 0.0f;
+            g_ScreenWidth = 320;
+            g_ScreenHeight = 200;
+
+            Lisa_RenderPanorama();
+
+            /* VSync: wait for vertical blanking to eliminate tearing */
+            while ((inp(0x3DA) & 0x08) == 0);
+
+            /* Blit double-buffer to Mode 13h VGA video memory at 0xA0000 */
+            memcpy((void *)0xA0000, g_pVirtualFramebuffer, 320 * 200);
+
+            frame_count++;
+            if (frame_count == 1) {
+                BootLog("[MAINDOS] First 3D frame rendered and blitted to VGA screen!");
+            }
+
+            /* Check if a key was pressed; if so, exit cleanly to DOS */
+            if (kbhit()) {
+                getch();
+                BootLog("[MAINDOS] Key pressed, exiting to DOS...");
+                g_InRace = 0;
+                g_GameStage = 2;
+            }
         }
     }
 }
