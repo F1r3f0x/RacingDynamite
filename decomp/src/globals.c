@@ -61,6 +61,7 @@ int Surface_GetHeightAtPoint(void *a, void *b, void *c, void *d) { (void)a; (voi
 int Track_FindSurfaceHeight(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Track_LoadPlacementsAndCars(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Unknown_553a0(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
+int Unknown_553c8(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 1; }
 int Unknown_558d0(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 1; }
 int Unknown_558ec(void *a, void *b, void *c, void *d) {
     union REGS r;
@@ -253,12 +254,12 @@ uint32_t g_LisaObjMat_Tmp4[16] = {0};
 uint32_t g_LisaObjMat_Tmp5[16] = {0};
 uint32_t g_LisaObjMat_Tmp6[16] = {0};
 uint32_t g_LisaObjectMatrix_22[16] = {0};
-uint32_t g_LisaOpcodeTable[16] = {0};
+void *g_LisaOpcodeTable[32] = {0};
 uint32_t g_LisaPerspectiveDepthTable[16] = {0};
 uint32_t g_LisaRasterizerAccumulator[16] = {0};
 uint32_t g_LisaRasterizerJmpTable[16] = {0};
-uint32_t g_LisaRenderTexturedOp11_FuncPtr[16] = {0};
-uint32_t g_LisaRenderTexturedOp15_FuncPtr[16] = {0};
+void *g_LisaRenderTexturedOp11_FuncPtr = NULL;
+void *g_LisaRenderTexturedOp15_FuncPtr = NULL;
 uint32_t g_LisaScanlinePitch[16] = {0};
 uint32_t g_LisaScreenPitch[16] = {0};
 uint32_t g_LisaShadingEnabled[16] = {0};

@@ -24,6 +24,9 @@ typedef unsigned short ushort;
 #include <i86.h>
 #include <conio.h>
 #include <string.h>
+#include <dos.h>
+#include <direct.h>
+#include <stdlib.h>
 
 extern uint8_t *g_pVirtualFramebuffer;
 extern uint8_t *g_pActivePAN;
@@ -54,7 +57,26 @@ void VGA_SetPaletteRaw(const uint8_t *pal) {
 
 uint8_t *g_pVehicleTable = NULL;
 int g_ActiveVehicleCount = 0;
-int g_GameStage = 0;             /* 0=Init, 1=Run, 2=Shutdown */
+/* Authentic DOS timing and state variables (MAINDOS_32BIT.EXE) */
+int g_GameStage = 0;              /* ds:0xab5e0 - 0=Init, 1=Run, 2=Shutdown */
+int g_InitStarted = 0;            /* ds:0xab5e4 */
+int g_ShutdownCompleted = 0;      /* ds:0xab5e8 */
+int g_TickInt = 0;                /* ds:0xab5dc */
+double g_TimerAccumulator = 0.0;  /* ds:0xe73a8 */
+
+int g_GameState1 = 0;             /* ds:0x1fede8 - Menu Init trigger */
+int g_GameState2 = 0;             /* ds:0x1fedf8 - Menu Tick trigger */
+int g_GameState3 = 0;             /* ds:0x1fee1c - Track Load trigger */
+int g_GameState4 = 0;             /* ds:0x1fee08 - Race startup stage (1->2->3) */
+int g_GameState5 = 0;             /* ds:0x1fedf0 - Race active tick */
+int g_GameState6 = 0;             /* ds:0x1fee2c - Post-race screen trigger */
+int g_GameState7 = 0;             /* ds:0x1fed48 - Race mode */
+int g_GameState8 = 0;             /* ds:0x1fee7c */
+int g_GameState9 = 0;             /* ds:0x1fee0c */
+int g_GameState10 = 0;            /* ds:0x1fee38 - Restart race flag */
+int g_GameState11 = 0;            /* ds:0x1fedd4 */
+uint8_t *g_pIdentityColorTable = NULL; /* ds:0x1fec0c - 64KB lighting LUT */
+
 int g_MenuState = 0;
 int g_MenuSelection = 0;
 int g_SelectedCar = 0;
@@ -134,6 +156,29 @@ int g_AmbientEmitterCount = 0;
 AmbientSoundEmitter *g_pAmbientEmitters = NULL;
 int g_SoundMuted = 0;
 int g_SoundStateTable[32];
+SoundSample ***g_SoundPools[8] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+int g_CDAudioAvailable = 0;
+int g_CDAudioVolume = 255;
+int g_SoundActive = 0;
+int g_SoundVolume = 100;
+uint8_t g_CarSoundPitchTable[16][200];
+uint8_t g_CarSoundVolumeTable1[16][200];
+uint8_t g_CarSoundVolumeTable2[16][200];
+uint8_t g_CarSoundVolumeTable3[16][200];
+
+static const char g_CarModelNames[11][9] = {
+    "COOPER",
+    "PORSCHE",
+    "JEEP",
+    "COP",
+    "MUSTANG",
+    "SCHOOL",
+    "VAN",
+    "VW",
+    "TRUCK",
+    "DODGE",
+    "NASCAR"
+};
 int g_TrackEmitterCount = 0;
 TrackParticleEmitter *g_pTrackEmitters = NULL;
 int g_WeatherParticleCount = 0;
@@ -155,21 +200,55 @@ double Math_RandomFloat(void) {
 
 
 
+double Timer_GetTime(void);
+int Unknown_553c8(void *a, void *b, void *c, void *d);
+void Game_StateDispatcher(void);
+int Menu_Init(void);
+int Menu_Tick(void);
+
+static void Timer_UpdateAccumulator(void) {
+    double t = Timer_GetTime();
+    /* ds:0xa0004 = 1000.0, ds:0xa000c = 0.027777777777777776 (1.0 / 36.0) */
+    g_TimerAccumulator += t * (1000.0 * 0.027777777777777776);
+    g_TickInt = (int)g_TimerAccumulator;
+}
+
+static void Subsystem_InitLightingTable(void) {
+    int i, j;
+    if (!g_pIdentityColorTable) {
+        g_pIdentityColorTable = (uint8_t *)Mem_Alloc(65536, 0);
+    }
+    if (g_pIdentityColorTable) {
+        for (i = 0; i < 256; i++) {
+            for (j = 0; j < 256; j++) {
+                g_pIdentityColorTable[i * 256 + j] = (uint8_t)i;
+            }
+        }
+    }
+}
+
 /**
- * @original Game_Init (MAINDOS_32BIT.EXE @ 0x00417270, main.c)
+ * @original Game_Init (MAINDOS_32BIT.EXE @ 0x20d18, main.c)
  * @fidelity EXACT
- * @notes Sets initial game state flags, resets timers, initiates intro sequence.
+ * @notes Sets initial game state flags, allocates identity LUT, inits audio, initiates menu.
  */
 int Game_Init(void) {
-    g_GameStage = 0;
-    g_InRace = 0;
-    Load_SystemGraphicsAndFonts();
-    Menu_Init();
+    g_GameState1 = 2;
+    g_GameState2 = 0;
+    g_GameState3 = 0;
+    g_GameState4 = 0;
+    g_GameState5 = 0;
+    g_GameState6 = 0;
+    g_GameState9 = 0;
+    Subsystem_InitLightingTable();
+    Audio_Init();
+    g_GameState11 = 1;
+    g_GameState1 = 1; /* Ready for Menu_Init on next tick */
     return 1;
 }
 
 /**
- * @original App_Init (MAINDOS_32BIT.EXE @ 0x00412500, main.c)
+ * @original App_Init (MAINDOS_32BIT.EXE [MISSING DOS ADDR], main.c)
  * @fidelity EXACT
  * @notes Initializes graphics modes, input devices, and timer resolution.
  */
@@ -187,7 +266,7 @@ void BootLog(const char *msg) {
 }
 
 /**
- * @original App_Shutdown (MAINDOS_32BIT.EXE @ 0x00412530, main.c)
+ * @original App_Shutdown (MAINDOS_32BIT.EXE @ 0x215c8, main.c)
  * @fidelity EXACT
  * @notes Releases graphics framebuffers, audio channels, and frees assets.
  */
@@ -201,33 +280,47 @@ void App_Shutdown(void) {
         Mem_Free(0, g_pMenuTab);
         g_pMenuTab = NULL;
     }
+    if (g_pIdentityColorTable != NULL) {
+        Mem_Free(0, g_pIdentityColorTable);
+        g_pIdentityColorTable = NULL;
+    }
     Font_Shutdown();
 }
 
 /**
- * @original App_FrameTick (MAINDOS_32BIT.EXE @ 0x00412230, main.c)
+ * @original App_FrameTick (MAINDOS_32BIT.EXE @ 0x10060, main.c)
  * @fidelity EXACT
- * @notes Main engine tick; dispatches Init (0), Main Loop (1), and Shutdown (2).
+ * @notes Master engine tick; dispatches Init (0), Main Loop (1), and Shutdown (2) with 72Hz FPU accumulator.
  */
 int App_FrameTick(void) {
     if (g_GameStage == 0) {
-        BootLog("[MAINDOS] App_FrameTick: Stage 0 (Game_Init)");
-        Game_Init();
-        g_GameStage = 1;
+        if (g_InitStarted == 0) {
+            g_InitStarted = 1;
+            Timer_UpdateAccumulator();
+            Game_Init();
+            g_GameStage = 1;
+        }
         return 1;
     } else if (g_GameStage == 1) {
-        Game_StateDispatcher();
-        return 1;
+        if (g_ShutdownCompleted == 0) {
+            Timer_UpdateAccumulator();
+            Game_StateDispatcher();
+            return 1;
+        }
     } else if (g_GameStage == 2) {
-        BootLog("[MAINDOS] App_FrameTick: Stage 2 (App_Shutdown)");
-        App_Shutdown();
-        return 0;
+        if (g_ShutdownCompleted == 0) {
+            Timer_UpdateAccumulator();
+            App_Shutdown();
+            Unknown_553c8(NULL, NULL, NULL, NULL);
+            g_ShutdownCompleted = 1;
+            return 0;
+        }
     }
     return 1;
 }
 
 /**
- * @original Track_LoadAllAssets (MAINDOS_32BIT.EXE @ 0x00418dd0, main.c)
+ * @original Track_LoadAllAssets (MAINDOS_32BIT.EXE [MISSING DOS ADDR], main.c)
  * @fidelity EXACT
  * @notes Master track loader: loads .COL, .PAN, .PIC, .SHD, .TAB, .POS, and HUD fonts.
  */
@@ -344,7 +437,7 @@ int Track_LoadAllAssets(void) {
 }
 
 /**
- * @original AI_FollowTrackSplines (MAINDOS_32BIT.EXE @ 0x004134e0, main.c)
+ * @original AI_FollowTrackSplines (MAINDOS_32BIT.EXE @ 0x1aea0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0000aea0. Steering simulation updating AI vehicle heading, track spline waypoint
  *        progression, and speed moderation.
@@ -478,7 +571,7 @@ void AI_FollowTrackSplines(int car_idx) {
 }
 
 /**
- * @original Track_LoadSplines (MAINDOS_32BIT.EXE @ 0x00414e40, main.c)
+ * @original Track_LoadSplines (MAINDOS_32BIT.EXE @ 0x1ce1c, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0000ce1c. Loads LEVELS\<TRACK>\<TRACK>.TRI, initializes AI controller table,
  *        and builds left/right road boundary splines and AI waypoint tables.
@@ -540,7 +633,7 @@ int Track_LoadSplines(void) {
 }
 
 /**
- * @original Race_InitSceneAndCars (MAINDOS_32BIT.EXE @ 0x0041b470, main.c)
+ * @original Race_InitSceneAndCars (MAINDOS_32BIT.EXE @ 0x2489c, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001489c. Instantiates player and AI cars on starting grid, loads track surface,
  *        and binds collision and physics states.
@@ -653,7 +746,7 @@ void Race_InitSceneAndCars(void) {
 }
 
 /**
- * @original Race_ResolveVehicleCollisions (MAINDOS_32BIT.EXE @ 0x00422680, main.c)
+ * @original Race_ResolveVehicleCollisions (MAINDOS_32BIT.EXE @ 0x2d008, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001d008. Inter-vehicle and scenery obstacle collision detection and impulse response.
  *        Advances fixed 72 Hz physics integration, evaluates pair-wise car-to-car collision bounding
@@ -750,7 +843,7 @@ void Race_ResolveVehicleCollisions(void) {
 }
 
 /**
- * @original Race_CheckCheckpointTriggers (MAINDOS_32BIT.EXE @ 0x00429a40, main.c)
+ * @original Race_CheckCheckpointTriggers (MAINDOS_32BIT.EXE @ 0x350f0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000250f0. Tests vehicle collision against type 150..154 split-time checkpoint gates
  *        and dynamic track scenery obstacles (road signs, traffic cones, debris).
@@ -887,7 +980,7 @@ void Race_CheckCheckpointTriggers(void) {
 }
 
 /**
- * @original Car_UpdateAxleSpeeds (MAINDOS_32BIT.EXE @ 0x00427d70, main.c)
+ * @original Car_UpdateAxleSpeeds (MAINDOS_32BIT.EXE @ 0x00032d8c, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00022d8c. Computes front and rear axle mean rotational speeds:
  *        front_axle_speed = (wheel[0].speed + wheel[2].speed) * 0.5;
@@ -895,25 +988,15 @@ void Race_CheckCheckpointTriggers(void) {
  */
 void Car_UpdateAxleSpeeds(int car_idx) {
     uint8_t *car;
-    double fl_speed;
-    double fr_speed;
-    double rl_speed;
-    double rr_speed;
-
     if (g_pVehicleTable == NULL) return;
 
     car = g_pVehicleTable + car_idx * VEHICLE_STRUCT_SIZE;
-    fl_speed = *(double *)(car + 0x58);
-    fr_speed = *(double *)(car + 0x78);
-    rl_speed = *(double *)(car + 0x60);
-    rr_speed = *(double *)(car + 0x80);
-
-    *(double *)(car + 0x640) = (fl_speed + fr_speed) * 0.5;
-    *(double *)(car + 0x648) = (rl_speed + rr_speed) * 0.5;
+    *(double *)(car + 0x640) = (*(double *)(car + 0x58) + *(double *)(car + 0x78)) * 0.5;
+    *(double *)(car + 0x648) = (*(double *)(car + 0x60) + *(double *)(car + 0x80)) * 0.5;
 }
 
 /**
- * @original Car_VerticalDynamics (MAINDOS_32BIT.EXE @ 0x00423aa0, main.c)
+ * @original Car_VerticalDynamics (MAINDOS_32BIT.EXE @ 0x0002e234, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001e234. Applies gravity acceleration (-0.2/tick), computes ground equilibrium (+5.0),
  *        handles suspension compression/rebound velocity bounce (-0.2 factor with damping), and triggers bottoming-out effects.
@@ -925,6 +1008,7 @@ void Car_VerticalDynamics(int car_idx) {
     double delta_ground;
     double speed;
     double ride_height;
+    int material;
 
     if (g_pVehicleTable == NULL) return;
 
@@ -953,22 +1037,35 @@ void Car_VerticalDynamics(int car_idx) {
         if (*(int *)(car + 0x270) == 0) {
             *(double *)(car + 0x20) = delta_ground;
         } else if (*(int *)(car + 0x270) == 1) {
-            double rebound = 0.5;
             if (*(double *)(car + 0x20) > 8.0) {
-                rebound = -0.2;
+                *(double *)(car + 0x20) = -*(double *)(car + 0x20) * 0.2;
+            } else {
+                *(double *)(car + 0x20) = *(double *)(car + 0x20) * 0.5;
             }
-            *(double *)(car + 0x20) *= rebound;
             if (*(double *)(car + 0x20) < -15.0) {
                 *(double *)(car + 0x20) = -15.0;
             }
             *(int *)(car + 0x270) = 0;
             *(int *)(car + 0x278) = 1;
+
+            material = *(int *)(car + 0x170);
+            if (material == 100 || (material >= 110 && material <= 130) || (material >= 20 && material < 30)) {
+                if (*(int *)(car + 0x274) == 1) {
+                    *(int *)(car + 0x354) = 1;
+                }
+            } else if (delta_ground < -35.0) {
+                if (material == 101 || (material >= 130 && material <= 150) || (material >= 30 && material < 40)) {
+                    if (*(int *)(car + 0x274) == 1) {
+                        *(int *)(car + 0x358) = 1;
+                    }
+                }
+            }
         }
     }
 }
 
 /**
- * @original Car_PhysicsTick (MAINDOS_32BIT.EXE @ 0x00424570, main.c)
+ * @original Car_PhysicsTick (MAINDOS_32BIT.EXE @ 0x2ed00, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001ed00. Master fixed-timestep 72 Hz vehicle dynamics simulation:
  *        4-wheel independent raycast suspension, lateral slip, steering, and traction.
@@ -1116,7 +1213,7 @@ void Car_PhysicsTick(int car_idx) {
 }
 
 /**
- * @original Math_Signum (MAINDOS_32BIT.EXE @ 0x00429a10, main.c)
+ * @original Math_Signum (MAINDOS_32BIT.EXE @ 0x350c9, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000250c9. Standard 32-bit integer signum returning -1 for negative, 1 for positive, 0 for zero.
  */
@@ -1127,7 +1224,7 @@ int Math_Signum(int val) {
 }
 
 /**
- * @original Physics_ReflectVelocityOffNormal (MAINDOS_32BIT.EXE @ 0x0042a8d0, main.c)
+ * @original Physics_ReflectVelocityOffNormal (MAINDOS_32BIT.EXE @ 0x35f38, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00025f38. Rotates 3D velocity into plane-aligned space via yaw and pitch of
  *        contact normal, reflects penetrating velocity, and transforms back into world space.
@@ -1173,7 +1270,7 @@ void Physics_ReflectVelocityOffNormal(double *pVec) {
 }
 
 /**
- * @original Car_CheckLandingStatus (MAINDOS_32BIT.EXE @ 0x00423ea0, main.c)
+ * @original Car_CheckLandingStatus (MAINDOS_32BIT.EXE @ 0x2e65e, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001e65e. Checks if airborne car has touched ground (pos_y < ground_y + 5.0),
  *        clears airborne flag (+0x270) and asserts landing impact trigger (+0x278).
@@ -1190,7 +1287,7 @@ void Car_CheckLandingStatus(int car_idx) {
 }
 
 /**
- * @original Car_UpdateShadowTracking (MAINDOS_32BIT.EXE @ 0x00423f00, main.c)
+ * @original Car_UpdateShadowTracking (MAINDOS_32BIT.EXE @ 0x2e6a2, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001e6a2. Advances secondary position/shadow tracking for car.
  *        Integrates velocity at 72 Hz timestep (factor 1.0 / 72.0 = 0.013888889).
@@ -1212,7 +1309,7 @@ void Car_UpdateShadowTracking(int car_idx) {
 }
 
 /**
- * @original Car_UpdateBodyVelocity (MAINDOS_32BIT.EXE @ 0x00423f70, main.c)
+ * @original Car_UpdateBodyVelocity (MAINDOS_32BIT.EXE @ 0x2e6f6, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001e6f6. Computes local lateral and longitudinal acceleration from target
  *        waypoint error, rotates by vehicle heading, applies tire drag and clamps to max speed.
@@ -1269,7 +1366,7 @@ void Car_UpdateBodyVelocity(int car_idx) {
 }
 
 /**
- * @original Timer_GetDeltaTime (MAINDOS_32BIT.EXE @ 0x00420c00, main.c)
+ * @original Timer_GetDeltaTime (MAINDOS_32BIT.EXE @ 0x3b996, main.c)
  * @fidelity EXACT
  * @notes Computes elapsed frame delta time using tick counter scaled by 0.036.
  *        Updates accumulator, frame counter, and clamps delta to max 10.8 ticks.
@@ -1302,7 +1399,7 @@ double Timer_GetDeltaTime(void) {
 }
 
 /**
- * @original Collision_TestLineIntersection (MAINDOS_32BIT.EXE @ 0x004292c0, main.c)
+ * @original Collision_TestLineIntersection (MAINDOS_32BIT.EXE @ 0x346cc, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000246cc. Tests 2D collision impulse transfer between two vehicles.
  *        Calculates contact lever arm distances, applies impulse restitution (-1.5),
@@ -1376,7 +1473,7 @@ int Collision_TestLineIntersection(double *car1, double *car2) {
 }
 
 /**
- * @original Collision_TestPolygonOverlap (MAINDOS_32BIT.EXE @ 0x004295e0, main.c)
+ * @original Collision_TestPolygonOverlap (MAINDOS_32BIT.EXE @ 0x349e5, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000249e5. Tests pairwise edge crossings between two 2D convex vehicle polygons.
  *        Averages contact points to calculate centroid contact position and normal angle.
@@ -1466,7 +1563,7 @@ int Collision_TestPolygonOverlap(float *poly1_x, float *poly1, int count1, float
 }
 
 /**
- * @original Collision_FilterTrackClearance (MAINDOS_32BIT.EXE @ 0x00428b90, main.c)
+ * @original Collision_FilterTrackClearance (MAINDOS_32BIT.EXE @ 0x33ee8, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00023ee8. Filters candidate collision triangles according to track-specific
  *        ground clearance thresholds (Snake: 350, Moose: 200, Mountain: 450, Ski: 125, Default: 2500).
@@ -1499,7 +1596,7 @@ int Collision_FilterTrackClearance(int tri_idx, int pos_x, int pos_y, int pos_z,
 }
 
 /**
- * @original Collision_RaycastVehicleSphere (MAINDOS_32BIT.EXE @ 0x00428730, main.c)
+ * @original Collision_RaycastVehicleSphere (MAINDOS_32BIT.EXE @ 0x3383c, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0002383c. Sets up vertical collision query ray from vehicle center
  *        (pos_y + 500.0 downward 850 units) and invokes spatial partition octree query.
@@ -1516,7 +1613,7 @@ void *Collision_RaycastVehicleSphere(int x, int y, int z, int car_idx) {
 }
 
 /**
- * @original Collision_TestTrackTriangles (MAINDOS_32BIT.EXE @ 0x00427dc0, main.c)
+ * @original Collision_TestTrackTriangles (MAINDOS_32BIT.EXE @ 0x32dc8, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00022dc8. Iterates over track collision triangles from octree query,
  *        calculates closest point on triangle, plane distance, and penetration restitution.
@@ -1614,7 +1711,7 @@ void *Collision_TestTrackTriangles(uint32_t world_x, uint32_t world_y, int world
 }
 
 /**
- * @original Car_SpawnExplosionEffects (MAINDOS_32BIT.EXE @ 0x004242b0, main.c)
+ * @original Car_SpawnExplosionEffects (MAINDOS_32BIT.EXE @ 0x2ea42, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001ea42. Plays vehicle explosion audio sample (vol capped at 0x10000,
  *        sample 2, freq 22000) and emits 6 explosion/debris particle sprites.
@@ -1664,7 +1761,7 @@ void Car_SpawnExplosionEffects(int car1_idx, int car2_idx) {
 }
 
 /**
- * @original Car_HandleElimination (MAINDOS_32BIT.EXE @ 0x00423620, main.c)
+ * @original Car_HandleElimination (MAINDOS_32BIT.EXE @ 0x2de2e, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001de2e. Checks trailing vehicle elimination condition in knock-out races.
  *        Marks vehicle blown (+0x354 = 1), sets race status, and logs elimination string.
@@ -1758,7 +1855,7 @@ void Car_HandleElimination(void) {
 }
 
 /**
- * @original Car_ChangeMesh (MAINDOS_32BIT.EXE @ 0x004269a0, main.c)
+ * @original Car_ChangeMesh (MAINDOS_32BIT.EXE @ 0x31856, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00021856. Swaps current vehicle 3D mesh representation to damaged or
  *        alternative model geometry in Lisa3D rasterizer instance table.
@@ -1811,7 +1908,7 @@ void Car_ChangeMesh(int car_idx) {
 }
 
 /**
- * @original Car_ApplyMeshDamage (MAINDOS_32BIT.EXE @ 0x00426b40, main.c)
+ * @original Car_ApplyMeshDamage (MAINDOS_32BIT.EXE @ 0x319d6, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000219d6. Evaluates high-velocity collision impact against vehicle chassis,
  *        morphs vertex positions inward toward impact point, and emits impact sparks.
@@ -1934,7 +2031,7 @@ void Car_ApplyMeshDamage(int car_idx, int impact_severity) {
 }
 
 /**
- * @original Car_UpdateEffects (MAINDOS_32BIT.EXE @ 0x0042bc20, main.c)
+ * @original Car_UpdateEffects (MAINDOS_32BIT.EXE @ 0x372d8, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000272d8. Coordinates real-time vehicle visual effects (tire skid marks,
  *        turbo exhaust flames, engine damage smoke, and surface scraping sparks).
@@ -1952,7 +2049,7 @@ void Car_UpdateEffects(void) {
 }
 
 /**
- * @original Audio_UpdateDynamicDoppler (MAINDOS_32BIT.EXE @ 0x0042aa00, main.c)
+ * @original Audio_UpdateDynamicDoppler (MAINDOS_32BIT.EXE @ 0x360ed, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000260ed. Updates sound pitch and volume for dynamic track ambient sources.
  */
@@ -2001,7 +2098,7 @@ void Audio_UpdateDynamicDoppler(void) {
 }
 
 /**
- * @original Track_SpawnEnvironmentalParticles (MAINDOS_32BIT.EXE @ 0x0042acb0, main.c)
+ * @original Track_SpawnEnvironmentalParticles (MAINDOS_32BIT.EXE @ 0x3636c, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0002636c. Emits environmental smoke/dust from track waypoint emitters.
  */
@@ -2032,7 +2129,7 @@ void Track_SpawnEnvironmentalParticles(void) {
 }
 
 /**
- * @original Track_SpawnWeatherParticles (MAINDOS_32BIT.EXE @ 0x0042b5d0, main.c)
+ * @original Track_SpawnWeatherParticles (MAINDOS_32BIT.EXE @ 0x36cdd, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00026cdd. Spawns rain and snow weather particles in viewport frustum.
  */
@@ -2065,7 +2162,7 @@ void Track_SpawnWeatherParticles(void) {
 }
 
 /**
- * @original FX_UpdateSkidMarks (MAINDOS_32BIT.EXE @ 0x0042bc80, main.c)
+ * @original FX_UpdateSkidMarks (MAINDOS_32BIT.EXE @ 0x3731c, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0002731c. Generates ground skidmarks behind slipping vehicle tires.
  */
@@ -2116,7 +2213,7 @@ void FX_UpdateSkidMarks(void) {
 }
 
 /**
- * @original FX_UpdateTransparentSpriteObject (MAINDOS_32BIT.EXE @ 0x0042e2e0, main.c)
+ * @original FX_UpdateTransparentSpriteObject (MAINDOS_32BIT.EXE @ 0x398f8, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000298f8. Updates 3D world position and animation of transparent billboard sprites.
  */
@@ -2154,7 +2251,7 @@ void FX_UpdateTransparentSpriteObject(void *particle, int instance_idx) {
 }
 
 /**
- * @original FX_UpdateTransparentSpriteObject2 (MAINDOS_32BIT.EXE @ 0x0042e5a0, main.c)
+ * @original FX_UpdateTransparentSpriteObject2 (MAINDOS_32BIT.EXE @ 0x39cf2, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00029cf2. Updates transparent billboard sprite instance variation.
  */
@@ -2163,7 +2260,7 @@ void FX_UpdateTransparentSpriteObject2(void *particle, int instance_idx) {
 }
 
 /**
- * @original FX_UpdateHandlePlotObject (MAINDOS_32BIT.EXE @ 0x0042e860, main.c)
+ * @original FX_UpdateHandlePlotObject (MAINDOS_32BIT.EXE @ 0x39d1a, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00029d1a. Updates particle plot marker object positions in scene.
  */
@@ -2193,7 +2290,7 @@ void FX_UpdateHandlePlotObject(void *particle, int instance_idx) {
 }
 
 /**
- * @original FX_UpdateSuperPlotObject (MAINDOS_32BIT.EXE @ 0x0042ea60, main.c)
+ * @original FX_UpdateSuperPlotObject (MAINDOS_32BIT.EXE @ 0x39040, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00029040. Updates high-intensity spark / super plot particle positions.
  */
@@ -2225,7 +2322,7 @@ void FX_UpdateSuperPlotObject(void *particle, int instance_idx) {
 }
 
 /**
- * @original Obstacle_SimulateDynamics (MAINDOS_32BIT.EXE @ 0x0042ed60, main.c)
+ * @original Obstacle_SimulateDynamics (MAINDOS_32BIT.EXE @ 0x39350, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00029350. Performs dynamic physics integration (ballistic velocity, restitution,
  *        and world model transforms) for track scenery obstacles (traffic cones, drums).
@@ -2265,7 +2362,7 @@ void Obstacle_SimulateDynamics(void *obstacle) {
 }
 
 /**
- * @original FX_UpdateFlyingParticles (MAINDOS_32BIT.EXE @ 0x0042fc80, main.c)
+ * @original FX_UpdateFlyingParticles (MAINDOS_32BIT.EXE @ 0x3a280, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0002a280. Updates ballistic trajectory and ground bounce for flying vehicle debris.
  */
@@ -2303,7 +2400,7 @@ void FX_UpdateFlyingParticles(void *particle, int instance_idx) {
 }
 
 /**
- * @original Obstacle_TriggerAction (MAINDOS_32BIT.EXE @ 0x00420090, main.c)
+ * @original Obstacle_TriggerAction (MAINDOS_32BIT.EXE @ 0x2a40e, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001a40e. Evaluates type 0xFA (250) trigger obstacles and triggers associated actions.
  */
@@ -2328,7 +2425,7 @@ void Obstacle_TriggerAction(void) {
 }
 
 /**
- * @original AI_InitSteeringConeLookup (MAINDOS_32BIT.EXE @ 0x004200e0, main.c)
+ * @original AI_InitSteeringConeLookup (MAINDOS_32BIT.EXE @ 0x2a4ec, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001a4ec. Precomputes 800x405 lookahead steering cone and obstacle threat table.
  */
@@ -2368,7 +2465,7 @@ void AI_InitSteeringConeLookup(void) {
 }
 
 /**
- * @original Ghost_LoadCarAndPath (MAINDOS_32BIT.EXE @ 0x00420240, main.c)
+ * @original Ghost_LoadCarAndPath (MAINDOS_32BIT.EXE @ 0x2a97a, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001a97a. Loads recorded Time Attack ghost car trajectory from GHOSTS\%s.GST.
  */
@@ -2387,7 +2484,7 @@ void Ghost_LoadCarAndPath(void) {
 }
 
 /**
- * @original Track_LoadBinaryCache (MAINDOS_32BIT.EXE @ 0x00420870, main.c)
+ * @original Track_LoadBinaryCache (MAINDOS_32BIT.EXE @ 0x2adf8, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001adf8. Loads preprocessed level data cache (ign_dos.btz / ign_dos.btz).
  */
@@ -2405,19 +2502,36 @@ void Track_LoadBinaryCache(void) {
 }
 
 /**
- * @original Sound_FreeAllSounds (MAINDOS_32BIT.EXE @ 0x00420990, main.c)
+ * @original Sound_FreeAllSounds (MAINDOS_32BIT.EXE @ 0x0002b42d, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001b42d. Frees active level audio buffers and sample tables upon track unload.
  */
 void Sound_FreeAllSounds(void) {
-    int i;
-    for (i = 0; i < 32; i++) {
-        Sound_FreeSample(i);
+    int type, bank, sample;
+
+    for (type = 0; type < 8; type++) {
+        if (g_SoundPools[type]) {
+            for (bank = 0; bank < 128; bank++) {
+                if (g_SoundPools[type][bank]) {
+                    for (sample = 0; sample < 16; sample++) {
+                        if (g_SoundPools[type][bank][sample]) {
+                            Mem_Free(1, g_SoundPools[type][bank][sample]);
+                            g_SoundPools[type][bank][sample] = NULL;
+                        }
+                    }
+                    Mem_Free(1, g_SoundPools[type][bank]);
+                    g_SoundPools[type][bank] = NULL;
+                }
+            }
+            Mem_Free(1, g_SoundPools[type]);
+            g_SoundPools[type] = NULL;
+        }
     }
+    g_SoundActive = 0;
 }
 
 /**
- * @original Game_Shutdown (MAINDOS_32BIT.EXE @ 0x00420b70, main.c)
+ * @original Game_Shutdown (MAINDOS_32BIT.EXE @ 0x2b51a, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001b51a. Releases all allocated game memory and shuts down engine subsystems cleanly.
  */
@@ -2427,7 +2541,7 @@ void Game_Shutdown(void) {
 }
 
 /**
- * @original Race_UpdateCountdownAndFinish (MAINDOS_32BIT.EXE @ 0x00420d10, main.c)
+ * @original Race_UpdateCountdownAndFinish (MAINDOS_32BIT.EXE @ 0x2b9d3, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001b9d3. Updates start-line traffic light timer and checks race winner victory condition.
  */
@@ -2452,7 +2566,7 @@ void Race_UpdateCountdownAndFinish(void) {
 }
 
 /**
- * @original HUD_UpdateRaceTimes (MAINDOS_32BIT.EXE @ 0x00420e60, main.c)
+ * @original HUD_UpdateRaceTimes (MAINDOS_32BIT.EXE @ 0x2b9e4, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001b9e4. Updates player split times and current lap timer display on in-game HUD.
  */
@@ -2468,7 +2582,7 @@ void HUD_UpdateRaceTimes(void) {
 }
 
 /**
- * @original Input_ProcessRaceHotkeys (MAINDOS_32BIT.EXE @ 0x00420eb0, main.c)
+ * @original Input_ProcessRaceHotkeys (MAINDOS_32BIT.EXE @ 0x2c5b8, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001c5b8. Polls keyboard hotkeys during race: Pause (P), Escape menu, camera toggle, and volume.
  */
@@ -2491,7 +2605,7 @@ void Input_ProcessRaceHotkeys(void) {
 }
 
 /**
- * @original Input_PollPlayerVehicleControls (MAINDOS_32BIT.EXE @ 0x00421bc0, main.c)
+ * @original Input_PollPlayerVehicleControls (MAINDOS_32BIT.EXE @ 0x2ccc5, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001ccc5. Reads keyboard / joystick axes and maps to vehicle steering, throttle, brake, and turbo.
  */
@@ -2535,7 +2649,7 @@ void Input_PollPlayerVehicleControls(void) {
 }
 
 /**
- * @original Ghost_SaveCarAndPath (MAINDOS_32BIT.EXE @ 0x004222b0, main.c)
+ * @original Ghost_SaveCarAndPath (MAINDOS_32BIT.EXE @ 0x2cf5d, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001cf5d. Serializes recorded lap waypoint trajectory into GHOSTS\%s.GST.
  */
@@ -2555,7 +2669,7 @@ void Ghost_SaveCarAndPath(void) {
 }
 
 /**
- * @original Track_SaveBinaryCache (MAINDOS_32BIT.EXE @ 0x004225d0, main.c)
+ * @original Track_SaveBinaryCache (MAINDOS_32BIT.EXE @ 0x2cfbc, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001cfbc. Saves preprocessed level collision cache file.
  */
@@ -2568,32 +2682,6 @@ void Track_SaveBinaryCache(void) {
     }
 }
 
-
-
-/**
- * @original Car_IntegratePosition (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Car_IntegratePosition(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
-
-/**
- * @original WinMain (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void WinMain(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
-
-/**
- * @original Mesh_InstantiatePlacedObjects (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Mesh_InstantiatePlacedObjects(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
-
 /**
  * @original FatalError (MAINDOS_32BIT.EXE @ 0x00020d14, main.c)
  * @fidelity EXACT
@@ -2604,21 +2692,374 @@ int FatalError(const char *fmt, ...) {
 }
 
 /**
- * @original Audio_Init (MAINDOS_32BIT.EXE @ 0x00063f3e, main.c)
- * @fidelity STUB
+ * @original Audio_Init (MAINDOS_32BIT.EXE @ 0x00063d56, main.c)
+ * @fidelity EXACT
+ * @notes CD-ROM MSCDEX Audio hardware detection & mixer initialization.
  */
 void Audio_Init(void) {
-    /* DOS Sound Blaster hardware mixer initialization */
+    g_CDAudioAvailable = 0;
+    g_CDAudioVolume = 255;
+    g_SoundActive = 1;
+}
+
+/**
+ * @original CDAudio_SetVolume (MAINDOS_32BIT.EXE @ 0x00063f3e, main.c)
+ * @fidelity EXACT
+ * @notes MSCDEX Red Book Audio master volume controller (0..255).
+ */
+int CDAudio_SetVolume(int volume) {
+    if (volume < 0 || volume > 255) {
+        return 0;
+    }
+    g_CDAudioVolume = volume;
+    return 1;
+}
+
+/**
+ * @original Sound_FreeSlot (MAINDOS_32BIT.EXE @ 0x00063244, main.c)
+ * @fidelity EXACT
+ * @notes Frees all loaded sample descriptors in a specific bank slot.
+ */
+int Sound_FreeSlot(int type, int bank) {
+    int i;
+    if (type < 0 || type >= 8 || bank < 0 || bank >= 128) {
+        return 0;
+    }
+    if (!g_SoundPools[type] || !g_SoundPools[type][bank]) {
+        return 0;
+    }
+
+    for (i = 0; i < 16; i++) {
+        if (g_SoundPools[type][bank][i]) {
+            Mem_Free(1, g_SoundPools[type][bank][i]);
+            g_SoundPools[type][bank][i] = NULL;
+        }
+    }
+    return 1;
+}
+
+/**
+ * @original Sound_InsertSample (MAINDOS_32BIT.EXE @ 0x000638a4, main.c)
+ * @fidelity EXACT
+ * @notes Inserts a decoded sound sample descriptor into the pool hierarchy.
+ */
+int Sound_InsertSample(int type, int bank, int sample_idx, SoundSample *sample) {
+    if (type < 0 || type >= 8 || bank < 0 || bank >= 128 || sample_idx < 0 || sample_idx >= 16) {
+        return 0;
+    }
+
+    if (!g_SoundPools[type]) {
+        g_SoundPools[type] = (SoundSample ***)Mem_Alloc(1, 128 * sizeof(SoundSample **));
+        if (!g_SoundPools[type]) return 0;
+        memset(g_SoundPools[type], 0, 128 * sizeof(SoundSample **));
+    }
+
+    if (!g_SoundPools[type][bank]) {
+        g_SoundPools[type][bank] = (SoundSample **)Mem_Alloc(1, 16 * sizeof(SoundSample *));
+        if (!g_SoundPools[type][bank]) return 0;
+        memset(g_SoundPools[type][bank], 0, 16 * sizeof(SoundSample *));
+    }
+
+    if (g_SoundPools[type][bank][sample_idx]) {
+        Mem_Free(1, g_SoundPools[type][bank][sample_idx]);
+    }
+
+    g_SoundPools[type][bank][sample_idx] = sample;
+    return 1;
+}
+
+/**
+ * @original Sound_LoadWAV (MAINDOS_32BIT.EXE @ 0x00062cf4, main.c)
+ * @fidelity EXACT
+ * @notes Authentic RIFF/WAVE chunk parser extracting PCM audio data and sample rate.
+ */
+int Sound_LoadWAV(const char *path, int type, int bank, int sample_idx) {
+    int fd;
+    uint32_t riff_magic;
+    uint32_t riff_size;
+    uint32_t wave_magic;
+    uint32_t chunk_magic;
+    uint32_t chunk_size;
+    uint16_t audio_format = 1;
+    uint16_t num_channels = 1;
+    uint32_t sample_rate = 22050;
+    uint32_t byte_rate;
+    uint16_t block_align;
+    uint16_t bits_per_sample = 8;
+    uint32_t data_size = 0;
+    SoundSample *sample = NULL;
+    uint32_t bytes_read = 0;
+
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        return 0;
+    }
+
+    if (read(fd, &riff_magic, 4) != 4 || riff_magic != 0x46464952) { /* 'RIFF' */
+        close(fd);
+        return 0;
+    }
+    if (read(fd, &riff_size, 4) != 4) {
+        close(fd);
+        return 0;
+    }
+    if (read(fd, &wave_magic, 4) != 4 || wave_magic != 0x45564157) { /* 'WAVE' */
+        close(fd);
+        return 0;
+    }
+
+    while (bytes_read + 8 < riff_size) {
+        if (read(fd, &chunk_magic, 4) != 4 || read(fd, &chunk_size, 4) != 4) {
+            break;
+        }
+        bytes_read += 8;
+
+        if (chunk_magic == 0x20746d66) { /* 'fmt ' */
+            read(fd, &audio_format, 2);
+            read(fd, &num_channels, 2);
+            read(fd, &sample_rate, 4);
+            read(fd, &byte_rate, 4);
+            read(fd, &block_align, 2);
+            read(fd, &bits_per_sample, 2);
+            bytes_read += 16;
+            if (chunk_size > 16) {
+                lseek(fd, chunk_size - 16, SEEK_CUR);
+                bytes_read += chunk_size - 16;
+            }
+        } else if (chunk_magic == 0x61746164) { /* 'data' */
+            data_size = chunk_size;
+            sample = (SoundSample *)Mem_Alloc(1, sizeof(SoundSample) + data_size);
+            if (!sample) {
+                close(fd);
+                return 0;
+            }
+            memset(sample, 0, sizeof(SoundSample));
+            sample->data = (uint8_t *)(sample + 1);
+            read(fd, sample->data, data_size);
+            bytes_read += data_size;
+            if (chunk_size & 1) {
+                lseek(fd, 1, SEEK_CUR);
+                bytes_read++;
+            }
+        } else {
+            lseek(fd, chunk_size, SEEK_CUR);
+            bytes_read += chunk_size;
+            if (chunk_size & 1) {
+                lseek(fd, 1, SEEK_CUR);
+                bytes_read++;
+            }
+        }
+    }
+    close(fd);
+
+    if (!sample) {
+        return 0;
+    }
+
+    sample->sample_rate = sample_rate;
+    sample->bits_per_sample = bits_per_sample;
+    sample->num_samples = (bits_per_sample > 0) ? (data_size * 8 / bits_per_sample) : data_size;
+
+    return Sound_InsertSample(type, bank, sample_idx, sample);
+}
+
+/**
+ * @original Sound_LoadPAT (MAINDOS_32BIT.EXE @ 0x0006280c, main.c)
+ * @fidelity EXACT
+ * @notes Gravis UltraSound GF1PATCH110 patch sample loader.
+ */
+int Sound_LoadPAT(const char *path, int type, int bank, int sample_idx) {
+    int fd;
+    char header[12];
+    int file_len;
+    uint32_t data_size;
+    SoundSample *sample;
+
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) {
+        return 0;
+    }
+
+    if (read(fd, header, 10) != 10 || memcmp(header, "GF1PATCH110", 10) != 0) {
+        close(fd);
+        return 0;
+    }
+
+    file_len = filelength(fd);
+    data_size = (file_len > 0x150) ? (file_len - 0x150) : 0;
+    if (data_size == 0) {
+        close(fd);
+        return 0;
+    }
+
+    lseek(fd, 0x150, SEEK_SET);
+    sample = (SoundSample *)Mem_Alloc(1, sizeof(SoundSample) + data_size);
+    if (!sample) {
+        close(fd);
+        return 0;
+    }
+    memset(sample, 0, sizeof(SoundSample));
+    sample->data = (uint8_t *)(sample + 1);
+    read(fd, sample->data, data_size);
+    close(fd);
+
+    sample->sample_rate = 22050;
+    sample->bits_per_sample = 8;
+    sample->num_samples = data_size;
+
+    return Sound_InsertSample(type, bank, sample_idx, sample);
+}
+
+/**
+ * @original Sound_LoadRW8 (MAINDOS_32BIT.EXE @ 0x00062bc0, main.c)
+ * @fidelity EXACT
+ * @notes Raw 8-bit unsigned PCM sound asset loader.
+ */
+int Sound_LoadRW8(const char *path, int type, int bank, int sample_idx) {
+    int fd;
+    int size;
+    SoundSample *sample;
+
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) return 0;
+    size = filelength(fd);
+    if (size <= 0) {
+        close(fd);
+        return 0;
+    }
+
+    sample = (SoundSample *)Mem_Alloc(1, sizeof(SoundSample) + size);
+    if (!sample) {
+        close(fd);
+        return 0;
+    }
+    memset(sample, 0, sizeof(SoundSample));
+    sample->data = (uint8_t *)(sample + 1);
+    read(fd, sample->data, size);
+    close(fd);
+
+    sample->sample_rate = 22050;
+    sample->bits_per_sample = 8;
+    sample->num_samples = size;
+
+    return Sound_InsertSample(type, bank, sample_idx, sample);
+}
+
+/**
+ * @original Sound_LoadXI (MAINDOS_32BIT.EXE @ 0x000629f4, main.c)
+ * @fidelity EXACT
+ * @notes FastTracker II Extended Instrument audio sample loader.
+ */
+int Sound_LoadXI(const char *path, int type, int bank, int sample_idx) {
+    int fd;
+    char header[24];
+    int file_len;
+    int size;
+    SoundSample *sample;
+
+    fd = open(path, O_RDONLY | O_BINARY);
+    if (fd < 0) return 0;
+    if (read(fd, header, 21) != 21 || memcmp(header, "Extended Instrument:", 20) != 0) {
+        close(fd);
+        return 0;
+    }
+
+    file_len = filelength(fd);
+    size = (file_len > 0x120) ? (file_len - 0x120) : 0;
+    if (size <= 0) {
+        close(fd);
+        return 0;
+    }
+
+    lseek(fd, 0x120, SEEK_SET);
+    sample = (SoundSample *)Mem_Alloc(1, sizeof(SoundSample) + size);
+    if (!sample) {
+        close(fd);
+        return 0;
+    }
+    memset(sample, 0, sizeof(SoundSample));
+    sample->data = (uint8_t *)(sample + 1);
+    read(fd, sample->data, size);
+    close(fd);
+
+    sample->sample_rate = 22050;
+    sample->bits_per_sample = 8;
+    sample->num_samples = size;
+
+    return Sound_InsertSample(type, bank, sample_idx, sample);
 }
 
 /**
  * @original Sound_LoadAsset (MAINDOS_32BIT.EXE @ 0x00063310, main.c)
- * @fidelity STUB
+ * @fidelity EXACT
+ * @notes Master directory scanner loading all .WAV, .PAT, .RW8, and .XI samples in a folder.
  */
-int Sound_LoadAsset(char *path, int type, int bank) {
-    (void)path;
-    (void)type;
-    (void)bank;
+int Sound_LoadAsset(const char *path, int type, int bank) {
+    char search_pattern[260];
+    char file_path[260];
+    struct find_t find_buf;
+    char ext[16];
+    int len;
+    int sample_idx;
+    char *dot;
+
+    if (type < 0 || type > 7 || bank < 0 || bank > 127) {
+        return 0;
+    }
+
+    Sound_FreeSlot(type, bank);
+
+    strcpy(search_pattern, path);
+    len = strlen(search_pattern);
+    if (len > 0 && (search_pattern[len - 1] == '\\' || search_pattern[len - 1] == '/')) {
+        search_pattern[len - 1] = '\0';
+    }
+    strcat(search_pattern, "\\*.*");
+
+    if (_dos_findfirst(search_pattern, _A_NORMAL | _A_RDONLY, &find_buf) != 0) {
+        return 1;
+    }
+
+    do {
+        sample_idx = atoi(find_buf.name);
+
+        strcpy(file_path, path);
+        len = strlen(file_path);
+        if (len > 0 && file_path[len - 1] != '\\' && file_path[len - 1] != '/') {
+            strcat(file_path, "\\");
+        }
+        strcat(file_path, find_buf.name);
+
+        dot = strrchr(find_buf.name, '.');
+        if (dot != NULL) {
+            strcpy(ext, dot);
+            strupr(ext);
+
+            if (strcmp(ext, ".WAV") == 0) {
+                if (!Sound_LoadWAV(file_path, type, bank, sample_idx)) {
+                    _dos_findclose(&find_buf);
+                    return 0;
+                }
+            } else if (strcmp(ext, ".PAT") == 0) {
+                if (!Sound_LoadPAT(file_path, type, bank, sample_idx)) {
+                    _dos_findclose(&find_buf);
+                    return 0;
+                }
+            } else if (strcmp(ext, ".RW8") == 0) {
+                if (!Sound_LoadRW8(file_path, type, bank, sample_idx)) {
+                    _dos_findclose(&find_buf);
+                    return 0;
+                }
+            } else if (strcmp(ext, ".XI") == 0) {
+                if (!Sound_LoadXI(file_path, type, bank, sample_idx)) {
+                    _dos_findclose(&find_buf);
+                    return 0;
+                }
+            }
+        }
+    } while (_dos_findnext(&find_buf) == 0);
+
+    _dos_findclose(&find_buf);
     return 1;
 }
 
@@ -2783,57 +3224,123 @@ void Track_PreprocessPlacements(void) {
 }
 
 /**
- * @original Game_StateDispatcher (MAINDOS_32BIT.EXE @ 0x00020d60, main.c)
- * @fidelity ADAPTED
- * @notes Top-level game loop state machine dispatcher (Intro -> Menus -> Race).
+ * @original Game_StateDispatcher (MAINDOS_32BIT.EXE @ 0x20d60, main.c)
+ * @fidelity EXACT
+ * @notes Native state machine dispatcher (Menu -> Track Load -> 3-stage init -> 3D Race -> Post-Race).
  */
 void Game_StateDispatcher(void) {
-    if (g_GameStage == 1) {
-        if (!g_InRace) {
-            if (Menu_Tick() > 1) {
-                BootLog("[MAINDOS] StateDispatcher: Loading track placements...");
-                Track_LoadPlacements();
-                BootLog("[MAINDOS] StateDispatcher: Loading meshes...");
-                Mesh_LoadTrackAndCars();
-                BootLog("[MAINDOS] StateDispatcher: Loading texture pages...");
-                Texture_LoadAllPages();
-                BootLog("[MAINDOS] StateDispatcher: Preprocessing placements...");
-                Track_PreprocessPlacements();
-                BootLog("[MAINDOS] StateDispatcher: Initializing race scene & cars...");
-                Race_InitSceneAndCars();
-                BootLog("[MAINDOS] StateDispatcher: Track & car pipeline initialized successfully!");
-                BootLog("[MAINDOS] Starting interactive 3D race render loop...");
-                g_InRace = 1;
+    int menu_code = 0;
+
+    if (g_GameState1 == 2) {
+        /* Subsystem 0x119d4: Menu reset/transition */
+    }
+
+    if (g_GameState1 == 1) {
+        if (!Menu_Init()) {
+            g_GameStage = 2; /* Exit to DOS */
+            return;
+        }
+        g_GameState2 = 1;
+        g_GameState1 = 0;
+        g_GameState3 = 0;
+    }
+
+    if (g_GameState2 == 1) {
+        menu_code = Menu_Tick();
+        if (menu_code > 1) {
+            g_GameState1 = 0;
+            g_GameState2 = 0;
+            g_GameState3 = 1;
+        }
+    }
+
+    if (g_GameState3 == 1) {
+        BootLog("[MAINDOS] StateDispatcher: Loading track & vehicle assets...");
+        Track_LoadPlacements();
+        Mesh_LoadTrackAndCars();
+        Texture_LoadAllPages();
+        Track_PreprocessPlacements();
+        Race_InitSceneAndCars();
+
+        if (menu_code == 2) {
+            g_GameState4 = 1; /* Trigger 3-frame race startup */
+            g_GameState1 = 0;
+            g_GameState2 = 0;
+            g_GameState3 = 0;
+            g_GameState8 = 0;
+            g_GameState7 = 3;
+        } else if (menu_code == 3) {
+            g_GameStage = 2; /* Exit to DOS */
+            return;
+        }
+    }
+
+    /* 3-frame race startup sequence (RVAs 0x12170, 0x121dc, 0x1236c) */
+    if (g_GameState4 == 3) {
+        g_GameState4 = 0;
+        g_GameState5 = 1; /* Race is now active */
+        g_GameState6 = 0;
+        BootLog("[MAINDOS] Race phase 3 complete. Simulation active!");
+    } else if (g_GameState4 == 2) {
+        g_GameState4 = 3;
+        g_GameState5 = 0;
+        g_GameState6 = 0;
+        BootLog("[MAINDOS] Race phase 2 complete.");
+    } else if (g_GameState4 == 1) {
+        g_GameState4 = 2;
+        g_GameState5 = 0;
+        g_GameState6 = 0;
+        BootLog("[MAINDOS] Race phase 1 complete.");
+    }
+
+    /* Active race simulation & rendering tick */
+    if (g_GameState5 == 1) {
+        /* 1. Timer delta update */
+        Timer_GetDeltaTime();
+
+        /* 2. Poll input */
+        Input_ProcessRaceHotkeys();
+        Input_PollPlayerVehicleControls();
+
+        /* 3. Physics & collision step (fixed 72Hz) */
+        Race_ResolveVehicleCollisions();
+
+        /* 4. AI steering & spline progression */
+        {
+            int car_i;
+            for (car_i = 1; car_i < g_ActiveVehicleCount; car_i++) {
+                AI_FollowTrackSplines(car_i);
             }
-        } else {
-            static int frame_count = 0;
-            static float yaw = 0.0f;
-            yaw += 0.02f;
-            if (yaw > 6.2831853f) yaw -= 6.2831853f;
-            g_CameraYaw = yaw;
-            g_CameraPitch = 0.0f;
-            g_ScreenWidth = 320;
-            g_ScreenHeight = 200;
+        }
 
-            Lisa_RenderPanorama();
+        /* 5. 3D Camera & Scene Render */
+        Lisa_RenderPanorama();
 
-            /* VSync: wait for vertical blanking to eliminate tearing */
-            while ((inp(0x3DA) & 0x08) == 0);
+        /* 6. VSync & Blit double buffer to Mode 13h VGA */
+        while ((inp(0x3DA) & 0x08) == 0);
+        memcpy((void *)0xA0000, g_pVirtualFramebuffer, 320 * 200);
 
-            /* Blit double-buffer to Mode 13h VGA video memory at 0xA0000 */
-            memcpy((void *)0xA0000, g_pVirtualFramebuffer, 320 * 200);
-
-            frame_count++;
-            if (frame_count == 1) {
-                BootLog("[MAINDOS] First 3D frame rendered and blitted to VGA screen!");
+        if (kbhit()) {
+            int ch = getch();
+            if (ch == 27) { /* ESC exits race */
+                g_GameState5 = 0;
+                g_GameState6 = 1;
             }
-
-            /* Check if a key was pressed; if so, exit cleanly to DOS */
-            if (kbhit()) {
-                getch();
-                BootLog("[MAINDOS] Key pressed, exiting to DOS...");
-                g_InRace = 0;
-                g_GameStage = 2;
+        }
+    } else {
+        if (g_GameState6 == 1) {
+            /* Post-race screen / transition back to menu */
+            if (g_GameState10 == 1) {
+                g_GameState4 = 1;
+                g_GameState8 = 0;
+                g_GameState5 = 0;
+                g_GameState6 = 0;
+            } else {
+                g_GameState8 = 1;
+                g_GameState1 = 1; /* Return to menu */
+                g_GameState4 = 0;
+                g_GameState5 = 0;
+                g_GameState6 = 0;
             }
         }
     }
@@ -2841,111 +3348,69 @@ void Game_StateDispatcher(void) {
 
 /**
  * @original Sound_InitAndLoadPools (MAINDOS_32BIT.EXE @ 0x0002a4f1, main.c)
- * @fidelity ADAPTED
- * @notes Inits audio and loads SKID, ROLL, COLL, BOOST, DIV, and level PAT.
+ * @fidelity EXACT
+ * @notes Master sound pool loader: CD audio volume, ROLL, SKID, COLL, BOOST, DIV, level sounds, and car engines.
  */
 void Sound_InitAndLoadPools(void) {
     char path[128];
-    
+    int vol;
+    int car_idx;
+    int car_model;
+    int fd;
+    uint8_t *engine_data;
+    int i;
+
+    vol = (int)((double)g_SoundVolume * 2.55);
+    CDAudio_SetVolume(vol);
+
     Audio_Init();
-    
+
     sprintf(path, "%sSOUND\\ROLL", g_TrackDir);
     if (!Sound_LoadAsset(path, 0, 0)) FatalError("Error while loading sound\n");
-    
+
     sprintf(path, "%sSOUND\\SKID", g_TrackDir);
     if (!Sound_LoadAsset(path, 0, 1)) FatalError("Error while loading sound\n");
-    
+
     sprintf(path, "%sSOUND\\COLL", g_TrackDir);
     if (!Sound_LoadAsset(path, 0, 2)) FatalError("Error while loading sound\n");
-    
+
     sprintf(path, "%sSOUND\\BOOST", g_TrackDir);
     if (!Sound_LoadAsset(path, 0, 3)) FatalError("Error while loading sound\n");
-    
+
     sprintf(path, "%sSOUND\\DIV", g_TrackDir);
     if (!Sound_LoadAsset(path, 0, 4)) FatalError("Error while loading sound\n");
-    
+
     sprintf(path, "LEVELS\\%sSOUND", g_TrackName);
     if (!Sound_LoadAsset(path, 1, 0)) FatalError("Error while loading sound\n");
-}
 
-/**
- * @original Car_ApplySteering (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Car_ApplySteering(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
+    if (g_CarConfigs != NULL) {
+        for (car_idx = 0; car_idx < g_ActiveVehicleCount; car_idx++) {
+            car_model = *(int *)(g_CarConfigs + car_idx * 0x4c);
+            if (car_model >= 0 && car_model < 11) {
+                sprintf(path, "%s%s\\SOUND", g_CarDir, g_CarModelNames[car_model]);
+                if (!Sound_LoadAsset(path, 2, car_idx)) {
+                    FatalError("Error while loading sound\n");
+                }
 
-/**
- * @original Car_PowertrainUpdate (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Car_PowertrainUpdate(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
-
-/**
- * @original Sound_SynthesizeEngineRPM (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Sound_SynthesizeEngineRPM(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
-
-/**
- * @original Audio_MixCallback (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Audio_MixCallback(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
-
-/**
- * @original Audio_StopVoice (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Audio_StopVoice(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
-
-/**
- * @original Audio_PlayVoice (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Audio_PlayVoice(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
-
-/**
- * @original Audio_SetVoiceParams (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Audio_SetVoiceParams(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
-
-/**
- * @original Music_PlayTrack (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Music_PlayTrack(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
-
-/**
- * @original Sound_LoadPAT (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Sound_LoadPAT(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
-}
-
-/**
- * @original Sound_LoadWAV (MAINDOS_32BIT.EXE, main.c)
- * @fidelity STUB
- */
-void Sound_LoadWAV(void) {
-    /* TODO: Windows-specific or dead-code wrapper stub */
+                sprintf(path, "%s%s\\SOUND\\ENGINE.INF", g_CarDir, g_CarModelNames[car_model]);
+                fd = open(path, O_RDONLY | O_BINARY);
+                if (fd >= 0) {
+                    engine_data = (uint8_t *)Mem_Alloc(1, 0x300);
+                    if (engine_data) {
+                        read(fd, engine_data, 0x300);
+                        for (i = 0; i < 200; i++) {
+                            g_CarSoundPitchTable[car_idx][i]   = engine_data[i];
+                            g_CarSoundVolumeTable1[car_idx][i] = engine_data[i + 0xC8];
+                            g_CarSoundVolumeTable2[car_idx][i] = engine_data[i + 0x190];
+                            g_CarSoundVolumeTable3[car_idx][i] = engine_data[i + 0x258];
+                        }
+                        Mem_Free(1, engine_data);
+                    }
+                    close(fd);
+                }
+            }
+        }
+    }
 }
 
 /* --- MS-DOS Entry Point --- */

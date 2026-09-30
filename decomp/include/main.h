@@ -136,6 +136,33 @@ typedef struct DynamicObject {
     int field_1c;            /* 0x1C */
 } DynamicObject;
 
+typedef struct SoundSample {
+    uint8_t  *data;              /* 0x00 */
+    uint32_t  num_samples;       /* 0x04 */
+    uint32_t  loop_start;        /* 0x08 */
+    uint32_t  loop_len;          /* 0x0C */
+    uint32_t  field_10;          /* 0x10 */
+    uint32_t  field_14;          /* 0x14 */
+    uint32_t  field_18;          /* 0x18 */
+    uint32_t  field_1c;          /* 0x1C */
+    uint32_t  field_20;          /* 0x20 */
+    uint32_t  field_24;          /* 0x24 */
+    uint32_t  field_28;          /* 0x28 */
+    uint32_t  field_2c;          /* 0x2C */
+    uint32_t  field_30;          /* 0x30 */
+    uint32_t  field_34;          /* 0x34 */
+    uint32_t  field_38;          /* 0x38 */
+    uint32_t  field_3c;          /* 0x3C */
+    uint32_t  field_40;          /* 0x40 */
+    uint32_t  field_44;          /* 0x44 */
+    uint32_t  field_48;          /* 0x48 */
+    uint32_t  field_4c;          /* 0x4C */
+    uint32_t  bits_per_sample;   /* 0x50 */
+    uint32_t  sample_rate;       /* 0x54 */
+    uint32_t  field_58;          /* 0x58 */
+    uint32_t  field_5c;          /* 0x5C */
+} SoundSample;
+
 typedef struct SoundChannel {
     int id;                  /* 0x00 */
     int sample_idx;          /* 0x04 */
@@ -297,6 +324,16 @@ void AI_InitSteeringConeLookup(void);
 void Ghost_LoadCarAndPath(void);
 void Track_LoadBinaryCache(void);
 void Sound_FreeAllSounds(void);
+void Audio_Init(void);
+int  CDAudio_SetVolume(int volume);
+int  Sound_LoadAsset(const char *path, int type, int bank);
+int  Sound_LoadWAV(const char *path, int type, int bank, int sample_idx);
+int  Sound_LoadPAT(const char *path, int type, int bank, int sample_idx);
+int  Sound_LoadRW8(const char *path, int type, int bank, int sample_idx);
+int  Sound_LoadXI(const char *path, int type, int bank, int sample_idx);
+int  Sound_InsertSample(int type, int bank, int sample_idx, SoundSample *sample);
+int  Sound_FreeSlot(int type, int bank);
+void Sound_InitAndLoadPools(void);
 void Game_Shutdown(void);
 void Race_UpdateCountdownAndFinish(void);
 void HUD_UpdateRaceTimes(void);
