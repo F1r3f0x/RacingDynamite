@@ -124,7 +124,11 @@ def get_rebuilt_func(symbol_name: str, size: int):
         return None, None
     with open(map_path, "r", encoding="utf-8") as f:
         map_lines = f.readlines()
-    target_names = [symbol_name, f"{symbol_name}_", f"_{symbol_name}"]
+    clean_name = symbol_name.strip('_')
+    target_names = list(set([
+        symbol_name, f"{symbol_name}_", f"_{symbol_name}",
+        clean_name, f"_{clean_name}", f"{clean_name}_", f"_{clean_name}_"
+    ]))
     syms = []
     target_info = None
     for line in map_lines:
