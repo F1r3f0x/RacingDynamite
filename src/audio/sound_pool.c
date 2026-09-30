@@ -25,7 +25,7 @@
 
 /**
  * @brief Load a RIFF/WAVE PCM audio file from disk into 16-bit PCM format.
- * @original FUN_00458e00 (IGN_WIN.EXE @ 0x00458e00, main.c)
+ * @original FUN_00458e00 (MAINDOS_32BIT.EXE @ 0x00458e00, main.c)
  * @fidelity ADAPTED
  */
 bool SoundPool_LoadWav(const char *path, SoundSample *out_sample) {
@@ -40,7 +40,7 @@ bool SoundPool_LoadWav(const char *path, SoundSample *out_sample) {
     Uint32 wav_len = 0;
     SDL_AudioSpec *ret_spec = SDL_LoadWAV(path, &wav_spec, &wav_buf, &wav_len);
     if (ret_spec == NULL) {
-        // Fallback: Check if a matching Gravis UltraSound GF1 .PAT file exists (authentic IGN_WIN.EXE 0x00458e00)
+        // Fallback: Check if a matching Gravis UltraSound GF1 .PAT file exists (authentic MAINDOS_32BIT.EXE 0x00458e00)
         char pat_path[256];
         strncpy(pat_path, path, sizeof(pat_path) - 1);
         pat_path[sizeof(pat_path) - 1] = '\0';
@@ -116,7 +116,7 @@ bool SoundPool_LoadWav(const char *path, SoundSample *out_sample) {
 
 /**
  * @brief Load a Gravis UltraSound GF1 .PAT audio file from disk into 16-bit PCM format.
- * @original FUN_004582b0 (IGN_WIN.EXE @ 0x004582b0, main.c)
+ * @original FUN_004582b0 (MAINDOS_32BIT.EXE @ 0x004582b0, main.c)
  * @fidelity ADAPTED
  */
 bool SoundPool_LoadPat(const char *path, SoundSample *out_sample) {
@@ -233,7 +233,7 @@ void SoundPool_FreeSample(SoundSample *sample) {
 
 /**
  * @brief Load the standard general sound effect pool (ROLL, SKID, COLL, BOOST).
- * @original FUN_0041f9b0 (IGN_WIN.EXE @ 0x0041f9b0, main.c)
+ * @original FUN_0041f9b0 (MAINDOS_32BIT.EXE @ 0x0041f9b0, main.c)
  * @fidelity ADAPTED
  */
 bool SoundPool_LoadGeneralSFX(GeneralSFX *sfx, const char *assets_dir) {

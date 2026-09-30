@@ -1,7 +1,7 @@
 /*
  * main.c - Ignition (1997) Main Engine Entry, Game Loop & Race Subsystem
  * Original file: main.c
- * Target: MAINDOS.EXE / IGN_WIN.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
+ * Target: MAINDOS_32BIT.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
  */
 
 #include "main.h"
@@ -156,7 +156,7 @@ double Math_RandomFloat(void) {
 
 
 /**
- * @original Game_Init (IGN_WIN.EXE @ 0x00417270, main.c)
+ * @original Game_Init (MAINDOS_32BIT.EXE @ 0x00417270, main.c)
  * @fidelity EXACT
  * @notes Sets initial game state flags, resets timers, initiates intro sequence.
  */
@@ -169,7 +169,7 @@ int Game_Init(void) {
 }
 
 /**
- * @original App_Init (IGN_WIN.EXE @ 0x00412500, main.c)
+ * @original App_Init (MAINDOS_32BIT.EXE @ 0x00412500, main.c)
  * @fidelity EXACT
  * @notes Initializes graphics modes, input devices, and timer resolution.
  */
@@ -187,7 +187,7 @@ void BootLog(const char *msg) {
 }
 
 /**
- * @original App_Shutdown (IGN_WIN.EXE @ 0x00412530, main.c)
+ * @original App_Shutdown (MAINDOS_32BIT.EXE @ 0x00412530, main.c)
  * @fidelity EXACT
  * @notes Releases graphics framebuffers, audio channels, and frees assets.
  */
@@ -205,7 +205,7 @@ void App_Shutdown(void) {
 }
 
 /**
- * @original App_FrameTick (IGN_WIN.EXE @ 0x00412230, main.c)
+ * @original App_FrameTick (MAINDOS_32BIT.EXE @ 0x00412230, main.c)
  * @fidelity EXACT
  * @notes Main engine tick; dispatches Init (0), Main Loop (1), and Shutdown (2).
  */
@@ -227,7 +227,7 @@ int App_FrameTick(void) {
 }
 
 /**
- * @original Track_LoadAllAssets (IGN_WIN.EXE @ 0x00418dd0, main.c)
+ * @original Track_LoadAllAssets (MAINDOS_32BIT.EXE @ 0x00418dd0, main.c)
  * @fidelity EXACT
  * @notes Master track loader: loads .COL, .PAN, .PIC, .SHD, .TAB, .POS, and HUD fonts.
  */
@@ -344,7 +344,7 @@ int Track_LoadAllAssets(void) {
 }
 
 /**
- * @original AI_FollowTrackSplines (IGN_WIN.EXE @ 0x004134e0, main.c)
+ * @original AI_FollowTrackSplines (MAINDOS_32BIT.EXE @ 0x004134e0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0000aea0. Steering simulation updating AI vehicle heading, track spline waypoint
  *        progression, and speed moderation.
@@ -478,7 +478,7 @@ void AI_FollowTrackSplines(int car_idx) {
 }
 
 /**
- * @original Track_LoadSplines (IGN_WIN.EXE @ 0x00414e40, main.c)
+ * @original Track_LoadSplines (MAINDOS_32BIT.EXE @ 0x00414e40, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0000ce1c. Loads LEVELS\<TRACK>\<TRACK>.TRI, initializes AI controller table,
  *        and builds left/right road boundary splines and AI waypoint tables.
@@ -540,7 +540,7 @@ int Track_LoadSplines(void) {
 }
 
 /**
- * @original Race_InitSceneAndCars (IGN_WIN.EXE @ 0x0041b470, main.c)
+ * @original Race_InitSceneAndCars (MAINDOS_32BIT.EXE @ 0x0041b470, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001489c. Instantiates player and AI cars on starting grid, loads track surface,
  *        and binds collision and physics states.
@@ -653,7 +653,7 @@ void Race_InitSceneAndCars(void) {
 }
 
 /**
- * @original Race_ResolveVehicleCollisions (IGN_WIN.EXE @ 0x00422680, main.c)
+ * @original Race_ResolveVehicleCollisions (MAINDOS_32BIT.EXE @ 0x00422680, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001d008. Inter-vehicle and scenery obstacle collision detection and impulse response.
  *        Advances fixed 72 Hz physics integration, evaluates pair-wise car-to-car collision bounding
@@ -750,7 +750,7 @@ void Race_ResolveVehicleCollisions(void) {
 }
 
 /**
- * @original Race_CheckCheckpointTriggers (IGN_WIN.EXE @ 0x00429a40, main.c)
+ * @original Race_CheckCheckpointTriggers (MAINDOS_32BIT.EXE @ 0x00429a40, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000250f0. Tests vehicle collision against type 150..154 split-time checkpoint gates
  *        and dynamic track scenery obstacles (road signs, traffic cones, debris).
@@ -887,7 +887,7 @@ void Race_CheckCheckpointTriggers(void) {
 }
 
 /**
- * @original Car_UpdateAxleSpeeds (IGN_WIN.EXE @ 0x00427d70, main.c)
+ * @original Car_UpdateAxleSpeeds (MAINDOS_32BIT.EXE @ 0x00427d70, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00022d8c. Computes front and rear axle mean rotational speeds:
  *        front_axle_speed = (wheel[0].speed + wheel[2].speed) * 0.5;
@@ -913,7 +913,7 @@ void Car_UpdateAxleSpeeds(int car_idx) {
 }
 
 /**
- * @original Car_VerticalDynamics (IGN_WIN.EXE @ 0x00423aa0, main.c)
+ * @original Car_VerticalDynamics (MAINDOS_32BIT.EXE @ 0x00423aa0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001e234. Applies gravity acceleration (-0.2/tick), computes ground equilibrium (+5.0),
  *        handles suspension compression/rebound velocity bounce (-0.2 factor with damping), and triggers bottoming-out effects.
@@ -968,7 +968,7 @@ void Car_VerticalDynamics(int car_idx) {
 }
 
 /**
- * @original Car_PhysicsTick (IGN_WIN.EXE @ 0x00424570, main.c)
+ * @original Car_PhysicsTick (MAINDOS_32BIT.EXE @ 0x00424570, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001ed00. Master fixed-timestep 72 Hz vehicle dynamics simulation:
  *        4-wheel independent raycast suspension, lateral slip, steering, and traction.
@@ -1116,7 +1116,7 @@ void Car_PhysicsTick(int car_idx) {
 }
 
 /**
- * @original Math_Signum (IGN_WIN.EXE @ 0x00429a10, main.c)
+ * @original Math_Signum (MAINDOS_32BIT.EXE @ 0x00429a10, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000250c9. Standard 32-bit integer signum returning -1 for negative, 1 for positive, 0 for zero.
  */
@@ -1127,7 +1127,7 @@ int Math_Signum(int val) {
 }
 
 /**
- * @original Physics_ReflectVelocityOffNormal (IGN_WIN.EXE @ 0x0042a8d0, main.c)
+ * @original Physics_ReflectVelocityOffNormal (MAINDOS_32BIT.EXE @ 0x0042a8d0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00025f38. Rotates 3D velocity into plane-aligned space via yaw and pitch of
  *        contact normal, reflects penetrating velocity, and transforms back into world space.
@@ -1173,7 +1173,7 @@ void Physics_ReflectVelocityOffNormal(double *pVec) {
 }
 
 /**
- * @original Car_CheckLandingStatus (IGN_WIN.EXE @ 0x00423ea0, main.c)
+ * @original Car_CheckLandingStatus (MAINDOS_32BIT.EXE @ 0x00423ea0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001e65e. Checks if airborne car has touched ground (pos_y < ground_y + 5.0),
  *        clears airborne flag (+0x270) and asserts landing impact trigger (+0x278).
@@ -1190,7 +1190,7 @@ void Car_CheckLandingStatus(int car_idx) {
 }
 
 /**
- * @original Car_UpdateShadowTracking (IGN_WIN.EXE @ 0x00423f00, main.c)
+ * @original Car_UpdateShadowTracking (MAINDOS_32BIT.EXE @ 0x00423f00, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001e6a2. Advances secondary position/shadow tracking for car.
  *        Integrates velocity at 72 Hz timestep (factor 1.0 / 72.0 = 0.013888889).
@@ -1212,7 +1212,7 @@ void Car_UpdateShadowTracking(int car_idx) {
 }
 
 /**
- * @original Car_UpdateBodyVelocity (IGN_WIN.EXE @ 0x00423f70, main.c)
+ * @original Car_UpdateBodyVelocity (MAINDOS_32BIT.EXE @ 0x00423f70, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001e6f6. Computes local lateral and longitudinal acceleration from target
  *        waypoint error, rotates by vehicle heading, applies tire drag and clamps to max speed.
@@ -1269,7 +1269,7 @@ void Car_UpdateBodyVelocity(int car_idx) {
 }
 
 /**
- * @original Timer_GetDeltaTime (IGN_WIN.EXE @ 0x00420c00, main.c)
+ * @original Timer_GetDeltaTime (MAINDOS_32BIT.EXE @ 0x00420c00, main.c)
  * @fidelity EXACT
  * @notes Computes elapsed frame delta time using tick counter scaled by 0.036.
  *        Updates accumulator, frame counter, and clamps delta to max 10.8 ticks.
@@ -1302,7 +1302,7 @@ double Timer_GetDeltaTime(void) {
 }
 
 /**
- * @original Collision_TestLineIntersection (IGN_WIN.EXE @ 0x004292c0, main.c)
+ * @original Collision_TestLineIntersection (MAINDOS_32BIT.EXE @ 0x004292c0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000246cc. Tests 2D collision impulse transfer between two vehicles.
  *        Calculates contact lever arm distances, applies impulse restitution (-1.5),
@@ -1376,7 +1376,7 @@ int Collision_TestLineIntersection(double *car1, double *car2) {
 }
 
 /**
- * @original Collision_TestPolygonOverlap (IGN_WIN.EXE @ 0x004295e0, main.c)
+ * @original Collision_TestPolygonOverlap (MAINDOS_32BIT.EXE @ 0x004295e0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000249e5. Tests pairwise edge crossings between two 2D convex vehicle polygons.
  *        Averages contact points to calculate centroid contact position and normal angle.
@@ -1466,7 +1466,7 @@ int Collision_TestPolygonOverlap(float *poly1_x, float *poly1, int count1, float
 }
 
 /**
- * @original Collision_FilterTrackClearance (IGN_WIN.EXE @ 0x00428b90, main.c)
+ * @original Collision_FilterTrackClearance (MAINDOS_32BIT.EXE @ 0x00428b90, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00023ee8. Filters candidate collision triangles according to track-specific
  *        ground clearance thresholds (Snake: 350, Moose: 200, Mountain: 450, Ski: 125, Default: 2500).
@@ -1499,7 +1499,7 @@ int Collision_FilterTrackClearance(int tri_idx, int pos_x, int pos_y, int pos_z,
 }
 
 /**
- * @original Collision_RaycastVehicleSphere (IGN_WIN.EXE @ 0x00428730, main.c)
+ * @original Collision_RaycastVehicleSphere (MAINDOS_32BIT.EXE @ 0x00428730, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0002383c. Sets up vertical collision query ray from vehicle center
  *        (pos_y + 500.0 downward 850 units) and invokes spatial partition octree query.
@@ -1516,7 +1516,7 @@ void *Collision_RaycastVehicleSphere(int x, int y, int z, int car_idx) {
 }
 
 /**
- * @original Collision_TestTrackTriangles (IGN_WIN.EXE @ 0x00427dc0, main.c)
+ * @original Collision_TestTrackTriangles (MAINDOS_32BIT.EXE @ 0x00427dc0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00022dc8. Iterates over track collision triangles from octree query,
  *        calculates closest point on triangle, plane distance, and penetration restitution.
@@ -1614,7 +1614,7 @@ void *Collision_TestTrackTriangles(uint32_t world_x, uint32_t world_y, int world
 }
 
 /**
- * @original Car_SpawnExplosionEffects (IGN_WIN.EXE @ 0x004242b0, main.c)
+ * @original Car_SpawnExplosionEffects (MAINDOS_32BIT.EXE @ 0x004242b0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001ea42. Plays vehicle explosion audio sample (vol capped at 0x10000,
  *        sample 2, freq 22000) and emits 6 explosion/debris particle sprites.
@@ -1664,7 +1664,7 @@ void Car_SpawnExplosionEffects(int car1_idx, int car2_idx) {
 }
 
 /**
- * @original Car_HandleElimination (IGN_WIN.EXE @ 0x00423620, main.c)
+ * @original Car_HandleElimination (MAINDOS_32BIT.EXE @ 0x00423620, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001de2e. Checks trailing vehicle elimination condition in knock-out races.
  *        Marks vehicle blown (+0x354 = 1), sets race status, and logs elimination string.
@@ -1758,7 +1758,7 @@ void Car_HandleElimination(void) {
 }
 
 /**
- * @original Car_ChangeMesh (IGN_WIN.EXE @ 0x004269a0, main.c)
+ * @original Car_ChangeMesh (MAINDOS_32BIT.EXE @ 0x004269a0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00021856. Swaps current vehicle 3D mesh representation to damaged or
  *        alternative model geometry in Lisa3D rasterizer instance table.
@@ -1811,7 +1811,7 @@ void Car_ChangeMesh(int car_idx) {
 }
 
 /**
- * @original Car_ApplyMeshDamage (IGN_WIN.EXE @ 0x00426b40, main.c)
+ * @original Car_ApplyMeshDamage (MAINDOS_32BIT.EXE @ 0x00426b40, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000219d6. Evaluates high-velocity collision impact against vehicle chassis,
  *        morphs vertex positions inward toward impact point, and emits impact sparks.
@@ -1934,7 +1934,7 @@ void Car_ApplyMeshDamage(int car_idx, int impact_severity) {
 }
 
 /**
- * @original Car_UpdateEffects (IGN_WIN.EXE @ 0x0042bc20, main.c)
+ * @original Car_UpdateEffects (MAINDOS_32BIT.EXE @ 0x0042bc20, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000272d8. Coordinates real-time vehicle visual effects (tire skid marks,
  *        turbo exhaust flames, engine damage smoke, and surface scraping sparks).
@@ -1952,7 +1952,7 @@ void Car_UpdateEffects(void) {
 }
 
 /**
- * @original Audio_UpdateDynamicDoppler (IGN_WIN.EXE @ 0x0042aa00, main.c)
+ * @original Audio_UpdateDynamicDoppler (MAINDOS_32BIT.EXE @ 0x0042aa00, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000260ed. Updates sound pitch and volume for dynamic track ambient sources.
  */
@@ -2001,7 +2001,7 @@ void Audio_UpdateDynamicDoppler(void) {
 }
 
 /**
- * @original Track_SpawnEnvironmentalParticles (IGN_WIN.EXE @ 0x0042acb0, main.c)
+ * @original Track_SpawnEnvironmentalParticles (MAINDOS_32BIT.EXE @ 0x0042acb0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0002636c. Emits environmental smoke/dust from track waypoint emitters.
  */
@@ -2032,7 +2032,7 @@ void Track_SpawnEnvironmentalParticles(void) {
 }
 
 /**
- * @original Track_SpawnWeatherParticles (IGN_WIN.EXE @ 0x0042b5d0, main.c)
+ * @original Track_SpawnWeatherParticles (MAINDOS_32BIT.EXE @ 0x0042b5d0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00026cdd. Spawns rain and snow weather particles in viewport frustum.
  */
@@ -2065,7 +2065,7 @@ void Track_SpawnWeatherParticles(void) {
 }
 
 /**
- * @original FX_UpdateSkidMarks (IGN_WIN.EXE @ 0x0042bc80, main.c)
+ * @original FX_UpdateSkidMarks (MAINDOS_32BIT.EXE @ 0x0042bc80, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0002731c. Generates ground skidmarks behind slipping vehicle tires.
  */
@@ -2116,7 +2116,7 @@ void FX_UpdateSkidMarks(void) {
 }
 
 /**
- * @original FX_UpdateTransparentSpriteObject (IGN_WIN.EXE @ 0x0042e2e0, main.c)
+ * @original FX_UpdateTransparentSpriteObject (MAINDOS_32BIT.EXE @ 0x0042e2e0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000298f8. Updates 3D world position and animation of transparent billboard sprites.
  */
@@ -2154,7 +2154,7 @@ void FX_UpdateTransparentSpriteObject(void *particle, int instance_idx) {
 }
 
 /**
- * @original FX_UpdateTransparentSpriteObject2 (IGN_WIN.EXE @ 0x0042e5a0, main.c)
+ * @original FX_UpdateTransparentSpriteObject2 (MAINDOS_32BIT.EXE @ 0x0042e5a0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00029cf2. Updates transparent billboard sprite instance variation.
  */
@@ -2163,7 +2163,7 @@ void FX_UpdateTransparentSpriteObject2(void *particle, int instance_idx) {
 }
 
 /**
- * @original FX_UpdateHandlePlotObject (IGN_WIN.EXE @ 0x0042e860, main.c)
+ * @original FX_UpdateHandlePlotObject (MAINDOS_32BIT.EXE @ 0x0042e860, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00029d1a. Updates particle plot marker object positions in scene.
  */
@@ -2193,7 +2193,7 @@ void FX_UpdateHandlePlotObject(void *particle, int instance_idx) {
 }
 
 /**
- * @original FX_UpdateSuperPlotObject (IGN_WIN.EXE @ 0x0042ea60, main.c)
+ * @original FX_UpdateSuperPlotObject (MAINDOS_32BIT.EXE @ 0x0042ea60, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00029040. Updates high-intensity spark / super plot particle positions.
  */
@@ -2225,7 +2225,7 @@ void FX_UpdateSuperPlotObject(void *particle, int instance_idx) {
 }
 
 /**
- * @original Obstacle_SimulateDynamics (IGN_WIN.EXE @ 0x0042ed60, main.c)
+ * @original Obstacle_SimulateDynamics (MAINDOS_32BIT.EXE @ 0x0042ed60, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00029350. Performs dynamic physics integration (ballistic velocity, restitution,
  *        and world model transforms) for track scenery obstacles (traffic cones, drums).
@@ -2265,7 +2265,7 @@ void Obstacle_SimulateDynamics(void *obstacle) {
 }
 
 /**
- * @original FX_UpdateFlyingParticles (IGN_WIN.EXE @ 0x0042fc80, main.c)
+ * @original FX_UpdateFlyingParticles (MAINDOS_32BIT.EXE @ 0x0042fc80, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0002a280. Updates ballistic trajectory and ground bounce for flying vehicle debris.
  */
@@ -2303,7 +2303,7 @@ void FX_UpdateFlyingParticles(void *particle, int instance_idx) {
 }
 
 /**
- * @original Obstacle_TriggerAction (IGN_WIN.EXE @ 0x00420090, main.c)
+ * @original Obstacle_TriggerAction (MAINDOS_32BIT.EXE @ 0x00420090, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001a40e. Evaluates type 0xFA (250) trigger obstacles and triggers associated actions.
  */
@@ -2328,7 +2328,7 @@ void Obstacle_TriggerAction(void) {
 }
 
 /**
- * @original AI_InitSteeringConeLookup (IGN_WIN.EXE @ 0x004200e0, main.c)
+ * @original AI_InitSteeringConeLookup (MAINDOS_32BIT.EXE @ 0x004200e0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001a4ec. Precomputes 800x405 lookahead steering cone and obstacle threat table.
  */
@@ -2368,7 +2368,7 @@ void AI_InitSteeringConeLookup(void) {
 }
 
 /**
- * @original Ghost_LoadCarAndPath (IGN_WIN.EXE @ 0x00420240, main.c)
+ * @original Ghost_LoadCarAndPath (MAINDOS_32BIT.EXE @ 0x00420240, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001a97a. Loads recorded Time Attack ghost car trajectory from GHOSTS\%s.GST.
  */
@@ -2387,9 +2387,9 @@ void Ghost_LoadCarAndPath(void) {
 }
 
 /**
- * @original Track_LoadBinaryCache (IGN_WIN.EXE @ 0x00420870, main.c)
+ * @original Track_LoadBinaryCache (MAINDOS_32BIT.EXE @ 0x00420870, main.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x0001adf8. Loads preprocessed level data cache (ign_win.btz / ign_dos.btz).
+ * @notes MAINDOS @ 0x0001adf8. Loads preprocessed level data cache (ign_dos.btz / ign_dos.btz).
  */
 void Track_LoadBinaryCache(void) {
     int fd;
@@ -2397,7 +2397,7 @@ void Track_LoadBinaryCache(void) {
     Sound_FreeAllSounds();
     Track_SaveBinaryCache();
 
-    fd = open("ign_win.btz", O_RDONLY | O_BINARY);
+    fd = open("ign_dos.btz", O_RDONLY | O_BINARY);
     if (fd >= 0) {
         read(fd, g_TrackBinaryCache, 0x597);
         close(fd);
@@ -2405,7 +2405,7 @@ void Track_LoadBinaryCache(void) {
 }
 
 /**
- * @original Sound_FreeAllSounds (IGN_WIN.EXE @ 0x00420990, main.c)
+ * @original Sound_FreeAllSounds (MAINDOS_32BIT.EXE @ 0x00420990, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001b42d. Frees active level audio buffers and sample tables upon track unload.
  */
@@ -2417,7 +2417,7 @@ void Sound_FreeAllSounds(void) {
 }
 
 /**
- * @original Game_Shutdown (IGN_WIN.EXE @ 0x00420b70, main.c)
+ * @original Game_Shutdown (MAINDOS_32BIT.EXE @ 0x00420b70, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001b51a. Releases all allocated game memory and shuts down engine subsystems cleanly.
  */
@@ -2427,7 +2427,7 @@ void Game_Shutdown(void) {
 }
 
 /**
- * @original Race_UpdateCountdownAndFinish (IGN_WIN.EXE @ 0x00420d10, main.c)
+ * @original Race_UpdateCountdownAndFinish (MAINDOS_32BIT.EXE @ 0x00420d10, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001b9d3. Updates start-line traffic light timer and checks race winner victory condition.
  */
@@ -2452,7 +2452,7 @@ void Race_UpdateCountdownAndFinish(void) {
 }
 
 /**
- * @original HUD_UpdateRaceTimes (IGN_WIN.EXE @ 0x00420e60, main.c)
+ * @original HUD_UpdateRaceTimes (MAINDOS_32BIT.EXE @ 0x00420e60, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001b9e4. Updates player split times and current lap timer display on in-game HUD.
  */
@@ -2468,7 +2468,7 @@ void HUD_UpdateRaceTimes(void) {
 }
 
 /**
- * @original Input_ProcessRaceHotkeys (IGN_WIN.EXE @ 0x00420eb0, main.c)
+ * @original Input_ProcessRaceHotkeys (MAINDOS_32BIT.EXE @ 0x00420eb0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001c5b8. Polls keyboard hotkeys during race: Pause (P), Escape menu, camera toggle, and volume.
  */
@@ -2491,7 +2491,7 @@ void Input_ProcessRaceHotkeys(void) {
 }
 
 /**
- * @original Input_PollPlayerVehicleControls (IGN_WIN.EXE @ 0x00421bc0, main.c)
+ * @original Input_PollPlayerVehicleControls (MAINDOS_32BIT.EXE @ 0x00421bc0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001ccc5. Reads keyboard / joystick axes and maps to vehicle steering, throttle, brake, and turbo.
  */
@@ -2535,7 +2535,7 @@ void Input_PollPlayerVehicleControls(void) {
 }
 
 /**
- * @original Ghost_SaveCarAndPath (IGN_WIN.EXE @ 0x004222b0, main.c)
+ * @original Ghost_SaveCarAndPath (MAINDOS_32BIT.EXE @ 0x004222b0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001cf5d. Serializes recorded lap waypoint trajectory into GHOSTS\%s.GST.
  */
@@ -2555,13 +2555,13 @@ void Ghost_SaveCarAndPath(void) {
 }
 
 /**
- * @original Track_SaveBinaryCache (IGN_WIN.EXE @ 0x004225d0, main.c)
+ * @original Track_SaveBinaryCache (MAINDOS_32BIT.EXE @ 0x004225d0, main.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0001cfbc. Saves preprocessed level collision cache file.
  */
 void Track_SaveBinaryCache(void) {
     int fd;
-    fd = open("ign_win.btz", O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0666);
+    fd = open("ign_dos.btz", O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0666);
     if (fd >= 0) {
         write(fd, g_TrackBinaryCache, 0x597);
         close(fd);
@@ -2571,7 +2571,7 @@ void Track_SaveBinaryCache(void) {
 
 
 /**
- * @original Car_IntegratePosition (IGN_WIN.EXE, main.c)
+ * @original Car_IntegratePosition (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Car_IntegratePosition(void) {
@@ -2579,7 +2579,7 @@ void Car_IntegratePosition(void) {
 }
 
 /**
- * @original WinMain (IGN_WIN.EXE, main.c)
+ * @original WinMain (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void WinMain(void) {
@@ -2587,7 +2587,7 @@ void WinMain(void) {
 }
 
 /**
- * @original Mesh_InstantiatePlacedObjects (IGN_WIN.EXE, main.c)
+ * @original Mesh_InstantiatePlacedObjects (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Mesh_InstantiatePlacedObjects(void) {
@@ -2869,7 +2869,7 @@ void Sound_InitAndLoadPools(void) {
 }
 
 /**
- * @original Car_ApplySteering (IGN_WIN.EXE, main.c)
+ * @original Car_ApplySteering (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Car_ApplySteering(void) {
@@ -2877,7 +2877,7 @@ void Car_ApplySteering(void) {
 }
 
 /**
- * @original Car_PowertrainUpdate (IGN_WIN.EXE, main.c)
+ * @original Car_PowertrainUpdate (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Car_PowertrainUpdate(void) {
@@ -2885,7 +2885,7 @@ void Car_PowertrainUpdate(void) {
 }
 
 /**
- * @original Sound_SynthesizeEngineRPM (IGN_WIN.EXE, main.c)
+ * @original Sound_SynthesizeEngineRPM (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Sound_SynthesizeEngineRPM(void) {
@@ -2893,7 +2893,7 @@ void Sound_SynthesizeEngineRPM(void) {
 }
 
 /**
- * @original Audio_MixCallback (IGN_WIN.EXE, main.c)
+ * @original Audio_MixCallback (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Audio_MixCallback(void) {
@@ -2901,7 +2901,7 @@ void Audio_MixCallback(void) {
 }
 
 /**
- * @original Audio_StopVoice (IGN_WIN.EXE, main.c)
+ * @original Audio_StopVoice (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Audio_StopVoice(void) {
@@ -2909,7 +2909,7 @@ void Audio_StopVoice(void) {
 }
 
 /**
- * @original Audio_PlayVoice (IGN_WIN.EXE, main.c)
+ * @original Audio_PlayVoice (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Audio_PlayVoice(void) {
@@ -2917,7 +2917,7 @@ void Audio_PlayVoice(void) {
 }
 
 /**
- * @original Audio_SetVoiceParams (IGN_WIN.EXE, main.c)
+ * @original Audio_SetVoiceParams (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Audio_SetVoiceParams(void) {
@@ -2925,7 +2925,7 @@ void Audio_SetVoiceParams(void) {
 }
 
 /**
- * @original Music_PlayTrack (IGN_WIN.EXE, main.c)
+ * @original Music_PlayTrack (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Music_PlayTrack(void) {
@@ -2933,7 +2933,7 @@ void Music_PlayTrack(void) {
 }
 
 /**
- * @original Sound_LoadPAT (IGN_WIN.EXE, main.c)
+ * @original Sound_LoadPAT (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Sound_LoadPAT(void) {
@@ -2941,7 +2941,7 @@ void Sound_LoadPAT(void) {
 }
 
 /**
- * @original Sound_LoadWAV (IGN_WIN.EXE, main.c)
+ * @original Sound_LoadWAV (MAINDOS_32BIT.EXE, main.c)
  * @fidelity STUB
  */
 void Sound_LoadWAV(void) {

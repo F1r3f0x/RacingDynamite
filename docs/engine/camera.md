@@ -1,6 +1,6 @@
 # Dynamic Chase Camera & Viewport Subsystem (`camera.c`)
 
-This document specifies the reverse-engineered dynamic chase camera, projection transforms, orientation lag filters, and multi-mode viewports of **Ignition** (1997, Unique Development Studios / Virgin Interactive), reconstructed from `IGN_WIN.EXE` (`0x0043c910`, `0x00436990`) and `MAINDOS.EXE` (`main.c`, `lisa3d.c`).
+This document specifies the reverse-engineered dynamic chase camera, projection transforms, orientation lag filters, and multi-mode viewports of **Ignition** (1997, Unique Development Studios / Virgin Interactive), reconstructed from `MAINDOS_32BIT.EXE` (`0x0043c910`, `0x00436990`) and `MAINDOS.EXE` (`main.c`, `lisa3d.c`).
 
 ---
 
@@ -90,7 +90,7 @@ $$\Delta \theta = \text{atan2}(\sin(\theta_{\text{target}} - \theta_{\text{cam}}
 $$\theta_{\text{cam}, t+1} = \theta_{\text{cam}, t} + \Delta \theta \cdot \alpha$$
 
 ### 4.1 Authentic Lag Constant ($\alpha = 0.125$)
-In `IGN_WIN.EXE` at global memory location `_DAT_0047a720` (`.rdata` file offset `0x79720`), the camera orientation filter constant reads as a **`double`**:
+In `MAINDOS_32BIT.EXE` at global memory location `_DAT_0047a720` (`.rdata` file offset `0x79720`), the camera orientation filter constant reads as a **`double`**:
 
 $$\text{DAT\_0047a720} = -0.125 = -\frac{1}{8}$$
 
@@ -134,7 +134,7 @@ When the car becomes airborne ($Y_{\text{car}} - Y_{\text{ground}} > 100$), the 
 
 ## 6. Mathematical Coordinate Basis Alignment (`DEV-004`)
 
-### Original Behavior (`IGN_WIN.EXE` @ `0x00436990`)
+### Original Behavior (`MAINDOS_32BIT.EXE` @ `0x00436990`)
 The original 1997 engine used an ad-hoc software projection matrix tailored to DirectDraw's top-left origin with inverted Z depth conventions. When pitching downward past vertical ($-90^\circ$), the viewport flipped upside down due to unhandled gimbal singularities.
 
 ### Source Port Implementation

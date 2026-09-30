@@ -1,6 +1,6 @@
 /*
  * menu.c - Ignition (1997) Authentic Menu UI Engine
- * Target: MAINDOS.EXE / IGN_WIN.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
+ * Target: MAINDOS_32BIT.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
  */
 
 #include "menu.h"

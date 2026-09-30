@@ -6,13 +6,13 @@ This document provides the complete technical specification, architectural bluep
 
 ## 1. Overview & Problem Statement
 
-In reverse engineering and source porting **Ignition (1997)** (`IGN_WIN.EXE` / `MAINDOS.EXE`), maintaining strict fidelity to the original assembly code while adapting the engine for modern platforms (C11, SDL2, 64-bit portability) is paramount.
+In reverse engineering and source porting **Ignition (1997)** (`MAINDOS_32BIT.EXE` / `MAINDOS.EXE`), maintaining strict fidelity to the original assembly code while adapting the engine for modern platforms (C11, SDL2, 64-bit portability) is paramount.
 
 This system addresses five critical challenges:
 1. **Tooling Hygiene & Documentation Gap**: The `tools/` directory contains 50 Python scripts that are undocumented, with several obsolete or redundant scratch scripts from initial reverse engineering exploration.
 2. **Renderer Authenticity & Pluggable Backends**: Preserving the authentic 1997 "Lisa3D" software rasterizer (8-bit paletted color, depth-bucketing, 16.16 fixed-point math, opcode dispatch) exactly as it worked in the original game, while providing an architecture to toggle between Software, 3dfx Glide (`IGN_3DFX.EXE`), and Direct3D (`IGN_D3D.EXE`) modes.
 3. **Granular Per-Category Game Fixes**: Moving away from a coarse "ON/OFF" switch so players can independently toggle specific bug fix categories (No-Clip/Collision, Surface Elevation, Camera Glitches, AI Navigation, Audio).
-4. **Code Provenance & Traceability**: Binding every C function, struct, and constant directly to its assembly address in `IGN_WIN.EXE` with standardized Doxygen provenance headers.
+4. **Code Provenance & Traceability**: Binding every C function, struct, and constant directly to its assembly address in `MAINDOS_32BIT.EXE` with standardized Doxygen provenance headers.
 5. **Change Tracking & Deviation Registry**: Maintaining an immutable record of each change, bug fix, and architectural deviation.
 
 ---
@@ -26,7 +26,7 @@ graph TD
     end
 
     subgraph "2. Ghidra & Knowledge Base"
-        C["IGN_WIN.EXE / Ghidra"] <-->|"Ghidra MCP Live Sync"| D["docs/ghidra/functions.md"]
+        C["MAINDOS_32BIT.EXE / Ghidra"] <-->|"Ghidra MCP Live Sync"| D["docs/ghidra/functions.md"]
         D <--> E["docs/ghidra/globals.md & structs.md"]
     end
 
@@ -97,7 +97,7 @@ Master guideline defining code provenance, commit conventions, and verification 
 ```c
 /**
  * @brief Raycasts world coordinate (X, Z) against track surface collision grid.
- * @original FUN_00412fc0 (IGN_WIN.EXE @ 0x00412fc0, getsurf.c)
+ * @original FUN_00412fc0 (MAINDOS_32BIT.EXE @ 0x00412fc0, getsurf.c)
  * @fidelity ADAPTED
  * @deviation DEV-001 (Boundary safety clamp preventing off-track crash)
  * @fix_category FIX_CAT_NOCLIP
@@ -116,10 +116,10 @@ bool Surface_Raycast(const SrfData *srf, ...);
 * **`INFRASTRUCTURE`**: Modern engine scaffolding not present in the 1997 binary (e.g. logging subsystem, SDL input mapper, CMake, unit test harnesses).
 
 #### 2. `docs/tracking/deviations.md`
-Formal register of every intentional divergence from `IGN_WIN.EXE`:
+Formal register of every intentional divergence from `MAINDOS_32BIT.EXE`:
 * **ID**: `DEV-001`, `DEV-002`, etc.
 * **Category**: e.g., `FIX_CAT_NOCLIP`
-* **Original Address & Assembly**: Exact disassembly and decompilation from `IGN_WIN.EXE`.
+* **Original Address & Assembly**: Exact disassembly and decompilation from `MAINDOS_32BIT.EXE`.
 * **Original Bug / Limitation**: Why it failed in 1997 (e.g., out-of-bounds array read in Austria, mesh clipping).
 * **Source Port Implementation**: How Racing Dynamite handles it.
 * **Menu Toggle Key**: The option struct flag controlling it.
@@ -168,7 +168,7 @@ typedef struct {
   * Opcode 0x15 (perspective textured triangle)
   * Opcode 0x16 (transparent cutout variant)
   * Opcode 0x17 (Gouraud shaded shadow triangle)
-* When `authentic_fixed_point_uv` and `authentic_depth_buckets` are active, the rasterizer operates identical to `IGN_WIN.EXE`.
+* When `authentic_fixed_point_uv` and `authentic_depth_buckets` are active, the rasterizer operates identical to `MAINDOS_32BIT.EXE`.
 
 #### 3. GFX Options UI Integration
 * Submenu: `Options > GFX Options`:

@@ -39,7 +39,7 @@ static AudioManager g_audio = {0};
 
 /**
  * @brief Master audio mixing callback executing inside SDL2 audio thread.
- * @original FUN_00457890 (IGN_WIN.EXE @ 0x00457890, main.c)
+ * @original FUN_00457890 (MAINDOS_32BIT.EXE @ 0x00457890, main.c)
  * @fidelity ADAPTED
  */
 static void Audio_MixCallback(void *userdata, Uint8 *stream, int len) {
@@ -124,7 +124,7 @@ static void Audio_MixCallback(void *userdata, Uint8 *stream, int len) {
 
 /**
  * @brief Initialize SDL2 audio device and allocate 32 software mixer voices.
- * @original FUN_0041f9b0 (IGN_WIN.EXE @ 0x0041f9b0, main.c)
+ * @original FUN_0041f9b0 (MAINDOS_32BIT.EXE @ 0x0041f9b0, main.c)
  * @fidelity ADAPTED
  */
 bool Audio_Init(void) {
@@ -169,7 +169,7 @@ bool Audio_Init(void) {
 
 /**
  * @brief Close audio hardware device and release all mixer voice buffers.
- * @original FUN_00412530 (IGN_WIN.EXE @ 0x00412530, main.c)
+ * @original FUN_00412530 (MAINDOS_32BIT.EXE @ 0x00412530, main.c)
  * @fidelity ADAPTED
  */
 void Audio_Shutdown(void) {
@@ -197,7 +197,7 @@ void Audio_Shutdown(void) {
 
 /**
  * @brief Allocate an active mixer voice and begin playback of a PCM sample.
- * @original FUN_004579b0 (IGN_WIN.EXE @ 0x004579b0, main.c)
+ * @original FUN_004579b0 (MAINDOS_32BIT.EXE @ 0x004579b0, main.c)
  * @fidelity ADAPTED
  */
 int Audio_PlayVoice(const SoundSample *sample, float volume, float pitch, float pan, bool loop) {
@@ -264,7 +264,7 @@ int Audio_PlayVoice(const SoundSample *sample, float volume, float pitch, float 
 
 /**
  * @brief Update real-time playback parameters for an active voice.
- * @original FUN_00457aa0 (IGN_WIN.EXE @ 0x00457aa0, main.c)
+ * @original FUN_00457aa0 (MAINDOS_32BIT.EXE @ 0x00457aa0, main.c)
  * @fidelity ADAPTED
  */
 void Audio_SetVoiceParams(int voice_handle, float volume, float pitch, float pan) {
@@ -306,7 +306,7 @@ void Audio_SetVoiceParams(int voice_handle, float volume, float pitch, float pan
 
 /**
  * @brief Stop and release a specific active voice.
- * @original FUN_00457980 (IGN_WIN.EXE @ 0x00457980, main.c)
+ * @original FUN_00457980 (MAINDOS_32BIT.EXE @ 0x00457980, main.c)
  * @fidelity ADAPTED
  */
 void Audio_StopVoice(int voice_handle) {
@@ -330,7 +330,7 @@ void Audio_StopVoice(int voice_handle) {
 
 /**
  * @brief Stop and release all currently playing voices.
- * @original FUN_00457980 (IGN_WIN.EXE @ 0x00457980, main.c)
+ * @original FUN_00457980 (MAINDOS_32BIT.EXE @ 0x00457980, main.c)
  * @fidelity ADAPTED
  */
 void Audio_StopAllVoices(void) {
@@ -347,7 +347,7 @@ void Audio_StopAllVoices(void) {
 
 /**
  * @brief Set global master volume levels for sound effects and music.
- * @original FUN_00457ae0 (IGN_WIN.EXE @ 0x00457ae0, main.c)
+ * @original FUN_00457ae0 (MAINDOS_32BIT.EXE @ 0x00457ae0, main.c)
  * @fidelity ADAPTED
  */
 void Audio_SetMasterVolume(float sfx_volume, float music_volume) {
@@ -379,7 +379,7 @@ int Audio_PlaySFX(const SoundSample *sample, float volume, float pan) {
 
 /**
  * @brief Play spatialized 3D audio relative to listener camera/car.
- * @original FUN_0043e710 (IGN_WIN.EXE @ 0x0043e710, main.c)
+ * @original FUN_0043e710 (MAINDOS_32BIT.EXE @ 0x0043e710, main.c)
  * @fidelity ADAPTED
  */
 int Audio_PlaySpatialSFX(const SoundSample *sample,

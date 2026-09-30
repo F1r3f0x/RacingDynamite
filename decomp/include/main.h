@@ -13,12 +13,12 @@
 #include "geputget.h"
 
 /* Global Game Engine State */
-extern int g_GameStage;             /* 0=Init, 1=Run, 2=Shutdown (MAINDOS @ 0x000D7C58, IGN_WIN @ 0x00493734) */
-extern int g_MenuState;             /* Active menu state (IGN_WIN @ 0x00563C3C) */
-extern int g_MenuSelection;         /* Selected menu item (IGN_WIN @ 0x00563D9C) */
+extern int g_GameStage;             /* 0=Init, 1=Run, 2=Shutdown (MAINDOS @ 0x000D7C58, MAINDOS @ 0x00493734) */
+extern int g_MenuState;             /* Active menu state (MAINDOS @ 0x00563C3C) */
+extern int g_MenuSelection;         /* Selected menu item (MAINDOS @ 0x00563D9C) */
 extern int g_SelectedCar;
 extern int g_SelectedTrack;
-extern int g_InRace;                /* 1 if in race (IGN_WIN @ 0x00525E5C) */
+extern int g_InRace;                /* 1 if in race (MAINDOS @ 0x00525E5C) */
 extern uint8_t *g_pMenuCol;
 extern uint8_t *g_pMenuTab;
 extern int g_CheckpointCount;

@@ -1190,7 +1190,7 @@ def generate_html(data: Dict[str, Any]) -> str:
           <span>DATABASE IN SYNC</span>
         </div>
         <div class="badge">
-          Target: <strong>MAINDOS.EXE</strong> &amp; <strong>IGN_WIN.EXE</strong>
+          Target: <strong>MAINDOS_32BIT.EXE</strong> (Watcom DOS/4GW)
         </div>
         <div class="badge">
           Compiler: <strong>Watcom C/C++ 10.6</strong>

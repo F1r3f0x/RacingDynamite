@@ -1,6 +1,6 @@
 # Audio Subsystem & Soundtrack Streaming Architecture
 
-This document specifies the reverse-engineered sound architecture, 32-channel software voice mixer, vehicle acoustic synthesizer, sound effect pools, and CD-DA soundtrack streaming of **Ignition** (1997, Unique Development Studios / Virgin Interactive), reconstructed from `IGN_WIN.EXE` (`0x0041f9b0`, `0x004452c0`, `0x00458e00`, `0x00457890`, `0x004579b0`, `0x00457ed0`) and `MAINDOS.EXE` (`main.c`).
+This document specifies the reverse-engineered sound architecture, 32-channel software voice mixer, vehicle acoustic synthesizer, sound effect pools, and CD-DA soundtrack streaming of **Ignition** (1997, Unique Development Studios / Virgin Interactive), reconstructed from `MAINDOS_32BIT.EXE` (`0x0041f9b0`, `0x004452c0`, `0x00458e00`, `0x00457890`, `0x004579b0`, `0x00457ed0`) and `MAINDOS.EXE` (`main.c`).
 
 ---
 
@@ -114,7 +114,7 @@ During every physics tick, the vehicle powertrain speed is mapped to the `ENGINE
 2. **Curve Sample Index**:
    $$k = \lfloor \text{ratio} \cdot 199.0 \rfloor$$
 3. **Authentic Bug & Clamping (`DEV-006`)**:
-   In `IGN_WIN.EXE`, when using turbo boost on fast vehicles (e.g. Vegas, Monster Truck), speed exceeds `max_speed`, causing $k \ge 200$. The original binary performed an unchecked read past the 800-byte buffer, corrupting pitch modulation and silencing the engine channel.
+   In `MAINDOS_32BIT.EXE`, when using turbo boost on fast vehicles (e.g. Vegas, Monster Truck), speed exceeds `max_speed`, causing $k \ge 200$. The original binary performed an unchecked read past the 800-byte buffer, corrupting pitch modulation and silencing the engine channel.
    Under `fixes->fix_audio` (`DEV-006`), $k$ is clamped to 199.
 4. **Dual-Sample Cross-Fade**:
    Vehicles utilize two looping engine sound files:
@@ -130,7 +130,7 @@ During every physics tick, the vehicle powertrain speed is mapped to the `ENGINE
 ## 4. CD-DA Digital Audio Soundtrack Streaming
 
 ### 4.1 Circuit-to-CD Track Mapping (`DAT_00497eb8`)
-In `IGN_WIN.EXE` at global address `0x00497eb8`, an 8-byte array maps each circuit index to its corresponding CD-DA audio track:
+In `MAINDOS_32BIT.EXE` at global address `0x00497eb8`, an 8-byte array maps each circuit index to its corresponding CD-DA audio track:
 
 | Circuit Index | Circuit Name | CD-DA Track | File Name | Style / Theme |
 | :---: | :---: | :---: | :---: | :---: |

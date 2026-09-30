@@ -1,6 +1,6 @@
-# Master Global Variable & Memory Map (`IGN_WIN.EXE`)
+# Master Global Variable & Memory Map (`MAINDOS_32BIT.EXE`)
 
-This table documents the global memory addresses in the data segments (`.data`, `.rdata`, `.bss`) of `IGN_WIN.EXE` (`0x00400000` base address), their types, purpose, and engine context.
+This table documents the global memory addresses in the data segments (`.data`, `.rdata`, `.bss`) of `MAINDOS_32BIT.EXE` (`0x00400000` base address), their types, purpose, and engine context.
 
 | Address | Type | Name | Purpose |
 | :--- | :--- | :--- | :--- |

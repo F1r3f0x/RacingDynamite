@@ -4,7 +4,7 @@
 
 
 ## 1. Decompilation Constraints (MAINDOS_32BIT.EXE)
-- **TARGET:** ONLY reverse-engineer `MAINDOS_32BIT.EXE`. Use `IGN_WIN.EXE` purely as a reference.
+- **TARGET:** ONLY reverse-engineer `MAINDOS_32BIT.EXE`. Focus strictly on the DOS executable.
 - **NO RAW GHIDRA DUMPS:** NEVER commit unrefined decompiler output. You MUST:
   - **Structs:** Replace raw pointer offsets with proper C struct definitions and field accesses (e.g., `camera->enable_sky`).
   - **Variables:** Rename ALL register artifacts (e.g., `iVar1`, `param_1`) to meaningful semantic names.
@@ -12,6 +12,7 @@
   - **Functions:** Rename `FUN_XXXXXXXX` to semantic names in code, `docs/ghidra/functions.md`, AND `database/decomp.db`.
 - **ARCHITECTURE (Pure C):** The project is strictly a Pure C implementation. Hand-written assembly fallbacks (`decomp/src/asm/*.asm`) are banned. If Watcom C fails to produce a 1:1 byte match due to optimization differences (e.g. instruction selection, floating point ops), it is fully acceptable as long as the logic is functionally exact and respects the original game architecture.
 - **NO AD-HOC IMPLEMENTATIONS:** You MUST reverse-engineer the authentic game systems and architectures (UI widgets, menus, render pipelines). Writing custom state machines, bypassing native systems, or placing code in completely unrelated files (e.g. putting UI rendering code inside the 3D renderer) just to "make something work quickly" is **STRICTLY FORBIDDEN**.
+- **PRESERVE ORIGINAL ASSETS & BINARIES:** NEVER modify or overwrite `MAINDOS.EXE` or any other original game assets in `Ignition/`. Doing so will invalidate our tests and corrupt test environments.
 - **STYLE:** Use pure C89 (4-space indent). NEVER use inline assembly (`__asm`) in `.c` files.
 - **WORKFLOW:** Run `uv run python tools/verify_matching.py` to verify. The tool still outputs matching percentages, but aim for a clean, warning-free build and logically equivalent implementation rather than agonizing over 100% instruction diffs.
 
@@ -19,7 +20,7 @@
 - **STACK:** C11/SDL2 engine, Python tools (via `uv`), CMake build.
 - **ANNOTATIONS:** EVERY function in `src/` MUST include this header comment:
   ```c
-  // @original <SymbolName> (IGN_WIN.EXE @ 0x<Address>, <SourceFileHint>)
+  // @original <SymbolName> (MAINDOS_32BIT.EXE @ 0x<Address>, <SourceFileHint>)
   // @fidelity EXACT | ADAPTED | EXTENDED | INFRASTRUCTURE
   // @deviation DEV-XXX (if logic diverges)
   // @fix_category FIX_CAT_XXX (if toggleable)

@@ -46,10 +46,10 @@ typedef struct {
     int32_t field_1c;
 } SpriteDesc;
 
-/* Global font table matching MAINDOS @ 0x0024C214, IGN_WIN @ 0x0063F2E0 */
+/* Global font table matching MAINDOS @ 0x0024C214, MAINDOS @ 0x0063F2E0 */
 extern FontSlot g_fonts[MAX_FONTS];
 
-/* Global font system initialized flag (MAINDOS @ 0x000D7C60, IGN_WIN @ 0x004BA6C4) */
+/* Global font system initialized flag (MAINDOS @ 0x000D7C60, MAINDOS @ 0x004BA6C4) */
 extern int g_fontSystemInitialized;
 
 /* Global Graphics and Font Pointers */

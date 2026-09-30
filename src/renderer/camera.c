@@ -25,7 +25,7 @@
 
 /**
  * @brief Initializes camera viewing volume, mode, and aspect ratio.
- * @original FUN_00436990 (IGN_WIN.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004 (Right-handed camera basis alignment)
  * @fix_category FIX_CAT_CAMERA
@@ -58,7 +58,7 @@ void Camera_Init(Camera3D *cam, float aspect) {
 
 /**
  * @brief Switch active camera view mode and reconfigure baseline orbital parameters.
- * @original FUN_00436990 (IGN_WIN.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA
@@ -114,7 +114,7 @@ void Camera_CycleMode(Camera3D *cam) {
 
 /**
  * @brief Orbits camera around target point with yaw, pitch, and zoom constraints.
- * @original FUN_00436990 (IGN_WIN.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA
@@ -139,7 +139,7 @@ void Camera_Orbit(Camera3D *cam, float delta_yaw, float delta_pitch, float delta
 
 /**
  * @brief Computes Cartesian camera position from spherical orbital parameters.
- * @original FUN_00436990 (IGN_WIN.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA
@@ -163,7 +163,7 @@ void Camera_Update(Camera3D *cam, float delta_time) {
 
 /**
  * @brief Pans camera target in world horizontal plane.
- * @original FUN_00436990 (IGN_WIN.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA
@@ -191,7 +191,7 @@ void Camera_Pan(Camera3D *cam, float delta_forward, float delta_right, float del
 
 /**
  * @brief Update camera position and heading following a vehicle with authentic lag and slope tracking.
- * @original FUN_0043c910 (IGN_WIN.EXE @ 0x0043c910, main.c)
+ * @original FUN_0043c910 (MAINDOS_32BIT.EXE @ 0x0043c910, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA

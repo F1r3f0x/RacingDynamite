@@ -34,7 +34,7 @@ static double Clamp(double val, double min_val, double max_val) {
 
 /**
  * @brief Initialize vehicle physics state, dimensions, and starting grid placement.
- * @original FUN_0041b470 (IGN_WIN.EXE @ 0x0041b470, main.c)
+ * @original FUN_0041b470 (MAINDOS_32BIT.EXE @ 0x0041b470, main.c)
  * @fidelity ADAPTED
  */
 void Vehicle_Init(VehicleState *veh, int car_index,
@@ -165,12 +165,12 @@ void Vehicle_ApplyInput(VehicleState *veh, double throttle, double brake, double
 
 /**
  * @brief Perform a single fixed-timestep 72 Hz physics integration tick.
- * @original FUN_00424570 (IGN_WIN.EXE @ 0x00424570, vehicle.c)
- * @original FUN_00427d70 (IGN_WIN.EXE @ 0x00427d70, main.c)
- * @original FUN_0040e6b0 (IGN_WIN.EXE @ 0x0040e6b0, vehicle.c)
- * @original FUN_00423aa0 (IGN_WIN.EXE @ 0x00423aa0, vehicle.c)
- * @original FUN_00442030 (IGN_WIN.EXE @ 0x00442030, vehicle.c)
- * @original FUN_00442670 (IGN_WIN.EXE @ 0x00442670, vehicle.c)
+ * @original FUN_00424570 (MAINDOS_32BIT.EXE @ 0x00424570, vehicle.c)
+ * @original FUN_00427d70 (MAINDOS_32BIT.EXE @ 0x00427d70, main.c)
+ * @original FUN_0040e6b0 (MAINDOS_32BIT.EXE @ 0x0040e6b0, vehicle.c)
+ * @original FUN_00423aa0 (MAINDOS_32BIT.EXE @ 0x00423aa0, vehicle.c)
+ * @original FUN_00442030 (MAINDOS_32BIT.EXE @ 0x00442030, vehicle.c)
+ * @original FUN_00442670 (MAINDOS_32BIT.EXE @ 0x00442670, vehicle.c)
  * @fidelity EXTENDED
  * @deviation DEV-003 (Mountain wall climbing steep gradient adhesion clamp)
  * @fix_category FIX_CAT_NOCLIP
@@ -202,7 +202,7 @@ void Vehicle_Update(VehicleState *veh, const SrfData *srf, const PlcData *plc, c
         SurfaceRaycastResult ray;
         Surface_Raycast(srf, plc, msh, wheel->world_x, wheel->world_z, veh->y, &ray, fixes);
 
-        // Maximum step height that can be climbed based on forward speed (IGN_WIN.EXE 0x00424570)
+        // Maximum step height that can be climbed based on forward speed (MAINDOS_32BIT.EXE 0x00424570)
         double max_step = fabs(veh->speed_long) * 0.5 + 25.0;
         bool is_wall = (ray.normal_y < 0.25) || (ray.material_id >= 80);
         bool is_steep_step = false;
@@ -457,7 +457,7 @@ void Vehicle_LogTelemetry(const VehicleState *veh, uint32_t tick_num) {
 
 /**
  * @brief Compute smooth isometric chase camera parameters targeting the vehicle.
- * @original FUN_00436990 (IGN_WIN.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004 (Right-handed camera basis vector normalization)
  * @fix_category FIX_CAT_CAMERA

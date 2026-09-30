@@ -30,7 +30,7 @@ def normalize_address(addr: Optional[str]) -> Optional[str]:
 
 def detect_target_binary(server_url: str) -> str:
     """
-    Detect whether the active binary in Ghidra is IGN_WIN.EXE or MAINDOS.EXE
+    Detect whether the active binary in Ghidra is MAINDOS_32BIT.EXE or MAINDOS.EXE
     based on loaded memory segments.
     """
     try:
@@ -71,7 +71,7 @@ def sync_ghidra(
 
     detected = detect_target_binary(server_url)
     active_target = detected if target == "auto" else target
-    target_desc = "IGN_WIN.EXE (Windows PE)" if active_target == "win" else "MAINDOS.EXE (Watcom DOS/4GW)"
+    target_desc = "MAINDOS_32BIT.EXE (Windows PE)" if active_target == "win" else "MAINDOS.EXE (Watcom DOS/4GW)"
     print(f"[*] Target executable: {target_desc} (selection: {target})")
 
     conn = sqlite3.connect(DB_PATH)

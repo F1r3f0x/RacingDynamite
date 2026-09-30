@@ -1,4 +1,4 @@
-# Master Function Registry (MAINDOS.EXE / IGN_WIN.EXE)
+# Master Function Registry (MAINDOS.EXE / MAINDOS_32BIT.EXE)
 
 > Auto-generated from `database/decomp.db`. Edit via `tools/db.py`.
 
@@ -40,7 +40,7 @@
 | `0x2a40e` | `0x00420090` | `FUN_00420090` | `Obstacle_TriggerAction` | `main.c` | Decompiled | EXACT | Evaluates type 0xFA (250) trigger obstacles and triggers associated actions. |
 | `0x2a4ec` | `0x004200e0` | `FUN_004200e0` | `AI_InitSteeringConeLookup` | `main.c` | Decompiled | EXACT | Precomputes 800x405 lookahead steering cone and obstacle threat table. |
 | `0x2a97a` | `0x00420240` | `FUN_00420240` | `Ghost_LoadCarAndPath` | `main.c` | Decompiled | EXACT | Loads recorded Time Attack ghost car trajectory from GHOSTS\%s.GST. |
-| `0x2adf8` | `0x00420870` | `FUN_00420870` | `Track_LoadBinaryCache` | `main.c` | Decompiled | EXACT | Loads preprocessed level data cache (ign_win.btz / ign_dos.btz). |
+| `0x2adf8` | `0x00420870` | `FUN_00420870` | `Track_LoadBinaryCache` | `main.c` | Decompiled | EXACT | Loads preprocessed level data cache (ign_dos.btz / ign_dos.btz). |
 | `0x2b42d` | `0x00420990` | `FUN_00420990` | `Sound_FreeAllSounds` | `main.c` | Decompiled | EXACT | Frees active level audio buffers and sample tables upon track unload. |
 | `0x2b51a` | `0x00420b70` | `FUN_00420b70` | `Game_Shutdown` | `main.c` | Decompiled | EXACT | Releases all allocated game memory and shuts down engine subsystems cleanly. |
 | `0x3b996` | `0x00420c00` | `FUN_00420c00` | `Timer_GetDeltaTime` | `main.c` | Decompiled | EXACT | Computes elapsed frame delta time using tick counter scaled by 0.036. Updates accumulator, frame counter, and clamps delta to max 10.8 ticks. |

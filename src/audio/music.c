@@ -63,7 +63,7 @@ static MusicState g_music = {0};
 
 /**
  * @brief Map circuit index to CD soundtrack track number.
- * @original DAT_00497eb8 (IGN_WIN.EXE @ 0x00419260, main.c)
+ * @original DAT_00497eb8 (MAINDOS_32BIT.EXE @ 0x00419260, main.c)
  * @fidelity EXACT
  */
 int Music_GetTrackForCircuit(int track_index) {
@@ -75,7 +75,7 @@ int Music_GetTrackForCircuit(int track_index) {
 
 /**
  * @brief Mix decoded music PCM samples directly into the audio output stream.
- * @original FUN_00457890 (IGN_WIN.EXE @ 0x00457890, main.c)
+ * @original FUN_00457890 (MAINDOS_32BIT.EXE @ 0x00457890, main.c)
  * @fidelity ADAPTED
  */
 void Music_MixAudio(int16_t *stream, int frames, float master_music_vol) {
@@ -124,7 +124,7 @@ void Music_MixAudio(int16_t *stream, int frames, float master_music_vol) {
 
 /**
  * @brief Begin streaming a music track file (e.g. Track02.ogg).
- * @original FUN_00457ed0 (IGN_WIN.EXE @ 0x00457ed0, main.c)
+ * @original FUN_00457ed0 (MAINDOS_32BIT.EXE @ 0x00457ed0, main.c)
  * @fidelity ADAPTED
  */
 bool Music_PlayTrack(int track_number, bool loop) {
@@ -178,7 +178,7 @@ bool Music_PlayTrack(int track_number, bool loop) {
 
 /**
  * @brief Stop digital music streaming.
- * @original FUN_00457ed0 (IGN_WIN.EXE @ 0x00457ed0, main.c)
+ * @original FUN_00457ed0 (MAINDOS_32BIT.EXE @ 0x00457ed0, main.c)
  * @fidelity ADAPTED
  */
 void Music_Stop(void) {
@@ -199,7 +199,7 @@ void Music_Stop(void) {
 
 /**
  * @brief Set music playback volume.
- * @original FUN_00457ae0 (IGN_WIN.EXE @ 0x00457ae0, main.c)
+ * @original FUN_00457ae0 (MAINDOS_32BIT.EXE @ 0x00457ae0, main.c)
  * @fidelity ADAPTED
  */
 void Music_SetVolume(float volume) {
@@ -210,7 +210,7 @@ void Music_SetVolume(float volume) {
 
 /**
  * @brief Check if music is actively streaming.
- * @original FUN_00457b10 (IGN_WIN.EXE @ 0x00457b10, main.c)
+ * @original FUN_00457b10 (MAINDOS_32BIT.EXE @ 0x00457b10, main.c)
  * @fidelity ADAPTED
  */
 bool Music_IsPlaying(void) {
@@ -219,7 +219,7 @@ bool Music_IsPlaying(void) {
 
 /**
  * @brief Update music streaming buffer (call periodically or from main loop).
- * @original FUN_0041775a (IGN_WIN.EXE @ 0x0041775a, main.c)
+ * @original FUN_0041775a (MAINDOS_32BIT.EXE @ 0x0041775a, main.c)
  * @fidelity ADAPTED
  */
 void Music_Update(void) {

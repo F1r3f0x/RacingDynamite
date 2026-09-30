@@ -86,7 +86,7 @@ typedef struct {
 } SrfHeader;
 
 // Spatial grid cell entry (12 bytes)
-// @original DAT_004c53d4 grid entries (IGN_WIN.EXE @ 0x00412fc0, getsurf.c)
+// @original DAT_004c53d4 grid entries (MAINDOS_32BIT.EXE @ 0x00412fc0, getsurf.c)
 // @notes Confirmed by FUN_00412fc0 decompile: *(ushort*)(cell+8) = table1_count,
 //        *(ushort*)(cell+10) = table2_count. NOT a packed bitfield.
 typedef struct {
@@ -131,7 +131,7 @@ typedef struct PlcData {
 } PlcData;
 
 // Ignition .MSH Polygon Record (44 bytes / 11 x int32)
-// @original FUN_00452800 (IGN_WIN.EXE @ 0x00452800, lisa3d.c)
+// @original FUN_00452800 (MAINDOS_32BIT.EXE @ 0x00452800, lisa3d.c)
 typedef struct {
     uint32_t header;          // Opcode (low byte: 0x11, 0x12, 0x13, 0x15, 0x17) and flags
     uint32_t idx0;            // Index of vertex 0 in submesh vertex array
@@ -270,7 +270,7 @@ void     Pos_Update(PosData *pos, PlcData *plc);
 #pragma pack(push, 1)
 
 // Ignition .CDP Animation Video Stream (Header + Frames)
-// @original Cdp_OpenFile (IGN_WIN.EXE @ 0x00412580, lisa3d.c)
+// @original Cdp_OpenFile (MAINDOS_32BIT.EXE @ 0x00412580, lisa3d.c)
 typedef struct {
     uint8_t *file_data;         // +0x00: Pointer to raw file data
     uint8_t *pixel_buffer;      // +0x04: 8bpp destination pixel buffer

@@ -20,7 +20,7 @@
 #include <string.h>
 
 /**
- * @original Cdp_OpenFile (IGN_WIN.EXE @ 0x00412580, lisa3d.c)
+ * @original Cdp_OpenFile (MAINDOS_32BIT.EXE @ 0x00412580, lisa3d.c)
  * @fidelity EXACT
  */
 bool Cdp_OpenFile(CdpStream *cdp, const uint8_t *data, size_t size) {
@@ -50,7 +50,7 @@ bool Cdp_OpenFile(CdpStream *cdp, const uint8_t *data, size_t size) {
 }
 
 /**
- * @original Cdp_DecompressRLE (IGN_WIN.EXE @ 0x00499abc, lisa3d.c)
+ * @original Cdp_DecompressRLE (MAINDOS_32BIT.EXE @ 0x00499abc, lisa3d.c)
  * @fidelity EXACT
  */
 int Cdp_DecompressRLE(CdpStream *cdp) {
@@ -125,7 +125,7 @@ int Cdp_DecompressRLE(CdpStream *cdp) {
 }
 
 /**
- * @original Cdp_DecodeFrame (IGN_WIN.EXE @ 0x00412610, lisa3d.c)
+ * @original Cdp_DecodeFrame (MAINDOS_32BIT.EXE @ 0x00412610, lisa3d.c)
  * @fidelity EXACT
  */
 int Cdp_DecodeFrame(CdpStream *cdp) {

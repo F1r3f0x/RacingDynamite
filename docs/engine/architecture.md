@@ -2,7 +2,7 @@
 
 ## 1. Subsystem Architecture Overview
 
-**Racing Dynamite** is structured as a modular C11/SDL2 engine designed for 100% behavioral parity with the 1997 Windows 95 release (`IGN_WIN.EXE`) and DOS release (`MAINDOS.EXE`).
+**Racing Dynamite** is structured as a modular C11/SDL2 engine designed for 100% behavioral parity with the 1997 Windows 95 release (`MAINDOS_32BIT.EXE`) and DOS release (`MAINDOS.EXE`).
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -63,7 +63,7 @@ Ignition utilizes a right-handed Cartesian world coordinate system:
   * Typical coordinates range from $-10,000$ to $+10,000$ world units.
 * **$Y$-Axis (Elevation)**:
   * World coordinate space: positive values denote elevation **above** sea level; negative values denote elevation **below** into canyons, valleys, or underwater tunnels.
-  * In certain internal vertex arrays of `IGN_WIN.EXE` and `getsurf.c`, the elevation coordinate is inverted (`-Y`) when loading from `.MSH` or calculating triangle heights `(y0 + y1 + y2) / -3`.
+  * In certain internal vertex arrays of `MAINDOS_32BIT.EXE` and `getsurf.c`, the elevation coordinate is inverted (`-Y`) when loading from `.MSH` or calculating triangle heights `(y0 + y1 + y2) / -3`.
 * **$Z$-Axis (North / South)**:
   * Horizontal depth axis along the track terrain.
   * Typical coordinates range from $-10,000$ to $+10,000$ world units.

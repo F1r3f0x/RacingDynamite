@@ -145,22 +145,37 @@ def link_rebuilt_binary():
         print(f"Link step note (see {log_path} for details)")
         return False
     print(f"Linking SUCCESS: {rebuilt_exe} generated successfully.")
+    deploy_rebuilt_binary()
     return True
 
-def run_in_dosbox():
-    """Copies rebuilt binary to Ignition directory and launches DOSBox."""
+def deploy_rebuilt_binary():
+    """Copies rebuilt binary to Ignition directory as MREBUILT.EXE with strict safety checks."""
     rebuilt_exe = BUILD_DIR / "MAINDOS_REBUILT.EXE"
     if not rebuilt_exe.exists():
-        if not link_rebuilt_binary():
-            return False
+        return False
 
     game_dir = ROOT_DIR / "Ignition" / "Ignition"
     target_exe = game_dir / "MREBUILT.EXE"
 
+    # CRITICAL SAFETY GUARD: Never overwrite MAINDOS.EXE or original game files
+    if target_exe.name.upper() in ["MAINDOS.EXE", "IGNITION.EXE"]:
+        raise RuntimeError(f"FATAL: Refusing to overwrite original game binary: {target_exe.name}")
+
     import shutil
     shutil.copy2(rebuilt_exe, target_exe)
-    print(f"[DOSBox] Copied {rebuilt_exe.name} -> {target_exe.name}")
+    print(f"[Deploy] Copied {rebuilt_exe.name} -> {target_exe.relative_to(ROOT_DIR)} ({target_exe.stat().st_size} bytes)")
+    return True
 
+def run_in_dosbox():
+    """Ensures binary is deployed to Ignition directory and launches DOSBox."""
+    rebuilt_exe = BUILD_DIR / "MAINDOS_REBUILT.EXE"
+    if not rebuilt_exe.exists():
+        if not link_rebuilt_binary():
+            return False
+    else:
+        deploy_rebuilt_binary()
+
+    game_dir = ROOT_DIR / "Ignition" / "Ignition"
     dosbox_exe = game_dir / "DOSBOX" / "DOSBox.exe"
     dosbox_conf = game_dir / "dosbox_rebuilt.conf"
 

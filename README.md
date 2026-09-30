@@ -4,7 +4,7 @@
 [![Standard: C11](https://img.shields.io/badge/Standard-C11-green.svg)](https://en.wikipedia.org/wiki/C11_(C_standard_revision))
 [![Platform: SDL2](https://img.shields.io/badge/Platform-SDL2-red.svg)](https://www.libsdl.org/)
 
-**Racing Dynamite** is an open-source, portable C11/SDL2 source port and reverse-engineering effort of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting the original Windows 95 release (`IGN_WIN.EXE`) with insights from the DOS release (`MAINDOS.EXE`).
+**Racing Dynamite** is an open-source, portable C implementation and reverse-engineering effort of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting the authentic DOS release (`MAINDOS_32BIT.EXE`).
 
 ---
 
@@ -69,6 +69,19 @@ Launch the engine:
 ```bash
 ./build/racing_dynamite
 ```
+
+### 4. DOS Decompilation & DOSBox Testing (Open Watcom V2)
+To compile the authentic pure C DOS implementation (`decomp/src/`) using Open Watcom V2 and link with DOS/4GW objects:
+```bash
+# Compile and link MAINDOS_REBUILT.EXE and deploy to Ignition/Ignition/MREBUILT.EXE
+uv run python tools/build_decomp.py --link
+
+# Compile, link, deploy to MREBUILT.EXE and automatically launch in DOSBox
+uv run python tools/build_decomp.py --run
+```
+> [!IMPORTANT]
+> The build system deploys the rebuilt binary strictly as `MREBUILT.EXE` inside the game directory. The original `MAINDOS.EXE` and all other original game files are strictly preserved and never overwritten.
+
 
 ---
 

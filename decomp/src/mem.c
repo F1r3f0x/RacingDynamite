@@ -96,7 +96,7 @@ done:
 }
 
 /**
- * File_LoadToMemory (MAINDOS @ 0x00060F9C, IGN_WIN @ 0x004574A0)
+ * File_LoadToMemory (MAINDOS @ 0x00060F9C)
  * Allocates memory buffer via malloc and loads entire file content from disk.
  */
 void *File_LoadToMemory(const char *filename) {

@@ -1,6 +1,6 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
-This document defines the complete engineering roadmap and milestone plan for **Racing Dynamite**, the clean-room reverse engineering and modern C11/SDL2 source port of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting `IGN_WIN.EXE` with reference insights from `MAINDOS.EXE`.
+This document defines the complete engineering roadmap and milestone plan for **Racing Dynamite**, the clean-room reverse engineering and modern C11/SDL2 source port of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting `MAINDOS_32BIT.EXE` with reference insights from `MAINDOS.EXE`.
 
 ---
 
@@ -95,7 +95,7 @@ graph TD
 ---
 
 ### Phase 4: Tooling Hygiene, Authentic Multi-Backend Renderer & Fidelity Tracking (FCTS)
-**Objective**: Clean and document the reverse engineering asset tools, preserve the authentic Lisa3D software rasterizer while architecting pluggable 3dfx/DirectX backends, implement granular per-category game fix controls, and establish machine-verifiable code fidelity against `IGN_WIN.EXE`.
+**Objective**: Clean and document the reverse engineering asset tools, preserve the authentic Lisa3D software rasterizer while architecting pluggable 3dfx/DirectX backends, implement granular per-category game fix controls, and establish machine-verifiable code fidelity against `MAINDOS_32BIT.EXE`.
 
 1. **Prep Stage: Tools Audit, Pruning & Documentation**:
    * Audit all 50 Python scripts in `tools/`:
@@ -213,7 +213,7 @@ graph TD
    * Proper aspect-ratio correction for 16:9 and 21:9 monitors while maintaining crisp 8-bit software rendering.
    * Frame interpolation / uncoupled physics tick for smooth high-refresh (120Hz / 144Hz / 240Hz) displays.
 4. **Reverse Engineering Completeness**:
-   * Ensure all identified functions, memory addresses, and structures in `IGN_WIN.EXE` are completely catalogued in `docs/ghidra/functions.md`, `globals.md`, and `structs.md`.
+   * Ensure all identified functions, memory addresses, and structures in `MAINDOS_32BIT.EXE` are completely catalogued in `docs/ghidra/functions.md`, `globals.md`, and `structs.md`.
 
 ---
 
@@ -227,4 +227,4 @@ graph TD
 | **Spline Waypoints** | Spline test suite | Continuous closed-loop chaining across all circuits without breaks. |
 | **Audio Engine** | Audio loopback verification | SFX and music stream concurrently without clipping, buffer underruns, or memory leaks. |
 | **Full Race Loop** | Interactive playtesting | Complete a full 3-lap race on every circuit with 5 AI opponents, working HUD, camera, sound, and finish line results. |
-| **Binary Parity** | Side-by-side visual comparison | Visual parity against original `IGN_WIN.EXE` running under Wine / DOSBox. |
+| **Binary Parity** | Side-by-side visual comparison | Visual parity against original `MAINDOS_32BIT.EXE` running under Wine / DOSBox. |

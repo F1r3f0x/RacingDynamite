@@ -17,7 +17,7 @@ Original source references: `Mesh_LoadTrackAndCars` (`0x00419bd0`) and `Mesh_Ins
 | `polygons[]`   | `MshPolygon` | $44 \times \text{polygon\_count}$| Stream of 44-byte polygon records. |
 
 ### Polygon Record Layout (`MshPolygon` - 44 bytes / 11 x `uint32_t`)
-Each polygon starts with an opcode byte dispatched via opcode table `PTR_LAB_0049c8e0` in `IGN_WIN.EXE` (`Lisa_RenderSubmeshes` `0x0044c1f0`):
+Each polygon starts with an opcode byte dispatched via opcode table `PTR_LAB_0049c8e0` in `MAINDOS_32BIT.EXE` (`Lisa_RenderSubmeshes` `0x0044c1f0`):
 
 | Offset | Type | Field | Description |
 | :--- | :--- | :--- | :--- |

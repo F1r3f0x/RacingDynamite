@@ -84,7 +84,7 @@ void Shd_Free(ShdData *shd) {
 
 /**
  * @brief Loads 1MB track .TEX, car .TEX, and 64KB aligned texture pages into memory.
- * @original FUN_00419d10 (IGN_WIN.EXE @ 0x00419d10, main.c)
+ * @original FUN_00419d10 (MAINDOS_32BIT.EXE @ 0x00419d10, main.c)
  * @fidelity ADAPTED
  */
 TexData *Tex_LoadFromFile(const char *filepath) {
@@ -105,7 +105,7 @@ TexData *Tex_LoadFromFile(const char *filepath) {
         return NULL;
     }
 
-    // Authentic IGN_WIN.EXE (Texture_LoadAllPages 0x00419d10):
+    // Authentic MAINDOS_32BIT.EXE (Texture_LoadAllPages 0x00419d10):
     // Buffer size is rounded up to 64KB multiples: (file_size + 0xFFFF) & ~0xFFFF.
     // Minimum buffer is 16 pages (1MB = 1,048,576 bytes).
     size_t alloc_size = (size_t)((file_size + 0xFFFF) & ~0xFFFF);

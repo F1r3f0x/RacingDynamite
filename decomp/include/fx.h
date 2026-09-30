@@ -1,6 +1,6 @@
 /*
  * fx.h - Special Effects, Particle Systems, HUD & Dynamic Object Rendering
- * Target: MAINDOS.EXE / IGN_WIN.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
+ * Target: MAINDOS_32BIT.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
  */
 
 #ifndef FX_H

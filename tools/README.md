@@ -56,7 +56,7 @@ uv run python tools/<script_name>.py [args]
 | :--- | :--- |
 | **`verify_fidelity.py`** | Automated Fidelity & Change Tracking System (FCTS) auditor. Validates bidirectional consistency between `docs/ghidra/functions.md`, `docs/tracking/deviations.md`, and C source code annotations (`@original`, `@fidelity`, `@deviation`, `@fix_category`). Generates parity dashboard and returns non-zero on broken references. |
 | **`verify_tab_formula.py`** | Verifies the mathematical formula for `.TAB` shading matrix against original binary behavior. |
-| **`verify_all_game_strings.py`** | Validates game strings in C code against the string table extracted from `IGN_WIN.EXE`. |
+| **`verify_all_game_strings.py`** | Validates game strings in C code against the string table extracted from `MAINDOS_32BIT.EXE`. |
 | **`verify_screens.py`** | Verifies UI screen coordinates, button positions, and layout dimensions. |
 
 ---

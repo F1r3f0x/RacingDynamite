@@ -199,7 +199,7 @@ def main():
             sys.exit(1)
     elif os.path.isdir(source):
         # Check primary binary or image inside dir if present
-        for check_sub in ["game.gog", "MAINDOS.EXE", "IGN_WIN.EXE"]:
+        for check_sub in ["game.gog", "MAINDOS.EXE"]:
             for root, _, files in os.walk(source):
                 if check_sub in files:
                     full_p = os.path.join(root, check_sub)

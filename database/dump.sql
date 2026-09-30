@@ -17,7 +17,7 @@ INSERT INTO "deviations" VALUES('DEV-006','FIX_CAT_AUDIO','High-RPM engine pitch
 CREATE TABLE functions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT UNIQUE,               -- Address in MAINDOS.EXE (e.g. '0x00012340')
-    win_address TEXT UNIQUE,               -- Cross-ref address in IGN_WIN.EXE (e.g. '0x00412fc0')
+    win_address TEXT UNIQUE,               -- Cross-ref address in MAINDOS_32BIT.EXE (e.g. '0x00412fc0')
     symbol_name TEXT NOT NULL,             -- Reconstructed / authentic C function name
     original_ghidra_name TEXT,             -- Ghidra default label (e.g. 'FUN_00412fc0')
     module_id INTEGER REFERENCES modules(id) ON DELETE SET NULL,
@@ -150,7 +150,7 @@ INSERT INTO "functions" VALUES(185,'0x0002a785','0x0042fc80','FX_UpdateFlyingPar
 INSERT INTO "functions" VALUES(186,'0x0001a40e','0x00420090','Obstacle_TriggerAction','FUN_00420090',5,'decompiled','watcom_reg','void','void',222,NULL,'EXACT','decomp/src/main.c','Evaluates type 0xFA (250) trigger obstacles and triggers associated actions.',NULL,NULL);
 INSERT INTO "functions" VALUES(187,'0x0001a4ec','0x004200e0','AI_InitSteeringConeLookup','FUN_004200e0',5,'decompiled','watcom_reg','void','void',567,NULL,'EXACT','decomp/src/main.c','Precomputes 800x405 lookahead steering cone and obstacle threat table.',NULL,NULL);
 INSERT INTO "functions" VALUES(188,'0x0001a97a','0x00420240','Ghost_LoadCarAndPath','FUN_00420240',5,'decompiled','watcom_reg','void','void',380,NULL,'EXACT','decomp/src/main.c','Loads recorded Time Attack ghost car trajectory from GHOSTS\%s.GST.',NULL,NULL);
-INSERT INTO "functions" VALUES(189,'0x0001adf8','0x00420870','Track_LoadBinaryCache','FUN_00420870',5,'decompiled','watcom_reg','void','void',158,NULL,'EXACT','decomp/src/main.c','Loads preprocessed level data cache (ign_win.btz / ign_dos.btz).',NULL,NULL);
+INSERT INTO "functions" VALUES(189,'0x0001adf8','0x00420870','Track_LoadBinaryCache','FUN_00420870',5,'decompiled','watcom_reg','void','void',158,NULL,'EXACT','decomp/src/main.c','Loads preprocessed level data cache (ign_dos.btz).',NULL,NULL);
 INSERT INTO "functions" VALUES(190,'0x0001b42d','0x00420990','Sound_FreeAllSounds','FUN_00420990',5,'decompiled','watcom_reg','void','void',237,NULL,'EXACT','decomp/src/main.c','Frees active level audio buffers and sample tables upon track unload.',NULL,NULL);
 INSERT INTO "functions" VALUES(191,'0x0001b51a','0x00420b70','Game_Shutdown','FUN_00420b70',5,'decompiled','watcom_reg','void','void',429,NULL,'EXACT','decomp/src/main.c','Releases all allocated game memory and shuts down engine subsystems cleanly.',NULL,NULL);
 INSERT INTO "functions" VALUES(192,'0x0001b9d3','0x00420d10','Race_UpdateCountdownAndFinish','FUN_00420d10',5,'decompiled','watcom_reg','void','void',17,NULL,'EXACT','decomp/src/main.c','Updates start-line traffic light timer and checks race winner victory condition.',NULL,NULL);
@@ -223,7 +223,7 @@ INSERT INTO "functions" VALUES(258,NULL,'0x0044f070','Lisa_InitRasterizerTables'
 CREATE TABLE globals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT,                      -- Address in MAINDOS.EXE
-    win_address TEXT UNIQUE,               -- Address in IGN_WIN.EXE
+    win_address TEXT UNIQUE,               -- Address in MAINDOS_32BIT.EXE
     name TEXT NOT NULL,                    -- Variable name (e.g. 'g_pActiveSRF')
     module_id INTEGER REFERENCES modules(id) ON DELETE SET NULL,
     type TEXT NOT NULL,                    -- Data type (e.g. 'uint8_t*', 'int32_t')
@@ -298,7 +298,7 @@ CREATE TABLE metadata (
     value TEXT NOT NULL
 );
 INSERT INTO "metadata" VALUES('target_exe','MAINDOS.EXE');
-INSERT INTO "metadata" VALUES('reference_exe','IGN_WIN.EXE');
+INSERT INTO "metadata" VALUES('reference_exe','MAINDOS_32BIT.EXE');
 INSERT INTO "metadata" VALUES('compiler','Watcom C/C++ 10.6');
 INSERT INTO "metadata" VALUES('project_name','Racing Dynamite Decompilation');
 CREATE TABLE modules (

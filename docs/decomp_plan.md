@@ -48,7 +48,7 @@ Tracking has migrated from manual markdown tables to a centralized, relational S
 * **`modules`**: Translation units (`getsurf.c`, `lisa3d.c`, `geputget.c`, `mem.c`, `main.c`, `sound.c`).
 * **`functions`**: Dual-addressing scheme:
   * `dos_address`: Primary address in `MAINDOS_32BIT.EXE` (e.g. `0x0002004c`).
-  * `win_address`: Cross-reference address in `IGN_WIN.EXE` (e.g. `0x00412670`).
+  * `win_address`: Cross-reference address in `MAINDOS_32BIT.EXE` (e.g. `0x00412670`).
   * `calling_convention`: Watcom register (`watcom_reg`: `eax`, `edx`, `ebx`, `ecx`), `cdecl`.
   * `status`: `unidentified` $\rightarrow$ `analyzed` $\rightarrow$ `decompiled` $\rightarrow$ `matching`.
 * **`globals`**: Global variables, buffers, and tables mapped to addresses and types.
@@ -85,7 +85,7 @@ uv run python tools/db.py dump-sql
 1. **`getsurf.c`**:
    * String: `d:\projects\ignition\getsurf\getsurf.c` (at `0x000a7cf4`)
    * Asserts: `pFile != NULL` (line 222), `x == 1`
-   * Anchor Function: **`Surface_LoadSRF` @ `0x0002004C`** (corresponds to `IGN_WIN.EXE @ 0x00412670`)
+   * Anchor Function: **`Surface_LoadSRF` @ `0x0002004C`** (corresponds to `MAINDOS_32BIT.EXE @ 0x00412670`)
 2. **`lisa3d.c`**:
    * Swedish Error Logs: `FEL VID LI_MOVEOBJECT`, `LI_PLACEOBJECT`, `LI_HIDEOBJECT`
    * Identifies Lisa 2 3D Development System engine functions: `Li_MoveObject`, `Li_PlaceObject`, `Li_HideObject`
