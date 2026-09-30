@@ -160,6 +160,11 @@ int Menu_Init(void) {
         VGA_SetPalette(g_pMenuCol);
     }
 
+    /* 2b. Ensure HUD fonts are loaded for menu text rasterization */
+    if (!g_pHUDFonts) {
+        Font_LoadHUDFonts();
+    }
+
     /* 3. Allocate and load the 5 authentic menu PIC graphics (MAINDOS @ 0x00011a3e..0x00011b06) */
     g_pPicBilar = (uint8_t *)Mem_Alloc(CAR_CARD_DATA_SIZE, 0);
     if (g_pPicBilar) {
@@ -298,6 +303,11 @@ int Menu_Tick(void) {
 
         case MENU_STATE_LANG_SELECT: {
             int i;
+
+            if (g_pHUDFonts) {
+                Font_DrawHUDText(90, 10, "SELECT LANGUAGE", g_pVirtualFramebuffer, 320, g_pHUDFonts, 0x20);
+            }
+
             /* Language Selection Screen */
             /* 6 Flags: EN(0), DE(1), IT(2), ES(3), SE(4), FR(5) */
             for (i = 0; i < 6; i++) {
@@ -364,6 +374,10 @@ int Menu_Tick(void) {
                         }
                     }
                 }
+
+                if (g_pHUDFonts) {
+                    Font_DrawHUDText(85, y, label, g_pVirtualFramebuffer, 320, g_pHUDFonts, is_selected ? 0x20 : 0x00);
+                }
             }
 
             /* Handle Navigation */
@@ -389,6 +403,11 @@ int Menu_Tick(void) {
 
         case MENU_STATE_CAR_SELECT: {
             int card_y;
+
+            /* Draw car name above pedestal */
+            if (g_pHUDFonts) {
+                Font_DrawHUDText(130, 48, g_CarNames[g_SelectedCar], g_pVirtualFramebuffer, 320, g_pHUDFonts, 0x20);
+            }
 
             /* 1. Blit central pedestal graphic (CAR_SEL.PIC: 255x74) */
             Menu_BlitSprite(g_pPicCarSel, CAR_PEDESTAL_WIDTH, CAR_PEDESTAL_HEIGHT, (320 - CAR_PEDESTAL_WIDTH) / 2, 70);
