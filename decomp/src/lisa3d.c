@@ -578,7 +578,7 @@ void Lisa_DrawTriangle_OpcodeHelper(int shd_table, int depth_bias);
 void Lisa_DrawBillboard_Op07(void);
 void Lisa_DrawBillboard_Op08(void);
 LisaReturn64 Lisa_InitRasterizerTables(int mode, unsigned int flags);
-LisaReturn64 Lisa_ExecuteRasterizerCommands(int mode, unsigned int flags);
+LisaReturn64 Lisa_ExecuteRasterizerCommands(void);
 extern void VGA_SetPalette(const uint8_t *col_data);
 extern uint8_t *g_pTrackCOL;
 extern uint8_t *g_pCarsMesh;
@@ -705,7 +705,7 @@ extern int *g_pLisaScanlineBuffer;
 extern int *g_pLisaSpanBuffer;
 extern int *g_pLisaEdgeBuffer;
 extern double g_LisaCameraZoom;
-extern double g_pLisaActiveShading;
+extern void *g_pLisaActiveShading;
 extern int g_LisaClipLeft;
 extern int g_LisaClipRight;
 extern int g_LisaClipTop;
@@ -5466,43 +5466,92 @@ LisaReturn64 Lisa_InitRasterizerTables(int screen_pitch,unsigned int flags) {
  * @original Lisa_ExecuteRasterizerCommands (MAINDOS_32BIT.EXE @ 0x00060e3d, lisa3d.c)
  * @fidelity EXACT
  */
-LisaReturn64 Lisa_ExecuteRasterizerCommands(int mode,unsigned int flags) {
-  int *tmp_esi;
-  LisaReturn64 ret_val;
+extern int *g_pLisaDrawCommandQueue;
+LisaReturn64 Lisa_ExecuteRasterizerCommands(void) {
+  int **command_nodes;
+  int *node;
+  LisaReturn64 _r;
 
-  
-
-  g_pLisaScanlineBuffer = tmp_esi;
-  g_pLisaSpanBuffer = (int *)*tmp_esi;
-  g_LisaCameraZoom = tmp_esi[1];
-  g_pLisaActiveShading = tmp_esi[3];
-  g_LisaClipLeft = tmp_esi[4];
-  g_LisaClipRight = tmp_esi[5];
+  g_pLisaScanlineBuffer = (void *)g_pLisaDrawCommandQueue;
+  g_pLisaSpanBuffer = (int *)*g_pLisaDrawCommandQueue;
+  g_LisaCameraZoom = g_pLisaDrawCommandQueue[1];
+  g_pLisaActiveShading = (uint8_t *)g_pLisaDrawCommandQueue[3];
+  g_LisaClipLeft = g_LisaViewport.min_x;
+  g_LisaClipRight = g_LisaViewport.min_y;
   g_LisaClipSubpixelLeft = g_LisaClipLeft;
   g_LisaViewportCenterX = g_LisaClipLeft << 8;
   g_LisaClipSubpixelRight = g_LisaClipRight;
   g_LisaViewportCenterY = g_LisaClipRight << 8;
   g_SubpixelMinX = g_LisaViewportCenterX;
   g_SubpixelMinY = g_LisaViewportCenterY;
-  g_LisaClipTop = tmp_esi[6];
-  g_LisaClipBottom = tmp_esi[7];
+  g_LisaClipTop = g_LisaViewport.max_x;
+  g_LisaClipBottom = g_LisaViewport.max_y;
   g_LisaClipSubpixelTop = g_LisaClipTop + 1;
   g_LisaClipSubpixelBottom = g_LisaClipBottom + 1;
   g_SubpixelMaxX = g_LisaClipSubpixelTop * 0x100;
-  g_LisaViewportWidth = g_SubpixelMaxX + -1;
+  g_LisaViewportWidth = g_SubpixelMaxX - 1;
   g_SubpixelMaxY = g_LisaClipSubpixelBottom * 0x100;
-  g_LisaViewportHeight = g_SubpixelMaxY + -1;
-  g_pLisaEdgeBuffer = (int *)*g_pLisaSpanBuffer;
+  g_LisaViewportHeight = g_SubpixelMaxY - 1;
+  
+  command_nodes = (int **)*g_pLisaDrawCommandQueue;
+  node = *command_nodes;
 
-  if (g_pLisaEdgeBuffer != (int *)0x0) {
-    ret_val = (*(LisaReturn64 (*)())(((void **)g_LisaRasterizerJmpTable)[*g_pLisaEdgeBuffer]))();
-    return ret_val;
+  while (node != NULL) {
+      int opcode = node[0];
+      
+      switch (opcode) {
+          case 0x0F: {
+              int *active_mip_table = (int *)node[1];
+              int v0_x = node[2];
+              int v0_y = node[3];
+              int v1_x = node[4];
+              int v1_y = node[5];
+              int v2_x = node[6];
+              int v2_y = node[7];
+              
+              if (v1_y < v0_y) {
+                  if (v1_y < v2_y) {
+                      if (v2_y < v0_y) {
+                          int tx = v0_x; int ty = v0_y;
+                          v0_x = v1_x; v0_y = v1_y;
+                          v1_x = v2_x; v1_y = v2_y;
+                          v2_x = tx; v2_y = ty;
+                      } else {
+                          int tx = v0_x; int ty = v0_y;
+                          v0_x = v1_x; v0_y = v1_y;
+                          v1_x = tx; v1_y = ty;
+                      }
+                  } else {
+                      int tx = v0_x; int ty = v0_y;
+                      v0_x = v2_x; v0_y = v2_y;
+                      v2_x = tx; v2_y = ty;
+                  }
+              } else {
+                  if (v2_y < v0_y) {
+                      int tx = v0_x; int ty = v0_y;
+                      v0_x = v2_x; v0_y = v2_y;
+                      v2_x = v1_x; v2_y = v1_y;
+                      v1_x = tx; v1_y = ty;
+                  } else {
+                      if (v2_y < v1_y) {
+                          int tx = v1_x; int ty = v1_y;
+                          v1_x = v2_x; v1_y = v2_y;
+                          v2_x = tx; v2_y = ty;
+                      }
+                  }
+              }
+              break;
+          }
+          default:
+              break;
+      }
+      
+      command_nodes++;
+      node = *command_nodes;
   }
 
-  { LisaReturn64 _r; _r.edx = flags; _r.eax = 0; return _r; }
+  _r.edx = 0; _r.eax = 0; return _r;
 }
-
-
 /**
  * @original Car_UnpackMeshGeometry (MAINDOS_32BIT.EXE @ 0x00016616, lisa3d.c)
  * @fidelity EXACT

@@ -69,7 +69,7 @@ extern char s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468[];
 #include "lisa3d.h"
 
 extern uint8_t *g_pVirtualFramebuffer;
-extern LisaReturn64 Lisa_ExecuteRasterizerCommands(int mode, unsigned int flags);
+extern LisaReturn64 Lisa_ExecuteRasterizerCommands();
 
 /* Physics & Gameplay Tuning Constants */
 extern double k_WreckRespawnSplineOffset;
@@ -120,8 +120,8 @@ extern int g_AudioEventParam4;
 extern int g_AudioEventParam5;
 extern int g_AudioEventParam6;
 extern int g_AudioEventParam7;
-extern int Lisa_InitRasterizerTables(int a, unsigned int b);
-extern int *g_pLisaDrawCommandQueue;
+extern int Lisa_InitRasterizerTables(int width, unsigned int height);
+extern int g_pLisaDrawCommandQueue[];
 extern int *g_LisaDrawCommandBuffer;
 extern int Lisa_FlushRasterizerCommands(void *cmd_queue, unsigned int flags);
 
@@ -5781,7 +5781,7 @@ void FX_UpdateAllParticles(void) {
  */
 int Lisa_FlushRasterizerCommands(void *cmd_queue, unsigned int flags) {
     if (cmd_queue != NULL) {
-        Lisa_ExecuteRasterizerCommands(0, flags);
+        Lisa_ExecuteRasterizerCommands();
     }
     return 0;
 }
