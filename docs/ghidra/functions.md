@@ -96,7 +96,7 @@
 | - | - | `-` | `Math_LookupTrigAngle` | `fx.c` | Decompiled | EXACT | Computes arctangent angle lookup |
 | `0x00038e6d` | - | `-` | `Camera_UpdateOverview` | `fx.c` | Decompiled | EXACT | Simulates blimp overview camera following leading vehicles |
 | - | - | `FUN_00436990` | `Race_RenderViewport` | `fx.c` | Decompiled | ADAPTED | Renders single/splitscreen 3D scene viewport with HUD elements |
-| `0x00049a54` | - | `-` | `Lisa_FlushRasterizerCommands` | `fx.c` | Decompiled | EXACT | Command queue flush dispatcher calling Lisa_ExecuteRasterizerCommands |
+| `0x00049a54` | - | `-` | `Lisa_FlushRasterizerCommands` | `fx.c` | Decompiled | EXACT | Command queue flush dispatcher calling Lisa_ExecuteRasterizerCommands (Massive Switch Statement Loop) |
 | - | - | `-` | `Race_FindFocusedVehicle` | `fx.c` | Decompiled | EXACT | Identifies primary racer or human player to orient camera focus |
 | - | - | `FUN_00438210` | `Lisa_RenderPanorama` | `lisa3d.c` | Decompiled | ADAPTED | Panoramic backdrop sky blitter sampling active .PAN texture |
 | `0x000534cc` | - | `-` | `HUD_RenderPauseMenu` | `fx.c` | Decompiled | EXACT | Renders in-race pause menu overlay and handles Continue / Restart / Quit navigation |
@@ -160,9 +160,9 @@
 | `0x0005cc58` | - | `Lisa_DrawTexturedTriangle_Op11_Shaded` | `Lisa_DrawTexturedTriangle_Op11_Shaded` | `lisa3d.c` | Decompiled | EXACT | Textured triangle rasterizer with 32-level light shading (Opcode 0x11, Mode 0) |
 | `0x00060210` | - | `FUN_0044e900` | `Lisa_DrawTexturedTriangle_Op15_Sub` | `lisa3d.c` | Decompiled | EXACT | Sub-pixel trapezoid scanline rasterizer kernel for Opcode 0x15 |
 | `0x00060dc4` | - | `FUN_0044f070` | `Lisa_InitRasterizerTables` | `lisa3d.c` | Decompiled | EXACT | Computes scanline edge stepping tables and reciprocal lookup tables |
-| `0x00060e3d` | - | `FUN_0044f0e9` | `Lisa_ExecuteRasterizerCommands` | `lisa3d.c` | Decompiled | EXACT | Flushes queued draw commands from depth buckets through active opcode drawer functions |
+| `0x00060e3d` | - | `FUN_0044f0e9` | `Lisa_ExecuteRasterizerCommands (Massive Switch Statement Loop)` | `lisa3d.c` | Decompiled | EXACT | Flushes queued draw commands from depth buckets through active opcode drawer functions |
 | `0x0005d084` | - | `FUN_00452800` | `Lisa_RenderTexturedTriangle_Op11` | `lisa3d.c` | Decompiled | EXACT | Textured triangle dispatch helper (Opcode 0x11, Mode 0 Shaded NoFilter) |
-| `0x0005ef14` | - | `FUN_004537dc` | `Lisa_DrawTexturedSpan_Op11` | `lisa3d.c` | Decompiled | EXACT | Textured span rasterizer kernel with bilinear filtering (Opcode 0x11, Mode 0 Filtered) |
+| `0x0005ef14` | - | `FUN_004537dc` | `Lisa_DrawTexturedSpan_Op11 (FAKE FUNCTION - Switch Case)` | `lisa3d.c` | Decompiled | EXACT | Textured span rasterizer kernel with bilinear filtering (Opcode 0x11, Mode 0 Filtered) |
 | `0x00061220` | - | `-` | `Font_InitSystem` | `geputget.c` | Decompiled | EXACT | Initializes font subsystem tables (30 slots) |
 | `0x00061319` | - | `-` | `Font_Shutdown` | `geputget.c` | Decompiled | EXACT | Unloads active fonts and shuts down font subsystem |
 | `0x00061399` | - | `-` | `Font_Parse` | `geputget.c` | Decompiled | EXACT | Parses LFT font header, initializes glyph handles and metrics |

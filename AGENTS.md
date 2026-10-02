@@ -1,13 +1,14 @@
 # Ignition (1997) Reverse Engineering & Porting Rules
 
-**CURRENT PHASE:** Functional Implementation of `MAINDOS_32BIT.EXE` using pure C (Open Watcom V2). The goal is to reach 100% `FUNCTIONAL` fidelity. Structural equivalence is what matters.
+**CURRENT PHASE:** Functional Implementation of `MAINDOS.EXE` using pure C (Open Watcom V2). The goal is to reach 100% `FUNCTIONAL` fidelity. Structural equivalence is what matters.
 
 
-## 1. Decompilation Constraints (MAINDOS_32BIT.EXE)
-- **TARGET:** ONLY reverse-engineer `MAINDOS_32BIT.EXE`. Focus strictly on the DOS executable.
+## 1. Decompilation Constraints
+- **TARGET:** Our primary source of truth is the authentic `Ignition/Ignition/MAINDOS.EXE` DOS4GW binary. We have scrapped absolute reliance on the flawed `MAINDOS_32BIT.EXE` Ghidra database, which was repackaged and lost critical `.data` segment initialization (e.g. jump tables) and calling convention fidelity.
+- **VERIFICATION PIPELINE:** You MUST use the `tools/verify_capstone.py` and `tools/le_parser.py` pipeline to disassemble and extract initializers directly from the authentic `MAINDOS.EXE` LE file when porting complex systems (like the 3D rasterizer).
 - **NO RAW GHIDRA DUMPS:** NEVER commit unrefined decompiler output. You MUST:
   - **Structs:** Replace raw pointer offsets with proper C struct definitions and field accesses (e.g., `camera->enable_sky`).
-  - **Variables:** Rename ALL register artifacts (e.g., `iVar1`, `param_1`) to meaningful semantic names.
+  - **Variables:** Rename ALL register artifacts (e.g., `iVar1`, `tmp_esi`) to meaningful semantic names. Beware of Watcom C `ESI`-based `.data` segment addressing being incorrectly decompiled as parameters.
   - **Globals:** Replace raw `DAT_XXXXXXXX` addresses with authentic globals (e.g., `g_ViewportMinX`) AND document them in `docs/ghidra/globals.md`.
   - **Functions:** Rename `FUN_XXXXXXXX` to semantic names in code, `docs/ghidra/functions.md`, AND `database/decomp.db`.
 - **ARCHITECTURE (Pure C):** The project is strictly a Pure C implementation. Hand-written assembly fallbacks (`decomp/src/asm/*.asm`) are banned. If Watcom C fails to produce a 1:1 byte match due to optimization differences (e.g. instruction selection, floating point ops), it is fully acceptable as long as the logic is functionally exact and respects the original game architecture.
