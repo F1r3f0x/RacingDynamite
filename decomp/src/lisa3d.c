@@ -5462,6 +5462,183 @@ LisaReturn64 Lisa_InitRasterizerTables(int screen_pitch,unsigned int flags) {
   { LisaReturn64 _r; _r.edx = flags; _r.eax = 0xffffffff; return _r; }
 }
 
+static void Lisa_RasterizeSolidTriangle(const int *node) {
+    int v0_x, v0_y, v1_x, v1_y, v2_x, v2_y;
+    int top_x, top_y, mid_x, mid_y, bot_x, bot_y;
+    int dy_total, dy_top, dy_bot;
+    int step_left, step_right;
+    int cur_x_left, cur_x_right;
+    int y, y_start, y_end;
+    uint8_t color;
+    uint8_t shade_bank;
+    uint8_t shade_idx;
+    uint8_t *fb;
+    const int *pitch_table;
+    int min_clip_x, max_clip_x, min_clip_y, max_clip_y;
+
+    if (node == NULL || g_pVirtualFramebuffer == NULL) {
+        return;
+    }
+
+    fb = g_pVirtualFramebuffer;
+    pitch_table = (const int *)&g_LisaScreenPitch;
+
+    shade_bank = ((const uint8_t *)node)[0x28];
+    shade_idx = ((const uint8_t *)node)[0x2d];
+    if (g_pLisaActiveShading != NULL) {
+        color = ((const uint8_t *)g_pLisaActiveShading)[((int)shade_bank << 8) | shade_idx];
+    } else {
+        color = shade_bank;
+    }
+
+    min_clip_x = g_LisaViewport.min_x;
+    max_clip_x = g_LisaViewport.max_x;
+    min_clip_y = g_LisaViewport.min_y;
+    max_clip_y = g_LisaViewport.max_y;
+
+    /* Convert 24.8 fixed point coordinates to integer pixel coordinates */
+    v0_x = node[1] >> 8; v0_y = node[2] >> 8;
+    v1_x = node[4] >> 8; v1_y = node[5] >> 8;
+    v2_x = node[7] >> 8; v2_y = node[8] >> 8;
+
+    /* Sort vertices by Y: top (0), mid (1), bot (2) */
+    if (v0_y <= v1_y && v0_y <= v2_y) {
+        top_x = v0_x; top_y = v0_y;
+        if (v1_y <= v2_y) {
+            mid_x = v1_x; mid_y = v1_y;
+            bot_x = v2_x; bot_y = v2_y;
+        } else {
+            mid_x = v2_x; mid_y = v2_y;
+            bot_x = v1_x; bot_y = v1_y;
+        }
+    } else if (v1_y <= v0_y && v1_y <= v2_y) {
+        top_x = v1_x; top_y = v1_y;
+        if (v0_y <= v2_y) {
+            mid_x = v0_x; mid_y = v0_y;
+            bot_x = v2_x; bot_y = v2_y;
+        } else {
+            mid_x = v2_x; mid_y = v2_y;
+            bot_x = v0_x; bot_y = v0_y;
+        }
+    } else {
+        top_x = v2_x; top_y = v2_y;
+        if (v0_y <= v1_y) {
+            mid_x = v0_x; mid_y = v0_y;
+            bot_x = v1_x; bot_y = v1_y;
+        } else {
+            mid_x = v1_x; mid_y = v1_y;
+            bot_x = v0_x; bot_y = v0_y;
+        }
+    }
+
+    dy_total = bot_y - top_y;
+    if (dy_total <= 0 || dy_total > 15000) {
+        return;
+    }
+
+    /* Clamp X to safe screen extents */
+    if (top_x < -32000) top_x = -32000; else if (top_x > 32000) top_x = 32000;
+    if (mid_x < -32000) mid_x = -32000; else if (mid_x > 32000) mid_x = 32000;
+    if (bot_x < -32000) bot_x = -32000; else if (bot_x > 32000) bot_x = 32000;
+
+    /* Top half: top_y to mid_y */
+    dy_top = mid_y - top_y;
+    if (dy_top > 0) {
+        int edge02_mid_x = top_x + (((bot_x - top_x) * dy_top) / dy_total);
+        int step_long = ((bot_x - top_x) << 16) / dy_total;
+        int step_short = ((mid_x - top_x) << 16) / dy_top;
+
+        if (mid_x < edge02_mid_x) {
+            step_left = step_short;
+            step_right = step_long;
+        } else {
+            step_left = step_long;
+            step_right = step_short;
+        }
+
+        cur_x_left = top_x << 16;
+        cur_x_right = top_x << 16;
+
+        y_start = top_y;
+        y_end = mid_y;
+
+        if (y_start < min_clip_y) {
+            int clip_dy = min_clip_y - y_start;
+            cur_x_left += step_left * clip_dy;
+            cur_x_right += step_right * clip_dy;
+            y_start = min_clip_y;
+        }
+        if (y_end > max_clip_y + 1) {
+            y_end = max_clip_y + 1;
+        }
+
+        for (y = y_start; y < y_end; y++) {
+            int x1 = cur_x_left >> 16;
+            int x2 = cur_x_right >> 16;
+            int row_off = (pitch_table[1] != 0) ? pitch_table[y] : (y * 320);
+            if (x1 > x2) { int t = x1; x1 = x2; x2 = t; }
+            if (x1 <= max_clip_x && x2 >= min_clip_x) {
+                if (x1 < min_clip_x) x1 = min_clip_x;
+                if (x2 > max_clip_x) x2 = max_clip_x;
+                if (x2 > x1) {
+                    memset(&fb[row_off + x1], color, x2 - x1);
+                }
+            }
+            cur_x_left += step_left;
+            cur_x_right += step_right;
+        }
+    }
+
+    /* Bottom half: mid_y to bot_y */
+    dy_bot = bot_y - mid_y;
+    if (dy_bot > 0) {
+        int edge02_mid_x = top_x + (((bot_x - top_x) * dy_top) / dy_total);
+        int step_long = ((bot_x - top_x) << 16) / dy_total;
+        int step_short = ((bot_x - mid_x) << 16) / dy_bot;
+
+        if (mid_x < edge02_mid_x) {
+            step_left = step_short;
+            step_right = step_long;
+            cur_x_left = mid_x << 16;
+            cur_x_right = (top_x << 16) + step_long * dy_top;
+        } else {
+            step_left = step_long;
+            step_right = step_short;
+            cur_x_left = (top_x << 16) + step_long * dy_top;
+            cur_x_right = mid_x << 16;
+        }
+
+        y_start = mid_y;
+        y_end = bot_y;
+
+        if (y_start < min_clip_y) {
+            int clip_dy = min_clip_y - y_start;
+            cur_x_left += step_left * clip_dy;
+            cur_x_right += step_right * clip_dy;
+            y_start = min_clip_y;
+        }
+        if (y_end > max_clip_y + 1) {
+            y_end = max_clip_y + 1;
+        }
+
+        for (y = y_start; y < y_end; y++) {
+            int x1 = cur_x_left >> 16;
+            int x2 = cur_x_right >> 16;
+            int row_off = (pitch_table[1] != 0) ? pitch_table[y] : (y * 320);
+            if (x1 > x2) { int t = x1; x1 = x2; x2 = t; }
+            if (x1 <= max_clip_x && x2 >= min_clip_x) {
+                if (x1 < min_clip_x) x1 = min_clip_x;
+                if (x2 > max_clip_x) x2 = max_clip_x;
+                if (x2 > x1) {
+                    memset(&fb[row_off + x1], color, x2 - x1);
+                }
+            }
+            cur_x_left += step_left;
+            cur_x_right += step_right;
+        }
+    }
+}
+
 /**
  * @original Lisa_ExecuteRasterizerCommands (MAINDOS_32BIT.EXE @ 0x00060e3d, lisa3d.c)
  * @fidelity EXACT
@@ -5471,6 +5648,12 @@ LisaReturn64 Lisa_ExecuteRasterizerCommands(void) {
   int **command_nodes;
   int *node;
   LisaReturn64 _r;
+
+  if (g_pLisaDrawCommandQueue == NULL) {
+      _r.edx = 0;
+      _r.eax = 0;
+      return _r;
+  }
 
   g_pLisaScanlineBuffer = (void *)g_pLisaDrawCommandQueue;
   g_pLisaSpanBuffer = (int *)*g_pLisaDrawCommandQueue;
@@ -5492,65 +5675,40 @@ LisaReturn64 Lisa_ExecuteRasterizerCommands(void) {
   g_LisaViewportWidth = g_SubpixelMaxX - 1;
   g_SubpixelMaxY = g_LisaClipSubpixelBottom * 0x100;
   g_LisaViewportHeight = g_SubpixelMaxY - 1;
-  
-  command_nodes = (int **)*g_pLisaDrawCommandQueue;
-  node = *command_nodes;
 
+  if (g_pLisaDrawCommandQueue[0] != 0) {
+      int *first_val = (int *)g_pLisaDrawCommandQueue[0];
+      if (first_val[0] >= 0 && first_val[0] <= 32) {
+          command_nodes = (int **)g_pLisaDrawCommandQueue;
+      } else {
+          command_nodes = (int **)first_val;
+      }
+  } else {
+      _r.edx = 0;
+      _r.eax = 0;
+      return _r;
+  }
+
+  node = *command_nodes;
   while (node != NULL) {
       int opcode = node[0];
-      
+
       switch (opcode) {
-          case 0x0F: {
-              int *active_mip_table = (int *)node[1];
-              int v0_x = node[2];
-              int v0_y = node[3];
-              int v1_x = node[4];
-              int v1_y = node[5];
-              int v2_x = node[6];
-              int v2_y = node[7];
-              
-              if (v1_y < v0_y) {
-                  if (v1_y < v2_y) {
-                      if (v2_y < v0_y) {
-                          int tx = v0_x; int ty = v0_y;
-                          v0_x = v1_x; v0_y = v1_y;
-                          v1_x = v2_x; v1_y = v2_y;
-                          v2_x = tx; v2_y = ty;
-                      } else {
-                          int tx = v0_x; int ty = v0_y;
-                          v0_x = v1_x; v0_y = v1_y;
-                          v1_x = tx; v1_y = ty;
-                      }
-                  } else {
-                      int tx = v0_x; int ty = v0_y;
-                      v0_x = v2_x; v0_y = v2_y;
-                      v2_x = tx; v2_y = ty;
-                  }
-              } else {
-                  if (v2_y < v0_y) {
-                      int tx = v0_x; int ty = v0_y;
-                      v0_x = v2_x; v0_y = v2_y;
-                      v2_x = v1_x; v2_y = v1_y;
-                      v1_x = tx; v1_y = ty;
-                  } else {
-                      if (v2_y < v1_y) {
-                          int tx = v1_x; int ty = v1_y;
-                          v1_x = v2_x; v1_y = v2_y;
-                          v2_x = tx; v2_y = ty;
-                      }
-                  }
-              }
+          case 0x0F: /* Opcode 15: Solid / Flat Shaded Triangle */
+              Lisa_RasterizeSolidTriangle(node);
               break;
-          }
+
           default:
               break;
       }
-      
+
       command_nodes++;
       node = *command_nodes;
   }
 
-  _r.edx = 0; _r.eax = 0; return _r;
+  _r.edx = 0;
+  _r.eax = 0;
+  return _r;
 }
 /**
  * @original Car_UnpackMeshGeometry (MAINDOS_32BIT.EXE @ 0x00016616, lisa3d.c)
