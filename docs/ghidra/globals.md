@@ -264,3 +264,26 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x00016900` | `CdpFile[6]` | `g_MenuCdp` | Array of 6 CDP video playback streams for intro and background loop. |
 | `0x000bed00` | `char*[6]`   | `g_MenuVideoPaths` | File paths for the 6 CDP videos (IGN1, IGN2, IGN3_0..IGN3_3). |
 | `0x000a07bd` | `int32_t`    | `g_SelectedLanguage` | Active menu language index (0=EN, 1=DE, 2=IT, 3=ES, 4=SE, 5=FR). |
+
+---
+
+## Authentic DOS Linear Memory Map (DPMI Runtime)
+
+These linear addresses correspond directly to runtime DOS addresses in `MAINDOS_32BIT.EXE` and are verified by the memory scraping harness (`tools/runtime_differ.py`):
+
+| Linear Address | Type | Name | Purpose |
+| :--- | :--- | :--- | :--- |
+| `0x000ab5dc` | `int32_t` | `g_TickInt` | Authentic integer PIT frame tick counter. |
+| `0x000ab5e0` | `int32_t` | `g_GameStage` | Master engine stage (0 = Init, 1 = Running, 2 = Shutdown). |
+| `0x000ab5e4` | `int32_t` | `g_InitStarted` | Engine initialization flag. |
+| `0x000ab5e8` | `int32_t` | `g_ShutdownCompleted`| Engine termination flag. |
+| `0x000e73a8` | `double` | `g_TimerAccumulator` | 72Hz FPU timer accumulator. |
+| `0x001fede8` | `int32_t` | `g_GameState1` | Menu initialization trigger. |
+| `0x001fedf8` | `int32_t` | `g_GameState2` | Menu loop execution tick trigger. |
+| `0x001fee1c` | `int32_t` | `g_GameState3` | Track asset loading and car spawning trigger. |
+| `0x001fee08` | `int32_t` | `g_GameState4` | 3-frame race countdown/startup sequence stage. |
+| `0x001fedf0` | `int32_t` | `g_GameState5` | Active race physics and simulation tick trigger. |
+| `0x001fefe0` | `VehicleState*` | `g_pVehicleTable` | Pointer to master allocated vehicle table. |
+| `0x0020acb0` | `uint8_t[256]` | `g_KeyboardState` | Active keydown state array (polled by `Input_IsKeyPressed` @ `0x55c28`). |
+| `0x0020aab0` | `uint8_t[256]` | `g_KeyJustPressed`| Edge-triggered single keypress flag array (cleared on read). |
+

@@ -48,6 +48,7 @@ docs/extracted_bitmaps/
 /third_party/sdl2/
 /tools/watcom/
 /tools/objdiff/
+/tools/objconv_src/
 /tools/bin/
 *.dll
 *.lib
@@ -80,3 +81,4 @@ Thumbs.db
 scratch/
 /tools/openwatcomv2/
 *.err
+/reports/

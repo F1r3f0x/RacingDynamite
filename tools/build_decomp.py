@@ -83,14 +83,13 @@ def compile_file(src_path: Path):
     # -zq : quiet
     # -fo : output object path
     MODULE_FLAGS = {
-        "mem": ["-3r", "-s", "-ort"],
+        "mem": ["-3r", "-s", "-ort", "-ez"],
     }
-    flags = MODULE_FLAGS.get(src_path.stem, ["-3r", "-s", "-omaxet"])
+    flags = MODULE_FLAGS.get(src_path.stem, ["-3r", "-s", "-omaxet", "-ez"])
 
     cmd = [
         str(WCC386),
         *flags,
-        "-zq",
         f"-fo={obj_path}",
         str(src_path)
     ]

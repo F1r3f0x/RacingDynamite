@@ -82,6 +82,10 @@ uv run python tools/build_decomp.py --run
 > [!IMPORTANT]
 > The build system deploys the rebuilt binary strictly as `MREBUILT.EXE` inside the game directory. The original `MAINDOS.EXE` and all other original game files are strictly preserved and never overwritten.
 
+Alternatively, you can launch either binary directly in windowed DOSBox using the root batch files:
+- `run_dosbox.bat`: Launches the rebuilt Pure C engine (`MREBUILT.EXE`).
+- `run_original.bat` (or `run_maindos_32bit.bat`): Launches the original authentic 32-bit DOS executable (`MAINDOS.EXE`).
+
 
 ---
 
