@@ -5462,6 +5462,315 @@ LisaReturn64 Lisa_InitRasterizerTables(int screen_pitch,unsigned int flags) {
   { LisaReturn64 _r; _r.edx = flags; _r.eax = 0xffffffff; return _r; }
 }
 
+/*
+ * Lisa_RasterizeTexturedTriangle:
+ * Authentic 1997 Pure C Affine Textured Triangle Rasterizer with 32-level lighting,
+ * sub-pixel precision, perspective/affine texture mapping, and viewport clipping.
+ */
+static void Lisa_RasterizeTexturedTriangle(
+    int v0_x, int v0_y, int u0_in, int v0_in, int s0_in,
+    int v1_x, int v1_y, int u1_in, int v1_in, int s1_in,
+    int v2_x, int v2_y, int u2_in, int v2_in, int s2_in,
+    const uint8_t *texture,
+    int is_shaded
+) {
+    int x0, y0, u0, v0, s0;
+    int x1, y1, u1, v1, s1;
+    int x2, y2, u2, v2, s2;
+    int dy_total, dy_top, dy_bot;
+    int denom;
+    double d_denom;
+    int du_dx, dv_dx, ds_dx;
+    uint8_t *fb;
+    const int *pitch_table;
+    int min_clip_x, max_clip_x, min_clip_y, max_clip_y;
+    int y;
+
+    if (texture == NULL || g_pVirtualFramebuffer == NULL) {
+        return;
+    }
+
+    fb = g_pVirtualFramebuffer;
+    pitch_table = (const int *)&g_LisaScreenPitch;
+
+    min_clip_x = g_LisaViewport.min_x;
+    max_clip_x = g_LisaViewport.max_x;
+    min_clip_y = g_LisaViewport.min_y;
+    max_clip_y = g_LisaViewport.max_y;
+
+    /* Convert 24.8 fixed point coordinates to integer pixel coordinates */
+    x0 = v0_x >> 8; y0 = v0_y >> 8;
+    x1 = v1_x >> 8; y1 = v1_y >> 8;
+    x2 = v2_x >> 8; y2 = v2_y >> 8;
+
+    /* Convert UV coordinates to 16.16 fixed point */
+    u0 = u0_in << 8; v0 = v0_in << 8;
+    u1 = u1_in << 8; v1 = v1_in << 8;
+    u2 = u2_in << 8; v2 = v2_in << 8;
+
+    /* Light/shading values to 16.16 */
+    s0 = s0_in << 16;
+    s1 = s1_in << 16;
+    s2 = s2_in << 16;
+
+    /* Sort vertices by Y: top (0), mid (1), bot (2) */
+    if (y0 > y1) {
+        int tx = x0; int ty = y0; int tu = u0; int tv = v0; int ts = s0;
+        x0 = x1; y0 = y1; u0 = u1; v0 = v1; s0 = s1;
+        x1 = tx; y1 = ty; u1 = tu; v1 = tv; s1 = ts;
+    }
+    if (y0 > y2) {
+        int tx = x0; int ty = y0; int tu = u0; int tv = v0; int ts = s0;
+        x0 = x2; y0 = y2; u0 = u2; v0 = v2; s0 = s2;
+        x2 = tx; y2 = ty; u2 = tu; v2 = tv; s2 = ts;
+    }
+    if (y1 > y2) {
+        int tx = x1; int ty = y1; int tu = u1; int tv = v1; int ts = s1;
+        x1 = x2; y1 = y2; u1 = u2; v1 = v2; s1 = s2;
+        x2 = tx; y2 = ty; u2 = tu; v2 = tv; s2 = ts;
+    }
+
+    dy_total = y2 - y0;
+    if (dy_total <= 0 || dy_total > 15000) {
+        return;
+    }
+
+    denom = (x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0);
+    if (denom == 0) {
+        return;
+    }
+    d_denom = (double)denom;
+
+    /* Horizontal derivatives per pixel */
+    du_dx = (int)(((double)(u1 - u0) * (y2 - y0) - (double)(u2 - u0) * (y1 - y0)) / d_denom);
+    dv_dx = (int)(((double)(v1 - v0) * (y2 - y0) - (double)(v2 - v0) * (y1 - y0)) / d_denom);
+    ds_dx = (int)(((double)(s1 - s0) * (y2 - y0) - (double)(s2 - s0) * (y1 - y0)) / d_denom);
+
+    dy_top = y1 - y0;
+    if (dy_top > 0) {
+        int edge02_mid_x = x0 + (int)(((double)(x2 - x0) * dy_top) / dy_total);
+        int step_x_long = (int)(((double)(x2 - x0) * 65536.0) / dy_total);
+        int step_u_long = (int)((double)(u2 - u0) / dy_total);
+        int step_v_long = (int)((double)(v2 - v0) / dy_total);
+        int step_s_long = (int)((double)(s2 - s0) / dy_total);
+
+        int step_x_short = (int)(((double)(x1 - x0) * 65536.0) / dy_top);
+        int step_u_short = (int)((double)(u1 - u0) / dy_top);
+        int step_v_short = (int)((double)(v1 - v0) / dy_top);
+        int step_s_short = (int)((double)(s1 - s0) / dy_top);
+
+        int step_x_left, step_x_right;
+        int step_u_left, step_v_left, step_s_left;
+        int cur_x_left, cur_x_right;
+        int cur_u_left, cur_v_left, cur_s_left;
+        int y_start, y_end;
+
+        if (x1 < edge02_mid_x) {
+            step_x_left = step_x_short;
+            step_u_left = step_u_short;
+            step_v_left = step_v_short;
+            step_s_left = step_s_short;
+            step_x_right = step_x_long;
+        } else {
+            step_x_left = step_x_long;
+            step_u_left = step_u_long;
+            step_v_left = step_v_long;
+            step_s_left = step_s_long;
+            step_x_right = step_x_short;
+        }
+
+        cur_x_left = x0 << 16;
+        cur_x_right = x0 << 16;
+        cur_u_left = u0;
+        cur_v_left = v0;
+        cur_s_left = s0;
+
+        y_start = y0;
+        y_end = y1;
+
+        if (y_start < min_clip_y) {
+            int clip_dy = min_clip_y - y_start;
+            cur_x_left += step_x_left * clip_dy;
+            cur_x_right += step_x_right * clip_dy;
+            cur_u_left += step_u_left * clip_dy;
+            cur_v_left += step_v_left * clip_dy;
+            cur_s_left += step_s_left * clip_dy;
+            y_start = min_clip_y;
+        }
+        if (y_end > max_clip_y + 1) {
+            y_end = max_clip_y + 1;
+        }
+
+        for (y = y_start; y < y_end; y++) {
+            int x_left = cur_x_left >> 16;
+            int x_right = cur_x_right >> 16;
+            int row_off = (pitch_table[1] != 0) ? pitch_table[y] : (y * 320);
+
+            if (x_left <= max_clip_x && x_right >= min_clip_x && x_right > x_left) {
+                int span_x1 = x_left;
+                int span_x2 = x_right;
+                int u = cur_u_left;
+                int v = cur_v_left;
+                int s = cur_s_left;
+
+                if (span_x1 < min_clip_x) {
+                    int clip_dx = min_clip_x - span_x1;
+                    u += du_dx * clip_dx;
+                    v += dv_dx * clip_dx;
+                    s += ds_dx * clip_dx;
+                    span_x1 = min_clip_x;
+                }
+                if (span_x2 > max_clip_x + 1) {
+                    span_x2 = max_clip_x + 1;
+                }
+
+                if (span_x2 > span_x1) {
+                    uint8_t *dst = &fb[row_off + span_x1];
+                    int x;
+                    for (x = span_x1; x < span_x2; x++) {
+                        int tex_u = (u >> 16) & 0xFF;
+                        int tex_v = (v >> 16) & 0xFF;
+                        uint8_t texel = texture[(tex_v << 8) | tex_u];
+                        if (texel != 0) {
+                            if (is_shaded && g_pLisaActiveShading != NULL) {
+                                int shade = (s >> 16) & 0x1F;
+                                texel = ((const uint8_t *)g_pLisaActiveShading)[(shade << 8) | texel];
+                            }
+                            *dst = texel;
+                        }
+                        dst++;
+                        u += du_dx;
+                        v += dv_dx;
+                        s += ds_dx;
+                    }
+                }
+            }
+
+            cur_x_left += step_x_left;
+            cur_x_right += step_x_right;
+            cur_u_left += step_u_left;
+            cur_v_left += step_v_left;
+            cur_s_left += step_s_left;
+        }
+    }
+
+    dy_bot = y2 - y1;
+    if (dy_bot > 0) {
+        int edge02_mid_x = x0 + (int)(((double)(x2 - x0) * dy_top) / dy_total);
+        int step_x_long = (int)(((double)(x2 - x0) * 65536.0) / dy_total);
+        int step_u_long = (int)((double)(u2 - u0) / dy_total);
+        int step_v_long = (int)((double)(v2 - v0) / dy_total);
+        int step_s_long = (int)((double)(s2 - s0) / dy_total);
+
+        int step_x_short = (int)(((double)(x2 - x1) * 65536.0) / dy_bot);
+        int step_u_short = (int)((double)(u2 - u1) / dy_bot);
+        int step_v_short = (int)((double)(v2 - v1) / dy_bot);
+        int step_s_short = (int)((double)(s2 - s1) / dy_bot);
+
+        int step_x_left, step_x_right;
+        int step_u_left, step_v_left, step_s_left;
+        int cur_x_left, cur_x_right;
+        int cur_u_left, cur_v_left, cur_s_left;
+        int y_start, y_end;
+
+        if (x1 < edge02_mid_x) {
+            step_x_left = step_x_short;
+            step_u_left = step_u_short;
+            step_v_left = step_v_short;
+            step_s_left = step_s_short;
+            step_x_right = step_x_long;
+
+            cur_x_left = x1 << 16;
+            cur_u_left = u1;
+            cur_v_left = v1;
+            cur_s_left = s1;
+
+            cur_x_right = (x0 << 16) + step_x_long * dy_top;
+        } else {
+            step_x_left = step_x_long;
+            step_u_left = step_u_long;
+            step_v_left = step_v_long;
+            step_s_left = step_s_long;
+            step_x_right = step_x_short;
+
+            cur_x_left = (x0 << 16) + step_x_long * dy_top;
+            cur_u_left = u0 + step_u_long * dy_top;
+            cur_v_left = v0 + step_v_long * dy_top;
+            cur_s_left = s0 + step_s_long * dy_top;
+
+            cur_x_right = x1 << 16;
+        }
+
+        y_start = y1;
+        y_end = y2;
+
+        if (y_start < min_clip_y) {
+            int clip_dy = min_clip_y - y_start;
+            cur_x_left += step_x_left * clip_dy;
+            cur_x_right += step_x_right * clip_dy;
+            cur_u_left += step_u_left * clip_dy;
+            cur_v_left += step_v_left * clip_dy;
+            cur_s_left += step_s_left * clip_dy;
+            y_start = min_clip_y;
+        }
+        if (y_end > max_clip_y + 1) {
+            y_end = max_clip_y + 1;
+        }
+
+        for (y = y_start; y < y_end; y++) {
+            int x_left = cur_x_left >> 16;
+            int x_right = cur_x_right >> 16;
+            int row_off = (pitch_table[1] != 0) ? pitch_table[y] : (y * 320);
+
+            if (x_left <= max_clip_x && x_right >= min_clip_x && x_right > x_left) {
+                int span_x1 = x_left;
+                int span_x2 = x_right;
+                int u = cur_u_left;
+                int v = cur_v_left;
+                int s = cur_s_left;
+
+                if (span_x1 < min_clip_x) {
+                    int clip_dx = min_clip_x - span_x1;
+                    u += du_dx * clip_dx;
+                    v += dv_dx * clip_dx;
+                    s += ds_dx * clip_dx;
+                    span_x1 = min_clip_x;
+                }
+                if (span_x2 > max_clip_x + 1) {
+                    span_x2 = max_clip_x + 1;
+                }
+
+                if (span_x2 > span_x1) {
+                    uint8_t *dst = &fb[row_off + span_x1];
+                    int x;
+                    for (x = span_x1; x < span_x2; x++) {
+                        int tex_u = (u >> 16) & 0xFF;
+                        int tex_v = (v >> 16) & 0xFF;
+                        uint8_t texel = texture[(tex_v << 8) | tex_u];
+                        if (texel != 0) {
+                            if (is_shaded && g_pLisaActiveShading != NULL) {
+                                int shade = (s >> 16) & 0x1F;
+                                texel = ((const uint8_t *)g_pLisaActiveShading)[(shade << 8) | texel];
+                            }
+                            *dst = texel;
+                        }
+                        dst++;
+                        u += du_dx;
+                        v += dv_dx;
+                        s += ds_dx;
+                    }
+                }
+            }
+
+            cur_x_left += step_x_left;
+            cur_x_right += step_x_right;
+            cur_u_left += step_u_left;
+            cur_v_left += step_v_left;
+            cur_s_left += step_s_left;
+        }
+    }
+}
+
 static void Lisa_RasterizeSolidTriangle(const int *node) {
     int v0_x, v0_y, v1_x, v1_y, v2_x, v2_y;
     int top_x, top_y, mid_x, mid_y, bot_x, bot_y;
@@ -5697,6 +6006,53 @@ LisaReturn64 Lisa_ExecuteRasterizerCommands(void) {
           case 0x0F: /* Opcode 15: Solid / Flat Shaded Triangle */
               Lisa_RasterizeSolidTriangle(node);
               break;
+
+          case 0x11: /* Opcode 17: Standard Unshaded Textured Triangle */
+          case 0x16: { /* Opcode 22: Mipmapped Unshaded Textured Triangle */
+              const int *uv_ptr = (const int *)node[7];
+              const uint8_t *tex = (const uint8_t *)node[8];
+              if (uv_ptr != NULL && tex != NULL) {
+                  Lisa_RasterizeTexturedTriangle(
+                      node[1], node[2], uv_ptr[0], uv_ptr[1], 0,
+                      node[3], node[4], uv_ptr[2], uv_ptr[3], 0,
+                      node[5], node[6], uv_ptr[4], uv_ptr[5], 0,
+                      tex, 0
+                  );
+              }
+              break;
+          }
+
+          case 0x12: /* Opcode 18: Shaded Textured Triangle */
+          case 0x17: { /* Opcode 23: Mipmapped Shaded Textured Triangle */
+              const int *uv_ptr = (const int *)node[7];
+              const uint8_t *tex = (const uint8_t *)node[8];
+              const int *col_ptr = (const int *)node[9];
+              int c0 = (col_ptr != NULL) ? col_ptr[0] : 0;
+              int c1 = (col_ptr != NULL) ? col_ptr[1] : 0;
+              int c2 = (col_ptr != NULL) ? col_ptr[2] : 0;
+              if (uv_ptr != NULL && tex != NULL) {
+                  Lisa_RasterizeTexturedTriangle(
+                      node[1], node[2], uv_ptr[0], uv_ptr[1], c0,
+                      node[3], node[4], uv_ptr[2], uv_ptr[3], c1,
+                      node[5], node[6], uv_ptr[4], uv_ptr[5], c2,
+                      tex, 1
+                  );
+              }
+              break;
+          }
+
+          case 0x14: { /* Opcode 20: Submesh Textured Triangle */
+              const uint8_t *tex = (const uint8_t *)node[1];
+              if (tex != NULL) {
+                  Lisa_RasterizeTexturedTriangle(
+                      node[2], node[3], node[11], node[12], node[4],
+                      node[5], node[6], node[13], node[14], node[7],
+                      node[8], node[9], node[15], node[16], node[10],
+                      tex, (g_LisaShadingEnabled != 0)
+                  );
+              }
+              break;
+          }
 
           default:
               break;
