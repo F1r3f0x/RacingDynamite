@@ -91,4 +91,37 @@ void Load_SystemGraphicsAndFonts(void);
 void Font_LoadHUDFonts(void);
 void Track_LoadOverlayGfx(void);
 
+/* Authentic keyboard subsystem globals & functions (MAINDOS.EXE @ 0x559e4 - 0x55dfc) */
+extern int32_t  g_KeyRepeatActiveTimer[256];
+extern uint8_t  g_KeyToggleState[256];
+extern uint8_t  g_KeyRepeatTriggered[256];
+extern uint8_t  g_KeyToggleMask[256];
+extern uint8_t  g_KeyReleasedFlag[256];
+extern uint8_t  g_KeyJustPressed[256];
+extern uint8_t  g_KeyPreviousDown[256];
+extern uint8_t  g_KeyboardState[256];
+extern uint8_t  g_KeyScancodeRingBuf[16];
+extern uint8_t  g_KeyRawState[256];
+extern char    *g_KeyAsciiRingWritePtr;
+extern int32_t  g_KeyLastPollTick;
+extern int32_t  g_KeyRepeatInterval;
+extern int32_t  g_KeyRepeatInitialDelay;
+extern int32_t  g_KeyDriverInstalled;
+extern void   (*g_KeyCallback)(int, int);
+extern char     g_KeyAsciiRingBuf[64];
+extern uint8_t  g_KeyIsrScancodeHead;
+extern uint8_t  g_KeyIsrInstalled;
+extern const uint8_t g_ScancodeToAsciiTable[84];
+
+int  Input_InitKeyboard(int initial_delay, int repeat_interval);
+int  Input_ShutdownKeyboard(void);
+void Input_PollKeyboard(void);
+int  Input_IsKeyDown(int scancode);
+int  Input_WasKeyPressed(int scancode);
+int  Input_WasKeyRepeated(int scancode);
+void Input_SetKeyCallback(void (*cb)(int, int));
+void Input_EnqueueAscii(int scancode);
+char *Input_GetQueuedKey(char *query_str);
+int  Input_InitKeyTables(void);
+
 #endif /* GEPUTGET_H */

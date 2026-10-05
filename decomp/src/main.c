@@ -2591,19 +2591,19 @@ void HUD_UpdateRaceTimes(void) {
  * @notes MAINDOS @ 0x0001c5b8. Polls keyboard hotkeys during race: Pause (P), Escape menu, camera toggle, and volume.
  */
 void Input_ProcessRaceHotkeys(void) {
-    if (Input_IsKeyPressed(0x19)) {
+    if (Input_IsKeyDown(0x19)) {
         g_IsGamePaused = !g_IsGamePaused;
     }
-    if (Input_IsKeyPressed(0x01)) {
+    if (Input_IsKeyDown(0x01)) {
         g_GameStage = 0;
     }
-    if (Input_IsKeyPressed(0x3b)) {
+    if (Input_IsKeyDown(0x3b)) {
         g_SelectedCameraView = 0;
     }
-    if (Input_IsKeyPressed(0x3c)) {
+    if (Input_IsKeyDown(0x3c)) {
         g_SelectedCameraView = 1;
     }
-    if (Input_IsKeyPressed(0x3d)) {
+    if (Input_IsKeyDown(0x3d)) {
         g_SelectedCameraView = 2;
     }
 }
@@ -2628,16 +2628,16 @@ void Input_PollPlayerVehicleControls(void) {
         return;
     }
 
-    if (Input_IsKeyPressed(config[0x1e])) {
+    if (Input_IsKeyDown(config[0x1e])) {
         throttle = 100;
     }
-    if (Input_IsKeyPressed(config[0x1f])) {
+    if (Input_IsKeyDown(config[0x1f])) {
         brake = 100;
     }
-    if (Input_IsKeyPressed(config[0x1c])) {
+    if (Input_IsKeyDown(config[0x1c])) {
         steer = -100;
     }
-    if (Input_IsKeyPressed(config[0x1d])) {
+    if (Input_IsKeyDown(config[0x1d])) {
         steer = 100;
     }
 
@@ -2645,7 +2645,7 @@ void Input_PollPlayerVehicleControls(void) {
     *(int *)(car + 0x348) = throttle;
     *(int *)(car + 0x34c) = brake;
 
-    if (Input_IsKeyPressed(config[0x22])) {
+    if (Input_IsKeyDown(config[0x22])) {
         if (*(int *)(car + 0x354) == 0 && *(int *)(car + 0x358) == 0 && *(int *)(car + 0x35c) == 0) {
             *(int *)(car + 0x4844) = 1;
         }
@@ -3303,6 +3303,7 @@ void Game_StateDispatcher(void) {
         double delta_time = Timer_GetDeltaTime();
 
         /* 2. Poll input */
+        Input_PollKeyboard();
         Input_ProcessRaceHotkeys();
         Input_PollPlayerVehicleControls();
 
@@ -3421,7 +3422,6 @@ void Sound_InitAndLoadPools(void) {
 
 extern void Unknown_553a0(void);
 extern int Unknown_558d0(void);
-extern int Unknown_559e4(int a, int b);
 extern int Timer_Init(void);
 extern void Unknown_558ec(void);
 
@@ -3439,7 +3439,7 @@ int main(int argc, char **argv) {
     
     if (Unknown_558d0() != 0) {
         BootLog("[MAINDOS] Engine core subsystems initialized.");
-        if (Unknown_559e4(0x15e, 0x46) != 0) {
+        if (Input_InitKeyboard(0x15e, 0x46) != 0) {
             BootLog("[MAINDOS] Display mode set (320x200 8bpp). Starting high-resolution PIT timer...");
             g_MainFlag_E73B0 = 1;
             

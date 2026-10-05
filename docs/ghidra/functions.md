@@ -187,3 +187,14 @@
 | `0x20d14` | - | - | `FatalError` | `main.c` | Decompiled | EXACT |  |
 | `0x0001aaf8` | - | - | `Menu_InitCarViewport` | `menu.c` | Decompiled | EXACT | Loads menucar.plc, menucar.msh, menucar.tex for 3D car viewport |
 | `0x00015344` | - | - | `Menu_RenderCarViewport` | `menu.c` | Decompiled | EXACT | Renders 3D rotating car model onto pedestal in car select screen |
+| `0x000559e4` | - | - | `Input_InitKeyboard` | `geputget.c` | Decompiled | EXACT | Initializes keyboard driver, clears key state arrays, sets repeat rate/delay. |
+| `0x00055a94` | - | - | `Input_ShutdownKeyboard` | `geputget.c` | Decompiled | EXACT | Shuts down keyboard driver and resets driver active flag. |
+| `0x00055ae4` | - | - | `Input_PollKeyboard` | `geputget.c` | Decompiled | EXACT | Polls hardware state, updates down/edge flags, advances repeat timers, enqueues ASCII. |
+| `0x00055c28` | - | - | `Input_IsKeyDown` | `geputget.c` | Decompiled | EXACT | Returns 1 if scancode is currently held down, 0 otherwise. |
+| `0x00055c3c` | - | - | `Input_WasKeyPressed` | `geputget.c` | Decompiled | EXACT | Returns 1 on edge-triggered keypress and clears flag. |
+| `0x00055c60` | - | - | `Input_WasKeyRepeated` | `geputget.c` | Decompiled | EXACT | Returns 1 on auto-repeat pulse and clears flag. |
+| `0x00055c84` | - | - | `Input_SetKeyCallback` | `geputget.c` | Decompiled | EXACT | Registers user callback invoked on key transition. |
+| `0x00055ca0` | - | - | `Input_EnqueueAscii` | `geputget.c` | Decompiled | EXACT | Translates scancode to ASCII and pushes into circular buffer. |
+| `0x00055cd0` | - | - | `Input_GetQueuedKey` | `geputget.c` | Decompiled | EXACT | Searches ASCII circular buffer for substring match (used for cheat codes). |
+| `0x00055d04` | - | - | `Input_InitKeyTables` | `geputget.c` | Decompiled | EXACT | Initializes ISR buffers, toggle masks, and release flags. |
+

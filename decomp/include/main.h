@@ -269,7 +269,12 @@ void   HUD_ShowAnnouncementBanner(const char *msg, int param2, int param3, int p
 void   HUD_DrawPlayerSplitTimer(int param1, int *param2);
 void   HUD_DrawDemoWatermark(int a, int b, int c, int d);
 void   HUD_UpdateLapCounters(void);
-int    Input_IsKeyPressed(uint8_t scancode);
+int    Input_IsKeyDown(int scancode);
+int    Input_WasKeyPressed(int scancode);
+int    Input_WasKeyRepeated(int scancode);
+void   Input_PollKeyboard(void);
+int    Input_InitKeyboard(int initial_delay, int repeat_interval);
+int    Input_ShutdownKeyboard(void);
 void   Obstacle_ResetActions(void);
 void   Obstacle_SetTriggerState(int *state, int val);
 void   Sound_FreeSample(int idx);

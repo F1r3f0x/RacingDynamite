@@ -658,3 +658,195 @@ void Track_LoadOverlayGfx(void) {
     read(fd, g_pPokalPic, size);
     close(fd);
 }
+
+/* ========================================================================= */
+/* Authentic DOS Keyboard Driver Subsystem (MAINDOS.EXE @ 0x559e4 - 0x55dfc) */
+/* ========================================================================= */
+
+extern int g_TickInt; /* ds:0xab5dc */
+
+// @original Input_InitKeyTables (MAINDOS.EXE @ 0x55d04, geputget.c)
+// @fidelity EXACT
+int Input_InitKeyTables(void) {
+    int i;
+    if (!g_KeyIsrInstalled) {
+        for (i = 1; i <= 256; i++) {
+            g_KeyRawState[i - 1] = 0;
+            g_KeyReleasedFlag[i - 1] = 1;
+            g_KeyToggleMask[i - 1] = 0;
+        }
+        for (i = 1; i <= 512; i++) {
+            g_KeyToggleState[i - 1] = 0;
+        }
+        for (i = 1; i <= 16; i++) {
+            g_KeyScancodeRingBuf[i - 1] = 0;
+        }
+        g_KeyIsrScancodeHead = 0;
+        g_KeyIsrInstalled = 1;
+    }
+    return 1;
+}
+
+// @original Input_InitKeyboard (MAINDOS.EXE @ 0x559e4, geputget.c)
+// @fidelity EXACT
+int Input_InitKeyboard(int initial_delay, int repeat_interval) {
+    int i;
+    if (g_KeyDriverInstalled == 1) {
+        return 0;
+    }
+    Input_InitKeyTables();
+    g_KeyDriverInstalled = 1;
+    g_KeyAsciiRingWritePtr = g_KeyAsciiRingBuf;
+    memset(g_KeyAsciiRingBuf, 0xFF, sizeof(g_KeyAsciiRingBuf));
+
+    for (i = 0; i < 256; i++) {
+        g_KeyJustPressed[i] = 0;
+        g_KeyboardState[i] = 0;
+        g_KeyPreviousDown[i] = 0;
+        g_KeyRepeatTriggered[i] = 0;
+        g_KeyRepeatActiveTimer[i] = 0;
+    }
+
+    g_KeyRepeatInitialDelay = initial_delay;
+    g_KeyRepeatInterval = repeat_interval;
+    g_KeyLastPollTick = g_TickInt;
+    return 1;
+}
+
+// @original Input_ShutdownKeyboard (MAINDOS.EXE @ 0x55a94, geputget.c)
+// @fidelity EXACT
+int Input_ShutdownKeyboard(void) {
+    if (g_KeyDriverInstalled != 0) {
+        g_KeyIsrInstalled = 0;
+        g_KeyDriverInstalled = 0;
+    }
+    return 1;
+}
+
+// @original Input_PollKeyboard (MAINDOS.EXE @ 0x55ae4, geputget.c)
+// @fidelity EXACT
+void Input_PollKeyboard(void) {
+    int delta = g_TickInt - g_KeyLastPollTick;
+    int threshold = g_KeyRepeatInitialDelay + g_KeyRepeatInterval;
+    int i;
+
+    /* 1. Advance repeat timers and trigger auto-repeat pulses */
+    for (i = 0; i < 256; i++) {
+        if (g_KeyboardState[i] == 1) {
+            g_KeyRepeatActiveTimer[i] += delta;
+            if (g_KeyRepeatActiveTimer[i] >= threshold) {
+                g_KeyRepeatTriggered[i] = 1;
+                g_KeyRepeatActiveTimer[i] -= g_KeyRepeatInterval;
+            }
+        }
+    }
+
+    /* 2. Update keydown and just-pressed edge states */
+    for (i = 0; i < 256; i++) {
+        uint8_t raw = g_KeyRawState[i];
+        if (raw == 1) {
+            uint8_t prev = g_KeyPreviousDown[i];
+            g_KeyboardState[i] = 1;
+            if (prev == 0) {
+                g_KeyJustPressed[i] = 1;
+                g_KeyPreviousDown[i] = 1;
+            }
+            if (g_KeyRepeatActiveTimer[i] == 0) {
+                g_KeyRepeatTriggered[i] = 1;
+            }
+            if (g_KeyCallback != NULL) {
+                g_KeyCallback(1, i);
+            }
+            if (i <= 0x53) {
+                char ch = (char)g_ScancodeToAsciiTable[i];
+                *g_KeyAsciiRingWritePtr = ch;
+                g_KeyAsciiRingWritePtr[32] = ch;
+                g_KeyAsciiRingWritePtr++;
+                if (g_KeyAsciiRingWritePtr == g_KeyAsciiRingBuf + 32) {
+                    g_KeyAsciiRingWritePtr = g_KeyAsciiRingBuf;
+                }
+            }
+        } else {
+            g_KeyJustPressed[i] = 0;
+            g_KeyboardState[i] = 0;
+            g_KeyPreviousDown[i] = 0;
+            g_KeyRepeatTriggered[i] = 0;
+            g_KeyRepeatActiveTimer[i] = 0;
+            if (g_KeyCallback != NULL) {
+                g_KeyCallback(0, i);
+            }
+        }
+    }
+
+    g_KeyLastPollTick = g_TickInt;
+}
+
+// @original Input_IsKeyDown (MAINDOS.EXE @ 0x55c28, geputget.c)
+// @fidelity EXACT
+int Input_IsKeyDown(int scancode) {
+    return (int)g_KeyboardState[scancode & 0xFF];
+}
+
+// @original Input_WasKeyPressed (MAINDOS.EXE @ 0x55c3c, geputget.c)
+// @fidelity EXACT
+int Input_WasKeyPressed(int scancode) {
+    scancode &= 0xFF;
+    if (g_KeyJustPressed[scancode] != 0) {
+        g_KeyJustPressed[scancode] = 0;
+        return 1;
+    }
+    return 0;
+}
+
+// @original Input_WasKeyRepeated (MAINDOS.EXE @ 0x55c60, geputget.c)
+// @fidelity EXACT
+int Input_WasKeyRepeated(int scancode) {
+    scancode &= 0xFF;
+    if (g_KeyRepeatTriggered[scancode] != 0) {
+        g_KeyRepeatTriggered[scancode] = 0;
+        return 1;
+    }
+    return 0;
+}
+
+// @original Input_SetKeyCallback (MAINDOS.EXE @ 0x55c84, geputget.c)
+// @fidelity EXACT
+void Input_SetKeyCallback(void (*cb)(int, int)) {
+    g_KeyCallback = cb;
+    if (g_KeyCallback != NULL) {
+        g_KeyCallback(0, 0);
+    }
+}
+
+// @original Input_EnqueueAscii (MAINDOS.EXE @ 0x55ca0, geputget.c)
+// @fidelity EXACT
+void Input_EnqueueAscii(int scancode) {
+    if (scancode <= 0x53) {
+        char ch = (char)g_ScancodeToAsciiTable[scancode];
+        *g_KeyAsciiRingWritePtr = ch;
+        g_KeyAsciiRingWritePtr[32] = ch;
+        g_KeyAsciiRingWritePtr++;
+        if (g_KeyAsciiRingWritePtr == g_KeyAsciiRingBuf + 32) {
+            g_KeyAsciiRingWritePtr = g_KeyAsciiRingBuf;
+        }
+    }
+}
+
+// @original Input_GetQueuedKey (MAINDOS.EXE @ 0x55cd0, geputget.c)
+// @fidelity EXACT
+char *Input_GetQueuedKey(char *query_str) {
+    char *match;
+    char *p = query_str;
+    while (*p != '\0') {
+        if (*p >= 'a' && *p <= 'z') {
+            *p -= 0x20;
+        }
+        p++;
+    }
+    match = strstr(g_KeyAsciiRingBuf, query_str);
+    if (match != NULL) {
+        memset(g_KeyAsciiRingBuf, 0xFF, sizeof(g_KeyAsciiRingBuf));
+    }
+    return match;
+}
+

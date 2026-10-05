@@ -284,6 +284,25 @@ These linear addresses correspond directly to runtime DOS addresses in `MAINDOS.
 | `0x001fee08` | `int32_t` | `g_GameState4` | 3-frame race countdown/startup sequence stage. |
 | `0x001fedf0` | `int32_t` | `g_GameState5` | Active race physics and simulation tick trigger. |
 | `0x001fefe0` | `VehicleState*` | `g_pVehicleTable` | Pointer to master allocated vehicle table. |
-| `0x0020acb0` | `uint8_t[256]` | `g_KeyboardState` | Active keydown state array (polled by `Input_IsKeyPressed` @ `0x55c28`). |
-| `0x0020aab0` | `uint8_t[256]` | `g_KeyJustPressed`| Edge-triggered single keypress flag array (cleared on read). |
+| `0x0020a1b0` | `int32_t[256]` | `g_KeyRepeatActiveTimer` | Per-key millisecond accumulator tracking duration held down for auto-repeat. |
+| `0x0020a5b0` | `uint8_t[256]` | `g_KeyToggleState` | Toggle state for latching keys. |
+| `0x0020a7b0` | `uint8_t[256]` | `g_KeyRepeatTriggered` | Key auto-repeat pulse flag array (cleared on read by `Input_WasKeyRepeated`). |
+| `0x0020a8b0` | `uint8_t[256]` | `g_KeyToggleMask` | Mask indicating whether key behaves in toggle mode. |
+| `0x0020a9b0` | `uint8_t[256]` | `g_KeyReleasedFlag` | Key release edge flag array. |
+| `0x0020aab0` | `uint8_t[256]` | `g_KeyJustPressed` | Edge-triggered single keypress flag array (cleared on read by `Input_WasKeyPressed`). |
+| `0x0020abb0` | `uint8_t[256]` | `g_KeyPreviousDown` | Previous poll frame key down state array. |
+| `0x0020acb0` | `uint8_t[256]` | `g_KeyboardState` | Active keydown state array (polled by `Input_IsKeyDown` @ `0x55c28`). |
+| `0x0020adb0` | `uint8_t[16]` | `g_KeyScancodeRingBuf` | Hardware ISR ring buffer for raw scancodes. |
+| `0x0020adc0` | `uint8_t[256]` | `g_KeyRawState` | Hardware keyboard state populated by ISR. |
+| `0x0020aec0` | `char*` | `g_KeyAsciiRingWritePtr` | Write head pointer into ASCII ring buffer. |
+| `0x0020aec4` | `int32_t` | `g_KeyLastPollTick` | Timestamp (`g_TickInt`) of the last keyboard poll call. |
+| `0x0020aec8` | `int32_t` | `g_KeyRepeatInterval` | Auto-repeat period in ticks / ms (set in `Input_InitKeyboard`). |
+| `0x0020aecc` | `int32_t` | `g_KeyRepeatInitialDelay` | Initial delay before auto-repeat begins in ticks / ms. |
+| `0x0020aed0` | `int32_t` | `g_KeyDriverInstalled` | 1 if keyboard driver is initialized, 0 otherwise. |
+| `0x0020aed4` | `void (*)(int,int)` | `g_KeyCallback` | Optional user callback invoked on key down/up events. |
+| `0x0020af3c` | `char[64]` | `g_KeyAsciiRingBuf` | Circular buffer for typed ASCII characters (32 chars with 32-char mirror). |
+| `0x000c5d19` | `uint8_t` | `g_KeyIsrScancodeHead` | Head index into `g_KeyScancodeRingBuf`. |
+| `0x000c5d1a` | `uint8_t` | `g_KeyIsrInstalled` | Flag indicating whether keyboard ISR is active. |
+| `0x000c5d20` | `uint8_t[84]` | `g_ScancodeToAsciiTable` | Scancode to ASCII conversion table. |
+
 

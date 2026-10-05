@@ -40,7 +40,6 @@ int HUD_RenderFloatingMessages(void *a, void *b, void *c, void *d) { (void)a; (v
 int HUD_RenderSpeedometerGauge(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int HUD_ShowAnnouncementBanner(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int HUD_UpdateLapCounters(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
-int Input_IsKeyPressed(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Lisa_InitDynamicObjectNode(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Lisa_ResetRasterizerContext(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Log_DebugPrintf(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
@@ -376,6 +375,35 @@ double g_ViewportScreenScaleTable[4][2] = {
 };
 uint8_t g_VirtualFramebuffer[320 * 200] = {0};
 uint8_t *g_pVirtualFramebuffer = g_VirtualFramebuffer;
+
+/* Authentic DOS keyboard subsystem state & tables (MAINDOS.EXE) */
+int32_t  g_KeyRepeatActiveTimer[256] = {0};       /* ds:0x20a1b0 - ms counter per key */
+uint8_t  g_KeyToggleState[256] = {0};            /* ds:0x20a5b0 - toggle state */
+uint8_t  g_KeyRepeatTriggered[256] = {0};        /* ds:0x20a7b0 - key auto-repeat flag */
+uint8_t  g_KeyToggleMask[256] = {0};             /* ds:0x20a8b0 - toggle mode mask */
+uint8_t  g_KeyReleasedFlag[256] = {0};           /* ds:0x20a9b0 - key release edge flag */
+uint8_t  g_KeyJustPressed[256] = {0};            /* ds:0x20aab0 - key press edge flag */
+uint8_t  g_KeyPreviousDown[256] = {0};           /* ds:0x20abb0 - previous poll down state */
+uint8_t  g_KeyboardState[256] = {0};             /* ds:0x20acb0 - active key down state */
+uint8_t  g_KeyScancodeRingBuf[16] = {0};         /* ds:0x20adb0 - ISR ring buffer */
+uint8_t  g_KeyRawState[256] = {0};               /* ds:0x20adc0 - raw hardware down state */
+char    *g_KeyAsciiRingWritePtr = NULL;          /* ds:0x20aec0 - pointer into ASCII ring buffer */
+int32_t  g_KeyLastPollTick = 0;                  /* ds:0x20aec4 - tick of last poll */
+int32_t  g_KeyRepeatInterval = 0;                /* ds:0x20aec8 - repeat rate threshold */
+int32_t  g_KeyRepeatInitialDelay = 0;            /* ds:0x20aecc - initial repeat delay */
+int32_t  g_KeyDriverInstalled = 0;               /* ds:0x20aed0 - 1 if keyboard initialized */
+void   (*g_KeyCallback)(int, int) = NULL;        /* ds:0x20aed4 - user key callback function */
+char     g_KeyAsciiRingBuf[64] = {0};            /* ds:0x20af3c - ASCII ring buffer (32B payload + mirror) */
+uint8_t  g_KeyIsrScancodeHead = 0;               /* ds:0xc5d19 - head index in ring buffer */
+uint8_t  g_KeyIsrInstalled = 0;                  /* ds:0xc5d1a - 1 if INT 9 hooked */
+const uint8_t g_ScancodeToAsciiTable[84] = {     /* ds:0xc5d20 - scancode to ASCII map */
+    0xff, 0xff, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x2d, 0x3d, 0xff, 0xff,
+    0x51, 0x57, 0x45, 0x52, 0x54, 0x59, 0x55, 0x49, 0x4f, 0x50, 0x7b, 0x7d, 0xff, 0xff, 0x41, 0x53,
+    0x44, 0x46, 0x47, 0x48, 0x4a, 0x4b, 0x4c, 0x3b, 0x27, 0xff, 0xff, 0x5c, 0x5a, 0x58, 0x43, 0x56,
+    0x42, 0x4e, 0x4d, 0x2c, 0x2e, 0x2f, 0xff, 0x2a, 0xff, 0x20, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x37, 0x38, 0x39, 0x2d, 0x34, 0x35, 0x36, 0x2b, 0x31,
+    0x32, 0x33, 0x30, 0x2e
+};
 uint32_t g_WeatherActive[16] = {0};
 uint32_t g_WeatherAnimTick[16] = {0};
 uint32_t g_WeatherAudioVoices[16] = {0};
