@@ -611,3 +611,6 @@ char s_pal_chk_str1[512] = {0};
 char s_pal_chk_str2[512] = {0};
 char s_rb[512] = {0};
 char s_tab_tab[512] = {0};
+
+/* TODO: unported (called from fx.c); void signature matches lisa3d.h */
+void Lisa_ResetRasterizerContext(void) { }

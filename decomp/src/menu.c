@@ -601,7 +601,7 @@ int Menu_Init(void) {
     BootLog("[MAINDOS] Menu_Init: Initializing authentic menu system...");
 
     /* 1. Allocate and load 768-byte palette (baltazar\\data\\menu.col) */
-    g_pMenuPalDefault = (uint8_t *)Mem_Alloc(0x300, 8);
+    g_pMenuPalDefault = (uint8_t *)Mem_Alloc(0x300, 0);
     if (!g_pMenuPalDefault || !File_ReadToBuffer("baltazar\\data\\menu.col", g_pMenuPalDefault, 0x300, 0)) {
         BootLog("[MAINDOS] Menu_Init: Failed to load menu.col!");
         return 0;
@@ -610,7 +610,7 @@ int Menu_Init(void) {
     g_pMenuPalActive = g_pMenuPalDefault;
 
     /* 2. Allocate 64,321 byte menu framebuffer 1 */
-    g_pMenuBuffer1 = (uint8_t *)Mem_Alloc(0xfb41, 8);
+    g_pMenuBuffer1 = (uint8_t *)Mem_Alloc(0xfb41, 0);
     if (!g_pMenuBuffer1) {
         return 0;
     }
@@ -645,17 +645,17 @@ int Menu_Init(void) {
     memset(g_pMenuBuffer1, 0, 64000);
 
     /* 7. Allocate fade palettes */
-    g_pMenuPalBlack = (uint8_t *)Mem_Alloc(0x300, 8);
+    g_pMenuPalBlack = (uint8_t *)Mem_Alloc(0x300, 0);
     if (g_pMenuPalBlack) memset(g_pMenuPalBlack, 0x00, 0x300);
 
-    g_pMenuPalWhite = (uint8_t *)Mem_Alloc(0x300, 8);
+    g_pMenuPalWhite = (uint8_t *)Mem_Alloc(0x300, 0);
     if (g_pMenuPalWhite) memset(g_pMenuPalWhite, 0xff, 0x300);
 
-    g_pMenuPalWork = (uint8_t *)Mem_Alloc(0x300, 8);
+    g_pMenuPalWork = (uint8_t *)Mem_Alloc(0x300, 0);
 
     /* 8. Allocate menu buffers 2 and 3 */
-    g_pMenuBuffer2 = (uint8_t *)Mem_Alloc(0xfb41, 8);
-    g_pMenuBuffer3 = (uint8_t *)Mem_Alloc(0xfb41, 8);
+    g_pMenuBuffer2 = (uint8_t *)Mem_Alloc(0xfb41, 0);
+    g_pMenuBuffer3 = (uint8_t *)Mem_Alloc(0xfb41, 0);
 
     /* 9. Load PIC sprite assets (skipping 846-byte header) */
     g_pMenuBilar = (uint8_t *)Mem_Alloc(0x1e786, 0);
