@@ -618,7 +618,14 @@ int Menu_Init(void) {
     /* 3. Initialize Lisa engine memory */
     g_pMenuLisaEngine = (uint8_t *)Lisa_InitEngineMemory();
 
-    /* 4. Set initial palette to active menu palette */
+    /* 4. Video mode: original stores 320x200x8 into 0xc5cfc..0xc5d08 and calls 0x558e4 */
+    g_ScreenWidth = 320;
+    g_ScreenHeight = 200;
+    g_ScreenBPP = 8;
+    g_ScreenMode = 1;
+    if (!App_SetVideoMode()) {
+        return 0;
+    }
     VGA_SetPaletteRaw(g_pMenuPalActive);
 
     /* 5. Load settings from ign_dos.btz or initialize defaults */
