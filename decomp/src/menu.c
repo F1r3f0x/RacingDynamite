@@ -34,6 +34,9 @@ uint8_t *g_pMenuCarTex = NULL;         /* menucar.tex (393,280 bytes) */
 uint8_t *g_pDefaultPSQ = NULL;         /* ds:0xea314 (default2.psq) */
 uint8_t *g_pTestPFM = NULL;            /* test2.pfm */
 
+/* ds:0xea21c - previous tick time in seconds (g_TickInt * 0.036) */
+static double g_MenuLastTickTime = 0.0;
+
 /* 3D Car rotation angle */
 static double s_CarYaw = 0.6;
 
@@ -693,6 +696,10 @@ int Menu_Init(void) {
     /* 10. Load intro CDP videos */
     Menu_LoadIntroCDPs();
 
+    /* Original 0x11b..: ea400 becomes the active draw buffer (0xc4844); menu UI composes over the CDP frame */
+    g_pVirtualFramebuffer = g_pMenuBuffer1;
+    g_MenuLastTickTime = (double)g_TickInt * 0.036;
+
     /* 11. Initial menu state */
     g_MenuSelection = 0;
     g_SelectedCar = 0;
@@ -728,10 +735,15 @@ int Menu_Tick(void) {
 
     /* 2. Compute authentic frame delta time (MAINDOS.EXE @ 0x12bd3..0x12c48) */
     delta = (double)g_TickInt * 0.036;
-    if (delta > 10.8) {
-        delta = 10.8;
-    } else if (delta <= 0.0) {
+    {
+        double cur_time = delta;
+        delta = cur_time - g_MenuLastTickTime;
+        g_MenuLastTickTime = cur_time;
+    }
+    if (delta == 0.0) {
         delta = 0.01;
+    } else if (delta > 10.8) {
+        delta = 10.8;
     }
     g_MenuDeltaTime = delta;
     g_MenuTimeSeconds += delta;
