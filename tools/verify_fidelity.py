@@ -294,6 +294,14 @@ def main() -> int:
         for w in warnings:
             print(f"  [WARN] {w}")
 
+    # PE-residue ratchet (MAINDOS_32BIT.EXE leftovers must never increase)
+    import subprocess
+    residue = subprocess.run(
+        [sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "audit_pe_residue.py")],
+        capture_output=True, text=True)
+    if residue.returncode != 0:
+        errors.append("PE residue audit failed:\n" + residue.stdout.strip())
+
     # Output Errors
     if errors:
         print("\n--------------------------------------------------------------------------------")
