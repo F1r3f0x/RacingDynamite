@@ -3,6 +3,7 @@
  */
 #include <stddef.h>
 #include <stdint.h>
+#include "lisa3d.h"
 #include <i86.h>
 #include <conio.h>
 
@@ -41,7 +42,6 @@ int HUD_RenderSpeedometerGauge(void *a, void *b, void *c, void *d) { (void)a; (v
 int HUD_ShowAnnouncementBanner(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int HUD_UpdateLapCounters(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Lisa_InitDynamicObjectNode(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
-int Lisa_ResetRasterizerContext(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Log_DebugPrintf(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Math_AngleMod(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
 int Math_RandomFloat0To1(void *a, void *b, void *c, void *d) { (void)a; (void)b; (void)c; (void)d; return 0; }
@@ -404,6 +404,48 @@ const uint8_t g_ScancodeToAsciiTable[84] = {     /* ds:0xc5d20 - scancode to ASC
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x37, 0x38, 0x39, 0x2d, 0x34, 0x35, 0x36, 0x2b, 0x31,
     0x32, 0x33, 0x30, 0x2e
 };
+
+/* Authentic Menu & Palette subsystem state (MAINDOS.EXE) */
+uint8_t *g_pMenuPalBlack = NULL;                 /* ds:0xea204 - 768B all-zero palette */
+uint8_t *g_pMenuPalWhite = NULL;                 /* ds:0xea208 - 768B all-0xFF palette */
+uint8_t *g_pMenuPalWork = NULL;                  /* ds:0xea20c - 768B interpolated work palette */
+uint8_t *g_pMenuPalDefault = NULL;               /* ds:0xea200 - 768B MENU.COL palette */
+uint8_t *g_pMenuCol = NULL;                      /* alias to g_pMenuPalDefault */
+uint8_t *g_pMenuPalActive = NULL;                /* ds:0xea1fc - currently loaded target palette */
+uint8_t *g_pMenuBuffer1 = NULL;                  /* ds:0xea400 - 64,321 byte 8bpp menu buffer 1 */
+uint8_t *g_pMenuBuffer2 = NULL;                  /* ds:0xea404 - 64,321 byte 8bpp menu buffer 2 */
+uint8_t *g_pMenuBuffer3 = NULL;                  /* ds:0xea408 - 64,321 byte 8bpp menu buffer 3 */
+double   g_MenuDeltaTime = 0.0;                  /* ds:0xea224 - frame delta time */
+double   g_MenuTimeSeconds = 0.0;                /* ds:0xea198 - cumulative menu elapsed time */
+double   g_MenuCdpFrameAccum = 0.0;              /* ds:0xea1a0 - CDP frame step accumulator */
+int32_t  g_MenuCdpActiveIndex = 0;               /* ds:0xea1d0 - index of active CDP (0..5) */
+int32_t  g_MenuCdpPendingLoad = 0;               /* ds:0xea1d4 - flag indicating CDP needs to be opened */
+int32_t  g_MenuAudioVoiceActive = 0;             /* ds:0xea268 - audio voice status flag */
+int32_t  g_MenuVideoResolutionMode = 0;          /* ds:0xea194 - video mode index (0 = 320x200) */
+
+uint8_t  g_GameSettings[0x598] = {0};            /* ds:0xe9bfc .. 0xea193 - game settings */
+uint8_t *g_pMenuCdpFiles[6] = {NULL};            /* ds:0xea1b8 .. 0xea1cc - 6 loaded CDP file buffers */
+CdpFile  g_MenuCdp = {0};                       /* ds:0xea1d8 - active menu CDP player */
+uint8_t *g_pMenuTab = NULL;                      /* ds:0xea210 - 64KB transparency lookup table pointer */
+uint8_t *g_pMenuTabAlloc = NULL;                 /* ds:0xea214 - raw allocation for menu.tab */
+const uint8_t *g_pMenuTransTable = NULL;         /* ds:0xea218 - trans table pointer */
+uint8_t *g_pMenuBilar = NULL;                    /* ds:0xea750 - bilar.pic (124,806 bytes) */
+uint8_t *g_pMenuTrackSpr = NULL;                 /* ds:0xea754 - trk_spr.pic (79,695 bytes) */
+uint8_t *g_pMenuLogo = NULL;                     /* ds:0xea758 - ign_logo.pic (9,861 bytes) */
+uint8_t *g_pMenuCarSel = NULL;                   /* ds:0xea75c - car_sel.pic (18,870 bytes) */
+uint8_t *g_pMenuFlags = NULL;                    /* ds:0xea760 - flaggor.pic (38,796 bytes) */
+int32_t  g_MenuSelectedLanguage = 0;             /* ds:0xea764 */
+int32_t  g_MenuIntroResetBuffers = 1;            /* ds:0xbecfc */
+int32_t  g_MenuIntroVideoEnabled = 1;            /* ds:0xbed18 */
+const char *g_MenuCdpNames[6] = {                /* ds:0xbed00 */
+    "baltazar\\data\\ign1.cdp",
+    "baltazar\\data\\ign2.cdp",
+    "baltazar\\data\\ign3_0.cdp",
+    "baltazar\\data\\ign3_1.cdp",
+    "baltazar\\data\\ign3_2.cdp",
+    "baltazar\\data\\ign3_3.cdp"
+};
+uint8_t *g_pMenuLisaEngine = NULL;               /* ds:0xea3c0 - engine context allocated in Menu_Init */
 uint32_t g_WeatherActive[16] = {0};
 uint32_t g_WeatherAnimTick[16] = {0};
 uint32_t g_WeatherAudioVoices[16] = {0};

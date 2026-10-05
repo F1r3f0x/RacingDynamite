@@ -467,64 +467,64 @@ Total: **501**
 - L367 `placeholder_global` uint32_t g_ViewportMaxY[16] = {0};
 - L368 `placeholder_global` uint32_t g_ViewportMinX[16] = {0};
 - L369 `placeholder_global` uint32_t g_ViewportMinY[16] = {0};
-- L407 `placeholder_global` uint32_t g_WeatherActive[16] = {0};
-- L408 `placeholder_global` uint32_t g_WeatherAnimTick[16] = {0};
-- L409 `placeholder_global` uint32_t g_WeatherAudioVoices[16] = {0};
-- L410 `placeholder_global` uint32_t g_WeatherDropOffsetX[16] = {0};
-- L411 `placeholder_global` uint32_t g_WeatherDropOffsetY[16] = {0};
-- L412 `placeholder_global` uint32_t g_WeatherGridObjects[16] = {0};
-- L413 `placeholder_global` uint32_t g_WeatherType[16] = {0};
-- L414 `placeholder_global` uint32_t g_WeatherViewportCount[16] = {0};
-- L415 `placeholder_global` uint32_t g_WheelParticleDescriptor[16] = {0};
-- L517 `pe_symbol` s_AT_FIRST_PLACE_WITH_00496a11
-- L518 `pe_symbol` s_AT_SECOND_PLACE_WITH_00496a34
-- L519 `pe_symbol` s_AT_THIRD_PLACE_WITH_00496a57
-- L520 `pe_symbol` s_A_SCORE_OF__d_PTS__00496a7a
-- L521 `pe_symbol` s_CD_TRACK_00494db2
-- L522 `pe_symbol` s_CONGRATULATIONS__004969a8
-- L523 `pe_symbol` s_CONTINUE_00494d58
-- L524 `pe_symbol` s_Cannot_use_this_graphics_mode__004989dc
-- L525 `pe_symbol` s_DEFAULT_00494dee
-- L526 `pe_symbol` s_Error_while_changing_car_mesh_00499248
-- L527 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_ANIM_OBJ_004994ac
-- L528 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_00499530
-- L529 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4
-- L530 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_SHA_00499558
-- L531 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_WHE_00499580
-- L532 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_TRAN_SPRIT_004993b4
-- L533 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468
-- L534 `pe_symbol` s_FEL_VID_LI_PLACEOBJECT_HANDLE_CA_00499508
-- L535 `pe_symbol` s_FPS__d_00499658
-- L536 `pe_symbol` s_GOLD_STATUE_TO_ADVANCE__0049707b
-- L537 `pe_symbol` s_NOW_TRY_THE__s_LEAGUE__00496f68
-- L538 `pe_symbol` s_OLDROADNR__d_00499630
-- L539 `pe_symbol` s_PLACE_OR_BETTER_TO_PROCEED__00496452
-- L540 `pe_symbol` s_PLAY_TRACK_AGAIN___Y_N__00495698
-- L541 `pe_symbol` s_PRESS_RETURN_TO_CONTINUE_00495860
-- L542 `pe_symbol` s_QUIT_00494d94
-- L543 `pe_symbol` s_QUIT___Y_N__00495248
-- L544 `pe_symbol` s_RANDOM_00494e0c
-- L545 `pe_symbol` s_RECORDING__0049964c
-- L546 `pe_symbol` s_RESTART_00494d76
-- L547 `pe_symbol` s_RESTART___Y_N__00495300
-- L548 `pe_symbol` s_RETRY_00494dd0
-- L549 `pe_symbol` s_ROLL___1f_00499640
-- L550 `pe_symbol` s_SKILLNAD___3f_004995f8
-- L551 `pe_symbol` s_SORRY__YOU_MUST_REACH_THIRD_00496420
-- L552 `pe_symbol` s_SPEED___3f_004995ec
-- L553 `pe_symbol` s_SQUASHED2__d_00499620
-- L554 `pe_symbol` s_TOTAL_SCORE_004955e0
-- L555 `pe_symbol` s_TRACK_RESULTS_00495470
-- L556 `pe_symbol` s_TRACK_SCORE_00495528
-- L557 `pe_symbol` s_TYPE1__d_00499614
-- L558 `pe_symbol` s_TYPE2__d_00499608
-- L560 `pe_symbol` s_WAITING_FOR_HOST_004957a8
-- L561 `pe_symbol` s_WELL_DONE__PRESS_RETURN_TO_ADVAN_004961c8
-- L562 `pe_symbol` s_YOU_HAVE_COMPLETED_THE_004969cb
-- L563 `pe_symbol` s_YOU_HAVE_COMPLETED_THIS_DIFFICUL_00495f70
-- L564 `pe_symbol` s_YOU_MUST_ACHIEVE_THE_00497058
-- L565 `pe_symbol` s__d_PTS_00496948
-- L566 `pe_symbol` s__s_CHAMPIONSHIP_004969ee
+- L449 `placeholder_global` uint32_t g_WeatherActive[16] = {0};
+- L450 `placeholder_global` uint32_t g_WeatherAnimTick[16] = {0};
+- L451 `placeholder_global` uint32_t g_WeatherAudioVoices[16] = {0};
+- L452 `placeholder_global` uint32_t g_WeatherDropOffsetX[16] = {0};
+- L453 `placeholder_global` uint32_t g_WeatherDropOffsetY[16] = {0};
+- L454 `placeholder_global` uint32_t g_WeatherGridObjects[16] = {0};
+- L455 `placeholder_global` uint32_t g_WeatherType[16] = {0};
+- L456 `placeholder_global` uint32_t g_WeatherViewportCount[16] = {0};
+- L457 `placeholder_global` uint32_t g_WheelParticleDescriptor[16] = {0};
+- L559 `pe_symbol` s_AT_FIRST_PLACE_WITH_00496a11
+- L560 `pe_symbol` s_AT_SECOND_PLACE_WITH_00496a34
+- L561 `pe_symbol` s_AT_THIRD_PLACE_WITH_00496a57
+- L562 `pe_symbol` s_A_SCORE_OF__d_PTS__00496a7a
+- L563 `pe_symbol` s_CD_TRACK_00494db2
+- L564 `pe_symbol` s_CONGRATULATIONS__004969a8
+- L565 `pe_symbol` s_CONTINUE_00494d58
+- L566 `pe_symbol` s_Cannot_use_this_graphics_mode__004989dc
+- L567 `pe_symbol` s_DEFAULT_00494dee
+- L568 `pe_symbol` s_Error_while_changing_car_mesh_00499248
+- L569 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_ANIM_OBJ_004994ac
+- L570 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_00499530
+- L571 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4
+- L572 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_SHA_00499558
+- L573 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_WHE_00499580
+- L574 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_TRAN_SPRIT_004993b4
+- L575 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468
+- L576 `pe_symbol` s_FEL_VID_LI_PLACEOBJECT_HANDLE_CA_00499508
+- L577 `pe_symbol` s_FPS__d_00499658
+- L578 `pe_symbol` s_GOLD_STATUE_TO_ADVANCE__0049707b
+- L579 `pe_symbol` s_NOW_TRY_THE__s_LEAGUE__00496f68
+- L580 `pe_symbol` s_OLDROADNR__d_00499630
+- L581 `pe_symbol` s_PLACE_OR_BETTER_TO_PROCEED__00496452
+- L582 `pe_symbol` s_PLAY_TRACK_AGAIN___Y_N__00495698
+- L583 `pe_symbol` s_PRESS_RETURN_TO_CONTINUE_00495860
+- L584 `pe_symbol` s_QUIT_00494d94
+- L585 `pe_symbol` s_QUIT___Y_N__00495248
+- L586 `pe_symbol` s_RANDOM_00494e0c
+- L587 `pe_symbol` s_RECORDING__0049964c
+- L588 `pe_symbol` s_RESTART_00494d76
+- L589 `pe_symbol` s_RESTART___Y_N__00495300
+- L590 `pe_symbol` s_RETRY_00494dd0
+- L591 `pe_symbol` s_ROLL___1f_00499640
+- L592 `pe_symbol` s_SKILLNAD___3f_004995f8
+- L593 `pe_symbol` s_SORRY__YOU_MUST_REACH_THIRD_00496420
+- L594 `pe_symbol` s_SPEED___3f_004995ec
+- L595 `pe_symbol` s_SQUASHED2__d_00499620
+- L596 `pe_symbol` s_TOTAL_SCORE_004955e0
+- L597 `pe_symbol` s_TRACK_RESULTS_00495470
+- L598 `pe_symbol` s_TRACK_SCORE_00495528
+- L599 `pe_symbol` s_TYPE1__d_00499614
+- L600 `pe_symbol` s_TYPE2__d_00499608
+- L602 `pe_symbol` s_WAITING_FOR_HOST_004957a8
+- L603 `pe_symbol` s_WELL_DONE__PRESS_RETURN_TO_ADVAN_004961c8
+- L604 `pe_symbol` s_YOU_HAVE_COMPLETED_THE_004969cb
+- L605 `pe_symbol` s_YOU_HAVE_COMPLETED_THIS_DIFFICUL_00495f70
+- L606 `pe_symbol` s_YOU_MUST_ACHIEVE_THE_00497058
+- L607 `pe_symbol` s__d_PTS_00496948
+- L608 `pe_symbol` s__s_CHAMPIONSHIP_004969ee
 
 ### decomp/src/lisa3d.c
 

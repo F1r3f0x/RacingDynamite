@@ -23,19 +23,9 @@
 #include <stdlib.h>
 #include <i86.h>
 
-/* --- Authentic Menu Assets & Buffers --- */
-uint8_t *g_pMenuBuffer1 = NULL;        /* ds:0xea400 (64,321 bytes) */
-uint8_t *g_pMenuBuffer2 = NULL;        /* ds:0xea404 */
-uint8_t *g_pMenuBuffer3 = NULL;        /* ds:0xea408 */
-
-uint8_t *g_pMenuBlackPal = NULL;       /* ds:0xea204 (768 bytes, 0x00) */
-uint8_t *g_pMenuWhitePal = NULL;       /* ds:0xea208 (768 bytes, 0xFF) */
-
-uint8_t *g_pMenuBilar = NULL;          /* ds:0xea750 (bilar.pic, 124,806 bytes) */
-uint8_t *g_pMenuTrackSpr = NULL;       /* ds:0xea754 (trk_spr.pic, 79,695 bytes) */
-uint8_t *g_pMenuLogo = NULL;           /* ds:0xea758 (ign_logo.pic, 9,861 bytes) */
-uint8_t *g_pMenuCarSel = NULL;         /* ds:0xea75c (car_sel.pic, 18,870 bytes) */
-uint8_t *g_pMenuFlags = NULL;          /* ds:0xea760 (flaggor.pic, 38,796 bytes) */
+/* --- Menu Asset Aliases --- */
+#define g_pMenuBlackPal g_pMenuPalBlack
+#define g_pMenuWhitePal g_pMenuPalWhite
 
 uint8_t *g_pMenuCarMsh = NULL;         /* menucar.msh (82,876 bytes) */
 uint8_t *g_pMenuCarPlc = NULL;         /* menucar.plc (224 bytes) */
@@ -43,11 +33,6 @@ uint8_t *g_pMenuCarTex = NULL;         /* menucar.tex (393,280 bytes) */
 
 uint8_t *g_pDefaultPSQ = NULL;         /* ds:0xea314 (default2.psq) */
 uint8_t *g_pTestPFM = NULL;            /* test2.pfm */
-
-/* Video background player */
-static CdpFile s_MenuCDP;
-static uint8_t *s_pCdpData = NULL;
-static int s_ActiveCdpId = -1;
 
 /* 3D Car rotation angle */
 static double s_CarYaw = 0.6;
@@ -89,9 +74,8 @@ static const char *s_CarNames[11] = {
     "BEETLE"
 };
 
-/**
- * 2D Software blitter for 8bpp sprites with color-key 0 transparency.
- */
+// @original Menu_BlitSprite (MAINDOS.EXE @ 0x00018500, menu.c)
+// @fidelity ADAPTED
 static void Menu_BlitSprite(uint8_t *dest, int dx, int dy,
                             const uint8_t *src, int sw, int sh,
                             int transparent) {
@@ -114,9 +98,8 @@ static void Menu_BlitSprite(uint8_t *dest, int dx, int dy,
     }
 }
 
-/**
- * Fast scanline horizontal span triangle filler for 3D car rendering.
- */
+// @original Menu_FillTriangle (MAINDOS.EXE @ 0x00015344, menu.c)
+// @fidelity ADAPTED
 static void Menu_FillTriangle(uint8_t *fb, int x0, int y0, int x1, int y1, int x2, int y2, uint8_t color) {
     int t;
     int min_y, max_y, cur_y;
@@ -150,9 +133,8 @@ static void Menu_FillTriangle(uint8_t *fb, int x0, int y0, int x1, int y1, int x
     }
 }
 
-/**
- * Draws an authentic rounded pill-shaped button widget.
- */
+// @original Menu_DrawPillButton (MAINDOS.EXE @ 0x000170ac, menu.c)
+// @fidelity ADAPTED
 static void Menu_DrawPillButton(uint8_t *fb, int cx, int cy, int w, int h, const char *text, int selected) {
     int x0 = cx - w / 2;
     int y0 = cy - h / 2;
@@ -184,58 +166,258 @@ static void Menu_DrawPillButton(uint8_t *fb, int cx, int cy, int w, int h, const
     }
 }
 
-/**
- * Loads authentic animated background CDP video.
- */
-static void Menu_LoadCDP(int id) {
-    char path[64];
-    int size;
-
-    if (s_ActiveCdpId == id && s_MenuCDP.is_open) return;
-
-    if (s_pCdpData) {
-        free(s_pCdpData);
-        s_pCdpData = NULL;
-        s_MenuCDP.is_open = 0;
+// @original Palette_Fade (MAINDOS.EXE @ 0x00051a9c, menu.c)
+// @fidelity EXACT
+void Palette_Fade(const uint8_t *src1, const uint8_t *src2, uint8_t *dest, int factor) {
+    int i;
+    if (factor >= 256) {
+        memcpy(dest, src2, 768);
+        return;
     }
-
-    if (id == 1) {
-        strcpy(path, "baltazar\\data\\ign1.cdp");
-    } else {
-        strcpy(path, "baltazar\\data\\ign3_0.cdp");
+    for (i = 0; i < 768; i++) {
+        int diff = (int)src2[i] - (int)src1[i];
+        int val = (int)src1[i] + (diff * factor / 256);
+        dest[i] = (uint8_t)val;
     }
+}
 
-    size = File_GetSize(path);
-    if (size > 0) {
-        s_pCdpData = (uint8_t *)malloc(size);
-        if (s_pCdpData) {
-            File_ReadToBuffer(path, s_pCdpData, size, 0);
-            s_MenuCDP.file_data = s_pCdpData;
-            s_MenuCDP.pixel_buffer = g_pVirtualFramebuffer;
-            if (Cdp_OpenFile(&s_MenuCDP)) {
-                s_ActiveCdpId = id;
-                if (s_MenuCDP.palette) {
-                    VGA_SetPaletteRaw(s_MenuCDP.palette);
-                }
-            }
+// @original Palette_BlitTrans (MAINDOS.EXE @ 0x00051818, menu.c)
+// @fidelity ADAPTED
+// NOTE: loop body matches the LUT blend (dst = lut[(src << 8) + dst]); the
+// register/stack parameter mapping is not yet verified against the 0x51818 prologue.
+void Palette_BlitTrans(const uint8_t *src, int x_start, int y_start, int x_end,
+                       int y_end, uint8_t *dest, int dest_x, int dest_y,
+                       const uint8_t *trans_table, int src_stride, int dest_stride) {
+    int y, x;
+    if (y_start >= y_end) {
+        return;
+    }
+    for (y = y_start; y < y_end; y++) {
+        int src_row = y * src_stride;
+        int dest_row = (dest_y + (y - y_start)) * dest_stride + dest_x;
+        for (x = x_start; x < x_end; x++) {
+            uint8_t src_pixel = src[src_row + x];
+            uint8_t dest_pixel = dest[dest_row + (x - x_start)];
+            uint16_t lut_idx = ((uint16_t)src_pixel << 8) | dest_pixel;
+            dest[dest_row + (x - x_start)] = trans_table[lut_idx];
         }
     }
 }
 
-/**
- * Decodes the next CDP video background frame.
- */
-static void Menu_PlayCDPFrame(void) {
-    if (s_MenuCDP.is_open) {
-        s_MenuCDP.pixel_buffer = g_pVirtualFramebuffer;
-        Cdp_DecodeFrame(&s_MenuCDP);
-        if (s_MenuCDP.current_frame >= s_MenuCDP.frame_count) {
-            s_MenuCDP.cur_frame_ptr = s_MenuCDP.frame_data_start;
-            s_MenuCDP.current_frame = 0;
-        }
-    } else {
-        memset(g_pVirtualFramebuffer, 0x00, 320 * 200);
+// @original Menu_InitSettings (MAINDOS.EXE @ 0x0001a864, menu.c)
+// @fidelity EXACT
+void Menu_InitSettings(void) {
+    int i;
+    memset(g_GameSettings, 0, sizeof(g_GameSettings));
+
+    *(uint32_t *)&g_GameSettings[0x00] = 0x1e; /* 0xe9bfc: settings version 30 */
+    *(uint32_t *)&g_GameSettings[0x04] = 0;    /* 0xe9c00 */
+    *(uint32_t *)&g_GameSettings[0x08] = 0;    /* 0xe9c04 */
+    *(uint32_t *)&g_GameSettings[0x0c] = 0;    /* 0xe9c08 */
+    *(uint32_t *)&g_GameSettings[0x10] = 1;    /* 0xe9c0c */
+    *(uint32_t *)&g_GameSettings[0x14] = 1;    /* 0xe9c10 */
+    *(uint32_t *)&g_GameSettings[0x18] = 1;    /* 0xe9c14 */
+    *(uint32_t *)&g_GameSettings[0x1c] = 0;    /* 0xe9c18 */
+    *(uint32_t *)&g_GameSettings[0x20] = 2;    /* 0xe9c1c */
+    *(uint32_t *)&g_GameSettings[0x24] = 3;    /* 0xe9c20 */
+    *(uint32_t *)&g_GameSettings[0x28] = 4;    /* 0xe9c24 */
+    *(uint32_t *)&g_GameSettings[0x2c] = 5;    /* 0xe9c28 */
+    *(uint32_t *)&g_GameSettings[0x30] = 7;    /* 0xe9c2c */
+    *(uint32_t *)&g_GameSettings[0x34] = 8;    /* 0xe9c30 */
+    *(uint32_t *)&g_GameSettings[0x38] = 8;    /* 0xe9c34 */
+    *(uint32_t *)&g_GameSettings[0x3c] = 0;    /* 0xe9c38 */
+    *(uint32_t *)&g_GameSettings[0x40] = 0;    /* 0xe9c3c */
+    *(uint32_t *)&g_GameSettings[0x44] = 0;    /* 0xe9c40 */
+
+    for (i = 1; i < 9; i++) {
+        *(uint32_t *)&g_GameSettings[0x44 + i * 4] = 1; /* 0xe9c44 .. 0xe9c64 */
     }
+
+    /* Player 1 Name: "PL1" */
+    g_GameSettings[0x6c] = 'P'; /* 0xe9c68 */
+    g_GameSettings[0x6d] = 'L'; /* 0xe9c69 */
+    g_GameSettings[0x6e] = '1'; /* 0xe9c6a */
+    g_GameSettings[0x6f] = '\0'; /* 0xe9c6b */
+
+    /* Player 2 Name: "PL2" */
+    g_GameSettings[0xe4] = 'P'; /* 0xe9ce0 */
+    g_GameSettings[0xe5] = 'L'; /* 0xe9ce1 */
+    g_GameSettings[0xe6] = '2'; /* 0xe9ce2 */
+    g_GameSettings[0xe7] = '\0'; /* 0xe9ce3 */
+
+    *(uint32_t *)&g_GameSettings[0xf3] = 0;    /* 0xe9cef */
+    *(uint32_t *)&g_GameSettings[0xf7] = 0;    /* 0xe9cf3 */
+    *(uint32_t *)&g_GameSettings[0xfb] = 5;    /* 0xe9cf7 */
+    *(uint32_t *)&g_GameSettings[0xff] = 10;   /* 0xe9cfb */
+    *(uint32_t *)&g_GameSettings[0x103] = 3;   /* 0xe9cff */
+    *(uint32_t *)&g_GameSettings[0x107] = 0;   /* 0xe9d03 */
+    *(uint32_t *)&g_GameSettings[0x10b] = 0;   /* 0xe9d07 */
+    *(uint32_t *)&g_GameSettings[0x10f] = 0;   /* 0xe9d0b */
+    *(uint32_t *)&g_GameSettings[0x113] = 1;   /* 0xe9d0f */
+    *(uint32_t *)&g_GameSettings[0x117] = 1;   /* 0xe9d13 */
+    *(uint32_t *)&g_GameSettings[0x11b] = 2;   /* 0xe9d17 */
+    *(uint32_t *)&g_GameSettings[0x11f] = 2;   /* 0xe9d1b */
+    *(uint32_t *)&g_GameSettings[0x123] = 0;   /* 0xe9d1f */
+    *(uint32_t *)&g_GameSettings[0x127] = 0;   /* 0xe9d23 */
+    *(uint32_t *)&g_GameSettings[0x12b] = 0;   /* 0xe9d27 */
+    *(uint32_t *)&g_GameSettings[0x12f] = 0;   /* 0xe9d2b */
+
+    for (i = 0; i < 8; i++) {
+        *(uint32_t *)&g_GameSettings[0x133 + i * 4] = i; /* 0xe9d2f .. 0xe9d4b */
+    }
+
+    *(uint32_t *)&g_GameSettings[0x153] = 1;   /* 0xe9d4f */
+    *(uint32_t *)&g_GameSettings[0x157] = 0;   /* 0xe9d53 */
+    *(uint32_t *)&g_GameSettings[0x15b] = 0;   /* 0xe9d57 */
+    *(uint32_t *)&g_GameSettings[0x15f] = 0;   /* 0xe9d5b */
+
+    for (i = 2; i < 8; i++) {
+        *(uint32_t *)&g_GameSettings[0x15b + i * 4] = 1; /* 0xe9d5f .. 0xe9d77 */
+    }
+
+    /* Player 1 keys */
+    g_GameSettings[0x17f] = 0xcb; /* 0xe9d7b: Left arrow */
+    g_GameSettings[0x180] = 0xcd; /* 0xe9d7c: Right arrow */
+    g_GameSettings[0x181] = 0xc8; /* 0xe9d7d: Up arrow */
+    g_GameSettings[0x182] = 0xd0; /* 0xe9d7e: Down arrow */
+    g_GameSettings[0x183] = 0x35; /* 0xe9d7f: '/' */
+    g_GameSettings[0x184] = 0x34; /* 0xe9d80: '.' */
+    g_GameSettings[0x185] = 0x36; /* 0xe9d81: RShift */
+    g_GameSettings[0x186] = 0x28; /* 0xe9d82: '\'' */
+
+    /* Player 2 keys */
+    g_GameSettings[0x187] = 0x2e; /* 0xe9d83: 'C' */
+    g_GameSettings[0x188] = 0x30; /* 0xe9d84: 'B' */
+    g_GameSettings[0x189] = 0x21; /* 0xe9d85: 'F' */
+    g_GameSettings[0x18a] = 0x2f; /* 0xe9d86: 'V' */
+    g_GameSettings[0x18b] = 0x2b; /* 0xe9d87: '\\' */
+    g_GameSettings[0x18c] = 0x2a; /* 0xe9d88: LShift */
+    g_GameSettings[0x18d] = 0x2c; /* 0xe9d89: 'Z' */
+    g_GameSettings[0x18e] = 0x1f; /* 0xe9d8a: 'S' */
+
+    *(uint32_t *)&g_GameSettings[0x18f] = 0; /* 0xe9d8b */
+    *(uint32_t *)&g_GameSettings[0x193] = 0; /* 0xe9d8f */
+
+    g_GameSettings[0x19b] = 0x47; /* 0xe9d97 */
+    g_GameSettings[0x19c] = 0x31; /* 0xe9d98 */
+    g_GameSettings[0x19d] = 0x00; /* 0xe9d99 */
+    g_GameSettings[0x1aa] = 0x31; /* 0xe9da6 */
+    g_GameSettings[0x1ab] = 0x32; /* 0xe9da7 */
+    g_GameSettings[0x1ac] = 0x00; /* 0xe9da8 */
+}
+
+// @original Menu_LoadIntroCDPs (MAINDOS.EXE @ 0x0001680d, menu.c)
+// @fidelity EXACT
+int Menu_LoadIntroCDPs(void) {
+    int i;
+    int size;
+
+    if (!g_MenuIntroVideoEnabled) {
+        return 0;
+    }
+
+    g_MenuTimeSeconds = 0.01;
+    g_MenuCdpFrameAccum = 0.0;
+    g_MenuCdpActiveIndex = 0;
+    if (g_pMenuBuffer1) {
+        memset(g_pMenuBuffer1, 0, 64000);
+    }
+
+    for (i = 0; i < 6; i++) {
+        size = File_GetSize(g_MenuCdpNames[i]);
+        if (size > 0) {
+            g_pMenuCdpFiles[i] = (uint8_t *)Mem_Alloc(size, 0);
+            if (g_pMenuCdpFiles[i]) {
+                File_ReadToBuffer(g_MenuCdpNames[i], g_pMenuCdpFiles[i], size, 0);
+            }
+        }
+    }
+
+    if (g_pMenuCdpFiles[0]) {
+        g_MenuCdp.file_data = g_pMenuCdpFiles[0];
+        g_MenuCdp.pixel_buffer = g_pMenuBuffer1;
+        Cdp_OpenFile(&g_MenuCdp);
+        g_MenuCdpPendingLoad = 1;
+    }
+
+    return 1;
+}
+
+// @original Menu_Shutdown (MAINDOS.EXE @ 0x00013a5c, menu.c)
+// @fidelity EXACT
+void Menu_Shutdown(void) {
+    int i;
+
+    g_MenuAudioVoiceActive = 0;
+    Lisa_FreeEngineMemory();
+
+    for (i = 0; i < 6; i++) {
+        if (g_pMenuCdpFiles[i]) {
+            Mem_Free(0, g_pMenuCdpFiles[i]);
+            g_pMenuCdpFiles[i] = NULL;
+        }
+    }
+
+    if (g_pMenuPalBlack) {
+        Mem_Free(0, g_pMenuPalBlack);
+        g_pMenuPalBlack = NULL;
+    }
+    if (g_pMenuPalWhite) {
+        Mem_Free(0, g_pMenuPalWhite);
+        g_pMenuPalWhite = NULL;
+    }
+    if (g_pMenuPalWork) {
+        Mem_Free(0, g_pMenuPalWork);
+        g_pMenuPalWork = NULL;
+    }
+    if (g_pMenuPalDefault) {
+        Mem_Free(0, g_pMenuPalDefault);
+        g_pMenuPalDefault = NULL;
+        g_pMenuCol = NULL;
+    }
+
+    if (g_pMenuBuffer1) {
+        Mem_Free(0, g_pMenuBuffer1);
+        g_pMenuBuffer1 = NULL;
+    }
+    if (g_pMenuBuffer2) {
+        Mem_Free(0, g_pMenuBuffer2);
+        g_pMenuBuffer2 = NULL;
+    }
+    if (g_pMenuBuffer3) {
+        Mem_Free(0, g_pMenuBuffer3);
+        g_pMenuBuffer3 = NULL;
+    }
+
+    if (g_pMenuBilar) {
+        Mem_Free(0, g_pMenuBilar);
+        g_pMenuBilar = NULL;
+    }
+    if (g_pMenuTrackSpr) {
+        Mem_Free(0, g_pMenuTrackSpr);
+        g_pMenuTrackSpr = NULL;
+    }
+    if (g_pMenuLogo) {
+        Mem_Free(0, g_pMenuLogo);
+        g_pMenuLogo = NULL;
+    }
+    if (g_pMenuCarSel) {
+        Mem_Free(0, g_pMenuCarSel);
+        g_pMenuCarSel = NULL;
+    }
+    if (g_pMenuFlags) {
+        Mem_Free(0, g_pMenuFlags);
+        g_pMenuFlags = NULL;
+    }
+
+    if (g_pMenuTabAlloc) {
+        Mem_Free(0, g_pMenuTabAlloc);
+        g_pMenuTabAlloc = NULL;
+        g_pMenuTab = NULL;
+        g_pMenuTransTable = NULL;
+    }
+
+    g_MenuInitialized = 0;
 }
 
 /**
@@ -407,9 +589,11 @@ void Menu_RenderCarViewport(void) {
 /**
  * @original Menu_Init (MAINDOS.EXE @ 0x00011504, menu.c)
  * @fidelity EXACT
- * @notes Loads MENU.COL, MENU.TAB, BILAR.PIC, TRK_SPR.PIC, IGN_LOGO.PIC, CAR_SEL.PIC, and FLAGGOR.PIC.
+ * @notes Authentic asset and pipeline initialization for menu subsystem.
  */
 int Menu_Init(void) {
+    int btz_version = 0;
+
     if (g_MenuInitialized) {
         return 1;
     }
@@ -417,68 +601,92 @@ int Menu_Init(void) {
     BootLog("[MAINDOS] Menu_Init: Initializing authentic menu system...");
 
     /* 1. Allocate and load 768-byte palette (baltazar\\data\\menu.col) */
-    g_pMenuCol = (uint8_t *)Mem_Alloc(768, 0);
-    if (!g_pMenuCol || !File_ReadToBuffer("baltazar\\data\\menu.col", g_pMenuCol, 768, 0)) {
+    g_pMenuPalDefault = (uint8_t *)Mem_Alloc(0x300, 8);
+    if (!g_pMenuPalDefault || !File_ReadToBuffer("baltazar\\data\\menu.col", g_pMenuPalDefault, 0x300, 0)) {
         BootLog("[MAINDOS] Menu_Init: Failed to load menu.col!");
         return 0;
     }
+    g_pMenuCol = g_pMenuPalDefault;
+    g_pMenuPalActive = g_pMenuPalDefault;
 
-    /* 2. Allocate framebuffers and fade palettes */
-    g_pMenuBuffer1 = (uint8_t *)Mem_Alloc(64321, 0);
-    g_pMenuBuffer2 = (uint8_t *)Mem_Alloc(64321, 0);
-    g_pMenuBuffer3 = (uint8_t *)Mem_Alloc(64321, 0);
+    /* 2. Allocate 64,321 byte menu framebuffer 1 */
+    g_pMenuBuffer1 = (uint8_t *)Mem_Alloc(0xfb41, 8);
+    if (!g_pMenuBuffer1) {
+        return 0;
+    }
 
-    g_pMenuBlackPal = (uint8_t *)Mem_Alloc(768, 0);
-    if (g_pMenuBlackPal) memset(g_pMenuBlackPal, 0x00, 768);
+    /* 3. Initialize Lisa engine memory */
+    g_pMenuLisaEngine = (uint8_t *)Lisa_InitEngineMemory();
 
-    g_pMenuWhitePal = (uint8_t *)Mem_Alloc(768, 0);
-    if (g_pMenuWhitePal) memset(g_pMenuWhitePal, 0xff, 768);
+    /* 4. Set initial palette to active menu palette */
+    VGA_SetPaletteRaw(g_pMenuPalActive);
 
-    /* 3. Allocate and load text/layout table (baltazar\\data\\menu.tab) */
-    g_pMenuTab = (uint8_t *)Mem_Alloc(0x10000, 0);
-    if (g_pMenuTab) {
+    /* 5. Load settings from ign_dos.btz or initialize defaults */
+    if (g_MenuIntroVideoEnabled && File_Exists("ign_dos.btz")) {
+        File_ReadToBuffer("ign_dos.btz", (uint8_t *)&btz_version, 4, 0);
+        if (btz_version == 0x1e) {
+            File_ReadToBuffer("ign_dos.btz", g_GameSettings, sizeof(g_GameSettings), 4);
+        } else {
+            Menu_InitSettings();
+        }
+    } else {
+        Menu_InitSettings();
+    }
+
+    /* 6. Allocate and load menu transparency table (menu.tab) */
+    g_pMenuTabAlloc = (uint8_t *)Mem_Alloc(0x1ffff, 0);
+    if (g_pMenuTabAlloc) {
+        g_pMenuTab = (uint8_t *)(((uintptr_t)g_pMenuTabAlloc + 0xffff) & ~0xffff);
         File_ReadToBuffer("baltazar\\data\\menu.tab", g_pMenuTab, 0x10000, 0);
+        g_pMenuTransTable = g_pMenuTab;
     }
 
-    /* 4. Allocate and load sprite banks (skip 846-byte PIC header) */
-    g_pMenuBilar = (uint8_t *)Mem_Alloc(CAR_CARD_DATA_SIZE, 0);
+    /* Clear menu buffer 1 */
+    memset(g_pMenuBuffer1, 0, 64000);
+
+    /* 7. Allocate fade palettes */
+    g_pMenuPalBlack = (uint8_t *)Mem_Alloc(0x300, 8);
+    if (g_pMenuPalBlack) memset(g_pMenuPalBlack, 0x00, 0x300);
+
+    g_pMenuPalWhite = (uint8_t *)Mem_Alloc(0x300, 8);
+    if (g_pMenuPalWhite) memset(g_pMenuPalWhite, 0xff, 0x300);
+
+    g_pMenuPalWork = (uint8_t *)Mem_Alloc(0x300, 8);
+
+    /* 8. Allocate menu buffers 2 and 3 */
+    g_pMenuBuffer2 = (uint8_t *)Mem_Alloc(0xfb41, 8);
+    g_pMenuBuffer3 = (uint8_t *)Mem_Alloc(0xfb41, 8);
+
+    /* 9. Load PIC sprite assets (skipping 846-byte header) */
+    g_pMenuBilar = (uint8_t *)Mem_Alloc(0x1e786, 0);
     if (g_pMenuBilar) {
-        File_ReadToBuffer("baltazar\\data\\bilar.pic", g_pMenuBilar, CAR_CARD_DATA_SIZE, PIC_HEADER_SIZE);
+        File_ReadToBuffer("baltazar\\data\\bilar.pic", g_pMenuBilar, 0x1e786, PIC_HEADER_SIZE);
     }
 
-    g_pMenuTrackSpr = (uint8_t *)Mem_Alloc(TRACK_SPR_DATA_SIZE, 0);
+    g_pMenuTrackSpr = (uint8_t *)Mem_Alloc(0x1374f, 0);
     if (g_pMenuTrackSpr) {
-        File_ReadToBuffer("baltazar\\data\\trk_spr.pic", g_pMenuTrackSpr, TRACK_SPR_DATA_SIZE, PIC_HEADER_SIZE);
+        File_ReadToBuffer("baltazar\\data\\trk_spr.pic", g_pMenuTrackSpr, 0x1374f, PIC_HEADER_SIZE);
     }
 
-    g_pMenuLogo = (uint8_t *)Mem_Alloc(LOGO_DATA_SIZE, 0);
+    g_pMenuLogo = (uint8_t *)Mem_Alloc(0x2685, 0);
     if (g_pMenuLogo) {
-        File_ReadToBuffer("baltazar\\data\\ign_logo.pic", g_pMenuLogo, LOGO_DATA_SIZE, PIC_HEADER_SIZE);
+        File_ReadToBuffer("baltazar\\data\\ign_logo.pic", g_pMenuLogo, 0x2685, PIC_HEADER_SIZE);
     }
 
-    g_pMenuCarSel = (uint8_t *)Mem_Alloc(CAR_PEDESTAL_DATA_SIZE, 0);
+    g_pMenuCarSel = (uint8_t *)Mem_Alloc(0x49b6, 0);
     if (g_pMenuCarSel) {
-        File_ReadToBuffer("baltazar\\data\\car_sel.pic", g_pMenuCarSel, CAR_PEDESTAL_DATA_SIZE, PIC_HEADER_SIZE);
+        File_ReadToBuffer("baltazar\\data\\car_sel.pic", g_pMenuCarSel, 0x49b6, PIC_HEADER_SIZE);
     }
 
-    g_pMenuFlags = (uint8_t *)Mem_Alloc(FLAG_DATA_SIZE, 0);
+    g_pMenuFlags = (uint8_t *)Mem_Alloc(0x978c, 0);
     if (g_pMenuFlags) {
-        File_ReadToBuffer("baltazar\\data\\flaggor.pic", g_pMenuFlags, FLAG_DATA_SIZE, PIC_HEADER_SIZE);
+        File_ReadToBuffer("baltazar\\data\\flaggor.pic", g_pMenuFlags, 0x978c, PIC_HEADER_SIZE);
     }
 
-    /* 5. Initialize 3D car viewport */
-    Menu_InitCarViewport();
+    /* 10. Load intro CDP videos */
+    Menu_LoadIntroCDPs();
 
-    /* 6. Ensure virtual double buffer exists */
-    if (!g_pVirtualFramebuffer) {
-        g_pVirtualFramebuffer = (uint8_t *)Mem_Alloc(320 * 200, 0);
-    }
-
-    /* 7. Start animated background video for language selection */
-    Menu_LoadCDP(1);
-
-    /* 8. Set initial state */
-    g_MenuState = MENU_STATE_LANG_SELECT;
+    /* 11. Initial menu state */
     g_MenuSelection = 0;
     g_SelectedCar = 0;
     g_SelectedTrack = 0;
@@ -496,12 +704,14 @@ int Menu_Init(void) {
  */
 int Menu_Tick(void) {
     int key = 0;
+    double delta;
 
     if (!g_pVirtualFramebuffer) {
         return 0;
     }
 
-    /* Poll keyboard input */
+    /* 1. Poll authentic keyboard subsystem */
+    Input_PollKeyboard();
     if (kbhit()) {
         key = getch();
         if (key == 0 || key == 0xE0) {
@@ -509,10 +719,92 @@ int Menu_Tick(void) {
         }
     }
 
-    /* 1. Advance and decode animated background video frame */
-    Menu_PlayCDPFrame();
+    /* 2. Compute authentic frame delta time (MAINDOS.EXE @ 0x12bd3..0x12c48) */
+    delta = (double)g_TickInt * 0.036;
+    if (delta > 10.8) {
+        delta = 10.8;
+    } else if (delta <= 0.0) {
+        delta = 0.01;
+    }
+    g_MenuDeltaTime = delta;
+    g_MenuTimeSeconds += delta;
 
-    /* 2. Dispatch menu screen rendering and input handling */
+    /* 3. Handle intro skip */
+    if (g_MenuTimeSeconds < 1278.0) {
+        if (Input_WasKeyPressed(0x1c) || Input_WasKeyPressed(0x39) ||
+            Input_WasKeyPressed(0x01) || Input_WasKeyPressed(0x9c) ||
+            key == 13 || key == 32 || key == 27) {
+            g_MenuTimeSeconds = 1278.0;
+        }
+    }
+
+    /* 4. Release CDP buffers and initialize car 3D viewport when intro finishes */
+    if (g_MenuTimeSeconds >= 1278.0 && g_MenuCdpPendingLoad) {
+        int i;
+        for (i = 0; i < 6; i++) {
+            if (g_pMenuCdpFiles[i]) {
+                Mem_Free(0, g_pMenuCdpFiles[i]);
+                g_pMenuCdpFiles[i] = NULL;
+            }
+        }
+        Menu_InitCarViewport();
+        g_MenuCdpPendingLoad = 0;
+    }
+
+    /* 5. Decode CDP background video frame (2.393103 ticks/frame) */
+    g_MenuCdpFrameAccum += delta;
+    if (g_MenuCdpFrameAccum >= 2.393103448275862) {
+        while (g_MenuCdpFrameAccum >= 2.393103448275862) {
+            g_MenuCdpFrameAccum -= 2.393103448275862;
+        }
+        if (g_MenuCdp.file_data != NULL) {
+            int ret = Cdp_DecodeFrame(&g_MenuCdp);
+            if (ret == 0) {
+                g_MenuCdpActiveIndex++;
+                if (g_MenuCdpActiveIndex >= 6) {
+                    g_MenuTimeSeconds = 1278.0;
+                } else if (g_pMenuCdpFiles[g_MenuCdpActiveIndex] != NULL) {
+                    g_MenuCdp.file_data = g_pMenuCdpFiles[g_MenuCdpActiveIndex];
+                    Cdp_OpenFile(&g_MenuCdp);
+                }
+            }
+        }
+    }
+
+    /* 6. Authentic intro palette fades */
+    if (g_MenuTimeSeconds < 28.8) {
+        int factor = (int)(g_MenuTimeSeconds * 270.0 / 28.8);
+        Palette_Fade(g_pMenuPalBlack, g_pMenuPalWhite, g_pMenuPalWork, factor);
+        VGA_SetPaletteRaw(g_pMenuPalWork);
+    } else if (g_MenuTimeSeconds < 57.6) {
+        int factor = (int)((g_MenuTimeSeconds - 28.8) * 270.0 / 28.8);
+        if (g_MenuCdp.palette) {
+            Palette_Fade(g_pMenuPalWhite, g_MenuCdp.palette, g_pMenuPalWork, factor);
+            VGA_SetPaletteRaw(g_pMenuPalWork);
+        }
+    } else if (g_MenuTimeSeconds >= 1249.2 && g_MenuTimeSeconds < 1278.0) {
+        int factor = (int)((g_MenuTimeSeconds - 1249.2) * 270.0 / 28.8);
+        if (g_MenuCdp.palette) {
+            Palette_Fade(g_MenuCdp.palette, g_pMenuPalWhite, g_pMenuPalWork, factor);
+            VGA_SetPaletteRaw(g_pMenuPalWork);
+        }
+    } else if (g_MenuTimeSeconds >= 1306.8) {
+        int factor = (int)((g_MenuTimeSeconds - 1306.8) * 270.0 / 28.8);
+        Palette_Fade(g_pMenuPalWhite, g_pMenuPalActive, g_pMenuPalWork, factor);
+        VGA_SetPaletteRaw(g_pMenuPalWork);
+    }
+
+    /* If playing intro sequence, blit g_pMenuBuffer1 to screen and return */
+    if (g_MenuTimeSeconds < 1278.0) {
+        while ((inp(0x3DA) & 0x08) == 0);
+        memcpy((void *)0xA0000, g_pMenuBuffer1, 320 * 200);
+        return 0;
+    }
+
+    /* Set active palette to default menu palette */
+    g_pMenuPalActive = g_pMenuPalDefault;
+
+    /* 7. Dispatch menu screen rendering and input handling */
     switch (g_MenuState) {
     case MENU_STATE_LANG_SELECT: {
         int k;
@@ -541,15 +833,14 @@ int Menu_Tick(void) {
         Font_DrawText("SELECT YOUR LANGUAGE", g_SystemFonts[1], 160, 168);
 
         /* Handle input */
-        if (key == 0x4B00 || key == 0xE04B) { /* Left arrow */
+        if (key == 0x4B00 || key == 0xE04B || Input_WasKeyPressed(0x4b)) { /* Left arrow */
             g_SelectedLanguage = (g_SelectedLanguage + 5) % 6;
-        } else if (key == 0x4D00 || key == 0xE04D) { /* Right arrow */
+        } else if (key == 0x4D00 || key == 0xE04D || Input_WasKeyPressed(0x4d)) { /* Right arrow */
             g_SelectedLanguage = (g_SelectedLanguage + 1) % 6;
-        } else if (key == 13 || key == 32) { /* Enter or Space */
+        } else if (key == 13 || key == 32 || Input_WasKeyPressed(0x1c) || Input_WasKeyPressed(0x39)) { /* Enter or Space */
             g_MenuState = MENU_STATE_MAIN;
             g_MenuSelection = 0;
-            Menu_LoadCDP(3); /* Switch to IGN3_0.CDP video */
-        } else if (key == 27) { /* Esc */
+        } else if (key == 27 || Input_WasKeyPressed(0x01)) { /* Esc */
             return 3; /* Exit to DOS */
         }
         break;
@@ -579,22 +870,21 @@ int Menu_Tick(void) {
         }
 
         /* Handle input */
-        if (key == 0x4800 || key == 0xE048) { /* Up */
+        if (key == 0x4800 || key == 0xE048 || Input_WasKeyPressed(0x48)) { /* Up */
             if (g_MenuSelection > 0) g_MenuSelection--;
             else g_MenuSelection = 5;
-        } else if (key == 0x5000 || key == 0xE050) { /* Down */
+        } else if (key == 0x5000 || key == 0xE050 || Input_WasKeyPressed(0x50)) { /* Down */
             if (g_MenuSelection < 5) g_MenuSelection++;
             else g_MenuSelection = 0;
-        } else if (key == 13 || key == 32) { /* Enter */
+        } else if (key == 13 || key == 32 || Input_WasKeyPressed(0x1c) || Input_WasKeyPressed(0x39)) { /* Enter */
             if (g_MenuSelection <= 2) {
                 g_MenuState = MENU_STATE_CAR_SELECT;
                 g_SelectedCar = 0;
             } else if (g_MenuSelection == 5) {
                 return 3; /* Quit */
             }
-        } else if (key == 27) { /* Esc */
+        } else if (key == 27 || Input_WasKeyPressed(0x01)) { /* Esc */
             g_MenuState = MENU_STATE_LANG_SELECT;
-            Menu_LoadCDP(1); /* Switch back to IGN1.CDP */
         }
         break;
     }
@@ -621,16 +911,16 @@ int Menu_Tick(void) {
                             s_CarNames[g_SelectedCar], 1);
 
         /* Handle input */
-        if (key == 0x4B00 || key == 0xE04B) { /* Left */
+        if (key == 0x4B00 || key == 0xE04B || Input_WasKeyPressed(0x4b)) { /* Left */
             if (g_SelectedCar > 0) g_SelectedCar--;
             else g_SelectedCar = 10;
-        } else if (key == 0x4D00 || key == 0xE04D) { /* Right */
+        } else if (key == 0x4D00 || key == 0xE04D || Input_WasKeyPressed(0x4d)) { /* Right */
             if (g_SelectedCar < 10) g_SelectedCar++;
             else g_SelectedCar = 0;
-        } else if (key == 13 || key == 32) { /* Enter */
+        } else if (key == 13 || key == 32 || Input_WasKeyPressed(0x1c) || Input_WasKeyPressed(0x39)) { /* Enter */
             g_MenuState = MENU_STATE_TRACK_SELECT;
             g_SelectedTrack = 0;
-        } else if (key == 27) { /* Esc */
+        } else if (key == 27 || Input_WasKeyPressed(0x01)) { /* Esc */
             g_MenuState = MENU_STATE_MAIN;
         }
         break;
@@ -653,19 +943,19 @@ int Menu_Tick(void) {
                             s_TrackNames[g_SelectedTrack], 1);
 
         /* Handle input */
-        if (key == 0x4B00 || key == 0xE04B) { /* Left */
+        if (key == 0x4B00 || key == 0xE04B || Input_WasKeyPressed(0x4b)) { /* Left */
             if (g_SelectedTrack > 0) g_SelectedTrack--;
             else g_SelectedTrack = 6;
-        } else if (key == 0x4D00 || key == 0xE04D) { /* Right */
+        } else if (key == 0x4D00 || key == 0xE04D || Input_WasKeyPressed(0x4d)) { /* Right */
             if (g_SelectedTrack < 6) g_SelectedTrack++;
             else g_SelectedTrack = 0;
-        } else if (key == 13 || key == 32) { /* Enter -> Start Race */
+        } else if (key == 13 || key == 32 || Input_WasKeyPressed(0x1c) || Input_WasKeyPressed(0x39)) { /* Enter -> Start Race */
             strncpy(g_TrackDir, s_TrackDirs[g_SelectedTrack], sizeof(g_TrackDir) - 1);
             strncpy(g_TrackName, s_TrackNames[g_SelectedTrack], sizeof(g_TrackName) - 1);
             g_MenuState = MENU_STATE_START_RACE;
             BootLog("[MAINDOS] Menu_Tick: Starting race on selected track!");
             return 2;
-        } else if (key == 27) { /* Esc */
+        } else if (key == 27 || Input_WasKeyPressed(0x01)) { /* Esc */
             g_MenuState = MENU_STATE_CAR_SELECT;
         }
         break;

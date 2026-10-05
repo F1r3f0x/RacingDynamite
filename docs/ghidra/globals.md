@@ -304,5 +304,36 @@ These linear addresses correspond directly to runtime DOS addresses in `MAINDOS.
 | `0x000c5d19` | `uint8_t` | `g_KeyIsrScancodeHead` | Head index into `g_KeyScancodeRingBuf`. |
 | `0x000c5d1a` | `uint8_t` | `g_KeyIsrInstalled` | Flag indicating whether keyboard ISR is active. |
 | `0x000c5d20` | `uint8_t[84]` | `g_ScancodeToAsciiTable` | Scancode to ASCII conversion table. |
+| `0x000e9bfc` | `uint8_t[0x598]` | `g_GameSettings` | Authentic game settings, high scores, keybindings, and profile structure. |
+| `0x000ea194` | `int32_t` | `g_MenuVideoResolutionMode` | Active menu resolution index (0 = 320x200, 1 = 640x480). |
+| `0x000ea198` | `double` | `g_MenuTimeSeconds` | Master elapsed seconds accumulator for menu animations, intro fades, and sequences. |
+| `0x000ea1a0` | `double` | `g_MenuCdpFrameAccum` | Sub-frame fractional tick accumulator for CDP video playback (2.393103 ticks/frame). |
+| `0x000ea1b8` | `uint8_t*[6]` | `g_pMenuCdpFiles` | Array of pointers to loaded CDP animation files in memory. |
+| `0x000ea1d0` | `int32_t` | `g_MenuCdpActiveIndex` | Currently playing intro CDP index (0 to 5). |
+| `0x000ea1d4` | `int32_t` | `g_MenuCdpPendingLoad` | Flag indicating CDP intro sequence is active and pending release. |
+| `0x000ea1d8` | `CdpFile` | `g_MenuCdp` | Master CDP video playback control structure. |
+| `0x000ea1fc` | `uint8_t*` | `g_pMenuPalActive` | Currently active palette target for menu blitting. |
+| `0x000ea200` | `uint8_t*` | `g_pMenuPalDefault` | 768-byte authentic MENU.COL palette. |
+| `0x000ea204` | `uint8_t*` | `g_pMenuPalBlack` | 768-byte all-black palette (0x00) for screen fade transitions. |
+| `0x000ea208` | `uint8_t*` | `g_pMenuPalWhite` | 768-byte all-white palette (0xFF) for flash and fade transitions. |
+| `0x000ea20c` | `uint8_t*` | `g_pMenuPalWork` | 768-byte work palette for runtime color interpolation and fading. |
+| `0x000ea210` | `uint8_t*` | `g_pMenuTab` | 64KB transparency lookup table pointer (page-aligned from MENU.TAB). |
+| `0x000ea214` | `uint8_t*` | `g_pMenuTabAlloc` | Raw memory allocation block for MENU.TAB. |
+| `0x000ea218` | `uint8_t*` | `g_pMenuTransTable` | Transparency blending LUT pointer passed to `Palette_BlitTrans`. |
+| `0x000ea224` | `double` | `g_MenuDeltaTime` | Delta time of current menu tick in seconds. |
+| `0x000ea268` | `int32_t` | `g_MenuAudioVoiceActive` | Audio voice playback activity flag during menus. |
+| `0x000ea3c0` | `uint8_t*` | `g_pMenuLisaEngine` | Lisa 3D engine context memory allocated during `Menu_Init`. |
+| `0x000ea400` | `uint8_t*` | `g_pMenuBuffer1` | Master 64,321-byte 8bpp menu composition framebuffer. |
+| `0x000ea404` | `uint8_t*` | `g_pMenuBuffer2` | Secondary 64,321-byte 8bpp menu framebuffer. |
+| `0x000ea408` | `uint8_t*` | `g_pMenuBuffer3` | Tertiary 64,321-byte 8bpp menu framebuffer. |
+| `0x000ea750` | `uint8_t*` | `g_pMenuBilar` | 124,806-byte vehicle cards sprite bank (BILAR.PIC). |
+| `0x000ea754` | `uint8_t*` | `g_pMenuTrackSpr` | 79,695-byte track previews sprite bank (TRK_SPR.PIC). |
+| `0x000ea758` | `uint8_t*` | `g_pMenuLogo` | 9,861-byte Ignition title logo sprite (IGN_LOGO.PIC). |
+| `0x000ea75c` | `uint8_t*` | `g_pMenuCarSel` | 18,870-byte car pedestal sprite (CAR_SEL.PIC). |
+| `0x000ea760` | `uint8_t*` | `g_pMenuFlags` | 38,796-byte language flags sprite bank (FLAGGOR.PIC). |
+| `0x000ea764` | `int32_t` | `g_MenuSelectedLanguage` | Selected language index (0=EN, 1=DE, 2=IT, 3=ES, 4=SE, 5=FR). |
+| `0x000becfc` | `int32_t` | `g_MenuIntroResetBuffers` | Flag indicating framebuffer reset required at intro transition. |
+| `0x000bed00` | `char*[6]` | `g_MenuCdpNames` | Authentic filenames for 6 intro/loop CDP videos. |
+| `0x000bed18` | `int32_t` | `g_MenuIntroVideoEnabled` | Flag enabling/disabling intro CDP sequence playback. |
 
 

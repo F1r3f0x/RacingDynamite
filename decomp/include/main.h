@@ -250,6 +250,7 @@ extern void *g_pSRF_RaycastTable;
 extern uint8_t g_GhostDataBuffer[0x49d4c];
 extern int g_GhostCarLoaded;
 extern uint8_t g_TrackBinaryCache[0x597];
+extern int g_TickInt;                            /* ds:0xab5dc - authentic timer tick counter */
 
 /* Engine helper declarations */
 double Math_RandomFloat(void);

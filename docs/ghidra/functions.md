@@ -197,4 +197,8 @@
 | `0x00055ca0` | - | - | `Input_EnqueueAscii` | `geputget.c` | Decompiled | EXACT | Translates scancode to ASCII and pushes into circular buffer. |
 | `0x00055cd0` | - | - | `Input_GetQueuedKey` | `geputget.c` | Decompiled | EXACT | Searches ASCII circular buffer for substring match (used for cheat codes). |
 | `0x00055d04` | - | - | `Input_InitKeyTables` | `geputget.c` | Decompiled | EXACT | Initializes ISR buffers, toggle masks, and release flags. |
-
+| `0x00051a9c` | - | `FUN_00051a9c` | `Palette_Fade` | `menu.c` | Decompiled | EXACT | Blends two 768-byte palettes using 8.8 fixed-point factor |
+| `0x00051818` | - | `FUN_00051818` | `Palette_BlitTrans` | `menu.c` | Decompiled | EXACT | Blits rectangular region with 64KB transparency lookup table blending |
+| `0x0001a864` | - | `FUN_0001a864` | `Menu_InitSettings` | `menu.c` | Decompiled | EXACT | Initializes default game settings, keybindings, and player names |
+| `0x0001680d` | - | `FUN_0001680d` | `Menu_LoadIntroCDPs` | `menu.c` | Decompiled | EXACT | Loads 6 intro CDP animation files and starts sequence playback |
+| `0x00013a5c` | - | `FUN_00013a5c` | `Menu_Shutdown` | `menu.c` | Decompiled | EXACT | Frees menu buffers, palettes, CDP streams, and Lisa memory |
