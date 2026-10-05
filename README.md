@@ -4,7 +4,7 @@
 [![Standard: C11](https://img.shields.io/badge/Standard-C11-green.svg)](https://en.wikipedia.org/wiki/C11_(C_standard_revision))
 [![Platform: SDL2](https://img.shields.io/badge/Platform-SDL2-red.svg)](https://www.libsdl.org/)
 
-**Racing Dynamite** is an open-source, portable C implementation and reverse-engineering effort of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting the authentic DOS release (`MAINDOS_32BIT.EXE`).
+**Racing Dynamite** is an open-source, portable C implementation and reverse-engineering effort of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting the authentic DOS release (`MAINDOS.EXE`).
 
 ---
 
@@ -84,7 +84,7 @@ uv run python tools/build_decomp.py --run
 
 Alternatively, you can launch either binary directly in windowed DOSBox using the root batch files:
 - `run_dosbox.bat`: Launches the rebuilt Pure C engine (`MREBUILT.EXE`).
-- `run_original.bat` (or `run_maindos_32bit.bat`): Launches the original authentic 32-bit DOS executable (`MAINDOS.EXE`).
+- `run_original.bat`: Launches the original authentic 32-bit DOS executable (`MAINDOS.EXE`).
 
 
 ---

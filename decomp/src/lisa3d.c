@@ -2,7 +2,7 @@ typedef unsigned char byte;
 /*
  * lisa3d.c - Lisa 2 3D Rasterizer, Panorama Sky Renderer & CDP Animation System
  * Original file: lisa3d.c
- * Target: MAINDOS_32BIT.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
+ * Target: MAINDOS.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
  */
 
 #include "lisa3d.h"
@@ -39,7 +39,7 @@ static int __ftol(void) {
 /* Global active panorama backdrop buffer (64KB, 256x256 8bpp) */
 uint8_t *g_pActivePAN = NULL;
 uint8_t *g_pLisaTransparencyLUT = NULL;
-uint8_t *g_pVirtualFramebuffer = NULL;
+extern uint8_t *g_pVirtualFramebuffer;
 LisaCamera *g_LisaCamera = NULL;
 extern int g_ScreenWidth;
 extern int g_ScreenHeight;
@@ -55,7 +55,7 @@ int32_t g_LisaCullFlag = 0;
 int32_t g_LisaMipmapTable[16] = {0};
 
 /**
- * @original Lisa_PrintVersion (MAINDOS_32BIT.EXE @ 0x0005571c, lisa3d.c)
+ * @original Lisa_PrintVersion (MAINDOS.EXE @ 0x0005571c, lisa3d.c)
  * @fidelity EXACT
  * @notes Prints Lisa 2 Development System version and UDS copyright header.
  */
@@ -66,7 +66,7 @@ int Lisa_PrintVersion(void) {
 }
 
 /**
- * @original Cdp_OpenFile (MAINDOS_32BIT.EXE @ 0x000552fc, lisa3d.c)
+ * @original Cdp_OpenFile (MAINDOS.EXE @ 0x000552fc, lisa3d.c)
  * @fidelity EXACT
  * @notes Validates CDP header magic "CDP\0", version 100, parses dimensions,
  *        frame count, and binds 768-byte embedded palette and frame stream offsets.
@@ -102,7 +102,7 @@ int Cdp_OpenFile(CdpFile *cdp) {
 }
 
 /**
- * @original Cdp_DecompressRLE (MAINDOS_32BIT.EXE @ 0x00054e00, lisa3d.c)
+ * @original Cdp_DecompressRLE (MAINDOS.EXE @ 0x00054e00, lisa3d.c)
  * @fidelity ADAPTED
  * @notes Delta-skip RLE decompression decoding skip commands (0xF7-0xFC),
  *        repeat runs (0xFD, 0xFE), end of frame (0xFF), and raw pixel literals.
@@ -180,7 +180,7 @@ int Cdp_DecompressRLE(CdpFile *cdp, unsigned int unused) {
 }
 
 /**
- * @original Cdp_DecodeFrame (MAINDOS_32BIT.EXE @ 0x00055384, lisa3d.c)
+ * @original Cdp_DecodeFrame (MAINDOS.EXE @ 0x00055384, lisa3d.c)
  * @fidelity EXACT
  * @notes Advances animation stream and triggers inter-frame delta decompression.
  */
@@ -192,7 +192,7 @@ int Cdp_DecodeFrame(CdpFile *cdp) {
 }
 
 /**
- * @original Lisa_RenderPanorama (MAINDOS_32BIT.EXE, lisa3d.c)
+ * @original Lisa_RenderPanorama (MAINDOS.EXE, lisa3d.c)
  * @fidelity ADAPTED
  * @notes Cylindrical horizon background blitter sampling 64KB (256x256) .PAN
  *        texture based on camera yaw and pitch angles.
@@ -239,34 +239,17 @@ void Lisa_RenderPanorama(void) {
         }
     }
 
-    /* Render ground below horizon: perspective track & terrain */
+    /* Render ground below horizon: backdrop fill from PAN texture */
     for (y = horizon_y; y < g_ScreenHeight; y++) {
         int ground_v = 200 + ((y - horizon_y) * 20) / (g_ScreenHeight - horizon_y);
         uint8_t *fb_row = &g_pVirtualFramebuffer[y * g_ScreenWidth];
         uint8_t ground_color = g_pActivePAN[ground_v * 256];
-        int road_center = g_ScreenWidth / 2;
-        int road_width = ((y - horizon_y) * 180) / (g_ScreenHeight - horizon_y);
-
-        for (x = 0; x < g_ScreenWidth; x++) {
-            if (x >= road_center - road_width && x <= road_center + road_width) {
-                int is_curb = (x < road_center - road_width + 5) || (x > road_center + road_width - 5);
-                int is_centerline = (abs(x - road_center) < 2) && (((y + (int)(g_CameraYaw * 60.0f)) / 4) % 2 == 0);
-                if (is_centerline) {
-                    fb_row[x] = 250;
-                } else if (is_curb) {
-                    fb_row[x] = (((y + (int)(g_CameraYaw * 60.0f)) / 4) % 2 == 0) ? 160 : 250;
-                } else {
-                    fb_row[x] = 236;
-                }
-            } else {
-                fb_row[x] = ground_color;
-            }
-        }
+        memset(fb_row, ground_color, g_ScreenWidth);
     }
 }
 
 /**
- * @original Lisa_DrawTexturedTriangle_Op11_Unshaded (MAINDOS_32BIT.EXE @ 0x0005c144, lisa3d.c)
+ * @original Lisa_DrawTexturedTriangle_Op11_Unshaded (MAINDOS.EXE @ 0x0005c144, lisa3d.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x0004d718. Processes Opcode 0x11 (textured triangle, unshaded, 44-byte packet)
  *        from display list: screen viewport clipping, 2D backface culling, depth calculation,
@@ -400,7 +383,7 @@ void Lisa_DrawTexturedTriangle_Op11_Unshaded(void) {
 }
 
 /**
- * @original Lisa_DrawTexturedTriangle_Op11_Shaded (MAINDOS_32BIT.EXE @ 0x0005cc58, lisa3d.c)
+ * @original Lisa_DrawTexturedTriangle_Op11_Shaded (MAINDOS.EXE @ 0x0005cc58, lisa3d.c)
  * @fidelity EXACT
  * @notes Processes Opcode 0x11 (textured triangle with Gouraud shading, 56-byte packet)
  *        from display list: screen boundary clipping, 2D backface culling, depth calculation,
@@ -753,7 +736,7 @@ extern double g_LisaViewportQuarter;
 extern double g_LisaViewportRemaining;
 
 /**
- * @original Lisa_RenderScene (MAINDOS_32BIT.EXE @ 0x00056410, lisa3d.c)
+ * @original Lisa_RenderScene (MAINDOS.EXE @ 0x00056410, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_RenderScene(void) {
@@ -768,12 +751,26 @@ int Lisa_RenderScene(void) {
   int cmd_index;
   int page_limit;
 
+  extern double g_pActiveCamera[];
+  if (g_LisaCamera == NULL) {
+    Lisa_InitEngineMemory();
+  }
+  if (g_LisaCamera != NULL) {
+    memcpy(g_LisaCamera, g_pActiveCamera, sizeof(LisaCamera));
+  }
+  if (g_ViewportMaxX <= g_ViewportMinX || g_ViewportMaxY <= g_ViewportMinY) {
+    g_ViewportMinX = 0;
+    g_ViewportMinY = 0;
+    g_ViewportMaxX = (g_ScreenWidth > 0) ? (g_ScreenWidth - 1) : 319;
+    g_ViewportMaxY = (g_ScreenHeight > 0) ? (g_ScreenHeight - 1) : 199;
+  }
+
   g_SubpixelMinX = g_ViewportMinX << 8;
   g_SubpixelMinY = g_ViewportMinY << 8;
   g_SubpixelMaxX = (g_ViewportMaxX + 1) * 0x100;
   g_SubpixelMaxY = (g_ViewportMaxY + 1) * 0x100;
 
-  if (g_LisaCamera->enable_sky != 0) {
+  if (g_LisaCamera != NULL && g_LisaCamera->enable_sky != 0) {
     Lisa_RenderSkyBackdrop();
   }
 
@@ -869,7 +866,7 @@ int Lisa_RenderScene(void) {
 }
 
 /**
- * @original Lisa_InitEngineMemory (MAINDOS_32BIT.EXE @ 0x000564d8, lisa3d.c)
+ * @original Lisa_InitEngineMemory (MAINDOS.EXE @ 0x000564d8, lisa3d.c)
  * @fidelity EXACT
  */
 int * Lisa_InitEngineMemory(void) {
@@ -1018,7 +1015,7 @@ int * Lisa_InitEngineMemory(void) {
 }
 
 /**
- * @original Lisa_FreeEngineMemory (MAINDOS_32BIT.EXE @ 0x00056974, lisa3d.c)
+ * @original Lisa_FreeEngineMemory (MAINDOS.EXE @ 0x00056974, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_FreeEngineMemory(void) {
@@ -1062,7 +1059,7 @@ void Lisa_FreeEngineMemory(void) {
 }
 
 /**
- * @original Lisa_InitSpatialGrid (MAINDOS_32BIT.EXE @ 0x000569ec, lisa3d.c)
+ * @original Lisa_InitSpatialGrid (MAINDOS.EXE @ 0x000569ec, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_InitSpatialGrid(int grid_w, int grid_h, size_t max_objects) {
@@ -1112,7 +1109,7 @@ int Lisa_InitSpatialGrid(int grid_w, int grid_h, size_t max_objects) {
 }
 
 /**
- * @original Lisa_CreateDynamicObject (MAINDOS_32BIT.EXE @ 0x00056b28, lisa3d.c)
+ * @original Lisa_CreateDynamicObject (MAINDOS.EXE @ 0x00056b28, lisa3d.c)
  * @fidelity EXACT
  */
 LisaReturn64 Lisa_CreateDynamicObject(int obj_type, int object_id, LisaEntityTransform *entity, MshSubmesh *mesh, int mesh_flag1, short mesh_flag2, short mesh_flag3, short base_elevation, short mesh_flag4) {
@@ -1178,7 +1175,7 @@ LisaReturn64 Lisa_CreateDynamicObject(int obj_type, int object_id, LisaEntityTra
 }
 
 /**
- * @original Lisa_MoveDynamicObject (MAINDOS_32BIT.EXE @ 0x00056c74, lisa3d.c)
+ * @original Lisa_MoveDynamicObject (MAINDOS.EXE @ 0x00056c74, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_MoveDynamicObject(LisaEntityTransform *entity) {
@@ -1208,7 +1205,7 @@ int Lisa_MoveDynamicObject(LisaEntityTransform *entity) {
 }
 
 /**
- * @original Lisa_UpdateObjectSpatialGrid (MAINDOS_32BIT.EXE @ 0x00056f8c, lisa3d.c)
+ * @original Lisa_UpdateObjectSpatialGrid (MAINDOS.EXE @ 0x00056f8c, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_UpdateObjectSpatialGrid(LisaEntityTransform *entity) {
@@ -1266,7 +1263,7 @@ int Lisa_UpdateObjectSpatialGrid(LisaEntityTransform *entity) {
 }
 
 /**
- * @original Lisa_SetDynamicObjectMesh (MAINDOS_32BIT.EXE @ 0x00056d24, lisa3d.c)
+ * @original Lisa_SetDynamicObjectMesh (MAINDOS.EXE @ 0x00056d24, lisa3d.c)
  * @fidelity EXACT
  */
 LisaReturn64 Lisa_SetDynamicObjectMesh(int obj_type, int render_flags, LisaEntityTransform *entity, MshSubmesh *mesh, int mesh_flag1, short mesh_flag2, short mesh_flag3, short base_elevation, short mesh_flag4) {
@@ -1317,7 +1314,7 @@ LisaReturn64 Lisa_SetDynamicObjectMesh(int obj_type, int render_flags, LisaEntit
 }
 
 /**
- * @original Lisa_DeleteDynamicObject (MAINDOS_32BIT.EXE @ 0x00056ffc, lisa3d.c)
+ * @original Lisa_DeleteDynamicObject (MAINDOS.EXE @ 0x00056ffc, lisa3d.c)
  * @fidelity ADAPTED
  */
 int Lisa_DeleteDynamicObject(LisaEntityTransform *entity) {
@@ -1349,7 +1346,7 @@ int Lisa_DeleteDynamicObject(LisaEntityTransform *entity) {
 }
 
 /**
- * @original Lisa_SetCameraViewport (MAINDOS_32BIT.EXE @ 0x00057014, lisa3d.c)
+ * @original Lisa_SetCameraViewport (MAINDOS.EXE @ 0x00057014, lisa3d.c)
  * @fidelity ADAPTED
  */
 LisaReturn64 Lisa_SetCameraViewport(void) {
@@ -1373,7 +1370,7 @@ LisaReturn64 Lisa_SetCameraViewport(void) {
 }
 
 /**
- * @original Lisa_GenerateMipmaps (MAINDOS_32BIT.EXE @ 0x000570d8, lisa3d.c)
+ * @original Lisa_GenerateMipmaps (MAINDOS.EXE @ 0x000570d8, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_GenerateMipmaps(unsigned int *texture_data_ptr,int orig_width,int orig_height,int mip_levels,int page_width,int page_height ,int tex_height,int tex_width,char *tex_name) {
@@ -1532,7 +1529,7 @@ int Lisa_GenerateMipmaps(unsigned int *texture_data_ptr,int orig_width,int orig_
 }
 
 /**
- * @original Lisa_GenerateTextureSpanTable (MAINDOS_32BIT.EXE @ 0x00057548, lisa3d.c)
+ * @original Lisa_GenerateTextureSpanTable (MAINDOS.EXE @ 0x00057548, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_GenerateTextureSpanTable(int src_tex_ptr,int palette_ptr,int dst_w,int dst_h,int *span_table) {
@@ -1923,7 +1920,7 @@ LAB_00447785:
 }
 
 /**
- * @original Lisa_DownsampleTextureMipmap (MAINDOS_32BIT.EXE @ 0x00058050, lisa3d.c)
+ * @original Lisa_DownsampleTextureMipmap (MAINDOS.EXE @ 0x00058050, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DownsampleTextureMipmap(byte *src_ptr,byte *dst_ptr,int width,int height,int stride,int palette) {
@@ -2058,7 +2055,7 @@ void Lisa_DownsampleTextureMipmap(byte *src_ptr,byte *dst_ptr,int width,int heig
 }
 
 /**
- * @original Lisa_FilterTextureBlock (MAINDOS_32BIT.EXE @ 0x0005829c, lisa3d.c)
+ * @original Lisa_FilterTextureBlock (MAINDOS.EXE @ 0x0005829c, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_FilterTextureBlock(byte *src,int dst,int width,int height,int stride,int color_map, int flags,int radius) {
@@ -2258,7 +2255,7 @@ LAB_004484c0:
 }
 
 /**
- * @original Lisa_LoadOrCreateShadingTable (MAINDOS_32BIT.EXE @ 0x000586d0, lisa3d.c)
+ * @original Lisa_LoadOrCreateShadingTable (MAINDOS.EXE @ 0x000586d0, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_LoadOrCreateShadingTable(int shade_level,int palette_ptr) {
@@ -2504,7 +2501,7 @@ void Lisa_LoadOrCreateShadingTable(int shade_level,int palette_ptr) {
 }
 
 /**
- * @original Lisa_FindClosestPaletteColor (MAINDOS_32BIT.EXE @ 0x000596c4, lisa3d.c)
+ * @original Lisa_FindClosestPaletteColor (MAINDOS.EXE @ 0x000596c4, lisa3d.c)
  * @fidelity EXACT
  */
 unsigned int Lisa_FindClosestPaletteColor(int *target_rgb,int palette_ptr) {
@@ -2550,7 +2547,7 @@ unsigned int Lisa_FindClosestPaletteColor(int *target_rgb,int palette_ptr) {
 }
 
 /**
- * @original Lisa_RenderSkyBackdrop (MAINDOS_32BIT.EXE @ 0x0005891c, lisa3d.c)
+ * @original Lisa_RenderSkyBackdrop (MAINDOS.EXE @ 0x0005891c, lisa3d.c)
  * @fidelity EXACT
  */
 LisaReturn64 Lisa_RenderSkyBackdrop(void) {
@@ -2699,7 +2696,7 @@ LAB_00448c11:
 }
 
 /**
- * @original Lisa_CullObjectsOrthographic (MAINDOS_32BIT.EXE @ 0x00058c1c, lisa3d.c)
+ * @original Lisa_CullObjectsOrthographic (MAINDOS.EXE @ 0x00058c1c, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_CullObjectsOrthographic(void) {
@@ -2826,7 +2823,7 @@ int Lisa_CullObjectsOrthographic(void) {
 }
 
 /**
- * @original Lisa_FrustumCullObjects (MAINDOS_32BIT.EXE @ 0x00058ebc, lisa3d.c)
+ * @original Lisa_FrustumCullObjects (MAINDOS.EXE @ 0x00058ebc, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_FrustumCullObjects(void) {
@@ -3118,7 +3115,7 @@ int Lisa_FrustumCullObjects(void) {
 }
 
 /**
- * @original Lisa_CullObjects (MAINDOS_32BIT.EXE @ 0x00058ebc, lisa3d.c)
+ * @original Lisa_CullObjects (MAINDOS.EXE @ 0x00058ebc, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_CullObjects(void) {
@@ -3586,7 +3583,7 @@ int Lisa_CullObjects(void) {
 }
 
 /**
- * @original Lisa_TransformVertices (MAINDOS_32BIT.EXE @ 0x0005a2c8, lisa3d.c)
+ * @original Lisa_TransformVertices (MAINDOS.EXE @ 0x0005a2c8, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_TransformVertices(void) {
@@ -3766,7 +3763,7 @@ void Lisa_TransformVertices(void) {
 }
 
 /**
- * @original Lisa_TransformVerticesPanorama (MAINDOS_32BIT.EXE @ 0x0005a8c8, lisa3d.c)
+ * @original Lisa_TransformVerticesPanorama (MAINDOS.EXE @ 0x0005a8c8, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_TransformVerticesPanorama(void) {
@@ -3950,7 +3947,7 @@ int Lisa_TransformVerticesPanorama(void) {
 }
 
 /**
- * @original Lisa_ComputeObjectMatrix (MAINDOS_32BIT.EXE @ 0x0005ae60, lisa3d.c)
+ * @original Lisa_ComputeObjectMatrix (MAINDOS.EXE @ 0x0005ae60, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_ComputeObjectMatrix(int pos_x,int pos_y,int pos_z,int obj_ptr,int *vertex_array) {
@@ -4081,7 +4078,7 @@ int Lisa_ComputeObjectMatrix(int pos_x,int pos_y,int pos_z,int obj_ptr,int *vert
 }
 
 /**
- * @original Lisa_TransformSubmeshVerticesPanorama (MAINDOS_32BIT.EXE @ 0x0005b308, lisa3d.c)
+ * @original Lisa_TransformSubmeshVerticesPanorama (MAINDOS.EXE @ 0x0005b308, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_TransformSubmeshVerticesPanorama(int pos_x,int pos_y,int pos_z,int submesh_ptr,int *vertex_array) {
@@ -4211,7 +4208,7 @@ int Lisa_TransformSubmeshVerticesPanorama(int pos_x,int pos_y,int pos_z,int subm
 }
 
 /**
- * @original Lisa_ComputeCameraRotationMatrix (MAINDOS_32BIT.EXE @ 0x0005b7a8, lisa3d.c)
+ * @original Lisa_ComputeCameraRotationMatrix (MAINDOS.EXE @ 0x0005b7a8, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_ComputeCameraRotationMatrix(int *out_val_matrix) {
@@ -4252,7 +4249,7 @@ void Lisa_ComputeCameraRotationMatrix(int *out_val_matrix) {
 }
 
 /**
- * @original Lisa_InitOpcodeTable (MAINDOS_32BIT.EXE @ 0x0005b8e8, lisa3d.c)
+ * @original Lisa_InitOpcodeTable (MAINDOS.EXE @ 0x0005b8e8, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_InitOpcodeTable(void) {
@@ -4262,7 +4259,7 @@ void Lisa_InitOpcodeTable(void) {
     g_LisaViewportQuarter = (camera->viewport_width >> 2) + 1;
     g_LisaViewportRemaining = camera->viewport_width - g_LisaViewportQuarter;
 
-    /* Base opcode table entries (authentic MAINDOS_32BIT.EXE @ 0xc86c4) */
+    /* Base opcode table entries (authentic MAINDOS.EXE @ 0xc86c4) */
     g_LisaOpcodeTable[0x07] = (void *)Lisa_DrawBillboard_Op07;
     g_LisaOpcodeTable[0x08] = (void *)Lisa_DrawBillboard_Op08;
     g_LisaOpcodeTable[0x0F] = (void *)Lisa_DrawTriangle_Op0F;
@@ -4314,7 +4311,7 @@ void Lisa_InitOpcodeTable(void) {
 }
 
 /**
- * @original Lisa_SortDepthBuckets (MAINDOS_32BIT.EXE @ 0x0005b9c4, lisa3d.c)
+ * @original Lisa_SortDepthBuckets (MAINDOS.EXE @ 0x0005b9c4, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_SortDepthBuckets(void) {
@@ -4344,7 +4341,7 @@ int Lisa_SortDepthBuckets(void) {
 }
 
 /**
- * @original Lisa_DrawTriangle_Op0F (MAINDOS_32BIT.EXE @ 0x0005bc10, lisa3d.c)
+ * @original Lisa_DrawTriangle_Op0F (MAINDOS.EXE @ 0x0005bc10, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawTriangle_Op0F(void) {
@@ -4429,7 +4426,7 @@ void Lisa_DrawTriangle_Op0F(void) {
 }
 
 /**
- * @original Lisa_DrawTriangle_Op10 (MAINDOS_32BIT.EXE @ 0x0005bea4, lisa3d.c)
+ * @original Lisa_DrawTriangle_Op10 (MAINDOS.EXE @ 0x0005bea4, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawTriangle_Op10(void) {
@@ -4516,7 +4513,7 @@ void Lisa_DrawTriangle_Op10(void) {
 }
 
 /**
- * @original Lisa_RenderSubmeshes (MAINDOS_32BIT.EXE @ 0x0005cb48, lisa3d.c)
+ * @original Lisa_RenderSubmeshes (MAINDOS.EXE @ 0x0005cb48, lisa3d.c)
  * @fidelity EXACT
  */
 int Lisa_RenderSubmeshes(void) {
@@ -4559,7 +4556,7 @@ int Lisa_RenderSubmeshes(void) {
 }
 
 /**
- * @original Lisa_DrawTriangle_OpcodeHelper (MAINDOS_32BIT.EXE @ 0x0005d718, lisa3d.c)
+ * @original Lisa_DrawTriangle_OpcodeHelper (MAINDOS.EXE @ 0x0005d718, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawTriangle_OpcodeHelper(int shd_table, int depth_bias) {
@@ -4713,7 +4710,7 @@ void Lisa_DrawTriangle_OpcodeHelper(int shd_table, int depth_bias) {
 }
 
 /**
- * @original Lisa_DrawTriangle_Op14 (MAINDOS_32BIT.EXE @ 0x0005dc08, lisa3d.c)
+ * @original Lisa_DrawTriangle_Op14 (MAINDOS.EXE @ 0x0005dc08, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawTriangle_Op14(void) {
@@ -4798,7 +4795,7 @@ void Lisa_DrawTriangle_Op14(void) {
 }
 
 /**
- * @original Lisa_DrawBillboard_Op07 (MAINDOS_32BIT.EXE @ 0x0005dea0, lisa3d.c)
+ * @original Lisa_DrawBillboard_Op07 (MAINDOS.EXE @ 0x0005dea0, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawBillboard_Op07(void) {
@@ -4859,7 +4856,7 @@ void Lisa_DrawBillboard_Op07(void) {
 }
 
 /**
- * @original Lisa_DrawBillboard_Op08 (MAINDOS_32BIT.EXE @ 0x0005e004, lisa3d.c)
+ * @original Lisa_DrawBillboard_Op08 (MAINDOS.EXE @ 0x0005e004, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawBillboard_Op08(void) {
@@ -4919,7 +4916,7 @@ void Lisa_DrawBillboard_Op08(void) {
 }
 
 /**
- * @original Lisa_DrawTexturedTriangle_Op15 (MAINDOS_32BIT.EXE @ 0x0005e358, lisa3d.c)
+ * @original Lisa_DrawTexturedTriangle_Op15 (MAINDOS.EXE @ 0x0005e358, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawTexturedTriangle_Op15(void) {
@@ -5221,7 +5218,7 @@ LAB_0044d8ef:
 }
 
 /**
- * @original Lisa_DrawTexturedTriangle_Op15_Sub (MAINDOS_32BIT.EXE @ 0x00060210, lisa3d.c)
+ * @original Lisa_DrawTexturedTriangle_Op15_Sub (MAINDOS.EXE @ 0x00060210, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
@@ -5415,7 +5412,7 @@ void Lisa_DrawTexturedTriangle_Op15_Sub(void) {
 }
 
 /**
- * @original Lisa_InitRasterizerTables (MAINDOS_32BIT.EXE @ 0x00060dc4, lisa3d.c)
+ * @original Lisa_InitRasterizerTables (MAINDOS.EXE @ 0x00060dc4, lisa3d.c)
  * @fidelity EXACT
  */
 LisaReturn64 Lisa_InitRasterizerTables(int screen_pitch,unsigned int flags) {
@@ -6088,35 +6085,37 @@ static void Lisa_RasterizeSolidTriangle(const int *node) {
 }
 
 /**
- * @original Lisa_ExecuteRasterizerCommands (MAINDOS_32BIT.EXE @ 0x00060e3d, lisa3d.c)
+ * @original Lisa_ExecuteRasterizerCommands (MAINDOS.EXE @ 0x00060e3d, lisa3d.c)
  * @fidelity EXACT
  */
-extern int *g_pLisaDrawCommandQueue;
+extern int g_pLisaDrawCommandQueue[];
 LisaReturn64 Lisa_ExecuteRasterizerCommands(void) {
   int **command_nodes;
   int *node;
   LisaReturn64 _r;
 
-  if (g_pLisaDrawCommandQueue == NULL) {
-      _r.edx = 0;
-      _r.eax = 0;
-      return _r;
-  }
-
   g_pLisaScanlineBuffer = (void *)g_pLisaDrawCommandQueue;
-  g_pLisaSpanBuffer = (int *)*g_pLisaDrawCommandQueue;
+  g_pLisaSpanBuffer = (int *)g_pLisaDrawCommandQueue[0];
   g_LisaCameraZoom = g_pLisaDrawCommandQueue[1];
   g_pLisaActiveShading = (uint8_t *)g_pLisaDrawCommandQueue[3];
-  g_LisaClipLeft = g_LisaViewport.min_x;
-  g_LisaClipRight = g_LisaViewport.min_y;
+
+  if (g_pLisaDrawCommandQueue[6] > 0) {
+      g_LisaClipLeft = g_pLisaDrawCommandQueue[4];
+      g_LisaClipRight = g_pLisaDrawCommandQueue[5];
+      g_LisaClipTop = g_pLisaDrawCommandQueue[6];
+      g_LisaClipBottom = g_pLisaDrawCommandQueue[7];
+  } else {
+      g_LisaClipLeft = g_LisaViewport.min_x;
+      g_LisaClipRight = g_LisaViewport.min_y;
+      g_LisaClipTop = g_LisaViewport.max_x;
+      g_LisaClipBottom = g_LisaViewport.max_y;
+  }
   g_LisaClipSubpixelLeft = g_LisaClipLeft;
   g_LisaViewportCenterX = g_LisaClipLeft << 8;
   g_LisaClipSubpixelRight = g_LisaClipRight;
   g_LisaViewportCenterY = g_LisaClipRight << 8;
   g_SubpixelMinX = g_LisaViewportCenterX;
   g_SubpixelMinY = g_LisaViewportCenterY;
-  g_LisaClipTop = g_LisaViewport.max_x;
-  g_LisaClipBottom = g_LisaViewport.max_y;
   g_LisaClipSubpixelTop = g_LisaClipTop + 1;
   g_LisaClipSubpixelBottom = g_LisaClipBottom + 1;
   g_SubpixelMaxX = g_LisaClipSubpixelTop * 0x100;
@@ -6227,7 +6226,7 @@ LisaReturn64 Lisa_ExecuteRasterizerCommands(void) {
   return _r;
 }
 /**
- * @original Car_UnpackMeshGeometry (MAINDOS_32BIT.EXE @ 0x00016616, lisa3d.c)
+ * @original Car_UnpackMeshGeometry (MAINDOS.EXE @ 0x00016616, lisa3d.c)
  * @fidelity EXACT
  */
 void Car_UnpackMeshGeometry(void) {
@@ -6250,7 +6249,7 @@ void Car_UnpackMeshGeometry(void) {
 }
 
 /**
- * @original Lisa_DrawPolygon_Op12 (MAINDOS_32BIT.EXE @ 0x0005d6d0, lisa3d.c)
+ * @original Lisa_DrawPolygon_Op12 (MAINDOS.EXE @ 0x0005d6d0, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawPolygon_Op12(void) {
@@ -6258,7 +6257,7 @@ void Lisa_DrawPolygon_Op12(void) {
 }
 
 /**
- * @original Lisa_DrawPolygon_Op13 (MAINDOS_32BIT.EXE @ 0x0005d6e0, lisa3d.c)
+ * @original Lisa_DrawPolygon_Op13 (MAINDOS.EXE @ 0x0005d6e0, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawPolygon_Op13(void) {
@@ -6266,7 +6265,7 @@ void Lisa_DrawPolygon_Op13(void) {
 }
 
 /**
- * @original Lisa_DrawPolygon_Op16 (MAINDOS_32BIT.EXE @ 0x0005d6f0, lisa3d.c)
+ * @original Lisa_DrawPolygon_Op16 (MAINDOS.EXE @ 0x0005d6f0, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawPolygon_Op16(void) {
@@ -6274,7 +6273,7 @@ void Lisa_DrawPolygon_Op16(void) {
 }
 
 /**
- * @original Lisa_DrawPolygon_Op17 (MAINDOS_32BIT.EXE @ 0x0005d704, lisa3d.c)
+ * @original Lisa_DrawPolygon_Op17 (MAINDOS.EXE @ 0x0005d704, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawPolygon_Op17(void) {
@@ -6282,7 +6281,7 @@ void Lisa_DrawPolygon_Op17(void) {
 }
 
 /**
- * @original Lisa_RenderTexturedTriangle_Op11 (MAINDOS_32BIT.EXE @ 0x0005d084, lisa3d.c)
+ * @original Lisa_RenderTexturedTriangle_Op11 (MAINDOS.EXE @ 0x0005d084, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_RenderTexturedTriangle_Op11(void) {
@@ -6290,7 +6289,7 @@ void Lisa_RenderTexturedTriangle_Op11(void) {
 }
 
 /**
- * @original Lisa_DrawTexturedSpan_Op11 (MAINDOS_32BIT.EXE @ 0x0005ef14, lisa3d.c)
+ * @original Lisa_DrawTexturedSpan_Op11 (MAINDOS.EXE @ 0x0005ef14, lisa3d.c)
  * @fidelity EXACT
  */
 void Lisa_DrawTexturedSpan_Op11(void) {
@@ -6298,7 +6297,7 @@ void Lisa_DrawTexturedSpan_Op11(void) {
 }
 
 /**
- * @original Video_SetPalette (MAINDOS_32BIT.EXE, lisa3d.c)
+ * @original Video_SetPalette (MAINDOS.EXE, lisa3d.c)
  * @fidelity EXACT
  */
 void Video_SetPalette(void) {

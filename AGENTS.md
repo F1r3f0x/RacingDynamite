@@ -4,8 +4,8 @@
 
 
 ## 1. Decompilation Constraints
-- **TARGET:** Our primary source of truth is the authentic `Ignition/Ignition/MAINDOS.EXE` DOS4GW binary. We have scrapped absolute reliance on the flawed `MAINDOS_32BIT.EXE` Ghidra database, which was repackaged and lost critical `.data` segment initialization (e.g. jump tables) and calling convention fidelity.
-- **VERIFICATION PIPELINE:** You MUST use the `tools/verify_capstone.py` and `tools/le_parser.py` pipeline to disassemble and extract initializers directly from the authentic `MAINDOS.EXE` LE file when porting complex systems (like the 3D rasterizer).
+- **TARGET:** Our primary and exclusive source of truth is the authentic `Ignition/Ignition/MAINDOS.EXE` DOS4GW binary. We have completely scrubbed and eliminated `MAINDOS_32BIT.EXE`, which was a flawed PE repackaging that lost critical `.data` segment initialization (e.g. jump tables) and calling convention fidelity.
+- **VERIFICATION PIPELINE:** You MUST use the `tools/verify_capstone.py`, `tools/disasm_le.py`, and `tools/le_parser.py` pipeline to disassemble and extract initializers directly from the authentic `MAINDOS.EXE` LE file when porting complex systems (like the 3D rasterizer).
 - **NO RAW GHIDRA DUMPS:** NEVER commit unrefined decompiler output. You MUST:
   - **Structs:** Replace raw pointer offsets with proper C struct definitions and field accesses (e.g., `camera->enable_sky`).
   - **Variables:** Rename ALL register artifacts (e.g., `iVar1`, `tmp_esi`) to meaningful semantic names. Beware of Watcom C `ESI`-based `.data` segment addressing being incorrectly decompiled as parameters.
@@ -19,9 +19,9 @@
 
 ## 2. Source Port & Fidelity Tracking
 - **STACK:** C11/SDL2 engine, Python tools (via `uv`), CMake build.
-- **ANNOTATIONS:** EVERY function in `src/` MUST include this header comment:
+- **ANNOTATIONS:** EVERY function in `src/` and `decomp/` MUST include this header comment:
   ```c
-  // @original <SymbolName> (MAINDOS_32BIT.EXE @ 0x<Address>, <SourceFileHint>)
+  // @original <SymbolName> (MAINDOS.EXE @ 0x<Address>, <SourceFileHint>)
   // @fidelity EXACT | ADAPTED | EXTENDED | INFRASTRUCTURE
   // @deviation DEV-XXX (if logic diverges)
   // @fix_category FIX_CAT_XXX (if toggleable)

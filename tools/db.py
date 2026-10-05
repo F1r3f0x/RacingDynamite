@@ -39,7 +39,7 @@ def init_db():
     # Set default metadata
     cur = conn.cursor()
     cur.execute("INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)", ("target_exe", "MAINDOS.EXE"))
-    cur.execute("INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)", ("reference_exe", "MAINDOS_32BIT.EXE"))
+    cur.execute("INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)", ("reference_exe", "MAINDOS.EXE"))
     cur.execute("INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)", ("compiler", "Watcom C/C++ 10.6"))
     cur.execute("INSERT OR REPLACE INTO metadata (key, value) VALUES (?, ?)", ("project_name", "Racing Dynamite Decompilation"))
     
@@ -316,7 +316,7 @@ def export_markdown():
     rows = cur.fetchall()
     
     with open(out_path, "w", encoding="utf-8") as f:
-        f.write("# Master Function Registry (MAINDOS_32BIT.EXE)\n\n")
+        f.write("# Master Function Registry (MAINDOS.EXE)\n\n")
         f.write("> Auto-generated from `database/decomp.db`. Edit via `tools/db.py`.\n\n")
         f.write("| DOS Addr | Win Addr | Ghidra Label | Symbol Name | Module | Status | Fidelity | Purpose |\n")
         f.write("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n")
@@ -415,7 +415,7 @@ def main():
     q_parser.add_argument("sql", type=str, help="SQL string to execute")
 
     link_p = subparsers.add_parser("link", help="Link Windows address to DOS address")
-    link_p.add_argument("win_addr", type=str, help="Address in MAINDOS_32BIT.EXE (e.g. 0x00412fc0)")
+    link_p.add_argument("win_addr", type=str, help="Legacy cross-ref address (e.g. 0x00412fc0)")
     link_p.add_argument("dos_addr", type=str, help="Address in MAINDOS.EXE (e.g. 0x00012340)")
 
     stat_p = subparsers.add_parser("set-status", help="Update function status")

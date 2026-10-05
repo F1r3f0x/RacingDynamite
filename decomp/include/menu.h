@@ -9,10 +9,12 @@
 /* Authentic Menu PIC Sprite Dimensions (from MAINDOS @ 0x00011a3e..0x00011afb) */
 #define PIC_HEADER_SIZE         846     /* 0x34E bytes */
 
-#define FLAG_WIDTH              61
-#define FLAG_HEIGHT             106
+#define FLAG_WIDTH              53
+#define FLAG_HEIGHT             61
 #define FLAG_COUNT              6
 #define FLAG_DATA_SIZE          38796   /* 0x978C */
+#define FLAG_SIZE               3233    /* 53 * 61 */
+#define FLAG_HIGHLIGHT_OFFSET   19398   /* 6 * 3233 */
 
 #define LOGO_WIDTH              173
 #define LOGO_HEIGHT             57
@@ -45,5 +47,6 @@
 int Menu_Init(void);
 int Menu_Tick(void);
 void Menu_InitCarViewport(void);
+void Menu_RenderCarViewport(void);
 
 #endif /* MENU_H */

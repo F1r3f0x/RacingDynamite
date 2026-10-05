@@ -306,7 +306,7 @@ CREATE TABLE metadata (
     value TEXT NOT NULL
 );
 INSERT INTO "metadata" VALUES('target_exe','MAINDOS.EXE');
-INSERT INTO "metadata" VALUES('reference_exe','MAINDOS_32BIT.EXE');
+INSERT INTO "metadata" VALUES('reference_exe','MAINDOS.EXE');
 INSERT INTO "metadata" VALUES('compiler','Watcom C/C++ 10.6');
 INSERT INTO "metadata" VALUES('project_name','Racing Dynamite Decompilation');
 CREATE TABLE modules (

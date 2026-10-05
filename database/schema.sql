@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- Racing Dynamite / Ignition (1997) Decompilation Tracking Database Schema
--- Target: MAINDOS_32BIT.EXE (DOS/4GW 32-bit LE)
+-- Target: MAINDOS.EXE (DOS/4GW 32-bit LE)
 -- ==============================================================================
 
 PRAGMA foreign_keys = ON;
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS modules (
 CREATE TABLE IF NOT EXISTS functions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT UNIQUE,               -- Address in MAINDOS.EXE (e.g. '0x00012340')
-    win_address TEXT UNIQUE,               -- Cross-ref address in MAINDOS_32BIT.EXE (e.g. '0x00412fc0')
+    win_address TEXT UNIQUE,               -- Legacy cross-ref address (e.g. '0x00412fc0')
     symbol_name TEXT NOT NULL,             -- Reconstructed / authentic C function name
     original_ghidra_name TEXT,             -- Ghidra default label (e.g. 'FUN_00412fc0')
     module_id INTEGER REFERENCES modules(id) ON DELETE SET NULL,
@@ -53,7 +53,7 @@ CREATE INDEX IF NOT EXISTS idx_functions_status ON functions(status);
 CREATE TABLE IF NOT EXISTS globals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     dos_address TEXT,                      -- Address in MAINDOS.EXE
-    win_address TEXT UNIQUE,               -- Address in MAINDOS_32BIT.EXE
+    win_address TEXT UNIQUE,               -- Legacy cross-ref address
     name TEXT NOT NULL,                    -- Variable name (e.g. 'g_pActiveSRF')
     module_id INTEGER REFERENCES modules(id) ON DELETE SET NULL,
     type TEXT NOT NULL,                    -- Data type (e.g. 'uint8_t*', 'int32_t')

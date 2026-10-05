@@ -22,8 +22,8 @@
 
 /**
  * @brief Loads .PLC scenery placement table and unpacks object archetypes.
- * @original FUN_00419a90 (MAINDOS_32BIT.EXE @ 0x00419a90, main.c)
- * @original FUN_0041b360 (MAINDOS_32BIT.EXE @ 0x0041b360, main.c)
+ * @original FUN_00419a90 (MAINDOS.EXE @ 0x00419a90, main.c)
+ * @original FUN_0041b360 (MAINDOS.EXE @ 0x0041b360, main.c)
  * @fidelity ADAPTED
  */
 PlcData *Plc_LoadFromFile(const char *filepath) {

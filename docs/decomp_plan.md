@@ -22,9 +22,9 @@ The original `MAINDOS.EXE` is an **LE (Linear Executable)** bound to a 16-bit DO
 To enable native Ghidra analysis with zero third-party plugins:
 * `tools/unpack_dos_le.py` extracts the 3 linear memory objects and 192 uncompressed 4KB pages starting at offset `0x5b200`.
 * Applies all **41,304 LE fixup relocations** (linear addresses and relative CALL/JMP targets).
-* Re-packages the memory into a standard 32-bit PE executable: **`Ignition/Ignition/MAINDOS_32BIT.EXE`** (784 KB).
+* Re-packages the memory into a standard 32-bit PE executable: **`Ignition/Ignition/MAINDOS.EXE`** (784 KB).
 
-### Master Memory Map (`MAINDOS_32BIT.EXE` / Runtime Linear Memory)
+### Master Memory Map (`MAINDOS.EXE` / Runtime Linear Memory)
 
 | Section | Linear Base Address | Virtual Size | File Offset | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -47,8 +47,8 @@ Tracking has migrated from manual markdown tables to a centralized, relational S
 ### Schema Architecture
 * **`modules`**: Translation units (`getsurf.c`, `lisa3d.c`, `geputget.c`, `mem.c`, `main.c`, `sound.c`).
 * **`functions`**: Dual-addressing scheme:
-  * `dos_address`: Primary address in `MAINDOS_32BIT.EXE` (e.g. `0x0002004c`).
-  * `win_address`: Cross-reference address in `MAINDOS_32BIT.EXE` (e.g. `0x00412670`).
+  * `dos_address`: Primary address in `MAINDOS.EXE` (e.g. `0x0002004c`).
+  * `win_address`: Cross-reference address in `MAINDOS.EXE` (e.g. `0x00412670`).
   * `calling_convention`: Watcom register (`watcom_reg`: `eax`, `edx`, `ebx`, `ecx`), `cdecl`.
   * `status`: `unidentified` $\rightarrow$ `analyzed` $\rightarrow$ `decompiled` $\rightarrow$ `matching`.
 * **`globals`**: Global variables, buffers, and tables mapped to addresses and types.
@@ -85,7 +85,7 @@ uv run python tools/db.py dump-sql
 1. **`getsurf.c`**:
    * String: `d:\projects\ignition\getsurf\getsurf.c` (at `0x000a7cf4`)
    * Asserts: `pFile != NULL` (line 222), `x == 1`
-   * Anchor Function: **`Surface_LoadSRF` @ `0x0002004C`** (corresponds to `MAINDOS_32BIT.EXE @ 0x00412670`)
+   * Anchor Function: **`Surface_LoadSRF` @ `0x0002004C`** (corresponds to `MAINDOS.EXE @ 0x00412670`)
 2. **`lisa3d.c`**:
    * Swedish Error Logs: `FEL VID LI_MOVEOBJECT`, `LI_PLACEOBJECT`, `LI_HIDEOBJECT`
    * Identifies Lisa 2 3D Development System engine functions: `Li_MoveObject`, `Li_PlaceObject`, `Li_HideObject`
@@ -172,7 +172,7 @@ decomp/
 ## 7. Toolchain & Verification Pipeline
 
 1. **Ghidra Analysis**:
-   * Open `Ignition/Ignition/MAINDOS_32BIT.EXE` in Ghidra CodeBrowser.
+   * Open `Ignition/Ignition/MAINDOS.EXE` in Ghidra CodeBrowser.
    * Auto-analysis detects 32-bit x86 PE with entry point `0x00055FBC`.
 2. **Decompilation**:
    * Decompile function in Ghidra at its `dos_address`.
@@ -180,7 +180,7 @@ decomp/
 3. **Compilation**:
    * Compile using Watcom C/C++ 10.6 (`wcc386 -3r -omaxet -s`).
 4. **Binary Diffing**:
-   * Verify assembly output against `MAINDOS_32BIT.EXE`.
+   * Verify assembly output against `MAINDOS.EXE`.
 5. **Status Update**:
    * Update `database/decomp.db` via `python tools/db.py set-status <addr> matching`.
    * Run `python tools/db.py dump-sql` and commit.

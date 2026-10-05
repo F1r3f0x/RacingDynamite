@@ -2,7 +2,7 @@
 """
 tools/runtime_differ.py
 Dynamic Execution & Telemetry Comparison Harness for Racing Dynamite.
-Compares runtime vehicle physics, states, and telemetry between MAINDOS_32BIT.EXE and MREBUILT.EXE.
+Compares runtime vehicle physics, states, and telemetry between authentic MAINDOS.EXE and MREBUILT.EXE.
 """
 
 import os

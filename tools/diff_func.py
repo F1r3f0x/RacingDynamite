@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 tools/diff_func.py
-Extracts disassembly of a function from MAINDOS_32BIT.EXE and from build/decomp/<module>.obj,
+Extracts disassembly of a function from authentic MAINDOS.EXE and from build/decomp/<module>.obj,
 and compares them instruction-by-instruction.
 """
 
@@ -74,12 +74,11 @@ def load_coff_symbols(obj_path: Path):
     return sections, symbols
 
 def get_orig_func(dos_addr: int, size: int):
-    exe_path = ROOT / "Ignition" / "Ignition" / "MAINDOS_32BIT.EXE"
-    with open(exe_path, "rb") as f:
-        data = f.read()
-    # In MAINDOS_32BIT.EXE, image base is 0x10000, .text starts at file offset 0x400
-    file_off = 0x400 + (dos_addr - 0x10000)
-    return data[file_off : file_off + size]
+    from le_parser import LEFile
+    le = LEFile(str(ROOT / "Ignition" / "Ignition" / "MAINDOS.EXE"))
+    obj = le.objects[0]
+    offset = dos_addr - obj['reloc_base']
+    return obj['data'][offset : offset + size]
 
 def normalize_asm(mnemonic: str, op_str: str, ins_addr: int = 0, base_addr: int = 0):
     import re

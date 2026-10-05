@@ -43,7 +43,7 @@ typedef struct {
 
 /**
  * @brief Audio pool types matching original DirectSound asset banks.
- * @original DAT_004990b4 (MAINDOS_32BIT.EXE @ 0x0041f9b0, main.c)
+ * @original DAT_004990b4 (MAINDOS.EXE @ 0x0041f9b0, main.c)
  */
 typedef enum {
     SOUND_POOL_GENERAL = 0, // ROLL, SKID, COLL, BOOST, DIV
@@ -54,7 +54,7 @@ typedef enum {
 
 /**
  * @brief Single mixer voice channel state.
- * @original DAT_0063caa4 (MAINDOS_32BIT.EXE @ 0x004579b0, main.c)
+ * @original DAT_0063caa4 (MAINDOS.EXE @ 0x004579b0, main.c)
  */
 typedef struct {
     const SoundSample *sample;
@@ -70,7 +70,7 @@ typedef struct {
 
 /**
  * @brief Vehicle engine acoustic state driven by ENGINE.INF curve lookup tables.
- * @original DAT_005daffc + 0x650 (MAINDOS_32BIT.EXE @ 0x0041f9b0, main.c)
+ * @original DAT_005daffc + 0x650 (MAINDOS.EXE @ 0x0041f9b0, main.c)
  */
 typedef struct {
     uint8_t     sample0_volume[ENGINE_INF_CURVE_SIZE]; // 0x000..0x0C7: Low-RPM volume curve
@@ -86,7 +86,7 @@ typedef struct {
 
 /**
  * @brief Master general SFX bank loaded during race startup.
- * @original DAT_004990b4 (MAINDOS_32BIT.EXE @ 0x0041f9b0, main.c)
+ * @original DAT_004990b4 (MAINDOS.EXE @ 0x0041f9b0, main.c)
  */
 typedef struct {
     SoundSample roll;       // GENERAL/SOUND/ROLL/00_RULL.WAV
@@ -108,7 +108,7 @@ typedef struct {
 
 /**
  * @brief Initialize SDL2 audio device and allocate 32 software mixer voices.
- * @original FUN_0041f9b0 (MAINDOS_32BIT.EXE @ 0x0041f9b0, main.c)
+ * @original FUN_0041f9b0 (MAINDOS.EXE @ 0x0041f9b0, main.c)
  * @fidelity ADAPTED
  * @return true on success, false on failure
  */
@@ -116,14 +116,14 @@ bool Audio_Init(void);
 
 /**
  * @brief Close audio hardware device and release all mixer voice buffers.
- * @original FUN_00412530 (MAINDOS_32BIT.EXE @ 0x00412530, main.c)
+ * @original FUN_00412530 (MAINDOS.EXE @ 0x00412530, main.c)
  * @fidelity ADAPTED
  */
 void Audio_Shutdown(void);
 
 /**
  * @brief Allocate an active mixer voice and begin playback of a PCM sample.
- * @original FUN_004579b0 (MAINDOS_32BIT.EXE @ 0x004579b0, main.c)
+ * @original FUN_004579b0 (MAINDOS.EXE @ 0x004579b0, main.c)
  * @fidelity ADAPTED
  *
  * @param sample Pointer to PCM sound sample
@@ -137,7 +137,7 @@ int Audio_PlayVoice(const SoundSample *sample, float volume, float pitch, float 
 
 /**
  * @brief Update real-time playback parameters for an active voice.
- * @original FUN_00457aa0 (MAINDOS_32BIT.EXE @ 0x00457aa0, main.c)
+ * @original FUN_00457aa0 (MAINDOS.EXE @ 0x00457aa0, main.c)
  * @fidelity ADAPTED
  *
  * @param voice_handle Handle returned by Audio_PlayVoice
@@ -149,7 +149,7 @@ void Audio_SetVoiceParams(int voice_handle, float volume, float pitch, float pan
 
 /**
  * @brief Stop and release a specific active voice.
- * @original FUN_00457980 (MAINDOS_32BIT.EXE @ 0x00457980, main.c)
+ * @original FUN_00457980 (MAINDOS.EXE @ 0x00457980, main.c)
  * @fidelity ADAPTED
  *
  * @param voice_handle Handle returned by Audio_PlayVoice
@@ -158,14 +158,14 @@ void Audio_StopVoice(int voice_handle);
 
 /**
  * @brief Stop and release all currently playing voices.
- * @original FUN_00457980 (MAINDOS_32BIT.EXE @ 0x00457980, main.c)
+ * @original FUN_00457980 (MAINDOS.EXE @ 0x00457980, main.c)
  * @fidelity ADAPTED
  */
 void Audio_StopAllVoices(void);
 
 /**
  * @brief Set global master volume levels for sound effects and music.
- * @original FUN_00457ae0 (MAINDOS_32BIT.EXE @ 0x00457ae0, main.c)
+ * @original FUN_00457ae0 (MAINDOS.EXE @ 0x00457ae0, main.c)
  * @fidelity ADAPTED
  *
  * @param sfx_volume Volume multiplier for sound effects (0.0f to 1.0f)
@@ -187,7 +187,7 @@ int Audio_PlaySFX(const SoundSample *sample, float volume, float pan);
 
 /**
  * @brief Play spatialized 3D audio relative to listener camera/car.
- * @original FUN_0043e710 (MAINDOS_32BIT.EXE @ 0x0043e710, main.c)
+ * @original FUN_0043e710 (MAINDOS.EXE @ 0x0043e710, main.c)
  * @fidelity ADAPTED
  *
  * @param sample Pointer to sound sample
@@ -210,7 +210,7 @@ int Audio_PlaySpatialSFX(const SoundSample *sample,
 
 /**
  * @brief Load ENGINE.INF curve tables and 00_A.WAV / 01_A.WAV for a car.
- * @original FUN_0041f9b0 (MAINDOS_32BIT.EXE @ 0x0041f9b0, main.c)
+ * @original FUN_0041f9b0 (MAINDOS.EXE @ 0x0041f9b0, main.c)
  * @fidelity ADAPTED
  *
  * @param ea Engine audio container
@@ -221,7 +221,7 @@ bool EngineAudio_Init(EngineAudio *ea, const char *car_dir);
 
 /**
  * @brief Update engine audio pitch and volume crossfade based on vehicle speed.
- * @original FUN_004452c0 (MAINDOS_32BIT.EXE @ 0x004452c0, main.c)
+ * @original FUN_004452c0 (MAINDOS.EXE @ 0x004452c0, main.c)
  * @fidelity ADAPTED
  * @deviation DEV-006 (High-RPM pitch curve safety clamp)
  * @fix_category FIX_CAT_AUDIO
@@ -247,7 +247,7 @@ void EngineAudio_Free(EngineAudio *ea);
 
 /**
  * @brief Load a RIFF/WAVE PCM audio file from disk into 16-bit PCM format.
- * @original FUN_00458e00 (MAINDOS_32BIT.EXE @ 0x00458e00, main.c)
+ * @original FUN_00458e00 (MAINDOS.EXE @ 0x00458e00, main.c)
  * @fidelity ADAPTED
  *
  * @param path Filesystem path to .WAV file
@@ -258,7 +258,7 @@ bool SoundPool_LoadWav(const char *path, SoundSample *out_sample);
 
 /**
  * @brief Load a Gravis UltraSound GF1 .PAT audio file from disk into 16-bit PCM format.
- * @original FUN_004582b0 (MAINDOS_32BIT.EXE @ 0x004582b0, main.c)
+ * @original FUN_004582b0 (MAINDOS.EXE @ 0x004582b0, main.c)
  * @fidelity ADAPTED
  *
  * @param path Filesystem path to .PAT file
@@ -276,7 +276,7 @@ void SoundPool_FreeSample(SoundSample *sample);
 
 /**
  * @brief Load the standard general sound effect pool (ROLL, SKID, COLL, BOOST).
- * @original FUN_0041f9b0 (MAINDOS_32BIT.EXE @ 0x0041f9b0, main.c)
+ * @original FUN_0041f9b0 (MAINDOS.EXE @ 0x0041f9b0, main.c)
  * @fidelity ADAPTED
  *
  * @param sfx Destination GeneralSFX bank
@@ -297,7 +297,7 @@ void SoundPool_FreeGeneralSFX(GeneralSFX *sfx);
 
 /**
  * @brief Map circuit index to CD soundtrack track number.
- * @original DAT_00497eb8 (MAINDOS_32BIT.EXE @ 0x00419260, main.c)
+ * @original DAT_00497eb8 (MAINDOS.EXE @ 0x00419260, main.c)
  * @fidelity EXACT
  *
  * @param track_index Circuit index (0..6)
@@ -307,7 +307,7 @@ int Music_GetTrackForCircuit(int track_index);
 
 /**
  * @brief Begin streaming a music track file (e.g. Track02.ogg).
- * @original FUN_00457ed0 (MAINDOS_32BIT.EXE @ 0x00457ed0, main.c)
+ * @original FUN_00457ed0 (MAINDOS.EXE @ 0x00457ed0, main.c)
  * @fidelity ADAPTED
  *
  * @param track_number Track index (2..8)
@@ -318,14 +318,14 @@ bool Music_PlayTrack(int track_number, bool loop);
 
 /**
  * @brief Stop digital music streaming.
- * @original FUN_00457ed0 (MAINDOS_32BIT.EXE @ 0x00457ed0, main.c)
+ * @original FUN_00457ed0 (MAINDOS.EXE @ 0x00457ed0, main.c)
  * @fidelity ADAPTED
  */
 void Music_Stop(void);
 
 /**
  * @brief Set music playback volume.
- * @original FUN_00457ae0 (MAINDOS_32BIT.EXE @ 0x00457ae0, main.c)
+ * @original FUN_00457ae0 (MAINDOS.EXE @ 0x00457ae0, main.c)
  * @fidelity ADAPTED
  *
  * @param volume Music volume (0.0f to 1.0f)
@@ -334,14 +334,14 @@ void Music_SetVolume(float volume);
 
 /**
  * @brief Check if music is actively streaming.
- * @original FUN_00457b10 (MAINDOS_32BIT.EXE @ 0x00457b10, main.c)
+ * @original FUN_00457b10 (MAINDOS.EXE @ 0x00457b10, main.c)
  * @fidelity ADAPTED
  */
 bool Music_IsPlaying(void);
 
 /**
  * @brief Update music streaming buffer (call periodically or from main loop).
- * @original FUN_0041775a (MAINDOS_32BIT.EXE @ 0x0041775a, main.c)
+ * @original FUN_0041775a (MAINDOS.EXE @ 0x0041775a, main.c)
  * @fidelity ADAPTED
  */
 void Music_Update(void);

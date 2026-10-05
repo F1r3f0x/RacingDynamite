@@ -1,6 +1,6 @@
 /*
  * fx.h - Special Effects, Particle Systems, HUD & Dynamic Object Rendering
- * Target: MAINDOS_32BIT.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
+ * Target: MAINDOS.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
  */
 
 #ifndef FX_H
@@ -249,9 +249,9 @@ extern int g_ActiveFontColor;
 extern int g_FontAlignMode;
 extern int g_PlayerCarChoice;
 extern int g_PlayerCarModel;
-extern uint8_t *g_PlayerHUDState;
+extern uint8_t g_PlayerHUDState[];
 extern int g_ScreenHeightAlt;
-extern int g_VirtualFramebuffer;
+extern uint8_t g_VirtualFramebuffer[320 * 200];
 extern int g_RenderTargetSurface;
 extern int g_MenuCursorPos;
 extern int g_IsDemoMode;

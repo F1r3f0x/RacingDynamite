@@ -76,15 +76,15 @@ def run():
     i = 0
     while i < len(lines):
         line = lines[i]
-        orig_match = re.search(r"(\s*\*\s*@original\s+)([A-Za-z0-9_]+)(\s*\(MAINDOS_32BIT\.EXE)([^,]*)(,\s*lisa3d\.c\))", line)
+        orig_match = re.search(r"(\s*\*\s*@original\s+)([A-Za-z0-9_]+)(\s*\(MAINDOS(?:_32BIT)?\.EXE)([^,]*)(,\s*lisa3d\.c\))", line)
         if orig_match:
             prefix, sym, mid, old_addr, suffix = orig_match.groups()
             if sym in updates:
                 new_addr, new_fid = updates[sym]
                 if new_addr:
-                    new_line = f"{prefix}{sym} (MAINDOS_32BIT.EXE @ {new_addr}{suffix}\n"
+                    new_line = f"{prefix}{sym} (MAINDOS.EXE @ {new_addr}{suffix}\n"
                 else:
-                    new_line = f"{prefix}{sym} (MAINDOS_32BIT.EXE{suffix}\n"
+                    new_line = f"{prefix}{sym} (MAINDOS.EXE{suffix}\n"
                 new_lines.append(new_line)
                 i += 1
                 # Check next line for @fidelity

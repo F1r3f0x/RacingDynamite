@@ -1,6 +1,6 @@
 # Master Authentic Divergence & Deviation Registry (FCTS)
 
-This registry serves as the **global technical inventory** of all intentional differences, original 1997 engine bug fixes, coordinate adaptations, and safety workarounds in **Racing Dynamite** relative to the original Windows 95 executable (`MAINDOS_32BIT.EXE`).
+This registry serves as the **global technical inventory** of all intentional differences, original 1997 engine bug fixes, coordinate adaptations, and safety workarounds in **Racing Dynamite** relative to the original Windows 95 executable (`MAINDOS.EXE`).
 
 Every entry documents:
 1. The **Original 1997 Code** (Ghidra decompilation and x86 disassembly).
@@ -27,12 +27,12 @@ Every entry documents:
 ### `DEV-001`: Surface Raycast Cell Clamping & Void Fall Protection
 * **Category**: `FIX_CAT_NOCLIP` (Collision & No-Clip Fixes)
 * **Function**: `Surface_GetCell` / `Surface_Raycast` (`src/physics/getsurf.c`)
-* **Original Address**: `MAINDOS_32BIT.EXE @ 0x00412fc0` (`getsurf.c`)
+* **Original Address**: `MAINDOS.EXE @ 0x00412fc0` (`getsurf.c`)
 * **Preservation Toggle**: `fixes->fix_noclip` (`Options > Gameplay > Game Fixes > COLLISION & NO-CLIP`)
 
-#### Original 1997 Code (`MAINDOS_32BIT.EXE`)
+#### Original 1997 Code (`MAINDOS.EXE`)
 ```c
-// Decompiled FUN_00412fc0 (MAINDOS_32BIT.EXE @ 0x00412fc0):
+// Decompiled FUN_00412fc0 (MAINDOS.EXE @ 0x00412fc0):
 undefined8 __cdecl FUN_00412fc0(int param_1, int param_2, int param_3)
 {
     DAT_004c5478 = param_1; // raw X coordinate
@@ -95,12 +95,12 @@ if (fixes && fixes->fix_noclip) {
 ### `DEV-002`: Vehicle Ground Alignment & Elevation
 * **Category**: `FIX_CAT_ELEVATION` (Surface Elevation Fixes)
 * **Function**: `Car_UnpackMeshGeometry` (`src/renderer/rasterizer.c`)
-* **Original Address**: `MAINDOS_32BIT.EXE @ 0x0041d190` (`lisa3d.c` / `main.c`)
+* **Original Address**: `MAINDOS.EXE @ 0x0041d190` (`lisa3d.c` / `main.c`)
 * **Preservation Toggle**: `fixes->fix_elevation` (`Options > Gameplay > Game Fixes > SURFACE ELEVATION`)
 
-#### Original 1997 Code (`MAINDOS_32BIT.EXE`)
+#### Original 1997 Code (`MAINDOS.EXE`)
 ```c
-// Decompiled FUN_0041d190 (MAINDOS_32BIT.EXE @ 0x0041d190):
+// Decompiled FUN_0041d190 (MAINDOS.EXE @ 0x0041d190):
 // Global hardcoded rest clearance stored across all 8 car records:
 *(double *)(DAT_005daffc + 0x358 + iVar8) = 0.0;
 *(double *)(DAT_005daffc + 0x360 + iVar8) = 5.0; // Hardcoded 5.0 elevation for all models
@@ -131,7 +131,7 @@ if (fixes && fixes->fix_elevation) {
 ```
 
 #### Technical Explanation
-1. **Root Cause**: The 8 vehicle archetypes in `CARS.MSH` feature drastically different wheel radii (e.g. Red Monster Truck has giant off-road tires, while the Mini Cooper has miniature wheels). `MAINDOS_32BIT.EXE` applied a single uniform $+5.0$ clearance offset above the surface triangle for all car chassis.
+1. **Root Cause**: The 8 vehicle archetypes in `CARS.MSH` feature drastically different wheel radii (e.g. Red Monster Truck has giant off-road tires, while the Mini Cooper has miniature wheels). `MAINDOS.EXE` applied a single uniform $+5.0$ clearance offset above the surface triangle for all car chassis.
 2. **1997 Symptom**: Vehicles with large tires sank halfway through the asphalt into the road mesh, while low-profile sports cars hovered several inches above the ground.
 3. **Port Solution**: When `fixes->fix_elevation` is active, the lowest vertex $Y$ coordinate across the wheel submeshes is computed dynamically and scaled by `PHYSICS_SCALE_FACTOR` (`21.76`), guaranteeing exact tire-to-surface alignment for every model.
 
@@ -140,12 +140,12 @@ if (fixes && fixes->fix_elevation) {
 ### `DEV-003`: Mountain Wall Climbing Clamping
 * **Category**: `FIX_CAT_NOCLIP` (Collision & No-Clip Fixes)
 * **Function**: `Vehicle_Update` / `Car_PhysicsTick` (`src/physics/vehicle.c`)
-* **Original Address**: `MAINDOS_32BIT.EXE @ 0x00424570` (`vehicle.c`)
+* **Original Address**: `MAINDOS.EXE @ 0x00424570` (`vehicle.c`)
 * **Preservation Toggle**: `fixes->fix_noclip` (`Options > Gameplay > Game Fixes > COLLISION & NO-CLIP`)
 
-#### Original 1997 Code (`MAINDOS_32BIT.EXE`)
+#### Original 1997 Code (`MAINDOS.EXE`)
 ```c
-// Decompiled FUN_00424570 (MAINDOS_32BIT.EXE @ 0x00424570):
+// Decompiled FUN_00424570 (MAINDOS.EXE @ 0x00424570):
 // Traction applied unconditionally whenever a surface triangle is intersected:
 if (bVar6) { // ground collision detected
     dVar2 = *(double *)(iVar4 + 0x340); // powertrain tractive force
@@ -188,12 +188,12 @@ if (fixes && fixes->fix_noclip) {
 ### `DEV-004`: Right-Handed Camera Basis Alignment
 * **Category**: `FIX_CAT_CAMERA` (Camera & Viewport Fixes)
 * **Function**: `Camera_Update` / `Camera_UpdateFollowChase` (`src/renderer/camera.c`)
-* **Original Address**: `MAINDOS_32BIT.EXE @ 0x00436990` (`main.c`)
+* **Original Address**: `MAINDOS.EXE @ 0x00436990` (`main.c`)
 * **Preservation Toggle**: `fixes->fix_camera` (`Options > Gameplay > Game Fixes > CAMERA & VIEWPORT`)
 
-#### Original 1997 Code (`MAINDOS_32BIT.EXE`)
+#### Original 1997 Code (`MAINDOS.EXE`)
 ```c
-// Decompiled FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990):
+// Decompiled FUN_00436990 (MAINDOS.EXE @ 0x00436990):
 // Ad-hoc Euler matrix construction for software viewport:
 *(float *)(DAT_0063c5f0 + 0x10) = -sin(yaw) * cos(pitch);
 *(float *)(DAT_0063c5f0 + 0x14) = sin(pitch);
@@ -226,7 +226,7 @@ if (fixes && fixes->fix_camera) {
 ```
 
 #### Technical Explanation
-1. **Root Cause**: The software viewport in `MAINDOS_32BIT.EXE` relied on direct Euler angle projection matrices tailored to DirectDraw's top-left origin.
+1. **Root Cause**: The software viewport in `MAINDOS.EXE` relied on direct Euler angle projection matrices tailored to DirectDraw's top-left origin.
 2. **1997 Symptom**: During steep downhill drops or airborne jump landings where the camera pitched directly downward towards $-90^\circ$, the view vector aligned with the world up axis, causing an arithmetic gimbal singularity where the entire screen violently flipped $180^\circ$ upside-down.
 3. **Port Solution**: `DEV-004` builds an orthonormal right-handed coordinate frame (`forward`, `right = forward x world_up`, `up = right x forward`) with fallback axis protection, preventing gimbal flips.
 
@@ -235,12 +235,12 @@ if (fixes && fixes->fix_camera) {
 ### `DEV-005`: Software Rasterizer 1/Z Depth Precision
 * **Category**: `FIX_CAT_RENDERER` (Renderer Glitches)
 * **Function**: `Lisa_RenderScene` (`src/renderer/rasterizer.c`)
-* **Original Address**: `MAINDOS_32BIT.EXE @ 0x004466d0` (`lisa3d.c`)
+* **Original Address**: `MAINDOS.EXE @ 0x004466d0` (`lisa3d.c`)
 * **Preservation Toggle**: `renderer->options.authentic_depth_buckets` (`Options > GFX Options > Z-BUFFERING`)
 
-#### Original 1997 Code (`MAINDOS_32BIT.EXE`)
+#### Original 1997 Code (`MAINDOS.EXE`)
 ```c
-// Decompiled Lisa_RenderScene (MAINDOS_32BIT.EXE @ 0x004466d0):
+// Decompiled Lisa_RenderScene (MAINDOS.EXE @ 0x004466d0):
 // Traverses 6,000 discrete integer depth buckets:
 iVar5 = 5999;
 piVar6 = (int *)(DAT_0063b5e8 + 0x5dbc);
@@ -295,12 +295,12 @@ if (renderer->options.authentic_depth_buckets) {
 ### `DEV-006`: High-RPM Engine Pitch Modulation Clamping
 * **Category**: `FIX_CAT_AUDIO` (Audio & Sound Fixes)
 * **Function**: `Sound_SynthesizeEngineRPM` / `EngineAudio_Update` (`src/audio/engine_audio.c`)
-* **Original Address**: `MAINDOS_32BIT.EXE @ 0x004452c0` / `0x0041f9b0` (`main.c`)
+* **Original Address**: `MAINDOS.EXE @ 0x004452c0` / `0x0041f9b0` (`main.c`)
 * **Preservation Toggle**: `fixes->fix_audio` (`Options > Gameplay > Game Fixes > AUDIO & SOUND`)
 
-#### Original 1997 Code (`MAINDOS_32BIT.EXE`)
+#### Original 1997 Code (`MAINDOS.EXE`)
 ```c
-// Decompiled FUN_004452c0 (MAINDOS_32BIT.EXE @ 0x004452c0):
+// Decompiled FUN_004452c0 (MAINDOS.EXE @ 0x004452c0):
 lVar6 = __ftol();
 iVar5 = (int)lVar6 * 2;
 // In original code when speed exceeded maximum gear ratio:

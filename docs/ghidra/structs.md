@@ -1,6 +1,6 @@
 # Reconstructed Data Structures
 
-This document catalogues the reconstructed C structures, member byte offsets, and original memory alignments recovered from `MAINDOS_32BIT.EXE` and `MAINDOS.EXE`.
+This document catalogues the reconstructed C structures, member byte offsets, and original memory alignments recovered from authentic `MAINDOS.EXE`.
 
 ---
 
@@ -127,7 +127,7 @@ typedef struct LisaCamera {
 ## 3. Vehicle Physics & Simulation (`main.c`)
 
 > [!NOTE]
-> **Vehicle Runtime State Block Stride**: In `MAINDOS_32BIT.EXE`, vehicle runtime state is stored in a flat array indexed as `base + car_idx * 0x484c` (18,508 bytes per vehicle), confirmed by `Camera_UpdateChase` (`FUN_0043c910`) decompilation: `DAT_005285c0 * 0x484c`. This total block size encompasses the full vehicle simulation state (physics parameters, wheel contact, audio curves, mesh geometry) and is larger than any individual struct below due to embedded engine audio data and runtime matrices.
+> **Vehicle Runtime State Block Stride**: In `MAINDOS.EXE`, vehicle runtime state is stored in a flat array indexed as `base + car_idx * 0x484c` (18,508 bytes per vehicle), confirmed by camera chase decompilation: `car_idx * 0x484c`. This total block size encompasses the full vehicle simulation state (physics parameters, wheel contact, audio curves, mesh geometry) and is larger than any individual struct below due to embedded engine audio data and runtime matrices.
 
 ### `VehicleState` (18,508 bytes / `0x484C` allocated in `main.c`)
 ```c

@@ -14,8 +14,6 @@ KNOWN_HASHES = {
     "f670bc866a4405f30ac5c93770ced36f859fbaed": "GOG Ignition CD image (game.gog)",
     # DOS Retail Executable (DOS/4GW 32-bit LE)
     "e1d9f3a7e348ea7b0e64d673ab0ee9cec4a19604": "MAINDOS.EXE (DOS/4GW 32-bit LE Executable)",
-    # Unpacked Flat 32-bit Binary
-    "16b4236810ca14a0adeb9cfb3c78a864a130f191": "MAINDOS_32BIT.EXE (32-bit Flat Binary)",
     # Windows 95 Retail Executable
     "d5d6909ee8a51122d89d622ce493459d8991fd6d": "IGN_WIN.EXE (Windows 95 Executable)",
 }

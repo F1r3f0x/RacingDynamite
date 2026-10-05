@@ -121,21 +121,21 @@ void Renderer_SetOptions(Renderer3D *r, const RendererOptions *opts);
 
 /**
  * @brief Initializes 3D renderer state, framebuffers, depth buffer, and default options.
- * @original FUN_0043e2a0 (MAINDOS_32BIT.EXE @ 0x0043e2a0, lisa3d.c)
+ * @original FUN_0043e2a0 (MAINDOS.EXE @ 0x0043e2a0, lisa3d.c)
  * @fidelity ADAPTED
  */
 bool Renderer_Init(Renderer3D *r, int width, int height);
 
 /**
  * @brief Releases renderer framebuffers and allocated depth buffers.
- * @original FUN_00412530 (MAINDOS_32BIT.EXE @ 0x00412530, main.c)
+ * @original FUN_00412530 (MAINDOS.EXE @ 0x00412530, main.c)
  * @fidelity ADAPTED
  */
 void Renderer_Shutdown(Renderer3D *r);
 
 /**
  * @brief Clears virtual framebuffer and depth buffer.
- * @original FUN_004468d0 (MAINDOS_32BIT.EXE @ 0x004468d0, lisa3d.c)
+ * @original FUN_004468d0 (MAINDOS.EXE @ 0x004468d0, lisa3d.c)
  * @fidelity ADAPTED
  */
 void Renderer_Clear(Renderer3D *r, uint8_t clear_color, float clear_depth);
@@ -147,7 +147,7 @@ void Renderer_SetShadow(Renderer3D *r, const ShdData *shd);
 
 /**
  * @brief Initializes camera viewing volume and aspect ratio.
- * @original FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA
@@ -156,7 +156,7 @@ void Camera_Init(Camera3D *cam, float aspect);
 
 /**
  * @brief Computes Cartesian camera position from spherical orbital parameters.
- * @original FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA
@@ -165,7 +165,7 @@ void Camera_Update(Camera3D *cam, float delta_time);
 
 /**
  * @brief Orbits camera around target point with yaw, pitch, and zoom constraints.
- * @original FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA
@@ -174,7 +174,7 @@ void Camera_Orbit(Camera3D *cam, float delta_yaw, float delta_pitch, float delta
 
 /**
  * @brief Pans camera target in world horizontal plane.
- * @original FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA
@@ -183,7 +183,7 @@ void Camera_Pan(Camera3D *cam, float delta_forward, float delta_right, float del
 
 /**
  * @brief Switch active camera view mode and reconfigure baseline orbital parameters.
- * @original FUN_00436990 (MAINDOS_32BIT.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA
@@ -203,7 +203,7 @@ void Camera_CycleMode(Camera3D *cam);
 
 /**
  * @brief Update camera position and heading following a vehicle with authentic lag and slope tracking.
- * @original FUN_0043c910 (MAINDOS_32BIT.EXE @ 0x0043c910, main.c)
+ * @original FUN_0043c910 (MAINDOS.EXE @ 0x0043c910, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004
  * @fix_category FIX_CAT_CAMERA
@@ -217,7 +217,7 @@ void Camera_UpdateFollowChase(Camera3D *cam, const VehicleState *veh, float delt
 
 /**
  * @brief Rasterizes single 3D triangle with perspective texture mapping, shading, and alpha/shadow blend.
- * @original FUN_0044d550 (MAINDOS_32BIT.EXE @ 0x0044d550, lisa3d.c)
+ * @original FUN_0044d550 (MAINDOS.EXE @ 0x0044d550, lisa3d.c)
  * @fidelity ADAPTED
  * @deviation DEV-005
  * @fix_category FIX_CAT_RENDERER
@@ -230,7 +230,7 @@ void Renderer_DrawPlacedObjects(Renderer3D *r, const Camera3D *cam, const PlcDat
 
 /**
  * @brief Renders all scenery and track meshes placed by .PLC file across two passes.
- * @original FUN_00416250 (MAINDOS_32BIT.EXE @ 0x00416250, main.c)
+ * @original FUN_00416250 (MAINDOS.EXE @ 0x00416250, main.c)
  * @fidelity ADAPTED
  */
 void Renderer_DrawTrackMesh(Renderer3D *r, const Camera3D *cam, const MshData *msh, const PlcData *plc);
@@ -243,7 +243,7 @@ typedef struct VehicleState VehicleState;
 
 /**
  * @brief Renders vehicle 3D model with chassis roll/pitch/yaw transforms and ground alignment.
- * @original FUN_0041d190 (MAINDOS_32BIT.EXE @ 0x0041d190, main.c / lisa3d.c)
+ * @original FUN_0041d190 (MAINDOS.EXE @ 0x0041d190, main.c / lisa3d.c)
  * @fidelity EXTENDED
  * @deviation DEV-002
  * @fix_category FIX_CAT_ELEVATION
@@ -252,14 +252,14 @@ void Renderer_DrawCar(Renderer3D *r, const Camera3D *cam, const MshData *cars_ms
 
 /**
  * @brief Prints Lisa 2 Development System build banner and timestamp.
- * @original FUN_0045b4f0 (MAINDOS_32BIT.EXE @ 0x0045b4f0, lisa3d.c)
+ * @original FUN_0045b4f0 (MAINDOS.EXE @ 0x0045b4f0, lisa3d.c)
  * @fidelity EXACT
  */
 void Renderer_PrintVersion(void);
 
 /**
  * @brief Renders 360-degree cylindrical horizon backdrop sampling 64KB (256x256) .PAN texture.
- * @original FUN_00438210 (MAINDOS_32BIT.EXE @ 0x00438210, lisa3d.c)
+ * @original FUN_00438210 (MAINDOS.EXE @ 0x00438210, lisa3d.c)
  * @fidelity ADAPTED
  */
 void Renderer_RenderPanorama(Renderer3D *r, const Camera3D *cam, const uint8_t *pan_pixels);

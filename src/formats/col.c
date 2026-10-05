@@ -23,7 +23,7 @@
 
 /**
  * @brief Parses and unpacks 256-color palette from memory buffer.
- * @original FUN_00456c40 (MAINDOS_32BIT.EXE @ 0x00456c40, lisa3d.c)
+ * @original FUN_00456c40 (MAINDOS.EXE @ 0x00456c40, lisa3d.c)
  * @fidelity ADAPTED
  */
 bool Col_LoadFromMemory(const uint8_t *data, size_t size, Palette256 *out_palette) {
@@ -38,7 +38,7 @@ bool Col_LoadFromMemory(const uint8_t *data, size_t size, Palette256 *out_palett
 
 /**
  * @brief Loads 256-color palette from .COL file.
- * @original FUN_004574a0 (MAINDOS_32BIT.EXE @ 0x004574a0, mem.c)
+ * @original FUN_004574a0 (MAINDOS.EXE @ 0x004574a0, mem.c)
  * @fidelity ADAPTED
  */
 bool Col_LoadFromFile(const char *filepath, Palette256 *out_palette) {

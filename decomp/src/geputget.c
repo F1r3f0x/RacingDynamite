@@ -2,7 +2,7 @@
  * geputget.c - 2D Graphics blitting, font rasterization, and palette management
  * Original file: geputget.c
  * Target: MAINDOS.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
- *         MAINDOS_32BIT.EXE (MSVC 4.x / 5.0, Win32)
+ *         MAINDOS.EXE (MSVC 4.x / 5.0, Win32)
  */
 
 #include "geputget.h"
@@ -51,7 +51,7 @@ extern void *Gfx_SpriteOp(void *desc, int op);
 extern void Gfx_DrawSprite(void *handle, Point2D *pos, int flags);
 
 /**
- * @original Font_InitSystem (MAINDOS_32BIT.EXE @ 0x00061220, geputget.c)
+ * @original Font_InitSystem (MAINDOS.EXE @ 0x00061220, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00061220. Initializes 30 font slots and registers subsystem callback.
  */
@@ -79,7 +79,7 @@ int Font_InitSystem(void) {
 }
 
 /**
- * @original Font_Shutdown (MAINDOS_32BIT.EXE @ 0x00061319, geputget.c)
+ * @original Font_Shutdown (MAINDOS.EXE @ 0x00061319, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00061319. Shuts down font subsystem and unloads all active font slots.
  */
@@ -103,7 +103,7 @@ int Font_Shutdown(void) {
 }
 
 /**
- * @original Font_Parse (MAINDOS_32BIT.EXE @ 0x00061399, geputget.c)
+ * @original Font_Parse (MAINDOS.EXE @ 0x00061399, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00061399. Validates LFT header, allocates a font slot, extracts 224 glyph
  *        metrics, registers sprite handles with Gfx_SpriteOp, and returns allocated font slot ID.
@@ -177,7 +177,7 @@ int Font_Parse(void *buffer, int unused) {
 }
 
 /**
- * @original Font_Load (MAINDOS_32BIT.EXE @ 0x000615eb, geputget.c)
+ * @original Font_Load (MAINDOS.EXE @ 0x000615eb, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000615eb. Loads a .LFT font from disk, creates glyph handles, and frees buffer.
  */
@@ -197,7 +197,7 @@ int Font_Load(const char *filename, int unused) {
 }
 
 /**
- * @original Font_Unload (MAINDOS_32BIT.EXE @ 0x00061653, geputget.c)
+ * @original Font_Unload (MAINDOS.EXE @ 0x00061653, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00061653. Frees all sprite handles for a font slot and marks the slot available.
  */
@@ -216,7 +216,7 @@ int Font_Unload(int font_id) {
 }
 
 /**
- * @original Font_GetTextWidth (MAINDOS_32BIT.EXE @ 0x000616db, geputget.c)
+ * @original Font_GetTextWidth (MAINDOS.EXE @ 0x000616db, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x000616db. Computes string pixel width considering proportional flag, spacing,
  *        and space character sizing (height * 0.35).
@@ -278,7 +278,7 @@ int Font_GetTextWidth(const char *text, int font_id) {
 }
 
 /**
- * @original Font_DrawText (MAINDOS_32BIT.EXE @ 0x00061959, geputget.c)
+ * @original Font_DrawText (MAINDOS.EXE @ 0x00061959, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00061959. Renders string to screen via Gfx_DrawSprite, taking into account
  *        text alignment (0=left, 1=center, 2=right), proportionality, and fixed-point coordinates.
@@ -402,7 +402,7 @@ int Font_DrawText(const char *text, int font_id, int x, int y) {
 }
 
 /**
- * @original Font_DrawHUDText (MAINDOS_32BIT.EXE @ 0x00043d60, geputget.c)
+ * @original Font_DrawHUDText (MAINDOS.EXE @ 0x00043d60, geputget.c)
  * @fidelity EXACT
  * @notes MAINDOS @ 0x00043d60. Direct 8bpp bitmap font rasterizer blitting characters from IGNITION.FNT
  *        directly into the target framebuffer with stride, height, spacing, and color offset.
@@ -464,7 +464,7 @@ void Font_DrawHUDText(int x, int y, const char *text, uint8_t *framebuffer, int 
 extern void BootLog(const char *msg);
 
 /**
- * @original Load_SystemGraphicsAndFonts (MAINDOS_32BIT.EXE @ 0x00021860, geputget.c)
+ * @original Load_SystemGraphicsAndFonts (MAINDOS.EXE @ 0x00021860, geputget.c)
  * @fidelity EXACT
  */
 void Load_SystemGraphicsAndFonts(void) {
@@ -518,7 +518,7 @@ void Load_SystemGraphicsAndFonts(void) {
 }
 
 /**
- * @original Font_LoadHUDFonts (MAINDOS_32BIT.EXE @ 0x000240f4, geputget.c)
+ * @original Font_LoadHUDFonts (MAINDOS.EXE @ 0x000240f4, geputget.c)
  * @fidelity EXACT
  */
 void Font_LoadHUDFonts(void) {
@@ -579,7 +579,7 @@ void Font_LoadHUDFonts(void) {
 }
 
 /**
- * @original Track_LoadOverlayGfx (MAINDOS_32BIT.EXE @ 0x000243e0, geputget.c)
+ * @original Track_LoadOverlayGfx (MAINDOS.EXE @ 0x000243e0, geputget.c)
  * @fidelity EXACT
  */
 void Track_LoadOverlayGfx(void) {

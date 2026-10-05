@@ -1,6 +1,6 @@
-# Master Global Variable & Memory Map (`MAINDOS_32BIT.EXE`)
+# Master Global Variable & Memory Map (`MAINDOS.EXE`)
 
-This table documents the global memory addresses in the data segments (`.data`, `.rdata`, `.bss`) of `MAINDOS_32BIT.EXE` (`0x00400000` base address), their types, purpose, and engine context.
+This table documents the global memory addresses in the data segments (`.data`, `.rdata`, `.bss`) of `MAINDOS.EXE`, their types, purpose, and engine context.
 
 | Address | Type | Name | Purpose |
 | :--- | :--- | :--- | :--- |
@@ -269,7 +269,7 @@ This table documents the global memory addresses in the data segments (`.data`, 
 
 ## Authentic DOS Linear Memory Map (DPMI Runtime)
 
-These linear addresses correspond directly to runtime DOS addresses in `MAINDOS_32BIT.EXE` and are verified by the memory scraping harness (`tools/runtime_differ.py`):
+These linear addresses correspond directly to runtime DOS addresses in `MAINDOS.EXE` and are verified by the memory scraping harness (`tools/runtime_differ.py`):
 
 | Linear Address | Type | Name | Purpose |
 | :--- | :--- | :--- | :--- |

@@ -2,7 +2,7 @@
 """
 tools/verify_matching.py
 Automated Batch Decompilation Matching & Verification Tool for Racing Dynamite.
-Verifies compiled Watcom C object files against MAINDOS_32BIT.EXE.
+Verifies compiled Watcom C object files against authentic MAINDOS.EXE.
 Used in CI and local workflows to prevent regressions.
 """
 
@@ -19,7 +19,7 @@ from diff_func import diff_func
 
 def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bool = False, check_all: bool = True, strict_matching: bool = False):
     print("=======================================================================")
-    print("            MAINDOS_32BIT.EXE MATCHING VERIFICATION                    ")
+    print("               MAINDOS.EXE MATCHING VERIFICATION                       ")
     print("=======================================================================")
     
     # 0. Lint check for inline assembly in .c files
@@ -54,7 +54,7 @@ def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bo
         pass # Expected due to missing symbols but we have undefsok
 
     status_scope = "PROJECT-WIDE (ALL DECOMPILED)" if check_all else "MATCHING ONLY"
-    print(f"\n[2/2] Running byte/instruction diff against MAINDOS_32BIT.EXE ({status_scope})...")
+    print(f"\n[2/2] Running byte/instruction diff against authentic MAINDOS.EXE ({status_scope})...")
     conn = get_connection()
     cur = conn.cursor()
     
@@ -141,7 +141,7 @@ def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bo
     return True
 
 def main():
-    parser = argparse.ArgumentParser(description="MAINDOS_32BIT Decompilation Batch Verification")
+    parser = argparse.ArgumentParser(description="MAINDOS Decompilation Batch Verification")
     parser.add_argument("-m", "--module", type=str, default=None, help="Filter by module (e.g. getsurf.c)")
     parser.add_argument("-s", "--symbol", type=str, default=None, help="Filter by symbol name")
     parser.add_argument("-v", "--verbose", action="store_true", help="Show full side-by-side assembly diffs")

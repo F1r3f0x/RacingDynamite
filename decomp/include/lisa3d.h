@@ -149,5 +149,10 @@ int Cdp_DecompressRLE(CdpFile *cdp, unsigned int unused);
 void Lisa_RenderPanorama(void);
 void Lisa_DrawTexturedTriangle_Op11_Unshaded(void);
 void Lisa_DrawTexturedTriangle_Op11_Shaded(void);
+int *Lisa_InitEngineMemory(void);
+void Lisa_FreeEngineMemory(void);
+int Lisa_RenderScene(void);
+LisaReturn64 Lisa_ExecuteRasterizerCommands(void);
+void Lisa_ResetRasterizerContext(void);
 
 #endif /* LISA3D_H */

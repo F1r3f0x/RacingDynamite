@@ -73,7 +73,7 @@ void Renderer_SetOptions(Renderer3D *r, const RendererOptions *opts) {
 
 /**
  * @brief Initializes 3D renderer state, framebuffers, depth buffer, and default options.
- * @original FUN_0043e2a0 (MAINDOS_32BIT.EXE @ 0x0043e2a0, lisa3d.c)
+ * @original FUN_0043e2a0 (MAINDOS.EXE @ 0x0043e2a0, lisa3d.c)
  * @fidelity ADAPTED
  */
 bool Renderer_Init(Renderer3D *r, int width, int height) {
@@ -94,7 +94,7 @@ bool Renderer_Init(Renderer3D *r, int width, int height) {
 
 /**
  * @brief Releases renderer framebuffers and allocated depth buffers.
- * @original FUN_00412530 (MAINDOS_32BIT.EXE @ 0x00412530, main.c)
+ * @original FUN_00412530 (MAINDOS.EXE @ 0x00412530, main.c)
  * @fidelity ADAPTED
  */
 void Renderer_Shutdown(Renderer3D *r) {
@@ -107,7 +107,7 @@ void Renderer_Shutdown(Renderer3D *r) {
 
 /**
  * @brief Clears virtual framebuffer and depth buffer.
- * @original FUN_004468d0 (MAINDOS_32BIT.EXE @ 0x004468d0, lisa3d.c)
+ * @original FUN_004468d0 (MAINDOS.EXE @ 0x004468d0, lisa3d.c)
  * @fidelity ADAPTED
  */
 void Renderer_Clear(Renderer3D *r, uint8_t clear_color, float clear_depth) {
@@ -148,7 +148,7 @@ typedef struct {
 
 /**
  * @brief Transforms 3D vertex to camera space, applies near/far clipping and perspective projection.
- * @original FUN_00449e70 (MAINDOS_32BIT.EXE @ 0x00449e70, lisa3d.c)
+ * @original FUN_00449e70 (MAINDOS.EXE @ 0x00449e70, lisa3d.c)
  * @fidelity ADAPTED
  */
 static bool ProjectVertex(const Renderer3D *r, const Camera3D *cam,
@@ -181,10 +181,10 @@ static bool ProjectVertex(const Renderer3D *r, const Camera3D *cam,
 
 /**
  * @brief Rasterizes single 3D triangle with perspective texture mapping, shading, and alpha/shadow blend.
- * @original FUN_0044d550 (MAINDOS_32BIT.EXE @ 0x0044d550, lisa3d.c)
- * @original FUN_00452800 (MAINDOS_32BIT.EXE @ 0x00452800, lisa3d.c)
- * @original FUN_004537dc (MAINDOS_32BIT.EXE @ 0x004537dc, lisa3d.c)
- * @original FUN_0044f0e9 (MAINDOS_32BIT.EXE @ 0x0044f0e9, lisa3d.c)
+ * @original FUN_0044d550 (MAINDOS.EXE @ 0x0044d550, lisa3d.c)
+ * @original FUN_00452800 (MAINDOS.EXE @ 0x00452800, lisa3d.c)
+ * @original FUN_004537dc (MAINDOS.EXE @ 0x004537dc, lisa3d.c)
+ * @original FUN_0044f0e9 (MAINDOS.EXE @ 0x0044f0e9, lisa3d.c)
  * @fidelity ADAPTED
  * @deviation DEV-005 (1/Z depth buffer precision vs authentic 6,000 depth buckets)
  * @fix_category FIX_CAT_RENDERER
@@ -332,16 +332,16 @@ void Renderer_DrawPlacedObjects(Renderer3D *r, const Camera3D *cam, const PlcDat
 
 /**
  * @brief Renders all scenery and track meshes placed by .PLC file across two passes.
- * @original FUN_00416250 (MAINDOS_32BIT.EXE @ 0x00416250, main.c)
- * @original FUN_004466d0 (MAINDOS_32BIT.EXE @ 0x004466d0, lisa3d.c)
- * @original FUN_00448e70 (MAINDOS_32BIT.EXE @ 0x00448e70, lisa3d.c)
- * @original FUN_0044b480 (MAINDOS_32BIT.EXE @ 0x0044b480, lisa3d.c)
- * @original FUN_0044c1f0 (MAINDOS_32BIT.EXE @ 0x0044c1f0, lisa3d.c)
- * @original LAB_0044caa0 (MAINDOS_32BIT.EXE @ 0x0044caa0, lisa3d.c)
- * @original LAB_0044cac0 (MAINDOS_32BIT.EXE @ 0x0044cac0, lisa3d.c)
- * @original LAB_0044cae0 (MAINDOS_32BIT.EXE @ 0x0044cae0, lisa3d.c)
- * @original LAB_0044cb00 (MAINDOS_32BIT.EXE @ 0x0044cb00, lisa3d.c)
- * @original FUN_0044cb20 (MAINDOS_32BIT.EXE @ 0x0044cb20, lisa3d.c)
+ * @original FUN_00416250 (MAINDOS.EXE @ 0x00416250, main.c)
+ * @original FUN_004466d0 (MAINDOS.EXE @ 0x004466d0, lisa3d.c)
+ * @original FUN_00448e70 (MAINDOS.EXE @ 0x00448e70, lisa3d.c)
+ * @original FUN_0044b480 (MAINDOS.EXE @ 0x0044b480, lisa3d.c)
+ * @original FUN_0044c1f0 (MAINDOS.EXE @ 0x0044c1f0, lisa3d.c)
+ * @original LAB_0044caa0 (MAINDOS.EXE @ 0x0044caa0, lisa3d.c)
+ * @original LAB_0044cac0 (MAINDOS.EXE @ 0x0044cac0, lisa3d.c)
+ * @original LAB_0044cae0 (MAINDOS.EXE @ 0x0044cae0, lisa3d.c)
+ * @original LAB_0044cb00 (MAINDOS.EXE @ 0x0044cb00, lisa3d.c)
+ * @original FUN_0044cb20 (MAINDOS.EXE @ 0x0044cb20, lisa3d.c)
  * @fidelity ADAPTED
  */
 void Renderer_DrawTrackMesh(Renderer3D *r, const Camera3D *cam, const MshData *msh, const PlcData *plc) {
@@ -624,7 +624,7 @@ static const uint8_t s_car_fallback_colors[CAR_ARCHETYPE_COUNT] = {
 
 /**
  * @brief Renders vehicle 3D model with chassis roll/pitch/yaw transforms and ground alignment.
- * @original FUN_0041d190 (MAINDOS_32BIT.EXE @ 0x0041d190, main.c / lisa3d.c)
+ * @original FUN_0041d190 (MAINDOS.EXE @ 0x0041d190, main.c / lisa3d.c)
  * @fidelity EXTENDED
  * @deviation DEV-002 (Tire contact vertex alignment)
  * @fix_category FIX_CAT_ELEVATION
@@ -773,7 +773,7 @@ void Renderer_DrawCar(Renderer3D *r, const Camera3D *cam, const MshData *cars_ms
 
 /**
  * @brief Prints Lisa 2 Development System build banner and timestamp.
- * @original FUN_0045b4f0 (MAINDOS_32BIT.EXE @ 0x0045b4f0, lisa3d.c)
+ * @original FUN_0045b4f0 (MAINDOS.EXE @ 0x0045b4f0, lisa3d.c)
  * @fidelity EXACT
  */
 void Renderer_PrintVersion(void) {
@@ -783,7 +783,7 @@ void Renderer_PrintVersion(void) {
 
 /**
  * @brief Renders 360-degree cylindrical horizon backdrop sampling 64KB (256x256) .PAN texture.
- * @original FUN_00438210 (MAINDOS_32BIT.EXE @ 0x00438210, lisa3d.c)
+ * @original FUN_00438210 (MAINDOS.EXE @ 0x00438210, lisa3d.c)
  * @fidelity ADAPTED
  */
 void Renderer_RenderPanorama(Renderer3D *r, const Camera3D *cam, const uint8_t *pan_pixels) {

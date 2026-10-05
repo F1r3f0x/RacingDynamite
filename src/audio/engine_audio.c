@@ -25,7 +25,7 @@
 
 /**
  * @brief Load ENGINE.INF curve tables and 00_A.WAV / 01_A.WAV for a car.
- * @original FUN_0041f9b0 (MAINDOS_32BIT.EXE @ 0x0041f9b0, main.c)
+ * @original FUN_0041f9b0 (MAINDOS.EXE @ 0x0041f9b0, main.c)
  * @fidelity ADAPTED
  */
 bool EngineAudio_Init(EngineAudio *ea, const char *car_dir) {
@@ -91,7 +91,7 @@ bool EngineAudio_Init(EngineAudio *ea, const char *car_dir) {
 
 /**
  * @brief Update engine audio pitch and volume crossfade based on vehicle speed.
- * @original FUN_004452c0 (MAINDOS_32BIT.EXE @ 0x004452c0, main.c)
+ * @original FUN_004452c0 (MAINDOS.EXE @ 0x004452c0, main.c)
  * @fidelity ADAPTED
  * @deviation DEV-006 (High-RPM pitch curve safety clamp)
  * @fix_category FIX_CAT_AUDIO

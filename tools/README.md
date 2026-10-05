@@ -56,7 +56,7 @@ uv run python tools/<script_name>.py [args]
 | :--- | :--- |
 | **`verify_fidelity.py`** | Automated Fidelity & Change Tracking System (FCTS) auditor. Validates bidirectional consistency between `docs/ghidra/functions.md`, `docs/tracking/deviations.md`, and C source code annotations (`@original`, `@fidelity`, `@deviation`, `@fix_category`). Generates parity dashboard and returns non-zero on broken references. |
 | **`verify_tab_formula.py`** | Verifies the mathematical formula for `.TAB` shading matrix against original binary behavior. |
-| **`verify_all_game_strings.py`** | Validates game strings in C code against the string table extracted from `MAINDOS_32BIT.EXE`. |
+| **`verify_all_game_strings.py`** | Validates game strings in C code against font tables in `MAINDOS.EXE`. |
 | **`verify_screens.py`** | Verifies UI screen coordinates, button positions, and layout dimensions. |
 
 ---
@@ -90,7 +90,7 @@ Central tracking interface for decompiling **`MAINDOS.EXE`**:
   * `uv run python tools/db.py dump-sql`: Dumps database to version-controlled `database/dump.sql`.
   * `uv run python tools/db.py dashboard`: Generates the interactive HTML progress dashboard (`dashboard.html`).
   * `uv run python tools/db.py query "<SQL>"`: Runs ad-hoc SQL queries.
-* **`tools/diff_func.py`**: Instruction-by-instruction bytecode comparison tool between `MAINDOS_32BIT.EXE` and Watcom-compiled COFF objects in `build/decomp/`.
+* **`tools/diff_func.py`**: Instruction-by-instruction bytecode comparison tool between authentic `MAINDOS.EXE` and Watcom-compiled COFF objects in `build/decomp/`.
   * Usage: `uv run python tools/diff_func.py <symbol_name> <dos_addr> <byte_size> [module.c]`
 
 ---

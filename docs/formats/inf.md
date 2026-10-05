@@ -36,7 +36,7 @@ typedef struct {
 
 ## 2. Ghidra Decompilation & Binary Verification
 
-In `MAINDOS_32BIT.EXE`, `ENGINE.INF` is loaded during race sound initialization in `FUN_0041f9b0` (`Sound_Init`):
+In `MAINDOS.EXE`, `ENGINE.INF` is loaded during race sound initialization in `FUN_0041f9b0` (`Sound_Init`):
 
 ```c
 // Decompiled snippet from FUN_0041f9b0 (0x0041f9b0)

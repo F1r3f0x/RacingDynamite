@@ -26,7 +26,7 @@
 
 /**
  * @brief Loads and parses .LFT/.FNT font headers, character widths, and raster glyphs.
- * @original FUN_00456270 (MAINDOS_32BIT.EXE @ 0x00456270, geputget.c)
+ * @original FUN_00456270 (MAINDOS.EXE @ 0x00456270, geputget.c)
  * @fidelity ADAPTED
  */
 LftFont *Lft_LoadFromFile(const char *filepath) {
@@ -148,7 +148,7 @@ void Lft_Free(LftFont *font) {
 
 /**
  * @brief 2D bitmap font rasterizer blitting characters to 8bpp buffer.
- * @original FUN_004133d0 (MAINDOS_32BIT.EXE @ 0x004133d0, geputget.c)
+ * @original FUN_004133d0 (MAINDOS.EXE @ 0x004133d0, geputget.c)
  * @fidelity ADAPTED
  */
 void Font_DrawText(uint8_t *framebuffer, int stride, const LftFont *font, int x, int y, const char *text, uint8_t color_offset) {

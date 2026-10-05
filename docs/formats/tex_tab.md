@@ -15,7 +15,7 @@ Ignition relies on fixed-size 64KB and 1MB binary tables to optimize 8-bit softw
   * `ICELAND.TEX`: **1,065,088 bytes** ($16.25$ pages; uses 17 pages $0\dots 16$).
   * `JAPAN.TEX`: **1,032,192 bytes** ($15.75$ pages; page 15 has 192 active rows = 49,152 bytes, saving 16,384 unused bytes).
 * **Engine Memory Allocation (`Texture_LoadAllPages` `0x00419d10`)**:
-  `MAINDOS_32BIT.EXE` rounds the allocation size up to the next 64KB multiple:
+  `MAINDOS.EXE` rounds the allocation size up to the next 64KB multiple:
   $$\text{alloc\_size} = (\text{file\_length} + \text{0xFFFF}) \ \& \ \sim\text{0xFFFF}$$
   The file is read directly from byte offset 0 into the buffer.
 * **Polygon Page Addressing (`poly->extra`)**:
@@ -46,7 +46,7 @@ Ignition relies on fixed-size 64KB and 1MB binary tables to optimize 8-bit softw
   where:
   * `light_level`: 0 = full bright, ramping to 63 = maximum darkness / shadow.
   * Slices 0 and 64 are full bright identity (`tab[c * 256 + 64] == c` for all 256 palette entries). Slices 64..255 remain identity.
-  * **Opcode 0x11** (Track Mesh Polygons): In Lisa3D (`MAINDOS_32BIT.EXE` `0x004559a8`), track scenery and road triangles bypass `.TAB` shading completely and blit texels directly, guaranteeing crisp, vivid retro texturing without palette degradation.
+  * **Opcode 0x11** (Track Mesh Polygons): In Lisa3D (`MAINDOS.EXE` `0x004559a8`), track scenery and road triangles bypass `.TAB` shading completely and blit texels directly, guaranteeing crisp, vivid retro texturing without palette degradation.
   * **Opcode 0x15 & 0x17** (Dynamic Gouraud / Car Shading): Evaluates vertex lighting and applies `.TAB` color ramp lookups.
 
 ---
@@ -61,7 +61,7 @@ Ignition relies on fixed-size 64KB and 1MB binary tables to optimize 8-bit softw
   where:
   * `texel`: 8-bit foreground texel sampled from the texture page ($0\dots 255$).
   * `bg_pixel`: 8-bit destination pixel already residing in the framebuffer ($0\dots 255$).
-* **Opcode Dispatch (`MAINDOS_32BIT.EXE` `0x0044cac0` & `0x0044cb00`)**:
+* **Opcode Dispatch (`MAINDOS.EXE` `0x0044cac0` & `0x0044cb00`)**:
   * **Opcode `0x11`**: Standard opaque textured polygons.
   * **Opcode `0x12, 0x16`**: Standard 1-bit color key 0 discard (transparent cutout).
   * **Opcode `0x13, 0x17`**: Shadow / Alpha blend polygons. Pushes `DAT_0063b5f0` (`.SHD` table) into the triangle bucket rasterizer.
@@ -104,4 +104,4 @@ DAT_005530f8 = (void*)((int)DAT_005530f8 + (int)g_pActiveTEX);
 ```
 
 > [!NOTE]
-> The exact filenames for the 4th and 5th sub-pages require reading the string data at `DAT_00497260` and `DAT_00497280` from `MAINDOS_32BIT.EXE`. These are confirmed present in the binary but not yet decoded to their full path strings.
+> The exact filenames for the 4th and 5th sub-pages require reading the string data at `DAT_00497260` and `DAT_00497280` from `MAINDOS.EXE`. These are confirmed present in the binary but not yet decoded to their full path strings.

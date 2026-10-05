@@ -7,7 +7,7 @@
 #include "getsurf.h"
 #include "mem.h"
 
-/* Global collision variables matching MAINDOS_32BIT.EXE memory */
+/* Global collision variables matching MAINDOS.EXE memory */
 void *g_pActiveSRF = NULL;
 SrfCell *g_pSRF_Grid = NULL;
 SrfTriangle *g_pSRF_Triangles = NULL;
@@ -21,7 +21,7 @@ int g_SRF_GridStrideX = 0;
 int g_SRF_GridStrideZ = 0;
 
 /**
- * Surface_LoadSRF (MAINDOS_32BIT.EXE @ 0x0001FEE0)
+ * Surface_LoadSRF (MAINDOS.EXE @ 0x0001FEE0)
  * Loads .SRF track collision surface from disk and converts relative offsets to pointers.
  */
 int Surface_LoadSRF(const char *filename, void *scene_objects) {
@@ -85,7 +85,7 @@ int Surface_LoadSRF(const char *filename, void *scene_objects) {
 }
 
 /**
- * Surface_FreeSRF (MAINDOS_32BIT.EXE @ 0x0002002C)
+ * Surface_FreeSRF (MAINDOS.EXE @ 0x0002002C)
  * Frees the current active surface.
  */
 void Surface_FreeSRF(void) {
@@ -97,7 +97,7 @@ void Surface_FreeSRF(void) {
 }
 
 /**
- * Surface_GetTriangleHeight (MAINDOS_32BIT.EXE @ 0x00020BBC)
+ * Surface_GetTriangleHeight (MAINDOS.EXE @ 0x00020BBC)
  * Evaluates the triangle plane height at the apex: ((-y0 - y1 - y2) / 3) + obj->pos_y
  */
 int Surface_GetTriangleHeight(SurfaceHeightContext *ctx) {
@@ -140,7 +140,7 @@ void *Surface_TestTrianglePositiveDZ(int count, int qx, int qz, SrfTriangle **ta
 }
 
 /**
- * Surface_TestTriangleNegativeDZ (MAINDOS_32BIT.EXE @ 0x00020C81)
+ * Surface_TestTriangleNegativeDZ (MAINDOS.EXE @ 0x00020C81)
  * 2D trapezoidal slope span test for table1 triangles (dz < 0).
  */
 void *Surface_TestTriangleNegativeDZ(int count, int qx, int qz, SrfTriangle **table, void *out_hits) {
@@ -196,7 +196,7 @@ static int s_scratch_obj_field20;
 static int s_scratch_obj_field1e;
 
 /**
- * Surface_Raycast (MAINDOS_32BIT.EXE @ 0x00020814)
+ * Surface_Raycast (MAINDOS.EXE @ 0x00020814)
  * Evaluates spatial grid cell, queries triangle spans, selects best surface,
  * computes face normal via cross product, and transforms triangle vertices to world space.
  */
