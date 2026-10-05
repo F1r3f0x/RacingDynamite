@@ -5771,6 +5771,83 @@ static void Lisa_RasterizeTexturedTriangle(
     }
 }
 
+/*
+ * Lisa_RasterizeBillboard:
+ * Authentic 1997 scaled sprite / billboard rasterizer for Opcode 7 (0x07):
+ * Transforms 4 billboard corners via 2x2 matrix and renders as two textured triangles.
+ */
+static void Lisa_RasterizeBillboard(const int *cmd) {
+    const int *ebp_params;
+    const int *matrix;
+    int center_x, center_y;
+    int du_center, dv_center;
+    int u0, v0, u1, v1;
+    const uint8_t *texture;
+    int m00, m01, m10, m11;
+    int w, h;
+    int c0_x, c0_y;
+    int c1_x, c1_y;
+    int c2_x, c2_y;
+    int c3_x, c3_y;
+
+    if (cmd == NULL) return;
+
+    ebp_params = (const int *)cmd[1];
+    matrix = (const int *)cmd[2];
+    if (ebp_params == NULL || matrix == NULL) return;
+
+    center_x = cmd[3];
+    center_y = cmd[4];
+
+    du_center = ebp_params[0];
+    dv_center = ebp_params[1];
+    u0 = ebp_params[2];
+    v0 = ebp_params[3];
+    u1 = ebp_params[4];
+    v1 = ebp_params[5];
+    texture = (const uint8_t *)ebp_params[6];
+
+    m00 = matrix[0];
+    m01 = matrix[1];
+    m10 = matrix[2];
+    m11 = matrix[3];
+
+    w = u1 - u0;
+    h = v1 - v0;
+
+    /* Corner 0: (-du_center, -dv_center) */
+    c0_x = center_x + (int)(((double)-du_center * m00 + (double)-dv_center * m10) / 65536.0);
+    c0_y = center_y + (int)(((double)-du_center * m01 + (double)-dv_center * m11) / 65536.0);
+
+    /* Corner 1: (w - du_center, -dv_center) */
+    c1_x = center_x + (int)(((double)(w - du_center) * m00 + (double)-dv_center * m10) / 65536.0);
+    c1_y = center_y + (int)(((double)(w - du_center) * m01 + (double)-dv_center * m11) / 65536.0);
+
+    /* Corner 2: (w - du_center, h - dv_center) */
+    c2_x = center_x + (int)(((double)(w - du_center) * m00 + (double)(h - du_center) * m10) / 65536.0);
+    c2_y = center_y + (int)(((double)(w - du_center) * m01 + (double)(h - du_center) * m11) / 65536.0);
+
+    /* Corner 3: (-du_center, h - du_center) */
+    c3_x = center_x + (int)(((double)-du_center * m00 + (double)(h - dv_center) * m10) / 65536.0);
+    c3_y = center_y + (int)(((double)-du_center * m01 + (double)(h - dv_center) * m11) / 65536.0);
+
+    /* Render Triangle 1: c0, c1, c2 */
+    Lisa_RasterizeTexturedTriangle(
+        c0_x, c0_y, u0, v0, 0,
+        c1_x, c1_y, u1, v0, 0,
+        c2_x, c2_y, u1, v1, 0,
+        texture, (g_LisaShadingEnabled != 0)
+    );
+
+    /* Render Triangle 2: c0, c2, c3 */
+    Lisa_RasterizeTexturedTriangle(
+        c0_x, c0_y, u0, v0, 0,
+        c2_x, c2_y, u1, v1, 0,
+        c3_x, c3_y, u0, v1, 0,
+        texture, (g_LisaShadingEnabled != 0)
+    );
+}
+
 static void Lisa_RasterizeSolidTriangle(const int *node) {
     int v0_x, v0_y, v1_x, v1_y, v2_x, v2_y;
     int top_x, top_y, mid_x, mid_y, bot_x, bot_y;
@@ -6003,9 +6080,25 @@ LisaReturn64 Lisa_ExecuteRasterizerCommands(void) {
       int opcode = node[0];
 
       switch (opcode) {
+          case 0x07: /* Opcode 7: Scaled Billboard / Sprite Quad */
+              Lisa_RasterizeBillboard(node);
+              break;
+
           case 0x0F: /* Opcode 15: Solid / Flat Shaded Triangle */
               Lisa_RasterizeSolidTriangle(node);
               break;
+
+          case 0x13: { /* Opcode 19: Solid Triangle variant */
+              int fake_node[12];
+              fake_node[0] = 0x0F;
+              fake_node[1] = node[1]; fake_node[2] = node[2];
+              fake_node[4] = node[3]; fake_node[5] = node[4];
+              fake_node[7] = node[5]; fake_node[8] = node[6];
+              ((uint8_t *)fake_node)[0x28] = (uint8_t)node[7];
+              ((uint8_t *)fake_node)[0x2d] = 0;
+              Lisa_RasterizeSolidTriangle(fake_node);
+              break;
+          }
 
           case 0x11: /* Opcode 17: Standard Unshaded Textured Triangle */
           case 0x16: { /* Opcode 22: Mipmapped Unshaded Textured Triangle */
