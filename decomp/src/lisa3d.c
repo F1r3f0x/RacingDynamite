@@ -5776,6 +5776,68 @@ static void Lisa_RasterizeTexturedTriangle(
  * Authentic 1997 scaled sprite / billboard rasterizer for Opcode 7 (0x07):
  * Transforms 4 billboard corners via 2x2 matrix and renders as two textured triangles.
  */
+/*
+ * Lisa_RasterizeLine:
+ * Authentic 1997 line rasterizer for Opcode 11 (0x0B) & Opcode 12 (0x0C):
+ * Skidmarks, particle vectors, and HUD lines with Bresenham algorithm and clipping.
+ */
+static void Lisa_RasterizeLine(const int *node) {
+    int x0, y0, x1, y1;
+    uint8_t color;
+    uint8_t shade_bank;
+    uint8_t shade_idx;
+    uint8_t *fb;
+    const int *pitch_table;
+    int min_clip_x, max_clip_x, min_clip_y, max_clip_y;
+    int dx, dy, sx, sy, err, e2;
+
+    if (node == NULL || g_pVirtualFramebuffer == NULL) return;
+
+    fb = g_pVirtualFramebuffer;
+    pitch_table = (const int *)&g_LisaScreenPitch;
+
+    shade_bank = ((const uint8_t *)node)[0x1c];
+    shade_idx = ((const uint8_t *)node)[0x21];
+    if (g_pLisaActiveShading != NULL) {
+        color = ((const uint8_t *)g_pLisaActiveShading)[((int)shade_bank << 8) | shade_idx];
+    } else {
+        color = shade_bank;
+    }
+
+    min_clip_x = g_LisaViewport.min_x;
+    max_clip_x = g_LisaViewport.max_x;
+    min_clip_y = g_LisaViewport.min_y;
+    max_clip_y = g_LisaViewport.max_y;
+
+    x0 = node[1] >> 8; y0 = node[2] >> 8;
+    x1 = node[4] >> 8; y1 = node[5] >> 8;
+
+    dx = (x1 > x0) ? (x1 - x0) : (x0 - x1);
+    dy = (y1 > y0) ? (y1 - y0) : (y0 - y1);
+    sx = (x0 < x1) ? 1 : -1;
+    sy = (y0 < y1) ? 1 : -1;
+    err = dx - dy;
+
+    while (1) {
+        if (x0 >= min_clip_x && x0 <= max_clip_x && y0 >= min_clip_y && y0 <= max_clip_y) {
+            int row_off = (pitch_table[1] != 0) ? pitch_table[y0] : (y0 * 320);
+            fb[row_off + x0] = color;
+        }
+
+        if (x0 == x1 && y0 == y1) break;
+
+        e2 = err * 2;
+        if (e2 > -dy) {
+            err -= dy;
+            x0 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
 static void Lisa_RasterizeBillboard(const int *cmd) {
     const int *ebp_params;
     const int *matrix;
@@ -6082,6 +6144,11 @@ LisaReturn64 Lisa_ExecuteRasterizerCommands(void) {
       switch (opcode) {
           case 0x07: /* Opcode 7: Scaled Billboard / Sprite Quad */
               Lisa_RasterizeBillboard(node);
+              break;
+
+          case 0x0B: /* Opcode 11: 2D Line (Tire skidmarks, vectors) */
+          case 0x0C: /* Opcode 12: Line variant */
+              Lisa_RasterizeLine(node);
               break;
 
           case 0x0F: /* Opcode 15: Solid / Flat Shaded Triangle */
