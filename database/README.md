@@ -46,6 +46,15 @@ hash is authenticated at import time; the current auditor's automatic original
 extent/hash comparison covers FPO records, so rerun the feature's pinned-byte
 analysis for non-FPO freshness.
 
+After recovering a previously unknown extent, use
+`db.py describe <RVA> --size <bytes> --evidence <document> --confidence <explanation>`.
+This authenticates and hashes the file-backed extent without promoting its stage.
+Entries in a section without the execute flag also require `--allow-nonexecutable`.
+The command rejects replacement of an already established size; correcting such
+an extent requires a separately reviewed migration. Seven isolated candidate tests
+cover import and extent description. See the [triangle evidence](../docs/ghidra/windows_triangle.md)
+for newly bounded native edge/gradient helpers and original-only rendering scope.
+
 `migrate-windows` replaces the recognized legacy DOS database only after verifying
 the original fingerprint and imported Windows claims. It atomically installs the
 replacement and is a no-op on the already-active Windows store. It rejects unknown

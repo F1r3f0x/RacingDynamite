@@ -68,6 +68,47 @@ class CandidateTests(unittest.TestCase):
             self.assertEqual(self.invoke('0x10a0'), 1)
             self.assertEqual(self.invoke('0x10a0', '--allow-nonexecutable'), 0)
 
+    def describe(self, *args):
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            return db.main(['describe', '0x10a0', *args])
+
+    def test_describe_authenticates_unknown_extent_without_promoting_stage(self):
+        self.assertEqual(self.invoke('0x10a0'), 0)
+        self.assertEqual(self.describe('--size','8','--evidence','docs/ghidra/evidence.md',
+            '--confidence','closed control flow'), 0)
+        with tracking.connect(self.root) as conn:
+            row = conn.execute('SELECT * FROM functions WHERE rva=4256').fetchone()
+            self.assertEqual(row['byte_size'],8)
+            self.assertEqual(row['routine_sha256'],tracking.sha(bytes(8)))
+            self.assertEqual(row['analysis_stage'],'unidentified')
+            self.assertEqual(row['extent_origin'],'authenticated-file-analysis')
+        before = (self.root/'database/decomp.db').read_bytes()
+        self.assertEqual(self.describe('--size','12','--evidence','docs/ghidra/evidence.md',
+            '--confidence','replacement'),1)
+        self.assertEqual((self.root/'database/decomp.db').read_bytes(),before)
+
+    def test_describe_extent_guards_are_atomic(self):
+        self.assertEqual(self.invoke('0x10a0'),0)
+        before = (self.root/'database/decomp.db').read_bytes()
+        required = ['--evidence','docs/ghidra/evidence.md','--confidence','test']
+        for args in (['--size','0',*required], ['--size','8'],
+                ['--size','1024',*required], ['--size','8','--evidence','missing.md','--confidence','test']):
+            self.assertEqual(self.describe(*args),1)
+            self.assertEqual((self.root/'database/decomp.db').read_bytes(),before)
+        binary = self.root/'Ignition/Ignition/IGN_WIN.EXE'
+        binary.write_bytes(binary.read_bytes()[:-1]+b'\xff')
+        self.assertEqual(self.describe('--size','8',*required),1)
+        self.assertEqual((self.root/'database/decomp.db').read_bytes(),before)
+
+    def test_describe_nonexecutable_extent_requires_opt_in(self):
+        self.assertEqual(self.invoke('0x10a0'),0)
+        candidates, sections = tracking.pe_inventory((self.root/'Ignition/Ignition/IGN_WIN.EXE').read_bytes())
+        sections[0]['executable'] = False
+        args = ['--size','8','--evidence','docs/ghidra/evidence.md','--confidence','test']
+        with patch.object(db,'pe_inventory',return_value=(candidates,sections)):
+            self.assertEqual(self.describe(*args),1)
+            self.assertEqual(self.describe(*args,'--allow-nonexecutable'),0)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,5 +1,15 @@
 # Native sprite rasterizer entry — corrected extent and integration blocker
 
+Follow-up: [triangle execution analysis](windows_triangle.md) now executes the real
+triangle through return and both transformed calls through outer return. It checks
+312 unclipped expression cases, 60 clipped execution cases and 24 transformed cases
+(ten with combined framebuffer expressions). First-call live preparation scratch
+preservation is observed in those fixtures. Complete C reconstruction is blocked
+on clipped edge splitting at RVA `0x24F270` and its continuation, with the outer ESI
+integration still unresolved. The evidence below describes the preceding feature
+and its then-current first-call stopping boundary; it is retained as historical
+scope, not a current claim that no transformed framebuffer bytes have executed.
+
 Recovered 2026-10-07 from the authenticated standard Windows release
 `Ignition/Ignition/IGN_WIN.EXE`, 915,968 bytes, SHA-256
 `7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782`.

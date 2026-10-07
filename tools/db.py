@@ -37,6 +37,8 @@ def main(argv=None):
     describe.add_argument('--notes')
     describe.add_argument('--fidelity',choices=['unknown','EXACT','ADAPTED','EXTENDED','INFRASTRUCTURE'])
     describe.add_argument('--confidence')
+    describe.add_argument('--size', type=lambda x: int(x, 0), help='Authenticate a previously unknown extent; requires evidence and confidence')
+    describe.add_argument('--allow-nonexecutable', action='store_true')
     args = parser.parse_args(argv)
     try:
         if args.command=='migrate-windows':
@@ -76,12 +78,31 @@ def main(argv=None):
             print('Imported candidate only; use describe and set-status to record actual findings.')
         else:
             with connect(writable=True) as conn:
-                fn = conn.execute('SELECT id FROM functions WHERE rva=?',(args.rva,)).fetchone()
+                fn = conn.execute('SELECT * FROM functions WHERE rva=?',(args.rva,)).fetchone()
                 if not fn:
                     raise ValueError('Unknown Windows RVA; export/import new candidates from authentic analysis first')
                 if args.command=='set-status':
                     conn.execute('UPDATE functions SET analysis_stage=? WHERE id=?',(args.stage,fn['id']))
                 else:
+                    if args.size is not None:
+                        if args.size <= 0 or not args.evidence or not args.confidence:
+                            raise ValueError('Positive extent, evidence and confidence required')
+                        if fn['byte_size'] is not None and fn['byte_size'] != args.size:
+                            raise ValueError('Cannot replace an established extent with describe --size')
+                        target, data = load_target()
+                        _, sections = pe_inventory(data)
+                        if not inside(ROOT, args.evidence).is_file():
+                            raise ValueError('Extent evidence must exist')
+                        section = next((s for s in sections if
+                            (s['executable'] or args.allow_nonexecutable) and
+                            s['rva'] <= args.rva and args.rva+args.size <=
+                            s['rva']+min(s['virtual_size'],s['raw_size'])), None)
+                        if section is None:
+                            raise ValueError('Extent must be file-backed; non-executable requires opt-in')
+                        offset = section['raw_offset']+args.rva-section['rva']
+                        conn.execute('''UPDATE functions SET byte_size=?,routine_sha256=?,
+                            extent_origin=? WHERE id=?''', (args.size,sha(data[offset:offset+args.size]),
+                            fn['extent_origin'] if fn['byte_size'] is not None else 'authenticated-file-analysis',fn['id']))
                     mapping = {'name':'symbol_name','classification':'classification','source':'source_path','evidence':'evidence_path',
                                'abi':'abi','notes':'notes','fidelity':'fidelity','confidence':'extent_confidence'}
                     for argument,column in mapping.items():

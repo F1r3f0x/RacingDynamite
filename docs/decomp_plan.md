@@ -1,6 +1,17 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
-Latest bounded follow-up (2026-10-07): [native rasterizer analysis](ghidra/windows_sprite_rasterizer.md)
+Latest bounded follow-up (2026-10-07): [triangle execution analysis](ghidra/windows_triangle.md)
+recovers the unclipped triangle gradients, edge records, span ordering and persistent
+scratch. 312 original-only expression comparisons pass; 60 clipped cases execute
+through return with repeatability/confinement checks. 24 transformed cases now execute
+both real triangle calls and the outer return, including ten combined framebuffer
+expression checks. First-call effects preserve the live corner/packet-preparation
+scratch in these fixtures. No production C, instruction equality, original-versus-C
+differential or native rendering parity is claimed. Complete reconstruction remains
+blocked on the clipped edge splitter RVA `0x24F270` and its two-segment wrapper
+continuation; the outer ESI integration boundary remains unresolved.
+
+Previous bounded follow-up (2026-10-07): [native rasterizer analysis](ghidra/windows_sprite_rasterizer.md)
 corrects RVA `0x65BB5` from a 437-byte prefix to its complete 474-byte extent,
 including the narrow-span tail. 704 original-only cases execute real untransformed
 framebuffer writes through return; 72 execute the transformed path and RVA

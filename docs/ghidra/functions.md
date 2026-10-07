@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:95be4cd5df1b9cbe3e18454d04ba7a3855c1eeda82297593a516596478668c83 -->
+<!-- snapshot:e2739accf1727e5cddb89404135944bbd4b87fe8322ce07495980767a0e1868e -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -564,13 +564,13 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045C940` | `0x0005C940` | 19 | `sub_0045C940` | unknown | unidentified | - |
 | `0x0045C960` | `0x0005C960` | 24 | `sub_0045C960` | unknown | unidentified | - |
 | `0x0045C980` | `0x0005C980` | 14 | `sub_0045C980` | unknown | unidentified | - |
-| `0x0045C990` | `0x0005C990` | 24 | `sub_0045C990` | unknown | unidentified | - |
-| `0x0045C9B0` | `0x0005C9B0` | 32 | `sub_0045C9B0` | unknown | unidentified | - |
-| `0x0045C9D0` | `0x0005C9D0` | 28 | `sub_0045C9D0` | unknown | unidentified | - |
+| `0x0045C990` | `0x0005C990` | 24 | `Gfx_SetTriangleSpanState` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0045C9B0` | `0x0005C9B0` | 32 | `Gfx_DrawTriangleSpan` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0045C9D0` | `0x0005C9D0` | 28 | `Gfx_DrawClippedTriangleSpan` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
 | `0x0045C9F0` | `0x0005C9F0` | 84 | `sub_0045C9F0` | unknown | unidentified | - |
-| `0x0045CA50` | `0x0005CA50` | 1813 | `Gfx_RasterizeTexturedTriangle` | game | named | [windows_sprite_rasterizer.md](windows_sprite_rasterizer.md) |
-| `0x0045D170` | `0x0005D170` | 1569 | `sub_0045D170` | unknown | unidentified | - |
-| `0x0045D7A0` | `0x0005D7A0` | 53 | `sub_0045D7A0` | unknown | unidentified | - |
+| `0x0045CA50` | `0x0005CA50` | 1813 | `Gfx_RasterizeTexturedTriangle` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0045D170` | `0x0005D170` | 1569 | `Gfx_RasterizeClippedTriangle` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0045D7A0` | `0x0005D7A0` | 53 | `Gfx_ComputeTriangleEdgeSlope` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
 | `0x0045D7E0` | `0x0005D7E0` | 20 | `sub_0045D7E0` | unknown | unidentified | - |
 | `0x0045D800` | `0x0005D800` | 32 | `sub_0045D800` | unknown | unidentified | - |
 | `0x0045D820` | `0x0005D820` | 28 | `sub_0045D820` | unknown | unidentified | - |
@@ -709,7 +709,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00465B20` | `0x00065B20` | 29 | `sub_00465B20` | unknown | unidentified | - |
 | `0x00465B40` | `0x00065B40` | 33 | `sub_00465B40` | unknown | unidentified | - |
 | `0x00465B70` | `0x00065B70` | 33 | `sub_00465B70` | unknown | unidentified | - |
-| `0x00465BB5` | `0x00065BB5` | 474 | `Gfx_RasterizeSpritePacket` | game | analyzed | [windows_sprite_rasterizer.md](windows_sprite_rasterizer.md) |
+| `0x00465BB5` | `0x00065BB5` | 474 | `Gfx_RasterizeSpritePacket` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
 | `0x00465D90` | `0x00065D90` | 43 | `sub_00465D90` | unknown | unidentified | - |
 | `0x00465DC0` | `0x00065DC0` | 15 | `sub_00465DC0` | unknown | unidentified | - |
 | `0x00465DD0` | `0x00065DD0` | 28 | `sub_00465DD0` | unknown | unidentified | - |
@@ -728,6 +728,9 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x004677F0` | `0x000677F0` | 179 | `sub_004677F0` | unknown | unidentified | - |
 | `0x004678B0` | `0x000678B0` | 110 | `sub_004678B0` | unknown | unidentified | - |
 | `0x00467920` | `0x00067920` | 1531 | `sub_00467920` | unknown | unidentified | - |
+| `0x00467F1C` | `0x00067F1C` | 38 | `Gfx_SetTriangleSpanRegisters` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x00467F42` | `0x00067F42` | 85 | `Gfx_DrawTriangleSpanRegisters` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x00467F97` | `0x00067F97` | 53 | `Gfx_DrawClippedTriangleSpanRegisters` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
 | `0x00468170` | `0x00068170` | 337 | `sub_00468170` | unknown | unidentified | - |
 | `0x004682D0` | `0x000682D0` | 48 | `sub_004682D0` | unknown | unidentified | - |
 | `0x00468300` | `0x00068300` | 2125 | `sub_00468300` | unknown | unidentified | - |
@@ -737,7 +740,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00468C40` | `0x00068C40` | 16 | `sub_00468C40` | unknown | unidentified | - |
 | `0x00468C50` | `0x00068C50` | 15 | `sub_00468C50` | unknown | unidentified | - |
 | `0x00468C60` | `0x00068C60` | 15 | `sub_00468C60` | unknown | unidentified | - |
-| `0x00468C70` | `0x00068C70` | 631 | `Gfx_PrepareTransformedSprite` | game | analyzed | [windows_sprite_rasterizer.md](windows_sprite_rasterizer.md) |
+| `0x00468C70` | `0x00068C70` | 631 | `Gfx_PrepareTransformedSprite` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
 | `0x00469100` | `0x00069100` | 112 | `sub_00469100` | unknown | unidentified | - |
 | `0x00469170` | `0x00069170` | 328 | `sub_00469170` | unknown | unidentified | - |
 | `0x004692C0` | `0x000692C0` | 148 | `sub_004692C0` | unknown | unidentified | - |
@@ -1021,6 +1024,13 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00478980` | `0x00078980` | 160 | `sub_00478980` | unknown | unidentified | - |
 | `0x00478A20` | `0x00078A20` | 32 | `sub_00478A20` | unknown | unidentified | - |
 | `0x00478A40` | `0x00078A40` | 187 | `sub_00478A40` | unknown | unidentified | - |
-| `0x0064EA80` | `0x0024EA80` | - | `sub_0064EA80` | unknown | unidentified | [windows_sprite_rasterizer.md](windows_sprite_rasterizer.md) |
-| `0x0064EC00` | `0x0024EC00` | - | `sub_0064EC00` | unknown | unidentified | [windows_sprite_rasterizer.md](windows_sprite_rasterizer.md) |
-| `0x0064EC40` | `0x0024EC40` | - | `sub_0064EC40` | unknown | unidentified | [windows_sprite_rasterizer.md](windows_sprite_rasterizer.md) |
+| `0x0064EA80` | `0x0024EA80` | 380 | `Gfx_ComputeTriangleTextureGradients` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0064EC00` | `0x0024EC00` | 59 | `Gfx_BuildCorrectedTriangleEdge` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0064EC40` | `0x0024EC40` | 59 | `Gfx_BuildRawTriangleEdge` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0064EFA0` | `0x0024EFA0` | 282 | `Gfx_BuildClippedCorrectedTriangleEdge` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0064F0C0` | `0x0024F0C0` | 282 | `Gfx_BuildClippedRawTriangleEdge` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0064F1E0` | `0x0024F1E0` | 51 | `Gfx_EmitRawTriangleEdgeRecords` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0064F220` | `0x0024F220` | 70 | `Gfx_EmitCorrectedTriangleEdgeRecords` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0064F270` | `0x0024F270` | 537 | `Gfx_ClipAndSplitTriangleEdge` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0064F489` | `0x0024F489` | 63 | `Gfx_ClampTriangleEdgeRightEndpoint` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0064F4D0` | `0x0024F4D0` | 199 | `Gfx_InitializeTriangleEdgeSteps` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
