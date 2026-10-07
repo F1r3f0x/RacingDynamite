@@ -1,5 +1,17 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded follow-up (2026-10-07): [Font_Load](ghidra/windows_font_load.md)
+at VA `0x00456420` / RVA `0x56420` (71 bytes) now has fresh extracted-production-C
+compilation and 327 differential comparisons: 35 null-load, 260 real-parser
+and 32 modeled-parser-return cases. The wrapper forwards both parser arguments,
+frees a nonnull buffer even on parse failure, and preserves the parser result
+across freeing. Real lazy font initialization and handle bookkeeping execute;
+file I/O, freeing and sprite creation are modeled boundaries. The existing
+C89 wrapper required no source change. Live Ghidra inspection corroborates
+local authenticated instructions and 17 callers under the user-provided active
+program assumption. Instruction equality, native resource management and native
+game parity remain unverified. Full geputget.c remains blocked by legacy dependencies.
+
 Latest bounded follow-up (2026-10-07): [Font_Parse](ghidra/windows_font_parse.md)
 at VA `0x00456270` / RVA `0x56270` (429 bytes) now has extracted-production-C
 differential coverage. All 260 cases pass with complete font/handle state,

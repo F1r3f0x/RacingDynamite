@@ -59,7 +59,7 @@ def inspect_original(pe):
         (0x5640f, 0x63f2e0)]
 
 
-def build_parser():
+def build_parser(dll=DLL, include_loader=False):
     source = (ROOT / 'decomp/src/geputget.c').read_text(encoding='utf-8-sig')
     def extract(name):
         start = source.index('int ' + name + '(')
@@ -93,14 +93,21 @@ int memcmp(const void *a, const void *b, size_t n) {
 extern void *Gfx_SpriteOp(void *desc, int op);
 '''
     unit += context + '\nconst char * const validation_fontExitContext = s_fontExitContext;\n'
-    unit += '\n'.join(extract(n) for n in ['Font_Unload', 'Font_Shutdown', 'Font_InitSystem', 'Font_Parse'])
-    path, obj = BUILD / 'font_parse_unit.c', BUILD / 'font_parse.obj'
+    names = ['Font_Unload', 'Font_Shutdown', 'Font_InitSystem', 'Font_Parse']
+    unit += '\n'.join(extract(n) for n in names)
+    stem = dll.stem.replace('_validation', '')
+    path, obj = BUILD / (stem + '_unit.c'), BUILD / (stem + '.obj')
     path.write_text(unit + '\n', encoding='utf-8')
-    for p in [obj, DLL, DLL.with_suffix('.lib'), DLL.with_suffix('.exp')]:
+    for p in [obj, dll, dll.with_suffix('.lib'), dll.with_suffix('.exp')]:
         p.unlink(missing_ok=True)
-    stub = BUILD / 'font_parse_sprite_stub.c'
-    stub_obj = BUILD / 'font_parse_sprite_stub.obj'
-    stub.write_text('void *Gfx_SpriteOp(void *desc, int op) { (void)desc; (void)op; return 0; }\n', encoding='utf-8')
+    stub = BUILD / (stem + '_boundary_stub.c')
+    stub_obj = BUILD / (stem + '_boundary_stub.obj')
+    stubs = 'void *Gfx_SpriteOp(void *desc, int op) { (void)desc; (void)op; return 0; }\n'
+    if include_loader:
+        # Deliberately cannot complete without the explicit CPU boundary model.
+        stubs += 'void *File_LoadToMemory(const char *filename) { (void)filename; for (;;) {} }\n'
+        stubs += 'int Mem_Free(int pool, void *buffer) { (void)pool; (void)buffer; for (;;) {} }\n'
+    stub.write_text(stubs, encoding='utf-8')
     stub_obj.unlink(missing_ok=True)
     cc, ld = shutil.which('clang'), shutil.which('lld-link')
     if not cc or not ld:
@@ -109,14 +116,25 @@ extern void *Gfx_SpriteOp(void *desc, int op);
         'Font_Shutdown', 'Font_Unload', 'Mem_NextHandleId', 'Mem_RegisterHandle',
         'Mem_ReleaseHandleId', 'Mem_InitHandles', 'Gfx_SpriteOp',
         'validation_fontExitContext', 'g_fileErrorLine']
+    if include_loader:
+        exports += ['Font_Load', 'File_LoadToMemory', 'Mem_Free']
     commands = [[cc, '--target=i686-pc-windows-msvc', '-std=c89', '-pedantic-errors',
         '-Wall', '-Wextra', '-Werror', '-O2', '-ffreestanding', '-fno-builtin',
         '-fno-inline', '-mno-sse', '-mno-sse2', '-I', str(ROOT / 'decomp/include'),
         '-c', str(path), '-o', str(obj)],
         [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/base:0x10000000',
-         '/out:' + str(DLL), str(obj), str(stub_obj)] + ['/export:' + n for n in exports]]
+         '/out:' + str(dll), str(obj), str(stub_obj)] + ['/export:' + n for n in exports]]
     commands.insert(1, [cc, '--target=i686-pc-windows-msvc', '-std=c89', '-pedantic-errors',
         '-Wall', '-Wextra', '-Werror', '-O2', '-c', str(stub), '-o', str(stub_obj)])
+    if include_loader:
+        # Separate translation unit prevents dead-argument optimization of unused.
+        loader_path, loader_obj = BUILD / (stem + '_wrapper.c'), BUILD / (stem + '_wrapper.obj')
+        loader_path.write_text('#include \"geputget.h\"\nextern int g_fileErrorLine;\n'
+            'extern void *File_LoadToMemory(const char *filename);\n'
+            'extern int Mem_Free(int pool, void *buffer);\n' + extract('Font_Load') + '\n', encoding='utf-8')
+        loader_obj.unlink(missing_ok=True)
+        commands.insert(1, commands[0][:-4] + ['-c', str(loader_path), '-o', str(loader_obj)])
+        commands[-1].append(str(loader_obj))
     for command in commands:
         subprocess.run(command, check=True)
     return commands

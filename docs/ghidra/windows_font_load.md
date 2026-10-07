@@ -97,27 +97,132 @@ Direct calls to `Font_Load` (`0x00456420`) in `IGN_WIN.EXE`:
 2. HUD font initialization (`0x0041ACFB` .. `0x0041AF33`):
    - Loads in-game HUD font resources for player position, speed, and lap times.
 
-## Emulation Verification
-Verified under Unicorn x86 emulation across all execution paths:
-- **Case 1: File Loading Failure (`File_LoadToMemory` returns NULL)**:
-  - Invokes `File_LoadToMemory(filename)`.
-  - On NULL return, sets `g_fileErrorLine` (`0x004BAB34`) = `1000`.
-  - Returns `-1`.
-  - Callee-saved registers (`esi`, `edi`, `ebx`, `ebp`) preserved.
-  - Stack pointer restored exactly to entry `esp + 4` (caller cleanup).
-- **Case 2: Success Path (`File_LoadToMemory` returns valid buffer)**:
-  - Invokes `File_LoadToMemory(filename)`.
-  - Invokes `Font_Parse(buffer, unused)`.
-  - Invokes `Mem_Free(0, buffer)` to release the temporary file buffer.
-  - Returns allocated font slot ID (e.g. `5`).
-  - Callee-saved registers preserved and caller stack balance maintained.
-- **Case 3: Parse Failure Path (`Font_Parse` returns -1)**:
-  - Invokes `File_LoadToMemory(filename)`.
-  - Invokes `Font_Parse(buffer, unused)` which returns `-1`.
-  - Invokes `Mem_Free(0, buffer)` (ensuring no memory leak even on parse failure).
-  - Returns `-1`.
-  - Callee-saved registers preserved and caller stack balance maintained.
+## Independently inspected provenance (2026-10-07)
 
-## Extent and Limitations
-- **Extent**: Fully reconstructed in `decomp/src/geputget.c` and declared in `decomp/include/geputget.h` with 100% functional and structural fidelity to original Windows binary instructions.
-- **Harness Status**: Direct compilation of `geputget.c` into the isolated validation DLL (`mem_validation.dll`) remains blocked by unmigrated DOS-dependent systems (`<io.h>`, `<fcntl.h>`, `File_LoadToMemory`). Isolated Unicorn emulation and instruction-level analysis confirm the routine's exact instruction behavior and ABI contract.
+The target doctor passes the authentic 915,968-byte PE fingerprint, SHA-256
+`7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782`.
+Local Capstone decoding covers all 71 bytes / 28 instructions. FPO, all three
+relative calls, the sole HIGHLOW relocation and nine-byte padding agree.
+The error dword at VA `0x004BAB34` is file-backed .data, initially zero.
+No DOS executable or original asset was modified or used as evidence.
+
+Ghidra MCP at localhost:8080 responded to bounded disassembly, decompilation
+and xref requests. Authentic IGN_WIN.EXE being loaded and active is the
+user-provided operating assumption, not an automated program fingerprint check.
+Its loader disassembly agrees with the authenticated local bytes. Ghidra's
+parser pseudocode omits the second parameter, but the instructions explicitly
+push both buffer and the forwarded dword; that instruction evidence controls.
+The live xref list contains all 17 calls listed above: eight from the routine
+starting at VA 0x00418130 and nine from VA 0x0041AC40. Each direct CALL and its
+following ADD ESP,8 are independently asserted against the PE by the verifier.
+These callers pass zero as the second argument; tests also forward arbitrary
+raw dwords. Caller names are semantic names; original source names are inferred.
+
+The existing production C89 wrapper matches this instruction-derived contract.
+No production source change was required. The EXACT annotation describes the
+recovered wrapper behavior within its stated dependency contracts; it establishes
+neither instruction equality nor complete native resource-management fidelity.
+The older unrecorded three-case emulation and 100% fidelity claims in this
+file have been replaced by the fresh, reproducible evidence below.
+
+## Resource boundaries and error handling
+
+Native dependency bodies were inspected locally and through Ghidra, without
+promoting their tracking stages or claiming their production-C validation:
+
+| Boundary | RVA / size | Routine SHA-256 |
+| --- | --- | --- |
+| File_LoadToMemory | 0x574A0 / 230 | 2a23d52a4c2588198a7749db30e5de8c2f5ecd150a65f5940dbc2a1a5db87ec3 |
+| Mem_Free | 0x5B000 / 127 | 40c455ee2388ee3160f714b07885f4cc9f3fb5401ab86cd2bea5da8749acd471 |
+
+File_LoadToMemory consumes one cdecl stack dword. It calls VA 0x004576B0
+and requires result exactly 1 (otherwise error 2030), calls VA 0x00457630
+and requires a nonzero size result (otherwise 2040), then Mem_Alloc at
+VA 0x0045AE10 with pool zero and that size (allocation failure 2050).
+It calls the fopen entry at VA 0x00469390 with the filename and mode string
+at VA 0x0047C040. A null stream sets 2000. It calls VA 0x00469D20 with
+that stream and a zeroed local structure, then fread at VA 0x00469170 with
+(buffer, 1, size, stream). A short read sets 2010 and returns null; a full
+read calls fclose at VA 0x00469100 and returns the allocated buffer.
+The early null paths contain no compensating free; the short-read path
+contains no close. Recovering these transitive bodies and native failure
+cleanup is future work. Font_Load overwrites any loader failure error with
+1000 and does not call Font_Parse or Mem_Free when the returned pointer is zero.
+
+Mem_Free consumes two cdecl stack dwords. It selects the pool through the
+pointer table at VA 0x0063C6A0, scans a 64 by 64 by 16 pointer hierarchy, and
+compares record pointers against the supplied buffer. A found record calls
+VA 0x004693B0 with the buffer, then zeros the record's second dword and
+returns 1; no match returns 0. Font_Load calls it with pool zero and the
+identical loaded pointer after parsing, on both parser success and failure.
+Its return is ignored. Font_Load does not restore an error changed by a
+dependency, so any freeing-side error mutation persists. Modeled error mutation
+is a wrapper robustness fixture, not a claim that the native free writes errors.
+
+## Fresh compilation and differential validation
+
+PowerShell at the repository root:
+
+```powershell
+uv run python tools/verify_font_load.py
+uv run python tools/workflow.py complete --rva 0x56420 --limitation "Native file I/O, freeing and sprite creation modeled; instruction equality and native game parity unverified; full geputget.c blocked by legacy dependencies"
+uv run python tools/db.py update --check
+```
+
+The aggregate verifier also invokes the new contract. Script pins are pefile
+2024.8.26, Capstone 5.0.7 and Unicorn 2.1.4; standalone project Python currently
+uses Capstone 5.0.9. Clang/LLD 19.1.1 remain provisional behavior-validation
+tools, not the identified original compiler. Compilation uses strict C89,
+-O2, -ffreestanding, -fno-builtin, -fno-inline, -mno-sse and -mno-sse2 for
+an i686-pc-windows-msvc target, with production headers and layout assertions.
+
+The separate focused DLL at `build/decomp/windows/font_load_validation.dll`
+contains extracted production Font_Load, Font_Parse, Font_InitSystem,
+Font_Shutdown and Font_Unload, plus complete production mem.c. The wrapper is
+compiled in a separate translation unit so Clang cannot omit the parser's
+unused second argument. Compiling them together did omit that argument;
+the forwarding assertion caught this and no production edit was made to hide it.
+File_LoadToMemory and Mem_Free link boundaries cannot return without explicit
+emulator interception; their fixture link bodies loop forever. The parser
+executes fully in 260 cases, including real lazy initialization, allocation
+of handle IDs and registration. Sprite creation supplies explicit fixture
+handles, including null. A C immutable-byte memcmp models the parser's inline
+REPE CMPSB comparison, as in the existing parser verifier.
+
+**327 original-versus-production-C comparisons pass:**
+
+- 35 null-load cases combine five initialization flags with preserved or
+  overwritten loader errors. They check error 1000, return -1 and no parse,
+  initialization or freeing calls.
+- 90 real-parser cases cover all 30 slots with empty, sparse and full glyph
+  sets and noncanonical occupied status dwords.
+- 50 real-parser cases cover five initialization flags, each magic-byte
+  failure, invalid versions, full tables and error precedence.
+- 60 real-parser cases cover lazy initialization, disabled/noncanonical
+  memory flags, allocation exhaustion and first/last/full registration tables.
+- 60 randomized real-parser cases cover signed metrics, raw offset dwords,
+  arbitrary/null sprite handles and load/free error mutations.
+- 32 isolated wrapper cases model the parser boundary with eight raw return
+  dwords and four free-error fixtures. These distinguish preserving the parser
+  result from returning the free result, independently of parser success slots.
+  They are not real-parser executions.
+
+Each execution checks full font/handle/pending/error state, ordered calls,
+exact filename and parser-argument forwarding, parser and free boundary state,
+all sprite descriptor fields at bytes 4..31 and sprite-boundary state. An
+instruction-derived oracle checks each binary separately before differential
+comparison. File/free models clobber EAX, ECX, EDX and condition flags while
+preserving the recovered cdecl nonvolatile contract. Freeing poisons the input
+buffer; emulated reads after that boundary fail. Unrelated image bytes, buffer
+guards and caller stack bytes must remain unchanged. EAX, preserved EBX/ESI/
+EDI/EBP, ESP and clear DF are checked. Raw filename dwords exercise forwarding;
+the fixture loader never dereferences them and does not validate paths.
+
+Compilation and differential emulation have separate fresh SQLite records.
+Raw-prefix bytes differ; compiled extent, instruction equality, original linked
+layout and native game parity remain unverified. Full geputget.c/native game
+remain blocked by legacy dependencies. No native file I/O, allocator/freeing,
+sprite creation/destruction, dependency mutation beyond modeled error writes,
+reentry, aliased/invalid/unmapped buffers or negative memory-handle cursors are
+covered. Descriptor word zero is uninitialized in the authentic parser and C,
+and remains excluded. No playable reconstruction is produced.

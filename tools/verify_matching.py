@@ -709,3 +709,6 @@ if __name__ == '__main__':
     verify_font_cleanup()
     from verify_font_parse import verify_font_parse
     verify_font_parse()
+
+    from verify_font_load import verify_font_load
+    verify_font_load()
