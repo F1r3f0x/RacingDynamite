@@ -1,5 +1,13 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Milestone update, 2026-10-07: the [verified startup map](ghidra/windows_startup.md)
+and C89 `Mem_InitHandles` (`0x0045B1F0`) are complete within a focused validation
+scope. The three build/verification entry points now target that Windows routine;
+30 original-instruction versus compiled-C emulator comparisons passed. Modern
+Clang is provisional, instruction matching is not claimed, and visual/native
+startup remains unverified. Use [the temporary inventory](tracking/windows_inventory.json)
+for active Windows progress; the broader migration below remains pending.
+
 Decision date: 2026-10-07 (America/Santiago). The primary target is the standard
 Windows release, `Ignition/Ignition/IGN_WIN.EXE`. The DOS release remains a
 historical binary reference. The Windows reconstruction replaces the DOS

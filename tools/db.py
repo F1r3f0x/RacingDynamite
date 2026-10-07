@@ -235,6 +235,7 @@ def dump_sql():
     print("SQL dump complete.")
 
 def show_status():
+    print("LEGACY DOS inventory; not Windows progress. See docs/tracking/windows_inventory.json.")
     conn = get_connection()
     cur = conn.cursor()
     

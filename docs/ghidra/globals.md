@@ -1,5 +1,10 @@
 # Master Global Variable & Memory Map (`MAINDOS.EXE`)
 
+> LEGACY DOS evidence/unmigrated cross-references. These records do not certify
+> Windows addresses or completion. Active bounded Windows evidence is in
+> [windows_startup.md](windows_startup.md) and
+> [windows_inventory.json](../tracking/windows_inventory.json).
+
 This table documents the global memory addresses in the data segments (`.data`, `.rdata`, `.bss`) of `MAINDOS.EXE`, their types, purpose, and engine context.
 
 | Address | Type | Name | Purpose |

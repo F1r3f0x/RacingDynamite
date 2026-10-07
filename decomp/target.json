@@ -8,5 +8,7 @@
   "image_base": "0x00400000",
   "entry_rva": "0x00069950",
   "compiler": null,
-  "pipeline_status": "migration_pending"
+  "pipeline_status": "bounded_windows_mem_validation",
+  "validation_compiler": "Clang 19.1.1 / LLD 19.1.1; i686-pc-windows-msvc; provisional",
+  "validation_scope": "Mem_InitHandles @ 0x0045B1F0 only; no playable reconstruction"
 }

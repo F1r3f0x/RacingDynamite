@@ -5,7 +5,18 @@ database schema/CLI, dashboard generator, Ghidra bridge/synchronizer, runtime
 staging, dependency declarations, and project skill discovery. Existing DOS
 builds and symbol synchronization were not executed.
 
-## Current findings
+## Status after the first Windows milestone
+
+The findings table below records the **pre-migration inspection**. Build,
+verification and fidelity entry points now support only the verified Windows
+`mem.c` routine; see [current evidence and commands](ghidra/windows_startup.md).
+PE/CPU dependencies are pinned in PEP 723 script metadata and supplied by `uv run`
+in isolated environments. Database, dashboard, old audits and old runtime staging
+remain legacy, explicitly excluded from active Windows progress. The target
+manifest now records the bounded validation scope. Original compiler identity and
+native visual baseline are still unresolved.
+
+## Historical findings before this milestone
 
 | Area | Observed implementation | Improvement |
 | --- | --- | --- |

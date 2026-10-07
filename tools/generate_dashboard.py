@@ -1174,6 +1174,11 @@ def generate_html(data: Dict[str, Any]) -> str:
   </style>
 </head>
 <body>
+  <aside style="padding:16px;background:#4b2e0b;color:#fff;text-align:center">
+    <strong>LEGACY DOS PROGRESS — not Windows completion.</strong>
+    Active Windows evidence: docs/ghidra/windows_startup.md and
+    docs/tracking/windows_inventory.json (one bounded routine).
+  </aside>
   <div class="container">
     <!-- Header -->
     <header>

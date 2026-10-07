@@ -1,6 +1,36 @@
 # Racing Dynamite Tooling Documentation (`tools/`)
 
-> Windows is the primary target from 2026-10-07; see [the active plan](../docs/decomp_plan.md). The DOS implementation is superseded. Existing build, instruction comparison, database CLI, fidelity audits, and dashboards must be retargeted in place; obsolete DOS scaffolding may be removed during migration. LE analysis may serve historical binary research, but no DOS build compatibility is required. These tools have not yet been migrated and their output is not Windows progress.
+> Windows is the primary target from 2026-10-07. The DOS implementation is
+> superseded. `build_decomp.py`, `verify_matching.py`, and `verify_fidelity.py`
+> now support only the independently verified Windows `mem.c` routine. Other
+> decomp modules, the DOS database CLI, old instruction diff/audits, runtime
+> staging, and dashboards are **legacy**, not Windows acceptance gates.
+
+## Active bounded Windows commands
+
+Run from the repository root in PowerShell, with `uv`, Clang and LLD on PATH:
+
+```powershell
+uv run tools/windows_inspect.py
+uv run python tools/build_decomp.py
+uv run tools/verify_matching.py
+uv run python tools/verify_fidelity.py
+```
+
+Analysis and CPU validation dependencies are pinned in each script's PEP 723
+metadata; use `uv run <script>` rather than `uv run python <script>` for those two
+commands. The build compiles only `decomp/src/mem.c` with strict C89 for x86 Windows,
+then links a dependency-free validation DLL under `build/decomp/windows/`. It prints
+actual compiler/linker commands, rejects the wrong target fingerprint, and never
+uses stale DOS objects. Optional build arguments: `--compiler <path>` and
+`--linker <path>`. The verifier always rebuilds, then runs 30 original-vs-C
+emulator cases; it does not certify instruction equality or native game behavior.
+
+The fidelity audit checks only the
+[temporary Windows inventory](../docs/tracking/windows_inventory.json). See the
+[startup map](../docs/ghidra/windows_startup.md) for addresses, data layout, compiler
+limitations, runtime observations and the next dependency. The catalog below
+also includes historical/asset tools; their results do not transfer DOS progress.
 
 This directory contains utility scripts, reverse engineering inspectors, asset pipeline tools, and verification scripts for **Racing Dynamite** (Ignition 1997 source port).
 
@@ -56,7 +86,7 @@ uv run python tools/<script_name>.py [args]
 
 | Script | Purpose |
 | :--- | :--- |
-| **`verify_fidelity.py`** | Automated Fidelity & Change Tracking System (FCTS) auditor. Validates bidirectional consistency between `docs/ghidra/functions.md`, `docs/tracking/deviations.md`, and C source code annotations (`@original`, `@fidelity`, `@deviation`, `@fix_category`). Generates parity dashboard and returns non-zero on broken references. |
+| **`verify_fidelity.py`** | Active Windows fingerprint/address/annotation audit for the temporary inventory and migrated `mem.c` only. Does not generate or certify legacy dashboards. |
 | **`verify_tab_formula.py`** | Verifies the mathematical formula for `.TAB` shading matrix against original binary behavior. |
 | **`verify_all_game_strings.py`** | Validates game strings in C code against font tables in `MAINDOS.EXE`. |
 | **`verify_screens.py`** | Verifies UI screen coordinates, button positions, and layout dimensions. |
@@ -99,7 +129,7 @@ Current DOS/legacy tracking interface, scheduled for in-place Windows migration.
 
 ## 7. Interactive HTML Decompilation Dashboard (`tools/generate_dashboard.py`)
 
-Visual analytics dashboard generator:
+Legacy DOS visual analytics dashboard generator (not Windows progress):
 * **`tools/generate_dashboard.py`**: Queries `database/decomp.db` and FCTS registries to generate a standalone, zero-dependency HTML dashboard with dark UI, live search, status filters, and structure inspection.
 * **Outputs**:
   * `dashboard.html` (project root)

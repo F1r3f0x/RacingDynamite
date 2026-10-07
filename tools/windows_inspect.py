@@ -1,0 +1,62 @@
+# /// script
+# requires-python = ">=3.13"
+# dependencies = ["pefile==2024.8.26", "capstone==5.0.7"]
+# ///
+"""Reproduce PE inventory and asserted startup edges from authentic file bytes."""
+import hashlib
+import struct
+from collections import Counter
+import pefile
+from capstone import Cs, CS_ARCH_X86, CS_MODE_32
+from windows_target import TARGET, SHA256, ROUTINE_SHA256, verify_target
+
+if not __debug__:
+    raise RuntimeError('Inspection checks require assertions; disable -O/PYTHONOPTIMIZE')
+
+def inspect():
+    data = verify_target()
+    pe = pefile.PE(data=data)
+    base = pe.OPTIONAL_HEADER.ImageBase
+    print(f'IGN_WIN.EXE: {len(data)} bytes; SHA256 {SHA256}')
+    print(f'PE32 x86; preferred base {base:#010x}; entry RVA {pe.OPTIONAL_HEADER.AddressOfEntryPoint:#010x}')
+    for s in pe.sections:
+        print(f'{s.Name.rstrip(bytes([0])).decode():8} RVA={s.VirtualAddress:#010x} virtual={s.Misc_VirtualSize:#x} raw_offset={s.PointerToRawData:#x} raw_size={s.SizeOfRawData:#x} flags={s.Characteristics:#010x}')
+    for d in pe.DIRECTORY_ENTRY_IMPORT:
+        print(f'{d.dll.decode()}: {len(d.imports)} imports')
+        for i in d.imports:
+            print(f'  IAT VA {i.address:#010x}: {i.name.decode() if i.name else "ordinal "+str(i.ordinal)}')
+    print('Relocation types:',dict(Counter(e.type for block in pe.DIRECTORY_ENTRY_BASERELOC for e in block.entries)))
+    fpo = next(d.struct for d in pe.DIRECTORY_ENTRY_DEBUG if d.struct.Type == 3)
+    records = {base+a:n for a,n,local,params,bits in struct.iter_unpack(
+        '<IIIHH',data[fpo.PointerToRawData:fpo.PointerToRawData+fpo.SizeOfData])}
+    for va in [0x4120a0,0x412230,0x4122d0,0x412460,0x412500,0x45b170,
+               0x45b1f0,0x456af0,0x45b690,0x456e60,0x456bc0,0x455ac0,
+               0x45b740,0x456f20,0x417270,0x417ea0,0x4184c0,0x458040]:
+        print(f'FPO: VA={va:#010x} RVA={va-base:#010x} size={records[va]} end={va+records[va]:#010x}')
+    assert records[0x45b1f0] == 76
+    assert hashlib.sha256(pe.get_data(0x5b1f0,76)).hexdigest() == ROUTINE_SHA256
+    md = Cs(CS_ARCH_X86,CS_MODE_32)
+    for site,target in [(0x469a96,0x4120a0),(0x412170,0x45b170),
+        (0x45b17a,0x45b1f0),(0x412175,0x412500),(0x41250a,0x456bc0),
+        (0x412513,0x455ac0),(0x412257,0x417270),(0x41729a,0x417ea0),
+        (0x41729f,0x4184c0),(0x45b7c6,0x47879c),(0x455b1a,0x478778),
+        (0x4679e2,0x4787a2),(0x417f25,0x456be0),(0x4180ff,0x458040)]:
+        instruction = next(md.disasm(pe.get_data(site-base,5),site))
+        assert instruction.mnemonic == 'call' and int(instruction.op_str,16) == target
+        print(f'Confirmed direct call {site:#010x} -> {target:#010x}')
+    for site,global_va,value in [(0x45b69a,0x50eb6c,0x45b740),(0x456e60,0x50eba0,0x456f20)]:
+        instruction = next(md.disasm(pe.get_data(site-base,10),site))
+        assert instruction.mnemonic == 'mov'
+        assert struct.unpack('<II',instruction.bytes[2:]) == (global_va,value)
+        print(f'Confirmed dispatch initializer {global_va:#010x} = {value:#010x}')
+    for name,va,n in [('flag',0x4bab38,4),('status',0x5116e0,800),
+                      ('ids',0x511230,400),('cursor',0x512040,2)]:
+        section = next(s for s in pe.sections if s.VirtualAddress<=va-base<s.VirtualAddress+s.Misc_VirtualSize)
+        relative = va-base-section.VirtualAddress
+        backed = relative+n <= section.SizeOfRawData
+        assert not backed or pe.get_data(va-base,n) == bytes(n)
+        print(f'{name}: VA={va:#010x} RVA={va-base:#010x} bytes={n}; '+('file initialized zero' if backed else 'loader-zeroed virtual tail'))
+    print('PASS: independent PE/startup evidence; no Ghidra names or DOS inventory used.')
+
+if __name__ == '__main__':
+    inspect()

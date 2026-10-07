@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "recorded_on": "2026-10-07",
+  "scope": "Temporary bounded Windows inventory; supersedes legacy DOS progress for mem.c only",
+  "target": {
+    "binary": "Ignition/Ignition/IGN_WIN.EXE",
+    "sha256": "7665E4E736BFD6C90790CEDBB27E2DE7E98A167374EB77933533C54EF0DC8782",
+    "image_base": "0x00400000"
+  },
+  "functions": [
+    {
+      "symbol": "Mem_InitHandles",
+      "va": "0x0045B1F0",
+      "rva": "0x0005B1F0",
+      "size": 76,
+      "extent_confidence": "high: original control flow, INT3 padding and embedded FPO record agree",
+      "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
+      "module": "decomp/src/mem.c",
+      "source_filename": "unknown; module association inferred from adjacent handle consumers",
+      "abi": "x86 no arguments, EAX int result, RET; EDI saved; DF clear",
+      "identified": true,
+      "analyzed": true,
+      "c_reconstructed": true,
+      "compiled": "Clang 19.1.1 i686-pc-windows-msvc strict C89, focused validation DLL",
+      "instruction_match": "not claimed",
+      "raw_code_bytes_equal": false,
+      "linked_binary_match": "not claimed",
+      "validation": "30 differential original-instruction versus compiled-C x86 emulator executions",
+      "native_routine_runtime": "unverified",
+      "gameplay_parity": "unverified",
+      "evidence": "docs/ghidra/windows_startup.md"
+    }
+  ],
+  "legacy": ["database/decomp.db", "database/dump.sql", "docs/ghidra/functions.md", "docs/ghidra/globals.md", "docs/ghidra/structs.md", "dashboard.html", "docs/dashboard.html", "other decomp modules", "tools/diff_func.py", "tools/source_audit.py", "tools/audit_pe_residue.py", "tools/runtime_baseline.py"]
+}

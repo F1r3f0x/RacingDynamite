@@ -26,8 +26,14 @@ fingerprint, migration boundaries, and next milestones. Windows reconstruction
 replaces the superseded DOS work in `decomp/`; build tools, tracking, and symbol
 maps will be retargeted in place. The old implementation is recoverable in Git
 history and does not need a parallel source tree or maintained DOS build.
-Historical DOS evidence remains a reference, not Windows completion. Windows
-compiler selection, build migration, and runtime baseline are still pending.
+Historical DOS evidence remains a reference, not Windows completion. The first
+[Windows milestone](docs/ghidra/windows_startup.md) now verifies startup edges and
+reconstructs `Mem_InitHandles` at `0x0045B1F0`, compiled as a focused PE32 validation
+DLL and checked against original instructions in x86 emulation. Run
+`uv run tools/verify_matching.py` and `uv run python tools/verify_fidelity.py`.
+The original compiler and visual/native startup baseline remain unresolved; the
+[temporary Windows inventory](docs/tracking/windows_inventory.json) has one
+routine. Remaining modules, DOS database progress, and dashboards are legacy.
 
 ## Features & Goals
 

@@ -1,5 +1,10 @@
 # Reconstructed Data Structures
 
+> LEGACY DOS evidence/unmigrated cross-references. These records do not certify
+> Windows addresses or completion. Active bounded Windows evidence is in
+> [windows_startup.md](windows_startup.md) and
+> [windows_inventory.json](../tracking/windows_inventory.json).
+
 This document catalogues the reconstructed C structures, member byte offsets, and original memory alignments recovered from authentic `MAINDOS.EXE`.
 
 ---
