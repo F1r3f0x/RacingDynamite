@@ -303,3 +303,13 @@ boundary, and increments the cursor. Recover its signed boundary behavior and
 callers before implementing it. Further startup priorities are CRT initializer
 targets, complete `0x0045B740` window/DirectDraw contracts, and an observed native
 language/menu baseline.
+
+## Tracking migration follow-up
+
+The temporary single-function inventory has been migrated into active Windows
+SQLite, retaining this milestone's evidence. `windows_inventory.json` is now a
+generated export, alongside the function registry and treemap. Authentic FPO
+records seed 1,012 candidate extents; other candidate routines are not reconstructed
+or validated by this milestone. Fresh harness runs persist compiler/input/artifact
+provenance and their 30-case emulation results. Native/instruction/binary matching
+claims remain unchanged. See `database/README.md`; run `db.py update` after results.

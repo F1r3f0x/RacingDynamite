@@ -7,10 +7,10 @@
 > The database and dashboard entry points are active Windows tools.
 
 > Windows is the primary target from 2026-10-07. The DOS implementation is
-> superseded. `build_decomp.py`, `verify_matching.py`, and `verify_fidelity.py`
-> now support only the independently verified Windows `mem.c` routine. Other
-> decomp modules, the DOS database CLI, old instruction diff/audits, runtime
-> staging, and dashboards are **legacy**, not Windows acceptance gates.
+> superseded. The active database, provenance audit, generated inventory and
+> treemap now track Windows evidence. The bounded build/emulator harness covers
+> the recovered memory routines; other source modules and standalone DOS
+> comparison/runtime tools remain unverified legacy work.
 
 ## Active bounded Windows commands
 
@@ -32,8 +32,8 @@ uses stale DOS objects. Optional build arguments: `--compiler <path>` and
 `--linker <path>`. The verifier always rebuilds, then runs 30 original-vs-C
 emulator cases; it does not certify instruction equality or native game behavior.
 
-The fidelity audit checks only the
-[temporary Windows inventory](../docs/tracking/windows_inventory.json). See the
+The fidelity audit checks the active SQLite inventory and current source/result
+provenance. [The Windows inventory](../docs/tracking/windows_inventory.json) is generated. See the
 [startup map](../docs/ghidra/windows_startup.md) for addresses, data layout, compiler
 limitations, runtime observations and the next dependency. The catalog below
 also includes historical/asset tools; their results do not transfer DOS progress.
@@ -116,37 +116,15 @@ Provides live bidirectional synchronization between the Antigravity agent and th
 
 ---
 
-## 6. Decompilation Tracking Database (`tools/db.py`)
+## 6. Windows SQLite Tracking and Dashboard
 
-Current DOS/legacy tracking interface, scheduled for in-place Windows migration. Replace/reset active DOS records and rebuild progress from independently verified **`IGN_WIN.EXE`** evidence; no parallel DOS database is required:
-* **`tools/db.py`**: SQLite database manager (`database/decomp.db` backed by `database/schema.sql` and `database/dump.sql`).
-* **Commands**:
-  * `uv run python tools/db.py init`: Initializes clean SQLite database from `database/schema.sql`.
-  * `uv run python tools/db.py status`: Prints high-level progress report (functions, globals, modules, completion percentages).
-  * `uv run python tools/db.py import-markdown`: Ingests legacy markdown documentation into the database.
-  * `uv run python tools/db.py export-markdown`: Generates `docs/ghidra/functions.md` from the database.
-  * `uv run python tools/db.py dump-sql`: Dumps database to version-controlled `database/dump.sql`.
-  * `uv run python tools/db.py dashboard`: Generates the interactive HTML progress dashboard (`dashboard.html`).
-  * `uv run python tools/db.py query "<SQL>"`: Runs ad-hoc SQL queries.
-* **`tools/diff_func.py`**: Instruction-by-instruction bytecode comparison tool between authentic `MAINDOS.EXE` and Watcom-compiled COFF objects in `build/decomp/`.
-  * Usage: `uv run python tools/diff_func.py <symbol_name> <dos_addr> <byte_size> [module.c]`
+See [database/README.md](../database/README.md) for the authoritative schema,
+explicit migration, supported editing commands and evidence semantics.
+`uv run python tools/db.py update` generates the registry, SQL/JSON snapshots
+and both Windows dashboards. `update --check` checks freshness without writing.
+`tools/diff_func.py` remains a legacy DOS comparator and is not an active gate.
 
 ---
-
-## 7. Interactive HTML Decompilation Dashboard (`tools/generate_dashboard.py`)
-
-Legacy DOS visual analytics dashboard generator (not Windows progress):
-* **`tools/generate_dashboard.py`**: Queries `database/decomp.db` and FCTS registries to generate a standalone, zero-dependency HTML dashboard with dark UI, live search, status filters, and structure inspection.
-* **Outputs**:
-  * `dashboard.html` (project root)
-  * `docs/dashboard.html` (documentation hub mirror)
-* **Usage**:
-  ```bash
-  uv run python tools/generate_dashboard.py
-  # Or via db manager:
-  uv run python tools/db.py dashboard
-  ```
-
 
 ## 8. Windows Target Diagnostics and Project Skill
 
@@ -168,3 +146,22 @@ binary analysis, bounded C89 reconstruction, and validation. It provides guidanc
 it does not retarget the old build pipeline by itself.
 
 See [the tooling audit](../docs/tooling_audit.md) for findings and migration order.
+
+## Active Windows tracking commands (supersedes legacy database/dashboard sections)
+
+The authoritative store is now Windows SQLite schema v2. Use `db.py status` for
+read-only metrics; `db.py describe`/`set-status` for documented analysis updates;
+`db.py audit` for source/provenance freshness; and `db.py update` to generate the
+registry, inventory JSON, SQL dump and both dashboards. `db.py update --check`
+reports output drift without mutation. `dashboard`, `export-markdown` and
+`dump-sql` are aliases of the synchronized update, so outputs cannot diverge.
+Destructive DOS initialization, markdown imports and bulk sync were removed from
+the active CLI. Standalone DOS residue/comparison/runtime tools remain legacy.
+
+`windows_tracking.py` reads genuine PE/FPO metadata without additional dependencies,
+verifies the imported milestone and migrates atomically. The existing Windows
+verifier now persists fresh per-function compilation, raw-byte and emulation
+results. `verify_fidelity.py` iterates active records rather than requiring exactly
+one function. `generate_dashboard.py` renders the Windows snapshot with canvas
+treemap, class/stage/search filters and separate evidence/native milestone cards.
+See [database/README.md](../database/README.md) for supported commands and scope.

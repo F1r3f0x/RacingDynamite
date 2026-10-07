@@ -44,13 +44,13 @@ See `docs/decomp_plan.md` for the active plan and target fingerprint.
    Report unavailable tooling; do not invent evidence or addresses.
 3. Replace raw offsets and register artifacts with verified named structs, fields,
    and semantic names. Recover Windows structure packing independently.
-4. Keep code, documentation, and tracking synchronized. Existing
-   `docs/ghidra/functions.md`, `globals.md`, `structs.md`, and `database/decomp.db`
-   contain legacy evidence; their Windows-style addresses are not automatically
-   verified against `IGN_WIN.EXE`. Replace/reset active records when migrating
-   tracking to the Windows target; start Windows completion from independently
-   verified evidence. Preserve binary identity for any historical evidence kept.
-   Never transfer DOS completion statuses to Windows.
+4. Keep code, documentation, and tracking synchronized. `database/decomp.db`
+   is the active Windows store; `docs/ghidra/functions.md`, the JSON inventory,
+   SQL dump and dashboards are generated via `uv run python tools/db.py update`.
+   Do not hand-edit generated progress. Run `db.py update --check` to detect drift.
+   Remaining legacy globals/structs/source modules require independent Windows
+   validation. Record reconstruction and test evidence separately; never transfer
+   DOS completion or infer runtime parity from status labels.
 5. Reuse DOS findings as hypotheses only after validating the corresponding Windows
    instructions, initializers, callers, and behavior.
 
@@ -75,11 +75,14 @@ proof of instruction equality or runtime fidelity.
 
 ## Build and validation
 
-- A Windows reconstruction build and verification pipeline does not exist yet.
-  Establish it before claiming Windows build, matching, or runtime success.
-- Migrate `tools/build_decomp.py`, `tools/verify_matching.py`, and
-  `tools/verify_fidelity.py` to Windows in place. Their current DOS assumptions
-  are obsolete for active reconstruction and must not be acceptance gates.
+- The Windows build/emulator harness currently covers `Mem_InitHandles` only;
+  it produces a focused validation DLL, not a playable rebuilt game.
+- `uv run tools/verify_matching.py` records fresh compilation and differential
+  emulation evidence. `uv run python tools/verify_fidelity.py` audits the active
+  Windows store and source/result provenance. Extend function-specific build/test
+  contracts for new routines; the auditor supports the whole active inventory.
+- Run `uv run python tools/db.py update` after tracking/results change, and
+  `uv run python tools/db.py update --check` before committing exports.
 - Once retargeted, run the applicable Windows build, link, and provenance checks
   after each implementation feature. Document the actual supported commands and
   inputs with the tooling change. No DOS compatibility or DOS runtime regression

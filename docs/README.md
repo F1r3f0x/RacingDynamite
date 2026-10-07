@@ -1,6 +1,6 @@
 # Ignition (1997) Technical Documentation
 
-> Active target (2026-10-07): standard Windows `IGN_WIN.EXE`. Windows work replaces the DOS implementation in `decomp/` and retargets build/tracking in place; no parallel DOS implementation is required. See [the active plan](decomp_plan.md). Existing engine notes, format notes, symbol maps, and database statuses contain DOS/legacy evidence; validate each claim against the fingerprinted Windows binary before treating it as Windows provenance.
+> Active target (2026-10-07): standard Windows `IGN_WIN.EXE`. Windows work replaces the DOS implementation in `decomp/` and retargets build/tracking in place; no parallel DOS implementation is required. See [the active plan](decomp_plan.md). The active Windows database, generated function map and treemap now share one snapshot. Other engine/format/global/struct notes contain legacy evidence and require independent Windows validation.
 
 Welcome to the central technical documentation and reverse engineering knowledge base for **Ignition** (1997, Unique Development Studios / Virgin Interactive).
 

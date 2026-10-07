@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Active Windows progress migration (2026-10-07)**: Replaced DOS tracking with Windows SQLite schema v2, seeded 1,012 authentic FPO extents, preserved the 76-byte `Mem_InitHandles` milestone, and added separately persisted fresh validation evidence with stale-input/artifact detection. Generated JSON/Markdown/SQL and both Windows treemap dashboards from one checked snapshot; removed inherited completion metrics and default EXACT/Watcom assumptions. Native gameplay remains unverified.
 - **Windows decompilation tooling audit and skill (2026-10-07)**: Added a shared target fingerprint manifest, a read-only JSON diagnostic command with focused identity/header tests, and the repository skill `$ignition-windows-decomp`. Documented DOS migration gaps and the next tooling priorities; the Windows build pipeline remains pending.
 - **Interactive Decompilation Progress Dashboard & Binary Diffing Tooling**:
   - Implemented standalone, zero-dependency HTML progress dashboard (`dashboard.html`, `docs/dashboard.html`) tracking all 74 functions, 8 modules, 9 data structures (69 fields), 62 globals, and 6 FCTS deviations.

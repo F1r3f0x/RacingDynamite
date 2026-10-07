@@ -5,8 +5,8 @@ and C89 `Mem_InitHandles` (`0x0045B1F0`) are complete within a focused validatio
 scope. The three build/verification entry points now target that Windows routine;
 30 original-instruction versus compiled-C emulator comparisons passed. Modern
 Clang is provisional, instruction matching is not claimed, and visual/native
-startup remains unverified. Use [the temporary inventory](tracking/windows_inventory.json)
-for active Windows progress; the broader migration below remains pending.
+startup remains unverified. The active Windows SQLite store now generates
+[the inventory](tracking/windows_inventory.json), registry and treemap from one snapshot.
 
 Decision date: 2026-10-07 (America/Santiago). The primary target is the standard
 Windows release, `Ignition/Ignition/IGN_WIN.EXE`. The DOS release remains a
@@ -70,13 +70,11 @@ and address convention (VA/RVA) with every symbol and initializer.
 - Identify the Windows compiler and ABI from executable evidence before selecting
   a vintage compiler. MSVC 4.2 is a research candidate, not a verified local fact;
   DOS Watcom flags and register calling conventions must not be assumed valid.
-- Existing `database/decomp.db` has DOS-primary records and legacy `win_address`
-  cross-references. Existing CLI/status/dashboard/audit output remains legacy
-  progress. Replace/reset active DOS records and adapt storage, address keys,
-  evidence, and progress reporting for the fingerprinted Windows target before
-  recording Windows results. Start completion from independently verified Windows
-  evidence; no parallel DOS tracking pipeline is required. Label any historical
-  cross-references that remain.
+- Active SQLite tracking is now Windows schema v2, seeded with authentic FPO
+  extents and the independently verified handle initializer. No DOS statuses are
+  imported. JSON, function Markdown, SQL dump and dashboards share a generated
+  snapshot. See [database guidance](../database/README.md) for commands and evidence
+  semantics. FPO coverage is incomplete and most candidates remain unclassified.
 - Do not assume legacy `0x004...` addresses or port annotations belong to this
   executable. Validate them before using them as Windows provenance.
 - Never treat DOS completion counts, matching scores, or runtime checks as Windows
@@ -123,10 +121,11 @@ when interpreting matching scores. A future treemap can use verified byte sizes
 for area and these evidence stages for color; existing dashboards are not yet a
 Windows inventory.
 
-The existing `build_decomp.py`, `verify_matching.py`, LE helpers, DOS runtime
-staging, and fidelity auditor have not been migrated by this docs-only change.
-They are scheduled for in-place replacement/retargeting and are not current
-Windows acceptance gates. Maintaining their DOS behavior is not a requirement.
+The focused Windows build and differential harness cover the handle initializer;
+the active provenance auditor and tracking exports cover the Windows inventory.
+LE helpers, the legacy instruction comparator and DOS runtime staging remain
+historical tools, not active Windows acceptance gates. DOS compatibility is not
+a requirement. Broader routine/runtime contracts still need independent recovery.
 
 ## 6. Preservation and provenance
 
@@ -138,9 +137,20 @@ functions. Remove obsolete DOS implementation annotations with the code they
 describe; any historical evidence kept remains attached to its original binary.
 Do not relabel DOS addresses or inherited completion claims as Windows evidence.
 
-This is a documentation-only policy update. Code, tooling, and active database
-records still need migration; their continued presence does not mean the DOS
-implementation is protected or supported.
+The DOS implementation preservation policy is superseded. The Windows tracking
+store and bounded handle-init tooling are migrated; other source modules remain
+unmigrated and may be replaced in place. Their presence is not a fidelity claim.
 
 Related guidance: [agent instructions](../AGENTS.md), [roadmap](roadmap.md),
 [fidelity strategy](tracking/fidelity_strategy.md), and [tools](../tools/README.md).
+
+## Current tracking migration (2026-10-07)
+
+Completed: active Windows database, 1,012 authentic FPO candidates, preserved
+76-byte `Mem_InitHandles` reconstruction, fresh persisted 30-case differential
+emulation evidence, generic provenance audit, synchronized exports and interactive
+treemap. Results carry target/routine/source/artifact hashes, compiler context and
+commands; stale evidence does not count. Compilation, reconstruction, byte equality,
+emulation and native validation remain separate. Native playable milestones are
+unverified. Next: reconstruct/validate the adjacent handle consumer and continue
+classifying/corroborating Windows candidate extents, including non-FPO routines.

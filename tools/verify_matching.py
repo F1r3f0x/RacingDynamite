@@ -9,6 +9,9 @@ Instruction equality and native game runtime are reported separately.
 import hashlib
 import random
 import struct
+import subprocess
+import shutil
+import unicorn
 import pefile
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn import Uc, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE, UC_HOOK_MEM_WRITE
@@ -16,7 +19,17 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ESI,
     UC_X86_REG_EDI, UC_X86_REG_EBP, UC_X86_REG_ESP, UC_X86_REG_EFLAGS,
     UC_X86_REG_EIP)
 from build_decomp import build
-from windows_target import TARGET, DLL, ROUTINE_SHA256, verify_target
+from windows_target import TARGET, DLL, ROUTINE_SHA256, verify_target, ROOT
+from windows_tracking import record_run
+
+TRACKING_INPUTS = ['decomp/src/mem.c', 'decomp/include/mem.h', 'decomp/target.json',
+                   'tools/build_decomp.py', 'tools/verify_matching.py',
+                   'tools/windows_target.py', 'tools/windows_tracking.py']
+
+def record_result(kind, outcome, cases=0, details=None):
+    record_run(0x5b1f0, kind, outcome, inputs=TRACKING_INPUTS,
+               artifact=DLL.relative_to(ROOT).as_posix() if DLL.exists() else None,
+               cases=cases, command='uv run tools/verify_matching.py', details=details or {})
 
 if not __debug__:
     raise RuntimeError('Verification requires assertions; disable -O/PYTHONOPTIMIZE')
@@ -124,8 +137,25 @@ def verify():
                     assert owrites[0] == (0x4bab38,4,1)
                     assert owrites[-1] == (0x512040,2,0)
                 cases += 1
+    versions = {name: subprocess.check_output([shutil.which(name), '--version'], text=True).splitlines()[0]
+                for name in ('clang', 'lld-link')}
+    details = {'toolchain': versions, 'pefile': pefile.__version__, 'unicorn': unicorn.__version__,
+               'scope': 'Mem_InitHandles only; focused PE32 DLL; not native game execution',
+               'compiler_flags': '--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2',
+               'linker_flags': '/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000',
+               'checks': 'state regions, boundary guards, skip/repeat, writes, EAX/ESP, saved registers, DF'}
+    record_result('compilation', 'pass', details=details)
+    record_result('raw_bytes', 'pass' if original_code == generated_code else 'different', details={'original_bytes': len(original_code), 'compiled_text_bytes': len(generated_code), 'scope': 'whole focused DLL .text versus routine; relocation-aware equality not evaluated'})
+    record_result('emulation', 'pass', cases=cases, details=details)
     print(f'PASS: {cases} original-vs-C executions; full state, boundaries, skip/repeat, writes and ABI checked.')
     print('Native DLL/game execution and startup/gameplay parity: unverified by this harness.')
 
 if __name__ == '__main__':
-    verify()
+    try:
+        verify()
+    except Exception as exc:
+        try:
+            record_result('emulation', 'fail', details={'error': str(exc), 'scope': 'Verification did not complete'})
+        except Exception as tracking_error:
+            print(f'Could not persist verification failure: {tracking_error}')
+        raise

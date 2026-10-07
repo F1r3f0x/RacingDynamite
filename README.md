@@ -26,14 +26,10 @@ fingerprint, migration boundaries, and next milestones. Windows reconstruction
 replaces the superseded DOS work in `decomp/`; build tools, tracking, and symbol
 maps will be retargeted in place. The old implementation is recoverable in Git
 history and does not need a parallel source tree or maintained DOS build.
-Historical DOS evidence remains a reference, not Windows completion. The first
-[Windows milestone](docs/ghidra/windows_startup.md) now verifies startup edges and
-reconstructs `Mem_InitHandles` at `0x0045B1F0`, compiled as a focused PE32 validation
-DLL and checked against original instructions in x86 emulation. Run
-`uv run tools/verify_matching.py` and `uv run python tools/verify_fidelity.py`.
-The original compiler and visual/native startup baseline remain unresolved; the
-[temporary Windows inventory](docs/tracking/windows_inventory.json) has one
-routine. Remaining modules, DOS database progress, and dashboards are legacy.
+Historical DOS evidence remains a reference, not Windows completion. A provisional
+x86 Clang/LLD harness now validates one routine; the active Windows SQLite inventory
+and treemap report reconstruction and evidence separately. Original compiler
+identification and native startup/gameplay validation remain pending.
 
 ## Features & Goals
 
@@ -88,17 +84,24 @@ Launch the engine:
 ./build/racing_dynamite
 ```
 
-### 4. Windows Reconstruction Migration
+### 4. Windows Reconstruction and Progress
 
-`decomp/` is the designated Windows reconstruction workspace. Its existing DOS
-code and Open Watcom build are superseded and will be replaced in place. There
-is no supported Windows reconstruction command yet: the existing
-`tools/build_decomp.py`, `tools/verify_matching.py`, and `tools/verify_fidelity.py`
-still contain DOS assumptions and must be retargeted before use as Windows gates.
+`decomp/` is the Windows reconstruction workspace. The focused C89 build and x86
+emulator harness currently cover only `Mem_InitHandles`, not a playable game.
 
-Start with the fingerprinted `IGN_WIN.EXE` and the
-[active migration milestones](docs/decomp_plan.md). Use disposable runtime copies
-under `build/runtime/`; never overwrite original binaries or assets in `Ignition/`.
+```powershell
+uv run tools/verify_matching.py
+uv run python tools/verify_fidelity.py
+uv run python tools/db.py status
+uv run python tools/db.py update
+uv run python tools/db.py update --check
+```
+
+The active store is `database/decomp.db`. JSON/Markdown/SQL snapshots and both
+HTML dashboards are generated together. Open `dashboard.html` for the interactive
+Windows treemap and evidence inspector. Read [database guidance](database/README.md)
+before editing tracking. Most FPO candidates remain unidentified; no overall game
+completion or native parity is claimed. Original assets remain untouched.
 
 
 ---

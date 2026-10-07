@@ -101,3 +101,11 @@ Repository skills are discoverable under `.agents/skills` for agents launched in
 this repository. Start a fresh project chat and use `$ignition-windows-decomp`.
 This projectless chat does not automatically inherit skills from another checkout.
 See [the official skill documentation](https://learn.chatgpt.com/docs/build-skills).
+
+## Windows tracking migration follow-up
+
+Active database/CLI, generic provenance audit, persisted bounded harness results,
+synchronized exports and Windows treemap are now implemented. Historical findings
+above describe the earlier audit state. Remaining work includes compiler identity,
+broader routine-specific harnesses, CRT/non-FPO classification, relocation-aware
+comparison, Ghidra identity/synchronization and native runtime staging/observation.
