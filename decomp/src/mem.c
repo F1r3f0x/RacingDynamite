@@ -32,6 +32,28 @@ volatile unsigned int g_memPendingContext;
 volatile unsigned int g_memPendingCallback;
 volatile unsigned int g_memPendingParameter;
 
+/* @original Mem_ReleaseHandleId (IGN_WIN.EXE @ 0x0045B410, inferred mem.c)
+ * @fidelity EXACT
+ * Semantic name; one stack dword, ordinary RET, EAX=0 disabled or 1 enabled.
+ * Full ascending scan, including duplicate IDs; no callback or other cleanup.
+ */
+int Mem_ReleaseHandleId(unsigned int handle_id)
+{
+    int index;
+    volatile unsigned int *status;
+
+    if (*(volatile unsigned int *)&g_memHandlesInitialized == 0U) {
+        return 0;
+    }
+    status = g_memHandleStatus;
+    for (index = 0; index < MEM_HANDLE_COUNT; ++index) {
+        if (status[index] == 1U && g_memRegisteredHandleIds[index] == handle_id) {
+            status[index] = 0U;
+        }
+    }
+    return 1;
+}
+
 /* @original Mem_ShutdownHandles (IGN_WIN.EXE @ 0x0045B240, inferred mem.c)
  * @fidelity EXACT
  * No arguments; x86 caller cleanup, EAX=1. Semantic name, unknown source name.

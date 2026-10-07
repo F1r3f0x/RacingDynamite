@@ -163,3 +163,14 @@ and `0x0005B360` receive fresh verifier results. Four routines cover 409 origina
 bytes; no native/instruction/linked match pass is asserted. Obtain the synchronized
 snapshot ID with `uv run python tools/db.py status`. Original assets/binaries and
 all unrelated candidate records remain unchanged.
+
+## ID-release follow-up
+
+`0x0045B410` is now reconstructed as `Mem_ReleaseHandleId`; see
+[its complete release contract](windows_handle_release.md). It clears all matching
+active statuses while enabled, invokes no callback, and returns 0 without table
+access when disabled. Shutdown clears the initialized flag before invoking any
+callback, so this release routine is disabled during ordinary shutdown callbacks.
+The new harness adds 418 comparisons and a five-routine lifecycle sequence while
+retaining all shutdown checks. The registered callback still depends on
+`0x00456470`, directly called at `0x00456244`; its body remains unvalidated.

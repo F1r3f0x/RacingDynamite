@@ -53,6 +53,9 @@ the first-free-slot contract, ordered effects and three-routine integration.
 `Mem_ShutdownHandles` adds 531 differential comparisons using explicit callback
 models; [shutdown evidence](../docs/ghidra/windows_handle_shutdown.md) distinguishes
 verified call-boundary behavior from unvalidated original callback bodies.
+`Mem_ReleaseHandleId` adds 418 differential comparisons for duplicate-ID release,
+all-slot boundaries and five-routine integration; see
+[release evidence](../docs/ghidra/windows_handle_release.md).
 Exact/relocated instruction comparison, linked equality, and native game parity
 remain unclaimed. Historical imported evidence is preserved but does not count
 as a fresh passing run until reproduced.

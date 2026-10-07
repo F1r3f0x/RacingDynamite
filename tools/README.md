@@ -37,6 +37,9 @@ It also runs 531 shutdown comparisons with explicit callback models, live-table
 mutation/reentry checks and four-routine integration; see
 [shutdown evidence](../docs/ghidra/windows_handle_shutdown.md). Original callback
 bodies are not validated by these models.
+The ID-based release routine adds 418 comparisons covering every slot, duplicate
+IDs, exact eligibility and five-routine integration; see
+[release evidence](../docs/ghidra/windows_handle_release.md).
 It does not certify instruction equality or native game behavior. The
 [consumer evidence](../docs/ghidra/windows_handles.md) states the negative-state
 memory contract and the validation DLL's differing data layout.

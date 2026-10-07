@@ -186,3 +186,16 @@ models, mutation/reentry checks and four-routine integration. Four routines cove
 409 original bytes. Callback body semantics, native runtime, original compiler
 identity and instruction equality remain unverified. Next recover ID-based release
 at `0x0045B410`, directly called by the registered callback at `0x00456210`.
+
+## Handle-ID release milestone (2026-10-07)
+
+`Mem_ReleaseHandleId` at `0x0045B410` is reconstructed in the memory module.
+[Independent release evidence](ghidra/windows_handle_release.md) records the
+single ascending 200-slot scan, clearing every status==1 entry with a matching
+raw dword ID, and returning 1 whenever enabled even without a match. It invokes
+no callback and ignores class flags. The verifier adds 418 comparisons while
+retaining 30/377/590/531 differential comparisons and eight original-only negative
+cursor checks. Five routines cover 471 original bytes. Native layout/runtime,
+instruction equality, callback bodies and compiler identity remain unverified.
+The registered cleanup callback's next verified dependency is `0x00456470`, called
+at `0x00456244`; recover that contract before implementing the callback itself.

@@ -42,7 +42,7 @@ def inspect():
     assert records[0x45b1b0] == 58
     assert hashlib.sha256(consumer).hexdigest() == '696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139'
     assert pe.get_data(0x5b1ea,6) == b'\xcc'*6
-    for va in [0x45b1b0,0x45b1f0,0x456180,0x45b360,0x45b1a0,0x45b240,0x456210]:
+    for va in [0x45b1b0,0x45b1f0,0x456180,0x45b360,0x45b1a0,0x45b240,0x456210,0x45b410]:
         for i in md.disasm(pe.get_data(va-base,records[va]),va):
             print(f'{i.address:#010x}: {i.mnemonic} {i.op_str}')
     # Independent scan of all file-backed FPO code, not bridge xref completeness.
@@ -67,6 +67,7 @@ def inspect():
     print('Absolute .text relocations referencing cursor/ID storage:',refs)
     for site,target in [(0x469a96,0x4120a0),(0x412170,0x45b170),
         (0x45b17a,0x45b1f0),(0x4561a0,0x45b1b0),(0x4561c5,0x45b360),
+        (0x456230,0x45b410),(0x456244,0x456470),
         (0x412175,0x412500),(0x41250a,0x456bc0),
         (0x412513,0x455ac0),(0x412257,0x417270),(0x41729a,0x417ea0),
         (0x41729f,0x4184c0),(0x45b7c6,0x47879c),(0x455b1a,0x478778),
@@ -83,6 +84,14 @@ def inspect():
     print('Bookkeeping SHA256:',hashlib.sha256(bookkeeping).hexdigest())
     print('Shutdown SHA256:',hashlib.sha256(pe.get_data(0x5b240,155)).hexdigest())
     print('Shutdown padding:',pe.get_data(0x5b2db,5).hex())
+    print('ID release SHA256:',hashlib.sha256(pe.get_data(0x5b410,62)).hexdigest())
+    print('ID release padding:',pe.get_data(0x5b44e,2).hex())
+    assert records[0x45b410]==62 and pe.get_data(0x5b44e,2)==b'\xcc'*2
+    release = pe.get_data(0x5b410,62)
+    assert hashlib.sha256(release).hexdigest()=='d0fee3704a333538872dacd400ee150f38a7a7dcfe33e1770f357d09ffb8d1cb'
+    release_instructions = list(md.disasm(release,0x45b410))
+    assert len(release_instructions)==16 and sum(i.size for i in release_instructions)==62
+    assert not any(i.mnemonic=='call' for i in release_instructions)
     assert records[0x45b240] == 155
     assert hashlib.sha256(pe.get_data(0x5b240,155)).hexdigest() == 'edf69cfb1fd2d860913575999d39e05e37e615c11fb1e4280e4c166836e3b59f'
     assert pe.get_data(0x5b2db,5) == b'\xcc'*5
@@ -101,7 +110,7 @@ def inspect():
         for i in md.disasm(pe.get_data(va-base,n),va):
             addresses = [o.imm if o.type == X86_OP_IMM else o.mem.disp
                          for o in i.operands if o.type in (X86_OP_IMM,X86_OP_MEM)]
-            if any(a in (*state_addresses,0x45b360,0x45b240) for a in addresses):
+            if any(a in (*state_addresses,0x45b360,0x45b240,0x45b410) for a in addresses):
                 print(f'Bookkeeping reference (routine {va:#010x}) {i.address:#010x}: {i.mnemonic} {i.op_str}')
     for name,va,n in [('flag',0x4bab38,4),('status',0x5116e0,800),
                       ('ids',0x511230,400),('cursor',0x512040,2),

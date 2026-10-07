@@ -270,6 +270,13 @@ def verify():
     record_result('compilation','pass',details=shutdown_details)
     shutdown_cases = verify_shutdown(original,rebuilt,symbols,extent)
     record_result('emulation','pass',cases=shutdown_cases,details=shutdown_details)
+    VALIDATING_RVA = 0x5b410
+    release_details = {**details,
+        'scope':'Mem_ReleaseHandleId; single-threaded nonaliasing mapped globals; no native/layout parity',
+        'checks':'all 200 slots, duplicates, exact status equality, raw ID equality, no-match/disabled/repeat states, exact ordered global reads/writes, full image guards, EAX/ESP/argument/saved registers/DF; five-routine integration'}
+    record_result('compilation','pass',details=release_details)
+    release_cases = verify_release(original,rebuilt,symbols,extent)
+    record_result('emulation','pass',cases=release_cases,details=release_details)
     print('Native DLL/game execution and startup/gameplay parity: unverified by this harness.')
 
 def verify_consumer(original, rebuilt, symbols, fields, extent):
@@ -580,6 +587,104 @@ def verify_shutdown(original,rebuilt,symbols,extent):
         assert state==cstate
     compare(state)
     print(f'PASS: {cases} shutdown original-vs-C executions; two passes, all indices, ordered lifecycle, callback ABI/model mutations/reentry and four-routine integration.')
+    return cases
+
+
+def verify_release(original,rebuilt,symbols,extent):
+    code = original.get_data(0x5b410,62)
+    assert hashlib.sha256(code).hexdigest()=='d0fee3704a333538872dacd400ee150f38a7a7dcfe33e1770f357d09ffb8d1cb'
+    decoded = list(Cs(CS_ARCH_X86,CS_MODE_32).disasm(code,0x45b410))
+    assert len(decoded)==16 and sum(i.size for i in decoded)==62 and not any(i.mnemonic=='call' for i in decoded)
+    prefix = rebuilt.get_data(symbols['Mem_ReleaseHandleId']-rebuilt.OPTIONAL_HEADER.ImageBase,62)
+    record_result('raw_bytes','pass' if code==prefix else 'different',details={
+        'original_bytes':62,'compiled_prefix_bytes':62,
+        'scope':'prefix diagnostic only; compiled extent/relocation-aware equality not established'})
+    fields = [(name,symbols[name],n) for name,_,n in BOOKKEEPING_FIELDS]
+    rng = random.Random(0x45b410)
+    cases = 0
+    handles = [0,1,0x7fffffff,0x80000000,0xffffffff]
+    def fresh(flag,statuses,ids):
+        old = [rng.randbytes(n) for _,_,n in BOOKKEEPING_FIELDS]
+        old[0] = struct.pack('<I',flag)
+        old[1] = struct.pack('<200I',*statuses)
+        old[6] = struct.pack('<200I',*ids)
+        return old
+    def compare(old,handle):
+        nonlocal cases
+        flag = struct.unpack('<I',old[0])[0]
+        statuses = struct.unpack('<200I',old[1])
+        ids = struct.unpack('<200I',old[6])
+        expected = list(old)
+        status_bytes = bytearray(old[1])
+        events = [('read',BOOKKEEPING_FIELDS[0][0],0,4,flag)]
+        writes = []
+        # Derived from CMP status,1; CMP registered ID,EAX; conditional store,
+        # then unconditional ascending continuation through all 200 slots.
+        if flag:
+            for index,status in enumerate(statuses):
+                events.append(('read',BOOKKEEPING_FIELDS[1][0],4*index,4,status))
+                if status!=1:
+                    continue
+                events.append(('read',BOOKKEEPING_FIELDS[6][0],4*index,4,ids[index]))
+                if ids[index]==handle:
+                    struct.pack_into('<I',status_bytes,4*index,0)
+                    events.append(('write',BOOKKEEPING_FIELDS[1][0],4*index,4,0))
+                    writes.append(index)
+        expected[1] = bytes(status_bytes)
+        actual,owrites = execute(original,0x45b410,BOOKKEEPING_FIELDS,old,cases,
+            (0x45b410,0x45b44e),int(flag!=0),stack_args=(handle,),expected_events=events)
+        rebuilt_state,cwrites = execute(rebuilt,symbols['Mem_ReleaseHandleId'],fields,old,cases,
+            extent,int(flag!=0),stack_args=(handle,),expected_events=events)
+        assert actual==rebuilt_state==expected
+        assert owrites==[(BOOKKEEPING_FIELDS[1][1]+4*i,4,0) for i in writes]
+        assert cwrites==[(fields[1][1]+4*i,4,0) for i in writes]
+        cases += 1
+        return actual
+    for index in range(200):
+        statuses = [0]*200;statuses[index]=1
+        handle = handles[index%len(handles)]
+        ids = [handle^0x01010101]*200;ids[index]=handle
+        compare(fresh(1,statuses,ids),handle)
+    for flag in [0,1,2,0x80000000,0xffffffff]:
+        for handle in handles:
+            for pattern in range(6):
+                statuses = [0]*200 if pattern==0 else [1]*200
+                ids = [handle^0x01010101]*200 if pattern==1 else [handle]*200
+                if pattern==3:
+                    statuses = [i%3 for i in range(200)]
+                    ids = [handle if i%2 else handle^0x01010101 for i in range(200)]
+                if pattern==4:
+                    statuses = [rng.choice([0,2,0x80000000,0xffffffff]) for _ in range(200)]
+                if pattern==5:
+                    statuses = [0]*200;statuses[0]=statuses[199]=1
+                compare(fresh(flag,statuses,ids),handle)
+    for _ in range(64):
+        handle = rng.getrandbits(32)
+        compare(fresh(rng.getrandbits(32),[rng.choice([0,1,2,0x80000000,0xffffffff]) for _ in range(200)],
+            [handle if rng.randrange(3) else rng.getrandbits(32) for _ in range(200)]),handle)
+    # Actual initializer/consumer/registration produce three duplicate IDs.
+    # Release clears all, repeat and no-match still succeed; shutdown then leaves
+    # release disabled. No callback is needed or manufactured for this sequence.
+    old = fresh(0,[0xffffffff]*200,[0xffffffff]*200)
+    state,_ = execute(original,0x45b1f0,BOOKKEEPING_FIELDS,old,3000,(0x45b1f0,0x45b23c))
+    cstate,_ = execute(rebuilt,symbols['Mem_InitHandles'],fields,old,3000,extent)
+    assert state==cstate
+    for index in range(3):
+        state,_ = execute(original,0x45b1b0,BOOKKEEPING_FIELDS,state,3001+index,(0x45b1b0,0x45b1ea),index+1)
+        cstate,_ = execute(rebuilt,symbols['Mem_NextHandleId'],fields,cstate,3001+index,extent,index+1)
+        assert state==cstate
+        state,_ = execute(original,0x45b360,BOOKKEEPING_FIELDS,state,3004+index,(0x45b360,0x45b3d8),index,stack_args=(42,))
+        cstate,_ = execute(rebuilt,symbols['Mem_RegisterHandle'],fields,cstate,3004+index,extent,index,stack_args=(42,))
+        assert state==cstate
+    state = compare(state,0)
+    state = compare(state,42)
+    state = compare(state,42)
+    cstate = list(state)
+    state,_ = execute(original,0x45b240,BOOKKEEPING_FIELDS,state,3007,(0x45b240,0x45b2db))
+    cstate,_ = execute(rebuilt,symbols['Mem_ShutdownHandles'],fields,cstate,3007,extent)
+    assert state==cstate
+    compare(state,42)
+    print(f'PASS: {cases} ID-release original-vs-C executions; all indices, duplicates, eligibility, ordered effects, ABI and five-routine integration.')
     return cases
 
 

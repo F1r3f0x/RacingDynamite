@@ -33,6 +33,11 @@ int Mem_RegisterHandle(unsigned int handle_id);
 typedef void (*Mem_ShutdownCallback)(unsigned int parameter);
 int Mem_ShutdownHandles(void);
 
+/* Clears every status==1 slot whose registered dword ID matches; no callback.
+ * One stack dword, caller cleanup; returns 0 disabled, 1 enabled (even no match).
+ */
+int Mem_ReleaseHandleId(unsigned int handle_id);
+
 int Mem_InitHandles(void);
 /* x86 flat-address contract: if an enabled cursor is negative, the signed
  * word at byte address (unsigned int)g_memHandleIds + 2*cursor must be
