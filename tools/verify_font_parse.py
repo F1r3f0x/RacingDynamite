@@ -106,7 +106,7 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     if include_loader:
         # Deliberately cannot complete without the explicit CPU boundary model.
         stubs += 'void *File_LoadToMemory(const char *filename) { (void)filename; for (;;) {} }\n'
-        stubs += 'int Mem_Free(int pool, void *buffer) { (void)pool; (void)buffer; for (;;) {} }\n'
+    stubs += 'void free(void *p) { (void)p; for (;;) {} }\n'
     stub.write_text(stubs, encoding='utf-8')
     stub_obj.unlink(missing_ok=True)
     cc, ld = shutil.which('clang'), shutil.which('lld-link')
@@ -115,9 +115,9 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     exports = [n for n, _, _ in LIFECYCLE_FIELDS] + ['Font_Parse', 'Font_InitSystem',
         'Font_Shutdown', 'Font_Unload', 'Mem_NextHandleId', 'Mem_RegisterHandle',
         'Mem_ReleaseHandleId', 'Mem_InitHandles', 'Gfx_SpriteOp',
-        'validation_fontExitContext', 'g_fileErrorLine']
+        'validation_fontExitContext', 'g_fileErrorLine', 'g_memPools', 'Mem_Free', 'free']
     if include_loader:
-        exports += ['Font_Load', 'File_LoadToMemory', 'Mem_Free']
+        exports += ['Font_Load', 'File_LoadToMemory']
     commands = [[cc, '--target=i686-pc-windows-msvc', '-std=c89', '-pedantic-errors',
         '-Wall', '-Wextra', '-Werror', '-O2', '-ffreestanding', '-fno-builtin',
         '-fno-inline', '-mno-sse', '-mno-sse2', '-I', str(ROOT / 'decomp/include'),

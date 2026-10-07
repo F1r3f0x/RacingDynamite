@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:d959253569ab99333d1ba5316bc2202aa2cbed5630cbf60a3a869fa8ab664f14 -->
+<!-- snapshot:a5e8a2bb3d67b6eed13f38ebdb007f7f847a263d0dc1f7ddb06175d5752f0dd4 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -524,7 +524,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045AD50` | `0x0005AD50` | 35 | `sub_0045AD50` | unknown | unidentified | - |
 | `0x0045AD80` | `0x0005AD80` | 132 | `sub_0045AD80` | unknown | unidentified | - |
 | `0x0045AE10` | `0x0005AE10` | 406 | `sub_0045AE10` | unknown | unidentified | - |
-| `0x0045B000` | `0x0005B000` | 127 | `sub_0045B000` | unknown | unidentified | - |
+| `0x0045B000` | `0x0005B000` | 127 | `Mem_Free` | game | reconstructed | [windows_mem_free.md](windows_mem_free.md) |
 | `0x0045B080` | `0x0005B080` | 182 | `sub_0045B080` | unknown | unidentified | - |
 | `0x0045B140` | `0x0005B140` | 41 | `sub_0045B140` | unknown | unidentified | - |
 | `0x0045B170` | `0x0005B170` | 41 | `sub_0045B170` | unknown | unidentified | - |

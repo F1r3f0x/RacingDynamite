@@ -177,6 +177,7 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     return 0;
 }
 """
+    stub_c += 'void free(void *p) { (void)p; for (;;) {} }\n'
     stub_path = BUILD / 'sprite_op_stub.c'
     stub_obj = BUILD / 'sprite_op_stub.obj'
     stub_path.write_text(stub_c, encoding='utf-8')

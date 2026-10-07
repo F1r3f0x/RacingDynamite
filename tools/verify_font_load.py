@@ -2,7 +2,7 @@
 # requires-python = ">=3.13"
 # dependencies = ["pefile==2024.8.26", "capstone==5.0.7", "unicorn==2.1.4"]
 # ///
-"""Font_Load differential contract; explicit file/free/sprite boundary fixtures."""
+"""Font_Load with real Mem_Free; explicit file/CRT-free/sprite boundary fixtures."""
 import hashlib
 import random
 import struct
@@ -14,6 +14,7 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ECX, UC_X86_REG_EDX,
 from verify_font_parse import (ParserCPU, build_parser, oracle, INPUTS as PARSER_INPUTS,
                                inspect_original as inspect_parser, BUFFER)
 from verify_font_cleanup import LIFECYCLE_FIELDS, SAVED, STACK, STOP
+from verify_mem_free import PoolFixture, ARENA, ARENA_SIZE
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -21,7 +22,7 @@ if not __debug__:
     raise RuntimeError('Verification requires assertions')
 RVA, SIZE = 0x56420, 71
 DLL = BUILD / 'font_load_validation.dll'
-INPUTS = PARSER_INPUTS + ['tools/verify_font_load.py']
+INPUTS = PARSER_INPUTS + ['tools/verify_font_load.py', 'tools/verify_mem_free.py', 'tools/build_decomp.py']
 CALLERS = [0x4181d5, 0x4181e9, 0x4181fd, 0x418211, 0x418225, 0x418239,
            0x41824d, 0x418268, 0x41acfb, 0x41ad42, 0x41ad89, 0x41add0,
            0x41ae17, 0x41ae5e, 0x41aea5, 0x41aeec, 0x41af33]
@@ -76,6 +77,9 @@ class LoaderCPU(ParserCPU):
         for name, address in [('Font_Load', 0x456420), ('File_LoadToMemory', 0x4574a0),
                               ('Mem_Free', 0x45b000)]:
             self.entries[name] = address if self.original else symbols[name]
+        self.entries['CRT_free'] = 0x4693b0 if self.original else symbols['free']
+        self.fields.append(('g_memPools', 0x63c6a0 if self.original else symbols['g_memPools'], 1024))
+        self.cpu.mem_map(ARENA, ARENA_SIZE)
         self.freed = False
         self.cpu.hook_add(UC_HOOK_MEM_READ, self.check_read, begin=BUFFER, end=BUFFER+0xffff)
 
@@ -119,6 +123,14 @@ class LoaderCPU(ParserCPU):
             assert self.state() == self.free_state
             assert bytes(cpu.mem_read(BUFFER, len(self.blob))) == self.blob
             self.calls.append(('Mem_Free', args))
+            assert bytes(cpu.mem_read(ARENA, ARENA_SIZE)) == self.pool_before
+            # Execute the complete native/reconstructed hierarchy traversal.
+        elif address == self.entries['CRT_free']:
+            args = struct.unpack('<I', cpu.mem_read(sp + 4, 4))
+            assert args == (BUFFER,) and self.tracked
+            assert self.state() == self.free_state
+            assert bytes(cpu.mem_read(ARENA, ARENA_SIZE)) == self.pool_before
+            self.calls.append(('CRT_free', args))
             if self.free_error is not None:
                 cpu.mem_write(self.addresses_error, struct.pack('<I', self.free_error))
             # Poison released bytes: there must be no subsequent parser/read access.
@@ -129,7 +141,15 @@ class LoaderCPU(ParserCPU):
             super().hook(cpu, address, length, unused)
 
     def execute(self, state, blob, unused, filename, loaded, load_error,
-                free_result, free_error, parse_result, parse_error, seed, returns):
+                free_result, free_error, parse_result, parse_error, seed, returns, tracked=True):
+        state = dict(state)
+        fixture = PoolFixture()
+        self.record_offset = fixture.match(63, 63, 15, BUFFER, 0x1000) if tracked else None
+        self.pool_before = bytes(fixture.data)
+        self.cpu.mem_write(ARENA, self.pool_before)
+        table = [ARENA + 0x2000]*256; table[0] = ARENA
+        state['g_memPools'] = struct.pack('<256I', *table)
+        self.tracked = tracked
         self.load(state)
         self.addresses_error = next(a for n, a, _ in self.fields if n == 'g_fileErrorLine')
         self.root_entry, self.calls, self.descriptors = 'Font_Load', [], []
@@ -155,7 +175,9 @@ class LoaderCPU(ParserCPU):
             self.free_state = dict(final)
             calls = [('File_LoadToMemory', (filename,)), ('Font_Parse', (BUFFER, unused))]
             calls += parser_calls + [('Mem_Free', (0, BUFFER))]
-            if free_error is not None: put(final, 'g_fileErrorLine', free_error)
+            if tracked:
+                calls.append(('CRT_free', (BUFFER,)))
+                if free_error is not None: put(final, 'g_fileErrorLine', free_error)
         cpu = self.cpu
         cpu.mem_write(BUFFER, blob)
         sp = STACK + 0x8000
@@ -175,7 +197,10 @@ class LoaderCPU(ParserCPU):
         assert not cpu.reg_read(UC_X86_REG_EFLAGS) & 0x400
         assert bytes(cpu.mem_read(sp, 0x8000)) == stack
         data_after = bytes(cpu.mem_read(BUFFER, 0x10000))
-        assert data_after == (b'\xa5' * len(blob) + data_before[len(blob):] if loaded else data_before)
+        assert data_after == (b'\xa5' * len(blob) + data_before[len(blob):] if loaded and tracked else data_before)
+        pool_after = bytearray(self.pool_before)
+        if loaded and tracked: struct.pack_into('<I', pool_after, self.record_offset+4, 0)
+        assert bytes(cpu.mem_read(ARENA, ARENA_SIZE)) == bytes(pool_after)
         assert len(self.descriptors) == len(self.expected_calls)
         after = bytearray(cpu.mem_read(self.base, self.size))
         for _, address, size in self.fields:
@@ -205,7 +230,7 @@ def verify_font_load():
 
         def compare(loaded=True, flag=1, slot=0, pattern='sparse', magic=b'LFT\0', version=100,
                     enabled=1, cursor=0, registration=0, load_error=None, free_error=None,
-                    parse_result=None, parse_error=None):
+                    parse_result=None, parse_error=None, tracked=True):
             nonlocal cases
             state = {n: rng.randbytes(size) for n, _, size in LIFECYCLE_FIELDS}
             put(state, 'g_fileErrorLine', rng.getrandbits(32))
@@ -232,7 +257,7 @@ def verify_font_load():
             filename, unused, free_result = rng.getrandbits(32), rng.getrandbits(32), rng.getrandbits(32)
             a, b = LoaderCPU(original), LoaderCPU(rebuilt, symbols)
             args = (state, bytes(blob), unused, filename, loaded, load_error,
-                    free_result, free_error, parse_result, parse_error, cases, returns)
+                    free_result, free_error, parse_result, parse_error, cases, returns, tracked)
             assert a.execute(*args) == b.execute(*args)
             counts['null' if not loaded else 'real_parser' if parse_result is None else 'modeled_parser'] += 1
             cases += 1
@@ -259,9 +284,12 @@ def verify_font_load():
             for free_error in [None, 0, 1000, 0xffffffff]:
                 compare(parse_result=result, parse_error=rng.getrandbits(32),
                         load_error=rng.getrandbits(32), free_error=free_error)
+        for slot in [0, 15, 29]:
+            for version in [100, 99]:
+                compare(slot=slot, version=version, tracked=False, free_error=0xffffffff)
         record('emulation', 'pass', cases=cases, case_groups=counts,
-               scope='Return, full font/handle/error state, ordered calls, descriptors, parser/free boundary snapshots and ABI; actual parser/lazy handles',
-               limitations='File_LoadToMemory, Mem_Free and sprite creation modeled; 32 isolated parser-return fixtures; no native I/O/freeing, reentry, aliased/invalid buffers, instruction equality or native parity')
+               scope='Return, full font/handle/error state, ordered calls, descriptors, parser/free boundary snapshots and ABI; actual parser/lazy handles and Mem_Free',
+               limitations='File_LoadToMemory, CRT free and sprite creation modeled; real Mem_Free executes; 32 isolated parser-return fixtures; no native I/O/freeing, reentry, aliased/invalid buffers, instruction equality or native parity')
         print(f'PASS: {cases} Font_Load original-vs-C cases; {counts}; state, ordered calls and ABI equality.')
     except Exception as exc:
         record(phase, 'fail', error=str(exc))

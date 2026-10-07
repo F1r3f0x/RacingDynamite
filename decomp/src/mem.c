@@ -2,6 +2,10 @@
  * mem.c is the reconstruction module, inferred from adjacent handle consumers.
  */
 #include "mem.h"
+#include <stddef.h>
+
+/* CRT caller-cleanup free boundary; native heap behavior is not reconstructed. */
+extern void free(void *pointer);
 
 typedef char Mem_UIntMustBe32Bits[(sizeof(unsigned int) == 4) ? 1 : -1];
 typedef char Mem_ShortMustBe16Bits[(sizeof(short) == 2) ? 1 : -1];
@@ -31,6 +35,58 @@ volatile unsigned int g_memHandleFlags[MEM_HANDLE_COUNT];
 volatile unsigned int g_memPendingContext;
 volatile unsigned int g_memPendingCallback;
 volatile unsigned int g_memPendingParameter;
+
+
+/* IGN_WIN.EXE VA 0x0063C6A0: 256 loader-zeroed pool pointers.
+ * Pool name occupies 64 bytes, then 64 page pointers. Pages contain 64
+ * record-block pointers; each block contains 16 pointer/size dword pairs.
+ */
+MemPool * volatile g_memPools[MEM_POOL_COUNT];
+typedef char Mem_RecordSize[(sizeof(MemAllocationRecord) == 8) ? 1 : -1];
+typedef char Mem_RecordSizeOffset[(offsetof(MemAllocationRecord, size) == 4) ? 1 : -1];
+typedef char Mem_PageSize[(sizeof(MemAllocationPage) == 256) ? 1 : -1];
+typedef char Mem_PoolSize[(sizeof(MemPool) == 320) ? 1 : -1];
+typedef char Mem_PoolPagesOffset[(offsetof(MemPool, pages) == 64) ? 1 : -1];
+
+/* @original Mem_Free (IGN_WIN.EXE @ 0x0045B000, inferred mem.c)
+ * @fidelity EXACT
+ * First pointer match in ascending page/block/record order, regardless of size.
+ * Retains the record pointer; clears size after CRT free, including on repeat.
+ */
+int Mem_Free(int pool_id, void *pointer)
+{
+    int page_index;
+    int block_index;
+    int record_index;
+    unsigned int pool_address;
+    MemPool *pool;
+    MemAllocationPage *page;
+    MemAllocationRecord *records;
+
+    /* Preserve raw x86 indexed address arithmetic without signed C overflow.
+     * Normal pool IDs are 0..255; surrounding-table invalid IDs are unverified.
+     */
+    pool_address = (unsigned int)g_memPools + (unsigned int)pool_id * 4U;
+    pool = *(MemPool * volatile *)pool_address;
+    for (page_index = 0; page_index < MEM_POOL_PAGE_COUNT; ++page_index) {
+        page = pool->pages[page_index];
+        if (page != NULL) {
+            for (block_index = 0; block_index < MEM_POOL_BLOCK_COUNT; ++block_index) {
+                records = page->blocks[block_index];
+                if (records != NULL) {
+                    for (record_index = 0; record_index < MEM_POOL_RECORD_COUNT; ++record_index) {
+                        if (records[record_index].pointer == pointer) {
+                            free(pointer);
+                            records[record_index].size = 0U;
+                            return 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 /* @original Mem_ReleaseHandleId (IGN_WIN.EXE @ 0x0045B410, inferred mem.c)
  * @fidelity EXACT

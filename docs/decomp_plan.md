@@ -1,5 +1,16 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded follow-up (2026-10-07): [Mem_Free](ghidra/windows_mem_free.md)
+at VA `0x0045B000` / RVA `0x5B000` (127 bytes) is reconstructed in mem.c,
+with independently recovered pool/page/record types and 519 differential
+executions checking exact read/write order, first-pointer matches regardless
+of size, repeated/null/stale pointers and post-CRT size clearing. The real
+routine now executes through Font_Load in 333 differential cases, including
+six unregistered-buffer cases. Only CRT freeing, file loading and sprite
+creation remain modeled at those boundaries. Raw bytes differ; instruction
+equality, native heap/game parity and invalid hierarchy behavior are unverified.
+Full geputget.c remains blocked by legacy dependencies.
+
 Latest bounded follow-up (2026-10-07): [Font_Load](ghidra/windows_font_load.md)
 at VA `0x00456420` / RVA `0x56420` (71 bytes) now has fresh extracted-production-C
 compilation and 327 differential comparisons: 35 null-load, 260 real-parser

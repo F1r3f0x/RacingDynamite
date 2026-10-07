@@ -159,7 +159,10 @@ Its return is ignored. Font_Load does not restore an error changed by a
 dependency, so any freeing-side error mutation persists. Modeled error mutation
 is a wrapper robustness fixture, not a claim that the native free writes errors.
 
-## Fresh compilation and differential validation
+## Previous loader-only validation (commit e0640b4)
+
+This section records the prior 327-case scope. The follow-up below supersedes
+its modeled Mem_Free boundary and current validation count.
 
 PowerShell at the repository root:
 
@@ -226,3 +229,33 @@ sprite creation/destruction, dependency mutation beyond modeled error writes,
 reentry, aliased/invalid/unmapped buffers or negative memory-handle cursors are
 covered. Descriptor word zero is uninitialized in the authentic parser and C,
 and remains excluded. No playable reconstruction is produced.
+
+## Mem_Free integration follow-up (2026-10-07)
+
+[Mem_Free](windows_mem_free.md), VA 0x0045B000 / RVA 0x5B000, is now reconstructed
+in production mem.c and executes fully in the loader differential harness.
+The CRT free at VA 0x004693B0 replaces the former Mem_Free model boundary.
+File_LoadToMemory and sprite creation remain modeled. The linked CRT/file
+fixtures cannot return without emulator interception. Production Font_Load
+still requires no body edit; geputget.c now uses the verified header prototype
+instead of its former redundant void-return Mem_Free declaration.
+
+**333 differential cases pass**: the prior 327 cases now execute actual
+Mem_Free plus six missing-registration cases (three slot positions, valid and
+invalid versions). There are 35 null-load, 266 real-parser and 32 isolated
+modeled-parser-return cases. Registered loaded buffers reside at record 15 of
+block 63/page 63, forcing native hierarchy traversal. Mem_Free calls CRT free
+before clearing the size word and preserves the pointer. Unregistered buffers
+return zero from Mem_Free with no CRT call or buffer poisoning; Font_Load still
+returns its saved parser result. Any CRT fixture error mutation persists only
+when the native traversal reaches the dependency. The arbitrary fixture EAX
+value from CRT free is ignored by native Mem_Free and then by the wrapper.
+
+The harness checks full pool table/hierarchy state alongside prior font/handle/
+error state, ordered Mem_Free and CRT calls, parser/free/CRT boundary snapshots,
+post-free buffer read guards, unrelated bytes and cdecl ABI. The Mem_Free
+standalone contract adds 519 differential executions with exact hierarchy read
+and write ordering. Fresh compilation and emulation records remain separate.
+CRT heap freeing, native file I/O and sprite creation are unverified. No native
+resource management, instruction equality, original linked layout or game
+parity is claimed. Full geputget.c remains blocked by legacy dependencies.

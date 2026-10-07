@@ -211,7 +211,15 @@ def verify():
     assert sum(i.size for i in instructions) == 76
     generated_code = text.get_data()[:text.Misc_VirtualSize]
     generated = list(md.disasm(generated_code, lo))
-    assert not any(i.mnemonic == 'call' and i.op_str.startswith('0x') for i in generated), 'Unexpected direct helper dependency'
+    direct_calls = [i for i in generated if i.mnemonic == 'call' and i.op_str.startswith('0x')]
+    code_entries = {name: symbols[name] for name in [
+        'Mem_Free', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
+        'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free']}
+    assert len(direct_calls) == 1, 'Unexpected direct helper dependency count'
+    call = direct_calls[0]
+    owner = max((name for name, address in code_entries.items() if address <= call.address),
+                key=lambda name: code_entries[name])
+    assert owner == 'Mem_Free' and int(call.op_str, 16) == symbols['free'], 'Unexpected direct helper dependency'
     print(f'Original: 76 bytes, {len(instructions)} instructions; compiled .text: {text.Misc_VirtualSize} bytes.')
     print(f'Raw code-byte equality: {original_code == generated_code}; relocation-aware equality not evaluated.')
     print('Instruction equality: not claimed (modern provisional Clang code generation).')
@@ -712,3 +720,6 @@ if __name__ == '__main__':
 
     from verify_font_load import verify_font_load
     verify_font_load()
+
+    from verify_mem_free import verify_mem_free
+    verify_mem_free()

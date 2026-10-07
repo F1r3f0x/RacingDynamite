@@ -2,6 +2,36 @@
 #define IGNITION_MEM_H
 
 /* Independently recovered Windows state; no aggregate packing is assumed. */
+#define MEM_POOL_COUNT 256
+#define MEM_POOL_PAGE_COUNT 64
+#define MEM_POOL_BLOCK_COUNT 64
+#define MEM_POOL_RECORD_COUNT 16
+
+/* Windows allocation hierarchy, independently corroborated by pool creation
+ * and allocation. Names are semantic; sizes are raw 32-bit requested lengths.
+ */
+typedef struct {
+    void * volatile pointer;
+    volatile unsigned int size;
+} MemAllocationRecord;
+
+typedef struct {
+    MemAllocationRecord * volatile blocks[MEM_POOL_BLOCK_COUNT];
+} MemAllocationPage;
+
+typedef struct {
+    char name[64];
+    MemAllocationPage * volatile pages[MEM_POOL_PAGE_COUNT];
+} MemPool;
+
+extern MemPool * volatile g_memPools[MEM_POOL_COUNT];
+/* Two cdecl stack dwords, EAX=1 on first pointer match, 0 on no match.
+ * A valid pool and readable hierarchy are required; no bounds/null guards.
+ * Ignores size when selecting. Calls CRT free, then clears size only; retains
+ * the pointer, including null/stale pointers. Repeated frees are authentic.
+ */
+int Mem_Free(int pool_id, void *pointer);
+
 #define MEM_HANDLE_COUNT 200
 extern unsigned int g_memHandlesInitialized;
 extern unsigned int g_memHandleStatus[MEM_HANDLE_COUNT];

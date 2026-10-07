@@ -49,7 +49,6 @@ uint8_t *g_pPokalPic;
 extern void *Gfx_SpriteOp(void *desc, int op);
 extern void Gfx_DrawSprite(void *handle, Point2D *pos, int flags);
 extern void *File_LoadToMemory(const char *filename);
-extern void Mem_Free(int pool, void *ptr);
 
 /**
  * @original Font_InitSystem (IGN_WIN.EXE @ 0x00456180, geputget.c)
