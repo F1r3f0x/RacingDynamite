@@ -93,6 +93,39 @@ proof of instruction equality or runtime fidelity.
 - Documentation-only changes require diff review and `git diff --check`; builds
   and code audits are required when implementation or build tooling changes.
 
+## Required progress handoff
+
+For every Windows analysis, reconstruction, or validation feature, updating progress
+is part of completion, not a separate task for the user:
+
+1. Update each affected candidate by verified RVA with `tools/db.py describe`
+   and `set-status`. Record its name/classification, source and evidence paths,
+   ABI, fidelity and analysis stage as supported by the actual findings. A source
+   edit does not automatically identify a routine or establish reconstruction.
+2. Run the applicable real verifier after implementation changes. Extend its
+   function contract and result recording for newly supported routines. Never
+   manufacture passing runs or promote stage labels into validation evidence.
+   Analysis-only work may have no test result; state that limitation explicitly.
+3. Run `uv run python tools/verify_fidelity.py`, then
+   `uv run python tools/db.py update`, then
+   `uv run python tools/db.py update --check`. Resolve failures or report a concrete
+   blocker; do not present a blocked feature as complete. Do not rerun unrelated
+   builds solely for documentation-only work.
+4. Review and stage the feature's database changes and synchronized generated
+   outputs with its source/evidence. Include the resulting snapshot ID, affected
+   RVAs, validation scope and remaining limitations in the final handoff.
+
+The generated HTML files and copied dashboard deliverables are snapshots; they
+do not refresh themselves. Always regenerate from the authoritative SQLite store.
+Recorded input/artifact hashes detect stale evidence, but cannot detect a new
+routine that an agent never added or described. Checking affected RVAs is required.
+
+When several chats share a checkout, coordinate validation and export/commit
+ownership before modifying shared harnesses, SQLite or generated files. Do not
+overwrite another feature's records or stage its unrelated edits. Run the final
+export/check after the agreed source changes settle; changes after validation can
+make results stale and require the applicable verification to run again.
+
 ## Commits and completion
 
 - Commit each completed feature separately with its accompanying documentation.
