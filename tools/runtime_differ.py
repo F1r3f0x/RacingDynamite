@@ -5,6 +5,14 @@ Dynamic Execution & Telemetry Comparison Harness for Racing Dynamite.
 Compares runtime vehicle physics, states, and telemetry between authentic MAINDOS.EXE and MREBUILT.EXE.
 """
 
+# MIGRATION REQUIRED: retained for Windows adaptation; do not use yet.
+if __package__:
+    from .tool_migration import require_migration
+else:
+    from tool_migration import require_migration
+require_migration(__file__)
+
+
 import os
 import sys
 import time

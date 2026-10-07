@@ -1,5 +1,11 @@
 # Racing Dynamite Tooling Documentation (`tools/`)
 
+> **Tool cleanup (2026-10-07):** [MIGRATION.md](MIGRATION.md) and
+> [migration_required.json](migration_required.json) supersede the legacy catalog
+> below. Retired DOS tools are removed; retained migration scripts stop before
+> execution. Objdiff stays, but its DOS object configuration needs retargeting.
+> The database and dashboard entry points are active Windows tools.
+
 > Windows is the primary target from 2026-10-07. The DOS implementation is
 > superseded. `build_decomp.py`, `verify_matching.py`, and `verify_fidelity.py`
 > now support only the independently verified Windows `mem.c` routine. Other

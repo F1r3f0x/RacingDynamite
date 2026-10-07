@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "scripts": {
+    "analyze_menu.py": "Replace LE/DOS menu addresses with fingerprinted Windows PE evidence.",
+    "diff_func.py": "Replace DOS/Watcom object extraction and lossy operand normalization with PE comparisons that preserve call/global identity.",
+    "disasm_le.py": "Retarget bounded disassembly to PE sections, VA/RVA and verified Windows function extents; the LE parser is retired.",
+    "disasm_annot.py": "Use Windows database address fields, PE bytes and independently verified symbols.",
+    "verify_capstone.py": "Replace LE loading and DOS addresses with fingerprinted Windows PE instruction/data reads.",
+    "inventory_gaps.py": "Use the Windows schema and PE initializers; remove DOS completion assumptions before any database/report writes.",
+    "lookup_addrs.py": "Query verified Windows VA/RVA fields instead of the removed dos_address column.",
+    "query_db.py": "Query the Windows schema instead of DOS address/port-location fields, or consolidate into db.py.",
+    "runtime_baseline.py": "Stage authentic Windows copies under build/runtime; remove DOSBox and rebuilt DOS assumptions.",
+    "runtime_differ.py": "Replace DOSBox memory scans, DOS offsets and input automation with a verified Windows runtime contract.",
+    "sync_ghidra.py": "Verify loaded-program fingerprint, use the Windows schema, preview mutations and reject unknown target identity. Remove DOS fallback."
+  },
+  "configurations": {
+    "objdiff.json": "Retained unchanged for future objdiff work. DOS object paths must be retargeted to verified Windows reference and rebuilt objects before use."
+  }
+}

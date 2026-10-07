@@ -3,6 +3,14 @@
 Annotates call targets with names from database/decomp.db (dos_address) and
 immediate/memory operands that point at printable strings in MAINDOS.EXE.
 """
+
+# MIGRATION REQUIRED: retained for Windows adaptation; do not use yet.
+if __package__:
+    from .tool_migration import require_migration
+else:
+    from tool_migration import require_migration
+require_migration(__file__)
+
 import os
 import sqlite3
 import sys

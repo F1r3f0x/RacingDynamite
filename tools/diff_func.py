@@ -5,6 +5,14 @@ Extracts disassembly of a function from authentic MAINDOS.EXE and from build/dec
 and compares them instruction-by-instruction.
 """
 
+# MIGRATION REQUIRED: retained for Windows adaptation; do not use yet.
+if __package__:
+    from .tool_migration import require_migration
+else:
+    from tool_migration import require_migration
+require_migration(__file__)
+
+
 import sys
 from pathlib import Path
 import capstone

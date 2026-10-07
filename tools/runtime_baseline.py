@@ -1,4 +1,12 @@
 """Stage and launch equivalent disposable DOSBox environments; never write Ignition/."""
+
+# MIGRATION REQUIRED: retained for Windows adaptation; do not use yet.
+if __package__:
+    from .tool_migration import require_migration
+else:
+    from tool_migration import require_migration
+require_migration(__file__)
+
 from pathlib import Path
 import shutil
 import hashlib
