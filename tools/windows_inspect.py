@@ -8,6 +8,7 @@ import struct
 from collections import Counter
 import pefile
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
+from capstone.x86 import X86_OP_IMM, X86_OP_MEM
 from windows_target import TARGET, SHA256, ROUTINE_SHA256, verify_target
 
 if not __debug__:
@@ -30,14 +31,43 @@ def inspect():
     records = {base+a:n for a,n,local,params,bits in struct.iter_unpack(
         '<IIIHH',data[fpo.PointerToRawData:fpo.PointerToRawData+fpo.SizeOfData])}
     for va in [0x4120a0,0x412230,0x4122d0,0x412460,0x412500,0x45b170,
-               0x45b1f0,0x456af0,0x45b690,0x456e60,0x456bc0,0x455ac0,
+               0x45b1b0,0x456180,0x45b360,0x45b1f0,0x456af0,0x45b690,0x456e60,0x456bc0,0x455ac0,
                0x45b740,0x456f20,0x417270,0x417ea0,0x4184c0,0x458040]:
         print(f'FPO: VA={va:#010x} RVA={va-base:#010x} size={records[va]} end={va+records[va]:#010x}')
     assert records[0x45b1f0] == 76
     assert hashlib.sha256(pe.get_data(0x5b1f0,76)).hexdigest() == ROUTINE_SHA256
     md = Cs(CS_ARCH_X86,CS_MODE_32)
+    md.detail = True
+    consumer = pe.get_data(0x5b1b0,58)
+    assert records[0x45b1b0] == 58
+    assert hashlib.sha256(consumer).hexdigest() == '696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139'
+    assert pe.get_data(0x5b1ea,6) == b'\xcc'*6
+    for va in [0x45b1b0,0x45b1f0,0x456180,0x45b360]:
+        for i in md.disasm(pe.get_data(va-base,records[va]),va):
+            print(f'{i.address:#010x}: {i.mnemonic} {i.op_str}')
+    # Independent scan of all file-backed FPO code, not bridge xref completeness.
+    for va,n in sorted(records.items()):
+        for i in md.disasm(pe.get_data(va-base,n),va):
+            addresses = [o.imm if o.type == X86_OP_IMM else o.mem.disp
+                         for o in i.operands if o.type in (X86_OP_IMM,X86_OP_MEM)]
+            if any(a in (0x512040,0x45b1b0) or 0x51122e <= a < 0x5113c0 for a in addresses):
+                print(f'Handle reference {i.address:#010x}: {i.mnemonic} {i.op_str}')
+    # Absolute-address relocation scan also covers code outside FPO records.
+    refs = []
+    text_section = next(s for s in pe.sections if s.Name.rstrip(b'\0') == b'.text')
+    for block in pe.DIRECTORY_ENTRY_BASERELOC:
+        for e in block.entries:
+            if e.type != 3 or not text_section.VirtualAddress <= e.rva < text_section.VirtualAddress+text_section.Misc_VirtualSize:
+                continue
+            value = struct.unpack('<I',pe.get_data(e.rva,4))[0]
+            if value == 0x512040 or 0x51122e <= value < 0x5113c0:
+                refs.append((base+e.rva,value))
+    assert refs == [(0x45b1c1,0x512040),(0x45b1d7,0x512040),
+                    (0x45b1df,0x511230),(0x45b221,0x51122e),(0x45b235,0x512040)], refs
+    print('Absolute .text relocations referencing cursor/ID storage:',refs)
     for site,target in [(0x469a96,0x4120a0),(0x412170,0x45b170),
-        (0x45b17a,0x45b1f0),(0x412175,0x412500),(0x41250a,0x456bc0),
+        (0x45b17a,0x45b1f0),(0x4561a0,0x45b1b0),(0x4561c5,0x45b360),
+        (0x412175,0x412500),(0x41250a,0x456bc0),
         (0x412513,0x455ac0),(0x412257,0x417270),(0x41729a,0x417ea0),
         (0x41729f,0x4184c0),(0x45b7c6,0x47879c),(0x455b1a,0x478778),
         (0x4679e2,0x4787a2),(0x417f25,0x456be0),(0x4180ff,0x458040)]:

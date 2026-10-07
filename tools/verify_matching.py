@@ -14,7 +14,7 @@ import shutil
 import unicorn
 import pefile
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
-from unicorn import Uc, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE, UC_HOOK_MEM_WRITE
+from unicorn import Uc, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE, UC_HOOK_MEM_WRITE, UC_HOOK_MEM_READ
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ESI,
     UC_X86_REG_EDI, UC_X86_REG_EBP, UC_X86_REG_ESP, UC_X86_REG_EFLAGS,
     UC_X86_REG_EIP)
@@ -26,8 +26,10 @@ TRACKING_INPUTS = ['decomp/src/mem.c', 'decomp/include/mem.h', 'decomp/target.js
                    'tools/build_decomp.py', 'tools/verify_matching.py',
                    'tools/windows_target.py', 'tools/windows_tracking.py']
 
+VALIDATING_RVA = 0x5b1f0
+
 def record_result(kind, outcome, cases=0, details=None):
-    record_run(0x5b1f0, kind, outcome, inputs=TRACKING_INPUTS,
+    record_run(VALIDATING_RVA, kind, outcome, inputs=TRACKING_INPUTS,
                artifact=DLL.relative_to(ROOT).as_posix() if DLL.exists() else None,
                cases=cases, command='uv run tools/verify_matching.py', details=details or {})
 
@@ -41,12 +43,15 @@ FIELDS = [('g_memHandlesInitialized', 0x4bab38, 4),
 STACK, STOP = 0x7000000, 0x7100000
 PRESERVED = [UC_X86_REG_EBX, UC_X86_REG_ESI, UC_X86_REG_EDI, UC_X86_REG_EBP]
 
-def execute(pe, entry, fields, values, seed, extent):
+def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words=(), expected_read=None):
     base = pe.OPTIONAL_HEADER.ImageBase
     size = (pe.OPTIONAL_HEADER.SizeOfImage + 4095) & ~4095
     uc = Uc(UC_ARCH_X86, UC_MODE_32)
     uc.mem_map(base, size)
     uc.mem_write(base, pe.get_memory_mapped_image())
+    # Negative cursors need mapped signed words before the compiled table.
+    # This is harness memory, not an invented reconstruction data structure.
+    uc.mem_map(base-0x10000, 0x10000)
     # Surrounding writable bytes expose overruns; neither leaf uses import slots.
     for section in pe.sections:
         if section.Characteristics & 0x80000000:
@@ -55,10 +60,13 @@ def execute(pe, entry, fields, values, seed, extent):
     for (_, addr, length), value in zip(fields, values):
         assert len(value) == length
         uc.mem_write(addr, value)
+    for address, value in extra_words:
+        uc.mem_write(address, struct.pack('<h', value))
     uc.mem_map(STACK, 0x10000)
     uc.mem_map(STOP, 0x1000)
     sp = STACK + 0x8000
     uc.mem_write(sp, struct.pack('<I', STOP))
+    caller_stack = bytes(uc.mem_read(sp,STACK+0x10000-sp))
     rng = random.Random(seed)
     registers = [rng.getrandbits(32) for _ in PRESERVED]
     for reg, value in zip(PRESERVED, registers):
@@ -66,7 +74,9 @@ def execute(pe, entry, fields, values, seed, extent):
     uc.reg_write(UC_X86_REG_ESP, sp)
     uc.reg_write(UC_X86_REG_EFLAGS, 2)  # Windows x86 ABI: direction flag clear.
     before = bytes(uc.mem_read(base, size))
+    prefix_before = bytes(uc.mem_read(base-0x10000,0x10000))
     writes = []
+    reads = []
     def code_hook(cpu, address, length, unused):
         if not (extent[0] <= address < extent[1]):
             raise AssertionError('Execution escaped bounded routine')
@@ -78,10 +88,12 @@ def execute(pe, entry, fields, values, seed, extent):
         writes.append((address, length, value))
     uc.hook_add(UC_HOOK_CODE, code_hook)
     uc.hook_add(UC_HOOK_MEM_WRITE, write_hook)
+    uc.hook_add(UC_HOOK_MEM_READ, lambda cpu,access,address,length,value,unused: reads.append((address,length)))
     uc.emu_start(entry, STOP, count=10000)
     assert uc.reg_read(UC_X86_REG_EIP) == STOP, 'Did not return within instruction limit'
-    assert uc.reg_read(UC_X86_REG_EAX) == 1
+    assert uc.reg_read(UC_X86_REG_EAX) == expected_eax & 0xffffffff
     assert uc.reg_read(UC_X86_REG_ESP) == sp+4
+    assert bytes(uc.mem_read(sp,STACK+0x10000-sp)) == caller_stack
     assert [uc.reg_read(r) for r in PRESERVED] == registers
     assert not (uc.reg_read(UC_X86_REG_EFLAGS) & 0x400)
     after = bytearray(uc.mem_read(base, size))
@@ -89,9 +101,24 @@ def execute(pe, entry, fields, values, seed, extent):
     for _,addr,n in fields:
         after[addr-base:addr-base+n] = before[addr-base:addr-base+n]
     assert bytes(after) == before, 'Changed unrelated image memory'
+    assert bytes(uc.mem_read(base-0x10000,0x10000)) == prefix_before
+    if expected_read is not None:
+        # Refused consumption must not read an ID; enabled consumption reads
+        # exactly one signed word at the original effective address.
+        word_reads = [(a,n) for a,n in reads if n==2 and a!=fields[3][1]]
+        assert word_reads == expected_read, word_reads
+        expected_data_reads = [(fields[0][1],4)]
+        if struct.unpack('<I',values[0])[0] != 0:
+            expected_data_reads.append((fields[3][1],2))
+        expected_data_reads += expected_read
+        assert [(a,n) for a,n in reads if not STACK <= a < STACK+0x10000] == expected_data_reads
+    for address, value in extra_words:
+        assert bytes(uc.mem_read(address,2)) == struct.pack('<h',value)
     return result, writes
 
 def verify():
+    global VALIDATING_RVA
+    VALIDATING_RVA = 0x5b1f0
     verify_target()
     build()  # Always fresh; no --skip-build and no stale DOS inputs.
     original, rebuilt = pefile.PE(str(TARGET)), pefile.PE(str(DLL))
@@ -100,6 +127,7 @@ def verify():
     symbols = {e.name.decode(): rebuilt.OPTIONAL_HEADER.ImageBase+e.address
                for e in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
     fields = [(name, symbols[name], n) for name,_,n in FIELDS]
+    print('Validation globals:', fields)
     original_code = original.get_data(0x5b1f0, 76)
     assert hashlib.sha256(original_code).hexdigest() == ROUTINE_SHA256
     text = next(s for s in rebuilt.sections if s.Name.rstrip(b'\0') == b'.text')
@@ -148,7 +176,94 @@ def verify():
     record_result('raw_bytes', 'pass' if original_code == generated_code else 'different', details={'original_bytes': len(original_code), 'compiled_text_bytes': len(generated_code), 'scope': 'whole focused DLL .text versus routine; relocation-aware equality not evaluated'})
     record_result('emulation', 'pass', cases=cases, details=details)
     print(f'PASS: {cases} original-vs-C executions; full state, boundaries, skip/repeat, writes and ABI checked.')
+    VALIDATING_RVA = 0x5b1b0
+    consumer_details = {**details,
+        'scope': 'Mem_NextHandleId; focused PE32 DLL; no native/layout parity claim',
+        'checks': 'signed EAX, full state, exact reads/writes, caller stack, saved registers, DF; initializer/exhaustion integration',
+        'negative_contract': 'readable nonaliasing signed-word storage; -4/-32768 differential; -1/-2 original-only'}
+    record_result('compilation','pass',details=consumer_details)
+    consumer_cases, original_only = verify_consumer(original, rebuilt, symbols, fields, extent)
+    record_result('emulation','pass',cases=consumer_cases,
+                  details={**consumer_details,'original_only_negative_cases':original_only})
     print('Native DLL/game execution and startup/gameplay parity: unverified by this harness.')
+
+def verify_consumer(original, rebuilt, symbols, fields, extent):
+    code = original.get_data(0x5b1b0,58)
+    assert hashlib.sha256(code).hexdigest() == '696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139'
+    md = Cs(CS_ARCH_X86,CS_MODE_32)
+    decoded = list(md.disasm(code,0x45b1b0))
+    assert sum(i.size for i in decoded) == 58 and not any(i.mnemonic=='call' for i in decoded)
+    # This is only a raw diagnostic, not a relocation-aware match score.
+    rebuilt_code = rebuilt.get_data(symbols['Mem_NextHandleId']-rebuilt.OPTIONAL_HEADER.ImageBase,58)
+    print(f'Consumer: 58 original bytes, {len(decoded)} instructions; raw 58-byte prefix equal: {code == rebuilt_code}.')
+    record_result('raw_bytes','pass' if code == rebuilt_code else 'different',
+        details={'original_bytes':58,'compiled_prefix_bytes':58,
+                 'scope':'prefix diagnostic only, not verified compiled extent or relocation-aware equality'})
+    cases = 0
+    rng = random.Random(0x45b1b0)
+    def compare(old, expected, result, cursor, word=None):
+        nonlocal cases
+        extras = [] if word is None else [(FIELDS[2][1]+cursor*2,word)]
+        cextras = [] if word is None else [(fields[2][1]+cursor*2,word)]
+        for address,_ in cextras:
+            assert not any(address < a+n and a < address+2 for _,a,n in fields), 'Sentinel aliases compiled global'
+        enabled = struct.unpack('<I',old[0])[0] != 0 and cursor < 199
+        actual, owrites = execute(original,0x45b1b0,FIELDS,old,cases,
+                                 (0x45b1b0,0x45b1ea),result,extras,
+                                 [(FIELDS[2][1]+cursor*2,2)] if enabled else [])
+        rebuilt_result, cwrites = execute(rebuilt,symbols['Mem_NextHandleId'],fields,
+                                         old,cases,extent,result,cextras,
+                                         [(fields[2][1]+cursor*2,2)] if enabled else [])
+        assert actual == rebuilt_result == expected, (cursor, result,
+            [(i,a.hex(),b.hex(),e.hex()) for i,(a,b,e) in enumerate(zip(actual,rebuilt_result,expected)) if a!=b or a!=e])
+        changed = expected[3] != old[3]
+        assert owrites == ([(FIELDS[3][1],2,(cursor+1)&0xffff)] if changed else [])
+        assert cwrites == ([(fields[3][1],2,(cursor+1)&0xffff)] if changed else [])
+        cases += 1
+        return actual
+    # Independent expected results derive from MOVSX, signed JGE, INC AX and
+    # the original effective address, rather than calling the reconstruction.
+    for flag in [0,1,2,0xffffffff,0x80000000]:
+        for cursor in [0,198,199,200,32767,-4,-32768]:
+            for id_value in [0,1,32767,-1,-32768]:
+                ids = bytearray(rng.randbytes(400))
+                if 0 <= cursor < 200:
+                    struct.pack_into('<h',ids,cursor*2,id_value)
+                old = [struct.pack('<I',flag),rng.randbytes(800),bytes(ids),struct.pack('<h',cursor)]
+                enabled = flag != 0 and cursor < 199
+                expected = list(old)
+                if enabled:
+                    expected[3] = struct.pack('<h',cursor+1)
+                compare(old,expected,id_value if enabled else -1,cursor,
+                        id_value if cursor < 0 else None)
+    # Linked validation globals have a different layout: at -1/-2 the compiled
+    # address aliases cursor/flag. Independently execute the original at those
+    # offsets without pretending the surrounding storage is layout-equivalent.
+    original_only = 0
+    for cursor in [-1,-2]:
+        for word in [0,32767,-1,-32768]:
+            old = [struct.pack('<I',2),bytes(800),bytes(400),struct.pack('<h',cursor)]
+            expected = list(old)
+            expected[3] = struct.pack('<h',cursor+1)
+            actual,writes = execute(original,0x45b1b0,FIELDS,old,800+original_only,
+                (0x45b1b0,0x45b1ea),word,[(FIELDS[2][1]+cursor*2,word)],
+                [(FIELDS[2][1]+cursor*2,2)])
+            assert actual == expected and writes == [(FIELDS[3][1],2,(cursor+1)&0xffff)]
+            original_only += 1
+    # Integrate actual original/C initializer outputs and consume to exhaustion.
+    seed = [bytes(4),rng.randbytes(800),rng.randbytes(400),b'\xff\x7f']
+    values,_ = execute(original,0x45b1f0,FIELDS,seed,900,(0x45b1f0,0x45b23c))
+    cvalues,_ = execute(rebuilt,symbols['Mem_InitHandles'],fields,seed,900,extent)
+    assert values == cvalues
+    for index in range(202):
+        cursor = min(index,199)
+        expected = list(values)
+        if index < 199:
+            expected[3] = struct.pack('<h',index+1)
+        values = compare(values,expected,index+1 if index < 199 else -1,cursor)
+    print(f'PASS: {cases} consumer original-vs-C executions; flags, signed IDs/cursors, exact writes, ABI and initializer/exhaustion integration.')
+    print(f'PASS: {original_only} original-only -1/-2 cursor executions; compiled surrounding data layout differs, no layout parity claim.')
+    return cases, original_only
 
 if __name__ == '__main__':
     try:

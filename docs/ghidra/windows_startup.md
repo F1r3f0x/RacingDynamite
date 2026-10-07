@@ -297,7 +297,7 @@ legacy. `verify_fidelity.py` audits only this Windows inventory and migrated mod
 it is not a project-wide fidelity certificate. Broader database/dashboard migration
 is deferred to keep this milestone bounded.
 
-Next reconstruct the adjacent handle-ID consumer at **`0x0045B1B0`**, whose direct
+The first milestone's next routine was the adjacent handle-ID consumer at **`0x0045B1B0`**, whose direct
 code reads the initialized flag, sign-extends cursor/IDs, checks the 200-entry
 boundary, and increments the cursor. Recover its signed boundary behavior and
 callers before implementing it. Further startup priorities are CRT initializer
@@ -313,3 +313,14 @@ records seed 1,012 candidate extents; other candidate routines are not reconstru
 or validated by this milestone. Fresh harness runs persist compiler/input/artifact
 provenance and their 30-case emulation results. Native/instruction/binary matching
 claims remain unchanged. See `database/README.md`; run `db.py update` after results.
+
+## Handle-ID consumer follow-up
+
+`Mem_NextHandleId` at `0x0045B1B0` is now reconstructed and independently validated
+with this initializer. See [the bounded consumer evidence](windows_handles.md)
+for its 58-byte extent, caller, signed ID/cursor semantics, original 199-slot
+consumption limit, negative-address memory contract, and linked-layout limitations.
+The harness retains all 30 initializer comparisons and adds 377 consumer
+comparisons plus eight original-only negative-cursor cases. Compilation, emulation,
+instruction equality and native behavior remain separate claims. The next verified
+dependency is the caller's downstream bookkeeping routine at `0x0045B360`.

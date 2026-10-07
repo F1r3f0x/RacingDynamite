@@ -1,4 +1,4 @@
-"""Compile only the verified Windows mem routine; link a validation DLL.
+"""Compile only the verified Windows mem routines; link a validation DLL.
 
 This replaces the DOS build entry point. Other decomp modules are unmigrated.
 """
@@ -7,7 +7,7 @@ import shutil
 import subprocess
 from windows_target import ROOT, BUILD, DLL, verify_target
 
-EXPORTS = ['Mem_InitHandles', 'g_memHandlesInitialized', 'g_memHandleStatus',
+EXPORTS = ['Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
            'g_memHandleIds', 'g_memHandleCursor']
 
 def build(compiler='clang', linker='lld-link'):

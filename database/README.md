@@ -39,9 +39,13 @@ recoverable through Git history. The old destructive `init`, markdown importer,
 arbitrary SQL mutation and bulk Ghidra sync are not active CLI commands.
 
 Verification results are appended by the real harness, not status labels. The
-current `uv run tools/verify_matching.py` freshly compiles and emulates only
-`Mem_InitHandles`; it records compilation, raw-byte difference and 30-case
-emulation separately. Other routines need their own verified contracts/harnesses.
+current `uv run tools/verify_matching.py` freshly compiles and emulates
+`Mem_InitHandles` and `Mem_NextHandleId`; it records compilation, raw-byte
+differences and emulation separately (30 and 377 differential cases).
+Eight additional consumer cases execute only the original; the
+[consumer evidence](../docs/ghidra/windows_handles.md) explains differing negative
+address surroundings and the memory contract. Other routines need their own
+verified contracts/harnesses.
 Exact/relocated instruction comparison, linked equality, and native game parity
 remain unclaimed. Historical imported evidence is preserved but does not count
 as a fresh passing run until reproduced.

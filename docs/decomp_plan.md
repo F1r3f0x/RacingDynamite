@@ -1,9 +1,11 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
-Milestone update, 2026-10-07: the [verified startup map](ghidra/windows_startup.md)
-and C89 `Mem_InitHandles` (`0x0045B1F0`) are complete within a focused validation
-scope. The three build/verification entry points now target that Windows routine;
-30 original-instruction versus compiled-C emulator comparisons passed. Modern
+Milestone update, 2026-10-07: the [verified startup map](ghidra/windows_startup.md),
+C89 `Mem_InitHandles` (`0x0045B1F0`) and its
+[handle-ID consumer](ghidra/windows_handles.md) (`0x0045B1B0`) are complete within
+a focused validation scope. The build/verification entry points cover both:
+30 initializer and 377 consumer original-instruction versus compiled-C emulator
+comparisons passed, with eight original-only negative-cursor checks. Modern
 Clang is provisional, instruction matching is not claimed, and visual/native
 startup remains unverified. The active Windows SQLite store now generates
 [the inventory](tracking/windows_inventory.json), registry and treemap from one snapshot.
@@ -121,7 +123,8 @@ when interpreting matching scores. A future treemap can use verified byte sizes
 for area and these evidence stages for color; existing dashboards are not yet a
 Windows inventory.
 
-The focused Windows build and differential harness cover the handle initializer;
+The focused Windows build and differential harness cover the handle initializer
+and handle-ID consumer;
 the active provenance auditor and tracking exports cover the Windows inventory.
 LE helpers, the legacy instruction comparator and DOS runtime staging remain
 historical tools, not active Windows acceptance gates. DOS compatibility is not
@@ -152,5 +155,7 @@ emulation evidence, generic provenance audit, synchronized exports and interacti
 treemap. Results carry target/routine/source/artifact hashes, compiler context and
 commands; stale evidence does not count. Compilation, reconstruction, byte equality,
 emulation and native validation remain separate. Native playable milestones are
-unverified. Next: reconstruct/validate the adjacent handle consumer and continue
+unverified. The adjacent consumer is now reconstructed with its signed boundary
+and negative-address contract preserved; next recover its caller's downstream
+bookkeeping routine at `0x0045B360` and continue
 classifying/corroborating Windows candidate extents, including non-FPO routines.

@@ -29,8 +29,11 @@ commands. The build compiles only `decomp/src/mem.c` with strict C89 for x86 Win
 then links a dependency-free validation DLL under `build/decomp/windows/`. It prints
 actual compiler/linker commands, rejects the wrong target fingerprint, and never
 uses stale DOS objects. Optional build arguments: `--compiler <path>` and
-`--linker <path>`. The verifier always rebuilds, then runs 30 original-vs-C
-emulator cases; it does not certify instruction equality or native game behavior.
+`--linker <path>`. The verifier always rebuilds, then runs 30 initializer and 377
+consumer original-vs-C cases, plus eight original-only negative-cursor cases.
+It does not certify instruction equality or native game behavior. The
+[consumer evidence](../docs/ghidra/windows_handles.md) states the negative-state
+memory contract and the validation DLL's differing data layout.
 
 The fidelity audit checks the active SQLite inventory and current source/result
 provenance. [The Windows inventory](../docs/tracking/windows_inventory.json) is generated. See the
