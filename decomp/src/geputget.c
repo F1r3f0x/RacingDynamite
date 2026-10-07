@@ -288,126 +288,89 @@ int Font_GetTextWidth(const char *text, int font_id) {
 }
 
 /**
- * @original Font_DrawText (MAINDOS.EXE @ 0x00061959, geputget.c)
+ * @original Font_DrawText (IGN_WIN.EXE @ 0x00456660, geputget.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x00061959. Renders string to screen via Gfx_DrawSprite, taking into account
- *        text alignment (0=left, 1=center, 2=right), proportionality, and fixed-point coordinates.
+ * @notes Native sprite dispatch boundary; see windows_font_draw_text.md.
  */
 int Font_DrawText(const char *text, int font_id, int x, int y) {
-    int orig_x = x;
-    int dummy_space;
+    unsigned int cursor = (unsigned int)x;
+    unsigned int origin = (unsigned int)x;
+    int proportional;
+    int measure;
+    int pass;
     int i;
+    volatile int discarded_space_width;
 
     if (font_id >= MAX_FONTS || g_fonts[font_id].in_use == 0) {
         return 1040;
     }
-
     if (g_fonts[font_id].field_08 != 0) {
         return 2;
     }
 
-    dummy_space = (int)((double)(g_fonts[font_id].height << 8) * 0.35);
-    if (dummy_space < 1) {
-        dummy_space = 1;
-    }
+    discarded_space_width = (int)((double)((short)g_fonts[font_id].height * 256)
+        * 0.35);
+    (void)discarded_space_width;
+    proportional = g_fonts[font_id].is_proportional != 0;
+    measure = g_fonts[font_id].alignment != 0;
 
-    if (g_fonts[font_id].is_proportional == 0) {
-        if (g_fonts[font_id].alignment != 0) {
-            for (i = 0; i < (int)strlen(text); i++) {
-                uint8_t c = (uint8_t)text[i];
-                if (c == '\0') {
-                    break;
-                }
+    /* A separate measurement pass precedes all drawing when alignment is set. */
+    for (pass = measure ? 0 : 1; pass < 2; pass++) {
+        for (i = 0; i < (int)strlen(text); i++) {
+            signed char c = (signed char)text[i];
+            const unsigned char *slot_bytes = (const unsigned char *)&g_fonts
+                + font_id * sizeof(FontSlot);
+            const short *width = (const short *)(slot_bytes
+                + offsetof(FontSlot, widths) + ((int)c - 32) * (int)sizeof(short));
 
-                if (g_fonts[font_id].glyph_present[c - 32] == 1) {
-                    int unk_8 = 0;
-                    if (g_fonts[font_id].widths[c - 32] != g_fonts[font_id].height) {
-                        unk_8 = (g_fonts[font_id].height - g_fonts[font_id].widths[c - 32]) / 2;
+            if (c == '\0') {
+                break;
+            }
+            /* Signed character indexing can read header/preceding-slot bytes. */
+            if (*(slot_bytes + offsetof(FontSlot, glyph_present) + (int)c - 32) == 1) {
+                if (pass == 1) {
+                    Point2D position;
+                    void *handle;
+                    int inset = 0;
+
+                    if (!proportional) {
+                        inset = ((short)g_fonts[font_id].height - (int)*width) / 2;
                     }
-                    (void)unk_8;
-                    x += g_fonts[font_id].height + g_fonts[font_id].extra_spacing;
-                } else if (c == ' ') {
-                    x += g_fonts[font_id].height + g_fonts[font_id].extra_spacing;
+                    position.x = (int)((cursor + (unsigned int)inset) << 8);
+                    position.y = (int)((unsigned int)y << 8);
+                    handle = *(void *const *)(slot_bytes
+                        + offsetof(FontSlot, glyph_handles)
+                        + ((int)c - 32) * (int)sizeof(void *));
+                    /* The native third argument is a pointer; this client uses
+                     * only its all-zero/null representation. EAX is ignored. */
+                    Gfx_DrawSprite(handle, &position, 0);
                 }
-            }
-
-            if (g_fonts[font_id].alignment == 1) {
-                int diff = x - orig_x;
-                x = orig_x - (diff / 2);
-            } else if (g_fonts[font_id].alignment == 2) {
-                int diff = x - orig_x;
-                x = orig_x - diff;
-            } else {
-                x = orig_x;
-            }
-        }
-
-        for (i = 0; i < (int)strlen(text); i++) {
-            uint8_t c = (uint8_t)text[i];
-            if (c == '\0') {
-                break;
-            }
-
-            if (g_fonts[font_id].glyph_present[c - 32] == 1) {
-                int unk_8 = 0;
-                Point2D pos;
-                if (g_fonts[font_id].widths[c - 32] != g_fonts[font_id].height) {
-                    unk_8 = (g_fonts[font_id].height - g_fonts[font_id].widths[c - 32]) / 2;
-                }
-                pos.x = (x + unk_8) << 8;
-                pos.y = y << 8;
-                Gfx_DrawSprite(g_fonts[font_id].glyph_handles[c - 32], &pos, 0);
-                x += g_fonts[font_id].height + g_fonts[font_id].extra_spacing;
+                /* The renderer may change metrics: advance from the live table. */
+                cursor += (unsigned int)(proportional ? (int)*width
+                    : (int)(short)g_fonts[font_id].height)
+                    + (unsigned int)g_fonts[font_id].extra_spacing;
             } else if (c == ' ') {
-                x += g_fonts[font_id].height + g_fonts[font_id].extra_spacing;
+                if (proportional) {
+                    int space_width = (int)((double)((short)g_fonts[font_id].height * 256)
+                        * 0.35 * (1.0 / 256.0));
+                    cursor += (unsigned int)space_width;
+                } else {
+                    cursor += (unsigned int)(short)g_fonts[font_id].height
+                        + (unsigned int)g_fonts[font_id].extra_spacing;
+                }
             }
         }
-    } else {
-        if (g_fonts[font_id].alignment != 0) {
-            for (i = 0; i < (int)strlen(text); i++) {
-                uint8_t c = (uint8_t)text[i];
-                if (c == '\0') {
-                    break;
-                }
-
-                if (g_fonts[font_id].glyph_present[c - 32] == 1) {
-                    x += g_fonts[font_id].widths[c - 32] + g_fonts[font_id].extra_spacing;
-                } else if (c == ' ') {
-                    int space_w = (int)((double)(g_fonts[font_id].height << 8) * 0.35 * (1.0 / 256.0));
-                    x += space_w;
-                }
-            }
-
+        if (pass == 0) {
             if (g_fonts[font_id].alignment == 1) {
-                int diff = x - orig_x;
-                x = orig_x - (diff / 2);
+                /* Original divides the wrapped origin-minus-end displacement. */
+                cursor = origin + (unsigned int)((int)(origin - cursor) / 2);
             } else if (g_fonts[font_id].alignment == 2) {
-                int diff = x - orig_x;
-                x = orig_x - diff;
+                cursor = origin + origin - cursor;
             } else {
-                x = orig_x;
-            }
-        }
-
-        for (i = 0; i < (int)strlen(text); i++) {
-            uint8_t c = (uint8_t)text[i];
-            if (c == '\0') {
-                break;
-            }
-
-            if (g_fonts[font_id].glyph_present[c - 32] == 1) {
-                Point2D pos;
-                pos.x = x << 8;
-                pos.y = y << 8;
-                Gfx_DrawSprite(g_fonts[font_id].glyph_handles[c - 32], &pos, 0);
-                x += g_fonts[font_id].widths[c - 32] + g_fonts[font_id].extra_spacing;
-            } else if (c == ' ') {
-                int space_w = (int)((double)(g_fonts[font_id].height << 8) * 0.35 * (1.0 / 256.0));
-                x += space_w;
+                cursor = origin;
             }
         }
     }
-
     return 1;
 }
 
@@ -859,4 +822,3 @@ char *Input_GetQueuedKey(char *query_str) {
     }
     return match;
 }
-

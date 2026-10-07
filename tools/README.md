@@ -48,6 +48,13 @@ header, a C `strlen` harness dependency and the original `_ftol` instructions;
 signed bytes/words, wrap and x87 double/extended precision are covered. Full
 `geputget.c` compilation remains blocked by legacy dependencies. See
 [font-width evidence](../docs/ghidra/windows_font_get_text_width.md).
+It also extracts and compiles production `Font_DrawText`, then checks 1,543
+original-versus-C executions plus three original-only negative-slot checks.
+Run `uv run tools/verify_font_draw.py` for the focused draw verifier. The original
+sprite wrapper and `_ftol` execute; renderer bodies are modeled at their recovered
+cdecl boundary. Ordered drawing arguments, live-table/text mutations, ABI and
+x87 precision are covered; framebuffer/native visuals are unverified. See
+[font-drawing evidence](../docs/ghidra/windows_font_draw_text.md).
 It does not certify instruction equality or native game behavior. The
 [consumer evidence](../docs/ghidra/windows_handles.md) states the negative-state
 memory contract and the validation DLL's differing data layout.

@@ -699,3 +699,5 @@ if __name__ == '__main__':
         raise
     from verify_font_width import verify_font_width
     verify_font_width()
+    from verify_font_draw import verify_font_draw
+    verify_font_draw()

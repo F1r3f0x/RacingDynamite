@@ -86,6 +86,10 @@ int Font_Load(const char *filename, int unused);
 int Font_Unload(int font_id);
 int Font_GetTextWidth(const char *text, int font_id);
 int Font_DrawText(const char *text, int font_id, int x, int y);
+/* IGN_WIN.EXE 0x00456D20: null-only font client of native sprite dispatch.
+ * Pass 0 for the pointer-sized third word; this client ignores renderer EAX.
+ * General non-null transform handling is not reconstructed here. */
+void Gfx_DrawSprite(void *handle, Point2D *position, int null_transform);
 void Font_DrawHUDText(int x, int y, const char *text, uint8_t *framebuffer, int stride, const uint8_t *font_data, uint8_t color_offset);
 void Load_SystemGraphicsAndFonts(void);
 void Font_LoadHUDFonts(void);
