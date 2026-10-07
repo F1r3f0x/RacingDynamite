@@ -199,15 +199,85 @@ Disassembly and operand relocations from authentic `IGN_WIN.EXE`:
    - `+0x1C`: `field_1c` = 0
    - Dispatched to `Gfx_SpriteOp(&desc, 0)` via wrapper `0x00456d40`. Result stored in `glyph_handles[i]`.
 
-## Emulation Verification
-Verified under Unicorn x86 emulation across all boundary scenarios:
-- **Lazy Subsystem Initialization**: When `g_fontSystemInitialized == 0`, invokes `Font_InitSystem()` (`0x00456180`), which sets `g_fontSystemInitialized = 1`, registers handle callback, and resets slots.
-- **Magic Validation**: When header does not begin with `"LFT\0"`, sets `g_fileErrorLine = 1050` and returns `-1`. Preserves registers (`ebx`, `esi`, `edi`, `ebp`) and caller stack balance.
-- **Version Validation**: When version word at `buffer + 4` does not equal `100`, sets `g_fileErrorLine = 1060` and returns `-1`. Preserves registers and caller stack balance.
-- **Slot Exhaustion**: When all 30 font slots are occupied (`in_use == 1`), sets `g_fileErrorLine = 1030` and returns `-1`.
-- **First Free Slot Allocation**: Scans `0..29`, allocates the first available slot (e.g. slot 0 when empty, slot 5 when 0..4 full), sets `in_use = 1`, and returns the slot index.
-- **Glyph Metrics & Sprite Creation**: For present glyphs (`offset >= 0`), constructs authentic `SpriteDesc` and calls sprite operator with `op = 0`. For absent glyphs (`offset == -1`), sets `glyph_present[i] = 0` and `glyph_handles[i] = NULL`.
+## Differential validation (2026-10-07)
 
-## Extent and Limitations
-- **Extent**: Fully reconstructed in `decomp/src/geputget.c` and declared in `decomp/include/geputget.h` with 100% functional and structural fidelity to original Windows binary instructions.
-- **Harness Status**: Direct compilation and emulation of `geputget.c` within `tools/verify_matching.py` remains blocked by unmigrated DOS-dependent systems (`<io.h>`, `<fcntl.h>`, `File_LoadToMemory`). Isolated Unicorn emulation and instruction-level analysis confirm the routine's exact instruction behavior and ABI contract.
+The authentic local PE fingerprint, FPO record (11 local dwords, two parameter
+words, flags 0x140E), complete instruction coverage, both calls, all 15 HIGHLOW
+operand relocations and initialized magic were independently rechecked by
+`tools/verify_font_parse.py`. The user-provided assumption is that authentic
+IGN_WIN.EXE is active in Ghidra. The doctor probe reported Windows socket access
+denied (10013); no live Ghidra corroboration is claimed. No DOS binary was used.
+
+The existing production C89 parser matches the recovered contract without a
+source edit. "EXACT" describes reconstructed behavior, not instruction equality.
+The prior unsupported 100% fidelity statement is superseded by this measured scope.
+
+**260 original-instruction versus compiled-production-C cases pass:**
+
+- 90 cases reach all 30 slots with empty, sparse and full glyph sets. Nonzero
+  status dwords (1, 2, 0x80000000, 0xFFFFFFFF) remain occupied; first zero wins.
+- 50 cases cover flags 0/1/2/0x80000000/0xFFFFFFFF, corruption of each of the
+  four magic bytes, five invalid versions, full tables and error precedence.
+  Lazy initialization precedes header validation and resets slots even on error.
+- 60 lazy initialization cases cover memory flags 0/1/2/0xFFFFFFFF, cursors
+  0/198/199/200/32767 and first/last/full registration tables. Signed handle IDs
+  include 0, 1, -1, -32768 and 32767. Allocation/registration failure is ignored.
+- 60 randomized glyph patterns cover arbitrary return handles (including null),
+  signed metric boundaries 0/32767/-32768/-1 and offset dwords 0/1/-2/INT_MIN/
+  INT_MAX. Exactly offset -1 is absent; all other dwords form pixel pointers with
+  32-bit wrapping. The modeled operator does not dereference these pointers.
+
+The focused DLL extracts Font_Parse, Font_InitSystem, Font_Shutdown and Font_Unload
+from production geputget.c, compiles complete production mem.c and includes
+production headers with compile-time layout checks. A C memcmp supplies ordinary
+immutable byte-comparison semantics; the original uses inline REPE CMPSB.
+Gfx_SpriteOp is linked in a separate stub object so Clang cannot eliminate calls;
+emulation intercepts it, records arguments and supplies explicit fixture handles.
+The original cdecl wrapper at VA 0x00456D40 executes through its indirect boundary.
+Only this sprite creation boundary is modeled; real memory lifecycle bodies execute.
+
+Every execution compares complete 48,000-byte font state, all handle/pending fields,
+error and return values, ordered dependency calls, seven descriptor dwords at
+bytes 4..31, and complete state observed at each sprite call. Presence becomes
+one before the call, the old glyph handle remains until return, copied metrics
+precede all sprite calls, and in_use becomes one only after the loop. Missing
+glyphs clear presence and handle. Header fields 4..23, padding 254..255, unrelated
+slots and image bytes remain unchanged except for actual lazy initializer effects.
+Caller argument/stack bytes, ESP, EBX/ESI/EDI/EBP, clear DF and the immutable input
+buffer are checked. The unused second argument is varied over arbitrary dwords.
+
+Descriptor word zero is left uninitialized by the authentic code and production
+C; it is excluded from comparison. This parser does not establish whether the
+native downstream operator reads it. No buffer-length, offset-range, sprite
+failure or rollback check exists in the recovered parser; null handles still
+leave glyphs present and the slot in use. Successful parsing preserves the old
+error code. These original behaviors are retained.
+
+## Reproduction and limits
+
+PowerShell at repository root:
+
+```powershell
+$env:UV_CACHE_DIR = Join-Path (Get-Location) 'build/uv-cache'
+$env:UV_OFFLINE = 1
+uv run python tools/verify_font_parse.py
+uv run python tools/workflow.py complete --rva 0x56270 --limitation "Modeled sprite creation; descriptor word zero excluded; no instruction equality or native game parity; Ghidra transport denied"
+uv run python tools/db.py update --check
+```
+
+The standalone direct script resolver lacks the cached Unicorn wheel in this
+sandbox; the existing uv project environment contains the required dependencies.
+Full workflow completion uses the established pinned matching environment.
+The full matching script pins pefile 2024.8.26, Capstone 5.0.7 and Unicorn 2.1.4;
+the standalone project environment uses Capstone 5.0.9 with the same other versions.
+Clang/LLD 19.1.1 is provisional, with i686-pc-windows-msvc, strict C89, -O2,
+-ffreestanding, -fno-builtin, -fno-inline, -mno-sse and -mno-sse2.
+Original compiler selection remains unresolved. Artifacts reside in
+build/decomp/windows/font_parse_validation.dll and are not committed.
+
+Compilation and differential emulation are separately recorded for RVA 0x56270.
+Raw compiled-prefix bytes differ; compiled extent and relocation-aware instruction
+equality are not established. Full geputget.c and native game builds remain
+blocked by legacy dependencies. Invalid/unmapped buffers, negative memory-handle
+cursors, aliased input/font storage, dependency mutation/reentry, native sprite
+creation/destruction and linked/native game parity remain outside this scope.

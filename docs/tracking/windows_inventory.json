@@ -13,7 +13,7 @@
     "compiler": null,
     "pipeline_status": "bounded_windows_mem_validation",
     "validation_compiler": "Clang 19.1.1 / LLD 19.1.1; i686-pc-windows-msvc; provisional",
-    "validation_scope": "Mem_InitHandles @ 0x0045B1F0, Mem_NextHandleId @ 0x0045B1B0, Mem_RegisterHandle @ 0x0045B360, Mem_ShutdownHandles @ 0x0045B240 (modeled callbacks), Mem_ReleaseHandleId @ 0x0045B410; Font_InitSystem @ 0x00456180 (510 differential cases, real handle registration and persistent font lifecycle); Font_Unload @ 0x00456470, Font_Shutdown @ 0x00456210, Font_GetTextWidth @ 0x004564D0 (extracted production C, original _ftol); full geputget.c blocked by legacy dependencies; no playable reconstruction"
+    "validation_scope": "Mem_InitHandles @ 0x0045B1F0, Mem_NextHandleId @ 0x0045B1B0, Mem_RegisterHandle @ 0x0045B360, Mem_ShutdownHandles @ 0x0045B240 (modeled callbacks), Mem_ReleaseHandleId @ 0x0045B410; Font_InitSystem @ 0x00456180 (510 differential cases, real handle registration and persistent font lifecycle); Font_Unload @ 0x00456470, Font_Shutdown @ 0x00456210, Font_GetTextWidth @ 0x004564D0 (extracted production C, original _ftol); full geputget.c blocked by legacy dependencies; no playable reconstruction; Font_Parse @ 0x00456270 (260 differential cases, extracted production C, real lazy initialization/handles, modeled sprite creation)"
   },
   "metadata": {
     "schema_version": "2",
@@ -38,11 +38,11 @@
       "reconstructed": 13
     },
     "current_passes": {
-      "compilation": 11,
+      "compilation": 12,
       "raw_bytes": 0,
       "instructions": 0,
       "linked": 0,
-      "emulation": 11,
+      "emulation": 12,
       "native": 0
     },
     "inventory_complete": false,
@@ -8007,17 +8007,17 @@
       "va": 4546944,
       "latest_runs": {
         "compilation": {
-          "id": 601,
+          "id": 639,
           "function_id": 379,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:35:57+00:00",
+          "recorded_at": "2026-10-07T21:51:19+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "32c69eb459a5bc9c8e74254334262750ef7db85caf4f5a70437ebc28738f2c3d",
-          "input_sha256": "56bbfb0a8c675795651522b8547f8b700d4db0fff98141c5d74410fb9ed6f1f3",
+          "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
           "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
-          "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
+          "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8048,17 +8048,17 @@
           ]
         },
         "raw_bytes": {
-          "id": 602,
+          "id": 640,
           "function_id": 379,
           "kind": "raw_bytes",
           "outcome": "different",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:35:57+00:00",
+          "recorded_at": "2026-10-07T21:51:19+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "32c69eb459a5bc9c8e74254334262750ef7db85caf4f5a70437ebc28738f2c3d",
-          "input_sha256": "56bbfb0a8c675795651522b8547f8b700d4db0fff98141c5d74410fb9ed6f1f3",
+          "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
           "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
-          "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
+          "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8081,17 +8081,17 @@
           ]
         },
         "emulation": {
-          "id": 603,
+          "id": 641,
           "function_id": 379,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 510,
-          "recorded_at": "2026-10-07T21:36:04+00:00",
+          "recorded_at": "2026-10-07T21:51:26+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "32c69eb459a5bc9c8e74254334262750ef7db85caf4f5a70437ebc28738f2c3d",
-          "input_sha256": "56bbfb0a8c675795651522b8547f8b700d4db0fff98141c5d74410fb9ed6f1f3",
+          "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
           "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
-          "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
+          "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8145,17 +8145,17 @@
       "va": 4547088,
       "latest_runs": {
         "compilation": {
-          "id": 605,
+          "id": 643,
           "function_id": 380,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:36:04+00:00",
+          "recorded_at": "2026-10-07T21:51:26+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "93eb65fc8f1076b5a1ec14a6b4e1b603893a3eb1bc30f17017e5ab54809a604c",
-          "input_sha256": "56bbfb0a8c675795651522b8547f8b700d4db0fff98141c5d74410fb9ed6f1f3",
+          "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
           "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
-          "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
+          "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8186,17 +8186,17 @@
           ]
         },
         "raw_bytes": {
-          "id": 607,
+          "id": 645,
           "function_id": 380,
           "kind": "raw_bytes",
           "outcome": "different",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:36:04+00:00",
+          "recorded_at": "2026-10-07T21:51:26+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "93eb65fc8f1076b5a1ec14a6b4e1b603893a3eb1bc30f17017e5ab54809a604c",
-          "input_sha256": "56bbfb0a8c675795651522b8547f8b700d4db0fff98141c5d74410fb9ed6f1f3",
+          "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
           "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
-          "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
+          "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8219,17 +8219,17 @@
           ]
         },
         "emulation": {
-          "id": 609,
+          "id": 647,
           "function_id": 380,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 71,
-          "recorded_at": "2026-10-07T21:36:07+00:00",
+          "recorded_at": "2026-10-07T21:51:29+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "93eb65fc8f1076b5a1ec14a6b4e1b603893a3eb1bc30f17017e5ab54809a604c",
-          "input_sha256": "56bbfb0a8c675795651522b8547f8b700d4db0fff98141c5d74410fb9ed6f1f3",
+          "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
           "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
-          "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
+          "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8274,13 +8274,179 @@
       "analysis_stage": "reconstructed",
       "source_path": "decomp/src/geputget.c",
       "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
-      "abi": "cdecl",
+      "abi": "cdecl; two stack words; EAX result; preserves EBX/ESI/EDI/EBP",
       "fidelity": "EXACT",
       "evidence_path": "docs/ghidra/windows_font_parse.md",
-      "notes": "Reconstructed Font_Parse. Compilation blocked by legacy DOS dependencies in geputget.c.",
+      "notes": "Authentic 429-byte FPO extent and instruction/data contract rechecked; extracted production C differential verification covers 260 cases, real lazy handle lifecycle, modeled sprite creation; descriptor word zero and native parity unverified",
       "module": null,
       "va": 4547184,
-      "latest_runs": {},
+      "latest_runs": {
+        "compilation": {
+          "id": 648,
+          "function_id": 381,
+          "kind": "compilation",
+          "outcome": "pass",
+          "case_count": 0,
+          "recorded_at": "2026-10-07T21:51:30+00:00",
+          "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+          "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+          "input_sha256": "61d78c2bde0ee9fe5428bdc9b972c9d1ff85918ba59dee943fb8b2128b87bbc1",
+          "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+          "artifact_sha256": "83c746a333ecad148eedd39e55786b2545c4b2d63f19d02558315aa42905677d",
+          "command": "uv run tools/verify_matching.py",
+          "stale": false,
+          "details": {
+            "commands": [
+              [
+                "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+                "--target=i686-pc-windows-msvc",
+                "-std=c89",
+                "-pedantic-errors",
+                "-Wall",
+                "-Wextra",
+                "-Werror",
+                "-O2",
+                "-ffreestanding",
+                "-fno-builtin",
+                "-fno-inline",
+                "-mno-sse",
+                "-mno-sse2",
+                "-I",
+                "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+                "-c",
+                "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_unit.c",
+                "-o",
+                "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse.obj"
+              ],
+              [
+                "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+                "--target=i686-pc-windows-msvc",
+                "-std=c89",
+                "-pedantic-errors",
+                "-Wall",
+                "-Wextra",
+                "-Werror",
+                "-O2",
+                "-c",
+                "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_sprite_stub.c",
+                "-o",
+                "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_sprite_stub.obj"
+              ],
+              [
+                "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE",
+                "/dll",
+                "/noentry",
+                "/nodefaultlib",
+                "/machine:x86",
+                "/base:0x10000000",
+                "/out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_validation.dll",
+                "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse.obj",
+                "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_sprite_stub.obj",
+                "/export:g_memHandlesInitialized",
+                "/export:g_memHandleStatus",
+                "/export:g_memHandleIds",
+                "/export:g_memHandleCursor",
+                "/export:g_memHandleContexts",
+                "/export:g_memHandleParameters",
+                "/export:g_memRegisteredHandleIds",
+                "/export:g_memHandleCallbacks",
+                "/export:g_memHandleFlags",
+                "/export:g_memPendingContext",
+                "/export:g_memPendingCallback",
+                "/export:g_memPendingParameter",
+                "/export:g_fontSystemInitialized",
+                "/export:g_fontSubsystemHandle",
+                "/export:g_fonts",
+                "/export:Font_Parse",
+                "/export:Font_InitSystem",
+                "/export:Font_Shutdown",
+                "/export:Font_Unload",
+                "/export:Mem_NextHandleId",
+                "/export:Mem_RegisterHandle",
+                "/export:Mem_ReleaseHandleId",
+                "/export:Mem_InitHandles",
+                "/export:Gfx_SpriteOp",
+                "/export:validation_fontExitContext",
+                "/export:g_fileErrorLine"
+              ]
+            ],
+            "scope": "Extracted production parser/font lifecycle and complete mem.c; focused DLL"
+          },
+          "input_paths": [
+            "decomp/src/geputget.c",
+            "decomp/include/geputget.h",
+            "decomp/include/mem.h",
+            "decomp/src/mem.c",
+            "decomp/target.json",
+            "tools/verify_font_parse.py",
+            "tools/verify_font_cleanup.py",
+            "tools/verify_matching.py",
+            "tools/windows_target.py",
+            "tools/windows_tracking.py"
+          ]
+        },
+        "raw_bytes": {
+          "id": 649,
+          "function_id": 381,
+          "kind": "raw_bytes",
+          "outcome": "different",
+          "case_count": 0,
+          "recorded_at": "2026-10-07T21:51:30+00:00",
+          "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+          "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+          "input_sha256": "61d78c2bde0ee9fe5428bdc9b972c9d1ff85918ba59dee943fb8b2128b87bbc1",
+          "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+          "artifact_sha256": "83c746a333ecad148eedd39e55786b2545c4b2d63f19d02558315aa42905677d",
+          "command": "uv run tools/verify_matching.py",
+          "stale": false,
+          "details": {
+            "scope": "Raw prefix diagnostic only; compiled extent and instruction equality unverified"
+          },
+          "input_paths": [
+            "decomp/src/geputget.c",
+            "decomp/include/geputget.h",
+            "decomp/include/mem.h",
+            "decomp/src/mem.c",
+            "decomp/target.json",
+            "tools/verify_font_parse.py",
+            "tools/verify_font_cleanup.py",
+            "tools/verify_matching.py",
+            "tools/windows_target.py",
+            "tools/windows_tracking.py"
+          ]
+        },
+        "emulation": {
+          "id": 650,
+          "function_id": 381,
+          "kind": "emulation",
+          "outcome": "pass",
+          "case_count": 260,
+          "recorded_at": "2026-10-07T21:51:40+00:00",
+          "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+          "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+          "input_sha256": "61d78c2bde0ee9fe5428bdc9b972c9d1ff85918ba59dee943fb8b2128b87bbc1",
+          "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+          "artifact_sha256": "83c746a333ecad148eedd39e55786b2545c4b2d63f19d02558315aa42905677d",
+          "command": "uv run tools/verify_matching.py",
+          "stale": false,
+          "details": {
+            "limitations": "Descriptor word zero uninitialized/excluded; no native sprite allocation, invalid buffers, negative handle cursors, instruction equality or native game parity",
+            "scope": "Full state, descriptor fields 4..31, boundary snapshots, lazy real handles, return and ABI; modeled Gfx_SpriteOp"
+          },
+          "input_paths": [
+            "decomp/src/geputget.c",
+            "decomp/include/geputget.h",
+            "decomp/include/mem.h",
+            "decomp/src/mem.c",
+            "decomp/target.json",
+            "tools/verify_font_parse.py",
+            "tools/verify_font_cleanup.py",
+            "tools/verify_matching.py",
+            "tools/windows_target.py",
+            "tools/windows_tracking.py"
+          ]
+        }
+      },
       "imported_evidence": null
     },
     {
@@ -8324,17 +8490,17 @@
       "va": 4547696,
       "latest_runs": {
         "compilation": {
-          "id": 604,
+          "id": 642,
           "function_id": 383,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:36:04+00:00",
+          "recorded_at": "2026-10-07T21:51:26+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "d398726038e727ae65ae4041981d9970b581fa2078b75d4e946c1dc0147a4009",
-          "input_sha256": "56bbfb0a8c675795651522b8547f8b700d4db0fff98141c5d74410fb9ed6f1f3",
+          "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
           "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
-          "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
+          "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8365,17 +8531,17 @@
           ]
         },
         "raw_bytes": {
-          "id": 606,
+          "id": 644,
           "function_id": 383,
           "kind": "raw_bytes",
           "outcome": "different",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:36:04+00:00",
+          "recorded_at": "2026-10-07T21:51:26+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "d398726038e727ae65ae4041981d9970b581fa2078b75d4e946c1dc0147a4009",
-          "input_sha256": "56bbfb0a8c675795651522b8547f8b700d4db0fff98141c5d74410fb9ed6f1f3",
+          "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
           "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
-          "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
+          "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8398,17 +8564,17 @@
           ]
         },
         "emulation": {
-          "id": 608,
+          "id": 646,
           "function_id": 383,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 123,
-          "recorded_at": "2026-10-07T21:36:05+00:00",
+          "recorded_at": "2026-10-07T21:51:27+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "d398726038e727ae65ae4041981d9970b581fa2078b75d4e946c1dc0147a4009",
-          "input_sha256": "56bbfb0a8c675795651522b8547f8b700d4db0fff98141c5d74410fb9ed6f1f3",
+          "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
           "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
-          "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
+          "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8461,17 +8627,17 @@
       "va": 4547792,
       "latest_runs": {
         "emulation": {
-          "id": 595,
+          "id": 633,
           "function_id": 384,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 708,
-          "recorded_at": "2026-10-07T21:35:13+00:00",
+          "recorded_at": "2026-10-07T21:50:34+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "f69343cc05e2d5113fe34847fd7ab817a81c430ebe0b59cd7320ca7193dbf066",
-          "input_sha256": "4d8f59a2b550b78a1d08d02530cb08908e1f1a699098aab3f02a23997e846a00",
+          "input_sha256": "bb7f9f5eb9c6c278f2b5877c0cd955e1858455c00558e03b6fc9c762c048c3ac",
           "artifact_path": "build/decomp/windows/font_width_validation.dll",
-          "artifact_sha256": "fbfca7412746102aceb8eb75247e8916d5cb7de4a78653dfb89257d95c0e1cc3",
+          "artifact_sha256": "e8a121b2ea85552b99b9b999108cb8d32aa665546423f9b6e0ad9ddbc710d71a",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8533,17 +8699,17 @@
           ]
         },
         "compilation": {
-          "id": 594,
+          "id": 632,
           "function_id": 384,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:35:05+00:00",
+          "recorded_at": "2026-10-07T21:50:26+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "f69343cc05e2d5113fe34847fd7ab817a81c430ebe0b59cd7320ca7193dbf066",
-          "input_sha256": "4d8f59a2b550b78a1d08d02530cb08908e1f1a699098aab3f02a23997e846a00",
+          "input_sha256": "bb7f9f5eb9c6c278f2b5877c0cd955e1858455c00558e03b6fc9c762c048c3ac",
           "artifact_path": "build/decomp/windows/font_width_validation.dll",
-          "artifact_sha256": "fbfca7412746102aceb8eb75247e8916d5cb7de4a78653dfb89257d95c0e1cc3",
+          "artifact_sha256": "e8a121b2ea85552b99b9b999108cb8d32aa665546423f9b6e0ad9ddbc710d71a",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8625,17 +8791,17 @@
       "va": 4548192,
       "latest_runs": {
         "compilation": {
-          "id": 596,
+          "id": 634,
           "function_id": 385,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:35:14+00:00",
+          "recorded_at": "2026-10-07T21:50:35+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "f726ad45a7e5cf42d9fa835cdfcdaf008d57a7540556d9e8ff6c044d5e27d147",
-          "input_sha256": "916e735fbbbcc31f40917bbb393a0ed03c34ce4ff19a659fd91b3df5dcac4f64",
+          "input_sha256": "19b54acefeefcce2c4d4927dc0133b34c4be671190f9db2ef54b6e55c930bc85",
           "artifact_path": "build/decomp/windows/font_draw_validation.dll",
-          "artifact_sha256": "7e1753f2770d538b1ce0f911c3994e99d81418e416127479297ccc1bc60520cb",
+          "artifact_sha256": "34a758fbfd54cb1dcd093392b90506416022b096434f63668d5fa4667bd49d4d",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -8715,17 +8881,17 @@
           ]
         },
         "emulation": {
-          "id": 597,
+          "id": 635,
           "function_id": 385,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 1543,
-          "recorded_at": "2026-10-07T21:35:31+00:00",
+          "recorded_at": "2026-10-07T21:50:53+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "f726ad45a7e5cf42d9fa835cdfcdaf008d57a7540556d9e8ff6c044d5e27d147",
-          "input_sha256": "916e735fbbbcc31f40917bbb393a0ed03c34ce4ff19a659fd91b3df5dcac4f64",
+          "input_sha256": "19b54acefeefcce2c4d4927dc0133b34c4be671190f9db2ef54b6e55c930bc85",
           "artifact_path": "build/decomp/windows/font_draw_validation.dll",
-          "artifact_sha256": "7e1753f2770d538b1ce0f911c3994e99d81418e416127479297ccc1bc60520cb",
+          "artifact_sha256": "34a758fbfd54cb1dcd093392b90506416022b096434f63668d5fa4667bd49d4d",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -9711,17 +9877,17 @@
       "va": 4551088,
       "latest_runs": {
         "compilation": {
-          "id": 598,
+          "id": 636,
           "function_id": 428,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:35:32+00:00",
+          "recorded_at": "2026-10-07T21:50:53+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "f2fe1b07e3a37fe080d3cfcaeadad8e3bae3d2ca326e16c4a99e6ac563e01dac",
-          "input_sha256": "fca254a8834299d8dac12151c104372b3a5516853c5016e62946a72209b52416",
+          "input_sha256": "227cc5a509e67e5f8c297b12ff9b4aa2467babb2dfcd8229936a99d2b379251d",
           "artifact_path": "build/decomp/windows/sprite_backend_validation.dll",
-          "artifact_sha256": "123deb4fc19376fecc182ead78b9073fed37006c70bb685dabae0f3fe48a2e90",
+          "artifact_sha256": "6545f558ddbc7c91d2b86fdaddb1f9f006313aca7ed5f20cbe8832f15209a7b1",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -9815,17 +9981,17 @@
           ]
         },
         "emulation": {
-          "id": 599,
+          "id": 637,
           "function_id": 428,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 2588,
-          "recorded_at": "2026-10-07T21:35:56+00:00",
+          "recorded_at": "2026-10-07T21:51:18+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "f2fe1b07e3a37fe080d3cfcaeadad8e3bae3d2ca326e16c4a99e6ac563e01dac",
-          "input_sha256": "fca254a8834299d8dac12151c104372b3a5516853c5016e62946a72209b52416",
+          "input_sha256": "227cc5a509e67e5f8c297b12ff9b4aa2467babb2dfcd8229936a99d2b379251d",
           "artifact_path": "build/decomp/windows/sprite_backend_validation.dll",
-          "artifact_sha256": "123deb4fc19376fecc182ead78b9073fed37006c70bb685dabae0f3fe48a2e90",
+          "artifact_sha256": "6545f558ddbc7c91d2b86fdaddb1f9f006313aca7ed5f20cbe8832f15209a7b1",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -9921,17 +10087,17 @@
           ]
         },
         "raw_bytes": {
-          "id": 600,
+          "id": 638,
           "function_id": 428,
           "kind": "raw_bytes",
           "outcome": "different",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:35:57+00:00",
+          "recorded_at": "2026-10-07T21:51:19+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "f2fe1b07e3a37fe080d3cfcaeadad8e3bae3d2ca326e16c4a99e6ac563e01dac",
-          "input_sha256": "fca254a8834299d8dac12151c104372b3a5516853c5016e62946a72209b52416",
+          "input_sha256": "227cc5a509e67e5f8c297b12ff9b4aa2467babb2dfcd8229936a99d2b379251d",
           "artifact_path": "build/decomp/windows/sprite_backend_validation.dll",
-          "artifact_sha256": "123deb4fc19376fecc182ead78b9073fed37006c70bb685dabae0f3fe48a2e90",
+          "artifact_sha256": "6545f558ddbc7c91d2b86fdaddb1f9f006313aca7ed5f20cbe8832f15209a7b1",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -11947,17 +12113,17 @@
       "va": 4567472,
       "latest_runs": {
         "compilation": {
-          "id": 582,
+          "id": 620,
           "function_id": 523,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:34:37+00:00",
+          "recorded_at": "2026-10-07T21:49:58+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -11984,17 +12150,17 @@
           ]
         },
         "raw_bytes": {
-          "id": 583,
+          "id": 621,
           "function_id": 523,
           "kind": "raw_bytes",
           "outcome": "different",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:34:37+00:00",
+          "recorded_at": "2026-10-07T21:49:58+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12013,17 +12179,17 @@
           ]
         },
         "emulation": {
-          "id": 584,
+          "id": 622,
           "function_id": 523,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 377,
-          "recorded_at": "2026-10-07T21:34:41+00:00",
+          "recorded_at": "2026-10-07T21:50:02+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12073,17 +12239,17 @@
       "va": 4567536,
       "latest_runs": {
         "compilation": {
-          "id": 579,
+          "id": 617,
           "function_id": 524,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:34:36+00:00",
+          "recorded_at": "2026-10-07T21:49:58+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12109,17 +12275,17 @@
           ]
         },
         "raw_bytes": {
-          "id": 580,
+          "id": 618,
           "function_id": 524,
           "kind": "raw_bytes",
           "outcome": "different",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:34:36+00:00",
+          "recorded_at": "2026-10-07T21:49:58+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12138,17 +12304,17 @@
           ]
         },
         "emulation": {
-          "id": 581,
+          "id": 619,
           "function_id": 524,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 30,
-          "recorded_at": "2026-10-07T21:34:36+00:00",
+          "recorded_at": "2026-10-07T21:49:58+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12217,17 +12383,17 @@
       "va": 4567616,
       "latest_runs": {
         "compilation": {
-          "id": 588,
+          "id": 626,
           "function_id": 525,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:34:50+00:00",
+          "recorded_at": "2026-10-07T21:50:11+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "edf69cfb1fd2d860913575999d39e05e37e615c11fb1e4280e4c166836e3b59f",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12253,17 +12419,17 @@
           ]
         },
         "raw_bytes": {
-          "id": 589,
+          "id": 627,
           "function_id": 525,
           "kind": "raw_bytes",
           "outcome": "different",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:34:50+00:00",
+          "recorded_at": "2026-10-07T21:50:11+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "edf69cfb1fd2d860913575999d39e05e37e615c11fb1e4280e4c166836e3b59f",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12282,17 +12448,17 @@
           ]
         },
         "emulation": {
-          "id": 590,
+          "id": 628,
           "function_id": 525,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 531,
-          "recorded_at": "2026-10-07T21:34:59+00:00",
+          "recorded_at": "2026-10-07T21:50:20+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "edf69cfb1fd2d860913575999d39e05e37e615c11fb1e4280e4c166836e3b59f",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12361,17 +12527,17 @@
       "va": 4567904,
       "latest_runs": {
         "compilation": {
-          "id": 585,
+          "id": 623,
           "function_id": 527,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:34:41+00:00",
+          "recorded_at": "2026-10-07T21:50:02+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12397,17 +12563,17 @@
           ]
         },
         "raw_bytes": {
-          "id": 586,
+          "id": 624,
           "function_id": 527,
           "kind": "raw_bytes",
           "outcome": "different",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:34:41+00:00",
+          "recorded_at": "2026-10-07T21:50:02+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12426,17 +12592,17 @@
           ]
         },
         "emulation": {
-          "id": 587,
+          "id": 625,
           "function_id": 527,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 590,
-          "recorded_at": "2026-10-07T21:34:50+00:00",
+          "recorded_at": "2026-10-07T21:50:11+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12505,17 +12671,17 @@
       "va": 4568080,
       "latest_runs": {
         "compilation": {
-          "id": 591,
+          "id": 629,
           "function_id": 529,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:34:59+00:00",
+          "recorded_at": "2026-10-07T21:50:20+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "d0fee3704a333538872dacd400ee150f38a7a7dcfe33e1770f357d09ffb8d1cb",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12541,17 +12707,17 @@
           ]
         },
         "raw_bytes": {
-          "id": 592,
+          "id": 630,
           "function_id": 529,
           "kind": "raw_bytes",
           "outcome": "different",
           "case_count": 0,
-          "recorded_at": "2026-10-07T21:34:59+00:00",
+          "recorded_at": "2026-10-07T21:50:20+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "d0fee3704a333538872dacd400ee150f38a7a7dcfe33e1770f357d09ffb8d1cb",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -12570,17 +12736,17 @@
           ]
         },
         "emulation": {
-          "id": 593,
+          "id": 631,
           "function_id": 529,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 418,
-          "recorded_at": "2026-10-07T21:35:04+00:00",
+          "recorded_at": "2026-10-07T21:50:26+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "d0fee3704a333538872dacd400ee150f38a7a7dcfe33e1770f357d09ffb8d1cb",
-          "input_sha256": "1869b6c4bdd9d08e00b0316d96c29e256a3462918d2ab86e3d1e8780e13c075d",
+          "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
+          "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -45882,7 +46048,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "state regions, boundary guards, skip/repeat, writes, EAX/ESP, saved registers, DF",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -45918,7 +46084,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "compiled_text_bytes": 785,
         "original_bytes": 76,
@@ -45947,7 +46113,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "state regions, boundary guards, skip/repeat, writes, EAX/ESP, saved registers, DF",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -45983,7 +46149,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "signed EAX, full state, exact reads/writes, caller stack, saved registers, DF; initializer/exhaustion integration",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -46020,7 +46186,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "compiled_prefix_bytes": 58,
         "original_bytes": 58,
@@ -46049,7 +46215,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "signed EAX, full state, exact reads/writes, caller stack, saved registers, DF; initializer/exhaustion integration",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -46087,7 +46253,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "all 200 indices, first-zero selection, full/disabled tables, raw argument/dispatch words, exact read/write order, full image guards, EAX/ESP/caller arguments, saved registers, DF; init/consumer integration",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -46123,7 +46289,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "compiled_prefix_bytes": 120,
         "original_bytes": 120,
@@ -46152,7 +46318,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "all 200 indices, first-zero selection, full/disabled tables, raw argument/dispatch words, exact read/write order, full image guards, EAX/ESP/caller arguments, saved registers, DF; init/consumer integration",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -46188,7 +46354,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "two live 200-slot scans, exact status/flag eligibility and pass order, flag clear and status clear before callback, raw arguments, callback mutations/reentry, scratch-register clobbering, EAX/ESP/saved registers/DF, full image guards",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -46224,7 +46390,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "compiled_prefix_bytes": 155,
         "original_bytes": 155,
@@ -46253,7 +46419,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "two live 200-slot scans, exact status/flag eligibility and pass order, flag clear and status clear before callback, raw arguments, callback mutations/reentry, scratch-register clobbering, EAX/ESP/saved registers/DF, full image guards",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -46289,7 +46455,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "all 200 slots, duplicates, exact status equality, raw ID equality, no-match/disabled/repeat states, exact ordered global reads/writes, full image guards, EAX/ESP/argument/saved registers/DF; five-routine integration",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -46325,7 +46491,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "compiled_prefix_bytes": 62,
         "original_bytes": 62,
@@ -46354,7 +46520,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "ff3d0b437b0c84e3b852d976951dc60757a4726c892deddce0fa167fd5334e67",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "all 200 slots, duplicates, exact status equality, raw ID equality, no-match/disabled/repeat states, exact ordered global reads/writes, full image guards, EAX/ESP/argument/saved registers/DF; five-routine integration",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -46390,7 +46556,7 @@
       "artifact_path": "build/decomp/windows/font_width_validation.dll",
       "artifact_sha256": "fbfca7412746102aceb8eb75247e8916d5cb7de4a78653dfb89257d95c0e1cc3",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "commands": [
           [
@@ -46460,7 +46626,7 @@
       "artifact_path": "build/decomp/windows/font_width_validation.dll",
       "artifact_sha256": "fbfca7412746102aceb8eb75247e8916d5cb7de4a78653dfb89257d95c0e1cc3",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "EAX, error writes, whole image/text immutability, stack, saved registers, DF, x87 control word",
         "commands": [
@@ -46532,7 +46698,7 @@
       "artifact_path": "build/decomp/windows/font_draw_validation.dll",
       "artifact_sha256": "7e1753f2770d538b1ce0f911c3994e99d81418e416127479297ccc1bc60520cb",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "commands": [
           [
@@ -46622,7 +46788,7 @@
       "artifact_path": "build/decomp/windows/font_draw_validation.dll",
       "artifact_sha256": "7e1753f2770d538b1ce0f911c3994e99d81418e416127479297ccc1bc60520cb",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "ordered calls/arguments/point values, boundary snapshots/model mutations, EAX, image/text state, stack, saved registers, DF, x87 control word",
         "commands": [
@@ -46714,7 +46880,7 @@
       "artifact_path": "build/decomp/windows/sprite_backend_validation.dll",
       "artifact_sha256": "123deb4fc19376fecc182ead78b9073fed37006c70bb685dabae0f3fe48a2e90",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "commands": [
           [
@@ -46818,7 +46984,7 @@
       "artifact_path": "build/decomp/windows/sprite_backend_validation.dll",
       "artifact_sha256": "123deb4fc19376fecc182ead78b9073fed37006c70bb685dabae0f3fe48a2e90",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "ordered dword state stores, downstream snapshots/mutations, return/EAX, cdecl stack, callee saves, DF, input/image immutability, x87 CW and stack balance",
         "commands": [
@@ -46924,7 +47090,7 @@
       "artifact_path": "build/decomp/windows/sprite_backend_validation.dll",
       "artifact_sha256": "123deb4fc19376fecc182ead78b9073fed37006c70bb685dabae0f3fe48a2e90",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "original_sha256": "f2fe1b07e3a37fe080d3cfcaeadad8e3bae3d2ca326e16c4a99e6ac563e01dac",
         "original_size": 145,
@@ -46954,7 +47120,7 @@
       "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
       "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "commands": [
           [
@@ -46995,7 +47161,7 @@
       "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
       "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "details": {
           "compiled_prefix_bytes": 134,
@@ -47028,7 +47194,7 @@
       "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
       "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "commands": [
           [
@@ -47070,7 +47236,7 @@
       "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
       "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "commands": [
           [
@@ -47111,7 +47277,7 @@
       "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
       "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "commands": [
           [
@@ -47152,7 +47318,7 @@
       "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
       "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "details": {
           "compiled_prefix_bytes": 88,
@@ -47185,7 +47351,7 @@
       "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
       "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "details": {
           "compiled_prefix_bytes": 83,
@@ -47218,7 +47384,7 @@
       "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
       "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "commands": [
           [
@@ -47259,6 +47425,1463 @@
       "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
       "artifact_sha256": "386a318b3d9472e90ff2c9ba862041bc98743ab3dd748a22fc83af893d790054",
       "command": "uv run tools/verify_matching.py",
+      "stale": true,
+      "details": {
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_unit.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE /dll /noentry /nodefaultlib /machine:x86 /base:0x10000000 /out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_validation.dll C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj /export:Font_InitSystem /export:Font_Shutdown /export:Font_Unload /export:Mem_ReleaseHandleId /export:Gfx_SpriteOp /export:Mem_NextHandleId /export:Mem_RegisterHandle /export:Mem_InitHandles /export:Mem_ShutdownHandles /export:validation_fontExitContext /export:g_memHandleIds /export:g_memHandleCursor /export:g_memHandleContexts /export:g_memHandleParameters /export:g_memHandleCallbacks /export:g_memHandleFlags /export:g_memPendingContext /export:g_memPendingCallback /export:g_memPendingParameter /export:g_fonts /export:g_fontSystemInitialized /export:g_fontSubsystemHandle /export:g_memHandlesInitialized /export:g_memHandleStatus /export:g_memRegisteredHandleIds"
+          ]
+        ],
+        "limitations": "Full geputget.c and native game blocked by legacy dependencies; instruction equality unclaimed",
+        "scope": "extracted production Font_InitSystem, Font_Unload, Font_Shutdown and complete mem.c; focused PE32 DLL; modeled sprite-release boundary",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 610,
+      "function_id": 381,
+      "kind": "compilation",
+      "outcome": "fail",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:48:19+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+      "input_sha256": "cfdfabf2dc1d632c84b38583e522cb99181c29b778a309985e41b2d7c5bff2d7",
+      "artifact_path": null,
+      "artifact_sha256": null,
+      "command": "uv run tools/verify_font_parse.py",
+      "stale": true,
+      "details": {
+        "error": "Command '['C:\\\\Users\\\\Patricio\\\\AppData\\\\Local\\\\Microsoft\\\\WinGet\\\\Packages\\\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\\\mingw64\\\\bin\\\\clang.EXE', '--target=i686-pc-windows-msvc', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra', '-Werror', '-O2', '-ffreestanding', '-fno-builtin', '-fno-inline', '-mno-sse', '-mno-sse2', '-I', 'C:\\\\Stuff\\\\Proyects\\\\RacingDynamite\\\\decomp\\\\include', '-c', 'C:\\\\Stuff\\\\Proyects\\\\RacingDynamite\\\\build\\\\decomp\\\\windows\\\\font_parse_unit.c', '-o', 'C:\\\\Stuff\\\\Proyects\\\\RacingDynamite\\\\build\\\\decomp\\\\windows\\\\font_parse.obj']' returned non-zero exit status 1."
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_parse.py",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 611,
+      "function_id": 381,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:48:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+      "input_sha256": "2d8be1c5a93d733ee943e3985cca47dc1bb1df698941000ce3529db7faa0c6ab",
+      "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+      "artifact_sha256": "3d4ca5f1add39f4bcde2f02f33be55b22521c4457cd5ea5e0f7dc95526b211c3",
+      "command": "uv run python tools/verify_font_parse.py",
+      "stale": true,
+      "details": {
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+            "--target=i686-pc-windows-msvc",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-ffreestanding",
+            "-fno-builtin",
+            "-fno-inline",
+            "-mno-sse",
+            "-mno-sse2",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_unit.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE",
+            "/dll",
+            "/noentry",
+            "/nodefaultlib",
+            "/machine:x86",
+            "/base:0x10000000",
+            "/out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_validation.dll",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse.obj",
+            "/export:g_memHandlesInitialized",
+            "/export:g_memHandleStatus",
+            "/export:g_memHandleIds",
+            "/export:g_memHandleCursor",
+            "/export:g_memHandleContexts",
+            "/export:g_memHandleParameters",
+            "/export:g_memRegisteredHandleIds",
+            "/export:g_memHandleCallbacks",
+            "/export:g_memHandleFlags",
+            "/export:g_memPendingContext",
+            "/export:g_memPendingCallback",
+            "/export:g_memPendingParameter",
+            "/export:g_fontSystemInitialized",
+            "/export:g_fontSubsystemHandle",
+            "/export:g_fonts",
+            "/export:Font_Parse",
+            "/export:Font_InitSystem",
+            "/export:Font_Shutdown",
+            "/export:Font_Unload",
+            "/export:Mem_NextHandleId",
+            "/export:Mem_RegisterHandle",
+            "/export:Mem_ReleaseHandleId",
+            "/export:Mem_InitHandles",
+            "/export:Gfx_SpriteOp",
+            "/export:validation_fontExitContext",
+            "/export:g_fileErrorLine"
+          ]
+        ],
+        "scope": "Extracted production parser/font lifecycle and complete mem.c; focused DLL"
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_parse.py",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 612,
+      "function_id": 381,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:48:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+      "input_sha256": "2d8be1c5a93d733ee943e3985cca47dc1bb1df698941000ce3529db7faa0c6ab",
+      "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+      "artifact_sha256": "3d4ca5f1add39f4bcde2f02f33be55b22521c4457cd5ea5e0f7dc95526b211c3",
+      "command": "uv run python tools/verify_font_parse.py",
+      "stale": true,
+      "details": {
+        "scope": "Raw prefix diagnostic only; compiled extent and instruction equality unverified"
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_parse.py",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 613,
+      "function_id": 381,
+      "kind": "emulation",
+      "outcome": "fail",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:48:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+      "input_sha256": "2d8be1c5a93d733ee943e3985cca47dc1bb1df698941000ce3529db7faa0c6ab",
+      "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+      "artifact_sha256": "3d4ca5f1add39f4bcde2f02f33be55b22521c4457cd5ea5e0f7dc95526b211c3",
+      "command": "uv run python tools/verify_font_parse.py",
+      "stale": true,
+      "details": {
+        "error": ""
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_parse.py",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 614,
+      "function_id": 381,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:48:37+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+      "input_sha256": "d829f07878615b2700828fdcc344720ca7561149b18a975bc24959c7ba91308c",
+      "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+      "artifact_sha256": "a23f9db3104f24bb2328da995faf64caf3892bf5681d00ce4ac3c361d7009e6a",
+      "command": "uv run python tools/verify_font_parse.py",
+      "stale": true,
+      "details": {
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+            "--target=i686-pc-windows-msvc",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-ffreestanding",
+            "-fno-builtin",
+            "-fno-inline",
+            "-mno-sse",
+            "-mno-sse2",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_unit.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+            "--target=i686-pc-windows-msvc",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_sprite_stub.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_sprite_stub.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE",
+            "/dll",
+            "/noentry",
+            "/nodefaultlib",
+            "/machine:x86",
+            "/base:0x10000000",
+            "/out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_validation.dll",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse.obj",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_sprite_stub.obj",
+            "/export:g_memHandlesInitialized",
+            "/export:g_memHandleStatus",
+            "/export:g_memHandleIds",
+            "/export:g_memHandleCursor",
+            "/export:g_memHandleContexts",
+            "/export:g_memHandleParameters",
+            "/export:g_memRegisteredHandleIds",
+            "/export:g_memHandleCallbacks",
+            "/export:g_memHandleFlags",
+            "/export:g_memPendingContext",
+            "/export:g_memPendingCallback",
+            "/export:g_memPendingParameter",
+            "/export:g_fontSystemInitialized",
+            "/export:g_fontSubsystemHandle",
+            "/export:g_fonts",
+            "/export:Font_Parse",
+            "/export:Font_InitSystem",
+            "/export:Font_Shutdown",
+            "/export:Font_Unload",
+            "/export:Mem_NextHandleId",
+            "/export:Mem_RegisterHandle",
+            "/export:Mem_ReleaseHandleId",
+            "/export:Mem_InitHandles",
+            "/export:Gfx_SpriteOp",
+            "/export:validation_fontExitContext",
+            "/export:g_fileErrorLine"
+          ]
+        ],
+        "scope": "Extracted production parser/font lifecycle and complete mem.c; focused DLL"
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_parse.py",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 615,
+      "function_id": 381,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:48:37+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+      "input_sha256": "d829f07878615b2700828fdcc344720ca7561149b18a975bc24959c7ba91308c",
+      "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+      "artifact_sha256": "a23f9db3104f24bb2328da995faf64caf3892bf5681d00ce4ac3c361d7009e6a",
+      "command": "uv run python tools/verify_font_parse.py",
+      "stale": true,
+      "details": {
+        "scope": "Raw prefix diagnostic only; compiled extent and instruction equality unverified"
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_parse.py",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 616,
+      "function_id": 381,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 260,
+      "recorded_at": "2026-10-07T21:48:48+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+      "input_sha256": "d829f07878615b2700828fdcc344720ca7561149b18a975bc24959c7ba91308c",
+      "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+      "artifact_sha256": "a23f9db3104f24bb2328da995faf64caf3892bf5681d00ce4ac3c361d7009e6a",
+      "command": "uv run python tools/verify_font_parse.py",
+      "stale": true,
+      "details": {
+        "limitations": "Descriptor word zero uninitialized/excluded; no native sprite allocation, invalid buffers, negative handle cursors, instruction equality or native game parity",
+        "scope": "Full state, descriptor fields 4..31, boundary snapshots, lazy real handles, return and ABI; modeled Gfx_SpriteOp"
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_parse.py",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 617,
+      "function_id": 524,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:49:58+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "state regions, boundary guards, skip/repeat, writes, EAX/ESP, saved registers, DF",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_InitHandles only; focused PE32 DLL; not native game execution",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 618,
+      "function_id": 524,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:49:58+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "compiled_text_bytes": 785,
+        "original_bytes": 76,
+        "scope": "whole focused DLL .text versus routine; relocation-aware equality not evaluated"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 619,
+      "function_id": 524,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 30,
+      "recorded_at": "2026-10-07T21:49:58+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "state regions, boundary guards, skip/repeat, writes, EAX/ESP, saved registers, DF",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_InitHandles only; focused PE32 DLL; not native game execution",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 620,
+      "function_id": 523,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:49:58+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "signed EAX, full state, exact reads/writes, caller stack, saved registers, DF; initializer/exhaustion integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "negative_contract": "readable nonaliasing signed-word storage; -4/-32768 differential; -1/-2 original-only",
+        "pefile": "2024.8.26",
+        "scope": "Mem_NextHandleId; focused PE32 DLL; no native/layout parity claim",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 621,
+      "function_id": 523,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:49:58+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "compiled_prefix_bytes": 58,
+        "original_bytes": 58,
+        "scope": "prefix diagnostic only, not verified compiled extent or relocation-aware equality"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 622,
+      "function_id": 523,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 377,
+      "recorded_at": "2026-10-07T21:50:02+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "signed EAX, full state, exact reads/writes, caller stack, saved registers, DF; initializer/exhaustion integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "negative_contract": "readable nonaliasing signed-word storage; -4/-32768 differential; -1/-2 original-only",
+        "original_only_negative_cases": 8,
+        "pefile": "2024.8.26",
+        "scope": "Mem_NextHandleId; focused PE32 DLL; no native/layout parity claim",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 623,
+      "function_id": 527,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:50:02+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "all 200 indices, first-zero selection, full/disabled tables, raw argument/dispatch words, exact read/write order, full image guards, EAX/ESP/caller arguments, saved registers, DF; init/consumer integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_RegisterHandle; single-threaded nonaliasing mapped globals; no native/layout parity",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 624,
+      "function_id": 527,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:50:02+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "compiled_prefix_bytes": 120,
+        "original_bytes": 120,
+        "scope": "prefix diagnostic only; compiled extent/relocation-aware equality not established"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 625,
+      "function_id": 527,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 590,
+      "recorded_at": "2026-10-07T21:50:11+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "all 200 indices, first-zero selection, full/disabled tables, raw argument/dispatch words, exact read/write order, full image guards, EAX/ESP/caller arguments, saved registers, DF; init/consumer integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_RegisterHandle; single-threaded nonaliasing mapped globals; no native/layout parity",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 626,
+      "function_id": 525,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:50:11+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "edf69cfb1fd2d860913575999d39e05e37e615c11fb1e4280e4c166836e3b59f",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "two live 200-slot scans, exact status/flag eligibility and pass order, flag clear and status clear before callback, raw arguments, callback mutations/reentry, scratch-register clobbering, EAX/ESP/saved registers/DF, full image guards",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_ShutdownHandles; callbacks modeled at verified ABI boundary; no native callback/game parity",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 627,
+      "function_id": 525,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:50:11+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "edf69cfb1fd2d860913575999d39e05e37e615c11fb1e4280e4c166836e3b59f",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "compiled_prefix_bytes": 155,
+        "original_bytes": 155,
+        "scope": "prefix diagnostic only; compiled extent/relocation-aware equality not established"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 628,
+      "function_id": 525,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 531,
+      "recorded_at": "2026-10-07T21:50:20+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "edf69cfb1fd2d860913575999d39e05e37e615c11fb1e4280e4c166836e3b59f",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "two live 200-slot scans, exact status/flag eligibility and pass order, flag clear and status clear before callback, raw arguments, callback mutations/reentry, scratch-register clobbering, EAX/ESP/saved registers/DF, full image guards",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_ShutdownHandles; callbacks modeled at verified ABI boundary; no native callback/game parity",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 629,
+      "function_id": 529,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:50:20+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "d0fee3704a333538872dacd400ee150f38a7a7dcfe33e1770f357d09ffb8d1cb",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "all 200 slots, duplicates, exact status equality, raw ID equality, no-match/disabled/repeat states, exact ordered global reads/writes, full image guards, EAX/ESP/argument/saved registers/DF; five-routine integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_ReleaseHandleId; single-threaded nonaliasing mapped globals; no native/layout parity",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 630,
+      "function_id": 529,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:50:20+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "d0fee3704a333538872dacd400ee150f38a7a7dcfe33e1770f357d09ffb8d1cb",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "compiled_prefix_bytes": 62,
+        "original_bytes": 62,
+        "scope": "prefix diagnostic only; compiled extent/relocation-aware equality not established"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 631,
+      "function_id": 529,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 418,
+      "recorded_at": "2026-10-07T21:50:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "d0fee3704a333538872dacd400ee150f38a7a7dcfe33e1770f357d09ffb8d1cb",
+      "input_sha256": "6d9d761131b929fb1d1b5ac3bb280422ed744f50e50e1fead4dccdceec32c844",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "998127e83a53f98ac342c33910e2bd4247cce29a62b2262a8eca44951c8db3f4",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "all 200 slots, duplicates, exact status equality, raw ID equality, no-match/disabled/repeat states, exact ordered global reads/writes, full image guards, EAX/ESP/argument/saved registers/DF; five-routine integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_ReleaseHandleId; single-threaded nonaliasing mapped globals; no native/layout parity",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 632,
+      "function_id": 384,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:50:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "f69343cc05e2d5113fe34847fd7ab817a81c430ebe0b59cd7320ca7193dbf066",
+      "input_sha256": "bb7f9f5eb9c6c278f2b5877c0cd955e1858455c00558e03b6fc9c762c048c3ac",
+      "artifact_path": "build/decomp/windows/font_width_validation.dll",
+      "artifact_sha256": "e8a121b2ea85552b99b9b999108cb8d32aa665546423f9b6e0ad9ddbc710d71a",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+            "--target=i686-pc-windows-msvc",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-ffreestanding",
+            "-fno-builtin",
+            "-fno-vectorize",
+            "-fno-slp-vectorize",
+            "-mno-sse",
+            "-mno-sse2",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_width_unit.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_width.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE",
+            "/dll",
+            "/noentry",
+            "/nodefaultlib",
+            "/machine:x86",
+            "/base:0x10000000",
+            "/out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_width_validation.dll",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_width.obj",
+            "/export:Font_GetTextWidth",
+            "/export:g_fonts",
+            "/export:g_fileErrorLine"
+          ]
+        ],
+        "limitations": "Full geputget.c and native game blocked by legacy dependencies; instruction equality unclaimed",
+        "scope": "extracted production Font_GetTextWidth only; real original _ftol; C strlen harness",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/verify_font_width.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 633,
+      "function_id": 384,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 708,
+      "recorded_at": "2026-10-07T21:50:34+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "f69343cc05e2d5113fe34847fd7ab817a81c430ebe0b59cd7320ca7193dbf066",
+      "input_sha256": "bb7f9f5eb9c6c278f2b5877c0cd955e1858455c00558e03b6fc9c762c048c3ac",
+      "artifact_path": "build/decomp/windows/font_width_validation.dll",
+      "artifact_sha256": "e8a121b2ea85552b99b9b999108cb8d32aa665546423f9b6e0ad9ddbc710d71a",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "EAX, error writes, whole image/text immutability, stack, saved registers, DF, x87 control word",
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+            "--target=i686-pc-windows-msvc",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-ffreestanding",
+            "-fno-builtin",
+            "-fno-vectorize",
+            "-fno-slp-vectorize",
+            "-mno-sse",
+            "-mno-sse2",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_width_unit.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_width.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE",
+            "/dll",
+            "/noentry",
+            "/nodefaultlib",
+            "/machine:x86",
+            "/base:0x10000000",
+            "/out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_width_validation.dll",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_width.obj",
+            "/export:Font_GetTextWidth",
+            "/export:g_fonts",
+            "/export:g_fileErrorLine"
+          ]
+        ],
+        "limitations": "Full geputget.c and native game blocked by legacy dependencies; instruction equality unclaimed",
+        "original_only_cases": 2,
+        "scope": "extracted production Font_GetTextWidth only; real original _ftol; C strlen harness",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/verify_font_width.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 634,
+      "function_id": 385,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:50:35+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "f726ad45a7e5cf42d9fa835cdfcdaf008d57a7540556d9e8ff6c044d5e27d147",
+      "input_sha256": "19b54acefeefcce2c4d4927dc0133b34c4be671190f9db2ef54b6e55c930bc85",
+      "artifact_path": "build/decomp/windows/font_draw_validation.dll",
+      "artifact_sha256": "34a758fbfd54cb1dcd093392b90506416022b096434f63668d5fa4667bd49d4d",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+            "--target=i686-pc-windows-msvc",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-ffreestanding",
+            "-fno-builtin",
+            "-fno-vectorize",
+            "-fno-slp-vectorize",
+            "-mno-sse",
+            "-mno-sse2",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw_unit.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+            "--target=i686-pc-windows-msvc",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-ffreestanding",
+            "-fno-builtin",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw_trap.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw_trap.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE",
+            "/dll",
+            "/noentry",
+            "/nodefaultlib",
+            "/machine:x86",
+            "/base:0x10000000",
+            "/out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw_validation.dll",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw.obj",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw_trap.obj",
+            "/export:Font_DrawText",
+            "/export:Gfx_DrawSprite",
+            "/export:g_fonts",
+            "/export:g_fileErrorLine"
+          ]
+        ],
+        "limitations": "Renderer bodies/native visuals/full geputget.c and instruction equality unverified",
+        "scope": "extracted production C; original dispatch wrapper and _ftol; modeled renderer boundary",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/verify_font_draw.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 635,
+      "function_id": 385,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 1543,
+      "recorded_at": "2026-10-07T21:50:53+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "f726ad45a7e5cf42d9fa835cdfcdaf008d57a7540556d9e8ff6c044d5e27d147",
+      "input_sha256": "19b54acefeefcce2c4d4927dc0133b34c4be671190f9db2ef54b6e55c930bc85",
+      "artifact_path": "build/decomp/windows/font_draw_validation.dll",
+      "artifact_sha256": "34a758fbfd54cb1dcd093392b90506416022b096434f63668d5fa4667bd49d4d",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "ordered calls/arguments/point values, boundary snapshots/model mutations, EAX, image/text state, stack, saved registers, DF, x87 control word",
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+            "--target=i686-pc-windows-msvc",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-ffreestanding",
+            "-fno-builtin",
+            "-fno-vectorize",
+            "-fno-slp-vectorize",
+            "-mno-sse",
+            "-mno-sse2",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw_unit.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+            "--target=i686-pc-windows-msvc",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-ffreestanding",
+            "-fno-builtin",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw_trap.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw_trap.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE",
+            "/dll",
+            "/noentry",
+            "/nodefaultlib",
+            "/machine:x86",
+            "/base:0x10000000",
+            "/out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw_validation.dll",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw.obj",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_draw_trap.obj",
+            "/export:Font_DrawText",
+            "/export:Gfx_DrawSprite",
+            "/export:g_fonts",
+            "/export:g_fileErrorLine"
+          ]
+        ],
+        "limitations": "Renderer bodies/native visuals/full geputget.c and instruction equality unverified",
+        "original_only_cases": 3,
+        "scope": "extracted production C; original dispatch wrapper and _ftol; modeled renderer boundary",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/verify_font_draw.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 636,
+      "function_id": 428,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:50:53+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "f2fe1b07e3a37fe080d3cfcaeadad8e3bae3d2ca326e16c4a99e6ac563e01dac",
+      "input_sha256": "227cc5a509e67e5f8c297b12ff9b4aa2467babb2dfcd8229936a99d2b379251d",
+      "artifact_path": "build/decomp/windows/sprite_backend_validation.dll",
+      "artifact_sha256": "6545f558ddbc7c91d2b86fdaddb1f9f006313aca7ed5f20cbe8832f15209a7b1",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "commands": [
+          [
+            "C:\\Stuff\\Programs\\w64devkit\\bin\\gcc.EXE",
+            "-m32",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-mfpmath=387",
+            "-mno-sse",
+            "-mno-sse2",
+            "-fno-math-errno",
+            "-funsafe-math-optimizations",
+            "-fno-associative-math",
+            "-fno-reciprocal-math",
+            "-fsigned-zeros",
+            "-fno-finite-math-only",
+            "-fno-tree-vectorize",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_backend_unit.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_backend.obj"
+          ],
+          [
+            "C:\\Stuff\\Programs\\w64devkit\\bin\\gcc.EXE",
+            "-m32",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-mfpmath=387",
+            "-mno-sse",
+            "-mno-sse2",
+            "-fno-math-errno",
+            "-funsafe-math-optimizations",
+            "-fno-associative-math",
+            "-fno-reciprocal-math",
+            "-fsigned-zeros",
+            "-fno-finite-math-only",
+            "-fno-tree-vectorize",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_submit_trap.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_submit_trap.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE",
+            "/dll",
+            "/noentry",
+            "/nodefaultlib",
+            "/safeseh:no",
+            "/machine:x86",
+            "/base:0x10000000",
+            "/out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_backend_validation.dll",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_backend.obj",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_submit_trap.obj",
+            "/export:Gfx_DrawSpriteNative",
+            "/export:Gfx_SubmitSpriteRequest",
+            "/export:g_nativeSpriteRequest",
+            "/export:g_nativeSpriteCoefficients",
+            "/export:g_activeSpriteRequest"
+          ]
+        ],
+        "limitations": "No rasterizer/framebuffer/native execution or instruction equality; masked FP exceptions, CW precision/rounding variants only; long-double GCC intrinsics provisional",
+        "scope": "extracted production C; native compiled x87; modeled zero-argument 57370 boundary",
+        "toolchain": {
+          "gcc": "gcc.EXE (GCC) 16.2.0",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/verify_sprite_backend.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 637,
+      "function_id": 428,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 2588,
+      "recorded_at": "2026-10-07T21:51:18+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "f2fe1b07e3a37fe080d3cfcaeadad8e3bae3d2ca326e16c4a99e6ac563e01dac",
+      "input_sha256": "227cc5a509e67e5f8c297b12ff9b4aa2467babb2dfcd8229936a99d2b379251d",
+      "artifact_path": "build/decomp/windows/sprite_backend_validation.dll",
+      "artifact_sha256": "6545f558ddbc7c91d2b86fdaddb1f9f006313aca7ed5f20cbe8832f15209a7b1",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "ordered dword state stores, downstream snapshots/mutations, return/EAX, cdecl stack, callee saves, DF, input/image immutability, x87 CW and stack balance",
+        "commands": [
+          [
+            "C:\\Stuff\\Programs\\w64devkit\\bin\\gcc.EXE",
+            "-m32",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-mfpmath=387",
+            "-mno-sse",
+            "-mno-sse2",
+            "-fno-math-errno",
+            "-funsafe-math-optimizations",
+            "-fno-associative-math",
+            "-fno-reciprocal-math",
+            "-fsigned-zeros",
+            "-fno-finite-math-only",
+            "-fno-tree-vectorize",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_backend_unit.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_backend.obj"
+          ],
+          [
+            "C:\\Stuff\\Programs\\w64devkit\\bin\\gcc.EXE",
+            "-m32",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-mfpmath=387",
+            "-mno-sse",
+            "-mno-sse2",
+            "-fno-math-errno",
+            "-funsafe-math-optimizations",
+            "-fno-associative-math",
+            "-fno-reciprocal-math",
+            "-fsigned-zeros",
+            "-fno-finite-math-only",
+            "-fno-tree-vectorize",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_submit_trap.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_submit_trap.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE",
+            "/dll",
+            "/noentry",
+            "/nodefaultlib",
+            "/safeseh:no",
+            "/machine:x86",
+            "/base:0x10000000",
+            "/out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_backend_validation.dll",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_backend.obj",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_submit_trap.obj",
+            "/export:Gfx_DrawSpriteNative",
+            "/export:Gfx_SubmitSpriteRequest",
+            "/export:g_nativeSpriteRequest",
+            "/export:g_nativeSpriteCoefficients",
+            "/export:g_activeSpriteRequest"
+          ]
+        ],
+        "limitations": "No rasterizer/framebuffer/native execution or instruction equality; masked FP exceptions, CW precision/rounding variants only; long-double GCC intrinsics provisional",
+        "original_only_downstream_cases": 28,
+        "scope": "extracted production C; native compiled x87; modeled zero-argument 57370 boundary",
+        "toolchain": {
+          "gcc": "gcc.EXE (GCC) 16.2.0",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/verify_sprite_backend.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 638,
+      "function_id": 428,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:51:19+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "f2fe1b07e3a37fe080d3cfcaeadad8e3bae3d2ca326e16c4a99e6ac563e01dac",
+      "input_sha256": "227cc5a509e67e5f8c297b12ff9b4aa2467babb2dfcd8229936a99d2b379251d",
+      "artifact_path": "build/decomp/windows/sprite_backend_validation.dll",
+      "artifact_sha256": "6545f558ddbc7c91d2b86fdaddb1f9f006313aca7ed5f20cbe8832f15209a7b1",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "original_sha256": "f2fe1b07e3a37fe080d3cfcaeadad8e3bae3d2ca326e16c4a99e6ac563e01dac",
+        "original_size": 145,
+        "scope": "Compiler-generated C differs in instructions and extent; no instruction equality claimed"
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/verify_sprite_backend.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 639,
+      "function_id": 379,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:51:19+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "32c69eb459a5bc9c8e74254334262750ef7db85caf4f5a70437ebc28738f2c3d",
+      "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
+      "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
+      "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
+      "command": "uv run tools/verify_matching.py",
       "stale": false,
       "details": {
         "commands": [
@@ -47286,8 +48909,478 @@
         "tools/windows_target.py",
         "tools/windows_tracking.py"
       ]
+    },
+    {
+      "id": 640,
+      "function_id": 379,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:51:19+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "32c69eb459a5bc9c8e74254334262750ef7db85caf4f5a70437ebc28738f2c3d",
+      "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
+      "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
+      "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "details": {
+          "compiled_prefix_bytes": 134,
+          "original_bytes": 134,
+          "scope": "diagnostic prefix only; instruction equality unclaimed"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 641,
+      "function_id": 379,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 510,
+      "recorded_at": "2026-10-07T21:51:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "32c69eb459a5bc9c8e74254334262750ef7db85caf4f5a70437ebc28738f2c3d",
+      "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
+      "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
+      "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_unit.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE /dll /noentry /nodefaultlib /machine:x86 /base:0x10000000 /out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_validation.dll C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj /export:Font_InitSystem /export:Font_Shutdown /export:Font_Unload /export:Mem_ReleaseHandleId /export:Gfx_SpriteOp /export:Mem_NextHandleId /export:Mem_RegisterHandle /export:Mem_InitHandles /export:Mem_ShutdownHandles /export:validation_fontExitContext /export:g_memHandleIds /export:g_memHandleCursor /export:g_memHandleContexts /export:g_memHandleParameters /export:g_memHandleCallbacks /export:g_memHandleFlags /export:g_memPendingContext /export:g_memPendingCallback /export:g_memPendingParameter /export:g_fonts /export:g_fontSystemInitialized /export:g_fontSubsystemHandle /export:g_memHandlesInitialized /export:g_memHandleStatus /export:g_memRegisteredHandleIds"
+          ]
+        ],
+        "lifecycle_steps": 20,
+        "limitations": "Full geputget.c and native game blocked by legacy dependencies; instruction equality unclaimed",
+        "scope": "extracted production Font_InitSystem, Font_Unload, Font_Shutdown and complete mem.c; focused PE32 DLL; modeled sprite-release boundary",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 642,
+      "function_id": 383,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:51:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "d398726038e727ae65ae4041981d9970b581fa2078b75d4e946c1dc0147a4009",
+      "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
+      "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
+      "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_unit.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE /dll /noentry /nodefaultlib /machine:x86 /base:0x10000000 /out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_validation.dll C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj /export:Font_InitSystem /export:Font_Shutdown /export:Font_Unload /export:Mem_ReleaseHandleId /export:Gfx_SpriteOp /export:Mem_NextHandleId /export:Mem_RegisterHandle /export:Mem_InitHandles /export:Mem_ShutdownHandles /export:validation_fontExitContext /export:g_memHandleIds /export:g_memHandleCursor /export:g_memHandleContexts /export:g_memHandleParameters /export:g_memHandleCallbacks /export:g_memHandleFlags /export:g_memPendingContext /export:g_memPendingCallback /export:g_memPendingParameter /export:g_fonts /export:g_fontSystemInitialized /export:g_fontSubsystemHandle /export:g_memHandlesInitialized /export:g_memHandleStatus /export:g_memRegisteredHandleIds"
+          ]
+        ],
+        "limitations": "Full geputget.c and native game blocked by legacy dependencies; instruction equality unclaimed",
+        "scope": "extracted production Font_InitSystem, Font_Unload, Font_Shutdown and complete mem.c; focused PE32 DLL; modeled sprite-release boundary",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 643,
+      "function_id": 380,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:51:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "93eb65fc8f1076b5a1ec14a6b4e1b603893a3eb1bc30f17017e5ab54809a604c",
+      "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
+      "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
+      "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_unit.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE /dll /noentry /nodefaultlib /machine:x86 /base:0x10000000 /out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_validation.dll C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj /export:Font_InitSystem /export:Font_Shutdown /export:Font_Unload /export:Mem_ReleaseHandleId /export:Gfx_SpriteOp /export:Mem_NextHandleId /export:Mem_RegisterHandle /export:Mem_InitHandles /export:Mem_ShutdownHandles /export:validation_fontExitContext /export:g_memHandleIds /export:g_memHandleCursor /export:g_memHandleContexts /export:g_memHandleParameters /export:g_memHandleCallbacks /export:g_memHandleFlags /export:g_memPendingContext /export:g_memPendingCallback /export:g_memPendingParameter /export:g_fonts /export:g_fontSystemInitialized /export:g_fontSubsystemHandle /export:g_memHandlesInitialized /export:g_memHandleStatus /export:g_memRegisteredHandleIds"
+          ]
+        ],
+        "limitations": "Full geputget.c and native game blocked by legacy dependencies; instruction equality unclaimed",
+        "scope": "extracted production Font_InitSystem, Font_Unload, Font_Shutdown and complete mem.c; focused PE32 DLL; modeled sprite-release boundary",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 644,
+      "function_id": 383,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:51:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "d398726038e727ae65ae4041981d9970b581fa2078b75d4e946c1dc0147a4009",
+      "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
+      "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
+      "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "details": {
+          "compiled_prefix_bytes": 88,
+          "original_bytes": 88,
+          "scope": "diagnostic prefix only; instruction equality unclaimed"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 645,
+      "function_id": 380,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:51:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "93eb65fc8f1076b5a1ec14a6b4e1b603893a3eb1bc30f17017e5ab54809a604c",
+      "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
+      "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
+      "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "details": {
+          "compiled_prefix_bytes": 83,
+          "original_bytes": 83,
+          "scope": "diagnostic prefix only; instruction equality unclaimed"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 646,
+      "function_id": 383,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 123,
+      "recorded_at": "2026-10-07T21:51:27+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "d398726038e727ae65ae4041981d9970b581fa2078b75d4e946c1dc0147a4009",
+      "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
+      "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
+      "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_unit.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE /dll /noentry /nodefaultlib /machine:x86 /base:0x10000000 /out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_validation.dll C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj /export:Font_InitSystem /export:Font_Shutdown /export:Font_Unload /export:Mem_ReleaseHandleId /export:Gfx_SpriteOp /export:Mem_NextHandleId /export:Mem_RegisterHandle /export:Mem_InitHandles /export:Mem_ShutdownHandles /export:validation_fontExitContext /export:g_memHandleIds /export:g_memHandleCursor /export:g_memHandleContexts /export:g_memHandleParameters /export:g_memHandleCallbacks /export:g_memHandleFlags /export:g_memPendingContext /export:g_memPendingCallback /export:g_memPendingParameter /export:g_fonts /export:g_fontSystemInitialized /export:g_fontSubsystemHandle /export:g_memHandlesInitialized /export:g_memHandleStatus /export:g_memRegisteredHandleIds"
+          ]
+        ],
+        "limitations": "Full geputget.c and native game blocked by legacy dependencies; instruction equality unclaimed",
+        "scope": "extracted production Font_InitSystem, Font_Unload, Font_Shutdown and complete mem.c; focused PE32 DLL; modeled sprite-release boundary",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 647,
+      "function_id": 380,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 71,
+      "recorded_at": "2026-10-07T21:51:29+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "93eb65fc8f1076b5a1ec14a6b4e1b603893a3eb1bc30f17017e5ab54809a604c",
+      "input_sha256": "aaa6c0198f72e48cd4ab697d9a7247f88f4da9415dda74ef226e2dce0b80d423",
+      "artifact_path": "build/decomp/windows/font_cleanup_validation.dll",
+      "artifact_sha256": "75cf34bea00fac42334c4576e3bf8c260f3cf7ce6860a581933ea0b3024fc858",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_unit.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE --target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-inline -mno-sse -mno-sse2 -I C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include -c C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.c -o C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj",
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE /dll /noentry /nodefaultlib /machine:x86 /base:0x10000000 /out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup_validation.dll C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_cleanup.obj C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\sprite_op_stub.obj /export:Font_InitSystem /export:Font_Shutdown /export:Font_Unload /export:Mem_ReleaseHandleId /export:Gfx_SpriteOp /export:Mem_NextHandleId /export:Mem_RegisterHandle /export:Mem_InitHandles /export:Mem_ShutdownHandles /export:validation_fontExitContext /export:g_memHandleIds /export:g_memHandleCursor /export:g_memHandleContexts /export:g_memHandleParameters /export:g_memHandleCallbacks /export:g_memHandleFlags /export:g_memPendingContext /export:g_memPendingCallback /export:g_memPendingParameter /export:g_fonts /export:g_fontSystemInitialized /export:g_fontSubsystemHandle /export:g_memHandlesInitialized /export:g_memHandleStatus /export:g_memRegisteredHandleIds"
+          ]
+        ],
+        "limitations": "Full geputget.c and native game blocked by legacy dependencies; instruction equality unclaimed",
+        "scope": "extracted production Font_InitSystem, Font_Unload, Font_Shutdown and complete mem.c; focused PE32 DLL; modeled sprite-release boundary",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        }
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 648,
+      "function_id": 381,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:51:30+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+      "input_sha256": "61d78c2bde0ee9fe5428bdc9b972c9d1ff85918ba59dee943fb8b2128b87bbc1",
+      "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+      "artifact_sha256": "83c746a333ecad148eedd39e55786b2545c4b2d63f19d02558315aa42905677d",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "commands": [
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+            "--target=i686-pc-windows-msvc",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-ffreestanding",
+            "-fno-builtin",
+            "-fno-inline",
+            "-mno-sse",
+            "-mno-sse2",
+            "-I",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\decomp\\include",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_unit.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\clang.EXE",
+            "--target=i686-pc-windows-msvc",
+            "-std=c89",
+            "-pedantic-errors",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-O2",
+            "-c",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_sprite_stub.c",
+            "-o",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_sprite_stub.obj"
+          ],
+          [
+            "C:\\Users\\Patricio\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BrechtSanders.WinLibs.POSIX.UCRT.LLVM_Microsoft.Winget.Source_8wekyb3d8bbwe\\mingw64\\bin\\lld-link.EXE",
+            "/dll",
+            "/noentry",
+            "/nodefaultlib",
+            "/machine:x86",
+            "/base:0x10000000",
+            "/out:C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_validation.dll",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse.obj",
+            "C:\\Stuff\\Proyects\\RacingDynamite\\build\\decomp\\windows\\font_parse_sprite_stub.obj",
+            "/export:g_memHandlesInitialized",
+            "/export:g_memHandleStatus",
+            "/export:g_memHandleIds",
+            "/export:g_memHandleCursor",
+            "/export:g_memHandleContexts",
+            "/export:g_memHandleParameters",
+            "/export:g_memRegisteredHandleIds",
+            "/export:g_memHandleCallbacks",
+            "/export:g_memHandleFlags",
+            "/export:g_memPendingContext",
+            "/export:g_memPendingCallback",
+            "/export:g_memPendingParameter",
+            "/export:g_fontSystemInitialized",
+            "/export:g_fontSubsystemHandle",
+            "/export:g_fonts",
+            "/export:Font_Parse",
+            "/export:Font_InitSystem",
+            "/export:Font_Shutdown",
+            "/export:Font_Unload",
+            "/export:Mem_NextHandleId",
+            "/export:Mem_RegisterHandle",
+            "/export:Mem_ReleaseHandleId",
+            "/export:Mem_InitHandles",
+            "/export:Gfx_SpriteOp",
+            "/export:validation_fontExitContext",
+            "/export:g_fileErrorLine"
+          ]
+        ],
+        "scope": "Extracted production parser/font lifecycle and complete mem.c; focused DLL"
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_parse.py",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 649,
+      "function_id": 381,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T21:51:30+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+      "input_sha256": "61d78c2bde0ee9fe5428bdc9b972c9d1ff85918ba59dee943fb8b2128b87bbc1",
+      "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+      "artifact_sha256": "83c746a333ecad148eedd39e55786b2545c4b2d63f19d02558315aa42905677d",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "scope": "Raw prefix diagnostic only; compiled extent and instruction equality unverified"
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_parse.py",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 650,
+      "function_id": 381,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 260,
+      "recorded_at": "2026-10-07T21:51:40+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "cb425727822dfce52643cd3c6d418c7bb2495aed08be4ae0667f54ad6a67f549",
+      "input_sha256": "61d78c2bde0ee9fe5428bdc9b972c9d1ff85918ba59dee943fb8b2128b87bbc1",
+      "artifact_path": "build/decomp/windows/font_parse_validation.dll",
+      "artifact_sha256": "83c746a333ecad148eedd39e55786b2545c4b2d63f19d02558315aa42905677d",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "limitations": "Descriptor word zero uninitialized/excluded; no native sprite allocation, invalid buffers, negative handle cursors, instruction equality or native game parity",
+        "scope": "Full state, descriptor fields 4..31, boundary snapshots, lazy real handles, return and ABI; modeled Gfx_SpriteOp"
+      },
+      "input_paths": [
+        "decomp/src/geputget.c",
+        "decomp/include/geputget.h",
+        "decomp/include/mem.h",
+        "decomp/src/mem.c",
+        "decomp/target.json",
+        "tools/verify_font_parse.py",
+        "tools/verify_font_cleanup.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
     }
   ],
-  "snapshot_id": "c9e5676c64d43493ba62437647b39d680288402952da58acc12c71f9e97c56fc",
-  "generated_at": "2026-10-07T21:36:48+00:00"
+  "snapshot_id": "b0634aabb53f6ca0faf0981dfcb1c74b5ecb93bb92bdbe582f118a8fe1c0edd8",
+  "generated_at": "2026-10-07T21:52:25+00:00"
 }

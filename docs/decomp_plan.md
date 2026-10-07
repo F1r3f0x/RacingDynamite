@@ -1,5 +1,15 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded follow-up (2026-10-07): [Font_Parse](ghidra/windows_font_parse.md)
+at VA `0x00456270` / RVA `0x56270` (429 bytes) now has extracted-production-C
+differential coverage. All 260 cases pass with complete font/handle state,
+ordered calls, descriptor fields 4..31, callback-boundary snapshots and ABI
+equality. Real lazy initialization, handle allocation and registration execute;
+sprite creation is modeled. The existing C89 parser required no source edit.
+Only offset -1 means absent; other negative offsets form raw pointer dwords.
+Descriptor word zero is uninitialized and excluded. Instruction equality,
+native allocation and native game parity remain unverified.
+
 Latest bounded follow-up (2026-10-07): [Font_InitSystem](ghidra/windows_font_init.md)
 at VA `0x00456180` / RVA `0x56180` (134 bytes) is independently recovered and
 verified against its existing C89 reconstruction. The expanded focused font DLL
