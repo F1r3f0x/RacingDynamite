@@ -18,6 +18,7 @@ FontSlot g_fonts[MAX_FONTS];
 int g_fontSystemInitialized = 0;                      /* IGN_WIN.EXE @ 0x004BA6C4 */
 static const char s_fontExitContext[] = "fontExit()"; /* IGN_WIN.EXE @ 0x004BA6C8 */
 int g_fontSubsystemHandle = 0;                        /* IGN_WIN.EXE @ 0x0050E680 */
+int g_fileErrorLine = 0;                              /* IGN_WIN.EXE @ 0x004BAB34 */
 
 uint8_t *g_pSysGfxPic;
 uint8_t *g_pSysG2Pic;
@@ -106,9 +107,9 @@ int Font_Shutdown(void) {
 }
 
 /**
- * @original Font_Parse (MAINDOS.EXE @ 0x00061399, geputget.c)
+ * @original Font_Parse (IGN_WIN.EXE @ 0x00456270, geputget.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x00061399. Validates LFT header, allocates a font slot, extracts 224 glyph
+ * @notes IGN_WIN.EXE @ 0x00456270. Validates LFT header, allocates a font slot, extracts 224 glyph
  *        metrics, registers sprite handles with Gfx_SpriteOp, and returns allocated font slot ID.
  */
 int Font_Parse(void *buffer, int unused) {
@@ -124,7 +125,7 @@ int Font_Parse(void *buffer, int unused) {
     }
 
     hdr = (uint8_t *)buffer;
-    if (strcmp((const char *)hdr, "LFT") != 0) {
+    if (memcmp(hdr, "LFT", 4) != 0) {
         g_fileErrorLine = 1050;
         return -1;
     }

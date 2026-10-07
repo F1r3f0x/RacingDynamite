@@ -47,9 +47,10 @@ typedef struct {
 /* Global font table matching IGN_WIN.EXE @ 0x0063F2E0 */
 extern FontSlot g_fonts[MAX_FONTS];
 
-/* Global font system state (IGN_WIN.EXE @ 0x004BA6C4, 0x0050E680) */
+/* Global font system state (IGN_WIN.EXE @ 0x004BA6C4, 0x0050E680, 0x004BAB34) */
 extern int g_fontSystemInitialized;
 extern int g_fontSubsystemHandle;
+extern int g_fileErrorLine;
 
 /* Global Graphics and Font Pointers */
 extern uint8_t *g_pSysGfxPic;
