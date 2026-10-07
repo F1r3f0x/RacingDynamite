@@ -11,12 +11,13 @@
 extern int g_MemoryAllocated;
 #include <string.h>
 
-/* Global font table matching MAINDOS @ 0x0024C214, MAINDOS @ 0x0063F2E0 */
+/* Global font table matching IGN_WIN.EXE @ 0x0063F2E0 */
 FontSlot g_fonts[MAX_FONTS];
 
 /* Global font system state */
-int g_fontSystemInitialized = 0; /* IGN_WIN.EXE @ 0x004BA6C4 */
-int g_fontSubsystemHandle = 0;   /* IGN_WIN.EXE @ 0x0050E680 */
+int g_fontSystemInitialized = 0;                      /* IGN_WIN.EXE @ 0x004BA6C4 */
+static const char s_fontExitContext[] = "fontExit()"; /* IGN_WIN.EXE @ 0x004BA6C8 */
+int g_fontSubsystemHandle = 0;                        /* IGN_WIN.EXE @ 0x0050E680 */
 
 uint8_t *g_pSysGfxPic;
 uint8_t *g_pSysG2Pic;
@@ -44,15 +45,15 @@ uint8_t *g_pHSignsPic;
 uint8_t *g_pPokalPic;
 
 /* External subsystem helpers */
-extern int Subsystem_Register(void);
-extern void Subsystem_AddCallback(int handle);
 extern void *Gfx_SpriteOp(void *desc, int op);
 extern void Gfx_DrawSprite(void *handle, Point2D *pos, int flags);
 
 /**
- * @original Font_InitSystem (MAINDOS.EXE @ 0x00061220, geputget.c)
+ * @original Font_InitSystem (IGN_WIN.EXE @ 0x00456180, geputget.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x00061220. Initializes 30 font slots and registers subsystem callback.
+ * @notes IGN_WIN.EXE @ 0x00456180. Initializes font subsystem: allocates handle ID via
+ *        Mem_NextHandleId, registers Font_Shutdown callback via Mem_RegisterHandle,
+ *        and resets all 30 FontSlot entries in g_fonts.
  */
 int Font_InitSystem(void) {
     int i;
@@ -62,8 +63,11 @@ int Font_InitSystem(void) {
     }
 
     g_fontSystemInitialized = 1;
-    g_fontSubsystemHandle = Subsystem_Register();
-    Subsystem_AddCallback(g_fontSubsystemHandle);
+    g_fontSubsystemHandle = Mem_NextHandleId();
+    g_memPendingContext = (unsigned int)(size_t)s_fontExitContext;
+    g_memPendingCallback = (unsigned int)(size_t)Font_Shutdown;
+    g_memPendingParameter = 0;
+    Mem_RegisterHandle((unsigned int)g_fontSubsystemHandle);
 
     for (i = 0; i < MAX_FONTS; i++) {
         g_fonts[i].in_use = 0;
