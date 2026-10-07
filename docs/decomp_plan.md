@@ -1,15 +1,17 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
-Latest bounded follow-up (2026-10-07): [triangle execution analysis](ghidra/windows_triangle.md)
-recovers the unclipped triangle gradients, edge records, span ordering and persistent
-scratch. 312 original-only expression comparisons pass; 60 clipped cases execute
-through return with repeatability/confinement checks. 24 transformed cases now execute
-both real triangle calls and the outer return, including ten combined framebuffer
-expression checks. First-call effects preserve the live corner/packet-preparation
-scratch in these fixtures. No production C, instruction equality, original-versus-C
-differential or native rendering parity is claimed. Complete reconstruction remains
-blocked on the clipped edge splitter RVA `0x24F270` and its two-segment wrapper
-continuation; the outer ESI integration boundary remains unresolved.
+Latest bounded follow-up (2026-10-07): [triangle clipping analysis](ghidra/windows_triangle.md)
+recovers the complete clipping and splitting contract at RVA `0x24F270` (537 bytes),
+both two-segment wrappers at RVAs `0x24EFA0` and `0x24F0C0` (282 bytes each), the
+right-endpoint clamp helper RVA `0x24F489` (63 bytes), and left-clipped span behavior
+at RVAs `0x5C9D0`/`0x67F97`. An independent unified clipped rendering oracle verifies
+62 direct splitter cases, 16 direct wrapper cases, 312 unclipped triangle cases,
+60 clipped triangle cases, and all 24 transformed sprite cases through both triangle
+calls and outer return with exact framebuffer byte and memory access equality.
+No production C, instruction equality, original-versus-C differential or native
+rendering parity is claimed. Complete C reconstruction remains blocked on resolving
+the register calling conventions (ESI edge packet, EBX output buffer, and outer ESI
+sprite packet) without forbidden assembly.
 
 Previous bounded follow-up (2026-10-07): [native rasterizer analysis](ghidra/windows_sprite_rasterizer.md)
 corrects RVA `0x65BB5` from a 437-byte prefix to its complete 474-byte extent,

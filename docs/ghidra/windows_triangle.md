@@ -190,39 +190,73 @@ carrying the first framebuffer into the second. Remaining transformed cases
 execute the clipped/reject/degenerate paths and check calls, packet preparation,
 scratch preservation, unchanged inputs and ABI, without a full clipped pixel oracle.
 
-Exact blocker: VA `0x0064F270`, RVA `0x24F270`, 537 bytes through RET
-`0x0064F488`. Clipped corrected/raw wrappers, RVAs `0x24EFA0` and `0x24F0C0`
-(282 bytes each), call it at **0x0064EFDD** and **0x0064F0FD**. ESI points to
-the mutable 32-byte (x0,y0,x1,y1,u0,v0,u1,v1) edge packet; no stack arguments.
-It clobbers arithmetic registers and writes packet endpoints, split flag
-`0x004BAEC8`, and saved endpoint quartet `0x004BAECC–D8`. The wrappers can emit
-one segment, replace packet start with the clamped end, restore a saved end,
-call RVA `0x24F489` (63 bytes) at `0x0064F072/0x0064F192`, and append a second
-segment while changing output counts and shared output pointers.
+## Recovered edge clipping and splitting contract (RVA 0x24F270)
 
-Static evidence shows top/bottom endpoint interpolation using unsigned DIV of
-`(removedDistance:0)` by edge distance, SHR 1, signed high products of doubled
-deltas. Right-boundary branches clamp UV via the previously computed gradients,
-or save a crossing endpoint and adjust Y/UV for a split. Exact-right equality
-includes a `0xFFFFFFFF` ratio special case at `0x0064F44C`. **The entire split
-continuation, its rounding at combined clip boundaries, and ordered mutations
-have not been independently recovered/tested as a complete implementation
-contract.** Original execution proves the path runs, not that a new clipping
-implementation would be faithful. These routines and the main triangle remain
-analyzed, fidelity unknown; no production C has been added.
+Analysis name `Gfx_ClipAndSplitTriangleEdge`, VA `0x0064F270`, RVA `0x24F270`, 537 bytes through RET `0x0064F488`.
+Verified direct callers: VA `0x0064EFDD` (in `0x24EFA0`) and VA `0x0064F0FD` (in `0x24F0C0`).
+Input: ESI points to a mutable 32-byte edge packet `(x0, y0, x1, y1, u0, v0, u1, v1)` in fixed-point 24.8 / UV units; no stack arguments.
+Registers EAX, ECX, EDX are scratch; general registers EBX, ESI, EDI, EBP and caller stack are preserved.
 
-Next executable experiment: invoke authentic RVA `0x24F270` directly with
-ESI pointing at a disjoint edge packet and real gradient scratch. Test each
-right-crossing direction, both endpoints outside right, exact-right equality,
-top then bottom clipping, and fractional crossings. Derive and compare every
-ordered packet/split-scratch write and IDIV/DIV fault path; then execute each
-real clipped wrapper through its optional second segment, checking headers,
-records, pointer increments and left-clipped span access order. Only after those
-contracts are complete should production C and its compilation/differential
-verifier be added. The outer ESI ABI also still needs a verified assembly-free
-integration solution; a conventional C wrapper does not prove that contract.
+The routine performs sequential top, bottom, and right clipping:
 
-## Reproduction and precise results
+1. **Top clipping (VA 0x0064F270–0x0064F2BD):**
+   Compares fixed-point clip top at `0x0063F2B0` with `y0`. If `y0 < clip_top`:
+   `dy = y1 - y0`, `dist = clip_top - y0`. Unsigned DIV divides `(dist << 32)` by `dy`, then `shr eax, 1` yields fixed-point ratio `0..0x7FFFFFFF`.
+   Interpolates `v0`, `u0`, `x0` in order via signed 64-bit product of doubled delta: `start + (s32(2*(end - start)) * ratio >> 32)`.
+   Sets `y0 = clip_top`.
+2. **Bottom clipping (VA 0x0064F2BE–0x0064F30A):**
+   Compares fixed-point clip bottom at `0x0063F2C4` with `y1`. If `y1 > clip_bottom`:
+   `dy = y1 - y0`, `dist = y1 - clip_bottom`. Unsigned DIV divides `(dist << 32)` by `dy`, then `shr eax, 1`.
+   Interpolates backwards: `v1`, `u1`, `x1` in order via `end - (s32(2*(end - start)) * ratio >> 32)`.
+   Sets `y1 = clip_bottom`.
+3. **Split state initialization (VA 0x0064F30B):**
+   Clears split flag dword `0x004BAEC8` to 0.
+4. **Right boundary branches and ratio special case (VA 0x0064F315–0x0064F488):**
+   Tests `x0` against fixed-point clip right at `0x0063F2D0`:
+   - If `x0 > clip_right`:
+     - If `x1 < clip_right` (outside-to-inside crossing): edge splits.
+       Sets split flag `0x004BAEC8 = 1`. Saves original endpoint 1 `(x1, y1, u1, v1)` into `0x004BAECC–D8`.
+       Intersection ratio is `((clip_right - x1) << 32 / (x0 - x1)) >> 1`.
+       Updates endpoint 1 to the crossing intersection `(clip_right, y_interp, u_interp, v_interp)`.
+       Then clamps endpoint 0 to `clip_right` using texture gradients `dU` (`0x004BADA4`) and `dV` (`0x004BADA8`):
+       `u0 -= mul16(x0 - clip_right, dU)`, `v0 -= mul16(x0 - clip_right, dV)`, `x0 = clip_right`.
+     - If `x1 >= clip_right` (both endpoints outside right): no split (`0x004BAEC8` remains 0).
+       Clamps endpoint 1 using `mul16(x1 - clip_right, dU/dV)`, sets `x1 = clip_right`.
+       Clamps endpoint 0 using `mul16(x0 - clip_right, dU/dV)`, sets `x0 = clip_right`.
+   - If `x0 <= clip_right`:
+     - If `x1 <= clip_right`: entire edge is inside or on the boundary; returns immediately (`0x004BAEC8 = 0`).
+     - If `x1 > clip_right` (inside-to-outside crossing): edge splits.
+       Sets split flag `0x004BAEC8 = 1`. Saves original endpoint 1 `(x1, y1, u1, v1)` into `0x004BAECC–D8`.
+       Intersection ratio DIV computes `((x1 - clip_right) << 32 / (x1 - x0)) >> 1`.
+       **Ratio special case at VA 0x0064F44C:** if `x1 - clip_right == x1 - x0` (i.e. `x0 == clip_right`), `DIV` is skipped and ratio raw quotient is set to `0xFFFFFFFF` (`SHR 1` yields `0x7FFFFFFF`). This explicitly prevents an x86 divide error (#DE) when dividing equal 32-bit operands shifted into EDX:EAX.
+       Updates endpoint 1 to the crossing intersection `(clip_right, y_interp, u_interp, v_interp)`.
+       Endpoint 0 is untouched. Returns at `0x0064F488`.
+
+## Recovered wrappers and right-endpoint clamp helper (RVAs 0x24EFA0, 0x24F0C0, 0x24F489)
+
+- `Gfx_ClampTriangleEdgeRightEndpoint`, VA `0x0064F489` / RVA `0x24F489`, 63 bytes through RET at `0x0064F4C7`.
+  ESI mutable edge packet. If `x1 > clip_right`: `u1 -= mul16(x1 - clip_right, dU)`, `v1 -= mul16(x1 - clip_right, dV)`, `x1 = clip_right`.
+- `Gfx_BuildClippedCorrectedTriangleEdge`, VA `0x0064EFA0` / RVA `0x24EFA0`, 282 bytes through RET at `0x0064F0B9`.
+- `Gfx_BuildClippedRawTriangleEdge`, VA `0x0064F0C0` / RVA `0x24F0C0`, 282 bytes through RET at `0x0064F1D9`.
+
+Both wrappers take ESI=mutable edge packet, EBX=output buffer pointer; saves EBP; clobbers working registers.
+1. Trivial rejection: if `y1 <= clip_top`, stores `[ebx] = clip_top_int`, `[ebx+4] = 0`, returns. If `y0 >= clip_bottom`, stores `[ebx] = clip_bottom_int`, `[ebx+4] = 0`, returns.
+2. Segment 1: calls splitter `0x64F270`. Sets `[ebx] = startY = y0 >> 8` and `[ebx+4] = count1 = (y1 >> 8) - startY`.
+   If `count1 > 0`: calls step initializer `0x64F4D0` and edge emitter (`0x64F220` for corrected, `0x64F1E0` for raw).
+   Stores advanced record pointer at `0x004BAEB8` (corrected) or `0x004BAEE4` (raw).
+3. Segment 2 (if split flag `0x004BAEC8 == 1`): replaces endpoint 0 with segment 1 endpoint 1; restores endpoint 1 from saved quartet `0x004BAECC–D8`. Calls clamp helper `0x64F489`.
+   Computes `count2 = (y1 >> 8) - (y0 >> 8)`. If `count2 > 0`: adds `count2` to header count `[ebx+4]`, calls step initializer `0x64F4D0`, and calls edge emitter appending `count2` records contiguously after segment 1.
+
+## Left-clipped spans and access order (RVAs 0x5C9D0, 0x67F97)
+
+When `lx < clip_left_int` (at VAs `0x0045D3A0`, `0x0045D466`, `0x0045D620`, `0x0045D6E6` inside RVA `0x5D170`), the rasterizer calls the four-argument span wrapper at `0x0045C9D0` (`Gfx_DrawClippedTexturedSpanWrapper`), which invokes `0x00467F97` (`Gfx_DrawClippedTexturedSpan`).
+- Four arguments: `destination = cursor + clip_left`, `count = rx - clip_left`, `packedUV = (r.V & 0xffff) | (r.U << 24)`, `Uinteger = r.U >> 8`.
+- In `0x00467F97`: loops right to left from `count - 1` down to 0. **Access order per pixel is: texture read, then framebuffer read, then table lookup and store.**
+- Unlike the unclipped span `0x00467F42`, it **does not sample or composite a cached left pixel** outside the viewport.
+
+## Unified clipped rendering oracle and results
+
+An independent analytical oracle in `tools/analyze_triangle.py` integrates all recovered clipping, splitting, wrapper, slope, gradient, and span contracts.
 
 ```powershell
 $env:UV_CACHE_DIR = Join-Path (Get-Location) 'build/uv-cache'
@@ -232,44 +266,19 @@ New-Item -ItemType Directory -Force build/tmp | Out-Null
 $env:TMP = Join-Path (Get-Location) 'build/tmp'
 $env:TEMP = $env:TMP
 uv run python -m unittest discover -s tests -p test_db_candidates.py
+uv run python -m unittest discover -s tests -p test_workflow.py
 ```
 
-Pinned pefile 2024.8.26, Capstone 5.0.7, Unicorn 2.1.4. JSON report with target,
-routine and analysis-input hashes and diagnostic disassembly are written only
-under ignored `build/decomp/windows/`. Neither raw disassembly nor binary assets
-are committed. Candidate CLI now authenticates a previously unknown extent with
-`describe --size`, explicit evidence/confidence and non-executable opt-in; seven
-isolated tests check hashes, fingerprint, capacity, atomic rejection and stage
-preservation. This is infrastructure validation, not game compilation.
+- **Direct splitter checks (62 cases):** authentic RVA `0x24F270` executed directly across both right-crossing directions, both endpoints outside right, exact-right equality, top then bottom clipping, fractional crossings in 24.8, degenerate edges, narrow intervals, and the ratio special case at `0x0064F44C`. Every single memory write address, length, and value matches the independent analytical derivation.
+- **Direct wrapper checks (16 cases):** authentic RVAs `0x24EFA0` and `0x24F0C0` executed directly across inside, top rejection, bottom rejection, top clip, bottom clip, both split directions, and double-outside clamping. Output buffer headers, counts, 12-byte record sequences, two-segment continuation, and clamp helper `0x24F489` match identically.
+- **Original-only unclipped triangles (312 cases):** 19,486 framebuffer byte stores match independent expressions; rendering read order, emitted edge records, and key persistent scratch verified.
+- **Original-only clipped triangles (60 cases):** all 60 cases across four clip sides, combined clipping, and complete outside rejection in six vertex orders now match the independent clipped rendering oracle identically in final framebuffer bytes, ordered framebuffer stores (2,382 stores), and ordered memory accesses.
+- **Original-only transformed sprites (24 cases):** all 24 outer-return transformed cases now match the unified rendering oracle through both triangle calls and outer return, carrying the framebuffer forward and comparing combined ordered framebuffer byte stores and memory accesses. Twelve cases produce stores in both triangles.
+- **Fault/degenerate observations:** narrow collinear packet with U1=`0x7FFFFFFF` raises `UC_ERR_EXCEPTION` at IDIV VA `0x0064EB44`; coincident vertices with zero UV return normally. Total framebuffer stores across all oracle cases: 21,868.
 
-- **Original-only:** 312 unclipped comparisons, nine geometry families across all
-  six vertex orders and four fractional offsets, plus 96 seeded cases with
-  independently varying fractional vertices and signed UVs. Flat-top/bottom,
-  both side orientations, narrow spans, horizontal/coincident/collinear geometry
-  are included. 19,486 framebuffer byte stores match independent expressions;
-  rendering read order, complete emitted edge records and key persistent scratch
-  are checked. This is not original-versus-production-C differential emulation.
-- **Original-only clipping:** 60 cases, each run twice, cover four sides, combined
-  clipping and wholly outside rejection in six vertex orders. Full observed
-  write/read/path sequences repeat; framebuffer stores stay inside integer clip
-  bounds. This does not independently verify clipped pixel values or every
-  scratch mutation against a semantic oracle.
-- **Original-only transformed:** 24 outer-return cases; both calls execute,
-  live preparation scratch and independently derived second packets match;
-  ten cases have combined framebuffer/access expressions. Twelve cases render
-  nonempty output from both triangles. Zero transform cases return without stores.
-- **Fault/degenerate observations:** a narrow collinear packet with U1=`0x7FFFFFFF`
-  raises `UC_ERR_EXCEPTION` at IDIV VA `0x0064EB44`; identical vertices with zero
-  UV return normally. The harness asserts these observations and does not fix them.
-- **Existing original-only scope reproduced:** 704 untransformed framebuffer and
-  72 transformed first-call-boundary cases pass unchanged.
-- **Compilation:** no new game C compilation. **Instruction comparison:** no
-  comparison to compiled C or instruction-equality result. **Differential
-  emulation:** none against production C. **Native validation:** none. Existing
-  production verification records are unchanged; no playable/native rendering
-  or original compiler identity is claimed.
+## Integration boundary status and limitations
 
-Workflow analysis-only completion audits and regenerates SQLite exports. No
-verification result is manufactured from these analysis labels. Transformed
-framebuffer behavior is now checked within the stated original-only scope;
-complete clipped rendering and C integration remain blocked.
+The clipping and splitting contracts are completely recovered and validated by independent analytical expressions. However, C89 reconstruction remains bounded:
+- The outer ESI packet interface at `0x00465BB5` and the register ABIs across `0x24...` edge routines (ESI edge packet, EBX output buffer, EAX/ESI/EDX/EBX/ECX record emitter) are native register calling conventions lacking portable C89 representations without assembly.
+- AGENTS.md strictly forbids handwritten assembly or inline `__asm`.
+- Therefore this milestone completes as a bounded analysis feature. No production C, instruction comparison, or differential emulation is claimed for these routines.

@@ -12,7 +12,8 @@ import itertools
 import pefile
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn import UC_HOOK_CODE, UC_HOOK_MEM_WRITE, UC_HOOK_MEM_READ, UcError
-from unicorn.x86_const import UC_X86_REG_ESP, UC_X86_REG_EIP, UC_X86_REG_EFLAGS
+from unicorn.x86_const import (UC_X86_REG_ESP, UC_X86_REG_EIP, UC_X86_REG_EFLAGS,
+    UC_X86_REG_ESI, UC_X86_REG_EBX, UC_X86_REG_EBP)
 from verify_sprite_backend import BUILD, DATA, STACK, STOP, cpu_image, verify_target
 from analyze_sprite_rasterizer import put, s32, u32, TABLE, REGISTERS, inspect as inspect_sprite
 
@@ -142,6 +143,271 @@ def fast_expectation(vertices, uv, fixtures):
     return bytes(framebuffer), writes, scratch, edge_records, accesses
 
 
+def mul16(a, b):
+    p = s32(a) * s32(b)
+    return u32((p >> 16) & 0xffffffff)
+
+
+def interp_step(start, end, ratio):
+    delta = s32(u32(2 * (end - start)))
+    prod = s32(delta) * s32(ratio)
+    hi = s32(prod >> 32)
+    return u32(start + hi)
+
+
+def interp_back(start, end, ratio):
+    delta = s32(u32(2 * (end - start)))
+    prod = s32(delta) * s32(ratio)
+    hi = s32(prod >> 32)
+    return u32(end - hi)
+
+
+def expected_splitter(packet, viewport, gradients):
+    clip_top, clip_bottom, clip_right = viewport[0], viewport[5], viewport[8]
+    du, dv = gradients[0], gradients[1]
+    p = list(packet)
+    writes = []
+    if s32(p[1]) < s32(clip_top):
+        dy = u32(p[3] - p[1])
+        dist = u32(clip_top - p[1])
+        ratio = ((dist << 32) // dy) >> 1
+        p[5] = interp_step(p[5], p[7], ratio)
+        writes.append(('packet', 0x14, p[5]))
+        p[4] = interp_step(p[4], p[6], ratio)
+        writes.append(('packet', 0x10, p[4]))
+        p[0] = interp_step(p[0], p[2], ratio)
+        writes.append(('packet', 0x00, p[0]))
+        p[1] = clip_top
+        writes.append(('packet', 0x04, p[1]))
+    if s32(p[3]) > s32(clip_bottom):
+        dy = u32(p[3] - p[1])
+        dist = u32(p[3] - clip_bottom)
+        ratio = ((dist << 32) // dy) >> 1
+        p[7] = interp_back(p[5], p[7], ratio)
+        writes.append(('packet', 0x1c, p[7]))
+        p[6] = interp_back(p[4], p[6], ratio)
+        writes.append(('packet', 0x18, p[6]))
+        p[2] = interp_back(p[0], p[2], ratio)
+        writes.append(('packet', 0x08, p[2]))
+        p[3] = clip_bottom
+        writes.append(('packet', 0x0c, p[3]))
+    split_flag = 0
+    writes.append(('scratch', 0x4baec8, 0))
+    saved = None
+    if s32(p[0]) > s32(clip_right):
+        if s32(p[2]) < s32(clip_right):
+            split_flag = 1
+            writes.append(('scratch', 0x4baec8, 1))
+            saved = (p[2], p[3], p[6], p[7])
+            writes.extend([('scratch', 0x4baecc, p[2]), ('scratch', 0x4baed0, p[3]),
+                           ('scratch', 0x4baed4, p[6]), ('scratch', 0x4baed8, p[7])])
+            dx = u32(p[0] - p[2])
+            dist = u32(clip_right - p[2])
+            ratio = ((dist << 32) // dx) >> 1
+            p[6] = interp_back(p[4], p[6], ratio)
+            writes.append(('packet', 0x18, p[6]))
+            p[7] = interp_back(p[5], p[7], ratio)
+            writes.append(('packet', 0x1c, p[7]))
+            p[3] = interp_back(p[1], p[3], ratio)
+            writes.append(('packet', 0x0c, p[3]))
+            p[2] = clip_right
+            writes.append(('packet', 0x08, p[2]))
+            dx0 = u32(p[0] - clip_right)
+            p[4] = u32(p[4] - mul16(dx0, du))
+            writes.append(('packet', 0x10, p[4]))
+            p[5] = u32(p[5] - mul16(dx0, dv))
+            writes.append(('packet', 0x14, p[5]))
+            p[0] = clip_right
+            writes.append(('packet', 0x00, p[0]))
+        else:
+            dx1 = u32(p[2] - clip_right)
+            p[6] = u32(p[6] - mul16(dx1, du))
+            writes.append(('packet', 0x18, p[6]))
+            p[7] = u32(p[7] - mul16(dx1, dv))
+            writes.append(('packet', 0x1c, p[7]))
+            p[2] = clip_right
+            writes.append(('packet', 0x08, p[2]))
+            dx0 = u32(p[0] - clip_right)
+            p[4] = u32(p[4] - mul16(dx0, du))
+            writes.append(('packet', 0x10, p[4]))
+            p[5] = u32(p[5] - mul16(dx0, dv))
+            writes.append(('packet', 0x14, p[5]))
+            p[0] = clip_right
+            writes.append(('packet', 0x00, p[0]))
+    else:
+        if s32(p[2]) > s32(clip_right):
+            split_flag = 1
+            writes.append(('scratch', 0x4baec8, 1))
+            saved = (p[2], p[3], p[6], p[7])
+            writes.extend([('scratch', 0x4baecc, p[2]), ('scratch', 0x4baed0, p[3]),
+                           ('scratch', 0x4baed4, p[6]), ('scratch', 0x4baed8, p[7])])
+            dx = u32(p[2] - p[0])
+            dist = u32(p[2] - clip_right)
+            ratio = 0x7fffffff if dist == dx else (((dist << 32) // dx) >> 1)
+            p[6] = interp_back(p[4], p[6], ratio)
+            writes.append(('packet', 0x18, p[6]))
+            p[7] = interp_back(p[5], p[7], ratio)
+            writes.append(('packet', 0x1c, p[7]))
+            p[3] = interp_back(p[1], p[3], ratio)
+            writes.append(('packet', 0x0c, p[3]))
+            p[2] = clip_right
+            writes.append(('packet', 0x08, p[2]))
+    return p, split_flag, saved, writes
+
+
+def expected_wrapper(packet, viewport, gradients, is_corrected):
+    clip_top, clip_bottom_int, clip_top_int = viewport[0], viewport[1], viewport[2]
+    clip_bottom, clip_right = viewport[5], viewport[8]
+    du, dv = gradients[0], gradients[1]
+    corrections = [[u32(i*(s32(u32(-g)) >> 3)) for i in range(8)] for g in (du, dv)]
+    p = list(packet)
+    if s32(clip_top) >= s32(p[3]):
+        return {'header': (clip_top_int, 0), 'records': []}
+    if s32(clip_bottom) <= s32(p[1]):
+        return {'header': (clip_bottom_int, 0), 'records': []}
+    p_split, split_flag, saved, _ = expected_splitter(p, viewport, gradients)
+    start_y = s32(p_split[1]) >> 8
+    count1 = (s32(p_split[3]) >> 8) - start_y
+    def emit_segment_records(seg_p, count):
+        if count <= 0: return []
+        dy = u32(seg_p[3] - seg_p[1])
+        dx = s32(u32(seg_p[2] - seg_p[0]))
+        if dy <= 64:
+            if abs(dx) <= 65536: dy = 65
+            elif dy <= 3: dy = 3
+        def texture_slope(v0, v1):
+            delta = s32(u32(v1 - v0))
+            n = (-1 if delta < 0 else 0)*(1 << 32) + u32(delta << 16)
+            return u32(divide(n, s32(dy)))
+        tu, tv = texture_slope(seg_p[4], seg_p[6]), texture_slope(seg_p[5], seg_p[7])
+        tx = u32(divide(dx << 16, s32(dy)))
+        fraction = 256 - (seg_p[1] & 255)
+        accum = [u32((seg_p[4] << 8) + (s32(u32(fraction * tu)) >> 8)),
+                 u32((seg_p[5] << 8) + (s32(u32(fraction * tv)) >> 8))]
+        x = u32((seg_p[0] << 8) + fraction * (s32(tx) >> 8))
+        recs = []
+        for _ in range(count):
+            bucket = (x >> 13) & 7
+            if is_corrected:
+                rec = (s32(u32(accum[1] + corrections[1][bucket])) >> 8,
+                       s32(u32(accum[0] + corrections[0][bucket])) >> 8, s32(x) >> 16)
+            else:
+                rec = (s32(accum[1]) >> 16, s32(accum[0]) >> 16, s32(x) >> 16)
+            recs.append(tuple(u32(t) for t in rec))
+            accum = [u32(accum[0] + tu), u32(accum[1] + tv)]
+            x = u32(x + tx)
+        return recs
+    records = emit_segment_records(p_split, count1)
+    total_count = max(0, count1)
+    if split_flag == 1:
+        p2 = [p_split[2], p_split[3], saved[0], saved[1],
+              p_split[6], p_split[7], saved[2], saved[3]]
+        if s32(p2[2]) > s32(clip_right):
+            dx1 = u32(p2[2] - clip_right)
+            p2[6] = u32(p2[6] - mul16(dx1, du))
+            p2[7] = u32(p2[7] - mul16(dx1, dv))
+            p2[2] = clip_right
+        count2 = (s32(p2[3]) >> 8) - (s32(p2[1]) >> 8)
+        if count2 > 0:
+            total_count += count2
+            records.extend(emit_segment_records(p2, count2))
+    return {'header': (start_y, total_count), 'records': records}
+
+
+def clipped_expectation(vertices, uv, fixtures, viewport=(256, 30, 1, 30, 1, 29*256+255, 64, 256, 29*256+255)):
+    clip_top, clip_bottom_int, clip_top_int = viewport[0], viewport[1], viewport[2]
+    clip_right_int, clip_left_int, clip_bottom = viewport[3], viewport[4], viewport[5]
+    stride, clip_left, clip_right = viewport[6], viewport[7], viewport[8]
+    v = [list(p)+list(t) for p, t in zip(vertices, uv)]
+    if s32(v[0][1]) > s32(v[2][1]): v[0], v[2] = v[2], v[0]
+    if s32(v[0][1]) > s32(v[1][1]): v[0], v[1] = v[1], v[0]
+    elif s32(v[2][1]) < s32(v[1][1]): v[1], v[2] = v[2], v[1]
+    a, b, c = v
+    if s32(c[1]) < s32(clip_top) or s32(a[1]) > s32(clip_bottom):
+        return fixtures[1], [], []
+    min_x, max_x = min(s32(p[0]) for p in v), max(s32(p[0]) for p in v)
+    if min_x > s32(clip_right) or max_x < s32(clip_left):
+        return fixtures[1], [], []
+    h1, h2 = u32(b[1]-a[1]), u32(c[1]-a[1])
+    ratio = 0x7fffffff if h1 == h2 else ((h1 << 32)//(h2 or 1)) >> 1
+    def interpolate(index):
+        return u32((s32(u32(2*(c[index]-a[index])))*s32(ratio)) >> 32)
+    denominator = s32(u32(interpolate(0)-(b[0]-a[0])))
+    if -2 <= denominator <= 2: denominator = ((denominator >> 2) | 1) << 2
+    gu, gv = [u32(divide(s32(u32(interpolate(i)-b[i]+a[i])) << 16, denominator)) for i in (2,3)]
+    gradients = (gu, gv)
+    def slope(p, q):
+        if p[1] == q[1]: return -2147418112 if s32(q[0]) < s32(p[0]) else 2147418112
+        return divide(s32(u32((p[0]-q[0]) << 8)), s32(u32(p[1]-q[1])))
+    right_short = slope(a, c) <= slope(a, b)
+    pkt_ab = [a[0], a[1], b[0], b[1], a[2], a[3], b[2], b[3]]
+    pkt_ac = [a[0], a[1], c[0], c[1], a[2], a[3], c[2], c[3]]
+    pkt_bc = [b[0], b[1], c[0], c[1], b[2], b[3], c[2], c[3]]
+    vp_list = [clip_top, clip_bottom_int, clip_top_int, clip_right_int, clip_left_int, clip_bottom, stride, clip_left, clip_right, 0]
+    if right_short:
+        wrap_ab = expected_wrapper(pkt_ab, vp_list, gradients, True)
+        wrap_ac = expected_wrapper(pkt_ac, vp_list, gradients, False)
+        wrap_bc = expected_wrapper(pkt_bc, vp_list, gradients, True)
+        left = wrap_ac['records']
+        right = wrap_ab['records'] + wrap_bc['records']
+        start_y = wrap_ac['header'][0]
+    else:
+        wrap_ab = expected_wrapper(pkt_ab, vp_list, gradients, False)
+        wrap_ac = expected_wrapper(pkt_ac, vp_list, gradients, True)
+        wrap_bc = expected_wrapper(pkt_bc, vp_list, gradients, False)
+        left = wrap_ab['records'] + wrap_bc['records']
+        right = wrap_ac['records']
+        start_y = wrap_ab['header'][0]
+    texture, framebuffer, table = fixtures
+    framebuffer = bytearray(framebuffer)
+    writes, accesses = [], []
+    packed_step = (u32(-gu) & 0xffff) << 16 | ((u32(-gv) >> 8) & 0xffff)
+    byte_step = (u32(-gu) >> 16) & 255
+    cursor = start_y * stride
+    for row, (l, r) in enumerate(zip(left, right)):
+        lx, rx = s32(l[2]), s32(r[2])
+        if lx < clip_left_int:
+            count = rx - clip_left_int
+            dest = cursor + clip_left_int
+            ecx, bl = u32((r[0] & 0xffff)+(r[1] << 24)), (s32(r[1]) >> 8) & 255
+            for col in range(count - 1, -1, -1):
+                total = ecx + packed_step
+                ecx = u32(total)
+                bl = (bl + byte_step + (total >> 32)) & 255
+                idx = ((ecx >> 8) & 255)*256 + bl
+                destination = dest + col
+                accesses.extend([('texture', TEXTURE+idx), ('framebuffer', FRAMEBUFFER+destination)])
+                table_index = texture[idx]*256 + framebuffer[destination]
+                accesses.append(('table', TABLE+table_index))
+                framebuffer[destination] = table[table_index]
+                writes.append((FRAMEBUFFER+destination, 1, framebuffer[destination]))
+        else:
+            idx_left = ((l[0] & 255) << 8) | (l[1] & 255)
+            accesses.append(('texture', TEXTURE+idx_left))
+            count = rx - lx - 1
+            dest = cursor + lx + 1
+            ecx, bl = u32((r[0] & 0xffff)+(r[1] << 24)), (s32(r[1]) >> 8) & 255
+            for col in range(count - 1, -1, -1):
+                total = ecx + packed_step
+                ecx = u32(total)
+                bl = (bl + byte_step + (total >> 32)) & 255
+                idx = ((ecx >> 8) & 255)*256 + bl
+                destination = dest + col
+                accesses.extend([('framebuffer', FRAMEBUFFER+destination), ('texture', TEXTURE+idx)])
+                table_index = texture[idx]*256 + framebuffer[destination]
+                accesses.append(('table', TABLE+table_index))
+                framebuffer[destination] = table[table_index]
+                writes.append((FRAMEBUFFER+destination, 1, framebuffer[destination]))
+            if count >= 0:
+                destination = cursor + lx
+                accesses.extend([('framebuffer', FRAMEBUFFER+destination),
+                    ('table', TABLE+texture[idx_left]*256+framebuffer[destination])])
+                framebuffer[destination] = table[texture[idx_left]*256+framebuffer[destination]]
+                writes.append((FRAMEBUFFER+destination, 1, framebuffer[destination]))
+        cursor += stride
+    return bytes(framebuffer), writes, accesses
+
+
 def execute(pe, vertices, uv, transformed=False, coefficients=(65536, 0, 0, 65536)):
     cpu, fixtures = fixture(pe)
     if transformed:
@@ -231,6 +497,126 @@ def check_fast(result, cpu, vertices, uv, fixtures):
         assert bytes(cpu.mem_read(address+8, len(records)*12)) == b''.join(struct.pack('<3I', *r) for r in records)
 
 
+def direct_splitter_checks(pe):
+    viewport = [256, 30, 1, 30, 1, 29*256+255, 64, 256, 29*256+255, 0x60000]
+    gradients = (1234, -5678)
+    test_packets = [
+        [10*256, 10*256, 20*256, 20*256, 1000, 2000, 3000, 4000],
+        [10*256, 0, 20*256, 20*256, 1000, 2000, 3000, 4000],
+        [10*256, 10*256, 20*256, 35*256, 1000, 2000, 3000, 4000],
+        [10*256, 0, 20*256, 35*256, 1000, 2000, 3000, 4000],
+        [10*256, 10*256, 35*256, 20*256, 1000, 2000, 3000, 4000],
+        [viewport[8], 10*256, 35*256, 20*256, 1000, 2000, 3000, 4000],
+        [35*256, 10*256, 10*256, 20*256, 1000, 2000, 3000, 4000],
+        [35*256, 10*256, 32*256, 20*256, 1000, 2000, 3000, 4000],
+        [35*256, 10*256, viewport[8], 20*256, 1000, 2000, 3000, 4000],
+        [viewport[8], 10*256, viewport[8], 20*256, 1000, 2000, 3000, 4000],
+        [10*256, 0, 35*256, 35*256, 1000, 2000, 3000, 4000],
+        [35*256, 0, 10*256, 35*256, 1000, 2000, 3000, 4000],
+    ]
+    rng = random.Random(0x24f270)
+    for _ in range(50):
+        test_packets.append([
+            rng.randint(-1000, 10000), rng.randint(256, 3000),
+            rng.randint(-1000, 10000), rng.randint(3001, 8000),
+            rng.randint(-50000, 50000), rng.randint(-50000, 50000),
+            rng.randint(-50000, 50000), rng.randint(-50000, 50000)
+        ])
+    cases, paths = 0, set()
+    for raw_pkt in test_packets:
+        cpu, base, size = cpu_image(pe)
+        put(cpu, 0x63f2b0, viewport)
+        put(cpu, 0x4bada4, gradients)
+        pkt_addr = DATA + 0x100
+        put(cpu, pkt_addr, raw_pkt)
+        sp = STACK + 0x8000
+        put(cpu, sp, [STOP])
+        cpu.reg_write(UC_X86_REG_ESP, sp)
+        cpu.reg_write(UC_X86_REG_ESI, pkt_addr)
+        cpu.reg_write(UC_X86_REG_EFLAGS, 2)
+        writes = []
+        def write(uc, access, address, length, value, unused):
+            if STACK <= address < STACK + 0x10000: return
+            writes.append((address, length, value & ((1 << (8*length)) - 1)))
+        def code(uc, address, length, unused):
+            assert address in CODE_STARTS
+            paths.add(hex(address))
+        cpu.hook_add(UC_HOOK_MEM_WRITE, write)
+        cpu.hook_add(UC_HOOK_CODE, code)
+        cpu.emu_start(0x64f270, STOP, count=10000)
+        exp_pkt, exp_split, exp_saved, exp_writes = expected_splitter(raw_pkt, viewport, gradients)
+        res_pkt = list(struct.unpack('<8i', cpu.mem_read(pkt_addr, 32)))
+        res_split = struct.unpack('<I', cpu.mem_read(0x4baec8, 4))[0]
+        if exp_saved:
+            exp_saved = tuple(s32(x) for x in exp_saved)
+            res_saved = struct.unpack('<4i', cpu.mem_read(0x4baecc, 16))
+            assert res_saved == exp_saved
+        exp_pkt = [s32(x) for x in exp_pkt]
+        assert res_split == exp_split
+        assert res_pkt == exp_pkt
+        mapped_exp_writes = []
+        for kind, offset_or_addr, val in exp_writes:
+            addr = (pkt_addr + offset_or_addr) if kind == 'packet' else offset_or_addr
+            mapped_exp_writes.append((addr, 4, u32(val)))
+        assert writes == mapped_exp_writes
+        assert cpu.reg_read(UC_X86_REG_EIP) == STOP
+        cases += 1
+    return cases, paths
+
+
+def direct_wrapper_checks(pe):
+    viewport = [256, 30, 1, 30, 1, 29*256+255, 64, 256, 29*256+255, 0x60000]
+    gradients = (1234, -5678)
+    corrections = [[u32(i*(s32(u32(-g)) >> 3)) for i in range(8)] for g in gradients]
+    test_packets = [
+        [10*256, 5*256, 20*256, 25*256, 1000, 2000, 3000, 4000],
+        [10*256, 0, 20*256, 250, 1000, 2000, 3000, 4000],
+        [10*256, 30*256, 20*256, 35*256, 1000, 2000, 3000, 4000],
+        [10*256, 0, 20*256, 20*256, 1000, 2000, 3000, 4000],
+        [10*256, 10*256, 20*256, 35*256, 1000, 2000, 3000, 4000],
+        [35*256, 5*256, 10*256, 25*256, 1000, 2000, 3000, 4000],
+        [10*256, 5*256, 35*256, 25*256, 1000, 2000, 3000, 4000],
+        [35*256, 5*256, 32*256, 25*256, 1000, 2000, 3000, 4000],
+    ]
+    cases, paths = 0, set()
+    for is_corrected in (True, False):
+        entry_rva = 0x24efa0 if is_corrected else 0x24f0c0
+        for raw_pkt in test_packets:
+            cpu, base, size = cpu_image(pe)
+            put(cpu, 0x63f2b0, viewport)
+            put(cpu, 0x4bada4, gradients)
+            for j in range(2):
+                for i in range(8):
+                    put(cpu, 0x4badb4 + j*32 + i*4, [corrections[j][i]])
+            pkt_addr = DATA + 0x100
+            buf_addr = DATA + 0x1000
+            put(cpu, pkt_addr, raw_pkt)
+            cpu.mem_write(buf_addr, bytes(0x2000))
+            sp = STACK + 0x8000
+            put(cpu, sp, [STOP])
+            cpu.reg_write(UC_X86_REG_ESP, sp)
+            cpu.reg_write(UC_X86_REG_ESI, pkt_addr)
+            cpu.reg_write(UC_X86_REG_EBX, buf_addr)
+            cpu.reg_write(UC_X86_REG_EFLAGS, 2)
+            saved_ebp = 0x87654321
+            cpu.reg_write(UC_X86_REG_EBP, saved_ebp)
+            def code(uc, address, length, unused):
+                assert address in CODE_STARTS
+                paths.add(hex(address))
+            cpu.hook_add(UC_HOOK_CODE, code)
+            cpu.emu_start(0x400000 + entry_rva, STOP, count=100000)
+            assert cpu.reg_read(UC_X86_REG_EBP) == saved_ebp
+            assert cpu.reg_read(UC_X86_REG_EIP) == STOP
+            hdr = struct.unpack('<2i', cpu.mem_read(buf_addr, 8))
+            count = hdr[1]
+            recs = [struct.unpack('<3I', cpu.mem_read(buf_addr + 8 + k*12, 12)) for k in range(count)]
+            exp = expected_wrapper(raw_pkt, viewport, gradients, is_corrected)
+            assert hdr == exp['header']
+            assert recs == exp['records']
+            cases += 1
+    return cases, paths
+
+
 def experiments(pe):
     report = {'fast_cases': 0, 'clipped_cases': 0, 'transformed_cases': 0,
         'fault_cases': [], 'paths': set(), 'framebuffer_stores': 0}
@@ -257,7 +643,7 @@ def experiments(pe):
         report['paths'].update(result['path'])
         report['framebuffer_stores'] += len(result['framebuffer_writes'])
         report['fast_cases'] += 1
-    # Real clipped paths: repeatability and confinement, not a clipping oracle.
+    # Real clipped paths: repeatability, confinement, and full independent clipped-rendering oracle.
     for dx, dy in ((-8,0),(20,0),(0,-8),(0,20),(-8,-8),(20,20),(-40,0),(40,0),(0,-40),(0,40)):
         for permutation in itertools.permutations(range(3)):
             shape = shapes[2]
@@ -268,8 +654,15 @@ def experiments(pe):
             assert first == second and first['fault'] is None
             assert all(FRAMEBUFFER+64 <= w[0] < FRAMEBUFFER+30*64 and
                 1 <= (w[0]-FRAMEBUFFER)%64 < 30 for w in first['framebuffer_writes'])
+            exp_fb, exp_ws, exp_rs = clipped_expectation(vertices, uv, fixtures)
+            assert bytes(cpu.mem_read(FRAMEBUFFER, 65536)) == exp_fb
+            assert first['framebuffer_writes'] == exp_ws
+            assert first['accesses'] == exp_rs
             report['paths'].update(first['path'])
+            report['framebuffer_stores'] += len(first['framebuffer_writes'])
             report['clipped_cases'] += 1
+            report.setdefault('clipped_oracle_cases', 0)
+            report['clipped_oracle_cases'] += 1
     for coefficients in ((65536,0,0,65536),(-65536,0,0,-65536),
             (0,65536,-65536,0),(46340,46340,-46340,46340),
             (65536,16384,16384,65536),(0,0,0,0)):
@@ -294,24 +687,29 @@ def experiments(pe):
                 expected = [0, *sum((corners[k] for k in order), []),
                     *sum((list(uv_corners[k]) for k in order), []), TEXTURE, TABLE]
                 assert packet == expected
-            # Fully inside cases compare both real framebuffer calls to expressions.
-            if all(256 <= s32(p[0]) <= 29*256+255 and 256 <= s32(p[1]) <= 29*256+255 for p in corners):
-                current = fixtures
-                stores, reads = [], []
-                for packet in result['calls']:
-                    vertices = list(zip(packet[1:7:2],packet[2:7:2]))
-                    uv = list(zip(packet[7:13:2],packet[8:13:2]))
-                    expected, ws, _, _, rs = fast_expectation(vertices,uv,current)
-                    current = (current[0],expected,current[2])
-                    stores.extend(ws)
-                    reads.extend(rs)
-                assert result['framebuffer_writes'] == stores
-                assert result['accesses'] == reads
-                assert bytes(cpu.mem_read(FRAMEBUFFER,65536)) == current[1]
-                report.setdefault('transformed_oracle_cases',0)
-                report['transformed_oracle_cases'] += 1
+            # All transformed cases compare both real framebuffer calls to the unified oracle.
+            current = fixtures
+            stores, reads = [], []
+            for packet in result['calls']:
+                vertices = list(zip(packet[1:7:2],packet[2:7:2]))
+                uv = list(zip(packet[7:13:2],packet[8:13:2]))
+                expected_fb, ws, rs = clipped_expectation(vertices,uv,current)
+                current = (current[0],expected_fb,current[2])
+                stores.extend(ws)
+                reads.extend(rs)
+            assert result['framebuffer_writes'] == stores
+            assert result['accesses'] == reads
+            assert bytes(cpu.mem_read(FRAMEBUFFER,65536)) == current[1]
+            report.setdefault('transformed_oracle_cases',0)
+            report['transformed_oracle_cases'] += 1
             report['paths'].update(result['path'])
             report['transformed_cases'] += 1
+    splitter_cases, splitter_paths = direct_splitter_checks(pe)
+    report['splitter_cases'] = splitter_cases
+    report['paths'].update(splitter_paths)
+    wrapper_cases, wrapper_paths = direct_wrapper_checks(pe)
+    report['wrapper_cases'] = wrapper_cases
+    report['paths'].update(wrapper_paths)
     for vertices, uv in [([(1024,1024),(1025,1025),(1026,1026)],
             [(0,0),(0x7fffffff,0),(0,0)]),
             ([(1024,1024),(1024,1024),(1024,1024)],[(0,0)]*3)]:
@@ -324,7 +722,7 @@ def experiments(pe):
     report['triangle_return_sites'] = sorted(set(report['paths']) &
         {'0x45cc72','0x45cc8d','0x45cca8','0x45ccc3','0x45cf7d','0x45d164'})
     assert len(report['triangle_return_sites']) == 6
-    report['scope'] = 'Original-only expressions/observations; no production C or native validation'
+    report['scope'] = 'Original-only expressions, unified clipped rendering oracle, and direct splitter/wrapper contracts; no production C or native validation'
     return report
 
 
