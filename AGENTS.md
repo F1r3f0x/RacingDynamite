@@ -1,36 +1,61 @@
-# Ignition (1997) Reverse Engineering & Porting Rules
+# Ignition (1997): Agent Instructions
 
-**CURRENT PHASE:** Functional Implementation of `MAINDOS.EXE` using pure C (Open Watcom V2). The goal is to reach 100% `FUNCTIONAL` fidelity. Structural equivalence is what matters.
+## Goal and scope
 
+Reimplement the authentic `Ignition/Ignition/MAINDOS.EXE` DOS4GW binary with functional fidelity and the original game architecture. Byte-for-byte matching is secondary to correct behavior.
 
-## 1. Decompilation Constraints
-- **TARGET:** Our primary and exclusive source of truth is the authentic `Ignition/Ignition/MAINDOS.EXE` DOS4GW binary. We have completely scrubbed and eliminated `MAINDOS_32BIT.EXE`, which was a flawed PE repackaging that lost critical `.data` segment initialization (e.g. jump tables) and calling convention fidelity.
-- **VERIFICATION PIPELINE:** You MUST use the `tools/verify_capstone.py`, `tools/disasm_le.py`, and `tools/le_parser.py` pipeline to disassemble and extract initializers directly from the authentic `MAINDOS.EXE` LE file when porting complex systems (like the 3D rasterizer).
-- **NO RAW GHIDRA DUMPS:** NEVER commit unrefined decompiler output. You MUST:
-  - **Structs:** Replace raw pointer offsets with proper C struct definitions and field accesses (e.g., `camera->enable_sky`).
-  - **Variables:** Rename ALL register artifacts (e.g., `iVar1`, `tmp_esi`) to meaningful semantic names. Beware of Watcom C `ESI`-based `.data` segment addressing being incorrectly decompiled as parameters.
-  - **Globals:** Replace raw `DAT_XXXXXXXX` addresses with authentic globals (e.g., `g_ViewportMinX`) AND document them in `docs/ghidra/globals.md`.
-  - **Functions:** Rename `FUN_XXXXXXXX` to semantic names in code, `docs/ghidra/functions.md`, AND `database/decomp.db`.
-- **ARCHITECTURE (Pure C):** The project is strictly a Pure C implementation. Hand-written assembly fallbacks (`decomp/src/asm/*.asm`) are banned. If Watcom C fails to produce a 1:1 byte match due to optimization differences (e.g. instruction selection, floating point ops), it is fully acceptable as long as the logic is functionally exact and respects the original game architecture.
-- **NO AD-HOC IMPLEMENTATIONS:** You MUST reverse-engineer the authentic game systems and architectures (UI widgets, menus, render pipelines). Writing custom state machines, bypassing native systems, or placing code in completely unrelated files (e.g. putting UI rendering code inside the 3D renderer) just to "make something work quickly" is **STRICTLY FORBIDDEN**.
-- **PRESERVE ORIGINAL ASSETS & BINARIES:** NEVER modify or overwrite `MAINDOS.EXE` or any other original game assets in `Ignition/`. Doing so will invalidate our tests and corrupt test environments.
-- **STYLE:** Use pure C89 (4-space indent). NEVER use inline assembly (`__asm`) in `.c` files.
-- **WORKFLOW:** Run `uv run python tools/verify_matching.py` to verify. The tool still outputs matching percentages, but aim for a clean, warning-free build and logically equivalent implementation rather than agonizing over 100% instruction diffs.
+- `decomp/`: pure C89, Open Watcom V2, 4-space indentation. No handwritten assembly or inline `__asm`.
+- `src/`: C11/SDL2 source port, built with CMake.
+- Tools: Python through `uv`. Use Windows PowerShell; `git`, `uv`, and `w64devkit` are on PATH. Do not run Linux package managers.
 
-## 2. Source Port & Fidelity Tracking
-- **STACK:** C11/SDL2 engine, Python tools (via `uv`), CMake build.
-- **ANNOTATIONS:** EVERY function in `src/` and `decomp/` MUST include this header comment:
-  ```c
-  // @original <SymbolName> (MAINDOS.EXE @ 0x<Address>, <SourceFileHint>)
-  // @fidelity EXACT | ADAPTED | EXTENDED | INFRASTRUCTURE
-  // @deviation DEV-XXX (if logic diverges)
-  // @fix_category FIX_CAT_XXX (if toggleable)
-  ```
-- **DEVIATIONS:** ALWAYS register bug fixes in `docs/tracking/deviations.md`. Original bugs MUST remain toggleable (defaulting to 1997 behavior).
-- **ENFORCEMENT:** Run `uv run python tools/verify_fidelity.py` before committing.
+## Non-negotiable constraints
 
-## 3. Tooling & Documentation
-- **GHIDRA MCP:** Use the active MCP server (`localhost:8080`) to inspect and sync the symbol database.
-- **DOCS FIRST:** Code and docs (`docs/ghidra/functions.md`, `globals.md`, `structs.md`) MUST evolve in lockstep.
-- **COMMITS:** Use Conventional Commits (`re: ...`, `port: ...`) citing addresses and deviation IDs.
-- **ENVIRONMENT:** Windows PowerShell. `w64devkit`, `git`, and `uv` are on PATH. NEVER run Linux package managers. NEVER commit binary assets/build outputs.
+- Treat `MAINDOS.EXE` as the source of truth. Do not use the flawed `MAINDOS_32BIT.EXE` PE repackaging; its data initialization and calling conventions are unreliable.
+- Never modify or overwrite original binaries or assets in `Ignition/`. Use disposable copies for runtime experiments.
+- Reconstruct native systems and place code in the appropriate module. Do not bypass original UI widgets, menus, or rendering pipelines with invented replacements.
+- Never commit raw decompiler output, binary assets, or generated build outputs.
+- Preserve unrelated working-tree changes. Stage explicit files or hunks belonging to the current feature.
+
+## Reverse engineering and implementation
+
+1. Inspect the authentic binary before implementing behavior. For complex systems, use `tools/verify_capstone.py`, `tools/disasm_le.py`, and `tools/le_parser.py` to verify disassembly and extract LE initializers.
+2. Use the Ghidra MCP server at `localhost:8080` to inspect and synchronize symbols when available. Report unavailable tooling; do not invent evidence or addresses.
+3. Replace raw offsets with named structs and fields. Rename register artifacts (`iVar1`, `tmp_esi`) semantically. Watch for Watcom ESI-based data references misidentified as function parameters.
+4. Replace `DAT_XXXXXXXX` and `FUN_XXXXXXXX` with meaningful names. Update global and struct definitions in `docs/ghidra/globals.md` and `docs/ghidra/structs.md`; keep function names synchronized across code, `docs/ghidra/functions.md`, and `database/decomp.db`.
+5. Update code and its documentation together. Accept compiler instruction differences only when behavior and architecture remain faithful.
+
+## Fidelity tracking
+
+Every function in `src/` and `decomp/` requires these annotations. Add deviation and fix-category lines only when applicable:
+
+```c
+// @original <SymbolName> (MAINDOS.EXE @ 0x<Address>, <SourceFileHint>)
+// @fidelity EXACT | ADAPTED | EXTENDED | INFRASTRUCTURE
+// @deviation DEV-XXX
+// @fix_category FIX_CAT_XXX
+```
+
+Choose one fidelity value and use verified addresses. Register behavioral changes and bug fixes in `docs/tracking/deviations.md`. Preserve original bugs behind toggles defaulting to 1997 behavior.
+
+## Build and validation
+
+Run commands from the repository root after each implemented feature and before its commit:
+
+```powershell
+uv run python tools/build_decomp.py
+uv run python tools/verify_matching.py
+uv run python tools/verify_fidelity.py
+```
+
+- `build_decomp.py` is the required decompilation build entry point. Its default mode compiles; use `uv run python tools/build_decomp.py --link` to validate executable linking when the feature affects the rebuilt game.
+- For `src/` changes, also run the applicable CMake build. Run focused tests or runtime checks appropriate to the changed behavior.
+- Resolve build failures and new verification failures before committing. Aim for a warning-free build. Report existing failures separately with evidence; do not describe failing checks as passing or expand the feature into unrelated repairs.
+- Compilation, annotations, and matching percentages do not prove behavioral fidelity. Report runtime validation separately.
+- For documentation-only changes, review the diff and run `git diff --check`; builds and code audits are required when implementation or build tooling changes.
+
+## Commits and completion
+
+- Commit each completed feature separately after validation, with its accompanying documentation. Do not accumulate multiple completed features in one commit.
+- Use Conventional Commits such as `re: ...`, `port: ...`, or `docs: ...`. Include relevant original addresses and deviation IDs when applicable.
+- Review the staged diff before committing; include only the current feature's changes.
+- In the completion report, state what changed, validation results and limitations, and the commit hash. If validation prevents a commit, explain the blocker explicitly.
