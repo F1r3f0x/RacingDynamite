@@ -1,0 +1,29 @@
+name: Repository policy
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+      - name: Guard regression tests
+        run: uv run --no-project --python 3.13 python -m unittest discover -s tests -p test_workflow.py
+      - name: Check committed snapshot (portable; no fidelity claim)
+        shell: pwsh
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if (-not $env:BASE -or $env:BASE -match '^0+$') {
+            throw 'A comparison base is required; configure one for an initial push.'
+          }
+          uv run --no-project --python 3.13 python tools/workflow.py check --base $env:BASE --portable
+          exit $LASTEXITCODE

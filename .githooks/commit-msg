@@ -1,0 +1,2 @@
+#!/bin/sh
+exec pwsh -NoLogo -NoProfile -File tools/git_hooks.ps1 commit-msg "$@"

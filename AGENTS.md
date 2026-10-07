@@ -130,6 +130,15 @@ make results stale and require the applicable verification to run again.
 
 ## Commits and completion
 
+- Install the tracked hooks with `uv run python tools/workflow.py install-hooks`.
+  Before a Windows feature, run `tools/workflow.py preflight` with its RVAs and
+  explicit feature files. Use `tools/workflow.py complete` for the real
+  verifier/audit/export sequence and generated handoff; see `docs/workflow.md`.
+- After staging explicit feature files, run
+  `uv run python tools/workflow.py check --staged`. Resolve gate failures before
+  committing. Do not bypass hooks to declare a feature complete. Reconstruction
+  commits include `RVA: 0x...` trailers for affected routines.
+
 - Commit each completed feature separately with its accompanying documentation.
 - Use Conventional Commits such as `re: ...`, `port: ...`, or `docs: ...`; include
   verified original addresses and deviation IDs when relevant.
