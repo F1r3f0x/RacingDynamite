@@ -1,5 +1,16 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded follow-up (2026-10-07): the native sprite backend at RVA `0x571B0`
+is reconstructed, following both font routines. The [sprite preparation adapter
+analysis](ghidra/windows_sprite_adapter.md) independently corroborates RVA
+`0x57370` and its descriptor lookup dependency `0x612E0`; 168 original-only
+executions stop before the rasterizer. Reconstruction is blocked on the ESI
+packet interface at VA `0x00465BB5`; compiled conventional C ABI diagnostics
+do not establish that register contract. Both candidates remain analyzed without
+adapter differential validation. Next recover that rasterizer's native effects
+and transitive contracts before choosing a C integration boundary. Older
+milestone next-step notes below are historical.
+
 Milestone update, 2026-10-07: the [verified startup map](ghidra/windows_startup.md),
 C89 `Mem_InitHandles` (`0x0045B1F0`) and its
 [handle-ID consumer](ghidra/windows_handles.md) (`0x0045B1B0`) are complete within
