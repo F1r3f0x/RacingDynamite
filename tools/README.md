@@ -30,7 +30,9 @@ then links a dependency-free validation DLL under `build/decomp/windows/`. It pr
 actual compiler/linker commands, rejects the wrong target fingerprint, and never
 uses stale DOS objects. Optional build arguments: `--compiler <path>` and
 `--linker <path>`. The verifier always rebuilds, then runs 30 initializer and 377
-consumer original-vs-C cases, plus eight original-only negative-cursor cases.
+consumer and 590 bookkeeping original-vs-C cases, plus eight original-only
+negative-cursor cases. The [bookkeeping evidence](../docs/ghidra/windows_handle_bookkeeping.md)
+records all-slot coverage, ordered effects and three-routine integration.
 It does not certify instruction equality or native game behavior. The
 [consumer evidence](../docs/ghidra/windows_handles.md) states the negative-state
 memory contract and the validation DLL's differing data layout.

@@ -16,6 +16,51 @@ unsigned int g_memHandleStatus[MEM_HANDLE_COUNT];
 short g_memHandleIds[MEM_HANDLE_COUNT];
 short g_memHandleCursor;
 
+/* IGN_WIN.EXE loader-zeroed .data: contexts 0x00510BF0,
+ * parameters 0x00510F10, registered IDs 0x005113C0,
+ * callbacks 0x00511A00, flags 0x00511D20 (800 bytes each).
+ * Pending context/callback/parameter: 0x0063C690/694/698 (4 bytes each).
+ * Names describe observed transfers, not recovered original symbols/types.
+ */
+volatile unsigned int g_memHandleContexts[MEM_HANDLE_COUNT];
+volatile unsigned int g_memHandleParameters[MEM_HANDLE_COUNT];
+volatile unsigned int g_memRegisteredHandleIds[MEM_HANDLE_COUNT];
+volatile unsigned int g_memHandleCallbacks[MEM_HANDLE_COUNT];
+volatile unsigned int g_memHandleFlags[MEM_HANDLE_COUNT];
+volatile unsigned int g_memPendingContext;
+volatile unsigned int g_memPendingCallback;
+volatile unsigned int g_memPendingParameter;
+
+/* @original Mem_RegisterHandle (IGN_WIN.EXE @ 0x0045B360, inferred mem.c)
+ * @fidelity EXACT
+ * Semantic name; bounded behavioral reconstruction, no instruction match claim.
+ * One stack dword; ordinary RET, caller cleanup; signed EAX result.
+ */
+int Mem_RegisterHandle(unsigned int handle_id)
+{
+    int index;
+    unsigned int context;
+    volatile unsigned int *status;
+
+    if (*(volatile unsigned int *)&g_memHandlesInitialized == 0U) {
+        return 0;
+    }
+    status = g_memHandleStatus;
+    for (index = 0; index < MEM_HANDLE_COUNT; ++index) {
+        if (status[index] == 0U) {
+            context = g_memPendingContext;
+            status[index] = 1U;
+            g_memHandleFlags[index] = 0x10000U;
+            g_memHandleContexts[index] = context;
+            g_memRegisteredHandleIds[index] = handle_id;
+            g_memHandleParameters[index] = g_memPendingParameter;
+            g_memHandleCallbacks[index] = g_memPendingCallback;
+            return index;
+        }
+    }
+    return -1;
+}
+
 /* @original Mem_NextHandleId (IGN_WIN.EXE @ 0x0045B1B0, inferred mem.c)
  * @fidelity EXACT
  * Semantic name, not a recovered symbol. No arguments; signed EAX result.

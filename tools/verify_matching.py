@@ -40,10 +40,20 @@ FIELDS = [('g_memHandlesInitialized', 0x4bab38, 4),
           ('g_memHandleStatus', 0x5116e0, 800),
           ('g_memHandleIds', 0x511230, 400),
           ('g_memHandleCursor', 0x512040, 2)]
+BOOKKEEPING_FIELDS = FIELDS + [
+    ('g_memHandleContexts',0x510bf0,800),
+    ('g_memHandleParameters',0x510f10,800),
+    ('g_memRegisteredHandleIds',0x5113c0,800),
+    ('g_memHandleCallbacks',0x511a00,800),
+    ('g_memHandleFlags',0x511d20,800),
+    ('g_memPendingContext',0x63c690,4),
+    ('g_memPendingCallback',0x63c694,4),
+    ('g_memPendingParameter',0x63c698,4)]
 STACK, STOP = 0x7000000, 0x7100000
 PRESERVED = [UC_X86_REG_EBX, UC_X86_REG_ESI, UC_X86_REG_EDI, UC_X86_REG_EBP]
 
-def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words=(), expected_read=None):
+def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words=(), expected_read=None,
+            stack_args=(), expected_events=None):
     base = pe.OPTIONAL_HEADER.ImageBase
     size = (pe.OPTIONAL_HEADER.SizeOfImage + 4095) & ~4095
     uc = Uc(UC_ARCH_X86, UC_MODE_32)
@@ -66,6 +76,8 @@ def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words
     uc.mem_map(STOP, 0x1000)
     sp = STACK + 0x8000
     uc.mem_write(sp, struct.pack('<I', STOP))
+    if stack_args:
+        uc.mem_write(sp+4,struct.pack('<'+'I'*len(stack_args),*stack_args))
     caller_stack = bytes(uc.mem_read(sp,STACK+0x10000-sp))
     rng = random.Random(seed)
     registers = [rng.getrandbits(32) for _ in PRESERVED]
@@ -77,6 +89,16 @@ def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words
     prefix_before = bytes(uc.mem_read(base-0x10000,0x10000))
     writes = []
     reads = []
+    events = []
+    def event(kind,address,length,value):
+        if STACK <= address < STACK+0x10000:
+            return
+        for name,addr,n in fields:
+            if addr <= address and address+length <= addr+n:
+                events.append((kind,name,address-addr,length,value & ((1 << (8*length))-1)))
+                return
+        if expected_events is not None:
+            raise AssertionError(f'Unexpected data {kind} at {address:#x}')
     def code_hook(cpu, address, length, unused):
         if not (extent[0] <= address < extent[1]):
             raise AssertionError('Execution escaped bounded routine')
@@ -86,9 +108,14 @@ def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words
         if not any(addr <= address and address+length <= addr+n for _,addr,n in fields):
             raise AssertionError(f'Unexpected write at {address:#x}, length {length}')
         writes.append((address, length, value))
+        event('write',address,length,value)
+    def read_hook(cpu,access,address,length,value,unused):
+        reads.append((address,length))
+        if expected_events is not None:
+            event('read',address,length,int.from_bytes(cpu.mem_read(address,length),'little'))
     uc.hook_add(UC_HOOK_CODE, code_hook)
     uc.hook_add(UC_HOOK_MEM_WRITE, write_hook)
-    uc.hook_add(UC_HOOK_MEM_READ, lambda cpu,access,address,length,value,unused: reads.append((address,length)))
+    uc.hook_add(UC_HOOK_MEM_READ, read_hook)
     uc.emu_start(entry, STOP, count=10000)
     assert uc.reg_read(UC_X86_REG_EIP) == STOP, 'Did not return within instruction limit'
     assert uc.reg_read(UC_X86_REG_EAX) == expected_eax & 0xffffffff
@@ -114,6 +141,8 @@ def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words
         assert [(a,n) for a,n in reads if not STACK <= a < STACK+0x10000] == expected_data_reads
     for address, value in extra_words:
         assert bytes(uc.mem_read(address,2)) == struct.pack('<h',value)
+    if expected_events is not None:
+        assert events == expected_events, (events,expected_events)
     return result, writes
 
 def verify():
@@ -185,6 +214,13 @@ def verify():
     consumer_cases, original_only = verify_consumer(original, rebuilt, symbols, fields, extent)
     record_result('emulation','pass',cases=consumer_cases,
                   details={**consumer_details,'original_only_negative_cases':original_only})
+    VALIDATING_RVA = 0x5b360
+    register_details = {**details,
+        'scope':'Mem_RegisterHandle; single-threaded nonaliasing mapped globals; no native/layout parity',
+        'checks':'all 200 indices, first-zero selection, full/disabled tables, raw argument/dispatch words, exact read/write order, full image guards, EAX/ESP/caller arguments, saved registers, DF; init/consumer integration'}
+    record_result('compilation','pass',details=register_details)
+    register_cases = verify_registration(original,rebuilt,symbols,extent)
+    record_result('emulation','pass',cases=register_cases,details=register_details)
     print('Native DLL/game execution and startup/gameplay parity: unverified by this harness.')
 
 def verify_consumer(original, rebuilt, symbols, fields, extent):
@@ -264,6 +300,97 @@ def verify_consumer(original, rebuilt, symbols, fields, extent):
     print(f'PASS: {cases} consumer original-vs-C executions; flags, signed IDs/cursors, exact writes, ABI and initializer/exhaustion integration.')
     print(f'PASS: {original_only} original-only -1/-2 cursor executions; compiled surrounding data layout differs, no layout parity claim.')
     return cases, original_only
+
+
+def verify_registration(original,rebuilt,symbols,extent):
+    code = original.get_data(0x5b360,120)
+    assert hashlib.sha256(code).hexdigest() == '2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34'
+    decoded = list(Cs(CS_ARCH_X86,CS_MODE_32).disasm(code,0x45b360))
+    assert sum(i.size for i in decoded) == 120 and not any(i.mnemonic=='call' for i in decoded)
+    prefix = rebuilt.get_data(symbols['Mem_RegisterHandle']-rebuilt.OPTIONAL_HEADER.ImageBase,120)
+    record_result('raw_bytes','pass' if code == prefix else 'different',details={
+        'original_bytes':120,'compiled_prefix_bytes':120,
+        'scope':'prefix diagnostic only; compiled extent/relocation-aware equality not established'})
+    print(f'Registration: 120 original bytes / {len(decoded)} instructions; raw prefix equal: {code == prefix}.')
+    fields = [(name,symbols[name],n) for name,_,n in BOOKKEEPING_FIELDS]
+    for i,(_,a,n) in enumerate(fields):
+        assert not any(a < b+m and b < a+n for _,b,m in fields[i+1:]), 'Aliasing validation fields'
+    rng = random.Random(0x45b360)
+    cases = 0
+    def compare(old,handle):
+        nonlocal cases
+        # Expectations derived from CMP/JZ loop and six MOV stores in the PE.
+        flag = struct.unpack('<I',old[0])[0]
+        statuses = struct.unpack('<200I',old[1])
+        index = next((i for i,s in enumerate(statuses) if s==0),None) if flag else None
+        result = 0 if not flag else -1 if index is None else index
+        expected = list(old)
+        events = [('read',BOOKKEEPING_FIELDS[0][0],0,4,flag)]
+        def append(kind,field,offset,value):
+            events.append((kind,BOOKKEEPING_FIELDS[field][0],offset,4,value))
+        if flag:
+            for i in range(200 if index is None else index+1):
+                append('read',1,4*i,statuses[i])
+        if index is not None:
+            context,callback,parameter = [struct.unpack('<I',old[i])[0] for i in [9,10,11]]
+            append('read',9,0,context)
+            # Order: status, flags, context, ID, parameter read/store, callback read/store.
+            for field,value in [(1,1),(8,0x10000),(4,context),(6,handle),
+                                (5,parameter),(7,callback)]:
+                if field==5:
+                    append('read',11,0,parameter)
+                if field==7:
+                    append('read',10,0,callback)
+                append('write',field,4*index,value)
+                data = bytearray(expected[field]);struct.pack_into('<I',data,4*index,value)
+                expected[field] = bytes(data)
+        actual,owrites = execute(original,0x45b360,BOOKKEEPING_FIELDS,old,cases,
+            (0x45b360,0x45b3d8),result,stack_args=(handle,),expected_events=events)
+        rebuilt_result,cwrites = execute(rebuilt,symbols['Mem_RegisterHandle'],fields,old,cases,
+            extent,result,stack_args=(handle,),expected_events=events)
+        assert actual == rebuilt_result == expected, (flag,index,handle)
+        assert len(owrites) == len(cwrites) == (0 if index is None else 6)
+        cases += 1
+        return actual
+    def values(flag,statuses):
+        old = [rng.randbytes(n) for _,_,n in BOOKKEEPING_FIELDS]
+        old[0] = struct.pack('<I',flag)
+        old[1] = struct.pack('<200I',*statuses)
+        return old
+    handles = [0,1,0x7fffffff,0x80000000,0xffffffff]
+    # Every slot must be reached without touching index 200. Later holes remain free.
+    for index in range(200):
+        statuses = [rng.choice([1,2,0x80000000,0xffffffff]) for _ in range(index)] + [0]*(200-index)
+        compare(values(1,statuses),handles[index%len(handles)])
+    for flag in [0,1,2,0x80000000,0xffffffff]:
+        for index in [0,1,198,199,None]:
+            statuses = [rng.choice([1,2,0x80000000,0xffffffff]) for _ in range(200)]
+            if index is not None:
+                statuses[index] = 0
+            for handle in handles:
+                old = values(flag,statuses)
+                # Include zero and all-one dispatch words, including null callback.
+                for field in [9,10,11]:
+                    old[field] = struct.pack('<I',handle)
+                compare(old,handle)
+    for _ in range(64):
+        compare(values(rng.getrandbits(32),[rng.choice([0,1,2,0xffffffff]) for _ in range(200)]),rng.getrandbits(32))
+    # Run all three actual routines: ID exhaustion at 199 does not stop registration
+    # from accepting 0xFFFFFFFF into slot 199; next registration fails without writes.
+    old = values(0,[0xffffffff]*200)
+    state,_ = execute(original,0x45b1f0,BOOKKEEPING_FIELDS,old,1000,(0x45b1f0,0x45b23c))
+    cstate,_ = execute(rebuilt,symbols['Mem_InitHandles'],fields,old,1000,extent)
+    assert state == cstate and state[4:] == old[4:]
+    for index in range(201):
+        handle = index+1 if index < 199 else 0xffffffff
+        state,_ = execute(original,0x45b1b0,BOOKKEEPING_FIELDS,state,1001+index,
+            (0x45b1b0,0x45b1ea),handle)
+        cstate,_ = execute(rebuilt,symbols['Mem_NextHandleId'],fields,cstate,1001+index,extent,handle)
+        assert state == cstate
+        state = compare(state,handle)
+        cstate = list(state)
+    print(f'PASS: {cases} registration original-vs-C executions; all indices, exhaustion/disabled, ordered effects and ABI; three-routine integration.')
+    return cases
 
 if __name__ == '__main__':
     try:

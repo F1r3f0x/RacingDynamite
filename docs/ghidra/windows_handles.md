@@ -129,3 +129,14 @@ execution is independent behavior evidence; native routine/game execution,
 language selector, menu, sound and gameplay remain unverified. Original binaries
 and assets are untouched; this feature adds no native runtime claim to the earlier
 disposable launch probe.
+
+## Bookkeeping follow-up
+
+The downstream routine `0x0045B360` is now reconstructed as `Mem_RegisterHandle`.
+See [its independently recovered contract](windows_handle_bookkeeping.md) for
+first-zero status selection across all 200 slots, disabled/full return values,
+the six ordered stores and raw dispatch-word layout. The current harness retains
+this consumer's coverage and adds 590 bookkeeping comparisons. Earlier text and
+snapshot above record this consumer's original milestone; current progress comes
+from SQLite and regenerated exports. The next verified dependency is callback
+dispatch at `0x0045B240`, whose full contract remains unimplemented.

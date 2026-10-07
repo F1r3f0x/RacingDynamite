@@ -13,7 +13,7 @@
     "compiler": null,
     "pipeline_status": "bounded_windows_mem_validation",
     "validation_compiler": "Clang 19.1.1 / LLD 19.1.1; i686-pc-windows-msvc; provisional",
-    "validation_scope": "Mem_InitHandles @ 0x0045B1F0 and Mem_NextHandleId @ 0x0045B1B0; no playable reconstruction"
+    "validation_scope": "Mem_InitHandles @ 0x0045B1F0, Mem_NextHandleId @ 0x0045B1B0, Mem_RegisterHandle @ 0x0045B360; no playable reconstruction"
   },
   "metadata": {
     "schema_version": "2",
@@ -29,20 +29,20 @@
     "functions": 1012,
     "recorded_extent_bytes": 441330,
     "summed_extent_bytes": 441330,
-    "reconstructed_extent_bytes": 134,
+    "reconstructed_extent_bytes": 254,
     "unknown_sizes": 0,
     "stages": {
-      "unidentified": 1010,
+      "unidentified": 1009,
       "named": 0,
       "analyzed": 0,
-      "reconstructed": 2
+      "reconstructed": 3
     },
     "current_passes": {
-      "compilation": 2,
+      "compilation": 3,
       "raw_bytes": 0,
       "instructions": 0,
       "linked": 0,
-      "emulation": 2,
+      "emulation": 3,
       "native": 0
     },
     "inventory_complete": false,
@@ -11031,17 +11031,17 @@
       "va": 4567472,
       "latest_runs": {
         "compilation": {
-          "id": 35,
+          "id": 50,
           "function_id": 523,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T11:52:55+00:00",
+          "recorded_at": "2026-10-07T12:28:51+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
-          "input_sha256": "509c802c536c81d8e25f1312b2d27de895680629f6eb18f2cadd7823e24ecf6d",
+          "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
+          "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -11068,17 +11068,17 @@
           ]
         },
         "raw_bytes": {
-          "id": 36,
+          "id": 51,
           "function_id": 523,
           "kind": "raw_bytes",
           "outcome": "different",
           "case_count": 0,
-          "recorded_at": "2026-10-07T11:52:55+00:00",
+          "recorded_at": "2026-10-07T12:28:51+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
-          "input_sha256": "509c802c536c81d8e25f1312b2d27de895680629f6eb18f2cadd7823e24ecf6d",
+          "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
+          "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -11097,17 +11097,17 @@
           ]
         },
         "emulation": {
-          "id": 37,
+          "id": 52,
           "function_id": 523,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 377,
-          "recorded_at": "2026-10-07T11:52:59+00:00",
+          "recorded_at": "2026-10-07T12:28:56+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
-          "input_sha256": "509c802c536c81d8e25f1312b2d27de895680629f6eb18f2cadd7823e24ecf6d",
+          "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
+          "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -11157,17 +11157,17 @@
       "va": 4567536,
       "latest_runs": {
         "compilation": {
-          "id": 32,
+          "id": 47,
           "function_id": 524,
           "kind": "compilation",
           "outcome": "pass",
           "case_count": 0,
-          "recorded_at": "2026-10-07T11:52:55+00:00",
+          "recorded_at": "2026-10-07T12:28:50+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
-          "input_sha256": "509c802c536c81d8e25f1312b2d27de895680629f6eb18f2cadd7823e24ecf6d",
+          "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
+          "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -11193,21 +11193,21 @@
           ]
         },
         "raw_bytes": {
-          "id": 33,
+          "id": 48,
           "function_id": 524,
           "kind": "raw_bytes",
           "outcome": "different",
           "case_count": 0,
-          "recorded_at": "2026-10-07T11:52:55+00:00",
+          "recorded_at": "2026-10-07T12:28:51+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
-          "input_sha256": "509c802c536c81d8e25f1312b2d27de895680629f6eb18f2cadd7823e24ecf6d",
+          "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
+          "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
-            "compiled_text_bytes": 289,
+            "compiled_text_bytes": 481,
             "original_bytes": 76,
             "scope": "whole focused DLL .text versus routine; relocation-aware equality not evaluated"
           },
@@ -11222,17 +11222,17 @@
           ]
         },
         "emulation": {
-          "id": 34,
+          "id": 49,
           "function_id": 524,
           "kind": "emulation",
           "outcome": "pass",
           "case_count": 30,
-          "recorded_at": "2026-10-07T11:52:55+00:00",
+          "recorded_at": "2026-10-07T12:28:51+00:00",
           "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
           "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
-          "input_sha256": "509c802c536c81d8e25f1312b2d27de895680629f6eb18f2cadd7823e24ecf6d",
+          "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
           "artifact_path": "build/decomp/windows/mem_validation.dll",
-          "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
+          "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
           "command": "uv run tools/verify_matching.py",
           "stale": false,
           "details": {
@@ -11327,21 +11327,123 @@
       "id": 527,
       "rva": 373600,
       "byte_size": 120,
-      "symbol_name": "sub_0045B360",
+      "symbol_name": "Mem_RegisterHandle",
       "module_id": null,
       "extent_origin": "fpo",
-      "extent_confidence": "medium",
-      "classification": "unknown",
-      "analysis_stage": "unidentified",
-      "source_path": null,
+      "extent_confidence": "high: FPO extent, complete control flow and INT3 padding agree",
+      "classification": "game",
+      "analysis_stage": "reconstructed",
+      "source_path": "decomp/src/mem.c",
       "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
-      "abi": null,
-      "fidelity": "unknown",
-      "evidence_path": null,
-      "notes": "",
+      "abi": "x86 caller-cleanup; one stack dword; signed EAX; EBX/ESI/EDI/EBP preserved",
+      "fidelity": "EXACT",
+      "evidence_path": "docs/ghidra/windows_handle_bookkeeping.md",
+      "notes": "Semantic name and mem.c association inferred. First zero status among 200 dwords; disabled returns 0, full returns -1; six ordered stores with raw pending dispatch words. Original compiler, native layout and runtime parity unverified.",
       "module": null,
       "va": 4567904,
-      "latest_runs": {},
+      "latest_runs": {
+        "compilation": {
+          "id": 53,
+          "function_id": 527,
+          "kind": "compilation",
+          "outcome": "pass",
+          "case_count": 0,
+          "recorded_at": "2026-10-07T12:28:56+00:00",
+          "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+          "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+          "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+          "artifact_path": "build/decomp/windows/mem_validation.dll",
+          "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+          "command": "uv run tools/verify_matching.py",
+          "stale": false,
+          "details": {
+            "checks": "all 200 indices, first-zero selection, full/disabled tables, raw argument/dispatch words, exact read/write order, full image guards, EAX/ESP/caller arguments, saved registers, DF; init/consumer integration",
+            "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+            "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+            "pefile": "2024.8.26",
+            "scope": "Mem_RegisterHandle; single-threaded nonaliasing mapped globals; no native/layout parity",
+            "toolchain": {
+              "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+              "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+            },
+            "unicorn": "2.1.4"
+          },
+          "input_paths": [
+            "decomp/src/mem.c",
+            "decomp/include/mem.h",
+            "decomp/target.json",
+            "tools/build_decomp.py",
+            "tools/verify_matching.py",
+            "tools/windows_target.py",
+            "tools/windows_tracking.py"
+          ]
+        },
+        "raw_bytes": {
+          "id": 54,
+          "function_id": 527,
+          "kind": "raw_bytes",
+          "outcome": "different",
+          "case_count": 0,
+          "recorded_at": "2026-10-07T12:28:56+00:00",
+          "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+          "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+          "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+          "artifact_path": "build/decomp/windows/mem_validation.dll",
+          "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+          "command": "uv run tools/verify_matching.py",
+          "stale": false,
+          "details": {
+            "compiled_prefix_bytes": 120,
+            "original_bytes": 120,
+            "scope": "prefix diagnostic only; compiled extent/relocation-aware equality not established"
+          },
+          "input_paths": [
+            "decomp/src/mem.c",
+            "decomp/include/mem.h",
+            "decomp/target.json",
+            "tools/build_decomp.py",
+            "tools/verify_matching.py",
+            "tools/windows_target.py",
+            "tools/windows_tracking.py"
+          ]
+        },
+        "emulation": {
+          "id": 55,
+          "function_id": 527,
+          "kind": "emulation",
+          "outcome": "pass",
+          "case_count": 590,
+          "recorded_at": "2026-10-07T12:29:04+00:00",
+          "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+          "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+          "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+          "artifact_path": "build/decomp/windows/mem_validation.dll",
+          "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+          "command": "uv run tools/verify_matching.py",
+          "stale": false,
+          "details": {
+            "checks": "all 200 indices, first-zero selection, full/disabled tables, raw argument/dispatch words, exact read/write order, full image guards, EAX/ESP/caller arguments, saved registers, DF; init/consumer integration",
+            "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+            "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+            "pefile": "2024.8.26",
+            "scope": "Mem_RegisterHandle; single-threaded nonaliasing mapped globals; no native/layout parity",
+            "toolchain": {
+              "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+              "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+            },
+            "unicorn": "2.1.4"
+          },
+          "input_paths": [
+            "decomp/src/mem.c",
+            "decomp/include/mem.h",
+            "decomp/target.json",
+            "tools/build_decomp.py",
+            "tools/verify_matching.py",
+            "tools/windows_target.py",
+            "tools/windows_tracking.py"
+          ]
+        }
+      },
       "imported_evidence": null
     },
     {
@@ -22602,7 +22704,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "state regions, boundary guards, skip/repeat, writes, EAX/ESP, saved registers, DF",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -22638,7 +22740,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "compiled_text_bytes": 289,
         "original_bytes": 76,
@@ -22667,7 +22769,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "state regions, boundary guards, skip/repeat, writes, EAX/ESP, saved registers, DF",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -22703,7 +22805,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "checks": "signed EAX, full state, exact reads/writes, caller stack, saved registers, DF; initializer/exhaustion integration",
         "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
@@ -22740,7 +22842,7 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
       "command": "uv run tools/verify_matching.py",
-      "stale": false,
+      "stale": true,
       "details": {
         "compiled_prefix_bytes": 58,
         "original_bytes": 58,
@@ -22769,6 +22871,517 @@
       "artifact_path": "build/decomp/windows/mem_validation.dll",
       "artifact_sha256": "7a18f7a28da8694af3b112928336ed69f2aa080e8f023032a48dbba57c85242c",
       "command": "uv run tools/verify_matching.py",
+      "stale": true,
+      "details": {
+        "checks": "signed EAX, full state, exact reads/writes, caller stack, saved registers, DF; initializer/exhaustion integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "negative_contract": "readable nonaliasing signed-word storage; -4/-32768 differential; -1/-2 original-only",
+        "original_only_negative_cases": 8,
+        "pefile": "2024.8.26",
+        "scope": "Mem_NextHandleId; focused PE32 DLL; no native/layout parity claim",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 38,
+      "function_id": 524,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:25:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
+      "input_sha256": "bba147c55bf89801f5ca754c195f624e6d9605459fb76b485347c3d2d8656304",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "a8439c15cfbb5152e3d72f6baf2b75ff82fcba0501fcbbdd1e6a19541a9ad5eb",
+      "command": "uv run tools/verify_matching.py",
+      "stale": true,
+      "details": {
+        "checks": "state regions, boundary guards, skip/repeat, writes, EAX/ESP, saved registers, DF",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_InitHandles only; focused PE32 DLL; not native game execution",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 39,
+      "function_id": 524,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:25:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
+      "input_sha256": "bba147c55bf89801f5ca754c195f624e6d9605459fb76b485347c3d2d8656304",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "a8439c15cfbb5152e3d72f6baf2b75ff82fcba0501fcbbdd1e6a19541a9ad5eb",
+      "command": "uv run tools/verify_matching.py",
+      "stale": true,
+      "details": {
+        "compiled_text_bytes": 481,
+        "original_bytes": 76,
+        "scope": "whole focused DLL .text versus routine; relocation-aware equality not evaluated"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 40,
+      "function_id": 524,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 30,
+      "recorded_at": "2026-10-07T12:25:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
+      "input_sha256": "bba147c55bf89801f5ca754c195f624e6d9605459fb76b485347c3d2d8656304",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "a8439c15cfbb5152e3d72f6baf2b75ff82fcba0501fcbbdd1e6a19541a9ad5eb",
+      "command": "uv run tools/verify_matching.py",
+      "stale": true,
+      "details": {
+        "checks": "state regions, boundary guards, skip/repeat, writes, EAX/ESP, saved registers, DF",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_InitHandles only; focused PE32 DLL; not native game execution",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 41,
+      "function_id": 523,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:25:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
+      "input_sha256": "bba147c55bf89801f5ca754c195f624e6d9605459fb76b485347c3d2d8656304",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "a8439c15cfbb5152e3d72f6baf2b75ff82fcba0501fcbbdd1e6a19541a9ad5eb",
+      "command": "uv run tools/verify_matching.py",
+      "stale": true,
+      "details": {
+        "checks": "signed EAX, full state, exact reads/writes, caller stack, saved registers, DF; initializer/exhaustion integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "negative_contract": "readable nonaliasing signed-word storage; -4/-32768 differential; -1/-2 original-only",
+        "pefile": "2024.8.26",
+        "scope": "Mem_NextHandleId; focused PE32 DLL; no native/layout parity claim",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 42,
+      "function_id": 523,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:25:26+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
+      "input_sha256": "bba147c55bf89801f5ca754c195f624e6d9605459fb76b485347c3d2d8656304",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "a8439c15cfbb5152e3d72f6baf2b75ff82fcba0501fcbbdd1e6a19541a9ad5eb",
+      "command": "uv run tools/verify_matching.py",
+      "stale": true,
+      "details": {
+        "compiled_prefix_bytes": 58,
+        "original_bytes": 58,
+        "scope": "prefix diagnostic only, not verified compiled extent or relocation-aware equality"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 43,
+      "function_id": 523,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 377,
+      "recorded_at": "2026-10-07T12:25:30+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
+      "input_sha256": "bba147c55bf89801f5ca754c195f624e6d9605459fb76b485347c3d2d8656304",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "a8439c15cfbb5152e3d72f6baf2b75ff82fcba0501fcbbdd1e6a19541a9ad5eb",
+      "command": "uv run tools/verify_matching.py",
+      "stale": true,
+      "details": {
+        "checks": "signed EAX, full state, exact reads/writes, caller stack, saved registers, DF; initializer/exhaustion integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "negative_contract": "readable nonaliasing signed-word storage; -4/-32768 differential; -1/-2 original-only",
+        "original_only_negative_cases": 8,
+        "pefile": "2024.8.26",
+        "scope": "Mem_NextHandleId; focused PE32 DLL; no native/layout parity claim",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 44,
+      "function_id": 527,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:25:30+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+      "input_sha256": "bba147c55bf89801f5ca754c195f624e6d9605459fb76b485347c3d2d8656304",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "a8439c15cfbb5152e3d72f6baf2b75ff82fcba0501fcbbdd1e6a19541a9ad5eb",
+      "command": "uv run tools/verify_matching.py",
+      "stale": true,
+      "details": {
+        "checks": "all 200 indices, first-zero selection, full/disabled tables, raw argument/dispatch words, exact read/write order, full image guards, EAX/ESP/caller arguments, saved registers, DF; init/consumer integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_RegisterHandle; single-threaded nonaliasing mapped globals; no native/layout parity",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 45,
+      "function_id": 527,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:25:30+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+      "input_sha256": "bba147c55bf89801f5ca754c195f624e6d9605459fb76b485347c3d2d8656304",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "a8439c15cfbb5152e3d72f6baf2b75ff82fcba0501fcbbdd1e6a19541a9ad5eb",
+      "command": "uv run tools/verify_matching.py",
+      "stale": true,
+      "details": {
+        "compiled_prefix_bytes": 120,
+        "original_bytes": 120,
+        "scope": "prefix diagnostic only; compiled extent/relocation-aware equality not established"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 46,
+      "function_id": 527,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 590,
+      "recorded_at": "2026-10-07T12:25:39+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+      "input_sha256": "bba147c55bf89801f5ca754c195f624e6d9605459fb76b485347c3d2d8656304",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "a8439c15cfbb5152e3d72f6baf2b75ff82fcba0501fcbbdd1e6a19541a9ad5eb",
+      "command": "uv run tools/verify_matching.py",
+      "stale": true,
+      "details": {
+        "checks": "all 200 indices, first-zero selection, full/disabled tables, raw argument/dispatch words, exact read/write order, full image guards, EAX/ESP/caller arguments, saved registers, DF; init/consumer integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_RegisterHandle; single-threaded nonaliasing mapped globals; no native/layout parity",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 47,
+      "function_id": 524,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:28:50+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
+      "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "state regions, boundary guards, skip/repeat, writes, EAX/ESP, saved registers, DF",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_InitHandles only; focused PE32 DLL; not native game execution",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 48,
+      "function_id": 524,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:28:51+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
+      "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "compiled_text_bytes": 481,
+        "original_bytes": 76,
+        "scope": "whole focused DLL .text versus routine; relocation-aware equality not evaluated"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 49,
+      "function_id": 524,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 30,
+      "recorded_at": "2026-10-07T12:28:51+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "bed1560d41e6ae198b393b26af425505bdae1eb3fb6f4169f6bb89267019cf8c",
+      "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "state regions, boundary guards, skip/repeat, writes, EAX/ESP, saved registers, DF",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_InitHandles only; focused PE32 DLL; not native game execution",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 50,
+      "function_id": 523,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:28:51+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
+      "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "signed EAX, full state, exact reads/writes, caller stack, saved registers, DF; initializer/exhaustion integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "negative_contract": "readable nonaliasing signed-word storage; -4/-32768 differential; -1/-2 original-only",
+        "pefile": "2024.8.26",
+        "scope": "Mem_NextHandleId; focused PE32 DLL; no native/layout parity claim",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 51,
+      "function_id": 523,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:28:51+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
+      "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "compiled_prefix_bytes": 58,
+        "original_bytes": 58,
+        "scope": "prefix diagnostic only, not verified compiled extent or relocation-aware equality"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 52,
+      "function_id": 523,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 377,
+      "recorded_at": "2026-10-07T12:28:56+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139",
+      "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+      "command": "uv run tools/verify_matching.py",
       "stale": false,
       "details": {
         "checks": "signed EAX, full state, exact reads/writes, caller stack, saved registers, DF; initializer/exhaustion integration",
@@ -22793,8 +23406,109 @@
         "tools/windows_target.py",
         "tools/windows_tracking.py"
       ]
+    },
+    {
+      "id": 53,
+      "function_id": 527,
+      "kind": "compilation",
+      "outcome": "pass",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:28:56+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+      "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "all 200 indices, first-zero selection, full/disabled tables, raw argument/dispatch words, exact read/write order, full image guards, EAX/ESP/caller arguments, saved registers, DF; init/consumer integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_RegisterHandle; single-threaded nonaliasing mapped globals; no native/layout parity",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 54,
+      "function_id": 527,
+      "kind": "raw_bytes",
+      "outcome": "different",
+      "case_count": 0,
+      "recorded_at": "2026-10-07T12:28:56+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+      "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "compiled_prefix_bytes": 120,
+        "original_bytes": 120,
+        "scope": "prefix diagnostic only; compiled extent/relocation-aware equality not established"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
+    },
+    {
+      "id": 55,
+      "function_id": 527,
+      "kind": "emulation",
+      "outcome": "pass",
+      "case_count": 590,
+      "recorded_at": "2026-10-07T12:29:04+00:00",
+      "target_sha256": "7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782",
+      "routine_sha256": "2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34",
+      "input_sha256": "b0864124fb8a2298dc5ef3ef54fb7de2edd569dd199401ca8ae098111cb26bf6",
+      "artifact_path": "build/decomp/windows/mem_validation.dll",
+      "artifact_sha256": "c92a3b4b6319d8ac3cec2935e7f164fdba4fb73d7acf808f21c91a08dfb85616",
+      "command": "uv run tools/verify_matching.py",
+      "stale": false,
+      "details": {
+        "checks": "all 200 indices, first-zero selection, full/disabled tables, raw argument/dispatch words, exact read/write order, full image guards, EAX/ESP/caller arguments, saved registers, DF; init/consumer integration",
+        "compiler_flags": "--target=i686-pc-windows-msvc -std=c89 -pedantic-errors -Wall -Wextra -Werror -O2 -ffreestanding -fno-builtin -fno-vectorize -fno-slp-vectorize -mno-sse -mno-sse2",
+        "linker_flags": "/dll /noentry /nodefaultlib /machine:x86 /base:0x10000000",
+        "pefile": "2024.8.26",
+        "scope": "Mem_RegisterHandle; single-threaded nonaliasing mapped globals; no native/layout parity",
+        "toolchain": {
+          "clang": "(built by Brecht Sanders, r2) clang version 19.1.1",
+          "lld-link": "(built by Brecht Sanders, r2) LLD 19.1.1"
+        },
+        "unicorn": "2.1.4"
+      },
+      "input_paths": [
+        "decomp/src/mem.c",
+        "decomp/include/mem.h",
+        "decomp/target.json",
+        "tools/build_decomp.py",
+        "tools/verify_matching.py",
+        "tools/windows_target.py",
+        "tools/windows_tracking.py"
+      ]
     }
   ],
-  "snapshot_id": "4049f74485c61cdcb1bed0c3246862d685c2ee74b6c7545d2bd20d36e6c1506d",
-  "generated_at": "2026-10-07T11:53:45+00:00"
+  "snapshot_id": "0bd4c2fc6de1312312d8cf0b8115e2287a041a8100fc01fa2abe48e9862be4e1",
+  "generated_at": "2026-10-07T12:29:37+00:00"
 }

@@ -324,3 +324,13 @@ The harness retains all 30 initializer comparisons and adds 377 consumer
 comparisons plus eight original-only negative-cursor cases. Compilation, emulation,
 instruction equality and native behavior remain separate claims. The next verified
 dependency is the caller's downstream bookkeeping routine at `0x0045B360`.
+
+## Bookkeeping follow-up
+
+`0x0045B360` is now reconstructed and independently emulated in the same memory
+module. [Bookkeeping evidence](windows_handle_bookkeeping.md) records 590 new
+comparisons and integration through ID-pool and registration exhaustion. All
+existing initializer/consumer coverage remains. The focused DLL now exports three
+routines; it is not a playable rebuild. Next recover callback dispatch at
+`0x0045B240`; instruction equality, original compiler identity and native visual
+baseline remain unresolved.

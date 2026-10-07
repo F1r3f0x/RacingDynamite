@@ -79,8 +79,26 @@ def inspect():
         assert instruction.mnemonic == 'mov'
         assert struct.unpack('<II',instruction.bytes[2:]) == (global_va,value)
         print(f'Confirmed dispatch initializer {global_va:#010x} = {value:#010x}')
+    bookkeeping = pe.get_data(0x5b360,120)
+    print('Bookkeeping SHA256:',hashlib.sha256(bookkeeping).hexdigest())
+    assert hashlib.sha256(bookkeeping).hexdigest() == '2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34'
+    assert records[0x45b360] == 120 and pe.get_data(0x5b3d8,8) == b'\xcc'*8
+    decoded = list(md.disasm(bookkeeping,0x45b360))
+    assert sum(i.size for i in decoded) == 120 and not any(i.mnemonic=='call' for i in decoded)
+    state_addresses = (0x510bf0,0x510f10,0x5113c0,0x5116e0,0x511a00,0x511d20,
+                       0x63c690,0x63c694,0x63c698)
+    for va,n in sorted(records.items()):
+        for i in md.disasm(pe.get_data(va-base,n),va):
+            addresses = [o.imm if o.type == X86_OP_IMM else o.mem.disp
+                         for o in i.operands if o.type in (X86_OP_IMM,X86_OP_MEM)]
+            if any(a in (*state_addresses,0x45b360) for a in addresses):
+                print(f'Bookkeeping reference (routine {va:#010x}) {i.address:#010x}: {i.mnemonic} {i.op_str}')
     for name,va,n in [('flag',0x4bab38,4),('status',0x5116e0,800),
-                      ('ids',0x511230,400),('cursor',0x512040,2)]:
+                      ('ids',0x511230,400),('cursor',0x512040,2),
+                      ('contexts',0x510bf0,800),('parameters',0x510f10,800),
+                      ('registered IDs',0x5113c0,800),('callbacks',0x511a00,800),
+                      ('flags',0x511d20,800),('pending context',0x63c690,4),
+                      ('pending callback',0x63c694,4),('pending parameter',0x63c698,4)]:
         section = next(s for s in pe.sections if s.VirtualAddress<=va-base<s.VirtualAddress+s.Misc_VirtualSize)
         relative = va-base-section.VirtualAddress
         backed = relative+n <= section.SizeOfRawData

@@ -159,3 +159,17 @@ unverified. The adjacent consumer is now reconstructed with its signed boundary
 and negative-address contract preserved; next recover its caller's downstream
 bookkeeping routine at `0x0045B360` and continue
 classifying/corroborating Windows candidate extents, including non-FPO routines.
+
+## Handle-bookkeeping milestone (2026-10-07)
+
+The [independently recovered bookkeeping routine](ghidra/windows_handle_bookkeeping.md)
+at `0x0045B360` is reconstructed as `Mem_RegisterHandle` in the existing C89
+memory module. The focused DLL/emulator now covers three routines (254 original
+bytes), with 30 initializer, 377 consumer and 590 bookkeeping differential
+comparisons, plus eight original-only negative-cursor checks. New coverage checks
+all 200 registration slots, first-zero selection, ordered effects, disabled/full
+states and three-routine integration. SQLite and its synchronized exports retain
+separate compilation, raw-code and emulation evidence; no instruction equality,
+native layout or gameplay claim is added. The next verified dependency is
+`0x0045B240`, which tests status/flags and invokes stored callbacks; recover its
+full lifecycle and callback ABI before reconstruction.

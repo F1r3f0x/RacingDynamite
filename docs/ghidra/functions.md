@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:4049f74485c61cdcb1bed0c3246862d685c2ee74b6c7545d2bd20d36e6c1506d -->
+<!-- snapshot:0bd4c2fc6de1312312d8cf0b8115e2287a041a8100fc01fa2abe48e9862be4e1 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -533,7 +533,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045B1F0` | `0x0005B1F0` | 76 | `Mem_InitHandles` | game | reconstructed | [windows_startup.md](windows_startup.md) |
 | `0x0045B240` | `0x0005B240` | 155 | `sub_0045B240` | unknown | unidentified | - |
 | `0x0045B2E0` | `0x0005B2E0` | 120 | `sub_0045B2E0` | unknown | unidentified | - |
-| `0x0045B360` | `0x0005B360` | 120 | `sub_0045B360` | unknown | unidentified | - |
+| `0x0045B360` | `0x0005B360` | 120 | `Mem_RegisterHandle` | game | reconstructed | [windows_handle_bookkeeping.md](windows_handle_bookkeeping.md) |
 | `0x0045B3E0` | `0x0005B3E0` | 33 | `sub_0045B3E0` | unknown | unidentified | - |
 | `0x0045B410` | `0x0005B410` | 62 | `sub_0045B410` | unknown | unidentified | - |
 | `0x0045B450` | `0x0005B450` | 51 | `sub_0045B450` | unknown | unidentified | - |

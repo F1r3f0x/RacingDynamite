@@ -40,12 +40,16 @@ arbitrary SQL mutation and bulk Ghidra sync are not active CLI commands.
 
 Verification results are appended by the real harness, not status labels. The
 current `uv run tools/verify_matching.py` freshly compiles and emulates
-`Mem_InitHandles` and `Mem_NextHandleId`; it records compilation, raw-byte
-differences and emulation separately (30 and 377 differential cases).
+`Mem_InitHandles`, `Mem_NextHandleId` and `Mem_RegisterHandle`; it records
+compilation, raw-byte differences and emulation separately (30, 377 and 590
+differential cases).
 Eight additional consumer cases execute only the original; the
 [consumer evidence](../docs/ghidra/windows_handles.md) explains differing negative
 address surroundings and the memory contract. Other routines need their own
 verified contracts/harnesses.
+
+The [bookkeeping evidence](../docs/ghidra/windows_handle_bookkeeping.md) records
+the first-free-slot contract, ordered effects and three-routine integration.
 Exact/relocated instruction comparison, linked equality, and native game parity
 remain unclaimed. Historical imported evidence is preserved but does not count
 as a fresh passing run until reproduced.
