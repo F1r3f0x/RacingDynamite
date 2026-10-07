@@ -15,8 +15,8 @@ extern int g_MemoryAllocated;
 FontSlot g_fonts[MAX_FONTS];
 
 /* Global font system state */
-int g_fontSystemInitialized = 0; /* MAINDOS @ 0x000D7C60 */
-int g_fontSubsystemHandle = 0;   /* MAINDOS @ 0x0024C210, MAINDOS @ 0x0050E680 */
+int g_fontSystemInitialized = 0; /* IGN_WIN.EXE @ 0x004BA6C4 */
+int g_fontSubsystemHandle = 0;   /* IGN_WIN.EXE @ 0x0050E680 */
 
 uint8_t *g_pSysGfxPic;
 uint8_t *g_pSysG2Pic;
@@ -46,7 +46,6 @@ uint8_t *g_pPokalPic;
 /* External subsystem helpers */
 extern int Subsystem_Register(void);
 extern void Subsystem_AddCallback(int handle);
-extern void Subsystem_Unregister(int handle);
 extern void *Gfx_SpriteOp(void *desc, int op);
 extern void Gfx_DrawSprite(void *handle, Point2D *pos, int flags);
 
@@ -79,9 +78,9 @@ int Font_InitSystem(void) {
 }
 
 /**
- * @original Font_Shutdown (MAINDOS.EXE @ 0x00061319, geputget.c)
+ * @original Font_Shutdown (IGN_WIN.EXE @ 0x00456210, geputget.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x00061319. Shuts down font subsystem and unloads all active font slots.
+ * @notes IGN_WIN.EXE @ 0x00456210. Registered font subsystem cleanup callback; releases handle ID and unloads all active font slots.
  */
 int Font_Shutdown(void) {
     int i;
@@ -90,7 +89,7 @@ int Font_Shutdown(void) {
         return 1020;
     }
 
-    Subsystem_Unregister(g_fontSubsystemHandle);
+    Mem_ReleaseHandleId(g_fontSubsystemHandle);
     g_fontSystemInitialized = 0;
 
     for (i = 0; i < MAX_FONTS; i++) {
