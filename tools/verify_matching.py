@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR / "tools"))
 
-from build_decomp import compile_all
+from build_decomp import compile_all, link_rebuilt_binary
 from db import get_connection
 from diff_func import diff_func
 
@@ -30,28 +30,18 @@ def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bo
             content = f.read()
             if "__asm" in content:
                 print(f"[ERROR] Inline assembly (__asm) found in {c_file.name}!", file=sys.stderr)
-                print("[ERROR] Project rule violation: Pure C Only. Move handwritten asm to separate .asm files.", file=sys.stderr)
+                print("[ERROR] Project rule violation: Pure C Only. Handwritten assembly is prohibited.", file=sys.stderr)
                 return False
 
     # 1. Compile decompiled code
     print("[1/2] Compiling authentic C sources with Watcom (wcc386)...")
     if not compile_all():
-        print("[WARNING] Compilation had errors. Proceeding anyway...", file=sys.stderr)
-
-    import subprocess
-    import os
-    print("[1.5/2] Linking object files using Watcom wlink to MAINDOS_REBUILT.EXE...")
-    env = os.environ.copy()
-    watcom_dir = ROOT_DIR / "tools" / "WATCOM"
-    env["WATCOM"] = str(watcom_dir)
-    env["PATH"] = str(watcom_dir / "BINNT") + ";" + str(watcom_dir / "BINW") + ";" + env.get("PATH", "")
-    wlink_exe = str(watcom_dir / "BINNT" / "wlink.exe")
-    log_path = ROOT_DIR / "build" / "decomp" / "wlink.log"
-    try:
-        with open(log_path, "w", encoding="utf-8") as log_f:
-            subprocess.run([wlink_exe, "@build/decomp/wlink.lnk"], env=env, stdin=subprocess.DEVNULL, stdout=log_f, stderr=subprocess.STDOUT, cwd=str(ROOT_DIR))
-    except Exception:
-        pass # Expected due to missing symbols but we have undefsok
+        print("[FAIL] Compilation failed; linking and comparison skipped.", file=sys.stderr)
+        return False
+    print("[1.5/2] Linking a fresh DOS executable...")
+    if not link_rebuilt_binary():
+        print("[FAIL] Linking failed; comparison skipped.", file=sys.stderr)
+        return False
 
     status_scope = "PROJECT-WIDE (ALL DECOMPILED)" if check_all else "MATCHING ONLY"
     print(f"\n[2/2] Running byte/instruction diff against authentic MAINDOS.EXE ({status_scope})...")
@@ -108,11 +98,14 @@ def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bo
         mod = r["module_name"] or "unknown"
 
         rebuilt_code, _ = get_rebuilt_func(sym, sz)
-        is_compiled = rebuilt_code is not None
+        is_compiled = bool(rebuilt_code)
         if is_compiled:
             compiled_funcs += 1
 
-        if dos_addr_str:
+        if not is_compiled:
+            stat_str, match_str = "MISSING", "--"
+            addr_display = dos_addr_str or "-"
+        elif dos_addr_str:
             diffed_funcs += 1
             dos_addr = int(dos_addr_str, 16)
             matched, pct, m, t = diff_func(sym, dos_addr, sz, verbose=verbose)
@@ -131,13 +124,17 @@ def verify_all(module_filter: str = None, symbol_filter: str = None, verbose: bo
 
     print("=" * len(header))
     summary_pct = (passed_funcs / diffed_funcs * 100.0) if diffed_funcs > 0 else 0.0
-    print(f"Summary: {passed_funcs}/{diffed_funcs} diffable functions bit-matched 100% ({summary_pct:.1f}%). Total compiled: {compiled_funcs}/{total_funcs}.")
+    print(f"Summary: {passed_funcs}/{diffed_funcs} diffable functions normalized instruction-matched 100% ({summary_pct:.1f}%). Total compiled: {compiled_funcs}/{total_funcs}.")
     
+    print("Behavioral fidelity: UNVERIFIED by this build/instruction scan.")
+    if compiled_funcs < total_funcs:
+        print(f"[FAIL] {total_funcs - compiled_funcs} tracked symbol(s) missing.", file=sys.stderr)
+        return False
     if strict_matching and passed_funcs < diffed_funcs:
         print(f"\n[FAIL] {diffed_funcs - passed_funcs} function(s) regressed or failed matching verification!", file=sys.stderr)
         return False
 
-    print(f"\n[INFO] Project verification scan complete.")
+    print(f"\n[INFO] Build/symbol verification complete; instruction matching is optional.")
     return True
 
 def main():

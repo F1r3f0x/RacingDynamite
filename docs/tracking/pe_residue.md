@@ -195,346 +195,346 @@ Total: **501**
 
 ### decomp/src/globals.c
 
-- L83 `placeholder_global` uint32_t g_ActiveFontColor[16] = {0};
-- L84 `placeholder_global` uint32_t g_ActiveParticle[16] = {0};
-- L85 `placeholder_global` uint32_t g_ActiveTrackPalette[16] = {0};
-- L86 `placeholder_global` uint32_t g_ActiveTrackSegmentAttribute[16] = {0};
-- L87 `placeholder_global` uint32_t g_ActiveVehicleIndex[16] = {0};
-- L88 `placeholder_global` uint32_t g_AudioCdTrackMode[16] = {0};
-- L89 `placeholder_global` uint32_t g_AudioEventParam1[16] = {0};
-- L90 `placeholder_global` uint32_t g_AudioEventParam2[16] = {0};
-- L91 `placeholder_global` uint32_t g_AudioEventParam3[16] = {0};
-- L92 `placeholder_global` uint32_t g_AudioEventParam4[16] = {0};
-- L93 `placeholder_global` uint32_t g_AudioEventParam5[16] = {0};
-- L94 `placeholder_global` uint32_t g_AudioEventParam6[16] = {0};
-- L95 `placeholder_global` uint32_t g_AudioEventParam7[16] = {0};
-- L96 `placeholder_global` uint32_t g_CameraAngleX[16] = {0};
-- L97 `placeholder_global` uint32_t g_CameraAngleY[16] = {0};
-- L98 `placeholder_global` uint32_t g_CameraFovHalfX[16] = {0};
-- L99 `placeholder_global` uint32_t g_CameraFovHalfY[16] = {0};
-- L100 `placeholder_global` uint32_t g_CameraFovScaleX[16] = {0};
-- L101 `placeholder_global` uint32_t g_CameraFovScaleY[16] = {0};
-- L102 `placeholder_global` uint32_t g_CameraFovWobbleActive[16] = {0};
-- L103 `placeholder_global` uint32_t g_CameraFovWobblePhase[16] = {0};
-- L104 `placeholder_global` uint32_t g_CameraPosX[16] = {0};
-- L105 `placeholder_global` uint32_t g_CameraPosX_Int[16] = {0};
-- L106 `placeholder_global` uint32_t g_CameraPosY[16] = {0};
-- L107 `placeholder_global` uint32_t g_CameraPosY_Int[16] = {0};
-- L108 `placeholder_global` uint32_t g_CameraPosZ[16] = {0};
-- L109 `placeholder_global` uint32_t g_CameraPosZ_Int[16] = {0};
-- L110 `placeholder_global` uint32_t g_CameraShakeActive[16] = {0};
-- L111 `placeholder_global` uint32_t g_CameraTargetHysteresis[16] = {0};
-- L112 `placeholder_global` uint32_t g_CameraViewportHeight[16] = {0};
-- L113 `placeholder_global` uint32_t g_CameraViewportWidth[16] = {0};
-- L114 `placeholder_global` uint32_t g_CarShadowVertices[16] = {0};
-- L115 `placeholder_global` uint32_t g_ChampionshipAdvanceAllowed[16] = {0};
-- L116 `placeholder_global` uint32_t g_ChampionshipCredits[16] = {0};
-- L117 `placeholder_global` uint32_t g_ChampionshipNextTrackIndex[16] = {0};
-- L118 `placeholder_global` uint32_t g_ChampionshipPoints[16] = {0};
-- L119 `placeholder_global` uint32_t g_ChampionshipWonFlag[16] = {0};
-- L120 `placeholder_global` uint32_t g_CinematicCameraAngleState[16] = {0};
-- L121 `placeholder_global` uint32_t g_CinematicFocusedVehicle[16] = {0};
-- L122 `placeholder_global` uint32_t g_ColorDepth[16] = {0};
-- L123 `placeholder_global` uint32_t g_ConfirmationPromptType[16] = {0};
-- L124 `placeholder_global` uint32_t g_Const_0_005[16] = {0};
-- L125 `placeholder_global` uint32_t g_Const_0_05[16] = {0};
-- L126 `placeholder_global` uint32_t g_Const_0_1[16] = {0};
-- L127 `placeholder_global` uint32_t g_Const_1000[16] = {0};
-- L128 `placeholder_global` uint32_t g_Const_1024[16] = {0};
-- L129 `placeholder_global` uint32_t g_Const_200_0[16] = {0};
-- L130 `placeholder_global` uint32_t g_Const_256[16] = {0};
-- L131 `placeholder_global` uint32_t g_Const_262144[16] = {0};
-- L132 `placeholder_global` uint32_t g_Const_512[16] = {0};
-- L133 `placeholder_global` uint32_t g_Const_DegToRad[16] = {0};
-- L134 `placeholder_global` uint32_t g_Const_Neg256[16] = {0};
-- L135 `placeholder_global` uint32_t g_Const_NegPi[16] = {0};
-- L136 `placeholder_global` uint32_t g_Const_NegTenthDegToRad[16] = {0};
-- L137 `placeholder_global` uint32_t g_Const_Pi[16] = {0};
-- L138 `placeholder_global` uint32_t g_Const_TenthDegToRad[16] = {0};
-- L139 `placeholder_global` uint32_t g_Const_TenthDegToRadFloat[16] = {0};
-- L140 `placeholder_global` uint32_t g_Const_TwoPi[16] = {0};
-- L141 `placeholder_global` uint32_t g_CountdownBeepStep[16] = {0};
-- L142 `placeholder_global` uint32_t g_CurrentCdTrackNumber[16] = {0};
-- L143 `placeholder_global` uint32_t g_CurrentTrackIndex[16] = {0};
-- L144 `placeholder_global` uint32_t g_DebrisDynamicMeshes[16] = {0};
-- L145 `placeholder_global` uint32_t g_DemoSubState[16] = {0};
-- L146 `placeholder_global` uint32_t g_DifficultyLevel[16] = {0};
-- L147 `placeholder_global` uint32_t g_DirectionArrowLookupTable[16] = {0};
-- L148 `placeholder_global` uint32_t g_DynamicObjectsPaused[16] = {0};
-- L149 `placeholder_global` uint32_t g_ErrorMessageBuffer[16] = {0};
-- L150 `placeholder_global` uint32_t g_FinishFanfarePlayed[16] = {0};
-- L151 `placeholder_global` uint32_t g_FinishSparklePosX[16] = {0};
-- L152 `placeholder_global` uint32_t g_FinishSparklePosY[16] = {0};
-- L153 `placeholder_global` uint32_t g_FinishSparkleTimers[16] = {0};
-- L154 `placeholder_global` uint32_t g_FlybyCameraOffsetX[16] = {0};
-- L155 `placeholder_global` uint32_t g_FlybyCameraOffsetY[16] = {0};
-- L156 `placeholder_global` uint32_t g_FlybyCameraOffsetZ[16] = {0};
-- L157 `placeholder_global` uint32_t g_FlybyLastCameraPosX[16] = {0};
-- L158 `placeholder_global` uint32_t g_FlybyLastCameraPosY[16] = {0};
-- L159 `placeholder_global` uint32_t g_FlybyLastCameraPosZ[16] = {0};
-- L160 `placeholder_global` uint32_t g_FlybyLastPitch[16] = {0};
-- L161 `placeholder_global` uint32_t g_FlybyLastRoll[16] = {0};
-- L162 `placeholder_global` uint32_t g_FlybyLastYaw[16] = {0};
-- L163 `placeholder_global` uint32_t g_FontAlignMode[16] = {0};
-- L164 `placeholder_global` uint32_t g_FontId_Large[16] = {0};
-- L165 `placeholder_global` uint32_t g_FontId_Medium[16] = {0};
-- L166 `placeholder_global` uint32_t g_FontId_Menu[16] = {0};
-- L167 `placeholder_global` uint32_t g_FontId_Small[16] = {0};
-- L168 `placeholder_global` uint32_t g_FontPositionColorTable[16] = {0};
-- L169 `placeholder_global` uint32_t g_FontTextColorTable[16] = {0};
-- L170 `placeholder_global` uint32_t g_ForceDirtDebris[16] = {0};
-- L171 `placeholder_global` uint32_t g_GamePauseState[16] = {0};
-- L172 `placeholder_global` uint32_t g_GlobalFrameCount[16] = {0};
-- L173 `placeholder_global` uint32_t g_GraphicsInitErrorFlag[16] = {0};
-- L174 `placeholder_global` uint32_t g_GraphicsResolutionMode[16] = {0};
-- L175 `placeholder_global` uint32_t g_HighScoreRecorded[16] = {0};
-- L176 `placeholder_global` uint32_t g_HudAnimSinPhase[16] = {0};
-- L177 `placeholder_global` uint32_t g_HudAnimTimers[16] = {0};
-- L178 `placeholder_global` uint32_t g_IsAttractDemoMode[16] = {0};
-- L179 `placeholder_global` uint32_t g_IsDemoMode[16] = {0};
-- L180 `placeholder_global` uint32_t g_IsSplitScreen[16] = {0};
-- L181 `placeholder_global` uint32_t g_IsTwoPlayerMode[16] = {0};
-- L182 `placeholder_global` uint32_t g_LapRecordSeconds[16] = {0};
-- L183 `placeholder_global` uint32_t g_LapsTotal[16] = {0};
-- L184 `placeholder_global` uint32_t g_LightningEnabled[16] = {0};
-- L185 `placeholder_global` uint32_t g_LisaActiveLightingMode[16] = {0};
-- L186 `placeholder_global` uint32_t g_LisaActiveMaterial[16] = {0};
-- L187 `placeholder_global` uint32_t g_LisaActivePageCount[16] = {0};
-- L188 `placeholder_global` uint32_t g_LisaActiveShdSize[16] = {0};
-- L189 `placeholder_global` uint32_t g_LisaActiveSubmeshFlags[16] = {0};
-- L190 `placeholder_global` uint32_t g_LisaActiveTabSize[16] = {0};
-- L192 `placeholder_global` uint32_t g_LisaAllocatedBufferCount[16] = {0};
-- L193 `placeholder_global` uint32_t g_LisaAllocatedBufferMax[16] = {0};
-- L194 `placeholder_global` uint32_t g_LisaAspectScale[16] = {0};
-- L195 `placeholder_global` uint32_t g_LisaBackfaceSign[16] = {0};
-- L196 `placeholder_global` uint32_t g_LisaCameraDistance[16] = {0};
-- L197 `placeholder_global` uint32_t g_LisaCameraFocalLength[16] = {0};
-- L198 `placeholder_global` uint32_t g_LisaCameraFocalScale[16] = {0};
-- L199 `placeholder_global` uint32_t g_LisaCameraMatrix_00[16] = {0};
-- L200 `placeholder_global` uint32_t g_LisaCameraMatrix_01[16] = {0};
-- L201 `placeholder_global` uint32_t g_LisaCameraMatrix_02[16] = {0};
-- L202 `placeholder_global` uint32_t g_LisaCameraMatrix_10[16] = {0};
-- L203 `placeholder_global` uint32_t g_LisaCameraMatrix_11[16] = {0};
-- L204 `placeholder_global` uint32_t g_LisaCameraMatrix_12[16] = {0};
-- L205 `placeholder_global` uint32_t g_LisaCameraMatrix_20[16] = {0};
-- L206 `placeholder_global` uint32_t g_LisaCameraMatrix_21[16] = {0};
-- L207 `placeholder_global` uint32_t g_LisaCameraMatrix_22[16] = {0};
-- L208 `placeholder_global` uint32_t g_LisaCameraMatrix_X[16] = {0};
-- L209 `placeholder_global` uint32_t g_LisaCameraMatrix_Y[16] = {0};
-- L210 `placeholder_global` uint32_t g_LisaCameraOffsetX[16] = {0};
-- L211 `placeholder_global` uint32_t g_LisaCameraOffsetY[16] = {0};
-- L212 `placeholder_global` uint32_t g_LisaCameraPitch[16] = {0};
-- L213 `placeholder_global` uint32_t g_LisaCameraZoom[16] = {0};
-- L214 `placeholder_global` uint32_t g_LisaClipBottom[16] = {0};
-- L215 `placeholder_global` uint32_t g_LisaClipLeft[16] = {0};
-- L216 `placeholder_global` uint32_t g_LisaClipRight[16] = {0};
-- L217 `placeholder_global` uint32_t g_LisaClipSubpixelBottom[16] = {0};
-- L218 `placeholder_global` uint32_t g_LisaClipSubpixelLeft[16] = {0};
-- L219 `placeholder_global` uint32_t g_LisaClipSubpixelRight[16] = {0};
-- L220 `placeholder_global` uint32_t g_LisaClipSubpixelTop[16] = {0};
-- L221 `placeholder_global` uint32_t g_LisaClipTop[16] = {0};
-- L222 `placeholder_global` uint32_t g_LisaCurrentVertexIndex[16] = {0};
-- L223 `placeholder_global` uint32_t g_LisaDefaultOffset_X[16] = {0};
-- L224 `placeholder_global` uint32_t g_LisaDefaultOffset_Y[16] = {0};
-- L225 `placeholder_global` uint32_t g_LisaDefaultOffset_Z[16] = {0};
-- L226 `placeholder_global` uint32_t g_LisaDefaultScale_X[16] = {0};
-- L227 `placeholder_global` uint32_t g_LisaDefaultScale_Y[16] = {0};
-- L228 `placeholder_global` uint32_t g_LisaDisableFiltering[16] = {0};
-- L230 `placeholder_global` uint32_t g_LisaDrawCommands[16] = {0};
-- L231 `placeholder_global` uint32_t g_LisaEnableMipmaps[16] = {0};
-- L232 `placeholder_global` uint32_t g_LisaFrustumNear[16] = {0};
-- L233 `placeholder_global` uint32_t g_LisaFrustumPlaneLeft[16] = {0};
-- L234 `placeholder_global` uint32_t g_LisaFrustumPlaneRight[16] = {0};
-- L235 `placeholder_global` uint32_t g_LisaFrustumPlaneTop[16] = {0};
-- L236 `placeholder_global` uint32_t g_LisaGridCellsX[16] = {0};
-- L237 `placeholder_global` uint32_t g_LisaGridWorldHeight[16] = {0};
-- L238 `placeholder_global` uint32_t g_LisaGridWorldWidth[16] = {0};
-- L239 `placeholder_global` uint32_t g_LisaMipmapQuality[16] = {0};
-- L240 `placeholder_global` uint32_t g_LisaObjMat_11[16] = {0};
-- L241 `placeholder_global` uint32_t g_LisaObjMat_20[16] = {0};
-- L242 `placeholder_global` uint32_t g_LisaObjMat_21[16] = {0};
-- L243 `placeholder_global` uint32_t g_LisaObjMat_CosPitch[16] = {0};
-- L244 `placeholder_global` uint32_t g_LisaObjMat_CosRoll[16] = {0};
-- L245 `placeholder_global` uint32_t g_LisaObjMat_CosYaw[16] = {0};
-- L246 `placeholder_global` uint32_t g_LisaObjMat_Scale[16] = {0};
-- L247 `placeholder_global` uint32_t g_LisaObjMat_SinPitch[16] = {0};
-- L248 `placeholder_global` uint32_t g_LisaObjMat_SinRoll[16] = {0};
-- L249 `placeholder_global` uint32_t g_LisaObjMat_Tmp1[16] = {0};
-- L250 `placeholder_global` uint32_t g_LisaObjMat_Tmp2[16] = {0};
-- L251 `placeholder_global` uint32_t g_LisaObjMat_Tmp3[16] = {0};
-- L252 `placeholder_global` uint32_t g_LisaObjMat_Tmp4[16] = {0};
-- L253 `placeholder_global` uint32_t g_LisaObjMat_Tmp5[16] = {0};
-- L254 `placeholder_global` uint32_t g_LisaObjMat_Tmp6[16] = {0};
-- L255 `placeholder_global` uint32_t g_LisaObjectMatrix_22[16] = {0};
-- L257 `placeholder_global` uint32_t g_LisaPerspectiveDepthTable[16] = {0};
-- L258 `placeholder_global` uint32_t g_LisaRasterizerAccumulator[16] = {0};
-- L259 `placeholder_global` uint32_t g_LisaRasterizerJmpTable[16] = {0};
-- L262 `placeholder_global` uint32_t g_LisaScanlinePitch[16] = {0};
-- L264 `placeholder_global` uint32_t g_LisaShadingEnabled[16] = {0};
-- L265 `placeholder_global` uint32_t g_LisaSubmeshBoundRadius[16] = {0};
-- L266 `placeholder_global` uint32_t g_LisaSubmeshCenterWorldX[16] = {0};
-- L267 `placeholder_global` uint32_t g_LisaSubmeshCenterWorldY[16] = {0};
-- L268 `placeholder_global` uint32_t g_LisaSubmeshCenterWorldZ[16] = {0};
-- L269 `placeholder_global` uint32_t g_LisaSubmeshClipMask[16] = {0};
-- L270 `placeholder_global` uint32_t g_LisaSubmeshDepthOffset[16] = {0};
-- L271 `placeholder_global` uint32_t g_LisaSubmeshFlags[16] = {0};
-- L272 `placeholder_global` uint32_t g_LisaSubmeshLodLevel[16] = {0};
-- L273 `placeholder_global` uint32_t g_LisaSubmeshPolyCount[16] = {0};
-- L274 `placeholder_global` uint32_t g_LisaSubmeshTmp1[16] = {0};
-- L275 `placeholder_global` uint32_t g_LisaSubmeshTmp4[16] = {0};
-- L276 `placeholder_global` uint32_t g_LisaSubmeshTmp5[16] = {0};
-- L277 `placeholder_global` uint32_t g_LisaSubmeshVertexStride[16] = {0};
-- L278 `placeholder_global` uint32_t g_LisaTexturePageSizes[16] = {0};
-- L279 `placeholder_global` uint32_t g_LisaTransformedVertices[16] = {0};
-- L280 `placeholder_global` uint32_t g_LisaViewportCenterX[16] = {0};
-- L281 `placeholder_global` uint32_t g_LisaViewportCenterY[16] = {0};
-- L282 `placeholder_global` uint32_t g_LisaViewportHeight[16] = {0};
-- L283 `placeholder_global` uint32_t g_LisaViewportQuarter[16] = {0};
-- L284 `placeholder_global` uint32_t g_LisaViewportRemaining[16] = {0};
-- L285 `placeholder_global` uint32_t g_LisaViewportWidth[16] = {0};
-- L286 `placeholder_global` uint32_t g_LisaVisibleObjects[16] = {0};
-- L287 `placeholder_global` uint32_t g_LisaVisibleSubmeshes[16] = {0};
-- L288 `placeholder_global` uint32_t g_MasterMusicVolume[16] = {0};
-- L290 `placeholder_global` uint32_t g_MultiplayerMode[16] = {0};
-- L292 `placeholder_global` uint32_t g_ParticleArray1[16] = {0};
-- L293 `placeholder_global` uint32_t g_ParticleArray2[16] = {0};
-- L294 `placeholder_global` uint32_t g_ParticleCount1[16] = {0};
-- L296 `placeholder_global` uint32_t g_ParticleTemplateX[16] = {0};
-- L297 `placeholder_global` uint32_t g_ParticleTemplateY[16] = {0};
-- L298 `placeholder_global` uint32_t g_ParticleTemplateZ[16] = {0};
-- L299 `placeholder_global` uint32_t g_PlayAgainPromptActive[16] = {0};
-- L300 `placeholder_global` uint32_t g_PlayerCarChoice[16] = {0};
-- L301 `placeholder_global` uint32_t g_PlayerCarModel[16] = {0};
-- L302 `placeholder_global` uint32_t g_PlayerFinishTimers[16] = {0};
-- L304 `placeholder_global` uint32_t g_PostRaceSequenceState[16] = {0};
-- L305 `placeholder_global` uint32_t g_RaceFinishingPointsTable[16] = {0};
-- L306 `placeholder_global` uint32_t g_RacePosition[16] = {0};
-- L307 `placeholder_global` uint32_t g_RaceStartTimer[16] = {0};
-- L308 `placeholder_global` uint32_t g_RaceTimer[16] = {0};
-- L309 `placeholder_global` uint32_t g_RaceTimer_P2[16] = {0};
-- L310 `placeholder_global` uint32_t g_RadarHighResFlag[16] = {0};
-- L311 `placeholder_global` uint32_t g_RainTextureId[16] = {0};
-- L312 `placeholder_global` uint32_t g_RenderTargetSurface[16] = {0};
-- L313 `placeholder_global` uint32_t g_ResultsMenuSelection[16] = {0};
-- L314 `placeholder_global` uint32_t g_ResultsOverlayActive[16] = {0};
-- L315 `placeholder_global` uint32_t g_ResultsRenderedLaps[16] = {0};
-- L316 `placeholder_global` uint32_t g_RpmNeedleDeltaScale[16] = {0};
-- L317 `placeholder_global` uint32_t g_SavedProfileLeague[16] = {0};
-- L319 `placeholder_global` uint32_t g_ScreenHeightAlt[16] = {0};
-- L320 `placeholder_global` uint32_t g_ScreenShakeTimerP1[16] = {0};
-- L321 `placeholder_global` uint32_t g_ScreenShakeTimerP2[16] = {0};
-- L322 `placeholder_global` uint32_t g_ScreenSizeSetting[16] = {0};
-- L323 `placeholder_global` uint32_t g_ShowDebugCoords[16] = {0};
-- L324 `placeholder_global` uint32_t g_ShowFpsOverlay[16] = {0};
-- L325 `placeholder_global` uint32_t g_ShowRecordingOverlay[16] = {0};
-- L326 `placeholder_global` uint32_t g_ShowRollTelemetry[16] = {0};
-- L327 `placeholder_global` uint32_t g_ShowSecondPlayerFlag[16] = {0};
-- L328 `placeholder_global` uint32_t g_SkyClearEnabled[16] = {0};
-- L329 `placeholder_global` uint32_t g_SmokeParticleDescriptor[16] = {0};
-- L330 `placeholder_global` uint32_t g_SnowflakeAngle[16] = {0};
-- L331 `placeholder_global` uint32_t g_SortedChampionshipPoints[16] = {0};
-- L332 `placeholder_global` uint32_t g_SortedRacerIndices[16] = {0};
-- L333 `placeholder_global` uint32_t g_SpeedoConfig[16] = {0};
-- L334 `placeholder_global` uint32_t g_SpeedoPosition[16] = {0};
-- L335 `placeholder_global` uint32_t g_SpriteScaleFactors[16] = {0};
-- L336 `placeholder_global` uint32_t g_SubpixelMaxX[16] = {0};
-- L337 `placeholder_global` uint32_t g_SubpixelMaxY[16] = {0};
-- L338 `placeholder_global` uint32_t g_SubpixelMinX[16] = {0};
-- L339 `placeholder_global` uint32_t g_SubpixelMinY[16] = {0};
-- L340 `placeholder_global` uint32_t g_SurfaceDustFlagTable[16] = {0};
-- L341 `placeholder_global` uint32_t g_TargetLapTimeCents[16] = {0};
-- L342 `placeholder_global` uint32_t g_TelemetryRollAngle[16] = {0};
-- L343 `placeholder_global` uint32_t g_TimeTrialActive[16] = {0};
-- L345 `placeholder_global` uint32_t g_TrackChunkToNodeTable[16] = {0};
-- L346 `placeholder_global` uint32_t g_TrackFlybyActiveTarget[16] = {0};
-- L348 `placeholder_global` uint32_t g_TrackHighScoreNames[16] = {0};
-- L349 `placeholder_global` uint32_t g_TrackHighScoreTimes[16] = {0};
-- L350 `placeholder_global` uint32_t g_TrackRoadSequenceNodeCount[16] = {0};
-- L351 `placeholder_global` uint32_t g_TrackSegmentTable[16] = {0};
-- L352 `placeholder_global` uint32_t g_TrackStyle[16] = {0};
-- L353 `placeholder_global` uint32_t g_TrigAngleTable[16] = {0};
-- L354 `placeholder_global` uint32_t g_TrophyFanfarePlayed[16] = {0};
-- L355 `placeholder_global` uint32_t g_TurboMeterFill[16] = {0};
-- L356 `placeholder_global` uint32_t g_UnlockedLeagueIndex[16] = {0};
-- L357 `placeholder_global` uint32_t g_VehicleCameraStates[16] = {0};
-- L360 `placeholder_global` uint32_t g_VideoModeActive[16] = {0};
-- L361 `placeholder_global` uint32_t g_ViewportBorderCornerBL[16] = {0};
-- L362 `placeholder_global` uint32_t g_ViewportBorderCornerBR[16] = {0};
-- L363 `placeholder_global` uint32_t g_ViewportBorderCornerTL[16] = {0};
-- L364 `placeholder_global` uint32_t g_ViewportBorderCornerTR[16] = {0};
-- L365 `placeholder_global` uint32_t g_ViewportBorderMetrics[16] = {0};
-- L366 `placeholder_global` uint32_t g_ViewportMaxX[16] = {0};
-- L367 `placeholder_global` uint32_t g_ViewportMaxY[16] = {0};
-- L368 `placeholder_global` uint32_t g_ViewportMinX[16] = {0};
-- L369 `placeholder_global` uint32_t g_ViewportMinY[16] = {0};
-- L449 `placeholder_global` uint32_t g_WeatherActive[16] = {0};
-- L450 `placeholder_global` uint32_t g_WeatherAnimTick[16] = {0};
-- L451 `placeholder_global` uint32_t g_WeatherAudioVoices[16] = {0};
-- L452 `placeholder_global` uint32_t g_WeatherDropOffsetX[16] = {0};
-- L453 `placeholder_global` uint32_t g_WeatherDropOffsetY[16] = {0};
-- L454 `placeholder_global` uint32_t g_WeatherGridObjects[16] = {0};
-- L455 `placeholder_global` uint32_t g_WeatherType[16] = {0};
-- L456 `placeholder_global` uint32_t g_WeatherViewportCount[16] = {0};
-- L457 `placeholder_global` uint32_t g_WheelParticleDescriptor[16] = {0};
-- L559 `pe_symbol` s_AT_FIRST_PLACE_WITH_00496a11
-- L560 `pe_symbol` s_AT_SECOND_PLACE_WITH_00496a34
-- L561 `pe_symbol` s_AT_THIRD_PLACE_WITH_00496a57
-- L562 `pe_symbol` s_A_SCORE_OF__d_PTS__00496a7a
-- L563 `pe_symbol` s_CD_TRACK_00494db2
-- L564 `pe_symbol` s_CONGRATULATIONS__004969a8
-- L565 `pe_symbol` s_CONTINUE_00494d58
-- L566 `pe_symbol` s_Cannot_use_this_graphics_mode__004989dc
-- L567 `pe_symbol` s_DEFAULT_00494dee
-- L568 `pe_symbol` s_Error_while_changing_car_mesh_00499248
-- L569 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_ANIM_OBJ_004994ac
-- L570 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_00499530
-- L571 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4
-- L572 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_SHA_00499558
-- L573 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_WHE_00499580
-- L574 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_TRAN_SPRIT_004993b4
-- L575 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468
-- L576 `pe_symbol` s_FEL_VID_LI_PLACEOBJECT_HANDLE_CA_00499508
-- L577 `pe_symbol` s_FPS__d_00499658
-- L578 `pe_symbol` s_GOLD_STATUE_TO_ADVANCE__0049707b
-- L579 `pe_symbol` s_NOW_TRY_THE__s_LEAGUE__00496f68
-- L580 `pe_symbol` s_OLDROADNR__d_00499630
-- L581 `pe_symbol` s_PLACE_OR_BETTER_TO_PROCEED__00496452
-- L582 `pe_symbol` s_PLAY_TRACK_AGAIN___Y_N__00495698
-- L583 `pe_symbol` s_PRESS_RETURN_TO_CONTINUE_00495860
-- L584 `pe_symbol` s_QUIT_00494d94
-- L585 `pe_symbol` s_QUIT___Y_N__00495248
-- L586 `pe_symbol` s_RANDOM_00494e0c
-- L587 `pe_symbol` s_RECORDING__0049964c
-- L588 `pe_symbol` s_RESTART_00494d76
-- L589 `pe_symbol` s_RESTART___Y_N__00495300
-- L590 `pe_symbol` s_RETRY_00494dd0
-- L591 `pe_symbol` s_ROLL___1f_00499640
-- L592 `pe_symbol` s_SKILLNAD___3f_004995f8
-- L593 `pe_symbol` s_SORRY__YOU_MUST_REACH_THIRD_00496420
-- L594 `pe_symbol` s_SPEED___3f_004995ec
-- L595 `pe_symbol` s_SQUASHED2__d_00499620
-- L596 `pe_symbol` s_TOTAL_SCORE_004955e0
-- L597 `pe_symbol` s_TRACK_RESULTS_00495470
-- L598 `pe_symbol` s_TRACK_SCORE_00495528
-- L599 `pe_symbol` s_TYPE1__d_00499614
-- L600 `pe_symbol` s_TYPE2__d_00499608
-- L602 `pe_symbol` s_WAITING_FOR_HOST_004957a8
-- L603 `pe_symbol` s_WELL_DONE__PRESS_RETURN_TO_ADVAN_004961c8
-- L604 `pe_symbol` s_YOU_HAVE_COMPLETED_THE_004969cb
-- L605 `pe_symbol` s_YOU_HAVE_COMPLETED_THIS_DIFFICUL_00495f70
-- L606 `pe_symbol` s_YOU_MUST_ACHIEVE_THE_00497058
-- L607 `pe_symbol` s__d_PTS_00496948
-- L608 `pe_symbol` s__s_CHAMPIONSHIP_004969ee
+- L283 `placeholder_global` uint32_t g_ActiveFontColor[16] = {0};
+- L284 `placeholder_global` uint32_t g_ActiveParticle[16] = {0};
+- L285 `placeholder_global` uint32_t g_ActiveTrackPalette[16] = {0};
+- L286 `placeholder_global` uint32_t g_ActiveTrackSegmentAttribute[16] = {0};
+- L287 `placeholder_global` uint32_t g_ActiveVehicleIndex[16] = {0};
+- L288 `placeholder_global` uint32_t g_AudioCdTrackMode[16] = {0};
+- L289 `placeholder_global` uint32_t g_AudioEventParam1[16] = {0};
+- L290 `placeholder_global` uint32_t g_AudioEventParam2[16] = {0};
+- L291 `placeholder_global` uint32_t g_AudioEventParam3[16] = {0};
+- L292 `placeholder_global` uint32_t g_AudioEventParam4[16] = {0};
+- L293 `placeholder_global` uint32_t g_AudioEventParam5[16] = {0};
+- L294 `placeholder_global` uint32_t g_AudioEventParam6[16] = {0};
+- L295 `placeholder_global` uint32_t g_AudioEventParam7[16] = {0};
+- L296 `placeholder_global` uint32_t g_CameraAngleX[16] = {0};
+- L297 `placeholder_global` uint32_t g_CameraAngleY[16] = {0};
+- L298 `placeholder_global` uint32_t g_CameraFovHalfX[16] = {0};
+- L299 `placeholder_global` uint32_t g_CameraFovHalfY[16] = {0};
+- L300 `placeholder_global` uint32_t g_CameraFovScaleX[16] = {0};
+- L301 `placeholder_global` uint32_t g_CameraFovScaleY[16] = {0};
+- L302 `placeholder_global` uint32_t g_CameraFovWobbleActive[16] = {0};
+- L303 `placeholder_global` uint32_t g_CameraFovWobblePhase[16] = {0};
+- L304 `placeholder_global` uint32_t g_CameraPosX[16] = {0};
+- L305 `placeholder_global` uint32_t g_CameraPosX_Int[16] = {0};
+- L306 `placeholder_global` uint32_t g_CameraPosY[16] = {0};
+- L307 `placeholder_global` uint32_t g_CameraPosY_Int[16] = {0};
+- L308 `placeholder_global` uint32_t g_CameraPosZ[16] = {0};
+- L309 `placeholder_global` uint32_t g_CameraPosZ_Int[16] = {0};
+- L310 `placeholder_global` uint32_t g_CameraShakeActive[16] = {0};
+- L311 `placeholder_global` uint32_t g_CameraTargetHysteresis[16] = {0};
+- L312 `placeholder_global` uint32_t g_CameraViewportHeight[16] = {0};
+- L313 `placeholder_global` uint32_t g_CameraViewportWidth[16] = {0};
+- L314 `placeholder_global` uint32_t g_CarShadowVertices[16] = {0};
+- L315 `placeholder_global` uint32_t g_ChampionshipAdvanceAllowed[16] = {0};
+- L316 `placeholder_global` uint32_t g_ChampionshipCredits[16] = {0};
+- L317 `placeholder_global` uint32_t g_ChampionshipNextTrackIndex[16] = {0};
+- L318 `placeholder_global` uint32_t g_ChampionshipPoints[16] = {0};
+- L319 `placeholder_global` uint32_t g_ChampionshipWonFlag[16] = {0};
+- L320 `placeholder_global` uint32_t g_CinematicCameraAngleState[16] = {0};
+- L321 `placeholder_global` uint32_t g_CinematicFocusedVehicle[16] = {0};
+- L322 `placeholder_global` uint32_t g_ColorDepth[16] = {0};
+- L323 `placeholder_global` uint32_t g_ConfirmationPromptType[16] = {0};
+- L324 `placeholder_global` uint32_t g_Const_0_005[16] = {0};
+- L325 `placeholder_global` uint32_t g_Const_0_05[16] = {0};
+- L326 `placeholder_global` uint32_t g_Const_0_1[16] = {0};
+- L327 `placeholder_global` uint32_t g_Const_1000[16] = {0};
+- L328 `placeholder_global` uint32_t g_Const_1024[16] = {0};
+- L329 `placeholder_global` uint32_t g_Const_200_0[16] = {0};
+- L330 `placeholder_global` uint32_t g_Const_256[16] = {0};
+- L331 `placeholder_global` uint32_t g_Const_262144[16] = {0};
+- L332 `placeholder_global` uint32_t g_Const_512[16] = {0};
+- L333 `placeholder_global` uint32_t g_Const_DegToRad[16] = {0};
+- L334 `placeholder_global` uint32_t g_Const_Neg256[16] = {0};
+- L335 `placeholder_global` uint32_t g_Const_NegPi[16] = {0};
+- L336 `placeholder_global` uint32_t g_Const_NegTenthDegToRad[16] = {0};
+- L337 `placeholder_global` uint32_t g_Const_Pi[16] = {0};
+- L338 `placeholder_global` uint32_t g_Const_TenthDegToRad[16] = {0};
+- L339 `placeholder_global` uint32_t g_Const_TenthDegToRadFloat[16] = {0};
+- L340 `placeholder_global` uint32_t g_Const_TwoPi[16] = {0};
+- L341 `placeholder_global` uint32_t g_CountdownBeepStep[16] = {0};
+- L342 `placeholder_global` uint32_t g_CurrentCdTrackNumber[16] = {0};
+- L343 `placeholder_global` uint32_t g_CurrentTrackIndex[16] = {0};
+- L344 `placeholder_global` uint32_t g_DebrisDynamicMeshes[16] = {0};
+- L345 `placeholder_global` uint32_t g_DemoSubState[16] = {0};
+- L346 `placeholder_global` uint32_t g_DifficultyLevel[16] = {0};
+- L347 `placeholder_global` uint32_t g_DirectionArrowLookupTable[16] = {0};
+- L348 `placeholder_global` uint32_t g_DynamicObjectsPaused[16] = {0};
+- L349 `placeholder_global` uint32_t g_ErrorMessageBuffer[16] = {0};
+- L350 `placeholder_global` uint32_t g_FinishFanfarePlayed[16] = {0};
+- L351 `placeholder_global` uint32_t g_FinishSparklePosX[16] = {0};
+- L352 `placeholder_global` uint32_t g_FinishSparklePosY[16] = {0};
+- L353 `placeholder_global` uint32_t g_FinishSparkleTimers[16] = {0};
+- L354 `placeholder_global` uint32_t g_FlybyCameraOffsetX[16] = {0};
+- L355 `placeholder_global` uint32_t g_FlybyCameraOffsetY[16] = {0};
+- L356 `placeholder_global` uint32_t g_FlybyCameraOffsetZ[16] = {0};
+- L357 `placeholder_global` uint32_t g_FlybyLastCameraPosX[16] = {0};
+- L358 `placeholder_global` uint32_t g_FlybyLastCameraPosY[16] = {0};
+- L359 `placeholder_global` uint32_t g_FlybyLastCameraPosZ[16] = {0};
+- L360 `placeholder_global` uint32_t g_FlybyLastPitch[16] = {0};
+- L361 `placeholder_global` uint32_t g_FlybyLastRoll[16] = {0};
+- L362 `placeholder_global` uint32_t g_FlybyLastYaw[16] = {0};
+- L363 `placeholder_global` uint32_t g_FontAlignMode[16] = {0};
+- L364 `placeholder_global` uint32_t g_FontId_Large[16] = {0};
+- L365 `placeholder_global` uint32_t g_FontId_Medium[16] = {0};
+- L366 `placeholder_global` uint32_t g_FontId_Menu[16] = {0};
+- L367 `placeholder_global` uint32_t g_FontId_Small[16] = {0};
+- L368 `placeholder_global` uint32_t g_FontPositionColorTable[16] = {0};
+- L369 `placeholder_global` uint32_t g_FontTextColorTable[16] = {0};
+- L370 `placeholder_global` uint32_t g_ForceDirtDebris[16] = {0};
+- L371 `placeholder_global` uint32_t g_GamePauseState[16] = {0};
+- L372 `placeholder_global` uint32_t g_GlobalFrameCount[16] = {0};
+- L373 `placeholder_global` uint32_t g_GraphicsInitErrorFlag[16] = {0};
+- L374 `placeholder_global` uint32_t g_GraphicsResolutionMode[16] = {0};
+- L375 `placeholder_global` uint32_t g_HighScoreRecorded[16] = {0};
+- L376 `placeholder_global` uint32_t g_HudAnimSinPhase[16] = {0};
+- L377 `placeholder_global` uint32_t g_HudAnimTimers[16] = {0};
+- L378 `placeholder_global` uint32_t g_IsAttractDemoMode[16] = {0};
+- L379 `placeholder_global` uint32_t g_IsDemoMode[16] = {0};
+- L380 `placeholder_global` uint32_t g_IsSplitScreen[16] = {0};
+- L381 `placeholder_global` uint32_t g_IsTwoPlayerMode[16] = {0};
+- L382 `placeholder_global` uint32_t g_LapRecordSeconds[16] = {0};
+- L383 `placeholder_global` uint32_t g_LapsTotal[16] = {0};
+- L384 `placeholder_global` uint32_t g_LightningEnabled[16] = {0};
+- L385 `placeholder_global` uint32_t g_LisaActiveLightingMode[16] = {0};
+- L386 `placeholder_global` uint32_t g_LisaActiveMaterial[16] = {0};
+- L387 `placeholder_global` uint32_t g_LisaActivePageCount[16] = {0};
+- L388 `placeholder_global` uint32_t g_LisaActiveShdSize[16] = {0};
+- L389 `placeholder_global` uint32_t g_LisaActiveSubmeshFlags[16] = {0};
+- L390 `placeholder_global` uint32_t g_LisaActiveTabSize[16] = {0};
+- L392 `placeholder_global` uint32_t g_LisaAllocatedBufferCount[16] = {0};
+- L393 `placeholder_global` uint32_t g_LisaAllocatedBufferMax[16] = {0};
+- L394 `placeholder_global` uint32_t g_LisaAspectScale[16] = {0};
+- L395 `placeholder_global` uint32_t g_LisaBackfaceSign[16] = {0};
+- L396 `placeholder_global` uint32_t g_LisaCameraDistance[16] = {0};
+- L397 `placeholder_global` uint32_t g_LisaCameraFocalLength[16] = {0};
+- L398 `placeholder_global` uint32_t g_LisaCameraFocalScale[16] = {0};
+- L399 `placeholder_global` uint32_t g_LisaCameraMatrix_00[16] = {0};
+- L400 `placeholder_global` uint32_t g_LisaCameraMatrix_01[16] = {0};
+- L401 `placeholder_global` uint32_t g_LisaCameraMatrix_02[16] = {0};
+- L402 `placeholder_global` uint32_t g_LisaCameraMatrix_10[16] = {0};
+- L403 `placeholder_global` uint32_t g_LisaCameraMatrix_11[16] = {0};
+- L404 `placeholder_global` uint32_t g_LisaCameraMatrix_12[16] = {0};
+- L405 `placeholder_global` uint32_t g_LisaCameraMatrix_20[16] = {0};
+- L406 `placeholder_global` uint32_t g_LisaCameraMatrix_21[16] = {0};
+- L407 `placeholder_global` uint32_t g_LisaCameraMatrix_22[16] = {0};
+- L408 `placeholder_global` uint32_t g_LisaCameraMatrix_X[16] = {0};
+- L409 `placeholder_global` uint32_t g_LisaCameraMatrix_Y[16] = {0};
+- L410 `placeholder_global` uint32_t g_LisaCameraOffsetX[16] = {0};
+- L411 `placeholder_global` uint32_t g_LisaCameraOffsetY[16] = {0};
+- L412 `placeholder_global` uint32_t g_LisaCameraPitch[16] = {0};
+- L413 `placeholder_global` uint32_t g_LisaCameraZoom[16] = {0};
+- L414 `placeholder_global` uint32_t g_LisaClipBottom[16] = {0};
+- L415 `placeholder_global` uint32_t g_LisaClipLeft[16] = {0};
+- L416 `placeholder_global` uint32_t g_LisaClipRight[16] = {0};
+- L417 `placeholder_global` uint32_t g_LisaClipSubpixelBottom[16] = {0};
+- L418 `placeholder_global` uint32_t g_LisaClipSubpixelLeft[16] = {0};
+- L419 `placeholder_global` uint32_t g_LisaClipSubpixelRight[16] = {0};
+- L420 `placeholder_global` uint32_t g_LisaClipSubpixelTop[16] = {0};
+- L421 `placeholder_global` uint32_t g_LisaClipTop[16] = {0};
+- L422 `placeholder_global` uint32_t g_LisaCurrentVertexIndex[16] = {0};
+- L423 `placeholder_global` uint32_t g_LisaDefaultOffset_X[16] = {0};
+- L424 `placeholder_global` uint32_t g_LisaDefaultOffset_Y[16] = {0};
+- L425 `placeholder_global` uint32_t g_LisaDefaultOffset_Z[16] = {0};
+- L426 `placeholder_global` uint32_t g_LisaDefaultScale_X[16] = {0};
+- L427 `placeholder_global` uint32_t g_LisaDefaultScale_Y[16] = {0};
+- L428 `placeholder_global` uint32_t g_LisaDisableFiltering[16] = {0};
+- L430 `placeholder_global` uint32_t g_LisaDrawCommands[16] = {0};
+- L431 `placeholder_global` uint32_t g_LisaEnableMipmaps[16] = {0};
+- L432 `placeholder_global` uint32_t g_LisaFrustumNear[16] = {0};
+- L433 `placeholder_global` uint32_t g_LisaFrustumPlaneLeft[16] = {0};
+- L434 `placeholder_global` uint32_t g_LisaFrustumPlaneRight[16] = {0};
+- L435 `placeholder_global` uint32_t g_LisaFrustumPlaneTop[16] = {0};
+- L436 `placeholder_global` uint32_t g_LisaGridCellsX[16] = {0};
+- L437 `placeholder_global` uint32_t g_LisaGridWorldHeight[16] = {0};
+- L438 `placeholder_global` uint32_t g_LisaGridWorldWidth[16] = {0};
+- L439 `placeholder_global` uint32_t g_LisaMipmapQuality[16] = {0};
+- L440 `placeholder_global` uint32_t g_LisaObjMat_11[16] = {0};
+- L441 `placeholder_global` uint32_t g_LisaObjMat_20[16] = {0};
+- L442 `placeholder_global` uint32_t g_LisaObjMat_21[16] = {0};
+- L443 `placeholder_global` uint32_t g_LisaObjMat_CosPitch[16] = {0};
+- L444 `placeholder_global` uint32_t g_LisaObjMat_CosRoll[16] = {0};
+- L445 `placeholder_global` uint32_t g_LisaObjMat_CosYaw[16] = {0};
+- L446 `placeholder_global` uint32_t g_LisaObjMat_Scale[16] = {0};
+- L447 `placeholder_global` uint32_t g_LisaObjMat_SinPitch[16] = {0};
+- L448 `placeholder_global` uint32_t g_LisaObjMat_SinRoll[16] = {0};
+- L449 `placeholder_global` uint32_t g_LisaObjMat_Tmp1[16] = {0};
+- L450 `placeholder_global` uint32_t g_LisaObjMat_Tmp2[16] = {0};
+- L451 `placeholder_global` uint32_t g_LisaObjMat_Tmp3[16] = {0};
+- L452 `placeholder_global` uint32_t g_LisaObjMat_Tmp4[16] = {0};
+- L453 `placeholder_global` uint32_t g_LisaObjMat_Tmp5[16] = {0};
+- L454 `placeholder_global` uint32_t g_LisaObjMat_Tmp6[16] = {0};
+- L455 `placeholder_global` uint32_t g_LisaObjectMatrix_22[16] = {0};
+- L457 `placeholder_global` uint32_t g_LisaPerspectiveDepthTable[16] = {0};
+- L458 `placeholder_global` uint32_t g_LisaRasterizerAccumulator[16] = {0};
+- L459 `placeholder_global` uint32_t g_LisaRasterizerJmpTable[16] = {0};
+- L462 `placeholder_global` uint32_t g_LisaScanlinePitch[16] = {0};
+- L464 `placeholder_global` uint32_t g_LisaShadingEnabled[16] = {0};
+- L465 `placeholder_global` uint32_t g_LisaSubmeshBoundRadius[16] = {0};
+- L466 `placeholder_global` uint32_t g_LisaSubmeshCenterWorldX[16] = {0};
+- L467 `placeholder_global` uint32_t g_LisaSubmeshCenterWorldY[16] = {0};
+- L468 `placeholder_global` uint32_t g_LisaSubmeshCenterWorldZ[16] = {0};
+- L469 `placeholder_global` uint32_t g_LisaSubmeshClipMask[16] = {0};
+- L470 `placeholder_global` uint32_t g_LisaSubmeshDepthOffset[16] = {0};
+- L471 `placeholder_global` uint32_t g_LisaSubmeshFlags[16] = {0};
+- L472 `placeholder_global` uint32_t g_LisaSubmeshLodLevel[16] = {0};
+- L473 `placeholder_global` uint32_t g_LisaSubmeshPolyCount[16] = {0};
+- L474 `placeholder_global` uint32_t g_LisaSubmeshTmp1[16] = {0};
+- L475 `placeholder_global` uint32_t g_LisaSubmeshTmp4[16] = {0};
+- L476 `placeholder_global` uint32_t g_LisaSubmeshTmp5[16] = {0};
+- L477 `placeholder_global` uint32_t g_LisaSubmeshVertexStride[16] = {0};
+- L478 `placeholder_global` uint32_t g_LisaTexturePageSizes[16] = {0};
+- L479 `placeholder_global` uint32_t g_LisaTransformedVertices[16] = {0};
+- L480 `placeholder_global` uint32_t g_LisaViewportCenterX[16] = {0};
+- L481 `placeholder_global` uint32_t g_LisaViewportCenterY[16] = {0};
+- L482 `placeholder_global` uint32_t g_LisaViewportHeight[16] = {0};
+- L483 `placeholder_global` uint32_t g_LisaViewportQuarter[16] = {0};
+- L484 `placeholder_global` uint32_t g_LisaViewportRemaining[16] = {0};
+- L485 `placeholder_global` uint32_t g_LisaViewportWidth[16] = {0};
+- L486 `placeholder_global` uint32_t g_LisaVisibleObjects[16] = {0};
+- L487 `placeholder_global` uint32_t g_LisaVisibleSubmeshes[16] = {0};
+- L488 `placeholder_global` uint32_t g_MasterMusicVolume[16] = {0};
+- L490 `placeholder_global` uint32_t g_MultiplayerMode[16] = {0};
+- L492 `placeholder_global` uint32_t g_ParticleArray1[16] = {0};
+- L493 `placeholder_global` uint32_t g_ParticleArray2[16] = {0};
+- L494 `placeholder_global` uint32_t g_ParticleCount1[16] = {0};
+- L496 `placeholder_global` uint32_t g_ParticleTemplateX[16] = {0};
+- L497 `placeholder_global` uint32_t g_ParticleTemplateY[16] = {0};
+- L498 `placeholder_global` uint32_t g_ParticleTemplateZ[16] = {0};
+- L499 `placeholder_global` uint32_t g_PlayAgainPromptActive[16] = {0};
+- L500 `placeholder_global` uint32_t g_PlayerCarChoice[16] = {0};
+- L501 `placeholder_global` uint32_t g_PlayerCarModel[16] = {0};
+- L502 `placeholder_global` uint32_t g_PlayerFinishTimers[16] = {0};
+- L504 `placeholder_global` uint32_t g_PostRaceSequenceState[16] = {0};
+- L505 `placeholder_global` uint32_t g_RaceFinishingPointsTable[16] = {0};
+- L506 `placeholder_global` uint32_t g_RacePosition[16] = {0};
+- L507 `placeholder_global` uint32_t g_RaceStartTimer[16] = {0};
+- L508 `placeholder_global` uint32_t g_RaceTimer[16] = {0};
+- L509 `placeholder_global` uint32_t g_RaceTimer_P2[16] = {0};
+- L510 `placeholder_global` uint32_t g_RadarHighResFlag[16] = {0};
+- L511 `placeholder_global` uint32_t g_RainTextureId[16] = {0};
+- L512 `placeholder_global` uint32_t g_RenderTargetSurface[16] = {0};
+- L513 `placeholder_global` uint32_t g_ResultsMenuSelection[16] = {0};
+- L514 `placeholder_global` uint32_t g_ResultsOverlayActive[16] = {0};
+- L515 `placeholder_global` uint32_t g_ResultsRenderedLaps[16] = {0};
+- L516 `placeholder_global` uint32_t g_RpmNeedleDeltaScale[16] = {0};
+- L517 `placeholder_global` uint32_t g_SavedProfileLeague[16] = {0};
+- L519 `placeholder_global` uint32_t g_ScreenHeightAlt[16] = {0};
+- L520 `placeholder_global` uint32_t g_ScreenShakeTimerP1[16] = {0};
+- L521 `placeholder_global` uint32_t g_ScreenShakeTimerP2[16] = {0};
+- L522 `placeholder_global` uint32_t g_ScreenSizeSetting[16] = {0};
+- L523 `placeholder_global` uint32_t g_ShowDebugCoords[16] = {0};
+- L524 `placeholder_global` uint32_t g_ShowFpsOverlay[16] = {0};
+- L525 `placeholder_global` uint32_t g_ShowRecordingOverlay[16] = {0};
+- L526 `placeholder_global` uint32_t g_ShowRollTelemetry[16] = {0};
+- L527 `placeholder_global` uint32_t g_ShowSecondPlayerFlag[16] = {0};
+- L528 `placeholder_global` uint32_t g_SkyClearEnabled[16] = {0};
+- L529 `placeholder_global` uint32_t g_SmokeParticleDescriptor[16] = {0};
+- L530 `placeholder_global` uint32_t g_SnowflakeAngle[16] = {0};
+- L531 `placeholder_global` uint32_t g_SortedChampionshipPoints[16] = {0};
+- L532 `placeholder_global` uint32_t g_SortedRacerIndices[16] = {0};
+- L533 `placeholder_global` uint32_t g_SpeedoConfig[16] = {0};
+- L534 `placeholder_global` uint32_t g_SpeedoPosition[16] = {0};
+- L535 `placeholder_global` uint32_t g_SpriteScaleFactors[16] = {0};
+- L536 `placeholder_global` uint32_t g_SubpixelMaxX[16] = {0};
+- L537 `placeholder_global` uint32_t g_SubpixelMaxY[16] = {0};
+- L538 `placeholder_global` uint32_t g_SubpixelMinX[16] = {0};
+- L539 `placeholder_global` uint32_t g_SubpixelMinY[16] = {0};
+- L540 `placeholder_global` uint32_t g_SurfaceDustFlagTable[16] = {0};
+- L541 `placeholder_global` uint32_t g_TargetLapTimeCents[16] = {0};
+- L542 `placeholder_global` uint32_t g_TelemetryRollAngle[16] = {0};
+- L543 `placeholder_global` uint32_t g_TimeTrialActive[16] = {0};
+- L545 `placeholder_global` uint32_t g_TrackChunkToNodeTable[16] = {0};
+- L546 `placeholder_global` uint32_t g_TrackFlybyActiveTarget[16] = {0};
+- L548 `placeholder_global` uint32_t g_TrackHighScoreNames[16] = {0};
+- L549 `placeholder_global` uint32_t g_TrackHighScoreTimes[16] = {0};
+- L550 `placeholder_global` uint32_t g_TrackRoadSequenceNodeCount[16] = {0};
+- L551 `placeholder_global` uint32_t g_TrackSegmentTable[16] = {0};
+- L552 `placeholder_global` uint32_t g_TrackStyle[16] = {0};
+- L553 `placeholder_global` uint32_t g_TrigAngleTable[16] = {0};
+- L554 `placeholder_global` uint32_t g_TrophyFanfarePlayed[16] = {0};
+- L555 `placeholder_global` uint32_t g_TurboMeterFill[16] = {0};
+- L556 `placeholder_global` uint32_t g_UnlockedLeagueIndex[16] = {0};
+- L557 `placeholder_global` uint32_t g_VehicleCameraStates[16] = {0};
+- L560 `placeholder_global` uint32_t g_VideoModeActive[16] = {0};
+- L561 `placeholder_global` uint32_t g_ViewportBorderCornerBL[16] = {0};
+- L562 `placeholder_global` uint32_t g_ViewportBorderCornerBR[16] = {0};
+- L563 `placeholder_global` uint32_t g_ViewportBorderCornerTL[16] = {0};
+- L564 `placeholder_global` uint32_t g_ViewportBorderCornerTR[16] = {0};
+- L565 `placeholder_global` uint32_t g_ViewportBorderMetrics[16] = {0};
+- L566 `placeholder_global` uint32_t g_ViewportMaxX[16] = {0};
+- L567 `placeholder_global` uint32_t g_ViewportMaxY[16] = {0};
+- L568 `placeholder_global` uint32_t g_ViewportMinX[16] = {0};
+- L569 `placeholder_global` uint32_t g_ViewportMinY[16] = {0};
+- L649 `placeholder_global` uint32_t g_WeatherActive[16] = {0};
+- L650 `placeholder_global` uint32_t g_WeatherAnimTick[16] = {0};
+- L651 `placeholder_global` uint32_t g_WeatherAudioVoices[16] = {0};
+- L652 `placeholder_global` uint32_t g_WeatherDropOffsetX[16] = {0};
+- L653 `placeholder_global` uint32_t g_WeatherDropOffsetY[16] = {0};
+- L654 `placeholder_global` uint32_t g_WeatherGridObjects[16] = {0};
+- L655 `placeholder_global` uint32_t g_WeatherType[16] = {0};
+- L656 `placeholder_global` uint32_t g_WeatherViewportCount[16] = {0};
+- L657 `placeholder_global` uint32_t g_WheelParticleDescriptor[16] = {0};
+- L759 `pe_symbol` s_AT_FIRST_PLACE_WITH_00496a11
+- L760 `pe_symbol` s_AT_SECOND_PLACE_WITH_00496a34
+- L761 `pe_symbol` s_AT_THIRD_PLACE_WITH_00496a57
+- L762 `pe_symbol` s_A_SCORE_OF__d_PTS__00496a7a
+- L763 `pe_symbol` s_CD_TRACK_00494db2
+- L764 `pe_symbol` s_CONGRATULATIONS__004969a8
+- L765 `pe_symbol` s_CONTINUE_00494d58
+- L766 `pe_symbol` s_Cannot_use_this_graphics_mode__004989dc
+- L767 `pe_symbol` s_DEFAULT_00494dee
+- L768 `pe_symbol` s_Error_while_changing_car_mesh_00499248
+- L769 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_ANIM_OBJ_004994ac
+- L770 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_00499530
+- L771 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_CAR_004995a4
+- L772 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_SHA_00499558
+- L773 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_HANDLE_WHE_00499580
+- L774 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_TRAN_SPRIT_004993b4
+- L775 `pe_symbol` s_FEL_VID_LI_MOVEOBJECT_WATER_SPLA_00499468
+- L776 `pe_symbol` s_FEL_VID_LI_PLACEOBJECT_HANDLE_CA_00499508
+- L777 `pe_symbol` s_FPS__d_00499658
+- L778 `pe_symbol` s_GOLD_STATUE_TO_ADVANCE__0049707b
+- L779 `pe_symbol` s_NOW_TRY_THE__s_LEAGUE__00496f68
+- L780 `pe_symbol` s_OLDROADNR__d_00499630
+- L781 `pe_symbol` s_PLACE_OR_BETTER_TO_PROCEED__00496452
+- L782 `pe_symbol` s_PLAY_TRACK_AGAIN___Y_N__00495698
+- L783 `pe_symbol` s_PRESS_RETURN_TO_CONTINUE_00495860
+- L784 `pe_symbol` s_QUIT_00494d94
+- L785 `pe_symbol` s_QUIT___Y_N__00495248
+- L786 `pe_symbol` s_RANDOM_00494e0c
+- L787 `pe_symbol` s_RECORDING__0049964c
+- L788 `pe_symbol` s_RESTART_00494d76
+- L789 `pe_symbol` s_RESTART___Y_N__00495300
+- L790 `pe_symbol` s_RETRY_00494dd0
+- L791 `pe_symbol` s_ROLL___1f_00499640
+- L792 `pe_symbol` s_SKILLNAD___3f_004995f8
+- L793 `pe_symbol` s_SORRY__YOU_MUST_REACH_THIRD_00496420
+- L794 `pe_symbol` s_SPEED___3f_004995ec
+- L795 `pe_symbol` s_SQUASHED2__d_00499620
+- L796 `pe_symbol` s_TOTAL_SCORE_004955e0
+- L797 `pe_symbol` s_TRACK_RESULTS_00495470
+- L798 `pe_symbol` s_TRACK_SCORE_00495528
+- L799 `pe_symbol` s_TYPE1__d_00499614
+- L800 `pe_symbol` s_TYPE2__d_00499608
+- L802 `pe_symbol` s_WAITING_FOR_HOST_004957a8
+- L803 `pe_symbol` s_WELL_DONE__PRESS_RETURN_TO_ADVAN_004961c8
+- L804 `pe_symbol` s_YOU_HAVE_COMPLETED_THE_004969cb
+- L805 `pe_symbol` s_YOU_HAVE_COMPLETED_THIS_DIFFICUL_00495f70
+- L806 `pe_symbol` s_YOU_MUST_ACHIEVE_THE_00497058
+- L807 `pe_symbol` s__d_PTS_00496948
+- L808 `pe_symbol` s__s_CHAMPIONSHIP_004969ee
 
 ### decomp/src/lisa3d.c
 
-- L1666 `pe_symbol` LAB_00447785
-- L1675 `pe_symbol` LAB_00447785
-- L2162 `pe_symbol` LAB_004484c0
-- L2192 `pe_symbol` LAB_004484c0
-- L2647 `pe_symbol` LAB_00448c11
-- L2654 `pe_symbol` LAB_00448c11
-- L2692 `pe_symbol` LAB_00448c11
-- L5096 `pe_symbol` LAB_0044d8ef
-- L5101 `pe_symbol` LAB_0044d8ef
+- L1670 `pe_symbol` LAB_00447785
+- L1679 `pe_symbol` LAB_00447785
+- L2166 `pe_symbol` LAB_004484c0
+- L2196 `pe_symbol` LAB_004484c0
+- L2651 `pe_symbol` LAB_00448c11
+- L2658 `pe_symbol` LAB_00448c11
+- L2696 `pe_symbol` LAB_00448c11
+- L5100 `pe_symbol` LAB_0044d8ef
+- L5105 `pe_symbol` LAB_0044d8ef
 

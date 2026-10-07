@@ -564,3 +564,7 @@ typedef struct TrackSegmentAttribute {
 } TrackSegmentAttribute;
 ```
 
+
+## Timer reconstruction scope
+
+The timer at DOS 0x10198/0x10238/0x1034c uses scalar globals and the Watcom BIOS REGS wrapper; it introduces no game structure changes. The database still tracks 10 structures. See [timer.md](timer.md) and the implementation inventory for unresolved placeholder types and sizes.

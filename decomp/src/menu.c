@@ -603,14 +603,16 @@ int Menu_Init(void) {
 
     BootLog("[MAINDOS] Menu_Init: Initializing authentic menu system...");
 
-    /* 1. Allocate and load 768-byte palette (baltazar\\data\\menu.col) */
+    /* 1. Load palette payload after COL header (0x11515, 0x11542). */
     g_pMenuPalDefault = (uint8_t *)Mem_Alloc(0x300, 0);
-    if (!g_pMenuPalDefault || !File_ReadToBuffer("baltazar\\data\\menu.col", g_pMenuPalDefault, 0x300, 0)) {
+    if (!g_pMenuPalDefault || !File_ReadToBuffer("baltazar\\data\\menu.col", g_pMenuPalDefault, 0x300, 8)) {
         BootLog("[MAINDOS] Menu_Init: Failed to load menu.col!");
         return 0;
     }
     g_pMenuCol = g_pMenuPalDefault;
     g_pMenuPalActive = g_pMenuPalDefault;
+
+    g_MenuState = MENU_STATE_LANG_SELECT;
 
     /* 2. Allocate 64,321 byte menu framebuffer 1 */
     g_pMenuBuffer1 = (uint8_t *)Mem_Alloc(0xfb41, 0);
@@ -771,20 +773,29 @@ int Menu_Tick(void) {
     }
 
     /* 5. Decode CDP background video frame (2.393103 ticks/frame) */
-    g_MenuCdpFrameAccum += delta;
-    if (g_MenuCdpFrameAccum >= 2.393103448275862) {
-        while (g_MenuCdpFrameAccum >= 2.393103448275862) {
-            g_MenuCdpFrameAccum -= 2.393103448275862;
-        }
-        if (g_MenuCdp.file_data != NULL) {
-            int ret = Cdp_DecodeFrame(&g_MenuCdp);
-            if (ret == 0) {
-                g_MenuCdpActiveIndex++;
-                if (g_MenuCdpActiveIndex >= 6) {
-                    g_MenuTimeSeconds = 1278.0;
-                } else if (g_pMenuCdpFiles[g_MenuCdpActiveIndex] != NULL) {
-                    g_MenuCdp.file_data = g_pMenuCdpFiles[g_MenuCdpActiveIndex];
-                    Cdp_OpenFile(&g_MenuCdp);
+    /* 0x12e2c..0x12e4a: decoding is active only after the initial
+     * white fade and before the 1278.0 release boundary. */
+    if (g_MenuTimeSeconds > 28.8 && g_MenuTimeSeconds < 1278.0) {
+        g_MenuCdpFrameAccum += delta;
+        if (g_MenuCdpFrameAccum >= 2.393103448275862) {
+            while (g_MenuCdpFrameAccum >= 2.393103448275862) {
+                g_MenuCdpFrameAccum -= 2.393103448275862;
+            }
+            if (g_MenuCdp.file_data != NULL) {
+                int ret = Cdp_DecodeFrame(&g_MenuCdp);
+                if (ret == 0) {
+                    g_MenuCdpActiveIndex++;
+                    if (g_MenuCdpActiveIndex >= 6) {
+                        g_MenuTimeSeconds = 1278.0;
+                    } else if (g_pMenuCdpFiles[g_MenuCdpActiveIndex] != NULL) {
+                        g_MenuCdp.file_data = g_pMenuCdpFiles[g_MenuCdpActiveIndex];
+                        Cdp_OpenFile(&g_MenuCdp);
+                    }
+                }
+                /* 0x12eec..0x12efe / 0x552f0: each clip installs its
+                 * own palette after the second decoded frame. */
+                if (g_MenuCdp.current_frame == 2) {
+                    VGA_SetPaletteRaw(g_MenuCdp.palette);
                 }
             }
         }

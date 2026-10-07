@@ -246,8 +246,7 @@ int Game_Init(void) {
     g_GameState9 = 0;
     Subsystem_InitLightingTable();
     Audio_Init();
-    g_GameState11 = 1;
-    g_GameState1 = 1; /* Ready for Menu_Init on next tick */
+
     return 1;
 }
 
@@ -3230,11 +3229,22 @@ void Track_PreprocessPlacements(void) {
  * @fidelity EXACT
  * @notes Native state machine dispatcher (Menu -> Track Load -> 3-stage init -> 3D Race -> Post-Race).
  */
+/**
+ * @original Unknown_219d4 (MAINDOS.EXE @ 0x000219d4, main.c)
+ * @fidelity ADAPTED
+ * @notes Loading screen subsystem. Native drew "LOADING" and progressed state.
+ */
+void Unknown_219d4(void) {
+    g_GameState11 = 1;
+    g_GameState1 = 1;
+}
+
 void Game_StateDispatcher(void) {
     int menu_code = 0;
 
     if (g_GameState1 == 2) {
-        /* Subsystem 0x119d4: Menu reset/transition */
+        /* Subsystem 0x219d4: Loading screen & state transition */
+        Unknown_219d4();
     }
 
     if (g_GameState1 == 1) {

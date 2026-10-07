@@ -337,3 +337,18 @@ These linear addresses correspond directly to runtime DOS addresses in `MAINDOS.
 | `0x000bed18` | `int32_t` | `g_MenuIntroVideoEnabled` | Flag enabling/disabling intro CDP sequence playback. |
 
 
+
+
+## Recovered DOS timer state
+
+See [timer.md](timer.md) for authentic instructions and initializer evidence.
+
+| Name | DOS address | Type | Bytes | Initial value | Purpose |
+| --- | --- | --- | --- | --- | --- |
+| g_TimerFrameRate | 0x000ab5c0 | int32_t | 4 | 0 | Truncated 36.418 divided by unclamped frame interval |
+| g_TimerCurrentTime | 0x000ab5c8 | double | 8 | 0.0 | Current half-BIOS-tick timestamp |
+| g_TimerPreviousTime | 0x000ab5d0 | double | 8 | 0.0 | Previous timestamp; reset on backward clock |
+| g_TimerShiftScale | 0x000ab5d8 | int32_t | 4 | 0 | 32-bit rotate count determined by PIT calibration |
+| g_TimerEpoch | 0x000e73b4 | int32_t | 4 | 0 | Truncated startup timestamp |
+| g_TimerElapsedSeconds | 0x000e73a0 | double | 8 | 0.0 | Elapsed seconds since truncated epoch |
+| g_TimerBaseScale | 0x000a001c | double | 8 | 3.0516646830846227e-05 | Initialized PIT multiplier; same bytes at 0xa0014 |

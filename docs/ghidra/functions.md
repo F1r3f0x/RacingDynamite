@@ -179,9 +179,9 @@
 | `0x00054e00` | - | `FUN_00499abc` | `Cdp_DecompressRLE` | `lisa3d.c` | Decompiled | ADAPTED | Delta RLE decompressor for CDP video frames |
 | `0x10010` | - | - | `main` | `main.c` | Decompiled | EXACT |  |
 | `0x6f549` | - | - | `__cstart` | `MSVC CRT` | Decompiled | EXACT |  |
-| `0x10198` | - | - | `Timer_Init` | `main.c` | Decompiled | EXACT |  |
-| `0x1034c` | - | - | `Timer_GetPITCounter` | `main.c` | Decompiled | EXACT |  |
-| `0x10238` | - | - | `Timer_GetTime` | `main.c` | Decompiled | EXACT |  |
+| `0x00010198` | - | - | `Timer_Init` | `main.c` | Decompiled | EXACT | PIT mode-2 setup, BIOS epoch, and 100-sample low-bit calibration |
+| `0x0001034c` | - | - | `Timer_GetPITCounter` | `main.c` | Decompiled | EXACT | Read PIT up-counter; 32-bit rotate then mask to 16 bits |
+| `0x00010238` | - | - | `Timer_GetTime` | `main.c` | Decompiled | EXACT | Elapsed half-BIOS-ticks; rollover reset, clamp, FPS and elapsed-seconds side effects |
 | `0x63310` | - | - | `Sound_LoadAsset` | `main.c` | Decompiled | EXACT |  |
 | `0x63d56` | - | - | `Audio_Init` | `main.c` | Decompiled | EXACT |  |
 | `0x20d14` | - | - | `FatalError` | `main.c` | Decompiled | EXACT |  |

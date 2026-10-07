@@ -8,29 +8,30 @@ This document establishes the official engineering plan, memory architecture, to
 
 To eliminate cognitive overhead and context switching, all active modernization/SDL porting work has been frozen on `master`. Decompilation proceeds on the dedicated **`decomp`** branch with two strict phases:
 
-1. **Phase A (The Re-creation)**: Achieve a 1:1 compilable, matching C representation of the authentic 1997 engine against the DOS executable using the original compiler (Watcom C/C++ 10.6).
+1. **Phase A (The Re-creation)**: Recover functionally faithful structured C89 from authentic MAINDOS.EXE, built with Open Watcom V2 and validated in equivalent DOSBox scenarios. Optional normalized instruction matching is diagnostic and does not establish functional completion.
 2. **Phase B (The Modernization)**: Once complete and verified against the original binary, port the clean C codebase to modern platforms (C11, SDL2, 64-bit).
 
 ---
 
 ## 2. Target Binary & Memory Architecture
 
-### The Problem with `MAINDOS.EXE`
-The original `MAINDOS.EXE` is an **LE (Linear Executable)** bound to a 16-bit DOS/4GW DOS extender stub (0x0000 - 0x2C80). Standard disassemblers (including Ghidra out of the box) only see the 16-bit real mode MZ stub and fail to parse the 32-bit protected mode payload.
+### Authentic LE analysis
 
-### The Unpacker & PE Converter (`tools/unpack_dos_le.py`)
-To enable native Ghidra analysis with zero third-party plugins:
-* `tools/unpack_dos_le.py` extracts the 3 linear memory objects and 192 uncompressed 4KB pages starting at offset `0x5b200`.
-* Applies all **41,304 LE fixup relocations** (linear addresses and relative CALL/JMP targets).
-* Re-packages the memory into a standard 32-bit PE executable: **`Ignition/Ignition/MAINDOS.EXE`** (784 KB).
+`Ignition/Ignition/MAINDOS.EXE` is the exclusive source of truth. Never convert, replace, or overwrite it. The obsolete PE repackaging workflow lost initializers and ABI information and is prohibited.
 
-### Master Memory Map (`MAINDOS.EXE` / Runtime Linear Memory)
+Use `tools/le_parser.py` to recover LE objects and apply relocations in memory, `tools/disasm_le.py` for bounded instruction inspection, and `tools/verify_capstone.py` for authentic instructions and data. File offsets are determined from the LE object/page tables, not assumed PE section offsets.
 
-| Section | Linear Base Address | Virtual Size | File Offset | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| **`.text`** | `0x00010000` - `0x00085C4F` | 482,383 bytes | `0x00000400` | 32-bit x86 Code. Entry Point: **`0x00055FBC`** |
-| **`.rdata`**| `0x00090000` - `0x00091597` | 5,527 bytes | `0x00076400` | Read-only constant data and string tables |
-| **`.data`** | `0x000A0000` - `0x0026F640` | 1,898,048 bytes| `0x00078400` | Global state, initialized buffers, BSS, stack |
+The authentic LE parser reports these objects:
+
+| Object | Linear base | Virtual size | Stored bytes |
+| --- | --- | --- | --- |
+| Code | `0x10000` | `0x75c4f` | 482383 |
+| Read-only data | `0x90000` | `0x1597` | 5527 |
+| Data/BSS | `0xa0000` | `0x1cf640` | 291734 |
+
+Unstored BSS, initialized pages, pointer fixups, and packed tables require separate interpretation. Do not assume a zero-filled reconstruction is authentic without binary evidence.
+
+Build/symbol verification uses `uv run python tools/verify_matching.py`. Instruction comparison remains optional via `--strict`. Tracking/annotation validation uses `uv run python tools/verify_fidelity.py`; it reports gaps and does not certify game behavior. See `docs/tracking/implementation_inventory.md` and `runtime_baseline.md` for source evidence and observed runtime limits.
 
 ---
 

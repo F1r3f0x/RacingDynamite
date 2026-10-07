@@ -99,3 +99,15 @@ CREATE TABLE IF NOT EXISTS deviations (
     win_address TEXT,
     toggle_key TEXT                        -- Corresponding flag in GameFixOptions
 );
+
+-- Source evidence is deliberately separate from historical reconstruction status.
+-- A lexical candidate is not a confirmed defect or proof of authentic behavior.
+CREATE TABLE IF NOT EXISTS implementation_audits (
+    symbol_name TEXT NOT NULL,
+    source_path TEXT NOT NULL,
+    source_line INTEGER NOT NULL,
+    implementation_state TEXT NOT NULL,
+    runtime_verification TEXT NOT NULL,
+    evidence TEXT NOT NULL,
+    PRIMARY KEY(symbol_name, source_path)
+);

@@ -614,3 +614,8 @@ char s_tab_tab[512] = {0};
 
 /* TODO: unported (called from fx.c); void signature matches lisa3d.h */
 void Lisa_ResetRasterizerContext(void) { }
+
+#pragma aux ABS_ "*";
+#pragma aux SQRT_ "*";
+int ABS_(int x) { return x < 0 ? -x : x; }
+double SQRT_(double x) { extern double sqrt(double); return sqrt(x); }
