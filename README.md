@@ -4,7 +4,7 @@
 [![Standard: C11](https://img.shields.io/badge/Standard-C11-green.svg)](https://en.wikipedia.org/wiki/C11_(C_standard_revision))
 [![Platform: SDL2](https://img.shields.io/badge/Platform-SDL2-red.svg)](https://www.libsdl.org/)
 
-**Racing Dynamite** is an open-source, portable C implementation and reverse-engineering effort of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting the authentic DOS release (`MAINDOS.EXE`).
+**Racing Dynamite** is an open-source, portable C implementation and reverse-engineering effort of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting the authentic standard Windows release (`IGN_WIN.EXE`). The DOS release (`MAINDOS.EXE`) is retained as a secondary reference.
 
 ---
 
@@ -16,6 +16,16 @@ This repository contains **strictly clean-room reverse-engineered source code, t
 To run the game, you must supply game assets from a legally purchased copy of *Ignition* (available on GOG.com or original CD-ROM).
 
 ---
+
+## Current Reconstruction Focus
+
+As of 2026-10-07, the active goal is faithful reconstruction of
+`Ignition/Ignition/IGN_WIN.EXE`, followed by modernization into C11/SDL2.
+See [the Windows decompilation plan](docs/decomp_plan.md) for the verified target
+fingerprint, migration boundaries, and next milestones. Existing DOS sources,
+Open Watcom tooling, symbol maps, and progress reports are preserved; they do not
+establish Windows completion. The Windows compiler/build pipeline and runtime
+baseline still need to be established.
 
 ## Features & Goals
 
@@ -70,21 +80,19 @@ Launch the engine:
 ./build/racing_dynamite
 ```
 
-### 4. DOS Decompilation & DOSBox Testing (Open Watcom V2)
-To compile the authentic pure C DOS implementation (`decomp/src/`) using Open Watcom V2 and link with DOS/4GW objects:
-```bash
-# Compile and link MAINDOS_REBUILT.EXE and deploy to Ignition/Ignition/MREBUILT.EXE
+### 4. Retained DOS Decompilation & DOSBox Testing (Open Watcom V2)
+
+These commands build the secondary DOS reference only. They do not build or validate the Windows target.
+To compile the retained C89 DOS reconstruction (`decomp/src/`) using Open Watcom V2:
+```powershell
 uv run python tools/build_decomp.py --link
-
-# Compile, link, deploy to MREBUILT.EXE and automatically launch in DOSBox
-uv run python tools/build_decomp.py --run
+uv run python tools/verify_matching.py
 ```
-> [!IMPORTANT]
-> The build system deploys the rebuilt binary strictly as `MREBUILT.EXE` inside the game directory. The original `MAINDOS.EXE` and all other original game files are strictly preserved and never overwritten.
 
-Alternatively, you can launch either binary directly in windowed DOSBox using the root batch files:
-- `run_dosbox.bat`: Launches the rebuilt Pure C engine (`MREBUILT.EXE`).
-- `run_original.bat`: Launches the original authentic 32-bit DOS executable (`MAINDOS.EXE`).
+For retained DOS runtime comparisons, follow
+[the historical DOSBox baseline](docs/tracking/runtime_baseline.md) and use
+disposable copies under `build/runtime/`. Never deploy rebuilt binaries into the
+original `Ignition/` directory. DOS startup remains unverified after timer repair.
 
 
 ---

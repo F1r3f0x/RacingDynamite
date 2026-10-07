@@ -1,5 +1,7 @@
 # Ignition (1997) Technical Documentation
 
+> Active target (2026-10-07): standard Windows `IGN_WIN.EXE`. See [the active plan](decomp_plan.md). Existing engine notes, format notes, symbol maps, and database statuses contain DOS/legacy evidence; validate each claim against the fingerprinted Windows binary before treating it as Windows provenance.
+
 Welcome to the central technical documentation and reverse engineering knowledge base for **Ignition** (1997, Unique Development Studios / Virgin Interactive).
 
 ---
@@ -72,4 +74,5 @@ Methodology, provenance standards, and divergence tracking:
 
 | Binary | Platform | Size | SHA-256 Checksum | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `MAINDOS.EXE` | DOS/4GW 32-bit LE | 1,156,502 bytes | `179C654BA65281F08BBCDA2B5943AB9F35C309EC718600F81104644D22DB948C` | Primary reverse engineering target; intact assertions & strings |
+| `MAINDOS.EXE` | DOS/4GW 32-bit LE | 1,156,502 bytes | `179C654BA65281F08BBCDA2B5943AB9F35C309EC718600F81104644D22DB948C` | Secondary DOS reference; retained evidence |
+| `IGN_WIN.EXE` | Windows x86 PE32 | 915,968 bytes | `7665E4E736BFD6C90790CEDBB27E2DE7E98A167374EB77933533C54EF0DC8782` | Primary target; headers/fingerprint verified, reconstruction and runtime baseline pending |

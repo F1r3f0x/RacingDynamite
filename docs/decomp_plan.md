@@ -1,187 +1,113 @@
-# Ignition (1997) Master Decompilation Plan (DOS Target)
+# Ignition Master Decompilation Plan (Windows Target)
 
-This document establishes the official engineering plan, memory architecture, tooling pipeline, and module sequence for the 1:1 decompilation of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting the 32-bit DOS executable (`MAINDOS.EXE`).
+Decision date: 2026-10-07 (America/Santiago). The primary target is the standard
+Windows release, `Ignition/Ignition/IGN_WIN.EXE`. The DOS release remains a
+secondary reference. The earlier plan is retained in
+[the DOS archive](tracking/dos_decomp_plan.md).
 
----
+## 1. Decompile first, port second
 
-## 1. Core Philosophy: Decompile First, Port Second
+Phase A reconstructs readable, functionally faithful C89 from the authentic
+Windows executable. Preserve native architecture, software rendering, UI,
+simulation, platform interactions, and original quirks. Phase B modernizes verified
+code into the C11/SDL2 port. Byte matching is a useful diagnostic and a secondary
+goal; compiling successfully does not prove behavioral fidelity.
 
-To eliminate cognitive overhead and context switching, all active modernization/SDL porting work has been frozen on `master`. Decompilation proceeds on the dedicated **`decomp`** branch with two strict phases:
+Start with standard Windows software rendering. 3dfx and other renderer variants
+are deferred and require their own binary fingerprints and evidence. This decision
+does not rename the current branch or change implementation/build tooling.
 
-1. **Phase A (The Re-creation)**: Recover functionally faithful structured C89 from authentic MAINDOS.EXE, built with Open Watcom V2 and validated in equivalent DOSBox scenarios. Optional normalized instruction matching is diagnostic and does not establish functional completion.
-2. **Phase B (The Modernization)**: Once complete and verified against the original binary, port the clean C codebase to modern platforms (C11, SDL2, 64-bit).
+## 2. Verified local target identity
 
----
+| Property | Observed value |
+| --- | --- |
+| Path | `Ignition/Ignition/IGN_WIN.EXE` |
+| Size | 915,968 bytes |
+| SHA-256 | `7665E4E736BFD6C90790CEDBB27E2DE7E98A167374EB77933533C54EF0DC8782` |
+| Format | PE32, x86 (`Machine 0x014c`, optional header `0x010b`) |
+| Preferred image base | `0x00400000` |
+| Entry RVA | `0x00069950` |
+| Entry VA at preferred base | `0x00469950` |
 
-## 2. Target Binary & Memory Architecture
+These values were read directly from the local file and PE headers. The entry
+point is not automatically `WinMain`. Compiler version, compiler flags, imports,
+function inventory, and runtime behavior have not been established by this
+documentation change. Recheck the fingerprint before using another regional or
+patched executable; do not borrow addresses from `FUN_WIN.EXE` or another release.
 
-### Authentic LE analysis
+Load the authentic PE into a separate Ghidra program and verify its image base,
+section map, imports, relocations, and entry point. Record both the binary identity
+and address convention (VA/RVA) with every symbol and initializer.
 
-`Ignition/Ignition/MAINDOS.EXE` is the exclusive source of truth. Never convert, replace, or overwrite it. The obsolete PE repackaging workflow lost initializers and ABI information and is prohibited.
+## 3. Migration boundaries and tracking
 
-Use `tools/le_parser.py` to recover LE objects and apply relocations in memory, `tools/disasm_le.py` for bounded instruction inspection, and `tools/verify_capstone.py` for authentic instructions and data. File offsets are determined from the LE object/page tables, not assumed PE section offsets.
+- Preserve the current DOS `decomp/` sources, LE tooling, Open Watcom build,
+  database, symbol maps, and runtime observations. Pause new DOS reconstruction
+  work unless needed to answer a Windows comparison question.
+- Plan a separate Windows reconstruction source/build path; it does not exist yet.
+  Choose and document the path when introducing the Windows build pipeline.
+- Identify the Windows compiler and ABI from executable evidence before selecting
+  a vintage compiler. MSVC 4.2 is a research candidate, not a verified local fact;
+  DOS Watcom flags and register calling conventions must not be assumed valid.
+- Existing `database/decomp.db` has DOS-primary records and legacy `win_address`
+  cross-references. Existing CLI/status/dashboard/audit output remains legacy
+  progress. Before recording Windows results, implement target-aware storage,
+  address keys, evidence, and progress reporting without resetting DOS history.
+- Do not assume legacy `0x004...` addresses or port annotations belong to this
+  executable. Validate them before using them as Windows provenance.
+- Never treat DOS completion counts, matching scores, or runtime checks as Windows
+  completion. No Windows reconstruction progress is certified by this migration.
 
-The authentic LE parser reports these objects:
+## 4. Active milestone sequence
 
-| Object | Linear base | Virtual size | Stored bytes |
-| --- | --- | --- | --- |
-| Code | `0x10000` | `0x75c4f` | 482383 |
-| Read-only data | `0x90000` | `0x1597` | 5527 |
-| Data/BSS | `0xa0000` | `0x1cf640` | 291734 |
+1. **Establish the Windows baseline.** Verify the fingerprint in Ghidra; inventory
+   sections, imports, strings, functions, CRT code, initializers, and ABI evidence.
+   Run a disposable original copy in a documented Windows-compatible environment
+   and record startup, language selector, loading, intro, and first menu. Record
+   any wrapper/compatibility settings and distinguish their behavior from the game.
+2. **Create Windows build and tracking infrastructure.** Select a compiler using
+   evidence, isolate output paths, add target-aware provenance and verification,
+   and link a minimal Windows executable without claiming gameplay parity.
+3. **Validate a small reconstruction.** Recover a bounded asset loader/decoder or
+   memory routine with verified inputs, outputs, data layout, and calling convention.
+   Compare against the original before scaling up.
+4. **Recover native startup and presentation.** Trace entry/CRT to application
+   initialization; recover window/message handling, graphics/palette presentation,
+   timing, input, audio initialization, language UI, menu layouts, and CDP playback.
+   Resolve the first observed Windows divergence before proceeding.
+5. **Reconstruct engine dependencies.** Recover memory/file I/O and asset formats,
+   surface queries, Lisa3D rendering, game state, vehicle physics, AI, race rules,
+   camera, HUD, and audio using the Windows call graph. DOS naming/module hints
+   are candidates that need independent Windows validation.
+6. **Validate the full game, then modernize.** Compare representative races,
+   controls, timing, visuals, audio, results, and menu return; extend coverage to
+   tracks/cars and supported multiplayer modes. Port verified code to C11/SDL2
+   with documented deviations and authentic defaults.
 
-Unstored BSS, initialized pages, pointer fixups, and packed tables require separate interpretation. Do not assume a zero-filled reconstruction is authentic without binary evidence.
+## 5. Evidence and acceptance criteria
 
-Build/symbol verification uses `uv run python tools/verify_matching.py`. Instruction comparison remains optional via `--strict`. Tracking/annotation validation uses `uv run python tools/verify_fidelity.py`; it reports gaps and does not certify game behavior. See `docs/tracking/implementation_inventory.md` and `runtime_baseline.md` for source evidence and observed runtime limits.
+Every reconstructed function needs a verified Windows address, size, signature,
+ABI, source/module association where supported, and explicit evidence status.
+Recover initialized data, relocations, BSS extents, and structure packing from PE
+evidence. Never infer equivalence from shared asset filenames alone.
 
----
+Track separately: identified/named, analyzed, C reconstructed, instruction match,
+linked binary match, and runtime validation. Report compiler/relocation differences
+when interpreting matching scores. A future treemap can use verified byte sizes
+for area and these evidence stages for color; existing dashboards are not yet a
+Windows inventory.
 
-## 3. SQLite Decompilation Tracking System
+The existing `build_decomp.py`, `verify_matching.py`, LE helpers, DOS runtime
+staging, and fidelity auditor have not been migrated by this docs-only change.
+Use them for their retained scope, not as Windows acceptance gates.
 
-Tracking has migrated from manual markdown tables to a centralized, relational SQLite database.
+## 6. Preservation and provenance
 
-### Files
-* **Database File**: `database/decomp.db`
-* **Schema Definition**: `database/schema.sql`
-* **Version-Controlled Dump**: `database/dump.sql` (text diffable in git)
-* **CLI Interface**: `tools/db.py`
+Never overwrite original files under `Ignition/`. Stage disposable runtime copies
+and isolate generated outputs. Keep the DOS inventory, timer recovery, and DOSBox
+baseline as evidence about `MAINDOS.EXE`, including their unresolved failures.
+Use `IGN_WIN.EXE` in new verified Windows `@original` annotations; keep DOS
+annotations and deviations attached to their original binary and addresses.
 
-### Schema Architecture
-* **`modules`**: Translation units (`getsurf.c`, `lisa3d.c`, `geputget.c`, `mem.c`, `main.c`, `sound.c`).
-* **`functions`**: Dual-addressing scheme:
-  * `dos_address`: Primary address in `MAINDOS.EXE` (e.g. `0x0002004c`).
-  * `win_address`: Cross-reference address in `MAINDOS.EXE` (e.g. `0x00412670`).
-  * `calling_convention`: Watcom register (`watcom_reg`: `eax`, `edx`, `ebx`, `ecx`), `cdecl`.
-  * `status`: `unidentified` $\rightarrow$ `analyzed` $\rightarrow$ `decompiled` $\rightarrow$ `matching`.
-* **`globals`**: Global variables, buffers, and tables mapped to addresses and types.
-* **`structs`** & **`struct_fields`**: Reconstructed C structs with exact byte offsets.
-* **`deviations`**: Bug workarounds and authentic quirk registry.
-
-### CLI Workflow (`tools/db.py`)
-```bash
-# View current decompilation status and module completion
-uv run python tools/db.py status
-
-# Link an identified DOS address to its Windows counterpart
-uv run python tools/db.py link 0x00412670 0x0002004c
-
-# Update function status
-uv run python tools/db.py set-status 0x0002004c matching
-
-# Add a newly discovered DOS function
-uv run python tools/db.py add-func 0x0002004c Surface_LoadSRF getsurf.c --purpose "Loads .SRF track surface"
-
-# Export back to human-readable markdown
-uv run python tools/db.py export-markdown
-
-# Dump database to git-tracked SQL
-uv run python tools/db.py dump-sql
-```
-
----
-
-## 4. Anchor Functions & Authentic Naming
-
-`MAINDOS.EXE` contains intact assert strings and Swedish developer debug logs that reveal the authentic 1997 source filenames, function names, line numbers, and object types:
-
-1. **`getsurf.c`**:
-   * String: `d:\projects\ignition\getsurf\getsurf.c` (at `0x000a7cf4`)
-   * Asserts: `pFile != NULL` (line 222), `x == 1`
-   * Anchor Function: **`Surface_LoadSRF` @ `0x0002004C`** (corresponds to `MAINDOS.EXE @ 0x00412670`)
-2. **`lisa3d.c`**:
-   * Swedish Error Logs: `FEL VID LI_MOVEOBJECT`, `LI_PLACEOBJECT`, `LI_HIDEOBJECT`
-   * Identifies Lisa 2 3D Development System engine functions: `Li_MoveObject`, `Li_PlaceObject`, `Li_HideObject`
-   * Object types: `HANDLE PLOT`, `SLADD OBJ 1` (skid/slide), `HANDLE SHADOW`, `LIGHTENING`, `HANDLE CAR`, `WEATHER`, `WATER SPLASH`, `FLYING PARTS`
-   * String: `Lisa 2 Development System` $\rightarrow$ `Lisa_Init` / `Lisa_PrintVersion`
-3. **`mem.c`**:
-   * Memory allocators, buffer initialization, file loading
-4. **`geputget.c`**:
-   * 2D blitter, `.PIC` image decoders, `.LFT` font renderer
-5. **`main.c`**:
-   * String: `CARS\TEST.AIS` $\rightarrow$ AI spline and navigation path loader
-   * Master state loop, 72 Hz physics tick, camera basis calculation
-
----
-
-## 5. Module-by-Module Decompilation Sequence
-
-Decompilation is ordered strictly from fewest dependencies to most complex:
-
-```mermaid
-graph TD
-    M1["1. getsurf.c (Self-contained surface collision & raycast)"] --> M2["2. mem.c & geputget.c (File I/O, fonts & 2D blits)"]
-    M2 --> M3["3. lisa3d.c (3D software rasterizer & polygon opcodes)"]
-    M3 --> M4["4. sound.c (SFX pools & RPM synthesis)"]
-    M4 --> M5["5. main.c (Game loop, vehicle dynamics & AI)"]
-```
-
-### Module 1: `getsurf.c` (Estimated ~15 functions)
-* `Surface_LoadSRF` (`0x0002004c`)
-* `Surface_FreeSRF`
-* `Surface_GetCell`
-* `Surface_GetTriangleHeight`
-* `Surface_Raycast`
-* `Surface_CalculateNormal`
-
-### Module 2: `mem.c` & `geputget.c` (Estimated ~25 functions)
-* `File_LoadToMemory`
-* `Font_Load` & `Font_DrawText`
-* `Pic_Decode` & `Palette_Set`
-
-### Module 3: `lisa3d.c` (Estimated ~50 functions)
-* Rasterizer initialization: `Lisa_Init`, `Lisa_InitEngineMemory`, `Lisa_InitOpcodeTable`
-* Scene transformation: `Lisa_FrustumCullObjects`, `Lisa_TransformVertices`
-* Polygon opcodes: `Opcode 0x11` (textured), `0x12` (color key cutout), `0x13` (shadow blend), `0x15` (perspective textured), `0x16` (perspective cutout), `0x17` (shadow Gouraud)
-* Depth bucketing: 6,000 bins sorting and span dispatcher
-
-### Module 4: `sound.c` (Estimated ~20 functions)
-* Pool loaders: `ROLL`, `SKID`, `COLL`, `BOOST`, `DIV`, `KLICK`, `OK`
-* `ENGINE.INF` 800-byte curve lookup arrays for vehicle acoustics
-
-### Module 5: `main.c` (Estimated ~60 functions)
-* `Game_StateDispatcher`
-* Vehicle physics integration (72 Hz timestep, `21.76` scale factor, slope clamping)
-* AI waypoint navigation along `.TRI` chunks and splines
-* Dynamic chase camera
-
----
-
-## 6. Decompilation Workspace Structure (`decomp/`)
-
-Source files for Phase A will reside in a dedicated vintage source tree:
-
-```text
-decomp/
-├── include/
-│   ├── getsurf.h
-│   ├── lisa3d.h
-│   ├── geputget.h
-│   ├── mem.h
-│   ├── sound.h
-│   ├── main.h
-│   └── types.h
-└── src/
-    ├── getsurf.c
-    ├── lisa3d.c
-    ├── geputget.c
-    ├── mem.c
-    ├── sound.c
-    └── main.c
-```
-
----
-
-## 7. Toolchain & Verification Pipeline
-
-1. **Ghidra Analysis**:
-   * Open `Ignition/Ignition/MAINDOS.EXE` in Ghidra CodeBrowser.
-   * Auto-analysis detects 32-bit x86 PE with entry point `0x00055FBC`.
-2. **Decompilation**:
-   * Decompile function in Ghidra at its `dos_address`.
-   * Reconstruct clean C in `decomp/src/<module>.c`.
-3. **Compilation**:
-   * Compile using Watcom C/C++ 10.6 (`wcc386 -3r -omaxet -s`).
-4. **Binary Diffing**:
-   * Verify assembly output against `MAINDOS.EXE`.
-5. **Status Update**:
-   * Update `database/decomp.db` via `python tools/db.py set-status <addr> matching`.
-   * Run `python tools/db.py dump-sql` and commit.
+Related guidance: [agent instructions](../AGENTS.md), [roadmap](roadmap.md),
+[fidelity strategy](tracking/fidelity_strategy.md), and [tools](../tools/README.md).

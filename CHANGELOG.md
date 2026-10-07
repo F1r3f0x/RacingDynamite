@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Automated parity verification tool `tools/verify_fidelity.py` integrated into CMake/CTest.
 
 ### Changed
+- **Windows reconstruction focus (2026-10-07)**: Standard `IGN_WIN.EXE` becomes the primary target; verified its local SHA-256 and PE headers. Updated agent guidance, decompilation plan, roadmap, fidelity guidance, and documentation/tooling entry points. Preserved the DOS plan and evidence as secondary references. Windows compiler selection, build/tracking migration, and runtime baseline remain pending; no implementation or matching progress is claimed by this documentation change.
 - Pruned 17 obsolete, redundant, or one-off exploratory scratch scripts from `tools/`.
 - Updated `docs/roadmap.md` and `docs/README.md` to introduce Phase 4 milestone.
 

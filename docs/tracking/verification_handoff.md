@@ -1,5 +1,7 @@
 # RacingDynamite verification and handoff
 
+> Retained DOS/legacy reference as of 2026-10-07. Windows `IGN_WIN.EXE` is now the primary target; see [the active plan](../decomp_plan.md). This document does not establish Windows progress, compiler selection, or runtime fidelity. Historical findings and unresolved checks are preserved below.
+
 Work remains incomplete: the startup divergence is reproducible, but the repaired timer has not been validated in DOSBox. The user stopped Computer Use with physical Escape; all subsequent desktop interaction stopped. No commits were created.
 
 ## Changes

@@ -2,44 +2,73 @@
 
 ## Goal and scope
 
-Reimplement the authentic `Ignition/Ignition/MAINDOS.EXE` DOS4GW binary with functional fidelity and the original game architecture. Byte-for-byte matching is secondary to correct behavior.
+As of 2026-10-07, reconstruct the authentic standard Windows release at
+`Ignition/Ignition/IGN_WIN.EXE` with functional fidelity and the original game
+architecture. Byte-for-byte matching is secondary to correct behavior.
+See `docs/decomp_plan.md` for the active plan and target fingerprint.
 
-- `decomp/`: pure C89, Open Watcom V2, 4-space indentation. No handwritten assembly or inline `__asm`.
-- `src/`: C11/SDL2 source port, built with CMake.
-- Tools: Python through `uv`. Use Windows PowerShell; `git`, `uv`, and `w64devkit` are on PATH. Do not run Linux package managers.
+- Windows reconstruction: readable C89; establish the original compiler, ABI,
+  data layout, and build configuration from this binary before selecting a toolchain.
+- `decomp/` currently contains the preserved DOS/Open Watcom V2 reconstruction.
+  Do not overwrite it with Windows code. A separate Windows source/build path is
+  planned; it is not implemented yet. Use 4-space indentation and no handwritten
+  assembly or inline `__asm`.
+- `src/`: C11/SDL2 source port, built with CMake; modernization follows verified reconstruction.
+- Tools: Python through `uv`. Use Windows PowerShell; do not run Linux package managers.
 
 ## Non-negotiable constraints
 
-- Treat `MAINDOS.EXE` as the source of truth. Do not use the flawed `MAINDOS_32BIT.EXE` PE repackaging; its data initialization and calling conventions are unreliable.
-- Never modify or overwrite original binaries or assets in `Ignition/`. Use disposable copies for runtime experiments.
-- Reconstruct native systems and place code in the appropriate module. Do not bypass original UI widgets, menus, or rendering pipelines with invented replacements.
+- `IGN_WIN.EXE` is the primary source of truth. `MAINDOS.EXE` is a secondary
+  reference, with its own addresses, ABI, and runtime evidence.
+- Never use `MAINDOS_32BIT.EXE`, the flawed DOS-to-PE repackaging, as evidence.
+  The authentic Windows PE executable is a distinct, valid analysis target.
+- Never modify or overwrite original binaries or assets in `Ignition/`.
+  Use disposable copies under `build/runtime/` for runtime experiments.
+- Reconstruct native systems in the appropriate module. Do not replace original
+  UI widgets, menus, or rendering pipelines with invented substitutes.
 - Never commit raw decompiler output, binary assets, or generated build outputs.
-- Preserve unrelated working-tree changes. Stage explicit files or hunks belonging to the current feature.
+- Preserve unrelated working-tree changes. Stage only explicit feature files or hunks.
 
 ## Reverse engineering and implementation
 
-1. Inspect the authentic binary before implementing behavior. For complex systems, use `tools/verify_capstone.py`, `tools/disasm_le.py`, and `tools/le_parser.py` to verify disassembly and extract LE initializers.
-2. Use the Ghidra MCP server at `localhost:8080` to inspect and synchronize symbols when available. Report unavailable tooling; do not invent evidence or addresses.
-3. Replace raw offsets with named structs and fields. Rename register artifacts (`iVar1`, `tmp_esi`) semantically. Watch for Watcom ESI-based data references misidentified as function parameters.
-4. Replace `DAT_XXXXXXXX` and `FUN_XXXXXXXX` with meaningful names. Update global and struct definitions in `docs/ghidra/globals.md` and `docs/ghidra/structs.md`; keep function names synchronized across code, `docs/ghidra/functions.md`, and `database/decomp.db`.
-5. Update code and its documentation together. Accept compiler instruction differences only when behavior and architecture remain faithful.
+1. Inspect authentic `IGN_WIN.EXE` PE sections, imports, relocations, initializers,
+   and calling conventions before implementing behavior. Record VA versus RVA
+   explicitly; do not apply DOS LE parsing or Watcom register assumptions to Windows.
+2. Use the Ghidra MCP server at `localhost:8080` when available. Select and verify
+   the Windows program by fingerprint before inspecting or synchronizing symbols.
+   Report unavailable tooling; do not invent evidence or addresses.
+3. Replace raw offsets and register artifacts with verified named structs, fields,
+   and semantic names. Recover Windows structure packing independently.
+4. Keep code, documentation, and tracking synchronized. Existing
+   `docs/ghidra/functions.md`, `globals.md`, `structs.md`, and `database/decomp.db`
+   contain legacy evidence; their Windows-style addresses are not automatically
+   verified against `IGN_WIN.EXE`. Preserve provenance until target-aware tracking
+   is implemented. Never transfer DOS completion statuses to Windows.
+5. Reuse DOS findings as hypotheses only after validating the corresponding Windows
+   instructions, initializers, callers, and behavior.
 
 ## Fidelity tracking
 
-Every function in `src/` and `decomp/` requires these annotations. Add deviation and fix-category lines only when applicable:
+New Windows functions require verified binary provenance:
 
 ```c
-// @original <SymbolName> (MAINDOS.EXE @ 0x<Address>, <SourceFileHint>)
+// @original <SymbolName> (IGN_WIN.EXE @ 0x<VerifiedVA>, <SourceFileHint>)
 // @fidelity EXACT | ADAPTED | EXTENDED | INFRASTRUCTURE
 // @deviation DEV-XXX
 // @fix_category FIX_CAT_XXX
 ```
 
-Choose one fidelity value and use verified addresses. Register behavioral changes and bug fixes in `docs/tracking/deviations.md`. Preserve original bugs behind toggles defaulting to 1997 behavior.
+Choose one fidelity value. Add deviation/fix-category lines only when applicable.
+Keep existing DOS annotations tied to `MAINDOS.EXE`; do not relabel their addresses.
+Record behavioral changes in `docs/tracking/deviations.md` and preserve original
+bugs behind toggles defaulting to authentic behavior. An annotation alone is not
+proof of instruction equality or runtime fidelity.
 
 ## Build and validation
 
-Run commands from the repository root after each implemented feature and before its commit:
+- A Windows reconstruction build and verification pipeline does not exist yet.
+  Establish it before claiming Windows build, matching, or runtime success.
+- For changes to the retained DOS implementation or its tooling, run:
 
 ```powershell
 uv run python tools/build_decomp.py
@@ -47,15 +76,18 @@ uv run python tools/verify_matching.py
 uv run python tools/verify_fidelity.py
 ```
 
-- `build_decomp.py` is the required decompilation build entry point. Its default mode compiles; use `uv run python tools/build_decomp.py --link` to validate executable linking when the feature affects the rebuilt game.
-- For `src/` changes, also run the applicable CMake build. Run focused tests or runtime checks appropriate to the changed behavior.
-- Resolve build failures and new verification failures before committing. Aim for a warning-free build. Report existing failures separately with evidence; do not describe failing checks as passing or expand the feature into unrelated repairs.
-- Compilation, annotations, and matching percentages do not prove behavioral fidelity. Report runtime validation separately.
-- For documentation-only changes, review the diff and run `git diff --check`; builds and code audits are required when implementation or build tooling changes.
+- `build_decomp.py --link` validates DOS executable linking when needed. These
+  checks are DOS-specific and do not certify `IGN_WIN.EXE` reconstruction.
+- For `src/` changes, run the applicable CMake build and focused tests/runtime checks.
+- Resolve new failures before committing; report existing failures separately.
+  Report compilation, instruction matching, and runtime validation separately.
+- Documentation-only changes require diff review and `git diff --check`; builds
+  and code audits are required when implementation or build tooling changes.
 
 ## Commits and completion
 
-- Commit each completed feature separately after validation, with its accompanying documentation. Do not accumulate multiple completed features in one commit.
-- Use Conventional Commits such as `re: ...`, `port: ...`, or `docs: ...`. Include relevant original addresses and deviation IDs when applicable.
-- Review the staged diff before committing; include only the current feature's changes.
-- In the completion report, state what changed, validation results and limitations, and the commit hash. If validation prevents a commit, explain the blocker explicitly.
+- Commit each completed feature separately with its accompanying documentation.
+- Use Conventional Commits such as `re: ...`, `port: ...`, or `docs: ...`; include
+  verified original addresses and deviation IDs when relevant.
+- Review the staged diff and include only the current feature's changes.
+- Report changes, validation, limitations, and commit hash. Explain any commit blocker.

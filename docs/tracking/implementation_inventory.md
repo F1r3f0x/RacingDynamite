@@ -1,5 +1,7 @@
 # DOS implementation evidence inventory
 
+> Retained DOS/legacy reference as of 2026-10-07. Windows `IGN_WIN.EXE` is now the primary target; see [the active plan](../decomp_plan.md). This document does not establish Windows progress, compiler selection, or runtime fidelity. Historical findings and unresolved checks are preserved below.
+
 Generated with `uv run python tools/inventory_gaps.py`. Candidate detection is conservative; inspect authentic instructions before classifying short routines as genuine stubs. Source callers are lexical references inside function bodies, not a binary call graph.
 
 Historical database `decompiled`/`matching` statuses describe reconstruction progress. The `implementation_audits` table separately records source evidence; neither status nor EXACT annotations prove behavior. Runtime verification is recorded in `docs/tracking/runtime_baseline.md`.

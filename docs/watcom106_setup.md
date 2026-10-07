@@ -1,5 +1,7 @@
 # Setting Up Watcom C/C++ 10.6 for Phase 2 (Byte-Matching)
 
+> Retained DOS/legacy reference as of 2026-10-07. Windows `IGN_WIN.EXE` is now the primary target; see [the active plan](decomp_plan.md). This document does not establish Windows progress, compiler selection, or runtime fidelity. Historical findings and unresolved checks are preserved below.
+
 To achieve a 100% bit-for-bit matching decompilation (Phase 2), we must use the exact compiler the developers used in 1997: **Watcom C/C++ 10.6**. 
 
 Because Watcom 10.6 is proprietary abandonware and uses a 16-bit installer that doesn't natively run on Windows 11, it cannot be downloaded automatically via `tools/setup_decomp_tools.py` like Open Watcom V2. You will need to manually procure and extract it using an emulator like DOSBox.

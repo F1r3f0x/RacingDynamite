@@ -1,5 +1,7 @@
 # DOSBox runtime baseline
 
+> Retained DOS/legacy reference as of 2026-10-07. Windows `IGN_WIN.EXE` is now the primary target; see [the active plan](../decomp_plan.md). This document does not establish Windows progress, compiler selection, or runtime fidelity. Historical findings and unresolved checks are preserved below.
+
 Tested on 2026-10-06 (America/Santiago), before the timer restoration. Two startup comparisons were attempted using DOSBox 0.74-2.1, normal core, fixed 50000 cycles, svga_s3, 32 MB RAM, surface output, identical CD mounting and disposable copies of the original game directory under build/runtime. No writes to Ignition/ were made by the build or staging tools.
 
 ## Observed behavior

@@ -1,5 +1,7 @@
 # Fidelity & Change Tracking System (FCTS) Master Specification & Implementation Plan
 
+> Retained source-port backlog. The [Windows decompilation plan](../decomp_plan.md) governs current work. Legacy binary/address and completion claims below require Windows validation; DOS audit rules are not Windows acceptance gates.
+
 This document provides the complete technical specification, architectural blueprint, and execution roadmap for **Phase 4: Tooling Hygiene, Authentic Multi-Backend Renderer & Fidelity Tracking (FCTS)** of **Racing Dynamite** (Ignition 1997 source port).
 
 ---

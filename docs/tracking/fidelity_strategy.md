@@ -1,12 +1,14 @@
 # Fidelity & Change Tracking Strategy (FCTS) Developer Guide
 
+> Active primary target: fingerprinted `IGN_WIN.EXE`; DOS is secondary. Existing annotations/registry entries retain their original binary provenance. Legacy Windows-style addresses must be validated before use, and current audits are not Windows certification. See [the active plan](../decomp_plan.md).
+
 This document defines the strict engineering guidelines, code provenance standards, divergence tracking rules, and verification procedures for **Racing Dynamite** (Ignition 1997 source port).
 
 ---
 
 ## 1. Core Philosophy: Golden Rules of Reverse Engineering & Fidelity
 
-1. **Never Guess When You Can Verify**: Every ported function, constant, lookup table, and algorithm must be traced back to its decompiled origin in `MAINDOS.EXE` (base address `0x00400000`) or reference source in `MAINDOS.EXE`.
+1. **Never Guess When You Can Verify**: Every ported function, constant, lookup table, and algorithm must be traced back to its verified origin in `IGN_WIN.EXE` (preferred image base `0x00400000`). DOS `MAINDOS.EXE` findings are secondary references and require independent Windows confirmation.
 2. **Document First, Implement Second**: Update `docs/ghidra/functions.md`, `globals.md`, `structs.md`, or format specifications *before* or *simultaneously with* the C implementation.
 3. **Preserve Authentic Behavior**: The baseline engine must behave *identically* to the original 1997 game. Any fixes, adaptations, or enhancements must be categorized, documented, and made toggleable via `GameFixOptions` or `RendererOptions`.
 4. **Machine-Verifiable Traceability**: All C source files must use standardized inline provenance annotations so automated tooling (`tools/verify_fidelity.py`) can audit fidelity coverage continuously.
@@ -22,7 +24,7 @@ Every function defined in `src/` and declared in `include/ignition/` must be pre
 ```c
 /**
  * @brief Brief description of the function.
- * @original <SymbolName> (MAINDOS.EXE @ 0x<Address>, <SourceFileHint>)
+ * @original <SymbolName> (IGN_WIN.EXE @ 0x<VerifiedVA>, <SourceFileHint>)
  * @fidelity EXACT | ADAPTED | EXTENDED | INFRASTRUCTURE
  * @deviation DEV-XXX (Optional: Deviation ID if behavior diverges or fixes bug)
  * @fix_category FIX_CAT_XXX (Optional: Category key controlling this fix)
@@ -51,7 +53,7 @@ Every function defined in `src/` and declared in `include/ignition/` must be pre
   * Example: `Surface_Raycast` (includes out-of-bounds grid clamping to prevent crashes).
 
 * **`INFRASTRUCTURE`**:
-  * Modern source port scaffolding not present in `MAINDOS.EXE`.
+  * Modern source port scaffolding not present in the verified original target.
   * Examples: logging engine (`src/core/log.c`), SDL platform backend (`src/platform/platform_sdl.c`), CMake build files, test suites.
 
 ---
@@ -64,7 +66,7 @@ When a bug in the 1997 game is discovered (e.g. falling through road meshes in A
 3. **Document the entry in `docs/tracking/deviations.md`**:
    * **ID**: `DEV-XXX`
    * **Category**: e.g., `FIX_CAT_NOCLIP`, `FIX_CAT_ELEVATION`, `FIX_CAT_CAMERA`, `FIX_CAT_AI_PATHING`, `FIX_CAT_AUDIO`, `FIX_CAT_RENDERER`.
-   * **Original Address & Assembly**: Disassembly snippet and decompilation from `MAINDOS.EXE`.
+   * **Original Address & Assembly**: Disassembly and decompilation with verified binary identity and VA/RVA; new Windows entries cite `IGN_WIN.EXE`, while retained DOS entries continue to cite `MAINDOS.EXE`.
    * **Original Bug / Quirk**: Explanation of why the original engine broke or behaved strangely.
    * **Source Port Solution**: How the C11 implementation solves it cleanly.
    * **Option Toggle**: The corresponding field in `GameFixOptions` (e.g., `fixes->fix_noclip`).

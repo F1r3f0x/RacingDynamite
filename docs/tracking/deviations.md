@@ -1,6 +1,8 @@
 # Master Authentic Divergence & Deviation Registry (FCTS)
 
-This registry serves as the **global technical inventory** of all intentional differences, original 1997 engine bug fixes, coordinate adaptations, and safety workarounds in **Racing Dynamite** relative to the original Windows 95 executable (`MAINDOS.EXE`).
+> Existing entries are preserved legacy evidence and need per-entry binary/address validation. New Windows deviations must cite the fingerprinted `IGN_WIN.EXE`; DOS evidence must remain labeled `MAINDOS.EXE`. No existing address is reclassified by the target change.
+
+This registry serves as the **global technical inventory** of all intentional differences, original 1997 engine bug fixes, coordinate adaptations, and safety workarounds in **Racing Dynamite** relative to their recorded original binary. The active baseline is Windows `IGN_WIN.EXE`; `MAINDOS.EXE` is the secondary DOS reference.
 
 Every entry documents:
 1. The **Original 1997 Code** (Ghidra decompilation and x86 disassembly).
