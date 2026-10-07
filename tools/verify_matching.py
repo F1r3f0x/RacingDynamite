@@ -17,7 +17,7 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn import Uc, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE, UC_HOOK_MEM_WRITE, UC_HOOK_MEM_READ
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ESI,
     UC_X86_REG_EDI, UC_X86_REG_EBP, UC_X86_REG_ESP, UC_X86_REG_EFLAGS,
-    UC_X86_REG_EIP)
+    UC_X86_REG_EIP, UC_X86_REG_ECX, UC_X86_REG_EDX)
 from build_decomp import build
 from windows_target import TARGET, DLL, ROUTINE_SHA256, verify_target, ROOT
 from windows_tracking import record_run
@@ -50,10 +50,11 @@ BOOKKEEPING_FIELDS = FIELDS + [
     ('g_memPendingCallback',0x63c694,4),
     ('g_memPendingParameter',0x63c698,4)]
 STACK, STOP = 0x7000000, 0x7100000
+CALLBACK, CALLBACK_RETURN = 0x7200000, 0x7200100
 PRESERVED = [UC_X86_REG_EBX, UC_X86_REG_ESI, UC_X86_REG_EDI, UC_X86_REG_EBP]
 
 def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words=(), expected_read=None,
-            stack_args=(), expected_events=None):
+            stack_args=(), expected_events=None, callback_code=None, callback_handler=None):
     base = pe.OPTIONAL_HEADER.ImageBase
     size = (pe.OPTIONAL_HEADER.SizeOfImage + 4095) & ~4095
     uc = Uc(UC_ARCH_X86, UC_MODE_32)
@@ -74,6 +75,13 @@ def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words
         uc.mem_write(address, struct.pack('<h', value))
     uc.mem_map(STACK, 0x10000)
     uc.mem_map(STOP, 0x1000)
+    if callback_handler is not None:
+        # Hook entry bytes are copied from an authenticated original callback,
+        # solely to provide decodable mapped addresses. No fixture instruction
+        # is executed: callback semantics are explicit Python test models.
+        uc.mem_map(CALLBACK,0x1000)
+        uc.mem_write(CALLBACK,callback_code)
+        uc.mem_write(CALLBACK_RETURN,callback_code)
     sp = STACK + 0x8000
     uc.mem_write(sp, struct.pack('<I', STOP))
     if stack_args:
@@ -90,6 +98,7 @@ def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words
     writes = []
     reads = []
     events = []
+    callback_frames = []
     def event(kind,address,length,value):
         if STACK <= address < STACK+0x10000:
             return
@@ -100,6 +109,33 @@ def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words
         if expected_events is not None:
             raise AssertionError(f'Unexpected data {kind} at {address:#x}')
     def code_hook(cpu, address, length, unused):
+        def return_from_callback():
+            callback_sp = cpu.reg_read(UC_X86_REG_ESP)
+            target = struct.unpack('<I',cpu.mem_read(callback_sp,4))[0]
+            assert extent[0] <= target < extent[1], 'Callback did not originate in routine'
+            cpu.reg_write(UC_X86_REG_EAX,0xdeadbeef)
+            cpu.reg_write(UC_X86_REG_ECX,0xa1b2c3d4)
+            cpu.reg_write(UC_X86_REG_EDX,0x87654321)
+            cpu.reg_write(UC_X86_REG_ESP,callback_sp+4)
+            cpu.reg_write(UC_X86_REG_EIP,target)
+        if callback_handler is not None and address == CALLBACK:
+            callback_sp = cpu.reg_read(UC_X86_REG_ESP)
+            parameter = struct.unpack('<I',cpu.mem_read(callback_sp+4,4))[0]
+            events.append(('callback','Mem_ShutdownCallback',0,4,parameter))
+            reenter = callback_handler(cpu,fields,parameter,events)
+            if reenter:
+                callback_frames.append(callback_sp)
+                cpu.mem_write(callback_sp-4,struct.pack('<I',CALLBACK_RETURN))
+                cpu.reg_write(UC_X86_REG_ESP,callback_sp-4)
+                cpu.reg_write(UC_X86_REG_EIP,entry)
+            else:
+                return_from_callback()
+            return
+        if callback_handler is not None and address == CALLBACK_RETURN:
+            assert cpu.reg_read(UC_X86_REG_EAX)==1, 'Reentrant shutdown return'
+            assert callback_frames and cpu.reg_read(UC_X86_REG_ESP)==callback_frames.pop()
+            return_from_callback()
+            return
         if not (extent[0] <= address < extent[1]):
             raise AssertionError('Execution escaped bounded routine')
     def write_hook(cpu, access, address, length, value, unused):
@@ -118,6 +154,7 @@ def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words
     uc.hook_add(UC_HOOK_MEM_READ, read_hook)
     uc.emu_start(entry, STOP, count=10000)
     assert uc.reg_read(UC_X86_REG_EIP) == STOP, 'Did not return within instruction limit'
+    assert not callback_frames, 'Reentrant invocation did not finish'
     assert uc.reg_read(UC_X86_REG_EAX) == expected_eax & 0xffffffff
     assert uc.reg_read(UC_X86_REG_ESP) == sp+4
     assert bytes(uc.mem_read(sp,STACK+0x10000-sp)) == caller_stack
@@ -142,7 +179,12 @@ def execute(pe, entry, fields, values, seed, extent, expected_eax=1, extra_words
     for address, value in extra_words:
         assert bytes(uc.mem_read(address,2)) == struct.pack('<h',value)
     if expected_events is not None:
-        assert events == expected_events, (events,expected_events)
+        if events != expected_events:
+            mismatch = next((i for i,(a,b) in enumerate(zip(events,expected_events)) if a!=b),
+                            min(len(events),len(expected_events)))
+            raise AssertionError(f'Data-event mismatch at {mismatch}: '
+                f'actual {events[mismatch:mismatch+2]}, expected {expected_events[mismatch:mismatch+2]}; '
+                f'event counts {len(events)}/{len(expected_events)}')
     return result, writes
 
 def verify():
@@ -167,7 +209,7 @@ def verify():
     assert sum(i.size for i in instructions) == 76
     generated_code = text.get_data()[:text.Misc_VirtualSize]
     generated = list(md.disasm(generated_code, lo))
-    assert not any(i.mnemonic == 'call' for i in generated), 'Helper is no longer a leaf'
+    assert not any(i.mnemonic == 'call' and i.op_str.startswith('0x') for i in generated), 'Unexpected direct helper dependency'
     print(f'Original: 76 bytes, {len(instructions)} instructions; compiled .text: {text.Misc_VirtualSize} bytes.')
     print(f'Raw code-byte equality: {original_code == generated_code}; relocation-aware equality not evaluated.')
     print('Instruction equality: not claimed (modern provisional Clang code generation).')
@@ -221,6 +263,13 @@ def verify():
     record_result('compilation','pass',details=register_details)
     register_cases = verify_registration(original,rebuilt,symbols,extent)
     record_result('emulation','pass',cases=register_cases,details=register_details)
+    VALIDATING_RVA = 0x5b240
+    shutdown_details = {**details,
+        'scope':'Mem_ShutdownHandles; callbacks modeled at verified ABI boundary; no native callback/game parity',
+        'checks':'two live 200-slot scans, exact status/flag eligibility and pass order, flag clear and status clear before callback, raw arguments, callback mutations/reentry, scratch-register clobbering, EAX/ESP/saved registers/DF, full image guards'}
+    record_result('compilation','pass',details=shutdown_details)
+    shutdown_cases = verify_shutdown(original,rebuilt,symbols,extent)
+    record_result('emulation','pass',cases=shutdown_cases,details=shutdown_details)
     print('Native DLL/game execution and startup/gameplay parity: unverified by this harness.')
 
 def verify_consumer(original, rebuilt, symbols, fields, extent):
@@ -391,6 +440,148 @@ def verify_registration(original,rebuilt,symbols,extent):
         cstate = list(state)
     print(f'PASS: {cases} registration original-vs-C executions; all indices, exhaustion/disabled, ordered effects and ABI; three-routine integration.')
     return cases
+
+def verify_shutdown(original,rebuilt,symbols,extent):
+    code = original.get_data(0x5b240,155)
+    assert hashlib.sha256(code).hexdigest() == 'edf69cfb1fd2d860913575999d39e05e37e615c11fb1e4280e4c166836e3b59f'
+    prefix = rebuilt.get_data(symbols['Mem_ShutdownHandles']-rebuilt.OPTIONAL_HEADER.ImageBase,155)
+    record_result('raw_bytes','pass' if code==prefix else 'different',details={
+        'original_bytes':155,'compiled_prefix_bytes':155,
+        'scope':'prefix diagnostic only; compiled extent/relocation-aware equality not established'})
+    fields = [(name,symbols[name],n) for name,_,n in BOOKKEEPING_FIELDS]
+    callback_code = original.get_data(0x56210,83)
+    rng = random.Random(0x45b240)
+    cases = 0
+    def fresh(flag,statuses,flags):
+        state = [rng.randbytes(n) for _,_,n in BOOKKEEPING_FIELDS]
+        state[0] = struct.pack('<I',flag)
+        state[1] = struct.pack('<200I',*statuses)
+        state[8] = struct.pack('<200I',*flags)
+        state[7] = struct.pack('<200I',*[CALLBACK]*200)
+        return state
+    def compare(old,actions=None):
+        nonlocal cases
+        actions = actions or {}
+        expected = [bytearray(value) for value in old]
+        events, calls = [], []
+        def word(field,index=0):
+            return struct.unpack_from('<I',expected[field],4*index)[0]
+        def event(kind,field,index,value):
+            events.append((kind,BOOKKEEPING_FIELDS[field][0],4*index,4,value))
+        def read(field,index=0):
+            value = word(field,index);event('read',field,index,value)
+            return value
+        def write(field,index,value,kind='write'):
+            event(kind,field,index,value)
+            struct.pack_into('<I',expected[field],4*index,value)
+        # Independent instruction-derived model: equality (not mask/nonzero),
+        # two ascending passes, status cleared BEFORE argument/pointer read.
+        if read(0):
+            write(0,0,0)
+            for required_flag in [0x10000,0x20000]:
+                for index in range(200):
+                    if read(1,index)!=1:
+                        continue
+                    if read(8,index)!=required_flag:
+                        continue
+                    write(1,index,0)
+                    parameter = read(5,index)
+                    assert read(7,index)==CALLBACK
+                    events.append(('callback','Mem_ShutdownCallback',0,4,parameter))
+                    action = actions.get(len(calls),{})
+                    calls.append((parameter,[bytes(value) for value in expected],action))
+                    for field,slot,value in action.get('writes',[]):
+                        write(field,slot,value,'callback_write')
+                    if action.get('reenter'):
+                        assert word(0)==0, 'This reentry contract uses the disabled nested path'
+                        read(0)
+        expected = [bytes(value) for value in expected]
+        def run(pe,entry,run_fields,run_extent):
+            call_index = 0
+            def callback(cpu,mapped_fields,parameter,actual_events):
+                nonlocal call_index
+                assert call_index < len(calls), 'Unexpected callback'
+                expected_parameter,snapshot,action = calls[call_index]
+                assert parameter==expected_parameter, 'Callback stack argument'
+                assert [bytes(cpu.mem_read(a,n)) for _,a,n in mapped_fields]==snapshot, 'Callback observes wrong lifecycle state'
+                for field,slot,value in action.get('writes',[]):
+                    name,address,_ = mapped_fields[field]
+                    cpu.mem_write(address+4*slot,struct.pack('<I',value))
+                    actual_events.append(('callback_write',name,4*slot,4,value))
+                call_index += 1
+                return action.get('reenter',False)
+            actual,writes = execute(pe,entry,run_fields,old,cases,run_extent,
+                expected_events=events,callback_code=callback_code,callback_handler=callback)
+            assert call_index==len(calls), 'Missing callback'
+            assert actual==expected, 'Shutdown state differs from original-instruction expectations'
+            return actual,writes
+        actual,owrites = run(original,0x45b240,BOOKKEEPING_FIELDS,(0x45b240,0x45b2db))
+        rebuilt_state,cwrites = run(rebuilt,symbols['Mem_ShutdownHandles'],fields,extent)
+        assert actual==rebuilt_state and len(owrites)==len(cwrites)
+        cases += 1
+        return actual
+    # Disabled, inactive, both all-active passes, unsupported flags, mixed states.
+    for flag in [0,1,2,0x80000000,0xffffffff]:
+        for pattern in range(6):
+            statuses = [0]*200 if pattern==0 else [1]*200
+            flags = [0x10000 if pattern in (0,1) else 0x20000 if pattern==2 else 0x30000]*200
+            if pattern==4:
+                statuses = [i%3 for i in range(200)]
+                flags = [0x10000 if i%2 else 0x20000 for i in range(200)]
+            if pattern==5:
+                statuses = [rng.choice([0,1,2,0xffffffff]) for _ in range(200)]
+                flags = [rng.choice([0,0x10000,0x20000,0x30000]) for _ in range(200)]
+            compare(fresh(flag,statuses,flags))
+    # Individually reach every slot in each pass; no index-200 access permitted.
+    for selected_flag in [0x10000,0x20000]:
+        for index in range(200):
+            statuses = [0]*200;statuses[index]=1
+            flags = [0]*200;flags[index]=selected_flag
+            compare(fresh(1,statuses,flags))
+    for index in [0,199]:
+        for status in [0,1,2,0x80000000,0xffffffff]:
+            for flag in [0,0x10000,0x20000,0x30000,0x10001,0xffffffff]:
+                statuses = [0]*200;statuses[index]=status
+                flags = [0]*200;flags[index]=flag
+                state = fresh(2,statuses,flags)
+                state[5] = struct.pack('<200I',*[0xffffffff]*200)
+                compare(state)
+    for _ in range(32):
+        compare(fresh(rng.getrandbits(32),[rng.choice([0,1,2,0xffffffff]) for _ in range(200)],
+            [rng.choice([0,0x10000,0x20000,0x30000,0x10001]) for _ in range(200)]))
+    # Mutation and reentry plans are explicit test callbacks, not game substitutes.
+    plans = [
+        ([0,1],[0x10000,0x10000],{0:{'writes':[(1,1,0),(1,199,1),(8,199,0x10000)]}}),
+        ([199],[0x10000],{0:{'writes':[(1,0,1),(8,0,0x20000)]}}),
+        ([199],[0x20000],{0:{'writes':[(1,0,1),(8,0,0x20000)]}}),
+        ([199],[0x10000],{0:{'writes':[(1,0,1),(8,0,0x10000)]}}),
+        ([0,1],[0x10000,0x10000],{0:{'writes':[(5,1,0xffffffff)]}}),
+        ([0,199],[0x10000,0x20000],{0:{'writes':[(0,0,2)]}}),
+        ([0,199],[0x10000,0x20000],{0:{'reenter':True}}),
+        ([0],[0x10000],{0:{'writes':[(1,0,1),(8,0,0x20000)]}})]
+    for indices,selected_flags,actions in plans:
+        statuses,flags = [0]*200,[0]*200
+        for index,flag in zip(indices,selected_flags):
+            statuses[index]=1;flags[index]=flag
+        compare(fresh(1,statuses,flags),actions)
+    # Registration -> shutdown integration uses actual original and compiled code.
+    old = fresh(0,[0xffffffff]*200,[0xffffffff]*200)
+    state,_ = execute(original,0x45b1f0,BOOKKEEPING_FIELDS,old,2000,(0x45b1f0,0x45b23c))
+    cstate,_ = execute(rebuilt,symbols['Mem_InitHandles'],fields,old,2000,extent)
+    assert state==cstate
+    for index in range(3):
+        state[10] = cstate[10] = struct.pack('<I',CALLBACK)
+        state[11] = cstate[11] = struct.pack('<I',[0,0x80000000,0xffffffff][index])
+        state,_ = execute(original,0x45b1b0,BOOKKEEPING_FIELDS,state,2001+index,(0x45b1b0,0x45b1ea),index+1)
+        cstate,_ = execute(rebuilt,symbols['Mem_NextHandleId'],fields,cstate,2001+index,extent,index+1)
+        assert state==cstate
+        state,_ = execute(original,0x45b360,BOOKKEEPING_FIELDS,state,2004+index,(0x45b360,0x45b3d8),index,stack_args=(index+1,))
+        cstate,_ = execute(rebuilt,symbols['Mem_RegisterHandle'],fields,cstate,2004+index,extent,index,stack_args=(index+1,))
+        assert state==cstate
+    compare(state)
+    print(f'PASS: {cases} shutdown original-vs-C executions; two passes, all indices, ordered lifecycle, callback ABI/model mutations/reentry and four-routine integration.')
+    return cases
+
 
 if __name__ == '__main__':
     try:

@@ -26,6 +26,13 @@ extern volatile unsigned int g_memPendingParameter;
  */
 int Mem_RegisterHandle(unsigned int handle_id);
 
+/* Shutdown callbacks use x86 caller cleanup with one raw dword argument.
+ * Only this invocation ABI is recovered; callback results are ignored.
+ * Raw callback words must name valid functions when their slots are selected.
+ */
+typedef void (*Mem_ShutdownCallback)(unsigned int parameter);
+int Mem_ShutdownHandles(void);
+
 int Mem_InitHandles(void);
 /* x86 flat-address contract: if an enabled cursor is negative, the signed
  * word at byte address (unsigned int)g_memHandleIds + 2*cursor must be

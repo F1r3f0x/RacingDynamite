@@ -6,6 +6,7 @@
 typedef char Mem_UIntMustBe32Bits[(sizeof(unsigned int) == 4) ? 1 : -1];
 typedef char Mem_ShortMustBe16Bits[(sizeof(short) == 2) ? 1 : -1];
 typedef char Mem_PointerMustBe32Bits[(sizeof(void *) == 4) ? 1 : -1];
+typedef char Mem_CallbackMustBe32Bits[(sizeof(Mem_ShutdownCallback) == 4) ? 1 : -1];
 
 /* IGN_WIN.EXE preferred VAs: flag 0x004BAB38 (file initialized zero),
  * status 0x005116E0 (800 bytes), IDs 0x00511230 (400 bytes),
@@ -30,6 +31,42 @@ volatile unsigned int g_memHandleFlags[MEM_HANDLE_COUNT];
 volatile unsigned int g_memPendingContext;
 volatile unsigned int g_memPendingCallback;
 volatile unsigned int g_memPendingParameter;
+
+/* @original Mem_ShutdownHandles (IGN_WIN.EXE @ 0x0045B240, inferred mem.c)
+ * @fidelity EXACT
+ * No arguments; x86 caller cleanup, EAX=1. Semantic name, unknown source name.
+ * Two live scans; callbacks may mutate later slots or reenter after flag clear.
+ */
+int Mem_ShutdownHandles(void)
+{
+    int pass;
+    int index;
+    unsigned int flag;
+    /* Keep the parameter load before the callback-word load, even when the
+     * compiler folds an argument into a PUSH memory operand.
+     */
+    volatile unsigned int parameter;
+    Mem_ShutdownCallback callback;
+    volatile unsigned int *status;
+
+    if (*(volatile unsigned int *)&g_memHandlesInitialized == 0U) {
+        return 1;
+    }
+    *(volatile unsigned int *)&g_memHandlesInitialized = 0U;
+    status = g_memHandleStatus;
+    for (pass = 0; pass < 2; ++pass) {
+        flag = (pass == 0) ? 0x10000U : 0x20000U;
+        for (index = 0; index < MEM_HANDLE_COUNT; ++index) {
+            if (status[index] == 1U && g_memHandleFlags[index] == flag) {
+                status[index] = 0U;
+                parameter = g_memHandleParameters[index];
+                callback = (Mem_ShutdownCallback)g_memHandleCallbacks[index];
+                callback(parameter);
+            }
+        }
+    }
+    return 1;
+}
 
 /* @original Mem_RegisterHandle (IGN_WIN.EXE @ 0x0045B360, inferred mem.c)
  * @fidelity EXACT

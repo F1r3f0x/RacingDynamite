@@ -76,7 +76,7 @@ proof of instruction equality or runtime fidelity.
 ## Build and validation
 
 - The Windows build/emulator harness currently covers `Mem_InitHandles`,
-  `Mem_NextHandleId` and `Mem_RegisterHandle`;
+  `Mem_NextHandleId`, `Mem_RegisterHandle` and `Mem_ShutdownHandles` (modeled callbacks);
   it produces a focused validation DLL, not a playable rebuilt game.
 - `uv run tools/verify_matching.py` records fresh compilation and differential
   emulation evidence. `uv run python tools/verify_fidelity.py` audits the active

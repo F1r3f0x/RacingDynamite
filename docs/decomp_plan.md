@@ -173,3 +173,16 @@ separate compilation, raw-code and emulation evidence; no instruction equality,
 native layout or gameplay claim is added. The next verified dependency is
 `0x0045B240`, which tests status/flags and invokes stored callbacks; recover its
 full lifecycle and callback ABI before reconstruction.
+
+## Handle-shutdown milestone (2026-10-07)
+
+`Mem_ShutdownHandles` at `0x0045B240` is reconstructed in the existing memory
+module. [Independent shutdown evidence](ghidra/windows_handle_shutdown.md) records
+its initialized-flag clear, two ordered 200-slot scans, exact status/flag equality,
+status clear before callback, and one-dword caller-cleanup callback ABI. The
+verifier retains 30/377/590 differential comparisons and eight original-only
+negative-cursor checks, adding 531 shutdown comparisons with explicit callback
+models, mutation/reentry checks and four-routine integration. Four routines cover
+409 original bytes. Callback body semantics, native runtime, original compiler
+identity and instruction equality remain unverified. Next recover ID-based release
+at `0x0045B410`, directly called by the registered callback at `0x00456210`.

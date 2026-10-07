@@ -172,3 +172,12 @@ registry, SQL dump and dashboards share the snapshot ID available from
 a self-referential generated-state dependency. Three routines / 254 original bytes
 are reconstructed; native and instruction-match passes remain zero. Original
 binaries/assets and all other candidates' stage labels are preserved.
+
+## Shutdown follow-up
+
+`0x0045B240` is now reconstructed as `Mem_ShutdownHandles`; see
+[the recovered two-pass shutdown contract](windows_handle_shutdown.md). The
+current harness adds 531 comparisons with explicit callback models while retaining
+all registration checks. Callback mutation/reentry and call ABI are validated;
+original callback bodies remain unimplemented and unvalidated. Next recover
+`0x0045B410`, called by the registered callback `0x00456210`.

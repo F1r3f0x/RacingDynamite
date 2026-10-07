@@ -8,7 +8,7 @@ import subprocess
 from windows_target import ROOT, BUILD, DLL, verify_target
 
 EXPORTS = ['Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
-           'g_memHandleIds', 'g_memHandleCursor', 'Mem_RegisterHandle',
+           'g_memHandleIds', 'g_memHandleCursor', 'Mem_RegisterHandle', 'Mem_ShutdownHandles',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',
            'g_memHandleCallbacks', 'g_memHandleFlags', 'g_memPendingContext',
            'g_memPendingCallback', 'g_memPendingParameter']

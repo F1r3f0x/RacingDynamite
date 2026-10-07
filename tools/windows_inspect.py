@@ -31,7 +31,7 @@ def inspect():
     records = {base+a:n for a,n,local,params,bits in struct.iter_unpack(
         '<IIIHH',data[fpo.PointerToRawData:fpo.PointerToRawData+fpo.SizeOfData])}
     for va in [0x4120a0,0x412230,0x4122d0,0x412460,0x412500,0x45b170,
-               0x45b1b0,0x456180,0x45b360,0x45b1f0,0x456af0,0x45b690,0x456e60,0x456bc0,0x455ac0,
+               0x45b1b0,0x456180,0x45b1a0,0x45b240,0x456210,0x45b410,0x45b360,0x45b1f0,0x456af0,0x45b690,0x456e60,0x456bc0,0x455ac0,
                0x45b740,0x456f20,0x417270,0x417ea0,0x4184c0,0x458040]:
         print(f'FPO: VA={va:#010x} RVA={va-base:#010x} size={records[va]} end={va+records[va]:#010x}')
     assert records[0x45b1f0] == 76
@@ -42,7 +42,7 @@ def inspect():
     assert records[0x45b1b0] == 58
     assert hashlib.sha256(consumer).hexdigest() == '696ce4a075f495b91bd79ce9fe531b4c474b66540d3935dcc8e5a45c74d6d139'
     assert pe.get_data(0x5b1ea,6) == b'\xcc'*6
-    for va in [0x45b1b0,0x45b1f0,0x456180,0x45b360]:
+    for va in [0x45b1b0,0x45b1f0,0x456180,0x45b360,0x45b1a0,0x45b240,0x456210]:
         for i in md.disasm(pe.get_data(va-base,records[va]),va):
             print(f'{i.address:#010x}: {i.mnemonic} {i.op_str}')
     # Independent scan of all file-backed FPO code, not bridge xref completeness.
@@ -81,6 +81,16 @@ def inspect():
         print(f'Confirmed dispatch initializer {global_va:#010x} = {value:#010x}')
     bookkeeping = pe.get_data(0x5b360,120)
     print('Bookkeeping SHA256:',hashlib.sha256(bookkeeping).hexdigest())
+    print('Shutdown SHA256:',hashlib.sha256(pe.get_data(0x5b240,155)).hexdigest())
+    print('Shutdown padding:',pe.get_data(0x5b2db,5).hex())
+    assert records[0x45b240] == 155
+    assert hashlib.sha256(pe.get_data(0x5b240,155)).hexdigest() == 'edf69cfb1fd2d860913575999d39e05e37e615c11fb1e4280e4c166836e3b59f'
+    assert pe.get_data(0x5b2db,5) == b'\xcc'*5
+    shutdown = list(md.disasm(pe.get_data(0x5b240,155),0x45b240))
+    assert sum(i.size for i in shutdown) == 155 and len(shutdown)==41
+    assert [(i.address,i.op_str) for i in shutdown if i.mnemonic=='call'] == [
+        (0x45b282,'dword ptr [esi + 0x511a00]'),
+        (0x45b2bf,'dword ptr [esi + 0x511a00]')]
     assert hashlib.sha256(bookkeeping).hexdigest() == '2dc672ad67179fa73bca4d901a607b72986ba7138a1d00ecb954b3b9280e5e34'
     assert records[0x45b360] == 120 and pe.get_data(0x5b3d8,8) == b'\xcc'*8
     decoded = list(md.disasm(bookkeeping,0x45b360))
@@ -91,7 +101,7 @@ def inspect():
         for i in md.disasm(pe.get_data(va-base,n),va):
             addresses = [o.imm if o.type == X86_OP_IMM else o.mem.disp
                          for o in i.operands if o.type in (X86_OP_IMM,X86_OP_MEM)]
-            if any(a in (*state_addresses,0x45b360) for a in addresses):
+            if any(a in (*state_addresses,0x45b360,0x45b240) for a in addresses):
                 print(f'Bookkeeping reference (routine {va:#010x}) {i.address:#010x}: {i.mnemonic} {i.op_str}')
     for name,va,n in [('flag',0x4bab38,4),('status',0x5116e0,800),
                       ('ids',0x511230,400),('cursor',0x512040,2),
