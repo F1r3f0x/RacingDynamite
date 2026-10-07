@@ -111,3 +111,24 @@ Visual analytics dashboard generator:
   uv run python tools/db.py dashboard
   ```
 
+
+## 8. Windows Target Diagnostics and Project Skill
+
+`tools/decomp_doctor.py` verifies the expected identity from `decomp/target.json`
+and reports dependencies, compiler paths, legacy tool assumptions, and read-only
+database metadata. Optional localhost GET probes check Ghidra reachability; they
+do not verify loaded-program identity. Exit zero means inspection and local target
+identity succeeded, not that the Windows pipeline is ready.
+
+```powershell
+uv run python tools/decomp_doctor.py
+uv run python tools/decomp_doctor.py --probe-ghidra
+uv run python -m unittest discover -s tests -p test_decomp_doctor.py
+```
+
+The repository skill `$ignition-windows-decomp` lives in
+`.agents/skills/ignition-windows-decomp/`. Use it in a project chat for verified
+binary analysis, bounded C89 reconstruction, and validation. It provides guidance;
+it does not retarget the old build pipeline by itself.
+
+See [the tooling audit](../docs/tooling_audit.md) for findings and migration order.

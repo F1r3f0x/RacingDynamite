@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Windows decompilation tooling audit and skill (2026-10-07)**: Added a shared target fingerprint manifest, a read-only JSON diagnostic command with focused identity/header tests, and the repository skill `$ignition-windows-decomp`. Documented DOS migration gaps and the next tooling priorities; the Windows build pipeline remains pending.
 - **Interactive Decompilation Progress Dashboard & Binary Diffing Tooling**:
   - Implemented standalone, zero-dependency HTML progress dashboard (`dashboard.html`, `docs/dashboard.html`) tracking all 74 functions, 8 modules, 9 data structures (69 fields), 62 globals, and 6 FCTS deviations.
   - Built `tools/generate_dashboard.py` and added `dashboard` subcommand to `tools/db.py` (`uv run python tools/db.py dashboard`).

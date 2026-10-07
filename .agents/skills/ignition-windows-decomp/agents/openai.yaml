@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ignition Windows Decompilation"
+  short_description: "Reconstruct Ignition Windows routines from evidence"
+  default_prompt: "Use $ignition-windows-decomp to reconstruct and validate one bounded Windows routine in RacingDynamite."

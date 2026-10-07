@@ -22,6 +22,10 @@ does not rename the current branch or change implementation/build tooling.
 
 ## 2. Verified local target identity
 
+The machine-readable expected identity is [decomp/target.json](../decomp/target.json).
+Verify it with `uv run python tools/decomp_doctor.py`; the diagnostic does not
+certify Windows pipeline readiness. See [the tooling audit](tooling_audit.md).
+
 | Property | Observed value |
 | --- | --- |
 | Path | `Ignition/Ignition/IGN_WIN.EXE` |

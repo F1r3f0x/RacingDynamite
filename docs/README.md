@@ -23,6 +23,8 @@ Welcome to the central technical documentation and reverse engineering knowledge
 
 ## 2. Master Roadmap
 
+* **[Windows Tooling Audit](tooling_audit.md)**: Current migration gaps, read-only diagnostics, and the project decompilation skill.
+
 * 🎯 **[Master Implementation Roadmap](roadmap.md)**: Comprehensive 8-phase reverse engineering and implementation plan to complete the source port.
 
 ---

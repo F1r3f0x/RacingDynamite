@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "binary": "Ignition/Ignition/IGN_WIN.EXE",
+  "sha256": "7665E4E736BFD6C90790CEDBB27E2DE7E98A167374EB77933533C54EF0DC8782",
+  "size": 915968,
+  "machine": "0x014c",
+  "optional_magic": "0x010b",
+  "image_base": "0x00400000",
+  "entry_rva": "0x00069950",
+  "compiler": null,
+  "pipeline_status": "migration_pending"
+}
