@@ -1,6 +1,15 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
-Latest bounded follow-up (2026-10-07): [triangle clipping analysis](ghidra/windows_triangle.md)
+Latest bounded follow-up (2026-10-07): handle cleanup callback `Font_Shutdown`
+at RVA `0x56210` (83 bytes) and downstream font unloader `Font_Unload` at RVA `0x56470`
+(88 bytes) are reconstructed and verified. Focused validation DLL in
+`tools/verify_font_cleanup.py` executes 123 `Font_Unload` and 71 `Font_Shutdown`
+differential emulation test cases against authentic `IGN_WIN.EXE` instructions
+in Unicorn with exact call-argument, state-mutation, and ABI equality.
+Full geputget.c compilation remains blocked by unmigrated DOS legacy dependencies.
+
+Previous bounded follow-up (2026-10-07): [triangle clipping analysis](ghidra/windows_triangle.md)
+
 recovers the complete clipping and splitting contract at RVA `0x24F270` (537 bytes),
 both two-segment wrappers at RVAs `0x24EFA0` and `0x24F0C0` (282 bytes each), the
 right-endpoint clamp helper RVA `0x24F489` (63 bytes), and left-clipped span behavior
@@ -237,3 +246,20 @@ cursor checks. Five routines cover 471 original bytes. Native layout/runtime,
 instruction equality, callback bodies and compiler identity remain unverified.
 The registered cleanup callback's next verified dependency is `0x00456470`, called
 at `0x00456244`; recover that contract before implementing the callback itself.
+
+## Handle cleanup & font unload milestone (2026-10-07)
+
+The registered handle cleanup callback `Font_Shutdown` at `0x00456210` (83 bytes)
+and its downstream font slot unloader `Font_Unload` at `0x00456470` (88 bytes)
+are reconstructed and verified in `decomp/src/geputget.c`.
+[Independent font unload evidence](ghidra/windows_font_unload.md) and
+[font shutdown evidence](ghidra/windows_font_shutdown.md) record the 224-glyph
+presence scan, `Gfx_SpriteOp(NULL, handle)` invocation, `FontSlot` Windows packing,
+handle release via `Mem_ReleaseHandleId(g_fontSubsystemHandle)`, ascending 30-slot
+active scan, and uninitialized error return `1020`.
+`tools/verify_font_cleanup.py` compiles a focused validation DLL and passes
+123 `Font_Unload` and 71 `Font_Shutdown` differential emulation executions against
+authentic PE instructions, covering uninitialized, empty, full, and sparse active
+configurations with exact call-argument, state-mutation, and ABI equality.
+Integrated into `tools/verify_matching.py`. Native layout, instruction equality,
+and unmigrated DOS subsystems remain unverified.

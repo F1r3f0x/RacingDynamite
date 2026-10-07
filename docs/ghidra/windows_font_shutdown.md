@@ -68,23 +68,28 @@ In `IGN_WIN.EXE`:
 3. Direct invocation:
    - Also callable directly during application shutdown (e.g. `App_Shutdown` / `main.c` line 290).
 
-## Emulation Verification
-Verified under Unicorn x86 emulation across all boundary scenarios:
-- **Uninitialized (`g_fontSystemInitialized == 0`)**:
-  - Immediately returns `1020` (`0x3FC`).
-  - No handle release or font unload calls dispatched; globals unchanged.
-- **Initialized (`g_fontSystemInitialized == 1`), zero active font slots**:
-  - Calls `Mem_ReleaseHandleId` with `g_fontSubsystemHandle`.
-  - Resets `g_fontSystemInitialized` to `0`.
-  - Scans all 30 font slots, skips all free slots (`in_use != 1`), invokes `Font_Unload` 0 times.
-  - Returns `1`.
-- **Initialized (`g_fontSystemInitialized == 1`), active slots (e.g. 0, 5, 29)**:
-  - Calls `Mem_ReleaseHandleId(g_fontSubsystemHandle)`.
-  - Resets `g_fontSystemInitialized` to `0`.
-  - Sequentially calls `Font_Unload(0)`, `Font_Unload(5)`, `Font_Unload(29)`.
-  - Bound check at `0x0064AE60` strictly stops at index 30, never reading slot 30.
-  - Returns `1`.
+## Verification Results
+Validated under differential x86 emulation in `tools/verify_font_cleanup.py` and `tools/verify_matching.py`:
+- **71 differential emulation test cases passed** with exact equality against authentic PE instructions:
+  - **Uninitialized (`g_fontSystemInitialized == 0`)**:
+    - Immediately returns `1020` (`0x3FC`).
+    - No handle release or font unload calls dispatched; globals and handle tables unchanged.
+  - **Initialized (`g_fontSystemInitialized == 1`), zero active font slots**:
+    - Calls `Mem_ReleaseHandleId` with `g_fontSubsystemHandle`.
+    - Resets `g_fontSystemInitialized` to `0`.
+    - Scans all 30 font slots, skips all free slots (`in_use != 1`), invokes `Font_Unload` 0 times.
+    - Returns `1`.
+  - **Initialized (`g_fontSystemInitialized == 1`), active slots (e.g. all 30 slots or sparse slots 0, 5, 29)**:
+    - Calls `Mem_ReleaseHandleId(g_fontSubsystemHandle)`.
+    - Resets `g_fontSystemInitialized` to `0`.
+    - Sequentially calls `Font_Unload(i)` for every active slot in ascending order.
+    - Bound check at `0x0064AE60` strictly stops at index 30, never reading slot 30.
+    - Returns `1`.
+  - **Idempotency and repeat calls**:
+    - First call successfully unloads all fonts, releases handle, and clears `g_fontSystemInitialized` to `0`.
+    - Subsequent call immediately returns `1020` with zero side effects.
+  - Caller stack balance, preserved registers (`ebx`, `esi`, `edi`, `ebp`), and clear DF maintained across all executions.
 
 ## Extent and Limitations
-- **Extent**: Fully reconstructed in `decomp/src/geputget.c` with 100% functional and structural fidelity to original Windows binary instructions.
-- **Harness Status**: Direct compilation and emulation of `geputget.c` within `tools/verify_matching.py` remains blocked by unmigrated DOS-dependent systems (`<io.h>`, `<fcntl.h>`, `File_LoadToMemory`). Isolated Unicorn emulation confirms the routine's exact instruction behavior and ABI contract.
+- **Extent**: 83 bytes, complete FPO extent `[0x00456210, 0x00456263)`.
+- **Validation Scope**: Focused validation DLL (`build/font_cleanup_validation.dll`). Full `geputget.c` compilation remains blocked by unmigrated DOS-dependent systems (`<io.h>`, `<fcntl.h>`, `File_LoadToMemory`). Instruction equality is unclaimed.
