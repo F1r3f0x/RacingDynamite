@@ -42,7 +42,10 @@ emulation for every requested RVA, exports and checks the exports. It writes
 It never stages or commits. The verifier supports the five memory handle routines
 and extracted-production-C `Font_GetTextWidth` and `Font_DrawText` contracts;
 the latter executes the original sprite wrapper with a modeled renderer boundary.
-Extend the verifier before
+The native sprite backend `Gfx_DrawSpriteNative` at RVA `0x571B0` additionally
+uses extracted production C with GCC x87; its zero-argument downstream boundary
+is modeled after executing the original adapter and descriptor lookup separately.
+Rasterizer bodies and framebuffer output are unverified. Extend the verifier before
 completing a different reconstructed routine.
 Compilation, instruction comparison, emulation and native execution remain separate
 evidence kinds. Differential emulation does not establish native game parity.

@@ -55,6 +55,14 @@ sprite wrapper and `_ftol` execute; renderer bodies are modeled at their recover
 cdecl boundary. Ordered drawing arguments, live-table/text mutations, ABI and
 x87 precision are covered; framebuffer/native visuals are unverified. See
 [font-drawing evidence](../docs/ghidra/windows_font_draw_text.md).
+The sprite backend at `0x004571B0` adds extracted-production-C validation with
+GCC 16.2.0 x87 and LLD, using `uv run tools/verify_sprite_backend.py` (also run
+by the integrated verifier). It compares 2,588 backend executions and separately
+executes 28 original downstream adapter/lookup cases. The backend comparison
+models the recovered zero-argument `0x00457370` boundary; rasterizer bodies,
+framebuffer output and native visual parity remain unverified. See
+[native sprite evidence](../docs/ghidra/windows_sprite_backend.md) for compiler
+flags, low-dword conversion quirks and dependency scope.
 It does not certify instruction equality or native game behavior. The
 [consumer evidence](../docs/ghidra/windows_handles.md) states the negative-state
 memory contract and the validation DLL's differing data layout.

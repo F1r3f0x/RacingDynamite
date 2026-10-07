@@ -701,3 +701,5 @@ if __name__ == '__main__':
     verify_font_width()
     from verify_font_draw import verify_font_draw
     verify_font_draw()
+    from verify_sprite_backend import verify_sprite_backend
+    verify_sprite_backend()

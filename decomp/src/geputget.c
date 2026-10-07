@@ -374,6 +374,47 @@ int Font_DrawText(const char *text, int font_id, int x, int y) {
     return 1;
 }
 
+/* The request is initialized file-backed zero data. Coefficients and the active
+ * pointer are loader-zeroed storage in IGN_WIN.EXE. These globals persist;
+ * position and handle pointers are borrowed for synchronous submission. */
+volatile GfxSpriteRequest g_nativeSpriteRequest = {0, 0, 0};
+volatile GfxSpriteCoefficients g_nativeSpriteCoefficients;
+volatile GfxSpriteRequest *volatile g_activeSpriteRequest;
+
+/**
+ * @original Gfx_DrawSpriteNative (IGN_WIN.EXE @ 0x004571B0, geputget.c)
+ * @fidelity EXACT
+ * @notes Native request/coefficient publication; downstream body not rebuilt.
+ */
+int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position,
+    const GfxSpriteTransform *transform) {
+    g_nativeSpriteRequest.position = position;
+    g_nativeSpriteRequest.coefficients = 0;
+    g_nativeSpriteRequest.handle = handle;
+    if (transform != 0) {
+        long double value = (long double)transform->scale * 65536.0L;
+        int32_t scale = GFX_X87_TRUNCATE_LOW32(value);
+        /* A volatile copy prevents contraction into FSINCOS: the original uses
+         * separate FCOS/FSIN, including their out-of-range operand behavior. */
+        volatile float angle = transform->angle_radians;
+        int32_t cosine;
+        int32_t sine;
+
+        value = (long double)scale * __builtin_cosl((long double)angle);
+        cosine = GFX_X87_TRUNCATE_LOW32(value);
+        g_nativeSpriteCoefficients.cosine_0 = cosine;
+        value = (long double)scale * __builtin_sinl((long double)angle);
+        sine = GFX_X87_TRUNCATE_LOW32(value);
+        g_nativeSpriteCoefficients.sine_1 = sine;
+        g_nativeSpriteCoefficients.sine_2 = sine;
+        g_nativeSpriteRequest.coefficients = &g_nativeSpriteCoefficients;
+        g_nativeSpriteCoefficients.cosine_3 = cosine;
+    }
+    g_activeSpriteRequest = &g_nativeSpriteRequest;
+    Gfx_SubmitSpriteRequest();
+    return 1;
+}
+
 /**
  * @original Font_DrawHUDText (MAINDOS.EXE @ 0x00043d60, geputget.c)
  * @fidelity EXACT

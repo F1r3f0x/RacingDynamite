@@ -60,6 +60,14 @@ Exact/relocated instruction comparison, linked equality, and native game parity
 remain unclaimed. Historical imported evidence is preserved but does not count
 as a fresh passing run until reproduced.
 
+`Gfx_DrawSpriteNative` at RVA `0x571B0` adds 2,588 differential cases with native
+compiled x87 instructions and a recovered, modeled downstream boundary. Its
+28 original-only downstream adapter/lookup executions corroborate that contract,
+without promoting those dependencies to reconstructed status. See
+[sprite backend evidence](../docs/ghidra/windows_sprite_backend.md). The focused
+sprite DLL requires GCC x86/x87 and LLD; all result kinds retain separate source,
+toolchain and artifact provenance. Framebuffer/native rendering is unverified.
+
 The treemap offers function, module and address-order views, search and stage/class
 filters. Blocks use original extent sizes, with minimum-area placeholders for
 unknown sizes. Aggregate byte metrics use interval unions to avoid overlap

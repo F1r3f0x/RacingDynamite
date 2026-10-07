@@ -33,6 +33,53 @@ typedef struct {
     int32_t y;
 } Point2D;
 
+/* IGN_WIN.EXE native sprite request: only the consumed handle prefix is known.
+ * Point/origin coordinates use eight fractional bits. No ownership transfer. */
+typedef struct {
+    int32_t image_id;
+    int32_t origin_x;
+    int32_t origin_y;
+} GfxSpriteHandle;
+
+typedef struct {
+    float scale;
+    float angle_radians;
+} GfxSpriteTransform;
+
+/* Native coefficients are deliberately (cosine, sine, sine, cosine).
+ * The duplicate positive sine is an original quirk, not a rotation correction. */
+typedef struct {
+    int32_t cosine_0;
+    int32_t sine_1;
+    int32_t sine_2;
+    int32_t cosine_3;
+} GfxSpriteCoefficients;
+
+typedef struct {
+    Point2D *position;
+    GfxSpriteHandle *handle;
+    volatile GfxSpriteCoefficients *coefficients;
+} GfxSpriteRequest;
+
+extern volatile GfxSpriteRequest g_nativeSpriteRequest;       /* VA 0x004BA708 */
+extern volatile GfxSpriteCoefficients g_nativeSpriteCoefficients; /* VA 0x0050EC10 */
+extern volatile GfxSpriteRequest *volatile g_activeSpriteRequest; /* VA 0x0050EBFC */
+int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position,
+    const GfxSpriteTransform *transform);
+/* VA 0x00457370: no stack arguments; consumes g_activeSpriteRequest.
+ * Its native body and ESI rasterizer adapter remain unreconstructed. */
+void Gfx_SubmitSpriteRequest(void);
+
+/* Original _ftol returns the low dword of a truncated signed 64-bit result.
+ * Indefinite conversion (NaN/outside signed 64-bit range) has low dword zero.
+ * GCC x87 intrinsics retain 80-bit intermediates without handwritten assembly.
+ * Evaluate only a side-effect-free long-double local through this macro. */
+#define GFX_X87_TRUNCATE_LOW32(value) \
+    (!(value >= -9223372036854775808.0L && value < 9223372036854775808.0L) \
+        ? 0 : (int32_t)(value < 0.0L \
+            ? 0u - (unsigned int)__builtin_fmodl(-value, 4294967296.0L) \
+            : (unsigned int)__builtin_fmodl(value, 4294967296.0L)))
+
 typedef struct {
     int32_t unk00;
     int32_t width;
