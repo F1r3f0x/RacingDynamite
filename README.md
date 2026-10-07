@@ -22,10 +22,12 @@ To run the game, you must supply game assets from a legally purchased copy of *I
 As of 2026-10-07, the active goal is faithful reconstruction of
 `Ignition/Ignition/IGN_WIN.EXE`, followed by modernization into C11/SDL2.
 See [the Windows decompilation plan](docs/decomp_plan.md) for the verified target
-fingerprint, migration boundaries, and next milestones. Existing DOS sources,
-Open Watcom tooling, symbol maps, and progress reports are preserved; they do not
-establish Windows completion. The Windows compiler/build pipeline and runtime
-baseline still need to be established.
+fingerprint, migration boundaries, and next milestones. Windows reconstruction
+replaces the superseded DOS work in `decomp/`; build tools, tracking, and symbol
+maps will be retargeted in place. The old implementation is recoverable in Git
+history and does not need a parallel source tree or maintained DOS build.
+Historical DOS evidence remains a reference, not Windows completion. Windows
+compiler selection, build migration, and runtime baseline are still pending.
 
 ## Features & Goals
 
@@ -80,19 +82,17 @@ Launch the engine:
 ./build/racing_dynamite
 ```
 
-### 4. Retained DOS Decompilation & DOSBox Testing (Open Watcom V2)
+### 4. Windows Reconstruction Migration
 
-These commands build the secondary DOS reference only. They do not build or validate the Windows target.
-To compile the retained C89 DOS reconstruction (`decomp/src/`) using Open Watcom V2:
-```powershell
-uv run python tools/build_decomp.py --link
-uv run python tools/verify_matching.py
-```
+`decomp/` is the designated Windows reconstruction workspace. Its existing DOS
+code and Open Watcom build are superseded and will be replaced in place. There
+is no supported Windows reconstruction command yet: the existing
+`tools/build_decomp.py`, `tools/verify_matching.py`, and `tools/verify_fidelity.py`
+still contain DOS assumptions and must be retargeted before use as Windows gates.
 
-For retained DOS runtime comparisons, follow
-[the historical DOSBox baseline](docs/tracking/runtime_baseline.md) and use
-disposable copies under `build/runtime/`. Never deploy rebuilt binaries into the
-original `Ignition/` directory. DOS startup remains unverified after timer repair.
+Start with the fingerprinted `IGN_WIN.EXE` and the
+[active migration milestones](docs/decomp_plan.md). Use disposable runtime copies
+under `build/runtime/`; never overwrite original binaries or assets in `Ignition/`.
 
 
 ---

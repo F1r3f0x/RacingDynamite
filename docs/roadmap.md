@@ -7,11 +7,13 @@ This document defines the complete engineering roadmap and milestone plan for **
 ## Active Windows Reconstruction Milestones (2026-10-07)
 
 The [Windows decompilation plan](decomp_plan.md) governs current priorities:
-fingerprint/import/ABI inventory and original runtime baseline; isolated Windows
-build and target-aware tracking; one verified bounded reconstruction; native
+fingerprint/import/ABI inventory and original runtime baseline; in-place
+replacement of the DOS `decomp/`, build, and active tracking; one verified bounded
+reconstruction; native
 startup/UI/presentation; engine/race recovery; full-game validation and then SDL2
 modernization. Compiler selection and Windows build/runtime verification remain
-pending. DOS progress is retained separately.
+pending. DOS implementation progress is historical and must not carry over to
+active Windows tracking. A parallel DOS implementation/build is out of scope.
 
 The eight source-port phases below remain a long-term backlog, not evidence of
 Windows completion or the immediate execution order. Their addresses, renderer

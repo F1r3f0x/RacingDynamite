@@ -2,8 +2,11 @@
 
 Decision date: 2026-10-07 (America/Santiago). The primary target is the standard
 Windows release, `Ignition/Ignition/IGN_WIN.EXE`. The DOS release remains a
-secondary reference. The earlier plan is retained in
-[the DOS archive](tracking/dos_decomp_plan.md).
+historical binary reference. The Windows reconstruction replaces the DOS
+implementation in `decomp/`; a parallel DOS reconstruction is out of scope.
+The [earlier DOS plan](tracking/dos_decomp_plan.md) is historical documentation,
+not an implementation-preservation requirement. This supersedes the earlier
+same-day decision to maintain separate DOS and Windows source trees.
 
 ## 1. Decompile first, port second
 
@@ -41,18 +44,27 @@ and address convention (VA/RVA) with every symbol and initializer.
 
 ## 3. Migration boundaries and tracking
 
-- Preserve the current DOS `decomp/` sources, LE tooling, Open Watcom build,
-  database, symbol maps, and runtime observations. Pause new DOS reconstruction
-  work unless needed to answer a Windows comparison question.
-- Plan a separate Windows reconstruction source/build path; it does not exist yet.
-  Choose and document the path when introducing the Windows build pipeline.
+- Use `decomp/` for the Windows reconstruction and replace the existing DOS
+  implementation in place. Its code, stubs, architecture assumptions, and status
+  labels are untrusted; carry over a routine only after independent Windows
+  instruction, data, ABI, and behavior validation.
+- Retarget existing build and verification entry points, database, symbol maps,
+  and dashboards in place. Remove obsolete DOS scaffolding during migration;
+  do not maintain a parallel DOS source tree or DOS build compatibility. Git
+  history preserves the superseded implementation for recovery.
+- Historical DOS binary observations and format research may remain as labeled
+  references. They do not constrain the Windows implementation or block removal
+  of flawed DOS reconstruction code. Original game files remain protected.
 - Identify the Windows compiler and ABI from executable evidence before selecting
   a vintage compiler. MSVC 4.2 is a research candidate, not a verified local fact;
   DOS Watcom flags and register calling conventions must not be assumed valid.
 - Existing `database/decomp.db` has DOS-primary records and legacy `win_address`
   cross-references. Existing CLI/status/dashboard/audit output remains legacy
-  progress. Before recording Windows results, implement target-aware storage,
-  address keys, evidence, and progress reporting without resetting DOS history.
+  progress. Replace/reset active DOS records and adapt storage, address keys,
+  evidence, and progress reporting for the fingerprinted Windows target before
+  recording Windows results. Start completion from independently verified Windows
+  evidence; no parallel DOS tracking pipeline is required. Label any historical
+  cross-references that remain.
 - Do not assume legacy `0x004...` addresses or port annotations belong to this
   executable. Validate them before using them as Windows provenance.
 - Never treat DOS completion counts, matching scores, or runtime checks as Windows
@@ -65,9 +77,11 @@ and address convention (VA/RVA) with every symbol and initializer.
    Run a disposable original copy in a documented Windows-compatible environment
    and record startup, language selector, loading, intro, and first menu. Record
    any wrapper/compatibility settings and distinguish their behavior from the game.
-2. **Create Windows build and tracking infrastructure.** Select a compiler using
-   evidence, isolate output paths, add target-aware provenance and verification,
-   and link a minimal Windows executable without claiming gameplay parity.
+2. **Replace the DOS workspace and infrastructure in place.** Select a compiler
+   using Windows evidence; rebuild `decomp/` and retarget the existing build,
+   verification, tracking, and dashboard entry points. Reset active DOS progress
+   and remove obsolete scaffolding. Isolate generated outputs from originals and
+   link a minimal Windows executable without claiming gameplay parity.
 3. **Validate a small reconstruction.** Recover a bounded asset loader/decoder or
    memory routine with verified inputs, outputs, data layout, and calling convention.
    Compare against the original before scaling up.
@@ -99,15 +113,22 @@ Windows inventory.
 
 The existing `build_decomp.py`, `verify_matching.py`, LE helpers, DOS runtime
 staging, and fidelity auditor have not been migrated by this docs-only change.
-Use them for their retained scope, not as Windows acceptance gates.
+They are scheduled for in-place replacement/retargeting and are not current
+Windows acceptance gates. Maintaining their DOS behavior is not a requirement.
 
 ## 6. Preservation and provenance
 
 Never overwrite original files under `Ignition/`. Stage disposable runtime copies
 and isolate generated outputs. Keep the DOS inventory, timer recovery, and DOSBox
 baseline as evidence about `MAINDOS.EXE`, including their unresolved failures.
-Use `IGN_WIN.EXE` in new verified Windows `@original` annotations; keep DOS
-annotations and deviations attached to their original binary and addresses.
+Use `IGN_WIN.EXE` in verified Windows `@original` annotations when replacing
+functions. Remove obsolete DOS implementation annotations with the code they
+describe; any historical evidence kept remains attached to its original binary.
+Do not relabel DOS addresses or inherited completion claims as Windows evidence.
+
+This is a documentation-only policy update. Code, tooling, and active database
+records still need migration; their continued presence does not mean the DOS
+implementation is protected or supported.
 
 Related guidance: [agent instructions](../AGENTS.md), [roadmap](roadmap.md),
 [fidelity strategy](tracking/fidelity_strategy.md), and [tools](../tools/README.md).

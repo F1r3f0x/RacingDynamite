@@ -1,6 +1,6 @@
 # Racing Dynamite Tooling Documentation (`tools/`)
 
-> Windows is the primary target from 2026-10-07; see [the active plan](../docs/decomp_plan.md). Existing DOS build, LE analysis, instruction comparison, database CLI, fidelity audits, and dashboards retain their existing scope. This docs change does not implement Windows build or verification support, and their output is not Windows progress.
+> Windows is the primary target from 2026-10-07; see [the active plan](../docs/decomp_plan.md). The DOS implementation is superseded. Existing build, instruction comparison, database CLI, fidelity audits, and dashboards must be retargeted in place; obsolete DOS scaffolding may be removed during migration. LE analysis may serve historical binary research, but no DOS build compatibility is required. These tools have not yet been migrated and their output is not Windows progress.
 
 This directory contains utility scripts, reverse engineering inspectors, asset pipeline tools, and verification scripts for **Racing Dynamite** (Ignition 1997 source port).
 
@@ -82,7 +82,7 @@ Provides live bidirectional synchronization between the Antigravity agent and th
 
 ## 6. Decompilation Tracking Database (`tools/db.py`)
 
-Retained DOS/legacy tracking interface for **`MAINDOS.EXE`**. Windows tracking requires target-aware provenance and independent validation before use:
+Current DOS/legacy tracking interface, scheduled for in-place Windows migration. Replace/reset active DOS records and rebuild progress from independently verified **`IGN_WIN.EXE`** evidence; no parallel DOS database is required:
 * **`tools/db.py`**: SQLite database manager (`database/decomp.db` backed by `database/schema.sql` and `database/dump.sql`).
 * **Commands**:
   * `uv run python tools/db.py init`: Initializes clean SQLite database from `database/schema.sql`.

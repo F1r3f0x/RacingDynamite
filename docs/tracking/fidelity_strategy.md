@@ -1,6 +1,6 @@
 # Fidelity & Change Tracking Strategy (FCTS) Developer Guide
 
-> Active primary target: fingerprinted `IGN_WIN.EXE`; DOS is secondary. Existing annotations/registry entries retain their original binary provenance. Legacy Windows-style addresses must be validated before use, and current audits are not Windows certification. See [the active plan](../decomp_plan.md).
+> Active primary target: fingerprinted `IGN_WIN.EXE`; DOS is secondary. The DOS implementation and active registry are superseded and may be replaced/reset during in-place Windows migration. Any historical annotations/registry evidence kept must retain its original binary provenance. Legacy Windows-style addresses must be validated before use, and current audits are not Windows certification. See [the active plan](../decomp_plan.md).
 
 This document defines the strict engineering guidelines, code provenance standards, divergence tracking rules, and verification procedures for **Racing Dynamite** (Ignition 1997 source port).
 

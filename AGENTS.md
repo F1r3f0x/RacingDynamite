@@ -9,10 +9,15 @@ See `docs/decomp_plan.md` for the active plan and target fingerprint.
 
 - Windows reconstruction: readable C89; establish the original compiler, ABI,
   data layout, and build configuration from this binary before selecting a toolchain.
-- `decomp/` currently contains the preserved DOS/Open Watcom V2 reconstruction.
-  Do not overwrite it with Windows code. A separate Windows source/build path is
-  planned; it is not implemented yet. Use 4-space indentation and no handwritten
-  assembly or inline `__asm`.
+- `decomp/` is the Windows reconstruction workspace. Replace the superseded
+  DOS/Open Watcom implementation in place; do not create a parallel Windows tree
+  or maintain a DOS build. Existing DOS code is untrusted implementation material,
+  not a foundation that must be preserved. Recover behavior from `IGN_WIN.EXE`.
+  Use 4-space indentation and no handwritten assembly or inline `__asm`.
+- Retarget build, verification, database, symbol maps, and dashboards in place.
+  Remove obsolete DOS scaffolding as part of the affected migration feature.
+  Git history provides recovery of the old implementation; no duplicate DOS source
+  archive is required. This documentation change itself does not replace code.
 - `src/`: C11/SDL2 source port, built with CMake; modernization follows verified reconstruction.
 - Tools: Python through `uv`. Use Windows PowerShell; do not run Linux package managers.
 
@@ -42,8 +47,10 @@ See `docs/decomp_plan.md` for the active plan and target fingerprint.
 4. Keep code, documentation, and tracking synchronized. Existing
    `docs/ghidra/functions.md`, `globals.md`, `structs.md`, and `database/decomp.db`
    contain legacy evidence; their Windows-style addresses are not automatically
-   verified against `IGN_WIN.EXE`. Preserve provenance until target-aware tracking
-   is implemented. Never transfer DOS completion statuses to Windows.
+   verified against `IGN_WIN.EXE`. Replace/reset active records when migrating
+   tracking to the Windows target; start Windows completion from independently
+   verified evidence. Preserve binary identity for any historical evidence kept.
+   Never transfer DOS completion statuses to Windows.
 5. Reuse DOS findings as hypotheses only after validating the corresponding Windows
    instructions, initializers, callers, and behavior.
 
@@ -59,7 +66,9 @@ New Windows functions require verified binary provenance:
 ```
 
 Choose one fidelity value. Add deviation/fix-category lines only when applicable.
-Keep existing DOS annotations tied to `MAINDOS.EXE`; do not relabel their addresses.
+When replacing a DOS function, replace its annotation with verified Windows
+provenance. Do not relabel a DOS address as a Windows address. Any retained
+historical DOS evidence remains explicitly tied to `MAINDOS.EXE`.
 Record behavioral changes in `docs/tracking/deviations.md` and preserve original
 bugs behind toggles defaulting to authentic behavior. An annotation alone is not
 proof of instruction equality or runtime fidelity.
@@ -68,16 +77,13 @@ proof of instruction equality or runtime fidelity.
 
 - A Windows reconstruction build and verification pipeline does not exist yet.
   Establish it before claiming Windows build, matching, or runtime success.
-- For changes to the retained DOS implementation or its tooling, run:
-
-```powershell
-uv run python tools/build_decomp.py
-uv run python tools/verify_matching.py
-uv run python tools/verify_fidelity.py
-```
-
-- `build_decomp.py --link` validates DOS executable linking when needed. These
-  checks are DOS-specific and do not certify `IGN_WIN.EXE` reconstruction.
+- Migrate `tools/build_decomp.py`, `tools/verify_matching.py`, and
+  `tools/verify_fidelity.py` to Windows in place. Their current DOS assumptions
+  are obsolete for active reconstruction and must not be acceptance gates.
+- Once retargeted, run the applicable Windows build, link, and provenance checks
+  after each implementation feature. Document the actual supported commands and
+  inputs with the tooling change. No DOS compatibility or DOS runtime regression
+  requirement applies; preserve original assets and unrelated working-tree work.
 - For `src/` changes, run the applicable CMake build and focused tests/runtime checks.
 - Resolve new failures before committing; report existing failures separately.
   Report compilation, instruction matching, and runtime validation separately.
