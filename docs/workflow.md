@@ -39,8 +39,9 @@ Completion takes an exclusive `build/workflow/completion.lock`, runs the current
 real Windows verifier, audits fidelity, requires fresh passing compilation and
 emulation for every requested RVA, exports and checks the exports. It writes
 `build/workflow/handoff.json` with snapshot ID, affected records/results and limitations.
-It never stages or commits. The verifier currently supports only the five memory
-handle routines; extend it before completing a different reconstructed routine.
+It never stages or commits. The verifier supports the five memory handle routines
+and an extracted-production-C `Font_GetTextWidth` contract; extend it before
+completing a different reconstructed routine.
 Compilation, instruction comparison, emulation and native execution remain separate
 evidence kinds. Differential emulation does not establish native game parity.
 

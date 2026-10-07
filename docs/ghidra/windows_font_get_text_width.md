@@ -15,7 +15,7 @@
   - Total measured pixel width of string `text`
   - Returns `2` immediately if `g_fonts[font_id].field_08 != 0`
 - **Side Effects**:
-  - If `font_id >= 30` or `g_fonts[font_id].in_use == 0`, sets `g_fileErrorLine` (`0x004BAB34`) to `1040` (`0x410`), but continues execution
+  - If signed `font_id >= 30` or `g_fonts[font_id].in_use == 0`, sets `g_fileErrorLine` (`0x004BAB34`) to `1040` (`0x410`), but continues execution. There is no lower-bound guard.
 - **Dependencies**:
   - `g_fonts` table @ VA `0x0063F2E0` (RVA `0x0023F2E0`)
   - `g_fileErrorLine` @ VA `0x004BAB34` (RVA `0x000BAB34`)
@@ -24,6 +24,32 @@
   - Double constant `0.00390625` (`1.0 / 256.0`) @ VA `0x0047AED0` (RVA `0x0007AED0`, `00 00 00 00 00 00 70 3f`)
 
 ## Binary Evidence
+
+Rechecked against the authenticated 915,968-byte PE (SHA-256
+`7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782`).
+`tools/verify_font_width.py` asserts the function hash, FPO tuple, padding,
+all 17 HIGHLOW relocations, constants and both helper call targets directly
+from the file. Its disposable listing is `build/decomp/windows/font_width_original.txt`.
+The PE section/import/startup inventory is reproduced by `tools/windows_inspect.py`.
+Ghidra at localhost:8080 responds and lists Windows-shaped sections, but its
+bridge exposes no independently verifiable loaded-program fingerprint. No
+Ghidra symbol synchronization or unverified decompiler evidence was used.
+
+The preliminary handoff's minimum-space clamp and fixed-font width-table lookup
+are absent from the instructions. The first `_ftol` result is discarded.
+Fixed fonts use signed `height + extra_spacing` for present glyphs and spaces;
+proportional fonts use signed 16-bit glyph widths plus spacing. An absent space
+uses the x87 product `(signed_height * 256) * 0.35 * (1/256)` truncated toward
+zero, without spacing or a minimum clamp. Presence must equal exactly 1 and
+is tested before the space fallback. Both paths repeat `strlen` for every iteration.
+
+`movsx ecx, al` makes the character signed. Its presence address is
+`slot + offsetof(FontSlot, glyph_present) + signed_character - 32`.
+High-bit bytes address earlier slot/header storage, not glyphs 128..255;
+this original quirk is preserved. Width loads and height loads also use `movsx`.
+The shared header retains the recovered unsigned storage fields; this routine
+interprets their bits as signed shorts at the verified load sites. Accumulation
+uses unsigned 32-bit arithmetic to retain x86 wrapping without signed C overflow.
 
 Disassembly and operand relocations from authentic `IGN_WIN.EXE`:
 ```assembly
@@ -59,7 +85,7 @@ Disassembly and operand relocations from authentic `IGN_WIN.EXE`:
 0x00456528: 89 44 24 10              mov      dword ptr [esp + 0x10], eax; store to stack for FPU
 0x0045652c: db 44 24 10              fild     dword ptr [esp + 0x10]     ; load (double)(height << 8)
 0x00456530: dc 0d c8 ae 47 00        fmul     qword ptr [0x0047aec8]     ; * 0.35 (reloc @ 0x456532)
-0x00456536: e8 d1 2f 01 00           call     0x0046950c                 ; _ftol() (result unused/optimized)
+0x00456536: e8 d1 2f 01 00           call     0x0046950c                 ; _ftol() (result discarded by following path)
 0x0045653b: 83 be ec f2 63 00 00     cmp      dword ptr [esi + 0x63f2ec], 0 ; cmp g_fonts[font_id].is_proportional, 0 (reloc @ 0x45653d)
 0x00456542: 75 78                    jne      0x004565bc                 ; if proportional, branch to 0x4565bc
 0x00456544: 33 d2                    xor      edx, edx                   ; edx = i = 0 (string index)
@@ -207,21 +233,53 @@ Direct calls to `Font_GetTextWidth` (`0x004564D0`) in `IGN_WIN.EXE` occur across
 - System text measurement: `0x004187C3`, `0x004188DD`, `0x00418AB4`
 - In-game HUD timer and speedometer alignment: `0x00438455` .. `0x0043C662`
 
-## Emulation Verification
-Verified under Unicorn x86 emulation against original `IGN_WIN.EXE` binary instructions across 11 test cases:
-- **Test 1 (Out of bounds slot)**: `font_id = 30` with `field_08 = 1`. Sets `g_fileErrorLine = 1040` (`0x410`), continues, returns `2`. Preserves callee registers (`ebx`, `esi`, `edi`, `ebp`) and maintains stack balance.
-- **Test 2 (Unallocated slot)**: `in_use = 0` with `field_08 = 1`. Sets `g_fileErrorLine = 1040` (`0x410`), returns `2`.
-- **Test 3 (Special font mode)**: Valid font slot with `field_08 = 5`. Returns `2` immediately; error line remains untouched.
-- **Test 4 (Fixed-width string)**: `is_proportional = 0`, `height = 20`, `extra_spacing = 2`, `text = "ABC"`. Returns `66` (`3 * (20 + 2)`).
-- **Test 5 (Fixed-width space handling)**: `is_proportional = 0`, `text = "A B"`. Returns `66` (`3 * (20 + 2)`).
-- **Test 6 (Fixed-width absent glyph)**: `is_proportional = 0`, glyph `'B'` absent (`glyph_present['B' - 32] = 0`). Returns `44` (`2 * 22`).
-- **Test 7 (Fixed-width empty string)**: `is_proportional = 0`, `text = ""`. Returns `0`.
-- **Test 8 (Proportional string)**: `is_proportional = 1`, `widths['A' - 32] = 12`, `widths['B' - 32] = 15`, `extra_spacing = 3`, `text = "AB"`. Returns `33` (`(12 + 3) + (15 + 3)`).
-- **Test 9 (Proportional space character)**: `is_proportional = 1`, `height = 20`, `text = "A B"`. Space character computed as `_ftol((20 << 8) * 0.35 * (1.0 / 256.0)) = 7`. Returns `40` (`15 + 7 + 18`).
-- **Test 9b (Proportional space with glyph present)**: `is_proportional = 1`, space glyph explicitly present in font table. Returns `46` (`15 + 13 + 18`).
-- **Test 10 (Proportional absent glyph)**: `is_proportional = 1`, glyph `'B'` absent. Returns `15`.
-- **Test 11 (Proportional empty string)**: `is_proportional = 1`, `text = ""`. Returns `0`.
+## Reproducible compilation and differential emulation
 
-## Extent and Limitations
-- **Extent**: Fully reconstructed in `decomp/src/geputget.c` and declared in `decomp/include/geputget.h` with 100% functional and structural fidelity to original Windows binary instructions.
-- **Harness Status**: Direct compilation of `geputget.c` into the isolated validation DLL (`mem_validation.dll`) remains blocked by unmigrated DOS-dependent systems (`<io.h>`, `<fcntl.h>`, `File_LoadToMemory`). Isolated Unicorn emulation and instruction-level analysis confirm the routine's exact instruction behavior and ABI contract.
+Run `uv run tools/verify_matching.py` for the integrated verifier, or
+`uv run tools/verify_font_width.py` for the focused font run. Dependencies are
+pinned to pefile 2024.8.26, Capstone 5.0.7 and Unicorn 2.1.4. The harness extracts
+the actual production function body into a disposable translation unit, includes
+the production header, and asserts the 1600-byte slot and offsets 30/1152.
+It supplies table storage, the error word, a C `strlen`, and the MSVC `_fltused`
+linker data marker; no reconstruction body or success-returning stub is copied.
+Clang/LLD 19.1.1 compile strict C89 x86 Windows with x87 (`-mno-sse -mno-sse2`),
+`-O2`, `/noentry` and `/nodefaultlib`. Exact commands are printed and recorded
+with input/artifact hashes in SQLite. The original executes its real `_ftol`
+at `[0x0046950C, 0x00469533)`, with no Python conversion model.
+
+708 differential cases cover all 30 slots, fixed/proportional modes (including
+noncanonical flags), present/absent/non-1 presence, empty strings, signed heights,
+signed widths, extreme spacing, 32-bit wrap, all 255 nonzero character bytes,
+and seeded mixed strings. Every case checks EAX, ordered error writes, unchanged
+table/image/text, caller stack, callee registers, clear DF and restored x87
+control word. Two original-only cases use mapped surrounding storage for slots
+-1 and 30, showing error 1040 followed by return 2. These do not certify C access
+outside its declared table.
+
+Space rounding depends on the caller's x87 precision. Height 20 and an absent
+space yield 6 with control word `0x037F` (extended precision) and 7 with `0x027F`
+(double precision): the stored binary64 0.35 is slightly below 7/20. Both are
+checked against original and compiled execution; the harness does not assume
+which control word applies to every game caller. No artificial minimum is added.
+
+## Lifecycle and limitations
+
+This leaf reads existing font-slot metadata populated by the parse/load lifecycle.
+It allocates/frees nothing and does not initialize the system. It writes only the
+diagnostic error line for invalid/unallocated slots, then continues. It returns
+2 before accessing text for nonzero `field_08`. The ordinary C contract requires
+a readable terminated immutable string, valid table storage and glyph accesses
+inside the containing table. Original unchecked accesses outside that table
+remain unsafe; no new rejection or fallback is introduced.
+
+`@fidelity EXACT` records reconstruction intent, not instruction equality.
+Full `geputget.c` compilation remains blocked by DOS includes/dependencies
+(`<io.h>`, `<fcntl.h>`, `File_LoadToMemory`). The extracted routine compiles and
+links as `build/decomp/windows/font_width_validation.dll`; it does not rebuild
+the full module or a playable game. Raw/relocated instruction equality, original
+compiler identity, native DLL/game execution and visual alignment are unverified.
+The historical 11-case narrative was not a reproducible compiled-C comparison;
+this harness replaces it and the earlier unsupported 100% fidelity claim.
+
+Next bounded candidate: `Font_DrawText` at VA `0x00456660` / RVA `0x00056660`;
+independently recover its rendering dependencies before implementation.

@@ -40,6 +40,14 @@ bodies are not validated by these models.
 The ID-based release routine adds 418 comparisons covering every slot, duplicate
 IDs, exact eligibility and five-routine integration; see
 [release evidence](../docs/ghidra/windows_handle_release.md).
+The integrated verifier also freshly extracts and compiles the production
+`Font_GetTextWidth` body from `geputget.c` into a separate focused DLL, then runs
+708 differential font cases and two original-only invalid-slot checks. Its
+standalone command is `uv run tools/verify_font_width.py`. It uses the production
+header, a C `strlen` harness dependency and the original `_ftol` instructions;
+signed bytes/words, wrap and x87 double/extended precision are covered. Full
+`geputget.c` compilation remains blocked by legacy dependencies. See
+[font-width evidence](../docs/ghidra/windows_font_get_text_width.md).
 It does not certify instruction equality or native game behavior. The
 [consumer evidence](../docs/ghidra/windows_handles.md) states the negative-state
 memory contract and the validation DLL's differing data layout.

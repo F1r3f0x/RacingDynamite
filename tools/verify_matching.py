@@ -697,3 +697,5 @@ if __name__ == '__main__':
         except Exception as tracking_error:
             print(f'Could not persist verification failure: {tracking_error}')
         raise
+    from verify_font_width import verify_font_width
+    verify_font_width()

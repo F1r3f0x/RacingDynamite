@@ -228,8 +228,8 @@ int Font_Unload(int font_id) {
  *        character glyph presence, widths table, extra spacing, and space character sizing.
  */
 int Font_GetTextWidth(const char *text, int font_id) {
-    int total_width = 0;
-    int dummy_space;
+    unsigned int total_width = 0;
+    volatile int discarded_space;
     int i;
 
     if (font_id >= MAX_FONTS || g_fonts[font_id].in_use == 0) {
@@ -240,42 +240,51 @@ int Font_GetTextWidth(const char *text, int font_id) {
         return 2;
     }
 
-    dummy_space = (int)((double)(g_fonts[font_id].height << 8) * 0.35);
-    if (dummy_space < 1) {
-        dummy_space = 1;
-    }
-    (void)dummy_space;
+    /* The original converts this value, then discards it without clamping. */
+    discarded_space = (int)((double)((short)g_fonts[font_id].height * 256) * 0.35);
+    (void)discarded_space;
 
     if (g_fonts[font_id].is_proportional == 0) {
         for (i = 0; i < (int)strlen(text); i++) {
-            char c = text[i];
+            signed char c = (signed char)text[i];
             if (c == '\0') {
                 break;
             }
 
-            if (g_fonts[font_id].glyph_present[(uint8_t)c - 32] == 1) {
-                total_width += g_fonts[font_id].height + g_fonts[font_id].extra_spacing;
+            /* Signed bytes may address header bytes or the preceding slot. */
+            if (*((const unsigned char *)&g_fonts + font_id * sizeof(FontSlot)
+                    + offsetof(FontSlot, glyph_present) + (int)c - 32) == 1) {
+                total_width += (unsigned int)(short)g_fonts[font_id].height
+                    + (unsigned int)g_fonts[font_id].extra_spacing;
             } else if (c == ' ') {
-                total_width += g_fonts[font_id].height + g_fonts[font_id].extra_spacing;
+                total_width += (unsigned int)(short)g_fonts[font_id].height
+                    + (unsigned int)g_fonts[font_id].extra_spacing;
             }
         }
     } else {
         for (i = 0; i < (int)strlen(text); i++) {
-            char c = text[i];
+            signed char c = (signed char)text[i];
             if (c == '\0') {
                 break;
             }
 
-            if (g_fonts[font_id].glyph_present[(uint8_t)c - 32] == 1) {
-                total_width += g_fonts[font_id].widths[(uint8_t)c - 32] + g_fonts[font_id].extra_spacing;
+            if (*((const unsigned char *)&g_fonts + font_id * sizeof(FontSlot)
+                    + offsetof(FontSlot, glyph_present) + (int)c - 32) == 1) {
+                /* Use the containing table, rather than an out-of-range subarray. */
+                const short *width = (const short *)((const unsigned char *)&g_fonts
+                    + font_id * sizeof(FontSlot) + offsetof(FontSlot, widths)
+                    + ((int)c - 32) * (int)sizeof(short));
+                total_width += (unsigned int)*width
+                    + (unsigned int)g_fonts[font_id].extra_spacing;
             } else if (c == ' ') {
-                int space_w = (int)((double)(g_fonts[font_id].height << 8) * 0.35 * (1.0 / 256.0));
-                total_width += space_w;
+                int space_w = (int)((double)((short)g_fonts[font_id].height * 256)
+                    * 0.35 * (1.0 / 256.0));
+                total_width += (unsigned int)space_w;
             }
         }
     }
 
-    return total_width;
+    return (int)total_width;
 }
 
 /**
