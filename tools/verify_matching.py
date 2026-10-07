@@ -4,6 +4,8 @@
 # ///
 """Execute original Windows instructions versus compiled C in x86 emulation.
 
+Includes font initialization/cleanup with actual handle allocation, registration
+and release, plus persistent lifecycle differential checks.
 Instruction equality and native game runtime are reported separately.
 """
 import hashlib

@@ -4,7 +4,7 @@
 # ///
 """Bounded original-instruction versus extracted production C font cleanup validation.
 
-Validates Font_Unload (VA 0x00456470 / RVA 0x56470) and Font_Shutdown
+Validates Font_InitSystem (VA 0x00456180 / RVA 0x56180), Font_Unload (VA 0x00456470 / RVA 0x56470) and Font_Shutdown
 (VA 0x00456210 / RVA 0x56210) against authentic PE execution in x86 emulation.
 Invoked by verify_matching.py in its pinned pefile/capstone/Unicorn environment.
 """
@@ -23,6 +23,13 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ESI,
 
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
+
+if not __debug__:
+    raise RuntimeError('Verification requires assertions; disable -O/PYTHONOPTIMIZE')
+
+RVA_INIT = 0x56180
+SIZE_INIT = 134
+SHA_INIT = '32c69eb459a5bc9c8e74254334262750ef7db85caf4f5a70437ebc28738f2c3d'
 
 RVA_SHUTDOWN = 0x56210
 RVA_UNLOAD = 0x56470
@@ -50,6 +57,23 @@ def record(rva, kind, outcome, cases=0, **details):
 
 
 def inspect_original(pe):
+    code = pe.get_data(RVA_INIT, SIZE_INIT)
+    assert hashlib.sha256(code).hexdigest() == SHA_INIT
+    assert pe.get_data(RVA_INIT + SIZE_INIT, 10) == b'\xcc' * 10
+    assert pe.get_data(0xba6c4, 4) == b'\0' * 4
+    assert pe.get_data(0xba6c8, 11) == b'fontExit()\0'
+    relocs = [(e.rva, struct.unpack('<I', pe.get_data(e.rva, 4))[0])
+              for block in pe.DIRECTORY_ENTRY_BASERELOC for e in block.entries
+              if e.type == 3 and RVA_INIT <= e.rva < RVA_INIT + SIZE_INIT]
+    assert relocs == [(0x56182, 0x4ba6c4), (0x5619c, 0x4ba6c4),
+        (0x561a7, 0x50e680), (0x561ad, 0x63c690), (0x561b1, 0x4ba6c8),
+        (0x561b7, 0x63c694), (0x561bb, 0x456210), (0x561c1, 0x63c698),
+        (0x561ce, 0x63f2e0), (0x561da, 0x64ae60)]
+    decoded = list(Cs(CS_ARCH_X86, CS_MODE_32).disasm(code, 0x456180))
+    assert len(decoded) == 33 and sum(i.size for i in decoded) == SIZE_INIT
+    assert [(i.address, i.op_str) for i in decoded if i.mnemonic == 'call'] == [
+        (0x4561a0, '0x45b1b0'), (0x4561c5, '0x45b360')]
+
     code_unload = pe.get_data(RVA_UNLOAD, SIZE_UNLOAD)
     assert hashlib.sha256(code_unload).hexdigest() == SHA_UNLOAD
     assert pe.get_data(RVA_UNLOAD + SIZE_UNLOAD, 8) == b'\xcc' * 8
@@ -62,6 +86,7 @@ def inspect_original(pe):
     fpo = {a: (n, local, params, bits) for a, n, local, params, bits in
            struct.iter_unpack('<IIIHH', pe.__data__[debug.PointerToRawData:
                                                      debug.PointerToRawData + debug.SizeOfData])}
+    assert fpo[RVA_INIT] == (SIZE_INIT, 0, 0, 0x209)
     assert fpo[RVA_UNLOAD] == (SIZE_UNLOAD, 0, 1, 0x140a)
     assert fpo[RVA_SHUTDOWN] == (SIZE_SHUTDOWN, 0, 0, 0x209)
 
@@ -117,33 +142,31 @@ def build_dll():
         end += 1
     unload_code = geputget_src[start:end]
 
-    start = mem_src.index('int Mem_ReleaseHandleId(unsigned int handle_id)')
-    opening = mem_src.index('{', start)
-    depth = 1
-    end = opening + 1
+    start = geputget_src.index('int Font_InitSystem(void)')
+    opening = geputget_src.index('{', start)
+    depth, end = 1, opening + 1
     while depth:
-        depth += (mem_src[end] == '{') - (mem_src[end] == '}')
+        depth += (geputget_src[end] == '{') - (geputget_src[end] == '}')
         end += 1
-    release_code = mem_src[start:end]
+    init_code = geputget_src[start:end]
+    context_line = next(line for line in geputget_src.splitlines()
+                        if line.startswith('static const char s_fontExitContext[]'))
 
     unit = f"""#include "geputget.h"
-#include "mem.h"
-
+{mem_src}
 FontSlot g_fonts[MAX_FONTS];
 int g_fontSystemInitialized;
 int g_fontSubsystemHandle;
-
-unsigned int g_memHandlesInitialized;
-unsigned int g_memHandleStatus[MEM_HANDLE_COUNT];
-volatile unsigned int g_memRegisteredHandleIds[MEM_HANDLE_COUNT];
-
+{context_line}
+const char * const validation_fontExitContext = s_fontExitContext;
+typedef char Font_SizeCheck[(sizeof(FontSlot) == 1600) ? 1 : -1];
+typedef char Font_HeaderCheck[(offsetof(FontSlot, field_18) == 24) ? 1 : -1];
+typedef char Font_PresenceCheck[(offsetof(FontSlot, glyph_present) == 30) ? 1 : -1];
+typedef char Font_HandleCheck[(offsetof(FontSlot, glyph_handles) == 256) ? 1 : -1];
 extern void *Gfx_SpriteOp(void *desc, int op);
-
-{release_code}
-
 {unload_code}
-
 {shutdown_code}
+{init_code}
 """
     unit_path = BUILD / 'font_cleanup_unit.c'
     obj_path = BUILD / 'font_cleanup.obj'
@@ -168,18 +191,22 @@ extern void *Gfx_SpriteOp(void *desc, int op);
 
     compile_cmd = [cc, '--target=i686-pc-windows-msvc', '-std=c89', '-pedantic-errors',
                    '-Wall', '-Wextra', '-Werror', '-O2', '-ffreestanding', '-fno-builtin',
-                   '-mno-sse', '-mno-sse2', '-I', str(ROOT / 'decomp/include'),
+                   '-fno-inline', '-mno-sse', '-mno-sse2', '-I', str(ROOT / 'decomp/include'),
                    '-c', str(unit_path), '-o', str(obj_path)]
     subprocess.run(compile_cmd, check=True)
 
     compile_stub_cmd = [cc, '--target=i686-pc-windows-msvc', '-std=c89', '-pedantic-errors',
                         '-Wall', '-Wextra', '-Werror', '-O2', '-ffreestanding', '-fno-builtin',
-                        '-mno-sse', '-mno-sse2', '-I', str(ROOT / 'decomp/include'),
+                        '-fno-inline', '-mno-sse', '-mno-sse2', '-I', str(ROOT / 'decomp/include'),
                         '-c', str(stub_path), '-o', str(stub_obj)]
     subprocess.run(compile_stub_cmd, check=True)
 
     exports = [
-        'Font_Shutdown', 'Font_Unload', 'Mem_ReleaseHandleId', 'Gfx_SpriteOp',
+        'Font_InitSystem', 'Font_Shutdown', 'Font_Unload', 'Mem_ReleaseHandleId', 'Gfx_SpriteOp',
+        'Mem_NextHandleId', 'Mem_RegisterHandle', 'Mem_InitHandles', 'Mem_ShutdownHandles',
+        'validation_fontExitContext', 'g_memHandleIds', 'g_memHandleCursor',
+        'g_memHandleContexts', 'g_memHandleParameters', 'g_memHandleCallbacks',
+        'g_memHandleFlags', 'g_memPendingContext', 'g_memPendingCallback', 'g_memPendingParameter',
         'g_fonts', 'g_fontSystemInitialized', 'g_fontSubsystemHandle',
         'g_memHandlesInitialized', 'g_memHandleStatus', 'g_memRegisteredHandleIds'
     ]
@@ -327,6 +354,265 @@ def execute_shutdown(pe, entry, fonts_addr, sys_init_addr, handle_addr,
             result_mem_init, result_mem_status, result_mem_ids, sprite_op_calls)
 
 
+# Original preferred VAs. Pointer relocation is normalized only for the verified
+# fontExit string and Font_Shutdown callback in their context/callback fields.
+LIFECYCLE_FIELDS = [
+    ('g_memHandlesInitialized', 0x4bab38, 4),
+    ('g_memHandleStatus', 0x5116e0, 800),
+    ('g_memHandleIds', 0x511230, 400),
+    ('g_memHandleCursor', 0x512040, 2),
+    ('g_memHandleContexts', 0x510bf0, 800),
+    ('g_memHandleParameters', 0x510f10, 800),
+    ('g_memRegisteredHandleIds', 0x5113c0, 800),
+    ('g_memHandleCallbacks', 0x511a00, 800),
+    ('g_memHandleFlags', 0x511d20, 800),
+    ('g_memPendingContext', 0x63c690, 4),
+    ('g_memPendingCallback', 0x63c694, 4),
+    ('g_memPendingParameter', 0x63c698, 4),
+    ('g_fontSystemInitialized', 0x4ba6c4, 4),
+    ('g_fontSubsystemHandle', 0x50e680, 4),
+    ('g_fonts', 0x63f2e0, 48000)]
+
+
+class FontLifecycleCPU:
+    """Persistent CPU: all handle/font bodies execute; only sprite release is modeled."""
+    def __init__(self, pe, symbols=None):
+        self.original = symbols is None
+        self.base = pe.OPTIONAL_HEADER.ImageBase
+        self.size = (pe.OPTIONAL_HEADER.SizeOfImage + 4095) & ~4095
+        self.cpu = Uc(UC_ARCH_X86, UC_MODE_32)
+        self.cpu.mem_map(self.base, self.size)
+        self.cpu.mem_write(self.base, pe.get_memory_mapped_image())
+        self.cpu.mem_map(STACK, 0x10000)
+        self.cpu.mem_map(STOP, 0x1000)
+        self.cpu.mem_map(MOCK_SPRITE_OP, 0x1000)
+        self.cpu.mem_write(MOCK_SPRITE_OP, b'\xc3')
+        self.fields = [(name, address if self.original else symbols[name], size)
+                       for name, address, size in LIFECYCLE_FIELDS]
+        self.addresses = {name: address for name, address, _ in self.fields}
+        if self.original:
+            self.entries = {'Font_InitSystem': 0x456180, 'Font_Shutdown': 0x456210,
+                'Font_Unload': 0x456470, 'Mem_NextHandleId': 0x45b1b0,
+                'Mem_RegisterHandle': 0x45b360, 'Mem_ReleaseHandleId': 0x45b410,
+                'Mem_InitHandles': 0x45b1f0, 'Gfx_SpriteOp': MOCK_SPRITE_OP}
+            self.context = 0x4ba6c8
+            self.cpu.mem_write(0x50ebc0, struct.pack('<I', MOCK_SPRITE_OP))
+        else:
+            self.entries = {name: symbols[name] for name in [
+                'Font_InitSystem', 'Font_Shutdown', 'Font_Unload', 'Mem_NextHandleId',
+                'Mem_RegisterHandle', 'Mem_ReleaseHandleId', 'Mem_InitHandles', 'Gfx_SpriteOp']}
+            self.context = struct.unpack('<I', self.cpu.mem_read(
+                symbols['validation_fontExitContext'], 4))[0]
+        assert bytes(self.cpu.mem_read(self.context, 11)) == b'fontExit()\0'
+        self.cpu.hook_add(UC_HOOK_CODE, self.hook)
+
+    def pointer(self, name, value, encode):
+        pairs = []
+        if name in ('g_memPendingContext', 'g_memHandleContexts'):
+            pairs = [(0x4ba6c8, self.context)]
+        if name in ('g_memPendingCallback', 'g_memHandleCallbacks'):
+            pairs = [(0x456210, self.entries['Font_Shutdown'])]
+        for canonical, actual in pairs:
+            if value == (canonical if encode else actual):
+                return actual if encode else canonical
+        return value
+
+    def encode(self, name, data, encode):
+        if name not in ('g_memPendingContext', 'g_memHandleContexts',
+                        'g_memPendingCallback', 'g_memHandleCallbacks'):
+            return data
+        return b''.join(struct.pack('<I', self.pointer(name, value, encode))
+                        for (value,) in struct.iter_unpack('<I', data))
+
+    def load(self, state):
+        for name, address, size in self.fields:
+            assert len(state[name]) == size
+            self.cpu.mem_write(address, self.encode(name, state[name], True))
+
+    def state(self):
+        return {name: self.encode(name, bytes(self.cpu.mem_read(address, size)), False)
+                for name, address, size in self.fields}
+
+    def hook(self, cpu, address, length, unused):
+        name = next((name for name, entry in self.entries.items() if entry == address), None)
+        if name is None or name == self.root_entry:
+            return
+        sp = cpu.reg_read(UC_X86_REG_ESP)
+        if name == 'Mem_NextHandleId':
+            args = ()
+            # Observe the initialized flag before allocation.
+            assert self.state()['g_fontSystemInitialized'] == struct.pack('<I', 1)
+        elif name == 'Gfx_SpriteOp':
+            args = struct.unpack('<II', cpu.mem_read(sp + 4, 8))
+        else:
+            args = struct.unpack('<I', cpu.mem_read(sp + 4, 4))
+        if name == 'Mem_RegisterHandle':
+            state = self.state()
+            assert state['g_memPendingContext'] == struct.pack('<I', 0x4ba6c8)
+            assert state['g_memPendingCallback'] == struct.pack('<I', 0x456210)
+            assert state['g_memPendingParameter'] == struct.pack('<I', 0)
+            assert state['g_fontSubsystemHandle'] == struct.pack('<I', args[0])
+        self.calls.append((name, args))
+
+    def invoke(self, name, seed):
+        self.root_entry, self.calls = name, []
+        sp = STACK + 0x8000
+        self.cpu.mem_write(sp, struct.pack('<I', STOP))
+        stack = bytes(self.cpu.mem_read(sp, 0x8000))
+        rng = random.Random(seed)
+        registers = [rng.getrandbits(32) for _ in SAVED]
+        for reg, value in zip(SAVED, registers):
+            self.cpu.reg_write(reg, value)
+        self.cpu.reg_write(UC_X86_REG_ESP, sp)
+        self.cpu.reg_write(UC_X86_REG_EFLAGS, 2)
+        before = bytes(self.cpu.mem_read(self.base, self.size))
+        self.cpu.emu_start(self.entries[name], STOP, count=10000000)
+        assert self.cpu.reg_read(UC_X86_REG_EIP) == STOP
+        assert self.cpu.reg_read(UC_X86_REG_ESP) == sp + 4
+        assert [self.cpu.reg_read(r) for r in SAVED] == registers
+        assert self.cpu.reg_read(UC_X86_REG_EFLAGS) & 0x400 == 0
+        assert bytes(self.cpu.mem_read(sp, 0x8000)) == stack
+        after = bytearray(self.cpu.mem_read(self.base, self.size))
+        for _, address, size in self.fields:
+            offset = address - self.base
+            after[offset:offset + size] = before[offset:offset + size]
+        assert bytes(after) == before, 'Write outside lifecycle state'
+        return self.cpu.reg_read(UC_X86_REG_EAX), self.state(), list(self.calls)
+
+
+def verify_font_init(original, rebuilt, symbols, details):
+    rng = random.Random(0x456180)
+    cases = 0
+
+    def word(state, field, index=0):
+        return struct.unpack_from('<I', state[field], index * 4)[0]
+
+    def store(state, field, value, index=0):
+        data = bytearray(state[field])
+        struct.pack_into('<I', data, index * 4, value & 0xffffffff)
+        state[field] = bytes(data)
+
+    def expected_init(old):
+        state = dict(old)
+        if word(state, 'g_fontSystemInitialized') == 1:
+            return 1010, state, []
+        store(state, 'g_fontSystemInitialized', 1)
+        enabled = word(state, 'g_memHandlesInitialized') != 0
+        cursor = struct.unpack('<h', state['g_memHandleCursor'])[0]
+        # Negative cursors need surrounding global layout recovery; excluded here.
+        assert cursor >= 0
+        handle = 0xffffffff
+        if enabled and cursor + 1 < 200:
+            handle = struct.unpack_from('<h', state['g_memHandleIds'], cursor * 2)[0] & 0xffffffff
+            state['g_memHandleCursor'] = struct.pack('<h', cursor + 1)
+        store(state, 'g_fontSubsystemHandle', handle)
+        store(state, 'g_memPendingContext', 0x4ba6c8)
+        store(state, 'g_memPendingCallback', 0x456210)
+        store(state, 'g_memPendingParameter', 0)
+        if enabled:
+            status = struct.unpack('<200I', state['g_memHandleStatus'])
+            slot = next((i for i, value in enumerate(status) if value == 0), None)
+            if slot is not None:
+                for field, value in [('g_memHandleStatus', 1), ('g_memHandleFlags', 0x10000),
+                    ('g_memHandleContexts', 0x4ba6c8), ('g_memRegisteredHandleIds', handle),
+                    ('g_memHandleParameters', 0), ('g_memHandleCallbacks', 0x456210)]:
+                    store(state, field, value, slot)
+        fonts = bytearray(state['g_fonts'])
+        for slot in range(30):
+            struct.pack_into('<6I', fonts, slot * 1600, 0, 0, 0, 0, 1, 1)
+        state['g_fonts'] = bytes(fonts)
+        return 1, state, [('Mem_NextHandleId', ()), ('Mem_RegisterHandle', (handle,))]
+
+    def fresh(flag, enabled, cursor, free_slot):
+        state = {name: rng.randbytes(size) for name, _, size in LIFECYCLE_FIELDS}
+        store(state, 'g_fontSystemInitialized', flag)
+        store(state, 'g_memHandlesInitialized', enabled)
+        state['g_memHandleCursor'] = struct.pack('<h', cursor)
+        state['g_memHandleIds'] = struct.pack('<200h', *[
+            rng.choice([0, 1, 32767, -1, -32768]) for _ in range(200)])
+        statuses = [rng.choice([1, 2, 0x80000000, 0xffffffff]) for _ in range(200)]
+        if free_slot is not None:
+            statuses[free_slot:] = [0] * (200 - free_slot)
+        state['g_memHandleStatus'] = struct.pack('<200I', *statuses)
+        return state
+
+    def compare(old):
+        nonlocal cases
+        a, b = FontLifecycleCPU(original), FontLifecycleCPU(rebuilt, symbols)
+        a.load(old); b.load(old)
+        expected = expected_init(old)
+        actual_a = a.invoke('Font_InitSystem', cases)
+        actual_b = b.invoke('Font_InitSystem', cases)
+        assert actual_a == actual_b == expected, (cases,
+            actual_a[0], actual_b[0], expected[0], actual_a[2], actual_b[2], expected[2],
+            [(name, actual_a[1][name][:32].hex(), actual_b[1][name][:32].hex(),
+              expected[1][name][:32].hex()) for name in old
+             if not actual_a[1][name] == actual_b[1][name] == expected[1][name]])
+        cases += 1
+        return a, b
+
+    # Every registration index and first-zero selection, with arbitrary old fonts.
+    for slot in range(200):
+        compare(fresh(0, 1, slot % 199, slot))
+    # Strict flag guard, disabled handles, cursor exhaustion, noncanonical flags,
+    # signed IDs, full registration table; failures are ignored by Font_InitSystem.
+    for flag in [0, 1, 2, 0x80000000, 0xffffffff]:
+        for enabled in [0, 1, 2, 0xffffffff]:
+            for cursor in [0, 198, 199, 200, 32767]:
+                for slot in [0, 199, None]:
+                    compare(fresh(flag, enabled, cursor, slot))
+
+    lifecycle_steps = 0
+    for active in [[], [0], [29], [0, 5, 29], list(range(30))]:
+        old = fresh(0, 0, 0, None)
+        a, b = FontLifecycleCPU(original), FontLifecycleCPU(rebuilt, symbols)
+        a.load(old); b.load(old)
+        result_a = a.invoke('Mem_InitHandles', cases)
+        result_b = b.invoke('Mem_InitHandles', cases)
+        assert result_a == result_b and result_a[0] == 1
+        assert word(result_a[1], 'g_memHandlesInitialized') == 1
+        assert result_a[1]['g_memHandleIds'] == struct.pack('<200h', *range(1, 201))
+        assert result_a[1]['g_memHandleStatus'] == b'\0' * 800
+        assert result_a[1]['g_memHandleCursor'] == b'\0' * 2
+        state = result_a[1]
+        assert a.invoke('Font_InitSystem', cases) == b.invoke('Font_InitSystem', cases) == expected_init(state)
+        cases += 1; lifecycle_steps += 2
+        state = a.state()
+        assert word(state, 'g_fontSubsystemHandle') == 1
+        # Populate font records directly; Font_Parse and native allocation aren't claimed.
+        fonts = bytearray(state['g_fonts'])
+        for slot in range(30):
+            fonts[slot * 1600 + 30:slot * 1600 + 254] = b'\0' * 224
+        calls = [('Mem_ReleaseHandleId', (1,))]
+        for slot in active:
+            struct.pack_into('<I', fonts, slot * 1600, 1)
+            calls.append(('Font_Unload', (slot,)))
+            for glyph in [0, 113, 223]:
+                fonts[slot * 1600 + 30 + glyph] = 1
+                handle = 0x80000000 + slot * 224 + glyph
+                struct.pack_into('<I', fonts, slot * 1600 + 256 + 4 * glyph, handle)
+                calls.append(('Gfx_SpriteOp', (0, handle)))
+        state['g_fonts'] = bytes(fonts)
+        a.load(state); b.load(state)
+        expected = dict(state)
+        store(expected, 'g_fontSystemInitialized', 0)
+        store(expected, 'g_memHandleStatus', 0, 0)
+        for slot in active:
+            struct.pack_into('<I', fonts, slot * 1600, 0)
+        expected['g_fonts'] = bytes(fonts)
+        assert a.invoke('Font_Shutdown', cases) == b.invoke('Font_Shutdown', cases) == (1, expected, calls)
+        lifecycle_steps += 1
+        assert a.invoke('Font_InitSystem', cases) == b.invoke('Font_InitSystem', cases) == expected_init(expected)
+        cases += 1; lifecycle_steps += 1
+        state = a.state()
+        assert word(state, 'g_fontSubsystemHandle') == 2
+        assert word(state, 'g_memHandleStatus') == 1
+        assert state['g_memHandleCursor'] == struct.pack('<h', 2)
+    record(RVA_INIT, 'emulation', 'pass', cases=cases,
+           lifecycle_steps=lifecycle_steps, **details)
+    print(f'PASS: {cases} Font_InitSystem differential executions; {lifecycle_steps} persistent lifecycle steps; state/calls/ABI equality.')
+
+
 def verify_font_cleanup():
     verify_target()
     commands = build_dll()
@@ -340,7 +626,7 @@ def verify_font_cleanup():
                for e in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
 
     details = {
-        'scope': 'extracted production Font_Unload and Font_Shutdown; focused PE32 DLL; mock Gfx_SpriteOp hook',
+        'scope': 'extracted production Font_InitSystem, Font_Unload, Font_Shutdown and complete mem.c; focused PE32 DLL; modeled sprite-release boundary',
         'commands': [[subprocess.list2cmdline(c) for c in commands]],
         'toolchain': {
             name: subprocess.check_output([shutil.which(name), '--version'], text=True).splitlines()[0]
@@ -350,6 +636,13 @@ def verify_font_cleanup():
     }
 
     # Record compilation
+    record(RVA_INIT, 'compilation', 'pass', **details)
+    code = original.get_data(RVA_INIT, SIZE_INIT)
+    prefix = rebuilt.get_data(symbols['Font_InitSystem'] - rebuilt.OPTIONAL_HEADER.ImageBase, SIZE_INIT)
+    record(RVA_INIT, 'raw_bytes', 'pass' if code == prefix else 'different',
+           details={'original_bytes': SIZE_INIT, 'compiled_prefix_bytes': SIZE_INIT,
+                    'scope': 'diagnostic prefix only; instruction equality unclaimed'})
+    verify_font_init(original, rebuilt, symbols, details)
     record(RVA_UNLOAD, 'compilation', 'pass', **details)
     record(RVA_SHUTDOWN, 'compilation', 'pass', **details)
 

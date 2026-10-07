@@ -1,6 +1,17 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
-Latest bounded follow-up (2026-10-07): handle cleanup callback `Font_Shutdown`
+Latest bounded follow-up (2026-10-07): [Font_InitSystem](ghidra/windows_font_init.md)
+at VA `0x00456180` / RVA `0x56180` (134 bytes) is independently recovered and
+verified against its existing C89 reconstruction. The expanded focused font DLL
+executes real memory allocation, registration and release bodies: 510 initializer
+differential comparisons and five persistent lifecycle round trips (20 routine
+invocations) pass, retaining 123 unload and 71 shutdown comparisons. Only sprite
+release is modeled. The initializer resets six header dwords per slot and ignores
+allocation/registration failure. No instruction equality or native game parity is
+claimed; full geputget.c remains blocked by legacy dependencies. Live Ghidra
+inspection was attempted after user confirmation but sandbox access was denied.
+
+Previous bounded follow-up (2026-10-07): handle cleanup callback `Font_Shutdown`
 at RVA `0x56210` (83 bytes) and downstream font unloader `Font_Unload` at RVA `0x56470`
 (88 bytes) are reconstructed and verified. Focused validation DLL in
 `tools/verify_font_cleanup.py` executes 123 `Font_Unload` and 71 `Font_Shutdown`

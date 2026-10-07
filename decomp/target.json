@@ -10,5 +10,5 @@
   "compiler": null,
   "pipeline_status": "bounded_windows_mem_validation",
   "validation_compiler": "Clang 19.1.1 / LLD 19.1.1; i686-pc-windows-msvc; provisional",
-  "validation_scope": "Mem_InitHandles @ 0x0045B1F0, Mem_NextHandleId @ 0x0045B1B0, Mem_RegisterHandle @ 0x0045B360, Mem_ShutdownHandles @ 0x0045B240 (modeled callbacks), Mem_ReleaseHandleId @ 0x0045B410; Font_Unload @ 0x00456470, Font_Shutdown @ 0x00456210, Font_GetTextWidth @ 0x004564D0 (extracted production C, original _ftol); full geputget.c blocked by legacy dependencies; no playable reconstruction"
+  "validation_scope": "Mem_InitHandles @ 0x0045B1F0, Mem_NextHandleId @ 0x0045B1B0, Mem_RegisterHandle @ 0x0045B360, Mem_ShutdownHandles @ 0x0045B240 (modeled callbacks), Mem_ReleaseHandleId @ 0x0045B410; Font_InitSystem @ 0x00456180 (510 differential cases, real handle registration and persistent font lifecycle); Font_Unload @ 0x00456470, Font_Shutdown @ 0x00456210, Font_GetTextWidth @ 0x004564D0 (extracted production C, original _ftol); full geputget.c blocked by legacy dependencies; no playable reconstruction"
 }
