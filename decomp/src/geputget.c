@@ -48,6 +48,8 @@ uint8_t *g_pPokalPic;
 /* External subsystem helpers */
 extern void *Gfx_SpriteOp(void *desc, int op);
 extern void Gfx_DrawSprite(void *handle, Point2D *pos, int flags);
+extern void *File_LoadToMemory(const char *filename);
+extern void Mem_Free(int pool, void *ptr);
 
 /**
  * @original Font_InitSystem (IGN_WIN.EXE @ 0x00456180, geputget.c)
@@ -181,9 +183,9 @@ int Font_Parse(void *buffer, int unused) {
 }
 
 /**
- * @original Font_Load (MAINDOS.EXE @ 0x000615eb, geputget.c)
+ * @original Font_Load (IGN_WIN.EXE @ 0x00456420, geputget.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x000615eb. Loads a .LFT font from disk, creates glyph handles, and frees buffer.
+ * @notes IGN_WIN.EXE @ 0x00456420. Loads a .LFT font from disk via File_LoadToMemory, parses glyphs via Font_Parse, frees temporary buffer via Mem_Free, and returns font slot ID.
  */
 int Font_Load(const char *filename, int unused) {
     void *buffer;
