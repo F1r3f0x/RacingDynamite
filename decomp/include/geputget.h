@@ -9,10 +9,9 @@
 #define FONT_GLYPH_COUNT 224
 
 /**
- * Authentic 1997 Ignition Font Slot Structure (1598 bytes, 0x63E)
- * Matches layout in MAINDOS.EXE @ 0x0024C214
+ * Authentic 1997 Ignition Font Slot Structure
+ * Windows native layout (1600 bytes, 0x640)
  */
-#pragma pack(push, 1)
 typedef struct {
     int32_t in_use;                     /* 0x00: 1 if allocated, 0 if free */
     int32_t alignment;                  /* 0x04: 0 = left, 1 = center, 2 = right */
@@ -24,11 +23,10 @@ typedef struct {
     uint16_t height;                    /* 0x1A: font glyph height in pixels */
     uint16_t spacing;                   /* 0x1C: default character spacing */
     uint8_t glyph_present[FONT_GLYPH_COUNT];  /* 0x1E: 1 if glyph exists, 0 if missing */
-    void *glyph_handles[FONT_GLYPH_COUNT];    /* 0xFE: pointer / sprite handle */
-    uint16_t widths[FONT_GLYPH_COUNT];
-    uint16_t padding;
+    /* 2 bytes implicit padding */
+    void *glyph_handles[FONT_GLYPH_COUNT];    /* 0x100: pointer / sprite handle */
+    uint16_t widths[FONT_GLYPH_COUNT];        /* 0x480: glyph widths */
 } FontSlot;
-#pragma pack(pop)
 
 typedef struct {
     int32_t x;

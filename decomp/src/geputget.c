@@ -197,9 +197,9 @@ int Font_Load(const char *filename, int unused) {
 }
 
 /**
- * @original Font_Unload (MAINDOS.EXE @ 0x00061653, geputget.c)
+ * @original Font_Unload (IGN_WIN.EXE @ 0x00456470, geputget.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x00061653. Frees all sprite handles for a font slot and marks the slot available.
+ * @notes IGN_WIN.EXE @ 0x00456470. Frees all sprite handles for a font slot and marks the slot available.
  */
 int Font_Unload(int font_id) {
     int i;
