@@ -39,9 +39,15 @@ See `docs/decomp_plan.md` for the active plan and target fingerprint.
 1. Inspect authentic `IGN_WIN.EXE` PE sections, imports, relocations, initializers,
    and calling conventions before implementing behavior. Record VA versus RVA
    explicitly; do not apply DOS LE parsing or Watcom register assumptions to Windows.
-2. Use the Ghidra MCP server at `localhost:8080` when available. Select and verify
-   the Windows program by fingerprint before inspecting or synchronizing symbols.
-   Report unavailable tooling; do not invent evidence or addresses.
+2. Use the Ghidra MCP server at `localhost:8080` when available. Assume the user
+   has the authentic `IGN_WIN.EXE` loaded and active in Ghidra. This is a
+   user-provided operating assumption, not an automated fingerprint check; a
+   missing program-identity endpoint does not block inspection. If Ghidra MCP is
+   not responding or reports no active program, prompt the user to open
+   `IGN_WIN.EXE` in Ghidra with the MCP plugin enabled, then retry. If responses
+   contradict the expected target, ask the user to select `IGN_WIN.EXE` before
+   continuing. Verify local binary fingerprints and routine provenance as usual;
+   do not invent evidence or addresses.
 3. Replace raw offsets and register artifacts with verified named structs, fields,
    and semantic names. Recover Windows structure packing independently.
 4. Keep code, documentation, and tracking synchronized. `database/decomp.db`

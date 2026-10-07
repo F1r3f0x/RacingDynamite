@@ -105,7 +105,11 @@ and address convention (VA/RVA) with every symbol and initializer.
 
 ## 4. Active milestone sequence
 
-1. **Establish the Windows baseline.** Verify the fingerprint in Ghidra; inventory
+1. **Establish the Windows baseline.** Verify the local binary fingerprint;
+   assume the user has authentic `IGN_WIN.EXE` loaded and active in Ghidra per
+   `AGENTS.md`. A missing identity endpoint does not block inspection. If MCP
+   is not responding or reports no active program, prompt the user to open
+   `IGN_WIN.EXE` with the MCP plugin enabled, then retry. Inventory
    sections, imports, strings, functions, CRT code, initializers, and ABI evidence.
    Run a disposable original copy in a documented Windows-compatible environment
    and record startup, language selector, loading, intro, and first menu. Record

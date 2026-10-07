@@ -35,6 +35,14 @@ git commit
 
 Preflight saves target diagnostics, declared RVAs/files and initial Git status to
 `build/workflow/preflight.json`. Availability is not verified Ghidra program identity.
+For Ghidra inspection, assume the user has the authentic `IGN_WIN.EXE` loaded
+and active. This user-provided assumption does not require an identity endpoint
+and must not be reported as an automated fingerprint check. If MCP is not
+responding or reports no active program, prompt the user to open `IGN_WIN.EXE`
+in Ghidra with the MCP plugin enabled, then retry. Contradictory target responses
+require asking the user to select `IGN_WIN.EXE` before continuing. Local binary
+fingerprint and routine provenance checks still apply.
+
 Completion takes an exclusive `build/workflow/completion.lock`, runs the current
 real Windows verifier, audits fidelity, requires fresh passing compilation and
 emulation for every requested RVA, exports and checks the exports. It writes

@@ -16,12 +16,16 @@ progress. `decomp/target.json` records the expected binary identity; the doctor
 reads only, reports dependencies/legacy assumptions, and does not certify a build.
 Use `--probe-ghidra` for bounded, read-only localhost reachability checks.
 
-Verify the loaded Ghidra program against the binary fingerprint independently.
-A `.text` section or familiar image base is insufficient. The current bridge lacks
-a verified program-fingerprint endpoint, and the legacy synchronizer guesses the
-target with a DOS fallback. Do not run bulk `sync_ghidra.py` against the new target
-until both loaded-program identity and source records have been verified. Prefer
-bounded inspection by address, callers/xrefs, and referenced initialized data.
+Assume the user has the authentic `IGN_WIN.EXE` loaded and active in Ghidra,
+as specified in `AGENTS.md`. Record this as a user-provided operating assumption,
+not an automated fingerprint check. The missing program-identity endpoint does
+not block inspection. If MCP is not responding or reports no active program,
+prompt the user to open `IGN_WIN.EXE` with the MCP plugin enabled, then retry.
+If responses contradict the target, ask the user to select `IGN_WIN.EXE`.
+Continue verifying the local binary fingerprint and each routine's provenance.
+The legacy synchronizer guesses the target with a DOS fallback; do not run bulk
+`sync_ghidra.py` until its target handling and source records have been verified.
+Prefer bounded inspection by address, callers/xrefs, and initialized data.
 
 The PE entry is not automatically `WinMain`; distinguish CRT/import thunks from
 game routines. Record VA/RVA, extent confidence, ABI, signedness, field packing,
