@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:c6bddf72009642aa99480e10126b1ef13a34529f3e3c76a2b0077c9f2126d476 -->
+<!-- snapshot:f1daaf413a6cef88c3ea92fff87bf72696a7338f9aae4a11439271c4929fb9c0 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -390,7 +390,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00456270` | `0x00056270` | 429 | `Font_Parse` | game | reconstructed | [windows_font_parse.md](windows_font_parse.md) |
 | `0x00456420` | `0x00056420` | 71 | `Font_Load` | game | reconstructed | [windows_font_load.md](windows_font_load.md) |
 | `0x00456470` | `0x00056470` | 88 | `Font_Unload` | game | reconstructed | [windows_font_unload.md](windows_font_unload.md) |
-| `0x004564D0` | `0x000564D0` | 397 | `sub_004564D0` | unknown | unidentified | - |
+| `0x004564D0` | `0x000564D0` | 397 | `Font_GetTextWidth` | game | reconstructed | [windows_font_get_text_width.md](windows_font_get_text_width.md) |
 | `0x00456660` | `0x00056660` | 978 | `sub_00456660` | unknown | unidentified | - |
 | `0x00456A40` | `0x00056A40` | 172 | `sub_00456A40` | unknown | unidentified | - |
 | `0x00456AF0` | `0x00056AF0` | 30 | `sub_00456AF0` | unknown | unidentified | - |

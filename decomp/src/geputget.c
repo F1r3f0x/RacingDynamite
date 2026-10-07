@@ -222,14 +222,13 @@ int Font_Unload(int font_id) {
 }
 
 /**
- * @original Font_GetTextWidth (MAINDOS.EXE @ 0x000616db, geputget.c)
+ * @original Font_GetTextWidth (IGN_WIN.EXE @ 0x004564D0, geputget.c)
  * @fidelity EXACT
- * @notes MAINDOS @ 0x000616db. Computes string pixel width considering proportional flag, spacing,
- *        and space character sizing (height * 0.35).
+ * @notes IGN_WIN.EXE @ 0x004564D0. Computes string pixel width considering proportional flag,
+ *        character glyph presence, widths table, extra spacing, and space character sizing.
  */
 int Font_GetTextWidth(const char *text, int font_id) {
     int total_width = 0;
-    int unk_c = 0;
     int dummy_space;
     int i;
 
@@ -245,20 +244,16 @@ int Font_GetTextWidth(const char *text, int font_id) {
     if (dummy_space < 1) {
         dummy_space = 1;
     }
+    (void)dummy_space;
 
     if (g_fonts[font_id].is_proportional == 0) {
         for (i = 0; i < (int)strlen(text); i++) {
-            uint8_t c = (uint8_t)text[i];
+            char c = text[i];
             if (c == '\0') {
                 break;
             }
 
-            if (g_fonts[font_id].glyph_present[c - 32] == 1) {
-                int unk_1c = 0;
-                if (g_fonts[font_id].widths[c - 32] != g_fonts[font_id].height) {
-                    unk_1c = (g_fonts[font_id].height - g_fonts[font_id].widths[c - 32]) / 2;
-                }
-                (void)unk_1c;
+            if (g_fonts[font_id].glyph_present[(uint8_t)c - 32] == 1) {
                 total_width += g_fonts[font_id].height + g_fonts[font_id].extra_spacing;
             } else if (c == ' ') {
                 total_width += g_fonts[font_id].height + g_fonts[font_id].extra_spacing;
@@ -266,13 +261,13 @@ int Font_GetTextWidth(const char *text, int font_id) {
         }
     } else {
         for (i = 0; i < (int)strlen(text); i++) {
-            uint8_t c = (uint8_t)text[i];
+            char c = text[i];
             if (c == '\0') {
                 break;
             }
 
-            if (g_fonts[font_id].glyph_present[c - 32] == 1) {
-                total_width += g_fonts[font_id].widths[c - 32] + g_fonts[font_id].extra_spacing;
+            if (g_fonts[font_id].glyph_present[(uint8_t)c - 32] == 1) {
+                total_width += g_fonts[font_id].widths[(uint8_t)c - 32] + g_fonts[font_id].extra_spacing;
             } else if (c == ' ') {
                 int space_w = (int)((double)(g_fonts[font_id].height << 8) * 0.35 * (1.0 / 256.0));
                 total_width += space_w;
@@ -280,7 +275,7 @@ int Font_GetTextWidth(const char *text, int font_id) {
         }
     }
 
-    return total_width - unk_c;
+    return total_width;
 }
 
 /**
