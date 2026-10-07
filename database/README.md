@@ -31,6 +31,21 @@ candidate through `db.py describe <RVA>`; set its analysis stage through
 and update after edits. Source reconstruction requires verified provenance and
 an evidence document; exact instructions/native behavior need separate results.
 
+Import a missing non-FPO candidate with `db.py add-candidate <RVA> --size <bytes>
+--evidence <document> --confidence <boundary explanation>`. The command verifies
+the target fingerprint, file-backed executable extent and existing evidence,
+hashes its authentic bytes, rejects duplicate RVAs, and leaves stage/fidelity
+unidentified/unknown. Omit `--size` for an observed call target whose extent is
+not recovered; byte size and routine hash then remain null. A directly observed
+call target in a file-backed section lacking the PE execute flag requires explicit
+`--allow-nonexecutable` and documented evidence; this does not certify native NX
+behavior. Import does not
+certify control-flow closure or promote analysis/test results. Independently
+recover boundaries before describing/promoting a candidate. The non-FPO import
+hash is authenticated at import time; the current auditor's automatic original
+extent/hash comparison covers FPO records, so rerun the feature's pinned-byte
+analysis for non-FPO freshness.
+
 `migrate-windows` replaces the recognized legacy DOS database only after verifying
 the original fingerprint and imported Windows claims. It atomically installs the
 replacement and is a no-op on the already-active Windows store. It rejects unknown

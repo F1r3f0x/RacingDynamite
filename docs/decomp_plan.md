@@ -1,6 +1,16 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
-Latest bounded follow-up (2026-10-07): the native sprite backend at RVA `0x571B0`
+Latest bounded follow-up (2026-10-07): [native rasterizer analysis](ghidra/windows_sprite_rasterizer.md)
+corrects RVA `0x65BB5` from a 437-byte prefix to its complete 474-byte extent,
+including the narrow-span tail. 704 original-only cases execute real untransformed
+framebuffer writes through return; 72 execute the transformed path and RVA
+`0x68C70` to its first triangle call. Both entries remain analyzed, with no
+production-C or differential-validation result. Complete C integration is blocked
+on the one-packet cdecl triangle routine RVA `0x5CA50` (1,813 bytes), whose effects
+and live-scratch mutations must be recovered next. No native rendering parity is
+claimed. Missing non-FPO entry candidates are imported without guessed extents.
+
+Previous bounded follow-up (2026-10-07): the native sprite backend at RVA `0x571B0`
 is reconstructed, following both font routines. The [sprite preparation adapter
 analysis](ghidra/windows_sprite_adapter.md) independently corroborates RVA
 `0x57370` and its descriptor lookup dependency `0x612E0`; 168 original-only

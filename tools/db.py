@@ -4,7 +4,7 @@ import argparse
 import json
 import sqlite3
 import sys
-from windows_tracking import ROOT, STAGES, connect, migrate, snapshot, export, audit, inside
+from windows_tracking import ROOT, STAGES, connect, migrate, snapshot, export, audit, inside, load_target, pe_inventory, sha
 
 
 def main(argv=None):
@@ -18,6 +18,12 @@ def main(argv=None):
     sub.add_parser('export-markdown',help='Alias of update')
     sub.add_parser('dump-sql',help='Alias of update')
     sub.add_parser('audit',help='Validate Windows provenance and result freshness')
+    add = sub.add_parser('add-candidate', help='Import a fingerprinted executable extent absent from FPO; boundary evidence required')
+    add.add_argument('rva', type=lambda x: int(x, 0))
+    add.add_argument('--size', type=lambda x: int(x, 0), help='Omit for an entry with unknown extent; no routine hash is then claimed')
+    add.add_argument('--evidence', required=True)
+    add.add_argument('--confidence', required=True)
+    add.add_argument('--allow-nonexecutable', action='store_true', help='Observed call target in a file-backed section lacking PE execute flag; requires explicit evidence')
     stage = sub.add_parser('set-status',help='Set analysis stage by numeric Windows RVA; never marks validation passed')
     stage.add_argument('rva',type=lambda x:int(x,0))
     stage.add_argument('stage',choices=STAGES)
@@ -46,6 +52,28 @@ def main(argv=None):
         elif args.command=='audit':
             data = audit()
             print(f"PASS: {data['summary']['functions']} Windows extents and recorded source/run provenance.")
+        elif args.command == 'add-candidate':
+            target, data = load_target()
+            _, sections = pe_inventory(data)
+            evidence = inside(ROOT, args.evidence)
+            if not evidence.is_file() or args.rva < 0 or (args.size is not None and args.size <= 0):
+                raise ValueError('Positive extent and existing boundary evidence required')
+            length = args.size if args.size is not None else 1
+            section = next((s for s in sections if (s['executable'] or args.allow_nonexecutable) and
+                s['rva'] <= args.rva and args.rva + length <= s['rva'] +
+                min(s['virtual_size'], s['raw_size'])), None)
+            if section is None:
+                raise ValueError('Candidate must be fully file-backed; non-executable sections require explicit opt-in')
+            offset = section['raw_offset'] + args.rva - section['rva']
+            with connect(writable=True) as conn:
+                if conn.execute('SELECT id FROM functions WHERE rva=?', (args.rva,)).fetchone():
+                    raise ValueError('Candidate already exists; use describe')
+                conn.execute('''INSERT INTO functions(rva,byte_size,symbol_name,extent_origin,
+                    extent_confidence,routine_sha256,evidence_path) VALUES (?,?,?,?,?,?,?)''',
+                    (args.rva, args.size, f"sub_{int(target['image_base'],16)+args.rva:08X}",
+                     'authenticated-file-analysis' if args.size is not None else 'authenticated-entry-analysis', args.confidence,
+                     sha(data[offset:offset+args.size]) if args.size is not None else None, args.evidence))
+            print('Imported candidate only; use describe and set-status to record actual findings.')
         else:
             with connect(writable=True) as conn:
                 fn = conn.execute('SELECT id FROM functions WHERE rva=?',(args.rva,)).fetchone()
