@@ -101,6 +101,22 @@ extern volatile GfxSpriteDescriptor g_nativeSpriteDefault; /* VA 0x0051FB88 */
 extern const char g_nativeSpriteDefaultName[8]; /* VA 0x004BACF8; includes NUL */
 extern volatile uint32_t g_nativeNextImageId; /* VA 0x00520380; raw search word */
 int Gfx_InitDefaultSpriteDescriptor(void); /* VA 0x004611D0; EAX=0 */
+/* Verified six-dword packing-node copy view. Range words retain raw bits;
+ * consumers establish pixel/child/previous/next links, not allocator fidelity. */
+typedef struct GfxSpritePackingNode {
+    uint32_t range_start;
+    uint32_t range_end;
+    unsigned char *pixels;
+    struct GfxSpritePackingNode *children;
+    struct GfxSpritePackingNode *previous;
+    struct GfxSpritePackingNode *next;
+} GfxSpritePackingNode;
+typedef struct GfxSpritePackingBucket GfxSpritePackingBucket;
+#define GFX_SPRITE_PACKING_BUCKET_COUNT 257
+extern volatile GfxSpritePackingNode g_spritePackingTemplate; /* VA 0x0051FC00 */
+extern GfxSpritePackingBucket *volatile g_spritePackingBuckets[GFX_SPRITE_PACKING_BUCKET_COUNT]; /* VA 0x0051FF58 */
+extern GfxSpritePackingNode *volatile g_spritePackingPages; /* VA 0x0051FE40 */
+int Gfx_InitSpritePackingState(void); /* VA 0x004614D0; EAX=0 */
 extern volatile int32_t g_nativeImageCapacity; /* VA 0x00520388; signed */
 extern GfxSpriteDescriptor *volatile *volatile g_nativeImageRecords; /* VA 0x0052038C */
 int Gfx_CopySpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x004612E0 */

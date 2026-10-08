@@ -1,5 +1,20 @@
 # Enforced agent workflow
 
+## Sprite packing state reset (2026-10-08)
+
+[The packing reset](ghidra/windows_gfx_sprite_packing_reset.md), RVA 0x614D0,
+now has production C89 with an independently recovered 24-byte node template,
+257 opaque bucket pointers and separate page head. It preserves exact store
+order and repeated orphaning without free. 810 standalone comparisons include
+405 persistent repeats; 922 real executions per binary include 112 startups
+through the explicitly modeled primitive driver. Default initialization executes
+first. Four consumers have static ownership/layout analysis only; no consumer
+production or native packing parity is claimed. All prior suites remain intact.
+Inventory: 1,028 candidates, 36 reconstructed routines; instruction equality,
+original compiler/link layout and native graphics/heap/game parity unverified.
+Earlier milestone entries below are historical.
+
+
 ## Default sprite descriptor initialization (2026-10-08)
 
 [The default initializer](ghidra/windows_gfx_default_descriptor.md), VA

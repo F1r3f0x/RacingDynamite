@@ -175,6 +175,9 @@ volatile GfxSpriteDescriptor g_nativeSpriteScratch;
 volatile GfxSpriteDescriptor g_nativeSpriteDefault;
 const char g_nativeSpriteDefaultName[] = "default"; /* VA 0x004BACF8 */
 volatile uint32_t g_nativeNextImageId; /* VA 0x00520380 */
+volatile GfxSpritePackingNode g_spritePackingTemplate;
+GfxSpritePackingBucket *volatile g_spritePackingBuckets[GFX_SPRITE_PACKING_BUCKET_COUNT];
+GfxSpritePackingNode *volatile g_spritePackingPages;
 volatile int32_t g_nativeImageCapacity;
 GfxSpriteDescriptor *volatile *volatile g_nativeImageRecords;
 
@@ -191,6 +194,26 @@ int Gfx_InitDefaultSpriteDescriptor(void) {
     g_nativeSpriteDefault.words[5] = 0;
     g_nativeSpriteDefault.words[6] = 0;
     g_nativeNextImageId = 1;
+    return 0;
+}
+
+/*
+ * @original Gfx_InitSpritePackingState (IGN_WIN.EXE @ 0x004614D0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InitSpritePackingState(void) {
+    int bucket;
+
+    g_spritePackingTemplate.previous = 0;
+    g_spritePackingTemplate.next = 0;
+    g_spritePackingTemplate.children = 0;
+    g_spritePackingTemplate.range_start = 0;
+    g_spritePackingTemplate.range_end = 0;
+    g_spritePackingTemplate.pixels = 0;
+    for (bucket = 0; bucket < GFX_SPRITE_PACKING_BUCKET_COUNT; ++bucket) {
+        g_spritePackingBuckets[bucket] = 0;
+    }
+    g_spritePackingPages = 0;
     return 0;
 }
 
