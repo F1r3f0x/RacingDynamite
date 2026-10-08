@@ -121,6 +121,66 @@ int Gfx_InstallSpriteDispatch(void) {
     return 1;
 }
 
+/* Statically owned handle pool and copied descriptor views. The default record
+ * is loader-zeroed, then RVA 0x611D0 writes only words 0..6; remaining words
+ * must survive subsequent initialization. Image records/table belong to the
+ * unreconstructed image allocator, not this copy helper. */
+GfxSpriteHandle *volatile g_nativeSpriteFreeList[GFX_SPRITE_HANDLE_COUNT];
+volatile GfxSpriteHandle g_nativeSpriteHandles[GFX_SPRITE_HANDLE_COUNT];
+GfxSpriteHandle *volatile *volatile g_nativeSpriteFreeCursor;
+volatile GfxSpriteDescriptor g_nativeSpriteScratch;
+volatile GfxSpriteDescriptor g_nativeSpriteDefault;
+volatile int32_t g_nativeImageCapacity;
+GfxSpriteDescriptor *volatile *volatile g_nativeImageRecords;
+
+/*
+ * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_CopySpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id) {
+    const volatile GfxSpriteDescriptor *source;
+    volatile GfxSpriteDescriptor *destination;
+    int live_record;
+    int word;
+
+    source = &g_nativeSpriteDefault;
+    live_record = 0;
+    if (image_id > 0 && image_id < g_nativeImageCapacity) {
+        source = g_nativeImageRecords[image_id];
+        if (source != 0) {
+            live_record = 1;
+        } else {
+            source = &g_nativeSpriteDefault;
+        }
+    }
+    destination = descriptor;
+    for (word = 0; word < 16; ++word) {
+        destination->words[word] = source->words[word];
+    }
+    if (live_record) {
+        destination->words[6] = 0;
+        destination->words[7] = 0;
+        return 0;
+    }
+    return image_id;
+}
+
+/*
+ * @original Gfx_InitSpriteHandles (IGN_WIN.EXE @ 0x0045C7F0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InitSpriteHandles(void) {
+    int handle;
+
+    g_nativeSpriteFreeCursor = g_nativeSpriteFreeList + GFX_SPRITE_HANDLE_COUNT;
+    for (handle = 0; handle < GFX_SPRITE_HANDLE_COUNT; ++handle) {
+        g_nativeSpriteFreeList[handle] = (GfxSpriteHandle *)&g_nativeSpriteHandles[handle];
+        g_nativeSpriteHandles[handle].image_id = 0;
+    }
+    Gfx_CopySpriteDescriptor((GfxSpriteDescriptor *)&g_nativeSpriteScratch, 0);
+    return 1;
+}
+
 /* Global font table matching IGN_WIN.EXE @ 0x0063F2E0 */
 FontSlot g_fonts[MAX_FONTS];
 

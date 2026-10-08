@@ -65,7 +65,7 @@ typedef int (*GfxSurfaceRestoreProc)(void);
 extern GfxSurfaceRestoreProc volatile g_surfaceRestore; /* VA 0x0050EB9C */
 int Gfx_SurfaceRestoreNative(void); /* VA 0x0045C730; body unreconstructed */
 
-/* Windows sprite dispatch. Descriptor/state records are opaque.
+/* Windows sprite dispatch. State remains opaque; descriptor copy footprint is verified.
  * Raw no-op option words retain unknown semantics/signedness. */
 typedef struct {
     int32_t x;
@@ -85,7 +85,22 @@ typedef struct {
     float angle_radians;
 } GfxSpriteTransform;
 
-typedef struct GfxSpriteDescriptor GfxSpriteDescriptor;
+/* Verified 64-byte copy footprint, not a complete semantic field layout.
+ * Words 6/7 are ownership-related slots cleared only for a live-record copy.
+ * Words retain bit patterns, including pointer representations. */
+typedef struct GfxSpriteDescriptor {
+    uint32_t words[16];
+} GfxSpriteDescriptor;
+
+#define GFX_SPRITE_HANDLE_COUNT 2000
+extern GfxSpriteHandle *volatile g_nativeSpriteFreeList[GFX_SPRITE_HANDLE_COUNT]; /* VA 0x00512C58 */
+extern volatile GfxSpriteHandle g_nativeSpriteHandles[GFX_SPRITE_HANDLE_COUNT]; /* VA 0x00514BD8 */
+extern GfxSpriteHandle *volatile *volatile g_nativeSpriteFreeCursor; /* VA 0x0051A998 */
+extern volatile GfxSpriteDescriptor g_nativeSpriteScratch; /* VA 0x00514B98 */
+extern volatile GfxSpriteDescriptor g_nativeSpriteDefault; /* VA 0x0051FB88 */
+extern volatile int32_t g_nativeImageCapacity; /* VA 0x00520388; signed */
+extern GfxSpriteDescriptor *volatile *volatile g_nativeImageRecords; /* VA 0x0052038C */
+int Gfx_CopySpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x004612E0 */
 typedef struct GfxSpriteState GfxSpriteState;
 typedef int (*GfxSpriteOpenProc)(void);
 extern GfxSpriteOpenProc volatile g_spriteOpen; /* VA 0x0050EBA0 */
@@ -136,9 +151,12 @@ typedef int (*GfxSpriteSetStateProc)(const GfxSpriteState *state);
 extern GfxSpriteSetStateProc volatile g_spriteSetState; /* VA 0x0050EBE8 */
 int Gfx_SpriteSetStateNative(const GfxSpriteState *state); /* VA 0x00457170; body unreconstructed */
 
-/* No stack arguments; caller consumes no result. Bodies remain unreconstructed. */
+/* Lazy workspace boundaries: no stack arguments or consumed result.
+ * These two bodies remain unreconstructed. */
 void Gfx_InitSpriteWorkspaceA(void); /* VA 0x0045D840 */
 void Gfx_InitSpriteWorkspaceB(void); /* VA 0x0045C9F0 */
+
+/* Reconstructed static handle pool initializer; the installer ignores EAX. */
 int Gfx_InitSpriteHandles(void); /* VA 0x0045C7F0; EAX=1 */
 
 #define MAX_FONTS 30

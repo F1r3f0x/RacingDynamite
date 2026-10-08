@@ -148,3 +148,18 @@ real surface/selector/lifecycle integration. See
 Current coverage adds 306 sprite comparisons, 48 original-only consumer ABI
 checks and 43 original-only initializer contracts. Instruction equality and
 native graphics/game parity remain unverified.
+
+## Real sprite handle/helper follow-up (2026-10-08)
+
+[Handle initialization and descriptor copying](ghidra/windows_gfx_sprite_handles.md)
+reconstruct RVAs 0x5C7F0/0x612E0 and execute the real helper through real handles,
+sprite installation, selector and 18 lifecycle startups. Fresh coverage adds
+486 helper and 48 handle comparisons, plus 16 original-only default initializer
+checks; existing 306/266 sprite/surface installers, 532 selectors, 48/39 consumer
+ABI and 43 downstream contracts, banner/input/memory validation remain.
+Default initialization writes seven words and preserves nine; only live copies
+clear +0x18/+0x1C. Two workspace initializers and primitive/CRT/callback boundaries
+remain modeled. Strict C89 compilation and differential emulation pass;
+instruction equality, original compiler/link layout and native graphics/game
+parity remain unverified. Earlier model/opaque-descriptor descriptions are
+historical. Inventory: 1,028 candidates, 32 reconstructed routines.

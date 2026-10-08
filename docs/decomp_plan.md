@@ -1,5 +1,17 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded feature (2026-10-08): [sprite handles and descriptor copy](ghidra/windows_gfx_sprite_handles.md)
+at RVAs 0x5C7F0/0x612E0 are reconstructed with independently recovered storage
+and seven-word default initialization (nine words preserved). 486 helper and
+48 handle differential comparisons execute real bodies; helper also executes
+through real sprite/surface installation, selector and 18 startups. All prior
+validation is retained, plus 16 original-only default initializer checks.
+Two sprite workspaces, primitive startup and CRT/callback boundaries remain
+modeled. 1,028 candidates, 32 reconstructed routines; current compilation and
+differential evidence, instruction equality/original layout/native parity
+unverified. Next bounded candidates: lazy sprite workspaces at RVAs
+0x5D840/0x5C9F0 with real allocation/failure contracts. Earlier entries are historical.
+
 Latest bounded feature (2026-10-08): [sprite dispatch installation](ghidra/windows_gfx_sprite_dispatch.md)
 at RVA 0x56E60 is reconstructed with sixteen typed production globals.
 306 standalone sprite installers, 532 selectors and 18 startups execute both

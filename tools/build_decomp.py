@@ -15,8 +15,7 @@ STARTUP_BOUNDARY_SOURCE = (
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
     'void Gfx_InitPrimitiveState(void) { for (;;) {} }\n'
     'void Gfx_InitSpriteWorkspaceA(void) { for (;;) {} }\n'
-    'void Gfx_InitSpriteWorkspaceB(void) { for (;;) {} }\n'
-    'int Gfx_InitSpriteHandles(void) { for (;;) {} }\n')
+    'void Gfx_InitSpriteWorkspaceB(void) { for (;;) {} }\n')
 STARTUP_EXPORTS = ['Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
     'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
 
@@ -90,7 +89,7 @@ STARTUP_BOUNDARY_SOURCE += (
     'int Gfx_SpriteGetStateNative(GfxSpriteState *state) { (void)state; for (;;) {} }\n'
     'int Gfx_SpriteSetStateNative(const GfxSpriteState *state) { (void)state; for (;;) {} }\n'
 )
-SPRITE_EXPORTS = ['g_spriteOpen', 'Gfx_SpriteOpenNative', 'g_spriteReset', 'Gfx_SpriteResetNative', 'g_spriteClose', 'Gfx_SpriteCloseNative', 'g_spriteOption', 'Gfx_SpriteOptionNative', 'g_spriteConfigure', 'Gfx_SpriteConfigureNative', 'g_spriteSetClip', 'Gfx_SpriteSetClipNative', 'g_spriteDrawList', 'Gfx_SpriteDrawListNative', 'g_spriteDraw', 'Gfx_DrawSpriteNative', 'g_spriteHandleOp', 'Gfx_SpriteHandleOpNative', 'g_spriteImageOp', 'Gfx_SpriteImageOpNative', 'g_spriteCreateDescriptor', 'Gfx_SpriteCreateDescriptorNative', 'g_spriteFreeDescriptor', 'Gfx_SpriteFreeDescriptorNative', 'g_spriteCopyDescriptor', 'Gfx_SpriteCopyDescriptorNative', 'g_spriteReserved', 'Gfx_SpriteReservedNative', 'g_spriteGetState', 'Gfx_SpriteGetStateNative', 'g_spriteSetState', 'Gfx_SpriteSetStateNative', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles']
+SPRITE_EXPORTS = ['g_spriteOpen', 'Gfx_SpriteOpenNative', 'g_spriteReset', 'Gfx_SpriteResetNative', 'g_spriteClose', 'Gfx_SpriteCloseNative', 'g_spriteOption', 'Gfx_SpriteOptionNative', 'g_spriteConfigure', 'Gfx_SpriteConfigureNative', 'g_spriteSetClip', 'Gfx_SpriteSetClipNative', 'g_spriteDrawList', 'Gfx_SpriteDrawListNative', 'g_spriteDraw', 'Gfx_DrawSpriteNative', 'g_spriteHandleOp', 'Gfx_SpriteHandleOpNative', 'g_spriteImageOp', 'Gfx_SpriteImageOpNative', 'g_spriteCreateDescriptor', 'Gfx_SpriteCreateDescriptorNative', 'g_spriteFreeDescriptor', 'Gfx_SpriteFreeDescriptorNative', 'g_spriteCopyDescriptor', 'Gfx_SpriteCopyDescriptorNative', 'g_spriteReserved', 'Gfx_SpriteReservedNative', 'g_spriteGetState', 'Gfx_SpriteGetStateNative', 'g_spriteSetState', 'Gfx_SpriteSetStateNative', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'g_nativeSpriteFreeList', 'g_nativeSpriteHandles', 'g_nativeSpriteFreeCursor', 'g_nativeSpriteScratch', 'g_nativeSpriteDefault', 'g_nativeImageCapacity', 'g_nativeImageRecords']
 
 EXPORTS = ['validation_gfxDispatchWords', 'Lisa_PrintVersion', 'printf', 'Input_ResetCallbacks', 'g_inputKeyEventCallback', 'g_inputPollCallback', 'Mem_InitSystem', 'Mem_ShutdownSystem', 'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool', 'Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
            'g_memHandleIds', 'g_memHandleCursor', 'Mem_RegisterHandle', 'Mem_ShutdownHandles',
