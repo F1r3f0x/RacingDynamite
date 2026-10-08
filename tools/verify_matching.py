@@ -216,11 +216,12 @@ def verify():
         'Mem_InitSystem', 'Mem_ShutdownSystem', 'Lisa_PrintVersion',
         'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
         'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
-        'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'Gfx_InitDefaultSpriteDescriptor', 'Gfx_InitSpritePackingState', 'Gfx_LinkSpritePackingNode',
+        'Gfx_AllocBytes', 'Gfx_AllocAlignedBytes', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'Gfx_InitDefaultSpriteDescriptor', 'Gfx_InitSpritePackingState', 'Gfx_LinkSpritePackingNode',
         'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
     expected_calls = {
+        'Gfx_AllocAlignedBytes': ['Gfx_AllocBytes'],
         'Gfx_InitSpriteWorkspaceA': ['malloc'] * 3,
         'Gfx_InitSpriteWorkspaceB': ['malloc'] * 3,
         'Gfx_InitSpriteHandles': ['Gfx_CopySpriteDescriptor'],
@@ -763,3 +764,5 @@ if __name__ == '__main__':
 
     from verify_mem_lifecycle import verify_mem_lifecycle
     verify_mem_lifecycle()
+    from verify_sprite_packing import verify_sprite_packing
+    verify_sprite_packing()

@@ -116,6 +116,11 @@ typedef struct GfxSpritePackingBucket GfxSpritePackingBucket;
 extern volatile GfxSpritePackingNode g_spritePackingTemplate; /* VA 0x0051FC00 */
 extern GfxSpritePackingBucket *volatile g_spritePackingBuckets[GFX_SPRITE_PACKING_BUCKET_COUNT]; /* VA 0x0051FF58 */
 extern GfxSpritePackingNode *volatile g_spritePackingPages; /* VA 0x0051FE40 */
+/* Native graphics allocation: zero bytes bypass CRT malloc. */
+void *Gfx_AllocBytes(uint32_t size); /* VA 0x0045F4A0 */
+/* Unsigned 32-bit size/alignment arithmetic; back-pointer precedes result.
+ * No zero-alignment or allocation-failure guard exists in the original. */
+unsigned char *Gfx_AllocAlignedBytes(uint32_t size, uint32_t alignment); /* VA 0x00461840 */
 int Gfx_InitSpritePackingState(void); /* VA 0x004614D0; EAX=0 */
 /* Returns the unchanged previous argument (incidental original EAX).
  * Current must be writable; exact node aliases retain ordered stores. */

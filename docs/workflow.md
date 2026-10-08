@@ -1,5 +1,17 @@
 # Enforced agent workflow
 
+## Graphics aligned allocation dependencies (2026-10-08)
+
+[Allocation dependencies](ghidra/windows_gfx_alloc_aligned.md), RVAs
+0x5F4A0/0x61840, now have readable production C89. The zero-size wrapper and
+unsigned aligned allocator retain unchecked failure behavior and back-pointer
+placement. 48/512 differential comparisons include 24/252 persistent repeats
+and eight aligned-helper fault cases; CRT malloc is modeled. Prior suites
+remain intact. Inventory: 1,028 candidates, 39 reconstructed routines.
+Page allocation RVA 0x617E0 remains the next separate feature. Instruction
+equality, original compiler/link layout and native heap/game parity are unverified.
+
+
 ## Sprite packing node links (2026-10-08)
 
 [The link helper](ghidra/windows_gfx_sprite_packing_links.md), VA 0x00461690 /

@@ -235,6 +235,33 @@ GfxSpritePackingNode *Gfx_LinkSpritePackingNode(GfxSpritePackingNode *previous,
 }
 
 /*
+ * @original Gfx_AllocBytes (IGN_WIN.EXE @ 0x0045F4A0, geputget.c)
+ * @fidelity EXACT
+ */
+void *Gfx_AllocBytes(uint32_t size) {
+    if (size == 0) {
+        return 0;
+    }
+    return malloc(size);
+}
+
+/*
+ * @original Gfx_AllocAlignedBytes (IGN_WIN.EXE @ 0x00461840, geputget.c)
+ * @fidelity EXACT
+ */
+unsigned char *Gfx_AllocAlignedBytes(uint32_t size, uint32_t alignment) {
+    uint32_t allocation;
+    uint32_t remainder;
+    uint32_t header;
+
+    allocation = (uint32_t)Gfx_AllocBytes(size + alignment + 4u);
+    remainder = (allocation + 4u) % alignment;
+    header = allocation - remainder + alignment;
+    *(volatile uint32_t *)header = allocation;
+    return (unsigned char *)(header + 4u);
+}
+
+/*
  * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0, geputget.c)
  * @fidelity EXACT
  */

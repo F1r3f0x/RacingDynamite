@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:6cd833d8e0e70d7c2d7687021e84708366c1edc74420db60695c5e94b2f9f6c6 -->
+<!-- snapshot:13f4b4f5e97810f8eac984244d3b9386b411f0e55c1acc4a9a9529c3fdcf56a6 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -591,7 +591,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045F390` | `0x0005F390` | 66 | `sub_0045F390` | unknown | unidentified | - |
 | `0x0045F3E0` | `0x0005F3E0` | 166 | `sub_0045F3E0` | unknown | unidentified | - |
 | `0x0045F490` | `0x0005F490` | 14 | `sub_0045F490` | unknown | unidentified | - |
-| `0x0045F4A0` | `0x0005F4A0` | 21 | `sub_0045F4A0` | unknown | unidentified | - |
+| `0x0045F4A0` | `0x0005F4A0` | 21 | `Gfx_AllocBytes` | game | reconstructed | [windows_gfx_alloc_aligned.md](windows_gfx_alloc_aligned.md) |
 | `0x0045F4C0` | `0x0005F4C0` | 151 | `sub_0045F4C0` | unknown | unidentified | - |
 | `0x0045F560` | `0x0005F560` | 133 | `Gfx_GrowImagePointerTable` | game | analyzed | [windows_gfx_sprite_handles.md](windows_gfx_sprite_handles.md) |
 | `0x0045F5F0` | `0x0005F5F0` | 79 | `sub_0045F5F0` | unknown | unidentified | - |
@@ -654,7 +654,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00461690` | `0x00061690` | 33 | `Gfx_LinkSpritePackingNode` | game | reconstructed | [windows_gfx_sprite_packing_links.md](windows_gfx_sprite_packing_links.md) |
 | `0x004616C0` | `0x000616C0` | 273 | `Gfx_AddSpritePackingBucket` | game | analyzed | [windows_gfx_sprite_packing_reset.md](windows_gfx_sprite_packing_reset.md) |
 | `0x004617E0` | `0x000617E0` | 85 | `Gfx_AddSpritePackingPage` | game | analyzed | [windows_gfx_sprite_packing_reset.md](windows_gfx_sprite_packing_reset.md) |
-| `0x00461840` | `0x00061840` | 47 | `sub_00461840` | unknown | unidentified | - |
+| `0x00461840` | `0x00061840` | 47 | `Gfx_AllocAlignedBytes` | game | reconstructed | [windows_gfx_alloc_aligned.md](windows_gfx_alloc_aligned.md) |
 | `0x00461870` | `0x00061870` | 62 | `sub_00461870` | unknown | unidentified | - |
 | `0x004618B0` | `0x000618B0` | 419 | `Gfx_ReleaseSpritePackingStorage` | game | analyzed | [windows_gfx_sprite_packing_reset.md](windows_gfx_sprite_packing_reset.md) |
 | `0x00461A60` | `0x00061A60` | 17 | `sub_00461A60` | unknown | unidentified | - |
