@@ -11,6 +11,19 @@
 extern int g_MemoryAllocated;
 #include <string.h>
 
+/* Windows input callback state. Both words are loader-zeroed .data tail. */
+InputKeyEventCallback volatile g_inputKeyEventCallback = 0; /* VA 0x0050DE14 */
+InputPollCallback volatile g_inputPollCallback = 0;         /* VA 0x0050E678 */
+
+/*
+ * @original Input_ResetCallbacks (IGN_WIN.EXE @ 0x00455AB0, geputget.c)
+ * @fidelity EXACT
+ */
+void Input_ResetCallbacks(void) {
+    g_inputKeyEventCallback = 0;
+    g_inputPollCallback = 0;
+}
+
 /* Global font table matching IGN_WIN.EXE @ 0x0063F2E0 */
 FontSlot g_fonts[MAX_FONTS];
 

@@ -22,7 +22,7 @@ RVA, SIZE = 0x5b000, 127
 DLL = BUILD / 'mem_free_validation.dll'
 ARENA, ARENA_SIZE = 0x7600000, 0x100000
 POINTER = 0x7800000
-INPUTS = ['decomp/src/mem.c', 'decomp/include/mem.h', 'decomp/target.json',
+INPUTS = ['decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/src/mem.c', 'decomp/include/mem.h', 'decomp/target.json',
           'tools/verify_mem_free.py', 'tools/build_decomp.py', 'tools/verify_matching.py',
           'tools/verify_font_cleanup.py', 'tools/windows_target.py', 'tools/windows_tracking.py']
 

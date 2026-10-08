@@ -36,7 +36,7 @@ Startup unconditionally makes these calls, then overwrites EAX with 1:
 | 0x0045B170 | 0x0045B4F0 | Lisa_PrintVersion, no arguments |
 | 0x0045B175 | 0x0045AD50 | Mem_InitPools, no arguments |
 | 0x0045B17A | 0x0045B1F0 | Mem_InitHandles, no arguments |
-| 0x0045B17F | 0x00455AB0 | Gfx_ResetResourceFlags, no arguments |
+| 0x0045B17F | 0x00455AB0 | Input_ResetCallbacks, no arguments |
 | 0x0045B184 | 0x0045E610 | Gfx_InitPrimitiveState, no arguments |
 | 0x0045B18B | 0x00456AF0 | Gfx_SelectBackend, one stack dword zero |
 
@@ -73,30 +73,38 @@ recovered in the handle contracts; teardown dispatches its live registered slots
 The backend dependencies install graphics dispatch pointers, not wrapper teardown
 registration. No invented lifecycle registration was added.
 
-## Independently inspected startup boundaries (analysis only)
+## Independently inspected startup boundaries
+
+Follow-up: [input callback reset](windows_resource_reset.md) reconstructs RVA
+0x55AB0 and executes its real production body through integrated startup.
+The former Gfx_ResetResourceFlags name was provisional; the two words are
+keyboard-event and post-poll callbacks. The dependency details below reflect this follow-up; the other three startup
+bodies remain analysis-only.
 
 | Semantic name | RVA | Bytes | SHA-256 |
 | --- | --- | --- | --- |
 | Lisa_PrintVersion | 0x5B4F0 | 34 | 719ae03224b3f4a4ab08fa52985cd65454730bd8de870f8afe632d9216951802 |
-| Gfx_ResetResourceFlags | 0x55AB0 | 13 | c301c37754413d115bac22b922a9ed480b4080011c559a4485b7ea044270fd59 |
+| Input_ResetCallbacks | 0x55AB0 | 13 | c301c37754413d115bac22b922a9ed480b4080011c559a4485b7ea044270fd59 |
 | Gfx_InitPrimitiveState | 0x5E610 | 326 | fd2abfef167ef5b92074ef41c17478dd955591025afb3aad714da050a29704a3 |
 | Gfx_SelectBackend | 0x56AF0 | 30 | d1fcb40ea924f27f8afef2a4b1e804ee70ce3fed2ff4f9e74a376877e7c3c4cd |
 
 All four hashes, FPO extents and complete instruction decoding are asserted.
-They remain analyzed, without production Windows reconstruction or compilation/
-emulation results. Existing Lisa_PrintVersion DOS code is not trusted or linked
+Input_ResetCallbacks is now reconstructed and verified; the other three remain
+analyzed without production Windows reconstruction or compilation/emulation
+results. Existing Lisa_PrintVersion DOS code is not trusted or linked
 as a Windows implementation. Production mem.c has explicit extern declarations,
-not substitute bodies. The three graphics names reflect inspected effects,
+not substitute bodies. The two remaining graphics names reflect inspected effects,
 not recovered original symbols or a complete subsystem contract.
 
 - Banner: calls CRT printf VA 0x0046A500 twice, with version string VA
   0x004BAB20, format VA 0x004BAB5C and copyright VA 0x004BAB3C; caller cleans
   two/one dwords. Returns EAX=0. Three HIGHLOW operands refer to those strings.
-- Resource reset: XOR EAX,EAX, stores zero to the two loader-zeroed .data words
+- Input callback reset: XOR EAX,EAX, stores zero to the two loader-zeroed .data words
   VA 0x0050DE14 and 0x0050E678, then RET. Two HIGHLOW operands select them.
-  Their consumers are at VAs 0x004560C0 and 0x00456165 (the latter also has a
-  reference at 0x00455F48). Their ownership/layout needs further independent
-  recovery; neither word is the font flag VA 0x004BA6C4. EAX happens to be zero;
+  Independent consumer recovery identifies keyboard-event and post-poll callback
+  pointers; VA 0x00455F48 only references the repeat-array end address. See
+  windows_resource_reset.md; neither word is the font flag VA 0x004BA6C4.
+  EAX happens to be zero;
   callers consume no result, so the reconstruction boundary prototype is void.
 - Primitive initialization: clears four dwords at VA 0x0051FD00 then copies
   that zero packet to seven 16-byte destinations (0x0051FE98, 0x005203B8,
@@ -122,7 +130,7 @@ $env:UV_CACHE_DIR = Join-Path (Get-Location) 'build/uv-cache'
 $env:UV_OFFLINE = 1
 uv run python tools/verify_mem_lifecycle.py
 uv run python tools/decomp_doctor.py --probe-ghidra
-uv run python tools/workflow.py complete --rva 0x5B170 --rva 0x5B1A0 --limitation "Four startup dependencies, CRT heap and handle callbacks modeled; instruction equality, original link layout, native startup/graphics/heap/game parity, invalid/aliased storage, concurrency and general reentry unverified"
+uv run python tools/workflow.py complete --rva 0x5B170 --rva 0x5B1A0 --limitation "Three startup dependencies, CRT heap and handle callbacks modeled; instruction equality, original link layout, native startup/graphics/heap/game parity, invalid/aliased storage, concurrency and general reentry unverified"
 uv run python tools/db.py update
 uv run python tools/db.py update --check
 ~~~
@@ -131,8 +139,9 @@ The builder compiles complete production mem.c under strict C89 with provisional
 Clang/LLD 19.1.1, i686-pc-windows-msvc, -O2, freestanding/no-builtin, disabled
 inlining/unrolling/vectorization/SSE. Original compiler and linked layout remain
 unknown. The separate fresh artifact is build/decomp/windows/mem_lifecycle_validation.dll,
-PE32 with no imports, not a playable game. Four startup fixtures and CRT malloc/
-free fixtures are nonreturning C loops, intercepted explicitly in emulation. They
+PE32 with no imports, not a playable game. The input reset body is extracted
+from production C. Three startup and CRT malloc/free fixtures are nonreturning
+C loops, intercepted explicitly in emulation. They
 cannot silently manufacture success if interception is missing. Existing font/
 file validation builders also link those startup fixtures because they compile
 complete mem.c; their unrelated dependency models are unchanged.
@@ -158,7 +167,8 @@ invocations pass against an independent instruction-derived oracle:
   identical pending callback/parameter client setup occurs once, after allocation.
   Successful allocation, registered callback teardown, repeated shutdown,
   failed default creation and repeated startup orphaning are checked. All real
-  pool and handle bodies are retained; startup/heap/callback boundaries are models.
+  pool and handle bodies are retained; three remaining startup dependencies,
+  heap and callbacks are modeled; input reset executes.
 
 The suite checks EAX, ESP, nonvolatile registers, caller stack, clear DF, exact
 ordered tracked accesses and call arguments, complete handle arrays/pending
@@ -174,7 +184,11 @@ compiler/link layout, native startup/graphics/CRT heap/callback/game parity and
 playable rebuilding remain unverified. Invalid/unmapped/aliased storage,
 concurrency and general reentry are excluded. Bounded dependency mutations do
 not validate arbitrary reentry. Font_Load retains its pool fixture and complete
-geputget.c/native rebuilding retain legacy blockers. The four startup bodies
+geputget.c/native rebuilding retain legacy blockers. The three remaining startup bodies
 are explicitly analysis-only; their native effects are not included in passing
 wrapper emulation claims. Compilation, raw-prefix diagnostics and differential
 emulation are separately recorded for the two reconstructed RVAs.
+
+The current verifier also records 266 standalone Input_ResetCallbacks comparisons;
+its real body clears both callback words through 18 integrated startups.
+See windows_resource_reset.md for ABI recovery, extraction and limitations.

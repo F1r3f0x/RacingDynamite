@@ -21,11 +21,11 @@ from windows_tracking import record_run
 if not __debug__:
     raise RuntimeError('Verification requires assertions')
 ROUTINES = {
+    'Input_ResetCallbacks': (0x55ab0,13,'c301c37754413d115bac22b922a9ed480b4080011c559a4485b7ea044270fd59'),
     'Mem_InitSystem': (0x5b170,41,'e4026b0791ef97b56f8fa7013dd568dfd4772d64e2638d850a217c9d338ce2b8'),
     'Mem_ShutdownSystem': (0x5b1a0,16,'75f6e3f589d50b5cb564113e1270c4f2a5df39c0614d41516b520d0d3ee064a3')}
 DEPENDENCIES = {
     'Lisa_PrintVersion': (0x5b4f0,34,'719ae03224b3f4a4ab08fa52985cd65454730bd8de870f8afe632d9216951802'),
-    'Gfx_ResetResourceFlags': (0x55ab0,13,'c301c37754413d115bac22b922a9ed480b4080011c559a4485b7ea044270fd59'),
     'Gfx_InitPrimitiveState': (0x5e610,326,'fd2abfef167ef5b92074ef41c17478dd955591025afb3aad714da050a29704a3'),
     'Gfx_SelectBackend': (0x56af0,30,'d1fcb40ea924f27f8afef2a4b1e804ee70ce3fed2ff4f9e74a376877e7c3c4cd')}
 MEMORY = {'Mem_InitHandles':(0x5b1f0,76), 'Mem_ShutdownHandles':(0x5b240,155),
@@ -36,7 +36,9 @@ ARGUMENTS = {'Gfx_SelectBackend':1, 'Mem_CreatePool':1, 'Mem_DestroyPool':1,
     'malloc':1, 'free':1, 'callback':1}
 CALLBACK = 0x7200000
 DLL = BUILD / 'mem_lifecycle_validation.dll'
-INPUTS = ['decomp/src/mem.c','decomp/include/mem.h','decomp/target.json',
+RESOURCE_FIELDS = [('g_inputKeyEventCallback',0x50de14,4), ('g_inputPollCallback',0x50e678,4)]
+STATE_FIELDS = BOOKKEEPING_FIELDS + RESOURCE_FIELDS
+INPUTS = ['decomp/src/geputget.c','decomp/include/geputget.h','decomp/src/mem.c','decomp/include/mem.h','decomp/target.json',
     'tools/verify_mem_lifecycle.py','tools/verify_mem_destroy.py','tools/verify_mem_pools.py',
     'tools/verify_mem_alloc.py','tools/verify_mem_free.py','tools/verify_matching.py',
     'tools/build_decomp.py','tools/verify_font_cleanup.py','tools/windows_target.py',
@@ -63,12 +65,35 @@ def inspect_original(pe):
         assert fpo[r]==(n,0,1 if name=='Gfx_SelectBackend' else 0,0)
         assert ins[-1].mnemonic==('jmp' if name=='Gfx_InitPrimitiveState' else 'ret')
     for name,(r,n,_) in ROUTINES.items():
+        if name=='Input_ResetCallbacks':continue
         ins=list(md.disasm(pe.get_data(r,n),0x400000+r))
         expected=[(0x45b170,0x45b4f0),(0x45b175,0x45ad50),(0x45b17a,0x45b1f0),
             (0x45b17f,0x455ab0),(0x45b184,0x45e610),(0x45b18b,0x456af0)] if name=='Mem_InitSystem' else [(0x45b1a0,0x45b240),(0x45b1a5,0x45b140)]
         assert [(i.address,int(i.op_str,16)) for i in ins if i.mnemonic=='call']==expected
         assert len(ins)==(10 if name=='Mem_InitSystem' else 4)
         assert not any(e.type==3 and r<=e.rva<r+n for b in pe.DIRECTORY_ENTRY_BASERELOC for e in b.entries)
+    # Independently authenticate consumer ABI/ownership, not inherited names.
+    for r,n,digest in [(0x560c0,26,'3b23ff815d34e56903eb4477a3cb227730eae66e254731b7902b62fed7d10a8b'),
+            (0x56160,19,'2d1dd1ad615325f87eae45141b3a1d7f53a09f9d2646d1adcd17f93e16c76f58'),
+            (0x55ef0,376,'ac1bfc5738cf5a68eef9491b90049eb23453052f9350d545c82586248ec92f33'),
+            (0x55c60,436,'6ade6c95c919cb9ea6d550e552623c057dbefcdef7b325d552d883a7ad782efe')]:
+        assert hashlib.sha256(pe.get_data(r,n)).hexdigest()==digest and fpo[r][0]==n
+    assert fpo[0x560c0]==(26,0,2,0) and fpo[0x56160]==(19,0,5,0)
+    for va,expected in [(0x50de14,[0x55ab3,0x560c2]),
+            (0x50e678,[0x55ab8,0x55f4a,0x56166])]:
+        assert [e.rva for b in pe.DIRECTORY_ENTRY_BASERELOC for e in b.entries
+            if e.type==3 and struct.unpack('<I',pe.get_data(e.rva,4))[0]==va]==expected
+    assert any(s.dll==b'WINMM.dll' and i.name==b'timeSetEvent' and i.address==0x64c474
+        for s in pe.DIRECTORY_ENTRY_IMPORT for i in s.imports)
+    assert pe.get_data(0x55abd,3)==b'\xcc'*3
+    relocs=[(e.rva,struct.unpack('<I',pe.get_data(e.rva,4))[0])
+        for b in pe.DIRECTORY_ENTRY_BASERELOC for e in b.entries
+        if e.type==3 and 0x55ab0<=e.rva<0x55abd]
+    assert relocs==[(0x55ab3,0x50de14),(0x55ab8,0x50e678)]
+    data=next(s for s in pe.sections if s.Name.rstrip(b'\0')==b'.data')
+    for _,va,n in RESOURCE_FIELDS:
+        assert data.VirtualAddress+data.SizeOfRawData<=va-0x400000
+        assert va-0x400000+n<=data.VirtualAddress+data.Misc_VirtualSize
     assert pe.get_data(0x5b199,7)==b'\xcc'*7
     assert pe.get_data(0x5b1b0,1)==b'\x83'  # Next entry directly follows shutdown RET.
     for site,target in [(0x412170,0x45b170),(0x4122a7,0x45b1a0),(0x412502,0x456af0)]:
@@ -112,12 +137,14 @@ class Oracle:
 
     def call(self,name,args=()):
         if name!=self.top:self.events.append(('call',name,args))
-        if name in STARTUP_EXPORTS or (self.isolated and name in (
+        if name in STARTUP_EXPORTS or (self.isolated and name in ('Input_ResetCallbacks',
                 'Mem_InitPools','Mem_InitHandles','Mem_ShutdownHandles','Mem_ShutdownPools')):
             return self.boundary(name,args)
+        if name=='Input_ResetCallbacks':
+            self.write('g_inputKeyEventCallback',0,0);self.write('g_inputPollCallback',0,0);return None
         if name=='Mem_InitSystem':
             for dep in ['Lisa_PrintVersion','Mem_InitPools','Mem_InitHandles',
-                        'Gfx_ResetResourceFlags','Gfx_InitPrimitiveState','Gfx_SelectBackend']:
+                        'Input_ResetCallbacks','Gfx_InitPrimitiveState','Gfx_SelectBackend']:
                 self.call(dep,(0,) if dep=='Gfx_SelectBackend' else ())
             return 1
         if name=='Mem_ShutdownSystem':
@@ -207,7 +234,7 @@ class Oracle:
 class LifecycleSession(DestroySession):
     def __init__(self,pe,symbols=None):
         super().__init__(pe,symbols)
-        self.fields=[(name,va if symbols is None else symbols[name],n) for name,va,n in BOOKKEEPING_FIELDS]
+        self.fields=[(name,va if symbols is None else symbols[name],n) for name,va,n in STATE_FIELDS]
         self.entries.update({name:0x400000+r if symbols is None else symbols[name]
             for name,(r,_,_) in (ROUTINES|DEPENDENCIES).items()})
         self.entries.update({name:0x400000+r if symbols is None else symbols[name] for name,(r,n) in MEMORY.items()})
@@ -254,7 +281,7 @@ class LifecycleSession(DestroySession):
                 assert args==(self.default,);args=('DEFAULT',)
             if name!=self.top:self.events.append(('call',name,args))
             modeled=name in STARTUP_EXPORTS or name in ('malloc','free','callback') or (
-                self.isolated and name in ('Mem_InitPools','Mem_InitHandles','Mem_ShutdownHandles','Mem_ShutdownPools'))
+                self.isolated and name in ('Input_ResetCallbacks','Mem_InitPools','Mem_InitHandles','Mem_ShutdownHandles','Mem_ShutdownPools'))
             if modeled:
                 assert self.boundary_index<len(self.expected_boundaries),'Unexpected boundary'
                 expected_name,expected_args,state=self.expected_boundaries[self.boundary_index]
@@ -294,7 +321,8 @@ class LifecycleSession(DestroySession):
             k=next((i for i,(a,b) in enumerate(zip(self.events,events)) if a!=b),min(len(self.events),len(events)))
             raise AssertionError('Event mismatch %d: %s != %s; counts %d/%d'%(k,self.events[k:k+3],events[k:k+3],len(self.events),len(events)))
         assert self.boundary_index==len(self.expected_boundaries)
-        assert self.state()==state and cpu.reg_read(UC_X86_REG_EAX)==eax
+        assert self.state()==state
+        if eax is not None:assert cpu.reg_read(UC_X86_REG_EAX)==eax
         return state
 
 
@@ -302,7 +330,7 @@ def verify_mem_lifecycle():
     verify_target();phase='compilation';counts={name:0 for name in ROUTINES}
     try:
         original=pefile.PE(str(TARGET));inspect_original(original);build(dll=DLL)
-        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c; strict C89; provisional Clang/LLD; explicit nonreturning startup and CRT fixtures')
+        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production Input_ResetCallbacks declarations/body; strict C89; provisional Clang/LLD; explicit nonreturning startup and CRT fixtures')
         rebuilt=pefile.PE(str(DLL));assert not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
         symbols={s.name.decode():rebuilt.OPTIONAL_HEADER.ImageBase+s.address for s in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if s.name}
         for name,(r,n,_) in ROUTINES.items():
@@ -311,7 +339,7 @@ def verify_mem_lifecycle():
         a,b=LifecycleSession(original),LifecycleSession(rebuilt,symbols);phase='emulation'
         rng=random.Random(0x5b170);isolated_counts={name:0 for name in ROUTINES};persistent=0
         def fresh(flag=0):
-            state={name:rng.randbytes(n) for name,_,n in BOOKKEEPING_FIELDS}
+            state={name:rng.randbytes(n) for name,_,n in STATE_FIELDS}
             state.update(table=bytes(1024),arena=bytes(PoolFixture().data))
             state['g_memHandlesInitialized']=struct.pack('<I',flag)
             state['g_memHandleStatus']=bytes(800)
@@ -325,10 +353,16 @@ def verify_mem_lifecycle():
             if name in counts:counts[name]+=1
             if isolated:isolated_counts[name]+=1
             return outputs[0]
+        # Standalone reset covers arbitrary raw pointer words and repeated clearing.
+        for value in [0,1,2,0x80000000,0xffffffff]+[rng.getrandbits(32) for _ in range(128)]:
+            state=fresh();state['g_inputKeyEventCallback']=struct.pack('<I',value)
+            state['g_inputPollCallback']=struct.pack('<I',value^0xffffffff)
+            state=compare('Input_ResetCallbacks',state)
+            compare('Input_ResetCallbacks',state,reset=False)
         # Every dependency receives all representative failure/high-bit EAX values.
         # Models mutate tracked state independently; no helper result short-circuits.
         for name,deps in [('Mem_InitSystem',['Lisa_PrintVersion','Mem_InitPools','Mem_InitHandles',
-                'Gfx_ResetResourceFlags','Gfx_InitPrimitiveState','Gfx_SelectBackend']),
+                'Input_ResetCallbacks','Gfx_InitPrimitiveState','Gfx_SelectBackend']),
                 ('Mem_ShutdownSystem',['Mem_ShutdownHandles','Mem_ShutdownPools'])]:
             for dep in deps:
                 for value in [0,1,2,0x80000000,0xffffffff]:
@@ -345,8 +379,9 @@ def verify_mem_lifecycle():
                 compare('Mem_InitSystem',state,returns={'malloc':[pointer]})
         # Changes made by early/late startup boundaries are observed by real helpers.
         for flag in [0,1,2,0xffffffff]:
-            actions={('Lisa_PrintVersion',0):[('g_memHandlesInitialized',0,4,flag)],
-                ('Gfx_ResetResourceFlags',0):[('g_memHandleStatus',796,4,1)],
+            actions={
+                ('Lisa_PrintVersion',0):[('g_memHandlesInitialized',0,4,flag),
+                    ('g_inputKeyEventCallback',0,4,0xffffffff),('g_inputPollCallback',0,4,0x12345678)],
                 ('Gfx_InitPrimitiveState',0):[('g_memPendingCallback',0,4,CALLBACK)],
                 ('Gfx_SelectBackend',0):[('g_memHandlesInitialized',0,4,0)]}
             compare('Mem_InitSystem',fresh(2),actions=actions,returns={'malloc':[ARENA]})
@@ -400,9 +435,11 @@ def verify_mem_lifecycle():
         step('Mem_ShutdownSystem')
         for name in ROUTINES:
             record(name,'emulation','pass',cases=counts[name],isolated_cases=isolated_counts[name],
-                persistent_invocations=persistent,scope='Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration',
-                limitations='Four startup dependencies, CRT heap and callbacks modeled; no instruction equality, original linked layout, native startup/graphics/heap/game parity, invalid/aliased storage, concurrency or general reentry validation')
-        print('PASS: %d Mem_InitSystem and %d Mem_ShutdownSystem differential invocations; isolated %s; %d persistent invocations.'%(counts['Mem_InitSystem'],counts['Mem_ShutdownSystem'],isolated_counts,persistent))
+                persistent_invocations=persistent if name!='Input_ResetCallbacks' else 0,
+                integrated_startups=18 if name=='Input_ResetCallbacks' else None,
+                scope=('266 standalone ordered two-dword clearing calls, repeated persistent clearing; 18 integrated startups; complete tracked state and boundary snapshots; nonvolatile registers/stack/DF/unrelated-image checks; void EAX excluded' if name=='Input_ResetCallbacks' else 'Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration'),
+                limitations='Three startup dependencies, CRT heap and callbacks modeled; no instruction equality, original linked layout, native startup/graphics/heap/game parity, invalid/aliased storage, concurrency or general reentry validation')
+        print('PASS: %d Input_ResetCallbacks; %d Mem_InitSystem and %d Mem_ShutdownSystem differential invocations; isolated %s; %d persistent invocations.'%(counts['Input_ResetCallbacks'],counts['Mem_InitSystem'],counts['Mem_ShutdownSystem'],isolated_counts,persistent))
         return counts
     except Exception as exc:
         for name in ROUTINES:record(name,phase,'fail',error=str(exc))

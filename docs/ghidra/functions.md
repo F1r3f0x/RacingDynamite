@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:1b2c239ebb88bc46b1703b16bf0898a99a076d6358e185dceb60da804128cd45 -->
+<!-- snapshot:61472e122d60ad769c3629676214887424927ad9ec38c9e71d6ec26ed75b3531 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -371,20 +371,20 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x004516F0` | `0x000516F0` | 64 | `sub_004516F0` | unknown | unidentified | - |
 | `0x00452010` | `0x00052010` | 56 | `sub_00452010` | unknown | unidentified | - |
 | `0x00452770` | `0x00052770` | 136 | `sub_00452770` | unknown | unidentified | - |
-| `0x00455AB0` | `0x00055AB0` | 13 | `Gfx_ResetResourceFlags` | game | analyzed | [windows_mem_lifecycle.md](windows_mem_lifecycle.md) |
+| `0x00455AB0` | `0x00055AB0` | 13 | `Input_ResetCallbacks` | game | reconstructed | [windows_resource_reset.md](windows_resource_reset.md) |
 | `0x00455AC0` | `0x00055AC0` | 406 | `sub_00455AC0` | unknown | unidentified | - |
-| `0x00455C60` | `0x00055C60` | 436 | `sub_00455C60` | unknown | unidentified | - |
+| `0x00455C60` | `0x00055C60` | 436 | `Input_InitKeyboardTimer` | game | analyzed | [windows_resource_reset.md](windows_resource_reset.md) |
 | `0x00455E20` | `0x00055E20` | 117 | `sub_00455E20` | unknown | unidentified | - |
 | `0x00455EA0` | `0x00055EA0` | 11 | `sub_00455EA0` | unknown | unidentified | - |
 | `0x00455EB0` | `0x00055EB0` | 57 | `sub_00455EB0` | unknown | unidentified | - |
-| `0x00455EF0` | `0x00055EF0` | 376 | `sub_00455EF0` | unknown | unidentified | - |
+| `0x00455EF0` | `0x00055EF0` | 376 | `Input_PollKeyboard` | game | analyzed | [windows_resource_reset.md](windows_resource_reset.md) |
 | `0x00456070` | `0x00056070` | 15 | `sub_00456070` | unknown | unidentified | - |
 | `0x00456080` | `0x00056080` | 28 | `sub_00456080` | unknown | unidentified | - |
 | `0x004560A0` | `0x000560A0` | 28 | `sub_004560A0` | unknown | unidentified | - |
-| `0x004560C0` | `0x000560C0` | 26 | `sub_004560C0` | unknown | unidentified | - |
+| `0x004560C0` | `0x000560C0` | 26 | `Input_DispatchKeyEvent` | game | analyzed | [windows_resource_reset.md](windows_resource_reset.md) |
 | `0x004560E0` | `0x000560E0` | 59 | `sub_004560E0` | unknown | unidentified | - |
 | `0x00456120` | `0x00056120` | 55 | `sub_00456120` | unknown | unidentified | - |
-| `0x00456160` | `0x00056160` | 19 | `sub_00456160` | unknown | unidentified | - |
+| `0x00456160` | `0x00056160` | 19 | `Input_TimerPollCallback` | game | analyzed | [windows_resource_reset.md](windows_resource_reset.md) |
 | `0x00456180` | `0x00056180` | 134 | `Font_InitSystem` | game | reconstructed | [windows_font_init.md](windows_font_init.md) |
 | `0x00456210` | `0x00056210` | 83 | `Font_Shutdown` | game | reconstructed | [windows_font_shutdown.md](windows_font_shutdown.md) |
 | `0x00456270` | `0x00056270` | 429 | `Font_Parse` | game | reconstructed | [windows_font_parse.md](windows_font_parse.md) |

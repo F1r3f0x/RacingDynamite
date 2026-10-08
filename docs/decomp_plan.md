@@ -1,5 +1,16 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded feature (2026-10-08): [input callback reset](ghidra/windows_resource_reset.md)
+at RVA 0x55AB0 is reconstructed in native geputget.c as Input_ResetCallbacks.
+Its former Gfx_ResetResourceFlags name was provisional: consumers establish two
+keyboard callback pointers, with two-argument caller-cleanup and zero-argument
+interfaces. 266 standalone differential invocations pass, and the real reset now
+executes through 18 integrated startups in the retained 112 startup / 519 shutdown
+lifecycle suite, including ten persistent calls. Three startup dependencies, CRT
+heap and handle callbacks remain modeled. Raw prefixes differ; original compiler,
+instruction equality, native input/timer/graphics/heap/game parity and playable
+rebuilding remain unverified. See evidence for static consumer provenance.
+
 Latest bounded feature (2026-10-08): [memory-system lifecycle wrappers](ghidra/windows_mem_lifecycle.md)
 at RVAs 0x5B170/0x5B1A0 are reconstructed in production C89 mem.c/mem.h.
 112 startup and 519 shutdown differential invocations pass, including 94/74

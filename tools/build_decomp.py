@@ -10,13 +10,21 @@ from windows_target import ROOT, BUILD, DLL, verify_target
 # Nonreturning validation-only boundaries: never fake production success.
 STARTUP_BOUNDARY_SOURCE = (
     'int Lisa_PrintVersion(void) { for (;;) {} }\n'
-    'void Gfx_ResetResourceFlags(void) { for (;;) {} }\n'
     'void Gfx_InitPrimitiveState(void) { for (;;) {} }\n'
     'int Gfx_SelectBackend(int backend) { (void)backend; for (;;) {} }\n')
-STARTUP_EXPORTS = ['Lisa_PrintVersion', 'Gfx_ResetResourceFlags',
+STARTUP_EXPORTS = ['Lisa_PrintVersion',
                    'Gfx_InitPrimitiveState', 'Gfx_SelectBackend']
 
-EXPORTS = ['Mem_InitSystem', 'Mem_ShutdownSystem', 'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool', 'Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
+# Extract these verified production declarations/body, rather than duplicating C.
+_resource_header = (ROOT / 'decomp/include/geputget.h').read_text(encoding='utf-8-sig')
+_resource_source = (ROOT / 'decomp/src/geputget.c').read_text(encoding='utf-8-sig')
+STARTUP_BOUNDARY_SOURCE += (
+    _resource_header[_resource_header.index('typedef void (*InputKeyEventCallback)'):
+        _resource_header.index('#define MAX_FONTS')]
+    + _resource_source[_resource_source.index('InputKeyEventCallback volatile g_inputKeyEventCallback ='):
+        _resource_source.index('/* Global font table matching')])
+
+EXPORTS = ['Input_ResetCallbacks', 'g_inputKeyEventCallback', 'g_inputPollCallback', 'Mem_InitSystem', 'Mem_ShutdownSystem', 'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool', 'Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
            'g_memHandleIds', 'g_memHandleCursor', 'Mem_RegisterHandle', 'Mem_ShutdownHandles',
            'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'free', 'malloc',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',

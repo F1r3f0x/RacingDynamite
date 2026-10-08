@@ -5,6 +5,13 @@
 #include <stddef.h>
 #include "mem.h"
 
+/* Windows input callback ABI; semantic names, original symbols unknown. */
+typedef void (*InputKeyEventCallback)(int pressed, int scan_code);
+typedef void (*InputPollCallback)(void);
+extern InputKeyEventCallback volatile g_inputKeyEventCallback;
+extern InputPollCallback volatile g_inputPollCallback;
+void Input_ResetCallbacks(void);
+
 #define MAX_FONTS 30
 #define FONT_GLYPH_COUNT 224
 

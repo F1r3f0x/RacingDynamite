@@ -30,6 +30,7 @@ DLL = BUILD / 'file_load_validation.dll'
 DATA, DATA_SIZE = 0x7400000, 0x10000
 ARENA, ARENA_SIZE = 0x8000000, 0x200000
 INPUTS = [
+    'decomp/src/geputget.c', 'decomp/include/geputget.h',
     'tools/build_decomp.py',
     'decomp/src/file.c', 'decomp/include/file.h',
     'decomp/src/mem.c', 'decomp/include/mem.h',

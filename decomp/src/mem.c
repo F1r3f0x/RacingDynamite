@@ -13,7 +13,7 @@ extern void *malloc(size_t size);
  * VAs: 0x0045B4F0, 0x00455AB0, 0x0045E610, 0x00456AF0 respectively.
  */
 extern int Lisa_PrintVersion(void);
-extern void Gfx_ResetResourceFlags(void);
+extern void Input_ResetCallbacks(void);
 extern void Gfx_InitPrimitiveState(void);
 extern int Gfx_SelectBackend(int backend);
 
@@ -460,7 +460,7 @@ int Mem_InitSystem(void)
     Lisa_PrintVersion();
     Mem_InitPools();
     Mem_InitHandles();
-    Gfx_ResetResourceFlags();
+    Input_ResetCallbacks();
     Gfx_InitPrimitiveState();
     Gfx_SelectBackend(0);
     return 1;
