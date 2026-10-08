@@ -34,7 +34,7 @@ typedef struct {
 
 /**
  * @brief Loads .TRI chunk indices, constructs left/right road boundary splines and AI waypoints.
- * @original FUN_00414e40 (IGN_WIN.EXE @ 0x00414e40, main.c)
+ * @original FUN_00414e40 (MAINDOS.EXE @ 0x00414e40, main.c)
  * @fidelity ADAPTED
  */
 TrackWaypoints *Track_BuildWaypoints(const char *track_dir, const char *track_name,

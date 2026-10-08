@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-// Authentic engine constants extracted from IGN_WIN.EXE
+// Authentic engine constants extracted from MAINDOS.EXE
 #define CAR_ARCHETYPE_COUNT     11              // 11 authentic vehicle archetypes (0x00494a70, 0x00495800)
 #define PHYSICS_DT_SEC          (1.0 / 72.0)    // 0.013888889 s (72 Hz tick rate, 0x004792f0)
 
@@ -149,7 +149,7 @@ void Vehicle_LogTelemetry(const VehicleState *veh, uint32_t tick_num);
 
 /**
  * @brief Raycast world coordinate against .SRF terrain heightfield and collision grid.
- * @original FUN_00412fc0 (IGN_WIN.EXE @ 0x00412fc0, getsurf.c)
+ * @original FUN_00412fc0 (MAINDOS.EXE @ 0x00412fc0, getsurf.c)
  * @fidelity EXTENDED
  * @deviation DEV-001 (Boundary safety clamp preventing memory fault on off-track jumps)
  * @fix_category FIX_CAT_NOCLIP
@@ -171,7 +171,7 @@ bool Surface_Raycast(const SrfData *srf, const PlcData *plc, const MshData *msh,
 
 /**
  * @brief Initialize vehicle physics state, dimensions, and starting grid placement.
- * @original FUN_0041b470 (IGN_WIN.EXE @ 0x0041b470, main.c)
+ * @original FUN_0041b470 (MAINDOS.EXE @ 0x0041b470, main.c)
  * @fidelity ADAPTED
  *
  * @param veh Vehicle state structure to initialize
@@ -198,7 +198,7 @@ void Vehicle_ApplyInput(VehicleState *veh, double throttle, double brake, double
 
 /**
  * @brief Perform a single fixed-timestep 72 Hz physics integration tick.
- * @original FUN_00424570 (IGN_WIN.EXE @ 0x00424570, vehicle.c)
+ * @original FUN_00424570 (MAINDOS.EXE @ 0x00424570, vehicle.c)
  * @fidelity EXTENDED
  * @deviation DEV-003 (Mountain wall climbing steep gradient adhesion clamp)
  * @fix_category FIX_CAT_NOCLIP
@@ -215,7 +215,7 @@ void Vehicle_Update(VehicleState *veh, const SrfData *srf, const PlcData *plc, c
 
 /**
  * @brief Compute smooth isometric chase camera parameters targeting the vehicle.
- * @original FUN_00436990 (IGN_WIN.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS.EXE @ 0x00436990, main.c)
  * @fidelity EXTENDED
  * @deviation DEV-004 (Right-handed camera basis vector normalization)
  * @fix_category FIX_CAT_CAMERA

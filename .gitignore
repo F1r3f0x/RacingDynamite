@@ -46,6 +46,10 @@ docs/extracted_bitmaps/
 
 # 3. Third-party Libraries & Precompiled Binaries
 /third_party/sdl2/
+/tools/watcom/
+/tools/objdiff/
+/tools/objconv_src/
+/tools/bin/
 *.dll
 *.lib
 *.a
@@ -74,3 +78,7 @@ __pycache__/
 .idea/
 .DS_Store
 Thumbs.db
+scratch/
+/tools/openwatcomv2/
+*.err
+/reports/

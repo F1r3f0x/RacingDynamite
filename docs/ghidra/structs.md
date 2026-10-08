@@ -1,6 +1,11 @@
 # Reconstructed Data Structures
 
-This document catalogues the reconstructed C structures, member byte offsets, and original memory alignments recovered from `IGN_WIN.EXE` and `MAINDOS.EXE`.
+> LEGACY DOS evidence/unmigrated cross-references. These records do not certify
+> Windows addresses or completion. Active bounded Windows evidence is in
+> [windows_startup.md](windows_startup.md) and
+> [windows_inventory.json](../tracking/windows_inventory.json).
+
+This document catalogues the reconstructed C structures, member byte offsets, and original memory alignments recovered from authentic `MAINDOS.EXE`.
 
 ---
 
@@ -90,12 +95,144 @@ typedef struct {
 } MshSubmesh;
 ```
 
+### `LisaCamera` (168 bytes / `0xA8` allocated in `Lisa_InitEngineMemory`)
+```c
+#pragma pack(push, 1)
+typedef struct LisaCamera {
+    int32_t pad00[6];              // 0x00: 24 bytes internal transformation state
+    double  rot_x;                 // 0x18: Camera rotation pitch
+    double  rot_y;                 // 0x20: Camera rotation yaw
+    double  rot_z;                 // 0x28: Camera rotation roll
+    double  zoom;                  // 0x30: Focal length / zoom factor
+    int32_t enable_sky;            // 0x38: Sky backdrop enable flag
+    int32_t enable_frustum_cull;   // 0x3C: Spatial grid frustum cull flag
+    int32_t enable_transform;      // 0x40: Vertex transformation flag
+    int32_t pad44[3];              // 0x44: 12 bytes
+    int32_t enable_submeshes;      // 0x50: Submesh processing flag
+    int32_t enable_depth_sort;     // 0x54: Depth bucket sorting flag
+    int32_t shading_mode;          // 0x58: 0 = unshaded, 1 = shaded/alpha
+    int32_t vertex_counter;        // 0x5C: Transformed vertex counter
+    int32_t visible_obj_count;     // 0x60: Count of visible objects passed culling
+    int32_t submesh_count;         // 0x64: Count of visible submeshes
+    int32_t active_draw_cmd;       // 0x68: Active draw command index
+    int32_t pad6c[5];              // 0x6C: 20 bytes
+    int32_t viewport_x;            // 0x80: Viewport center X
+    int32_t viewport_y;            // 0x84: Viewport center Y
+    int32_t viewport_width;        // 0x88: Viewport screen width
+    int32_t pad8c[4];              // 0x8C: 16 bytes
+    int32_t fov_x;                 // 0x9C: Horizontal FOV scale (8.8 fixed-point)
+    int32_t fov_y;                 // 0xA0: Vertical FOV scale (8.8 fixed-point)
+    int32_t projection_type;       // 0xA4: 0 = perspective 3D, 1 = panorama/ortho
+} LisaCamera;
+#pragma pack(pop)
+```
+
 ---
 
 ## 3. Vehicle Physics & Simulation (`main.c`)
 
 > [!NOTE]
-> **Vehicle Runtime State Block Stride**: In `IGN_WIN.EXE`, vehicle runtime state is stored in a flat array indexed as `base + car_idx * 0x484c` (18,508 bytes per vehicle), confirmed by `Camera_UpdateChase` (`FUN_0043c910`) decompilation: `DAT_005285c0 * 0x484c`. This total block size encompasses the full vehicle simulation state (physics parameters, wheel contact, audio curves, mesh geometry) and is larger than any individual struct below due to embedded engine audio data and runtime matrices.
+> **Vehicle Runtime State Block Stride**: In `MAINDOS.EXE`, vehicle runtime state is stored in a flat array indexed as `base + car_idx * 0x484c` (18,508 bytes per vehicle), confirmed by camera chase decompilation: `car_idx * 0x484c`. This total block size encompasses the full vehicle simulation state (physics parameters, wheel contact, audio curves, mesh geometry) and is larger than any individual struct below due to embedded engine audio data and runtime matrices.
+
+### `VehicleState` (18,508 bytes / `0x484C` allocated in `main.c`)
+```c
+typedef struct VehicleState {
+    double pos_x;                  // 0x0000: World X coordinate
+    double pos_y;                  // 0x0008: World Y elevation
+    double pos_z;                  // 0x0010: World Z coordinate
+    double vel_x;                  // 0x0018: Linear velocity X
+    double vel_y;                  // 0x0020: Linear velocity Y
+    double vel_z;                  // 0x0028: Linear velocity Z
+    double accel_x;                // 0x0030: Forward traction acceleration X
+    double accel_y;                // 0x0038: Forward traction acceleration Y
+    double accel_z;                // 0x0040: Forward traction acceleration Z
+    double rear_axle_pos_x;        // 0x0048: Rear axle center X
+    double rear_axle_pos_z;        // 0x0050: Rear axle center Z
+    double rear_axle_vel_x;        // 0x0058: Rear axle velocity X
+    double rear_axle_vel_z;        // 0x0060: Rear axle velocity Z
+    double front_axle_pos_x;       // 0x0068: Front axle center X
+    double front_axle_pos_z;       // 0x0070: Front axle center Z
+    double front_axle_vel_x;       // 0x0078: Front axle velocity X
+    double front_axle_vel_z;       // 0x0080: Front axle velocity Z
+    double angular_drag_x;         // 0x0088: Angular drag damping X
+    double angular_drag_y;         // 0x0090: Angular drag damping Y
+    double angular_drag_z;         // 0x0098: Angular drag damping Z
+    double wheel_angle_fl;         // 0x00A0: Front-left wheel steering angle
+    uint8_t gap_a8[8];             // 0x00A8: Padding
+    double wheel_angle_fr;         // 0x00B0: Front-right wheel steering angle
+    double wheel_rot_vel_fl;       // 0x00B8: Front-left wheel rotational velocity
+    double wheel_rot_vel_fr;       // 0x00C0: Front-right wheel rotational velocity
+    uint8_t gap_c8[48];            // 0x00C8: Internal physics state
+    double angle_yaw;              // 0x00F8: Heading orientation angle (radians)
+    double angle_pitch;            // 0x0100: Longitudinal pitch inclination angle
+    double angular_vel_roll;       // 0x0108: Roll angular velocity
+    double angle_roll;             // 0x0110: Lateral roll tilt angle
+    double steering_angle;         // 0x0118: Current front wheel steering angle
+    double ground_y;               // 0x0120: Ground contact surface plane elevation
+    double ground_y_rear;          // 0x0128: Rear contact surface plane elevation
+    uint8_t gap_130[32];           // 0x0130: Internal collision state
+    int32_t wheel_surface_id[4];   // 0x0150: Ground triangle ID under each of 4 wheels
+    uint8_t gap_160[16];           // 0x0160: Padding
+    int32_t wheel_surface_info[64];// 0x0170: 4 wheels x 16 ints surface probe cache
+    int32_t is_airborne;           // 0x0270: Airborne status flag (1 = wheels off ground)
+    int32_t landing_impact;        // 0x0274: Hard landing impact trigger flag
+    int32_t landing_flag;          // 0x0278: Touchdown trigger flag
+    int32_t current_gear;          // 0x027C: Active transmission gear (1 to 5, -1 reverse)
+    uint8_t gap_280[8];            // 0x0280: Padding
+    double target_rpm;             // 0x0288: Target engine RPM
+    double engine_rpm;             // 0x0290: Smoothed engine RPM
+    int32_t throttle_input;        // 0x0298: Throttle command state
+    int32_t brake_input;           // 0x029C: Brake command state
+    uint8_t gap_2a0[88];           // 0x02A0: Internal input buffer
+    int32_t handbrake;             // 0x02F8: Emergency handbrake toggle
+    uint8_t gap_2fc[64];           // 0x02FC: Padding
+    int32_t surface_type;          // 0x033C: Road material type under chassis
+    uint8_t gap_340[4];            // 0x0340: Padding
+    int32_t checkpoint_pass1;      // 0x0344: Sector 1 checkpoint trigger
+    int32_t checkpoint_pass2;      // 0x0348: Sector 2 checkpoint trigger
+    int32_t checkpoint_pass3;      // 0x034C: Sector 3 checkpoint trigger
+    int32_t checkpoint_counter;    // 0x0350: Next required checkpoint sequence index
+    int32_t crash_flag1;           // 0x0354: Elimination / blown vehicle flag
+    int32_t crash_flag2;           // 0x0358: Severe crash impact state
+    int32_t crash_flag3;           // 0x035C: Roll-over / upside-down crash state
+    uint8_t gap_360[4];            // 0x0360: Padding
+    int32_t current_node_idx;      // 0x0364: Current track road sequence node index
+    int32_t target_node_idx;       // 0x0368: Target track road sequence node index
+    int32_t road_surface_node;     // 0x036C: Nearest track road spline node index
+    uint8_t gap_370[44];           // 0x0370: Waypoint tracking state
+    int32_t car_model_id;          // 0x039C: Vehicle archetype model ID
+    int32_t race_rank;             // 0x03A0: Current race standing rank (1 to 6)
+    double lap_time;               // 0x03A4: Active lap time in seconds
+    uint8_t gap_3ac[380];          // 0x03AC: Split times and AI telemetry
+    int32_t turbo_active;          // 0x0528: Turbo boost activation flag
+    uint8_t gap_52c[40];           // 0x052C: Turbo recharge timers
+    int32_t suspension_override;   // 0x0554: Fixes collision resolution elevation
+    int32_t mesh_damage_flag;      // 0x0558: Mesh damage / deformation status flag
+    int32_t detached_wheel_mask;   // 0x055C: Bitmask of detached / flying wheels
+    int32_t wreck_debris_flag;     // 0x0560: Wreck debris emission trigger flag
+    uint8_t gap_564[32];           // 0x0564: Damage kinematics state
+    union {
+        double chassis_roll_spring;// 0x0584: Body roll spring equilibrium angle
+        double smooth_pitch;       // 0x0584: Visual frame smoothing interpolation
+    };
+    union {
+        double chassis_pitch_spring;// 0x058C: Body pitch spring equilibrium angle
+        double smooth_roll;        // 0x058C: Visual frame smoothing interpolation
+    };
+    uint8_t gap_594[24];           // 0x0594: Padding
+    int32_t front_axle_offset;     // 0x05AC: Front axle longitudinal offset distance from center
+    int32_t rear_axle_offset;      // 0x05B0: Rear axle longitudinal offset distance from center
+    uint8_t gap_5b4[88];           // 0x05B4: Padding
+    union {
+        int32_t water_splash_accum;// 0x060C: Water particle spawn threshold accumulator
+        int32_t elimination_timer; // 0x060C: Ticks until car is blown up in Knock-Out mode
+    };
+    uint8_t gap_610[908];          // 0x0610: Engine audio frequency & volume curves (ENGINE.INF)
+    int32_t voice_engine;          // 0x099C: DirectSound audio channel voice handle for engine
+    int32_t voice_skid;            // 0x09A0: DirectSound audio channel voice handle for tire skid
+    uint8_t gap_9a4[16040];        // 0x09A4: Collision mesh bounding tree and geometry cache
+} VehicleState;
+```
 
 ### `CarPhysicsState` (124 bytes / `0x7C` allocated in `Track_LoadSplines`)
 ```c
@@ -334,3 +471,105 @@ typedef struct {
 } Camera3D;
 ```
 
+---
+
+## 10. Dynamic Objects & Chase Camera (`fx.c`)
+
+### `DynamicObjectTransform` (32 bytes / 8 x `int32_t`)
+```c
+typedef struct DynamicObjectTransform {
+    int32_t handle;                    // 0x00: Engine entity / object handle
+    int32_t pos_x;                     // 0x04: World position X
+    int32_t pos_y;                     // 0x08: World position Y (elevation)
+    int32_t pos_z;                     // 0x0C: World position Z
+    int32_t rot_x;                     // 0x10: Pitch rotation (tenths of a degree)
+    int32_t rot_y;                     // 0x14: Yaw rotation (tenths of a degree)
+    int32_t rot_z;                     // 0x18: Roll rotation (tenths of a degree)
+    int32_t is_placed;                 // 0x1C: Active / placed status flag
+} DynamicObjectTransform;
+```
+
+### `RoadSequenceNode` (24 bytes)
+```c
+typedef struct RoadSequenceNode {
+    int32_t road_index;                // 0x00: Forward road chunk index
+    double  pitch1;                    // 0x04: Forward road pitch angle (radians)
+    int32_t road_index_rev;            // 0x0C: Reverse road chunk index
+    double  pitch2;                    // 0x10: Reverse road pitch angle (radians)
+} RoadSequenceNode;
+```
+
+### `VehicleConfig` (200 bytes / 0xC8 bytes)
+```c
+typedef struct VehicleConfig {
+    double  cam_height;                // 0x00: Camera height/elevation
+    double  camera_yaw;                // 0x08: Chase camera yaw angle (radians)
+    uint8_t pad_10[0x28 - 0x10];       // 0x10
+    double  camera_pitch;              // 0x28: Chase camera pitch angle (radians)
+    double  chase_cam_dist_factor;     // 0x30: Camera zoom/distance factor
+    int32_t cam_param1;                // 0x38: Secondary camera parameter 1
+    int32_t cam_param2;                // 0x3C: Secondary camera parameter 2
+    uint8_t pad_40[0x48 - 0x40];       // 0x40
+    double  pitch_offset;              // 0x48: Dynamic pitch/shake offset
+    int32_t chase_target_height;       // 0x50: Target camera height
+    int32_t chase_camera_distance;     // 0x54: Base camera distance
+    int32_t viewport_h;                // 0x58: Viewport height
+    int32_t viewport_w;                // 0x5C: Viewport width
+    int32_t unused_60;                 // 0x60
+    float   camera_fov_preset;         // 0x64: FOV preset
+    double  yaw_lag_angle;             // 0x68: Yaw in tenths of degrees (0-3599)
+    double  pitch_lag_angle;           // 0x70: Pitch in tenths of degrees (0-3599)
+    double  target_pos_x;              // 0x78: Interpolated lookat target X
+    double  target_pos_y;              // 0x80: Interpolated lookat target Y
+    double  target_pos_z;              // 0x88: Interpolated lookat target Z
+    double  cam_pos_x;                 // 0x90: Camera eye position X
+    double  cam_pos_y;                 // 0x98: Camera eye position Y
+    double  cam_pos_z;                 // 0xA0: Camera eye position Z
+    double  vehicle_yaw;               // 0xA8: Copied vehicle yaw (radians)
+    double  vehicle_pitch;             // 0xB0: Copied vehicle pitch (radians)
+    double  camera_yaw_desired;        // 0xB8: Desired camera yaw (vehicle_yaw + PI)
+    double  elevation_smooth_offset;   // 0xC0: Smoothed road elevation/incline offset
+} VehicleConfig;
+```
+
+### `CinematicCameraWaypoint` (20 bytes / 0x14 bytes)
+```c
+typedef struct CinematicCameraWaypoint {
+    float pos_x;                       // 0x00: World X viewpoint position
+    float pos_y;                       // 0x04: World Y viewpoint elevation
+    float pos_z;                       // 0x08: World Z viewpoint position
+    float pitch;                       // 0x0C: Camera pitch angle (degrees)
+    float yaw;                         // 0x10: Camera yaw heading angle (degrees)
+} CinematicCameraWaypoint;
+```
+
+### `PlayerHUDState` (76 bytes / 0x4C bytes)
+```c
+typedef struct PlayerHUDState {
+    int32_t racer_icon_idx;            // 0x00: Racer radar/blip icon sprite index
+    int32_t field_04;                  // 0x04: Secondary player state / splash count
+    int32_t field_08;                  // 0x08: Reserved / padding
+    int32_t field_0c;                  // 0x0C: Reserved / padding
+    int32_t field_10;                  // 0x10: Per-player animation flag
+    uint8_t gap_14[0x2c - 0x14];       // 0x14
+    int32_t vp_x1;                     // 0x2C: Viewport clip boundary left (X min)
+    int32_t vp_y1;                     // 0x30: Viewport clip boundary top (Y min)
+    int32_t vp_x2;                     // 0x34: Viewport clip boundary right (X max)
+    int32_t vp_y2;                     // 0x38: Viewport clip boundary bottom (Y max)
+    uint8_t gap_3c[0x4c - 0x3c];       // 0x3C
+} PlayerHUDState;
+```
+
+### `TrackSegmentAttribute` (12 bytes / 0x0C bytes)
+```c
+typedef struct TrackSegmentAttribute {
+    int32_t flags;                     // 0x00: Segment track flags
+    int32_t surface_type;              // 0x04: Surface physics material index
+    int32_t curve_severity;            // 0x08: Road turn curve severity (direction indicator)
+} TrackSegmentAttribute;
+```
+
+
+## Timer reconstruction scope
+
+The timer at DOS 0x10198/0x10238/0x1034c uses scalar globals and the Watcom BIOS REGS wrapper; it introduces no game structure changes. The database still tracks 10 structures. See [timer.md](timer.md) and the implementation inventory for unresolved placeholder types and sizes.

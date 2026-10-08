@@ -180,7 +180,7 @@ static void RestoreMenuBackground(GameContext *ctx) {
 
 /**
  * @brief Top-level game state machine initialization.
- * @original FUN_00417270 (IGN_WIN.EXE @ 0x00417270, main.c)
+ * @original FUN_00417270 (MAINDOS.EXE @ 0x00417270, main.c)
  * @fidelity ADAPTED
  */
 bool Game_Init(GameContext *ctx) {
@@ -247,7 +247,7 @@ bool Game_Init(GameContext *ctx) {
 
 /**
  * @brief Releases allocated game state memory and active assets.
- * @original FUN_00412530 (IGN_WIN.EXE @ 0x00412530, main.c)
+ * @original FUN_00412530 (MAINDOS.EXE @ 0x00412530, main.c)
  * @fidelity ADAPTED
  */
 void Game_Shutdown(GameContext *ctx) {
@@ -287,8 +287,8 @@ void Game_Shutdown(GameContext *ctx) {
 
 /**
  * @brief Top-level per-frame game state dispatcher and input handler.
- * @original FUN_004172b0 (IGN_WIN.EXE @ 0x004172b0, main.c)
- * @original FUN_00402c00 (IGN_WIN.EXE @ 0x00402c00, main.c)
+ * @original FUN_004172b0 (MAINDOS.EXE @ 0x004172b0, main.c)
+ * @original FUN_00402c00 (MAINDOS.EXE @ 0x00402c00, main.c)
  * @fidelity ADAPTED
  */
 void Game_Update(GameContext *ctx, const PlatformInput *input, uint32_t delta_ms) {
@@ -984,7 +984,7 @@ void Game_Update(GameContext *ctx, const PlatformInput *input, uint32_t delta_ms
 
 /**
  * @brief Master render dispatcher based on current game state.
- * @original FUN_00436990 (IGN_WIN.EXE @ 0x00436990, main.c)
+ * @original FUN_00436990 (MAINDOS.EXE @ 0x00436990, main.c)
  * @fidelity ADAPTED
  */
 void Game_Render(GameContext *ctx) {

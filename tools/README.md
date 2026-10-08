@@ -1,5 +1,78 @@
 # Racing Dynamite Tooling Documentation (`tools/`)
 
+> **Tool cleanup (2026-10-07):** [MIGRATION.md](MIGRATION.md) and
+> [migration_required.json](migration_required.json) supersede the legacy catalog
+> below. Retired DOS tools are removed; retained migration scripts stop before
+> execution. Objdiff stays, but its DOS object configuration needs retargeting.
+> The database and dashboard entry points are active Windows tools.
+
+> Windows is the primary target from 2026-10-07. The DOS implementation is
+> superseded. The active database, provenance audit, generated inventory and
+> treemap now track Windows evidence. The bounded build/emulator harness covers
+> the recovered memory routines; other source modules and standalone DOS
+> comparison/runtime tools remain unverified legacy work.
+
+## Active bounded Windows commands
+
+Run from the repository root in PowerShell, with `uv`, Clang and LLD on PATH:
+
+```powershell
+uv run tools/windows_inspect.py
+uv run python tools/build_decomp.py
+uv run tools/verify_matching.py
+uv run python tools/verify_fidelity.py
+```
+
+Analysis and CPU validation dependencies are pinned in each script's PEP 723
+metadata; use `uv run <script>` rather than `uv run python <script>` for those two
+commands. The build compiles only `decomp/src/mem.c` with strict C89 for x86 Windows,
+then links a dependency-free validation DLL under `build/decomp/windows/`. It prints
+actual compiler/linker commands, rejects the wrong target fingerprint, and never
+uses stale DOS objects. Optional build arguments: `--compiler <path>` and
+`--linker <path>`. The verifier always rebuilds, then runs 30 initializer and 377
+consumer and 590 bookkeeping original-vs-C cases, plus eight original-only
+negative-cursor cases. The [bookkeeping evidence](../docs/ghidra/windows_handle_bookkeeping.md)
+records all-slot coverage, ordered effects and three-routine integration.
+It also runs 531 shutdown comparisons with explicit callback models, live-table
+mutation/reentry checks and four-routine integration; see
+[shutdown evidence](../docs/ghidra/windows_handle_shutdown.md). Original callback
+bodies are not validated by these models.
+The ID-based release routine adds 418 comparisons covering every slot, duplicate
+IDs, exact eligibility and five-routine integration; see
+[release evidence](../docs/ghidra/windows_handle_release.md).
+The integrated verifier also freshly extracts and compiles the production
+`Font_GetTextWidth` body from `geputget.c` into a separate focused DLL, then runs
+708 differential font cases and two original-only invalid-slot checks. Its
+standalone command is `uv run tools/verify_font_width.py`. It uses the production
+header, a C `strlen` harness dependency and the original `_ftol` instructions;
+signed bytes/words, wrap and x87 double/extended precision are covered. Full
+`geputget.c` compilation remains blocked by legacy dependencies. See
+[font-width evidence](../docs/ghidra/windows_font_get_text_width.md).
+It also extracts and compiles production `Font_DrawText`, then checks 1,543
+original-versus-C executions plus three original-only negative-slot checks.
+Run `uv run tools/verify_font_draw.py` for the focused draw verifier. The original
+sprite wrapper and `_ftol` execute; renderer bodies are modeled at their recovered
+cdecl boundary. Ordered drawing arguments, live-table/text mutations, ABI and
+x87 precision are covered; framebuffer/native visuals are unverified. See
+[font-drawing evidence](../docs/ghidra/windows_font_draw_text.md).
+The sprite backend at `0x004571B0` adds extracted-production-C validation with
+GCC 16.2.0 x87 and LLD, using `uv run tools/verify_sprite_backend.py` (also run
+by the integrated verifier). It compares 2,588 backend executions and separately
+executes 28 original downstream adapter/lookup cases. The backend comparison
+models the recovered zero-argument `0x00457370` boundary; rasterizer bodies,
+framebuffer output and native visual parity remain unverified. See
+[native sprite evidence](../docs/ghidra/windows_sprite_backend.md) for compiler
+flags, low-dword conversion quirks and dependency scope.
+It does not certify instruction equality or native game behavior. The
+[consumer evidence](../docs/ghidra/windows_handles.md) states the negative-state
+memory contract and the validation DLL's differing data layout.
+
+The fidelity audit checks the active SQLite inventory and current source/result
+provenance. [The Windows inventory](../docs/tracking/windows_inventory.json) is generated. See the
+[startup map](../docs/ghidra/windows_startup.md) for addresses, data layout, compiler
+limitations, runtime observations and the next dependency. The catalog below
+also includes historical/asset tools; their results do not transfer DOS progress.
+
 This directory contains utility scripts, reverse engineering inspectors, asset pipeline tools, and verification scripts for **Racing Dynamite** (Ignition 1997 source port).
 
 All Python tools are managed using **`uv`**. Run any script using:
@@ -54,9 +127,9 @@ uv run python tools/<script_name>.py [args]
 
 | Script | Purpose |
 | :--- | :--- |
-| **`verify_fidelity.py`** | Automated Fidelity & Change Tracking System (FCTS) auditor. Validates bidirectional consistency between `docs/ghidra/functions.md`, `docs/tracking/deviations.md`, and C source code annotations (`@original`, `@fidelity`, `@deviation`, `@fix_category`). Generates parity dashboard and returns non-zero on broken references. |
+| **`verify_fidelity.py`** | Active Windows fingerprint/address/annotation audit for the temporary inventory and migrated `mem.c` only. Does not generate or certify legacy dashboards. |
 | **`verify_tab_formula.py`** | Verifies the mathematical formula for `.TAB` shading matrix against original binary behavior. |
-| **`verify_all_game_strings.py`** | Validates game strings in C code against the string table extracted from `IGN_WIN.EXE`. |
+| **`verify_all_game_strings.py`** | Validates game strings in C code against font tables in `MAINDOS.EXE`. |
 | **`verify_screens.py`** | Verifies UI screen coordinates, button positions, and layout dimensions. |
 
 ---
@@ -75,3 +148,55 @@ uv run python tools/<script_name>.py [args]
 Provides live bidirectional synchronization between the Antigravity agent and the Ghidra reverse-engineering environment:
 * **`bridge_mcp_ghidra.py`**: MCP JSON-RPC server connecting the agent to Ghidra's API.
 * Allows inspecting disassembly, renaming functions, adding decompiler comments, and syncing memory maps directly with `RacingDynamite.gpr`.
+
+---
+
+## 6. Windows SQLite Tracking and Dashboard
+
+See [database/README.md](../database/README.md) for the authoritative schema,
+explicit migration, supported editing commands and evidence semantics.
+`uv run python tools/db.py update` generates the registry, SQL/JSON snapshots
+and both Windows dashboards. `update --check` checks freshness without writing.
+`tools/diff_func.py` remains a legacy DOS comparator and is not an active gate.
+
+---
+
+## 8. Windows Target Diagnostics and Project Skill
+
+`tools/decomp_doctor.py` verifies the expected identity from `decomp/target.json`
+and reports dependencies, compiler paths, legacy tool assumptions, and read-only
+database metadata. Optional localhost GET probes check Ghidra reachability; they
+do not verify loaded-program identity. Exit zero means inspection and local target
+identity succeeded, not that the Windows pipeline is ready.
+
+```powershell
+uv run python tools/decomp_doctor.py
+uv run python tools/decomp_doctor.py --probe-ghidra
+uv run python -m unittest discover -s tests -p test_decomp_doctor.py
+```
+
+The repository skill `$ignition-windows-decomp` lives in
+`.agents/skills/ignition-windows-decomp/`. Use it in a project chat for verified
+binary analysis, bounded C89 reconstruction, and validation. It provides guidance;
+it does not retarget the old build pipeline by itself.
+
+See [the tooling audit](../docs/tooling_audit.md) for findings and migration order.
+
+## Active Windows tracking commands (supersedes legacy database/dashboard sections)
+
+The authoritative store is now Windows SQLite schema v2. Use `db.py status` for
+read-only metrics; `db.py describe`/`set-status` for documented analysis updates;
+`db.py audit` for source/provenance freshness; and `db.py update` to generate the
+registry, inventory JSON, SQL dump and both dashboards. `db.py update --check`
+reports output drift without mutation. `dashboard`, `export-markdown` and
+`dump-sql` are aliases of the synchronized update, so outputs cannot diverge.
+Destructive DOS initialization, markdown imports and bulk sync were removed from
+the active CLI. Standalone DOS residue/comparison/runtime tools remain legacy.
+
+`windows_tracking.py` reads genuine PE/FPO metadata without additional dependencies,
+verifies the imported milestone and migrates atomically. The existing Windows
+verifier now persists fresh per-function compilation, raw-byte and emulation
+results. `verify_fidelity.py` iterates active records rather than requiring exactly
+one function. `generate_dashboard.py` renders the Windows snapshot with canvas
+treemap, class/stage/search filters and separate evidence/native milestone cards.
+See [database/README.md](../database/README.md) for supported commands and scope.

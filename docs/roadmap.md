@@ -1,8 +1,23 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
-This document defines the complete engineering roadmap and milestone plan for **Racing Dynamite**, the clean-room reverse engineering and modern C11/SDL2 source port of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting `IGN_WIN.EXE` with reference insights from `MAINDOS.EXE`.
+This document defines the complete engineering roadmap and milestone plan for **Racing Dynamite**, the clean-room reverse engineering and modern C11/SDL2 source port of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting standard Windows `IGN_WIN.EXE`, with `MAINDOS.EXE` retained as a secondary DOS reference.
 
 ---
+
+## Active Windows Reconstruction Milestones (2026-10-07)
+
+The [Windows decompilation plan](decomp_plan.md) governs current priorities:
+fingerprint/import/ABI inventory and original runtime baseline; in-place
+replacement of the DOS `decomp/`, build, and active tracking; one verified bounded
+reconstruction; native
+startup/UI/presentation; engine/race recovery; full-game validation and then SDL2
+modernization. Compiler selection and Windows build/runtime verification remain
+pending. DOS implementation progress is historical and must not carry over to
+active Windows tracking. A parallel DOS implementation/build is out of scope.
+
+The eight source-port phases below remain a long-term backlog, not evidence of
+Windows completion or the immediate execution order. Their addresses, renderer
+variants, constants, and parity claims require validation against `IGN_WIN.EXE`.
 
 ## 1. Project Vision & Architecture Principles
 
@@ -95,7 +110,7 @@ graph TD
 ---
 
 ### Phase 4: Tooling Hygiene, Authentic Multi-Backend Renderer & Fidelity Tracking (FCTS)
-**Objective**: Clean and document the reverse engineering asset tools, preserve the authentic Lisa3D software rasterizer while architecting pluggable 3dfx/DirectX backends, implement granular per-category game fix controls, and establish machine-verifiable code fidelity against `IGN_WIN.EXE`.
+**Objective**: Clean and document the reverse engineering asset tools, preserve the authentic Lisa3D software rasterizer while architecting pluggable 3dfx/DirectX backends, implement granular per-category game fix controls, and establish machine-verifiable code fidelity against the fingerprinted Windows `IGN_WIN.EXE`.
 
 1. **Prep Stage: Tools Audit, Pruning & Documentation**:
    * Audit all 50 Python scripts in `tools/`:
@@ -213,7 +228,7 @@ graph TD
    * Proper aspect-ratio correction for 16:9 and 21:9 monitors while maintaining crisp 8-bit software rendering.
    * Frame interpolation / uncoupled physics tick for smooth high-refresh (120Hz / 144Hz / 240Hz) displays.
 4. **Reverse Engineering Completeness**:
-   * Ensure all identified functions, memory addresses, and structures in `IGN_WIN.EXE` are completely catalogued in `docs/ghidra/functions.md`, `globals.md`, and `structs.md`.
+   * Ensure all identified functions, memory addresses, and structures in `IGN_WIN.EXE` are completely catalogued with verified Windows provenance in `docs/ghidra/functions.md`, `globals.md`, and `structs.md`.
 
 ---
 
@@ -227,4 +242,4 @@ graph TD
 | **Spline Waypoints** | Spline test suite | Continuous closed-loop chaining across all circuits without breaks. |
 | **Audio Engine** | Audio loopback verification | SFX and music stream concurrently without clipping, buffer underruns, or memory leaks. |
 | **Full Race Loop** | Interactive playtesting | Complete a full 3-lap race on every circuit with 5 AI opponents, working HUD, camera, sound, and finish line results. |
-| **Binary Parity** | Side-by-side visual comparison | Visual parity against original `IGN_WIN.EXE` running under Wine / DOSBox. |
+| **Windows Runtime Parity** | Controlled original/rebuilt comparison | Behavioral and visual parity against the fingerprinted `IGN_WIN.EXE` in the same documented Windows-compatible environment; instruction/binary matching reported separately. |

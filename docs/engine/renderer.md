@@ -48,7 +48,7 @@ The rasterizer operates exclusively on **8-bit indexed color framebuffers** (`64
 
 ## 2.1 Backface Culling & Double-Sided Mesh Architecture
 
-In original Ignition (`IGN_WIN.EXE` / Lisa3D rasterizer at `Lisa_DrawTriangle_OpcodeHelper` `0x0044cb20`), every triangle undergoes 2D screen-space backface culling:
+In original Ignition (`MAINDOS.EXE` / Lisa3D rasterizer at `Lisa_DrawTriangle_OpcodeHelper` `0x0044cb20`), every triangle undergoes 2D screen-space backface culling:
 
 $$\text{area} = (x_1 - x_0)(y_2 - y_0) - (y_1 - y_0)(x_2 - x_0)$$
 
@@ -128,12 +128,12 @@ If $w_0 \ge 0 \land w_1 \ge 0 \land w_2 \ge 0$:
 
 ## 3.4 Two-Pass Ordering Table & Model-Type Opcode Routing
 
-Reverse engineering of `IGN_WIN.EXE` (`Track_PreprocessPlacements` at `FUN_0041b360`, `Lisa_DrawTriangle_OpcodeHelper` at `0x0044cb20`, `Lisa_RenderSubmeshes` at `0x0044c1f0`, and `Lisa_ExecuteRasterizerCommands` at `0x0044f0e9`) reveals that Lisa3D implements a dual-pass ordering table (OT) architecture with conditional opcode dispatch based on placed object archetype IDs:
+Reverse engineering of `MAINDOS.EXE` (`Track_PreprocessPlacements` at `FUN_0041b360`, `Lisa_DrawTriangle_OpcodeHelper` at `0x0044cb20`, `Lisa_RenderSubmeshes` at `0x0044c1f0`, and `Lisa_ExecuteRasterizerCommands` at `0x0044f0e9`) reveals that Lisa3D implements a dual-pass ordering table (OT) architecture with conditional opcode dispatch based on placed object archetype IDs:
 
 ### Authentic 12-Bit Archetype Masking (`FUN_0041b360`)
 During level loading in `Track_PreprocessPlacements`, the engine loads `.PLC` object headers and applies a **12-bit bitmask**:
 ```c
-// Decompiled from IGN_WIN.EXE FUN_0041b360:
+// Decompiled from MAINDOS.EXE FUN_0041b360:
 *puVar1 = *puVar1 & 0xfff;
 ```
 This masks the upper flags from `obj->model_type`, extracting the genuine archetype index:
@@ -165,7 +165,7 @@ When a polygon in `.MSH` specifies opcode `0x13` or `0x17`, it does **not** unco
 
 ## 3.5 Foreground Clipping & Game Fixes Menu
 
-Reverse engineering of `Lisa_TransformVertices` (`FUN_00449e70` in `IGN_WIN.EXE`) reveals how Lisa3D handles near-plane camera projection:
+Reverse engineering of `Lisa_TransformVertices` (`FUN_00449e70` in `MAINDOS.EXE`) reveals how Lisa3D handles near-plane camera projection:
 * **Authentic Lisa3D Vertex Clamping**: The original engine does **not** discard vertices or drop triangles when individual vertices fall close to or behind the camera plane. Instead, transformed camera $Z$ is clamped to a minimum positive integer (`DAT_0050ddfc`):
   ```c
   if (iVar15 < DAT_0050ddfc) {

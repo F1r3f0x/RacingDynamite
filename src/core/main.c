@@ -40,7 +40,7 @@ static bool StrCaseEqual(const char *a, const char *b) {
 
 /**
  * @brief Main entry point; parses command-line flags, initializes engine, and executes game loop.
- * @original FUN_004120a0 (IGN_WIN.EXE @ 0x004120a0, main.c)
+ * @original FUN_004120a0 (MAINDOS.EXE @ 0x004120a0, main.c)
  * @fidelity ADAPTED
  */
 int main(int argc, char *argv[]) {

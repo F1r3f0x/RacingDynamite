@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Active Windows progress migration (2026-10-07)**: Replaced DOS tracking with Windows SQLite schema v2, seeded 1,012 authentic FPO extents, preserved the 76-byte `Mem_InitHandles` milestone, and added separately persisted fresh validation evidence with stale-input/artifact detection. Generated JSON/Markdown/SQL and both Windows treemap dashboards from one checked snapshot; removed inherited completion metrics and default EXACT/Watcom assumptions. Native gameplay remains unverified.
+- **Windows decompilation tooling audit and skill (2026-10-07)**: Added a shared target fingerprint manifest, a read-only JSON diagnostic command with focused identity/header tests, and the repository skill `$ignition-windows-decomp`. Documented DOS migration gaps and the next tooling priorities; the Windows build pipeline remains pending.
+- **Interactive Decompilation Progress Dashboard & Binary Diffing Tooling**:
+  - Implemented standalone, zero-dependency HTML progress dashboard (`dashboard.html`, `docs/dashboard.html`) tracking all 74 functions, 8 modules, 9 data structures (69 fields), 62 globals, and 6 FCTS deviations.
+  - Built `tools/generate_dashboard.py` and added `dashboard` subcommand to `tools/db.py` (`uv run python tools/db.py dashboard`).
+  - Added `tools/diff_func.py` for Capstone-powered bytecode and instruction-by-instruction diffing between `MAINDOS.EXE` and Open Watcom compiled objects.
+  - Decompiled authentic Watcom C `Surface_Raycast` (`MAINDOS @ 0x00020814`) in `decomp/src/getsurf.c` targeting `build/decomp/getsurf.obj`.
+  - Updated `tools/README.md` with usage instructions and CLI workflows.
 - **Phase 5: Dynamic Chase Camera & Authentic Audio Subsystem**:
   - Multi-mode dynamic chase camera (`src/renderer/camera.c`) with 5 views (Classic Isometric, Close Chase, Far Chase, Bumper View, Free Orbit) supporting dynamic lookahead along velocity, 0.125 spring-damper azimuth lag, shortest-path angle wrapping, and terrain slope pitch adaptation (`0x0043c910`, `DEV-004`).
   - 32-channel software voice mixer (`src/audio/audio.c`) with 16.16 fixed-point linear resampling, equal-power stereo panning, master volume attenuation, and saturation clamping (`0x00459010`, `0x0041fad0`).
@@ -27,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Automated parity verification tool `tools/verify_fidelity.py` integrated into CMake/CTest.
 
 ### Changed
+- **Supersede DOS implementation (2026-10-07)**: Windows reconstruction now replaces the DOS work in `decomp/` and retargets existing tooling/tracking in place. Removed the separate-tree and DOS build preservation requirements; active tracking is to restart from verified Windows evidence. Historical DOS observations remain reference material, with recovery of old code available through Git history. This entry supersedes the earlier same-day preservation policy; code/tooling migration is still pending.
+- **Windows reconstruction focus (2026-10-07)**: Standard `IGN_WIN.EXE` becomes the primary target; verified its local SHA-256 and PE headers. Updated agent guidance, decompilation plan, roadmap, fidelity guidance, and documentation/tooling entry points. Preserved the DOS plan and evidence as secondary references. Windows compiler selection, build/tracking migration, and runtime baseline remain pending; no implementation or matching progress is claimed by this documentation change.
 - Pruned 17 obsolete, redundant, or one-off exploratory scratch scripts from `tools/`.
 - Updated `docs/roadmap.md` and `docs/README.md` to introduce Phase 4 milestone.
 

@@ -7,6 +7,38 @@ import os
 import sys
 import struct
 import shutil
+import hashlib
+
+KNOWN_HASHES = {
+    # GOG release (game.gog disc image)
+    "f670bc866a4405f30ac5c93770ced36f859fbaed": "GOG Ignition CD image (game.gog)",
+    # DOS Retail Executable (DOS/4GW 32-bit LE)
+    "e1d9f3a7e348ea7b0e64d673ab0ee9cec4a19604": "MAINDOS.EXE (DOS/4GW 32-bit LE Executable)",
+    # Windows 95 Retail Executable
+    "d5d6909ee8a51122d89d622ce493459d8991fd6d": "IGN_WIN.EXE (Windows 95 Executable)",
+}
+
+def compute_sha1(path):
+    """Compute SHA-1 hash of a file."""
+    h = hashlib.sha1()
+    with open(path, "rb") as f:
+        while chunk := f.read(65536):
+            h.update(chunk)
+    return h.hexdigest().lower()
+
+def verify_checksum(path, allow_unknown=False):
+    """Verify file against known baserom hashes."""
+    digest = compute_sha1(path)
+    if digest in KNOWN_HASHES:
+        print(f"[Asset Extractor] Verified: {path} matches '{KNOWN_HASHES[digest]}' (SHA-1: {digest})")
+        return True
+    
+    print(f"[Asset Extractor] WARNING: Unknown hash for {path} (SHA-1: {digest})", file=sys.stderr)
+    if not allow_unknown:
+        print(f"[Asset Extractor] Error: Clean-room integrity check failed. File does not match any known baserom dump.", file=sys.stderr)
+        print(f"Pass --skip-hash-check to proceed anyway.", file=sys.stderr)
+        return False
+    return True
 
 def detect_image_type(f):
     """Detect whether file is raw 2352-byte MODE1 (with 16-byte sync) or standard 2048-byte ISO."""
@@ -130,11 +162,14 @@ def copy_directory_assets(src_dir, assets_out):
     print(f"[Asset Extractor] Copied {count} game asset files.")
 
 def main():
-    assets_dir = os.path.abspath(sys.argv[2] if len(sys.argv) > 2 else "assets")
+    skip_hash = "--skip-hash-check" in sys.argv
+    args = [a for a in sys.argv[1:] if a != "--skip-hash-check"]
+
+    assets_dir = os.path.abspath(args[1] if len(args) > 1 else "assets")
     os.makedirs(assets_dir, exist_ok=True)
     
     # Check source argument or find defaults
-    source = sys.argv[1] if len(sys.argv) > 1 else None
+    source = args[0] if len(args) > 0 else None
     if not source:
         candidates = [
             "Ignition/Ignition/game.gog",
@@ -149,12 +184,26 @@ def main():
                 break
 
     if not source or not os.path.exists(source):
-        print("Usage: python tools/extract_assets.py <path_to_game.gog_or_iso_or_folder> [output_assets_dir]")
+        print("Usage: python tools/extract_assets.py <path_to_game.gog_or_iso_or_folder> [output_assets_dir] [--skip-hash-check]")
         print("\nExamples:")
         print("  python tools/extract_assets.py 'C:\\GOG Games\\Ignition\\game.gog'")
         print("  python tools/extract_assets.py 'D:\\' assets/")
         print("  python tools/extract_assets.py 'ignition.iso'")
         sys.exit(1)
+
+    # Clean-room verification:
+    if os.path.isfile(source):
+        if not verify_checksum(source, allow_unknown=skip_hash):
+            sys.exit(1)
+    elif os.path.isdir(source):
+        # Check primary binary or image inside dir if present
+        for check_sub in ["game.gog", "MAINDOS.EXE"]:
+            for root, _, files in os.walk(source):
+                if check_sub in files:
+                    full_p = os.path.join(root, check_sub)
+                    if not verify_checksum(full_p, allow_unknown=skip_hash):
+                        sys.exit(1)
+                    break
 
     if os.path.isdir(source):
         # Check if game.gog is inside the directory

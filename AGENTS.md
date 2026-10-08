@@ -1,105 +1,152 @@
-# Ignition (1997) Reverse Engineering & Source Port Guidelines
+# Ignition (1997): Agent Instructions
 
-This repository hosts the reverse engineering and modern C11/SDL source port of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting the original Windows 95 executable (`IGN_WIN.EXE`) with reference insights from the DOS executable (`MAINDOS.EXE`).
+## Goal and scope
 
----
+As of 2026-10-07, reconstruct the authentic standard Windows release at
+`Ignition/Ignition/IGN_WIN.EXE` with functional fidelity and the original game
+architecture. Byte-for-byte matching is secondary to correct behavior.
+See `docs/decomp_plan.md` for the active plan and target fingerprint.
 
-## 1. Golden Rule: Mandatory Documentation
+- Windows reconstruction: readable C89; establish the original compiler, ABI,
+  data layout, and build configuration from this binary before selecting a toolchain.
+- `decomp/` is the Windows reconstruction workspace. Replace the superseded
+  DOS/Open Watcom implementation in place; do not create a parallel Windows tree
+  or maintain a DOS build. Existing DOS code is untrusted implementation material,
+  not a foundation that must be preserved. Recover behavior from `IGN_WIN.EXE`.
+  Use 4-space indentation and no handwritten assembly or inline `__asm`.
+- Retarget build, verification, database, symbol maps, and dashboards in place.
+  Remove obsolete DOS scaffolding as part of the affected migration feature.
+  Git history provides recovery of the old implementation; no duplicate DOS source
+  archive is required. This documentation change itself does not replace code.
+- `src/`: C11/SDL2 source port, built with CMake; modernization follows verified reconstruction.
+- Tools: Python through `uv`. Use Windows PowerShell; do not run Linux package managers.
 
-> [!IMPORTANT]
-> **Every step of decompilation, reverse engineering, and source porting MUST be thoroughly documented.**  
-> Code implementation and documentation must evolve in lockstep. Never write or port engine code without documenting the underlying binary structures, memory layouts, and algorithms in `docs/`.
+## Non-negotiable constraints
 
-### Documentation Requirements for Every Feature:
-1. **File Formats (`docs/formats/`)**:
-   - Exact binary layout table (byte offsets, field names, C data types, sizes, descriptions).
-   - Endianness, padding, header structures, and coordinate conventions.
-   - Example values from real game files across tracks and cars.
-2. **Engine Subsystems (`docs/engine/`)**:
-   - Algorithmic explanations of game mechanics (e.g. physics raycasting, state transitions, span rasterization, AI navigation).
-   - Cross-references to original function addresses in `IGN_WIN.EXE` and source files from `MAINDOS.EXE` (`getsurf.c`, `lisa3d.c`, `geputget.c`, `mem.c`).
-3. **Ghidra Progress & Symbol Tracking (`docs/ghidra/`)**:
-   - Maintain `docs/ghidra/functions.md` with every identified function, address, signature, and decompilation status.
-   - Maintain `docs/ghidra/globals.md` with global variable addresses, types, and state meanings.
-   - Maintain `docs/ghidra/structs.md` with reconstructed structs and member offsets.
+- `IGN_WIN.EXE` is the primary source of truth. `MAINDOS.EXE` is a secondary
+  reference, with its own addresses, ABI, and runtime evidence.
+- Never use `MAINDOS_32BIT.EXE`, the flawed DOS-to-PE repackaging, as evidence.
+  The authentic Windows PE executable is a distinct, valid analysis target.
+- Never modify or overwrite original binaries or assets in `Ignition/`.
+  Use disposable copies under `build/runtime/` for runtime experiments.
+- Reconstruct native systems in the appropriate module. Do not replace original
+  UI widgets, menus, or rendering pipelines with invented substitutes.
+- Never commit raw decompiler output, binary assets, or generated build outputs.
+- Preserve unrelated working-tree changes. Stage only explicit feature files or hunks.
 
----
+## Reverse engineering and implementation
 
-## 2. Directory Layout & Organization
+1. Inspect authentic `IGN_WIN.EXE` PE sections, imports, relocations, initializers,
+   and calling conventions before implementing behavior. Record VA versus RVA
+   explicitly; do not apply DOS LE parsing or Watcom register assumptions to Windows.
+2. Use the Ghidra MCP server at `localhost:8080` when available. Assume the user
+   has the authentic `IGN_WIN.EXE` loaded and active in Ghidra. This is a
+   user-provided operating assumption, not an automated fingerprint check; a
+   missing program-identity endpoint does not block inspection. If Ghidra MCP is
+   not responding or reports no active program, prompt the user to open
+   `IGN_WIN.EXE` in Ghidra with the MCP plugin enabled, then retry. If responses
+   contradict the expected target, ask the user to select `IGN_WIN.EXE` before
+   continuing. Verify local binary fingerprints and routine provenance as usual;
+   do not invent evidence or addresses.
+3. Replace raw offsets and register artifacts with verified named structs, fields,
+   and semantic names. Recover Windows structure packing independently.
+4. Keep code, documentation, and tracking synchronized. `database/decomp.db`
+   is the active Windows store; `docs/ghidra/functions.md`, the JSON inventory,
+   SQL dump and dashboards are generated via `uv run python tools/db.py update`.
+   Do not hand-edit generated progress. Run `db.py update --check` to detect drift.
+   Remaining legacy globals/structs/source modules require independent Windows
+   validation. Record reconstruction and test evidence separately; never transfer
+   DOS completion or infer runtime parity from status labels.
+5. Reuse DOS findings as hypotheses only after validating the corresponding Windows
+   instructions, initializers, callers, and behavior.
 
-All technical documentation resides in `docs/`:
+## Fidelity tracking
 
-```text
-docs/
-├── README.md               # Master index and technical specification hub
-├── tracking/               # Fidelity & change tracking system (FCTS)
-│   ├── fidelity_strategy.md# Master guideline, header specs & workflow
-│   ├── deviations.md       # Registry of authentic divergences and bug fixes
-│   └── fidelity_system_plan.md # Master Phase 4 implementation specification
-├── formats/                # Binary file format specifications
-│   ├── col.md              # 256-color palette format (.COL)
-│   ├── pic.md              # 8-bit paletted image format (.PIC)
-│   ├── srf.md              # Road surface, heightmap & collision physics (.SRF)
-│   ├── msh_tri.md          # 3D meshes & triangle indices (.MSH, .TRI)
-│   ├── pos.md              # AI waypoints, camera splines & checkpoints (.POS)
-│   ├── plc.md              # Track object placement (.PLC)
-│   ├── tex_tab.md          # Textures (.TEX), color lookup tables (.TAB), shadows (.SHD), panoramas (.PAN)
-│   └── lft.md              # Lettering / bitmap font format (.LFT)
-├── engine/                 # Engine subsystems and architecture
-│   ├── architecture.md     # Engine overview, memory model, coordinate system
-│   ├── game_loop.md        # State machine (Logos -> Menus -> Loading -> Race)
-│   ├── surface_physics.md  # Vehicle dynamics, surface collision (getsurf)
-│   ├── renderer.md         # Lisa3D software rasterizer & 2D blitter
-│   └── audio.md            # Sound effects (.WAV, .PAT) & CD-DA soundtrack
-└── ghidra/                 # Reverse engineering tracking
-    ├── functions.md        # Master table of identified functions
-    ├── globals.md          # Master table of global variables & memory addresses
-    └── structs.md          # Reconstructed data structures
+New Windows functions require verified binary provenance:
+
+```c
+// @original <SymbolName> (IGN_WIN.EXE @ 0x<VerifiedVA>, <SourceFileHint>)
+// @fidelity EXACT | ADAPTED | EXTENDED | INFRASTRUCTURE
+// @deviation DEV-XXX
+// @fix_category FIX_CAT_XXX
 ```
 
----
+Choose one fidelity value. Add deviation/fix-category lines only when applicable.
+When replacing a DOS function, replace its annotation with verified Windows
+provenance. Do not relabel a DOS address as a Windows address. Any retained
+historical DOS evidence remains explicitly tied to `MAINDOS.EXE`.
+Record behavioral changes in `docs/tracking/deviations.md` and preserve original
+bugs behind toggles defaulting to authentic behavior. An annotation alone is not
+proof of instruction equality or runtime fidelity.
 
-## 3. Tooling & Workflow Conventions
+## Build and validation
 
-* **Language**: C11 for engine code, Python for format verification and tooling scripts.
-* **Platform Layer**: SDL2 for windowing, 2D framebuffer presentation, input, and audio streaming.
-* **Ghidra MCP Server**: Use the active Ghidra MCP server (`localhost:8080`) to inspect disassembly, decompile, rename functions, add comments, and update symbol databases directly from the agent.
-* **Build System**: CMake with Ninja / GCC or MSVC.
-* **Dependencies**: Managed strictly via `uv` for Python (`pyproject.toml`, `uv.lock`) and CMake for C.
-* **Tooling Documentation**: All active tools in `tools/` must be documented in `tools/README.md`. Scratch scripts must be cleaned after exploration.
-* **No Git Bloat**: Binary game assets (`assets/`) and build artifacts (`build/`, `.venv/`) must remain excluded from Git.
+- The Windows build/emulator harness currently covers `Mem_InitHandles`,
+  `Mem_NextHandleId`, `Mem_RegisterHandle`, `Mem_ShutdownHandles` (modeled callbacks)
+  and `Mem_ReleaseHandleId`;
+  it produces a focused validation DLL, not a playable rebuilt game.
+- `uv run tools/verify_matching.py` records fresh compilation and differential
+  emulation evidence. `uv run python tools/verify_fidelity.py` audits the active
+  Windows store and source/result provenance. Extend function-specific build/test
+  contracts for new routines; the auditor supports the whole active inventory.
+- Run `uv run python tools/db.py update` after tracking/results change, and
+  `uv run python tools/db.py update --check` before committing exports.
+- Once retargeted, run the applicable Windows build, link, and provenance checks
+  after each implementation feature. Document the actual supported commands and
+  inputs with the tooling change. No DOS compatibility or DOS runtime regression
+  requirement applies; preserve original assets and unrelated working-tree work.
+- For `src/` changes, run the applicable CMake build and focused tests/runtime checks.
+- Resolve new failures before committing; report existing failures separately.
+  Report compilation, instruction matching, and runtime validation separately.
+- Documentation-only changes require diff review and `git diff --check`; builds
+  and code audits are required when implementation or build tooling changes.
 
----
+## Required progress handoff
 
-## 4. Fidelity & Change Tracking Rules (FCTS)
+For every Windows analysis, reconstruction, or validation feature, updating progress
+is part of completion, not a separate task for the user:
 
-> [!IMPORTANT]
-> **Every change, port, bug fix, and deviation MUST follow the Fidelity & Change Tracking System.**
+1. Update each affected candidate by verified RVA with `tools/db.py describe`
+   and `set-status`. Record its name/classification, source and evidence paths,
+   ABI, fidelity and analysis stage as supported by the actual findings. A source
+   edit does not automatically identify a routine or establish reconstruction.
+2. Run the applicable real verifier after implementation changes. Extend its
+   function contract and result recording for newly supported routines. Never
+   manufacture passing runs or promote stage labels into validation evidence.
+   Analysis-only work may have no test result; state that limitation explicitly.
+3. Run `uv run python tools/verify_fidelity.py`, then
+   `uv run python tools/db.py update`, then
+   `uv run python tools/db.py update --check`. Resolve failures or report a concrete
+   blocker; do not present a blocked feature as complete. Do not rerun unrelated
+   builds solely for documentation-only work.
+4. Review and stage the feature's database changes and synchronized generated
+   outputs with its source/evidence. Include the resulting snapshot ID, affected
+   RVAs, validation scope and remaining limitations in the final handoff.
 
-1. **Standardized Inline Provenance Headers**:
-   Every function declared in `include/ignition/` and implemented in `src/` must be documented with:
-   - `@original <SymbolName> (IGN_WIN.EXE @ 0x<Address>, <SourceFileHint>)`
-   - `@fidelity EXACT | ADAPTED | EXTENDED | INFRASTRUCTURE`
-   - `@deviation DEV-XXX` (required if logic diverges from original 1997 binary or fixes a bug)
-   - `@fix_category FIX_CAT_XXX` (required if toggleable in options)
-   - `@notes <Details on registers, formulas, nuances>`
+The generated HTML files and copied dashboard deliverables are snapshots; they
+do not refresh themselves. Always regenerate from the authoritative SQLite store.
+Recorded input/artifact hashes detect stale evidence, but cannot detect a new
+routine that an agent never added or described. Checking affected RVAs is required.
 
-2. **Mandatory Deviation Logging (`docs/tracking/deviations.md`)**:
-   Never fix an authentic 1997 bug (e.g. falling through meshes, car floating, camera clipping, audio cutoff) silently. Register it in `docs/tracking/deviations.md` with:
-   - Unique ID (`DEV-XXX`)
-   - Category (`FIX_CAT_NOCLIP`, `FIX_CAT_ELEVATION`, `FIX_CAT_CAMERA`, `FIX_CAT_AI_PATHING`, `FIX_CAT_AUDIO`, `FIX_CAT_RENDERER`)
-   - Original address & assembly breakdown
-   - Port solution
-   - Option toggle key (`GameFixOptions` or `RendererOptions`)
+When several chats share a checkout, coordinate validation and export/commit
+ownership before modifying shared harnesses, SQLite or generated files. Do not
+overwrite another feature's records or stage its unrelated edits. Run the final
+export/check after the agreed source changes settle; changes after validation can
+make results stale and require the applicable verification to run again.
 
-3. **Granular Game Fix Controls**:
-   All original bug workarounds must be individually toggleable under `Options > Gameplay > Game Fixes` and `Options > GFX Options`. Always support `1997 AUTHENTIC` (all fixes off) to preserve original behavior.
+## Commits and completion
 
-4. **Change Logging (`CHANGELOG.md`)**:
-   Log all milestone progress, features, fixes, and reverse-engineering discoveries under `CHANGELOG.md` adhering to Keep a Changelog.
+- Install the tracked hooks with `uv run python tools/workflow.py install-hooks`.
+  Before a Windows feature, run `tools/workflow.py preflight` with its RVAs and
+  explicit feature files. Use `tools/workflow.py complete` for the real
+  verifier/audit/export sequence and generated handoff; see `docs/workflow.md`.
+- After staging explicit feature files, run
+  `uv run python tools/workflow.py check --staged`. Resolve gate failures before
+  committing. Do not bypass hooks to declare a feature complete. Reconstruction
+  commits include `RVA: 0x...` trailers for affected routines.
 
-5. **Conventional Commits**:
-   Commits must follow Conventional Commits (`feat`, `port`, `fix`, `re`, `docs`, `test`) and cite function addresses (`FUN_00412fc0 @ 0x00412fc0`) and deviation IDs (`DEV-001`).
-
-6. **Automated Fidelity Verification**:
-   Before submitting changes, run `uv run python tools/verify_fidelity.py` and ensure 100% pass without unannotated or mismatched functions.
+- Commit each completed feature separately with its accompanying documentation.
+- Use Conventional Commits such as `re: ...`, `port: ...`, or `docs: ...`; include
+  verified original addresses and deviation IDs when relevant.
+- Review the staged diff and include only the current feature's changes.
+- Report changes, validation, limitations, and commit hash. Explain any commit blocker.

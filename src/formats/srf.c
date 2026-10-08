@@ -22,7 +22,7 @@
 
 /**
  * @brief Loads .SRF track surface collision grid, cell index tables, and triangle headers.
- * @original FUN_00412670 (IGN_WIN.EXE @ 0x00412670, getsurf.c)
+ * @original FUN_00412670 (MAINDOS.EXE @ 0x00412670, getsurf.c)
  * @fidelity ADAPTED
  */
 SrfData *Srf_LoadFromFile(const char *filepath) {
@@ -98,7 +98,7 @@ SrfData *Srf_LoadFromFile(const char *filepath) {
 
 /**
  * @brief Releases loaded .SRF track surface memory.
- * @original FUN_004127a0 (IGN_WIN.EXE @ 0x004127a0, getsurf.c)
+ * @original FUN_004127a0 (MAINDOS.EXE @ 0x004127a0, getsurf.c)
  * @fidelity ADAPTED
  */
 void Srf_Free(SrfData *srf) {

@@ -62,7 +62,7 @@ Located immediately after the spatial grid index table:
 
 ## Surface Raycast Query Algorithm (`getsurf`)
 
-In `FUN_00412fc0` (`IGN_WIN.EXE`) / `getsurf.c`:
+In `FUN_00412fc0` (`MAINDOS.EXE`) / `getsurf.c`:
 1. World coordinates $(X, Z)$ are centered around the track origin by adding half the spatial grid stride ($\text{stride} / 2 = 50$, verified at address `0x00479c48` as `double 50.0`):
 $$\text{cell}_x = \lfloor X / \text{cell\_size}_x \rfloor + 50$$
 $$\text{cell}_z = \lfloor Z / \text{cell\_size}_z \rfloor + 50$$

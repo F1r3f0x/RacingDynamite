@@ -1,6 +1,11 @@
-# Master Global Variable & Memory Map (`IGN_WIN.EXE`)
+# Master Global Variable & Memory Map (`MAINDOS.EXE`)
 
-This table documents the global memory addresses in the data segments (`.data`, `.rdata`, `.bss`) of `IGN_WIN.EXE` (`0x00400000` base address), their types, purpose, and engine context.
+> LEGACY DOS evidence/unmigrated cross-references. These records do not certify
+> Windows addresses or completion. Active bounded Windows evidence is in
+> [windows_startup.md](windows_startup.md) and
+> [windows_inventory.json](../tracking/windows_inventory.json).
+
+This table documents the global memory addresses in the data segments (`.data`, `.rdata`, `.bss`) of `MAINDOS.EXE`, their types, purpose, and engine context.
 
 | Address | Type | Name | Purpose |
 | :--- | :--- | :--- | :--- |
@@ -51,6 +56,15 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x0063c5c8` | `uint8_t**`| `g_pLisaTextureSheets`| Table of loaded texture base pointers (Track, Cars, Lights, Smoke). |
 | `0x004cdc28` | `uint8_t**`| `g_pLisaActiveMipTable`| Pointer to active texture mip table bound during submesh dispatch. |
 | `0x004b63c4` | `uint8_t*` | `g_pLisaActivePage`| Base pointer of active 64KB ($256 \times 256$) texture page in span rasterizer. |
+| `0x00498740` | `int32_t`  | `g_ViewportMinX`   | Left screen pixel boundary for viewport clipping. |
+| `0x00498744` | `int32_t`  | `g_ViewportMinY`   | Top screen pixel boundary for viewport clipping. |
+| `0x00498748` | `int32_t`  | `g_ViewportMaxX`   | Right screen pixel boundary for viewport clipping. |
+| `0x0049874c` | `int32_t`  | `g_ViewportMaxY`   | Bottom screen pixel boundary for viewport clipping. |
+| `0x0049ca2c` | `int32_t`  | `g_SubpixelMinX`   | Fixed-point 8.8 subpixel left clipping bound (`g_ViewportMinX << 8`). |
+| `0x0049ca30` | `int32_t`  | `g_SubpixelMinY`   | Fixed-point 8.8 subpixel top clipping bound (`g_ViewportMinY << 8`). |
+| `0x0049ca34` | `int32_t`  | `g_SubpixelMaxX`   | Fixed-point 8.8 subpixel right clipping bound (`(g_ViewportMaxX + 1) * 256`). |
+| `0x0049ca38` | `int32_t`  | `g_SubpixelMaxY`   | Fixed-point 8.8 subpixel bottom clipping bound (`(g_ViewportMaxY + 1) * 256`). |
+| `0x005db040` | `SceneryParticle[]`| `g_SceneryParticles`| Global active particle and dynamic scenery simulation pool. |
 | `0x004792f0` | `double`   | `g_PhysicsTimestep`| 72 Hz physics integration timestep ($1/72\text{ s} \approx 0.013888889\text{ s}$). |
 | `0x00479af0` | `double`   | `g_PhysicsScaleFactor`| World velocity integration multiplier (`21.76`). |
 | `0x004792c8` | `double`   | `g_PhysicsGravity` | Gravitational acceleration constant (`9.81` $m/s^2$). |
@@ -66,4 +80,280 @@ This table documents the global memory addresses in the data segments (`.data`, 
 | `0x00552f44` | `AudioVoice[32]`| `g_AudioChannels`   | 32-channel software voice mixer table. |
 | `0x00552f48` | `int32_t`    | `g_MasterSoundVolume`| Master SFX attenuation level (0..128). |
 | `0x00552f4c` | `int32_t`    | `g_MasterMusicVolume`| Master CD-DA music attenuation level (0..128). |
+| `0x005daffc` | `VehicleState[]` | `g_Vehicles` | Master array of active vehicle physics & simulation states (stride `0x484c`). |
+| `0x005285c0` | `int32_t`    | `g_ActiveVehicleIndex` | Focused/controlled player vehicle index (0..5). |
+| `0x005daff4` | `VehicleConfig[]`| `g_VehicleConfigs` | Per-vehicle visual and camera configuration table (stride 200 bytes). |
+| `0x006192f0` | `int32_t`    | `g_NumRacers` | Total number of participating vehicles in current race. |
+| `0x00552ffc` | `uint8_t*`   | `g_PlayerHUDState` | Player telemetry and HUD viewport state array. |
+| `0x00527f24` | `int32_t`    | `g_PlayerCarModel` | Selected player car archetype / model ID. |
+| `0x005530a8` | `int32_t`    | `g_PlayerCarChoice` | Player selected vehicle slot. |
+| `0x00527f6c` | `int32_t`    | `g_GameMode` | Active gameplay mode (Championship, Single, Ghost, Multiplayer). |
+| `0x00639493` | `int32_t`    | `g_DifficultyLevel` | Current difficulty setting (0=Novice, 1=Amateur, 2=Pro). |
+| `0x00552fc4` | `int32_t`    | `g_CurrentTrackIndex` | Active circuit index (0..6). |
+| `0x00552fbc` | `int32_t`    | `g_RaceFinished` | Flag indicating player crossed finish line / race completed. |
+| `0x00563db0` | `uint8_t*`   | `g_VirtualFramebuffer` | Active virtual rendering surface / double-buffer page. |
+| `0x00563d40` | `int32_t`    | `g_RenderTargetSurface` | Active 2D rendering target surface index. |
+| `0x0055306c` | `int32_t`    | `g_IsSplitScreen` | Split-screen multiplayer mode toggle flag. |
+| `0x00527f2c` | `int32_t`    | `g_SplitScreenPlayer` | Active player viewport index during split-screen rendering. |
+| `0x00639933` | `int32_t`    | `g_LanguageId` | Active localization language index (German, English, French, etc.). |
+| `0x00552fd0` | `int32_t`    | `g_FontId_Large` | Font handle for large header and title font. |
+| `0x00552fd4` | `int32_t`    | `g_FontId_Medium` | Font handle for standard medium menu font. |
+| `0x00552fe8` | `int32_t`    | `g_FontId_Small` | Font handle for small telemetry overlay font. |
+| `0x00552fec` | `int32_t`    | `g_FontId_Menu` | Font handle for menu item text. |
+| `0x0054f9d4` | `int32_t`    | `g_ActiveFontColor` | Active font color index in palette. |
+| `0x0063f2e4` | `int32_t`    | `g_FontAlignMode` | Text alignment mode (0=Left, 1=Center, 2=Right). |
+| `0x004949a4` | `int32_t`    | `g_MenuCursorPos` | Current menu navigation cursor selection index. |
+| `0x00494990` | `int32_t`    | `g_IsDemoMode` | Attract / demo replay playback mode flag. |
+| `0x00553780` | `uint8_t*`   | `g_SpeedoConfig` | HUD speedometer dial and needle coordinate configuration. |
+| `0x00553770` | `uint8_t*`   | `g_SpeedoPosition` | Speedometer display screen offset. |
+| `0x00553774` | `int32_t`    | `g_WeatherType` | Active weather effect mode: `1` = Rain, `2` = Snow, `3` = Storm/Night. |
+| `0x005285ec` | `void*`      | `g_pSpeedoGaugeSprite` | Pointer to loaded speedometer gauge background sprite. |
+| `0x005285f0` | `void*`      | `g_pSpeedoNeedleSprite` | Pointer to loaded speedometer needle sprite. |
+| `0x00552f24` | `HUDMessage[5]` | `g_HudFloatingMessages` | Table of 5 active on-screen floating banner messages. |
+| `0x00639330` | `SceneryParticle` | `g_ActiveParticle` | Scratch particle struct populated during effect dispatch. |
+| `0x0063c5f0` | `double[20]` | `g_pActiveCamera` | Active camera position, direction, and projection matrix array. |
+| `0x0063c64c` | `double[20]` | `g_pActiveCamera_P2` | Player 2 active camera position, direction, and matrix array (splitscreen). |
+| `0x0054f980` | `double` | `g_RaceTimer` | Active race timer logic variable. |
+| `0x0063f2d8` | `int32_t*` | `g_pActiveDrawBuffer` | Pointer to the active draw buffer. |
+| `0x0054f994` | `LisaEntityTransform*`| `g_pFXTransforms` | Array of dynamic object transforms for VFX and debris. |
+| `0x00563d54` | `struct*` | `g_VehicleCameraStates`| Camera state structure per vehicle. |
+| `0x00553280` | `int32_t` | `g_LapsTotal` | Number of laps for the current race. |
+| `0x004920e8` | `char*` | `g_Format_Str_s` | Format string `"%s"`. |
+| `0x00493c78` | `char*` | `g_Format_Str_d` | Format string `"%d"`. |
+| `0x0054f9d0` | `int32_t` | `g_RacePosition` | Player race position logic variable. |
+| `0x00552e48` | `double` | `g_RaceTimer_P2` | Race timer logic variable for Player 2 (splitscreen). |
+| `0x0054f930` | `int32_t` | `g_DynamicObjectsPaused` | Flag to freeze dynamic object creation/destruction. |
+| `0x005db02c` | `LisaDynamicObject*`| `g_DynamicObjectArray1`| Array of dynamic objects used in VFX. |
+| `0x00552f20` | `LisaDynamicObject*`| `g_DynamicObjectArray2`| Array of dynamic objects used in VFX. |
+| `0x00552f30` | `int32_t[2]` | `g_WeatherActive` | Weather precipitation active flag per viewport (`[0]` = P1, `[1]` = P2). |
+| `0x00563c30` | `int32_t*`   | `g_pRainMesh_P1` | Dynamic vertex/triangle mesh buffer for Viewport 2 precipitation. |
+| `0x00563c34` | `int32_t*`   | `g_pRainMesh_P2` | Dynamic vertex/triangle mesh buffer for Viewport 1 precipitation. |
+| `0x0054f98c` | `int32_t`    | `g_WeatherViewportCount` | Number of active viewports for weather rendering (1 = single, 2 = split). |
+| `0x00553084` | `int32_t`    | `g_LightningEnabled` | Lightning strike flash and thunder effect enable toggle. |
+| `0x00563d28` | `int32_t[2]` | `g_WeatherDropOffsetX` | Horizontal drop/sway displacement offset per viewport. |
+| `0x00563d38` | `int32_t[2]` | `g_WeatherDropOffsetY` | Vertical drop fall offset per viewport (resets at -800). |
+| `0x00525e30` | `double[2]`  | `g_SnowflakeAngle` | Angular phase accumulator for sinusoidal snowflake oscillation. |
+| `0x00553030` | `uint8_t[576]`| `g_WeatherGridObjects` | 3x3 spatial grid dynamic objects for weather volume placement. |
+| `0x00525e50` | `int32_t[2]` | `g_WeatherAudioVoices` | Audio voice channel handles for weather ambient loops per player. |
+| `0x00563cf4` | `int32_t`    | `g_WeatherAnimTick` | Weather animation tick timer (updates every 2 frames). |
+| `0x005285d8` | `int32_t`    | `g_GlobalFrameCount` | Master engine frame/tick counter. |
+| `0x00527f74` | `int32_t`    | `g_RainTextureId` | Texture page ID for rain streak rendering. |
+| `0x00498480` | `int32_t[7]` | `g_TrackPathIntervalTable` | Moving path node update intervals per track. |
+| `0x00563d64` | `float`      | `g_TrackPathTimer` | Floating accumulator for moving path node updates. |
+| `0x004986e0` | `int32_t[12]`| `g_ParticlePriorityTable` | Priority ranking table for particle pool slot eviction. |
+| `0x004949bc` | `int32_t`    | `g_ShowDebugCoords` | Debug on-screen camera position and angle text toggle. |
+| `0x005532c0` | `double`     | `g_CameraPosX` | Camera X world coordinate in floating-point units. |
+| `0x005532b8` | `double`     | `g_CameraPosY` | Camera Y world coordinate in floating-point units. |
+| `0x00553288` | `double`     | `g_CameraPosZ` | Camera Z world coordinate in floating-point units. |
+| `0x006192f8` | `double`     | `g_CameraAngleX` | Camera pitch/yaw angle in radians. |
+| `0x00619318` | `double`     | `g_CameraAngleY` | Camera roll/yaw angle in radians. |
+| `0x005db038` | `int32_t`    | `g_TurboMeterFill` | Turbo gauge recharge accumulator (0 to 319). |
+| `0x006192a0` | `int32_t[20]`| `g_HudAnimTimers` | HUD digit/overlay animation timers (10 ints per player). |
+| `0x00563c60` | `int32_t`    | `g_IsGamePaused` | Pause status flag: `1` when race is actively paused. |
+| `0x00553090` | `double`     | `g_LapRecordSeconds` | Best lap time record in floating-point seconds. |
+| `0x00525e44` | `int32_t`    | `g_TargetLapTimeCents` | Target track record time in centiseconds. |
+| `0x00552f68` | `double`     | `g_HudAnimSinPhase` | Sinusoidal phase accumulator for animated HUD elements. |
+| `0x00601674` | `int32_t`    | `g_ConfirmationPromptType` | Active confirmation prompt dialog mode: `1` = Quit, `2` = Restart. |
+| `0x00525e64` | `int32_t*`   | `g_pHudDrawCommandBuffer` | Secondary command buffer for HUD/UI dialog rendering. |
+| `0x00552f10` | `int32_t`    | `g_MultiplayerMode` | Network / split-screen multiplayer mode flag (`4` = waiting for host). |
+| `0x00563da0` | `int32_t`    | `g_TimeTrialActive` | Time trial game mode flag. |
+| `0x005daff0` | `int32_t`    | `g_IsAttractDemoMode` | Attract / idle demo mode playback toggle. |
+| `0x00552f28` | `int32_t`    | `g_ChampionshipCredits` | Number of remaining restart credits in Championship mode. |
+| `0x00639497` | `int32_t`    | `g_AudioCdTrackMode` | Audio CD playback selection: `0` = Default, `-1` = Random, `>0` = Track. |
+| `0x00552e54` | `int32_t`    | `g_CurrentCdTrackNumber` | Currently playing audio CD track number. |
+| `0x005287e8` | `void*`      | `g_pCreditIconSprite` | Sprite graphic for restart credit icons in pause menu. |
+| `0x005285c8` | `int32_t`    | `g_PlayAgainPromptActive` | Flag indicating post-race Play Again confirmation prompt is visible. |
+| `0x005286f4` | `void*[]`    | `g_pCarIconSprites` | Table of car icon sprites rendered on the post-race results screen. |
+| `0x00553068` | `int32_t`    | `g_ShowSecondPlayerFlag` | Display toggle for Player 2 elements in split-screen menus. |
+| `0x00552fe0` | `int32_t`    | `g_FontId_Disabled` | Font resource ID for disabled / greyed-out menu options. |
+| `0x00494d94` | `char[]`     | `s_QUIT_00494d94` | Localized string table for 'QUIT' option in pause menu. |
+| `0x00552fc0` | `int32_t`    | `g_GraphicsResolutionMode` | Graphics resolution index (`0` = 320x200, `1` = 640x480, `2` = 800x600). |
+| `0x004ba6ec` | `int32_t`    | `g_VideoModeActive` | Flag indicating video graphics mode is actively set up. |
+| `0x006035f0` | `char[256]`  | `g_ErrorMessageBuffer` | Global error message string buffer. |
+| `0x0054f970` | `int32_t`    | `g_GraphicsInitErrorFlag` | Flag set to `1` when graphics mode initialization fails. |
+| `0x005285c4` | `int32_t`    | `g_CameraViewportWidth` | Calculated 3D camera viewport rendering width. |
+| `0x00552f50` | `int32_t`    | `g_CameraViewportHeight` | Calculated 3D camera viewport rendering height. |
+| `0x00552f58` | `int32_t`    | `g_SplitScreenMode` | Split-screen layout orientation: `1` = vertical, `0` = horizontal. |
+| `0x00527f28` | `int32_t`    | `g_ScreenSizeSetting` | In-game screen window scale setting index (0 to 3). |
+| `0x004949f0` | `double[4][2]`| `g_ViewportScreenScaleTable`| Scaling factors (X, Y) for the 4 in-game screen size modes. |
+| `0x00498730` | `void*`      | `g_pLisaCommandQueueMirror`| Mirror pointer for Lisa3D rasterizer command queue. |
+| `0x0049873c` | `void*`      | `g_pLisaActiveTABMirror` | Mirror pointer for active polygon table buffer. |
+| `0x00498734` | `void*`      | `g_pLisaFramebufferMirror1`| Primary Lisa3D display surface mirror pointer. |
+| `0x00498738` | `void*`      | `g_pLisaFramebufferMirror2`| Secondary Lisa3D display surface mirror pointer. |
+| `0x00498478` | `int32_t`    | `g_CameraFovHalfX` | Half horizontal field-of-view scale factor (`fov_x * 500`). |
+| `0x0049847c` | `int32_t`    | `g_CameraFovHalfY` | Half vertical field-of-view scale factor (`fov_y * 500`). |
+| `0x005db02c` | `DynamicObjectTransform*` | `g_pCarTransforms` | Pool of dynamic 3D object transforms for vehicles. |
+| `0x00552fbc` | `DynamicObjectTransform*` | `g_pWheelTransforms` | Pool of dynamic 3D object transforms for vehicle wheels (4 per vehicle). |
+| `0x00552f70` | `DynamicObjectTransform*` | `g_pCarReflectionTransforms` | Pool of dynamic 3D object transforms for vehicle mirror reflections (police car). |
+| `0x00552f20` | `DynamicObjectTransform*` | `g_pCarShadowTransforms` | Pool of dynamic 3D object transforms for vehicle ground shadows. |
+| `0x00553788` | `DynamicObjectTransform*` | `g_pCarGhostTransforms` | Pool of dynamic 3D object transforms for ghost vehicle replay. |
+| `0x0054f930` | `int32_t`    | `g_DynamicObjectsPaused` | Toggle flag: `1` when dynamic objects and entities are paused. |
+| `0x004949e0` | `int32_t`    | `g_CameraShakeActive` | Camera elevation clamp and shake toggle flag. |
+| `0x00552e40` | `int32_t*`   | `g_TrackSegmentTable` | Track segment properties table (12 bytes per record: flags, road type, curves). |
+| `0x00603718` | `int32_t*`   | `g_CarShadowVertices` | Calculated 4-point ground shadow quad vertex array (30 ints per vehicle). |
+| `0x00563da4` | `int32_t*`   | `g_ParticleCount1` | Particle emitter template vertex counts per vehicle model. |
+| `0x005537d8` | `int32_t*`   | `g_ParticleArray1` | Rotated primary particle emitter coordinates buffer. |
+| `0x00553db8` | `int32_t*`   | `g_ParticleArray2` | Rotated secondary particle emitter coordinates buffer. |
+| `0x00552e60` | `int32_t*`   | `g_ParticleTemplateX` | Local template X coordinates for vehicle particle emitters. |
+| `0x005533b0` | `int32_t*`   | `g_ParticleTemplateY` | Local template Y coordinates for vehicle particle emitters. |
+| `0x00553300` | `int32_t*`   | `g_ParticleTemplateZ` | Local template Z coordinates for vehicle particle emitters. |
+| `0x0063c5d8` | `int32_t`    | `g_ActiveTrackSegmentAttribute` | Active track segment visual / fog attribute passed to Lisa rasterizer. |
+| `0x00553784` | `int32_t*`   | `g_TrackChunkToNodeTable` | Lookup table mapping track placement chunks to spline road nodes (12 bytes per entry). |
+| `0x005db000` | `int32_t*`   | `g_pCarBaseMeshes` | Base unblemished mesh pointers for vehicle archetypes. |
+| `0x0054f92c` | `int32_t`    | `g_CameraFovWobbleActive` | Toggle flag for sinusoidal FOV/zoom camera oscillation. |
+| `0x00525e2c` | `float`      | `g_CameraFovWobblePhase` | Angular phase accumulator for camera FOV oscillation. |
+| `0x00498538` | `float[7][3][5]`| `g_TrackFlybyCameras` | Preset cinematic camera viewpoints (X, Y, Z, pitch, yaw) across 7 tracks. |
+| `0x00497ed8` | `int32_t[7]` | `g_TrackBackgroundColors` | Background viewport clear palette color index for each of the 7 tracks. |
+| `0x00527f40` | `int32_t`    | `g_ScreenShakeTimerP1` | Screen shake / collision impact decay timer for Player 1 (0 to 120 ticks). |
+| `0x00527f44` | `int32_t`    | `g_ScreenShakeTimerP2` | Screen shake / collision impact decay timer for Player 2 (0 to 120 ticks). |
+| `0x00563d20` | `int32_t`    | `g_CinematicCameraAngleState` | Post-race cinematic camera angle cycling state index (0 to 3). |
+| `0x00601664` | `int32_t`    | `g_CinematicFocusedVehicle` | Vehicle index currently being tracked by the post-race cinematic camera. |
+| `0x0054f960` | `void*`      | `g_ViewportBorderCornerTL` | Sprite graphic for top-left viewport corner border overlay. |
+| `0x0054f964` | `void*`      | `g_ViewportBorderCornerTR` | Sprite graphic for top-right viewport corner border overlay. |
+| `0x0054f968` | `void*`      | `g_ViewportBorderCornerBL` | Sprite graphic for bottom-left viewport corner border overlay. |
+| `0x0054f96c` | `void*`      | `g_ViewportBorderCornerBR` | Sprite graphic for bottom-right viewport corner border overlay. |
+| `0x00563c58` | `int32_t*`   | `g_ViewportBorderMetrics` | Viewport border sprite dimensions and layout metrics. |
+| `0x00563c60` | `int32_t`    | `g_GamePauseState` | Master game pause state toggle (1 = paused, 0 = active). |
+| `0x00563d88` | `int32_t`    | `g_PostRaceSequenceState` | Post-race results sequence state machine dispatcher. |
+| `0x00563c5c` | `int32_t`    | `g_TrackFlybyActiveTarget` | Target vehicle index followed during telemetry / flyby camera mode. |
+| `0x00563c48` | `double`     | `g_FlybyCameraOffsetX` | Camera follow offset X during vehicle chase telemetry mode. |
+| `0x00563c40` | `double`     | `g_FlybyCameraOffsetY` | Camera follow offset Y during vehicle chase telemetry mode. |
+| `0x00563c50` | `double`     | `g_FlybyCameraOffsetZ` | Camera follow offset Z during vehicle chase telemetry mode. |
+| `0x0054f9d8` | `int32_t`    | `g_FlybyLastCameraPosX` | Cached last camera world position X during flyby tracking. |
+| `0x0054f9dc` | `int32_t`    | `g_FlybyLastCameraPosY` | Cached last camera world position Y during flyby tracking. |
+| `0x0054f9e0` | `int32_t`    | `g_FlybyLastCameraPosZ` | Cached last camera world position Z during flyby tracking. |
+| `0x00553098` | `int32_t`    | `g_FlybyLastYaw` | Cached last camera heading yaw angle during flyby tracking. |
+| `0x005530a0` | `int32_t`    | `g_FlybyLastPitch` | Cached last camera pitch inclination angle during flyby tracking. |
+| `0x0055309c` | `int32_t`    | `g_FlybyLastRoll` | Cached last camera roll tilt angle during flyby tracking. |
+| `0x0054f934` | `int32_t`    | `g_SkyClearEnabled` | Viewport background sky clearing toggle flag. |
+| `0x00563c14` | `int32_t`    | `g_ShowRollTelemetry` | Debug roll telemetry / free camera mode toggle (0=Off, 1=Free, 2=Target). |
+| `0x005285e0` | `void*`      | `g_pLapTimerPanelSprite` | Sprite graphic for lap timer background header panel. |
+| `0x005285e4` | `void*`      | `g_pLapSplitPanelSprite` | Sprite graphic for lap splits background panel. |
+| `0x005285e8` | `void*`      | `g_pRacePositionBadgeSprite` | Sprite graphic for current race position badge / border. |
+| `0x005285f4` | `void*[10]`  | `g_pGearDigitSprites` | Table of gear indicator digit sprites (N, 1, 2, 3, etc.). |
+| `0x00528618` | `void*`      | `g_pTurboGaugeBorderSprite` | Sprite graphic for turbo boost meter border and gauge frame. |
+| `0x0052861c` | `void*[2]`   | `g_pTurboIndicatorLightSprites` | Table of turbo indicator light sprites (0 = unlit/off, 1 = charged/on). |
+| `0x00528620` | `void*`      | `g_pTurboIndicatorLightOnSprite` | Flashing turbo indicator light active state sprite. |
+| `0x00528624` | `int32_t[4]` | `g_FontTextColorTable` | Font text color palette table for in-game HUD displays. |
+| `0x0052863c` | `int32_t[4]` | `g_FontPositionColorTable` | Font text color palette table for position rankings display. |
+| `0x00528654` | `void*`      | `g_pTrafficLightRedSprite` | Start traffic light red signal sprite graphic. |
+| `0x00528658` | `void*`      | `g_pTrafficLightYellow1Sprite` | Start traffic light first yellow signal sprite graphic. |
+| `0x0052865c` | `void*`      | `g_pTrafficLightYellow2Sprite` | Start traffic light second yellow signal sprite graphic. |
+| `0x00528660` | `void*`      | `g_pTrafficLightGreenSprite` | Start traffic light green signal sprite graphic. |
+| `0x00528664` | `void*[]`    | `g_pDirectionArrowSprites` | Road turn warning curve direction arrow sprites table. |
+| `0x00497d74` | `int32_t[]`  | `g_DirectionArrowLookupTable` | Direction arrow sprite index lookup table per track style and curve severity. |
+| `0x00563ce8` | `int32_t`    | `g_TrackStyle` | Active track graphic theme / visual style index (0 to 6). |
+| `0x005286a0` | `void*`      | `g_pWrongWayBannerSprite` | Sprite graphic for 'WRONG WAY' flashing warning overlay banner. |
+| `0x005287ec` | `void*`      | `g_pRadarProgressBarSprite_LowRes` | Mini-map / elimination progress radar bar sprite (320x200 low-res). |
+| `0x005287f0` | `void*`      | `g_pRadarProgressBarSprite_HighRes`| Mini-map / elimination progress radar bar sprite (640x480 high-res). |
+| `0x00528764` | `void*[8]`   | `g_pRadarCarBlipSprites` | Table of miniature car icon blips plotted along the track radar bar. |
+| `0x005287f4` | `void*`      | `g_pRadarLeaderArrowSprite` | Radar pointer arrow marking the current race leader. |
+| `0x0052873c` | `void*[10]`  | `g_pRadarEliminatedBlipSprites`| Radar animation frame blip sprites for eliminated / wrecked racers. |
+| `0x005285d8` | `double`     | `g_RaceStartTimer` | Countdown and race launch timer in floating-point ticks. |
+| `0x00563c38` | `int32_t`    | `g_CountdownBeepStep` | Audio countdown beep progression stage (0 to 3). |
+| `0x00528794` | `void*[8]`   | `g_pFinishPlaceSprites` | Finishing position victory banner sprites (1st, 2nd, 3rd, etc.). |
+| `0x005531c0` | `int32_t[2]` | `g_FinishFanfarePlayed` | Flag indicating finish victory jingle has played for Player 1 / Player 2. |
+| `0x00552d90` | `int32_t[20]`| `g_FinishSparklePosX` | X screen pixel positions for post-race celebration victory sparkles. |
+| `0x00552df0` | `int32_t[20]`| `g_FinishSparklePosY` | Y screen pixel positions for post-race celebration victory sparkles. |
+| `0x00563d70` | `float[2]`   | `g_SpriteScaleFactors` | Scaling factors (scale_x, rot) passed to sprite draw routines. |
+| `0x00563d80` | `double`     | `g_RpmNeedleDeltaScale`| Speedometer needle smoothing rate constant (0.5 to 1.0). |
+| `0x00563d8c` | `void*`      | `g_pScreenConfig` | Screen / viewport geometry configuration table. |
+| `0x00011a3e` | `uint8_t*`   | `g_pPicFlaggor` | 38,796-byte sprite buffer for 6 language flags (FLAGGOR.PIC). |
+| `0x00011a72` | `uint8_t*`   | `g_pPicIgnLogo` | 9,861-byte sprite buffer for main title logo (IGN_LOGO.PIC). |
+| `0x00011ab4` | `uint8_t*`   | `g_pPicCarSel` | 18,870-byte sprite buffer for vehicle pedestal (CAR_SEL.PIC). |
+| `0x00011afb` | `uint8_t*`   | `g_pPicBilar` | 124,806-byte sprite buffer for 11 car stats cards (BILAR.PIC). |
+| `0x00011b06` | `uint8_t*`   | `g_pPicTrkSpr` | 79,695-byte sprite buffer for track selection cards (TRK_SPR.PIC). |
+| `0x0001aaf8` | `uint8_t*`   | `g_pMenuCarMsh` | 82,876-byte submesh geometry for rotating 3D menu cars (MENUCAR.MSH). |
+| `0x0001ab10` | `uint8_t*`   | `g_pMenuCarPlc` | 224-byte placement table mapping car IDs to mesh offsets (MENUCAR.PLC). |
+| `0x0001ab24` | `uint8_t*`   | `g_pMenuCarTex` | 393,280-byte texture bank for 3D menu cars (MENUCAR.TEX). |
+| `0x00016900` | `CdpFile[6]` | `g_MenuCdp` | Array of 6 CDP video playback streams for intro and background loop. |
+| `0x000bed00` | `char*[6]`   | `g_MenuVideoPaths` | File paths for the 6 CDP videos (IGN1, IGN2, IGN3_0..IGN3_3). |
+| `0x000a07bd` | `int32_t`    | `g_SelectedLanguage` | Active menu language index (0=EN, 1=DE, 2=IT, 3=ES, 4=SE, 5=FR). |
 
+---
+
+## Authentic DOS Linear Memory Map (DPMI Runtime)
+
+These linear addresses correspond directly to runtime DOS addresses in `MAINDOS.EXE` and are verified by the memory scraping harness (`tools/runtime_differ.py`):
+
+| Linear Address | Type | Name | Purpose |
+| :--- | :--- | :--- | :--- |
+| `0x000ab5dc` | `int32_t` | `g_TickInt` | Authentic integer PIT frame tick counter. |
+| `0x000ab5e0` | `int32_t` | `g_GameStage` | Master engine stage (0 = Init, 1 = Running, 2 = Shutdown). |
+| `0x000ab5e4` | `int32_t` | `g_InitStarted` | Engine initialization flag. |
+| `0x000ab5e8` | `int32_t` | `g_ShutdownCompleted`| Engine termination flag. |
+| `0x000e73a8` | `double` | `g_TimerAccumulator` | 72Hz FPU timer accumulator. |
+| `0x001fede8` | `int32_t` | `g_GameState1` | Menu initialization trigger. |
+| `0x001fedf8` | `int32_t` | `g_GameState2` | Menu loop execution tick trigger. |
+| `0x001fee1c` | `int32_t` | `g_GameState3` | Track asset loading and car spawning trigger. |
+| `0x001fee08` | `int32_t` | `g_GameState4` | 3-frame race countdown/startup sequence stage. |
+| `0x001fedf0` | `int32_t` | `g_GameState5` | Active race physics and simulation tick trigger. |
+| `0x001fefe0` | `VehicleState*` | `g_pVehicleTable` | Pointer to master allocated vehicle table. |
+| `0x0020a1b0` | `int32_t[256]` | `g_KeyRepeatActiveTimer` | Per-key millisecond accumulator tracking duration held down for auto-repeat. |
+| `0x0020a5b0` | `uint8_t[256]` | `g_KeyToggleState` | Toggle state for latching keys. |
+| `0x0020a7b0` | `uint8_t[256]` | `g_KeyRepeatTriggered` | Key auto-repeat pulse flag array (cleared on read by `Input_WasKeyRepeated`). |
+| `0x0020a8b0` | `uint8_t[256]` | `g_KeyToggleMask` | Mask indicating whether key behaves in toggle mode. |
+| `0x0020a9b0` | `uint8_t[256]` | `g_KeyReleasedFlag` | Key release edge flag array. |
+| `0x0020aab0` | `uint8_t[256]` | `g_KeyJustPressed` | Edge-triggered single keypress flag array (cleared on read by `Input_WasKeyPressed`). |
+| `0x0020abb0` | `uint8_t[256]` | `g_KeyPreviousDown` | Previous poll frame key down state array. |
+| `0x0020acb0` | `uint8_t[256]` | `g_KeyboardState` | Active keydown state array (polled by `Input_IsKeyDown` @ `0x55c28`). |
+| `0x0020adb0` | `uint8_t[16]` | `g_KeyScancodeRingBuf` | Hardware ISR ring buffer for raw scancodes. |
+| `0x0020adc0` | `uint8_t[256]` | `g_KeyRawState` | Hardware keyboard state populated by ISR. |
+| `0x0020aec0` | `char*` | `g_KeyAsciiRingWritePtr` | Write head pointer into ASCII ring buffer. |
+| `0x0020aec4` | `int32_t` | `g_KeyLastPollTick` | Timestamp (`g_TickInt`) of the last keyboard poll call. |
+| `0x0020aec8` | `int32_t` | `g_KeyRepeatInterval` | Auto-repeat period in ticks / ms (set in `Input_InitKeyboard`). |
+| `0x0020aecc` | `int32_t` | `g_KeyRepeatInitialDelay` | Initial delay before auto-repeat begins in ticks / ms. |
+| `0x0020aed0` | `int32_t` | `g_KeyDriverInstalled` | 1 if keyboard driver is initialized, 0 otherwise. |
+| `0x0020aed4` | `void (*)(int,int)` | `g_KeyCallback` | Optional user callback invoked on key down/up events. |
+| `0x0020af3c` | `char[64]` | `g_KeyAsciiRingBuf` | Circular buffer for typed ASCII characters (32 chars with 32-char mirror). |
+| `0x000c5d19` | `uint8_t` | `g_KeyIsrScancodeHead` | Head index into `g_KeyScancodeRingBuf`. |
+| `0x000c5d1a` | `uint8_t` | `g_KeyIsrInstalled` | Flag indicating whether keyboard ISR is active. |
+| `0x000c5d20` | `uint8_t[84]` | `g_ScancodeToAsciiTable` | Scancode to ASCII conversion table. |
+| `0x000e9bfc` | `uint8_t[0x598]` | `g_GameSettings` | Authentic game settings, high scores, keybindings, and profile structure. |
+| `0x000ea194` | `int32_t` | `g_MenuVideoResolutionMode` | Active menu resolution index (0 = 320x200, 1 = 640x480). |
+| `0x000ea198` | `double` | `g_MenuTimeSeconds` | Master elapsed seconds accumulator for menu animations, intro fades, and sequences. |
+| `0x000ea1a0` | `double` | `g_MenuCdpFrameAccum` | Sub-frame fractional tick accumulator for CDP video playback (2.393103 ticks/frame). |
+| `0x000ea1b8` | `uint8_t*[6]` | `g_pMenuCdpFiles` | Array of pointers to loaded CDP animation files in memory. |
+| `0x000ea1d0` | `int32_t` | `g_MenuCdpActiveIndex` | Currently playing intro CDP index (0 to 5). |
+| `0x000ea1d4` | `int32_t` | `g_MenuCdpPendingLoad` | Flag indicating CDP intro sequence is active and pending release. |
+| `0x000ea1d8` | `CdpFile` | `g_MenuCdp` | Master CDP video playback control structure. |
+| `0x000ea1fc` | `uint8_t*` | `g_pMenuPalActive` | Currently active palette target for menu blitting. |
+| `0x000ea200` | `uint8_t*` | `g_pMenuPalDefault` | 768-byte authentic MENU.COL palette. |
+| `0x000ea204` | `uint8_t*` | `g_pMenuPalBlack` | 768-byte all-black palette (0x00) for screen fade transitions. |
+| `0x000ea208` | `uint8_t*` | `g_pMenuPalWhite` | 768-byte all-white palette (0xFF) for flash and fade transitions. |
+| `0x000ea20c` | `uint8_t*` | `g_pMenuPalWork` | 768-byte work palette for runtime color interpolation and fading. |
+| `0x000ea210` | `uint8_t*` | `g_pMenuTab` | 64KB transparency lookup table pointer (page-aligned from MENU.TAB). |
+| `0x000ea214` | `uint8_t*` | `g_pMenuTabAlloc` | Raw memory allocation block for MENU.TAB. |
+| `0x000ea218` | `uint8_t*` | `g_pMenuTransTable` | Transparency blending LUT pointer passed to `Palette_BlitTrans`. |
+| `0x000ea224` | `double` | `g_MenuDeltaTime` | Delta time of current menu tick in seconds. |
+| `0x000ea268` | `int32_t` | `g_MenuAudioVoiceActive` | Audio voice playback activity flag during menus. |
+| `0x000ea3c0` | `uint8_t*` | `g_pMenuLisaEngine` | Lisa 3D engine context memory allocated during `Menu_Init`. |
+| `0x000ea400` | `uint8_t*` | `g_pMenuBuffer1` | Master 64,321-byte 8bpp menu composition framebuffer. |
+| `0x000ea404` | `uint8_t*` | `g_pMenuBuffer2` | Secondary 64,321-byte 8bpp menu framebuffer. |
+| `0x000ea408` | `uint8_t*` | `g_pMenuBuffer3` | Tertiary 64,321-byte 8bpp menu framebuffer. |
+| `0x000ea750` | `uint8_t*` | `g_pMenuBilar` | 124,806-byte vehicle cards sprite bank (BILAR.PIC). |
+| `0x000ea754` | `uint8_t*` | `g_pMenuTrackSpr` | 79,695-byte track previews sprite bank (TRK_SPR.PIC). |
+| `0x000ea758` | `uint8_t*` | `g_pMenuLogo` | 9,861-byte Ignition title logo sprite (IGN_LOGO.PIC). |
+| `0x000ea75c` | `uint8_t*` | `g_pMenuCarSel` | 18,870-byte car pedestal sprite (CAR_SEL.PIC). |
+| `0x000ea760` | `uint8_t*` | `g_pMenuFlags` | 38,796-byte language flags sprite bank (FLAGGOR.PIC). |
+| `0x000ea764` | `int32_t` | `g_MenuSelectedLanguage` | Selected language index (0=EN, 1=DE, 2=IT, 3=ES, 4=SE, 5=FR). |
+| `0x000becfc` | `int32_t` | `g_MenuIntroResetBuffers` | Flag indicating framebuffer reset required at intro transition. |
+| `0x000bed00` | `char*[6]` | `g_MenuCdpNames` | Authentic filenames for 6 intro/loop CDP videos. |
+| `0x000bed18` | `int32_t` | `g_MenuIntroVideoEnabled` | Flag enabling/disabling intro CDP sequence playback. |
+
+
+
+
+## Recovered DOS timer state
+
+See [timer.md](timer.md) for authentic instructions and initializer evidence.
+
+| Name | DOS address | Type | Bytes | Initial value | Purpose |
+| --- | --- | --- | --- | --- | --- |
+| g_TimerFrameRate | 0x000ab5c0 | int32_t | 4 | 0 | Truncated 36.418 divided by unclamped frame interval |
+| g_TimerCurrentTime | 0x000ab5c8 | double | 8 | 0.0 | Current half-BIOS-tick timestamp |
+| g_TimerPreviousTime | 0x000ab5d0 | double | 8 | 0.0 | Previous timestamp; reset on backward clock |
+| g_TimerShiftScale | 0x000ab5d8 | int32_t | 4 | 0 | 32-bit rotate count determined by PIT calibration |
+| g_TimerEpoch | 0x000e73b4 | int32_t | 4 | 0 | Truncated startup timestamp |
+| g_TimerElapsedSeconds | 0x000e73a0 | double | 8 | 0.0 | Elapsed seconds since truncated epoch |
+| g_TimerBaseScale | 0x000a001c | double | 8 | 3.0516646830846227e-05 | Initialized PIT multiplier; same bytes at 0xa0014 |

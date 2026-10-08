@@ -1,5 +1,7 @@
 # Ignition (1997) Technical Documentation
 
+> Active target (2026-10-07): standard Windows `IGN_WIN.EXE`. Windows work replaces the DOS implementation in `decomp/` and retargets build/tracking in place; no parallel DOS implementation is required. See [the active plan](decomp_plan.md). The active Windows database, generated function map and treemap now share one snapshot. Other engine/format/global/struct notes contain legacy evidence and require independent Windows validation.
+
 Welcome to the central technical documentation and reverse engineering knowledge base for **Ignition** (1997, Unique Development Studios / Virgin Interactive).
 
 ---
@@ -20,6 +22,8 @@ Welcome to the central technical documentation and reverse engineering knowledge
 ---
 
 ## 2. Master Roadmap
+
+* **[Windows Tooling Audit](tooling_audit.md)**: Current migration gaps, read-only diagnostics, and the project decompilation skill.
 
 * 🎯 **[Master Implementation Roadmap](roadmap.md)**: Comprehensive 8-phase reverse engineering and implementation plan to complete the source port.
 
@@ -72,5 +76,5 @@ Methodology, provenance standards, and divergence tracking:
 
 | Binary | Platform | Size | SHA-256 Checksum | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `IGN_WIN.EXE` | Win32 PE (i386) | 915,968 bytes | `7665E4E736BFD6C90790CEDBB27E2DE7E98A167374EB77933533C54EF0DC8782` | Primary reverse engineering target |
-| `MAINDOS.EXE` | DOS/4GW 32-bit | 1,156,502 bytes | `179C654BA65281F08BBCDA2B5943AB9F35C309EC718600F81104644D22DB948C` | Contains intact assertion strings & source filenames |
+| `MAINDOS.EXE` | DOS/4GW 32-bit LE | 1,156,502 bytes | `179C654BA65281F08BBCDA2B5943AB9F35C309EC718600F81104644D22DB948C` | Secondary DOS reference; retained evidence |
+| `IGN_WIN.EXE` | Windows x86 PE32 | 915,968 bytes | `7665E4E736BFD6C90790CEDBB27E2DE7E98A167374EB77933533C54EF0DC8782` | Primary target; headers/fingerprint verified, reconstruction and runtime baseline pending |

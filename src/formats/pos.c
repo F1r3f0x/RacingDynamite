@@ -23,7 +23,7 @@
 
 /**
  * @brief Loads .POS scenery object animation tracks matching PLC objects.
- * @original Pos_InitAnimatedObjects (IGN_WIN.EXE @ 0x004356d0, lisa3d.c)
+ * @original Pos_InitAnimatedObjects (MAINDOS.EXE @ 0x004356d0, lisa3d.c)
  * @fidelity ADAPTED
  */
 PosData *Pos_LoadFromFile(const char *filepath, uint32_t plc_count) {
@@ -150,7 +150,7 @@ void Pos_Free(PosData *pos) {
 
 /**
  * @brief Advances animated scenery keyframe playheads and updates PLC object coordinates.
- * @original Pos_UpdateAnimatedObjects (IGN_WIN.EXE @ 0x004357a0, lisa3d.c)
+ * @original Pos_UpdateAnimatedObjects (MAINDOS.EXE @ 0x004357a0, lisa3d.c)
  * @fidelity ADAPTED
  */
 void Pos_Update(PosData *pos, PlcData *plc) {

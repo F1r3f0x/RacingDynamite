@@ -23,7 +23,7 @@
 
 /**
  * @brief Loads .MSH 3D submesh geometry pools for tracks and car models.
- * @original FUN_00419bd0 (IGN_WIN.EXE @ 0x00419bd0, main.c)
+ * @original FUN_00419bd0 (MAINDOS.EXE @ 0x00419bd0, main.c)
  * @fidelity ADAPTED
  */
 MshData *Msh_LoadFromFile(const char *filepath) {

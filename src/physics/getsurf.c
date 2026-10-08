@@ -23,8 +23,8 @@
 #include <string.h>
 
 /**
- * @brief Material friction lookup table matching DAT_004972d0 from IGN_WIN.EXE.
- * @original DAT_004972d0 (IGN_WIN.EXE @ 0x004972d0, getsurf.c)
+ * @brief Material friction lookup table matching DAT_004972d0 from MAINDOS.EXE.
+ * @original DAT_004972d0 (MAINDOS.EXE @ 0x004972d0, getsurf.c)
  * @fidelity EXACT
  */
 static double GetMaterialFriction(int32_t material_id) {
@@ -51,7 +51,7 @@ static double GetMaterialFriction(int32_t material_id) {
 
 /**
  * @brief Filter out non-mesh gameplay markers to match authentic .SRF object indexing.
- * @original FUN_0041b360 (IGN_WIN.EXE @ 0x0041b360, main.c)
+ * @original FUN_0041b360 (MAINDOS.EXE @ 0x0041b360, main.c)
  * @fidelity ADAPTED
  */
 static inline bool IsGeometryMeshObject(int32_t model_type) {
@@ -67,10 +67,10 @@ static inline bool IsGeometryMeshObject(int32_t model_type) {
 
 /**
  * @brief Raycasts world coordinate (X, Z) against track surface collision grid.
- * @original FUN_00412fc0 (IGN_WIN.EXE @ 0x00412fc0, getsurf.c)
- * @original FUN_00413380 (IGN_WIN.EXE @ 0x00413380, getsurf.c)
- * @original FUN_00446578 (IGN_WIN.EXE @ 0x00446578, getsurf.c)
- * @original FUN_004465e1 (IGN_WIN.EXE @ 0x004465e1, getsurf.c)
+ * @original FUN_00412fc0 (MAINDOS.EXE @ 0x00412fc0, getsurf.c)
+ * @original FUN_00413380 (MAINDOS.EXE @ 0x00413380, getsurf.c)
+ * @original FUN_00446578 (MAINDOS.EXE @ 0x00446578, getsurf.c)
+ * @original FUN_004465e1 (MAINDOS.EXE @ 0x004465e1, getsurf.c)
  * @fidelity EXTENDED
  * @deviation DEV-001 (Boundary safety clamp preventing off-track crash and fall-through)
  * @fix_category FIX_CAT_NOCLIP

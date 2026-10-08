@@ -1,6 +1,6 @@
 # Authentic Vehicle Physics & Surface Raycasting Subsystem (`getsurf.c`)
 
-This document details the reverse-engineered vehicle dynamics, 4-wheel independent raycast suspension, terrain collision, and surface query subsystems from **Ignition** (1997, Unique Development Studios / Virgin Interactive), reconstructed from `IGN_WIN.EXE` (`0x00412fc0`, `0x00424570`, `0x0040e6b0`, `0x00423aa0`) and `MAINDOS.EXE` (`getsurf.c`, `lisa3d.c`).
+This document details the reverse-engineered vehicle dynamics, 4-wheel independent raycast suspension, terrain collision, and surface query subsystems from **Ignition** (1997, Unique Development Studios / Virgin Interactive), reconstructed from `MAINDOS.EXE` (`0x00412fc0`, `0x00424570`, `0x0040e6b0`, `0x00423aa0`) and `MAINDOS.EXE` (`getsurf.c`, `lisa3d.c`).
 
 ---
 
@@ -44,7 +44,7 @@ $$\vec{P}_{t+1} = \vec{P}_t + \vec{V} \cdot \Delta t \cdot 21.76$$
 
 ## 2. Authentic `.SRF` Spatial Raycasting (`Surface_Raycast`, `getsurf.c`)
 
-Surface elevation and normal querying is performed on the track's binary `.SRF` (Surface) data. The algorithm matches `FUN_00412fc0` in `IGN_WIN.EXE` (`getsurf.c`).
+Surface elevation and normal querying is performed on the track's binary `.SRF` (Surface) data. The algorithm matches `FUN_00412fc0` in `MAINDOS.EXE` (`getsurf.c`).
 
 ### 2.1 World Coordinate Offset & Grid Hashing
 
@@ -103,7 +103,7 @@ In `.SRF`, the placed object reference `normal_z` stores the byte offset into Li
 
 $$\text{obj\_index} = \frac{\text{normal\_z}}{42}$$
 
-The track placement table (`.PLC`) contains both physical 3D mesh instances (road chunks, terrain, buildings) and non-mesh gameplay markers. During scene registration in `IGN_WIN.EXE` (`0x00418c40` / `0x0041b6af`), non-mesh marker archetypes are excluded from the 42-byte object pool while preserving original `.PLC` sequential order:
+The track placement table (`.PLC`) contains both physical 3D mesh instances (road chunks, terrain, buildings) and non-mesh gameplay markers. During scene registration in `MAINDOS.EXE` (`0x00418c40` / `0x0041b6af`), non-mesh marker archetypes are excluded from the 42-byte object pool while preserving original `.PLC` sequential order:
 * **Checkpoints & split-time triggers**: Archetypes 150..199 (`model_type & 0xff == 0x9a`).
 * **Camera trigger zones**: Archetypes 200..299 (`model_type & 0xff == 0xc8`).
 * **Dynamic obstacle volumes & triggers**: Archetypes 300..399 (`model_type & 0xff in {0x62, 0x2c}`).
@@ -144,7 +144,7 @@ $$Y = V_{0,y} + \frac{(V_{1,y} - V_{0,y})\hat{N}_y + \hat{N}_x(V_{1,x} - X) + \h
 
 ---
 
-### 2.7 Mountain Wall Collision & Step Climb Rejection (`IGN_WIN.EXE 0x00424570`)
+### 2.7 Mountain Wall Collision & Step Climb Rejection (`MAINDOS.EXE 0x00424570`)
 
 In original assembly at `0x00424570` line 590:
 ```c
