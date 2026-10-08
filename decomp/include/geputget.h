@@ -12,6 +12,12 @@ extern InputKeyEventCallback volatile g_inputKeyEventCallback;
 extern InputPollCallback volatile g_inputPollCallback;
 void Input_ResetCallbacks(void);
 
+/* Windows selector: one caller-cleanup stack dword; zero installs both tables.
+ * Initializer bodies remain unreconstructed; both return 1 in IGN_WIN.EXE. */
+int Gfx_SelectBackend(int backend);
+int Gfx_InstallSurfaceDispatch(void); /* VA 0x0045B690 */
+int Gfx_InstallSpriteDispatch(void);  /* VA 0x00456E60 */
+
 #define MAX_FONTS 30
 #define FONT_GLYPH_COUNT 224
 

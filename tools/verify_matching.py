@@ -215,10 +215,12 @@ def verify():
     code_entries = {name: symbols[name] for name in [
         'Mem_InitSystem', 'Mem_ShutdownSystem', 'Lisa_PrintVersion',
         'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
+        'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
         'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
     expected_calls = {
+        'Gfx_SelectBackend': ['Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch'],
         'Lisa_PrintVersion': ['printf', 'printf'],
         'Mem_Free': ['free'], 'Mem_Alloc': ['malloc'] * 5,
         'Mem_CreatePool': ['malloc'], 'Mem_InitPools': ['Mem_CreatePool'],

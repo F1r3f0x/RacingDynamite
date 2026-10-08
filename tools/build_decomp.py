@@ -9,11 +9,14 @@ from windows_target import ROOT, BUILD, DLL, verify_target
 
 # Nonreturning validation-only boundaries: never fake production success.
 STARTUP_BOUNDARY_SOURCE = (
+    'unsigned int validation_gfxDispatchWords[34];\n'
     'int Lisa_PrintVersion(void);\n'
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
     'void Gfx_InitPrimitiveState(void) { for (;;) {} }\n'
-    'int Gfx_SelectBackend(int backend) { (void)backend; for (;;) {} }\n')
-STARTUP_EXPORTS = ['Gfx_InitPrimitiveState', 'Gfx_SelectBackend']
+    'int Gfx_InstallSurfaceDispatch(void) { for (;;) {} }\n'
+    'int Gfx_InstallSpriteDispatch(void) { for (;;) {} }\n')
+STARTUP_EXPORTS = ['Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
+    'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
 
 # Extract these verified production declarations/body, rather than duplicating C.
 _resource_header = (ROOT / 'decomp/include/geputget.h').read_text(encoding='utf-8-sig')
@@ -22,7 +25,7 @@ STARTUP_BOUNDARY_SOURCE += (
     _resource_header[_resource_header.index('typedef void (*InputKeyEventCallback)'):
         _resource_header.index('#define MAX_FONTS')]
     + _resource_source[_resource_source.index('InputKeyEventCallback volatile g_inputKeyEventCallback ='):
-        _resource_source.index('/* Global font table matching')])
+        _resource_source.index('/*\n * @original Gfx_SelectBackend')])
 
 # Extract the native banner body and its existing public prototype verbatim.
 _lisa_header = (ROOT / 'decomp/include/lisa3d.h').read_text(encoding='utf-8-sig')
@@ -35,7 +38,15 @@ LISA_VERSION_SOURCE = (
         _lisa_header.index('int Lisa_PrintVersion(void);') + len('int Lisa_PrintVersion(void);')]
     + '\n' + _lisa_source[_lisa_start:_lisa_end] + '\n')
 
-EXPORTS = ['Lisa_PrintVersion', 'printf', 'Input_ResetCallbacks', 'g_inputKeyEventCallback', 'g_inputPollCallback', 'Mem_InitSystem', 'Mem_ShutdownSystem', 'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool', 'Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
+# Like printf, the selector must not see its nonreturning fixtures in this TU.
+_selector_start = _resource_source.index('int Gfx_SelectBackend(int backend)')
+_selector_end = _resource_source.index('\n}', _selector_start) + 2
+LISA_VERSION_SOURCE += (
+    _resource_header[_resource_header.index('int Gfx_SelectBackend(int backend);'):
+        _resource_header.index('#define MAX_FONTS')]
+    + _resource_source[_selector_start:_selector_end] + '\n')
+
+EXPORTS = ['validation_gfxDispatchWords', 'Lisa_PrintVersion', 'printf', 'Input_ResetCallbacks', 'g_inputKeyEventCallback', 'g_inputPollCallback', 'Mem_InitSystem', 'Mem_ShutdownSystem', 'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool', 'Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
            'g_memHandleIds', 'g_memHandleCursor', 'Mem_RegisterHandle', 'Mem_ShutdownHandles',
            'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'free', 'malloc',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',

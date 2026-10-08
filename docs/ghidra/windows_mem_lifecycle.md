@@ -209,3 +209,19 @@ dependencies, CRT printf/heap and handle callbacks remain modeled. Separate
 banner compilation prevents optimization based on the nonreturning CRT fixture.
 See linked evidence for ABI, provenance, commands and exact validation limits.
 Earlier banner-as-boundary descriptions above record the original scope.
+
+## Production backend selector integration follow-up (2026-10-08)
+
+[Gfx_SelectBackend](windows_gfx_backend.md), RVA 0x56AF0, now executes its
+extracted production geputget.c body through all 18 integrated startups,
+alongside real banner/reset/pools/handles. 572 standalone selector comparisons
+verify all nonzero selectors return 2 without effects; zero invokes the surface
+then sprite dispatch initializers, ignores both modeled results and returns 1.
+Both initializer boundaries capture complete tracked entry state and can mutate
+it; the later startup mutation case now runs at Gfx_InstallSpriteDispatch.
+The 94 isolated startup cases retain a modeled selector return for independent
+wrapper validation. Retained counts: 306 banner / 266 reset / 112 startup / 519
+shutdown comparisons and ten persistent lifecycle calls. Raw prefixes differ.
+Primitive initialization, both dispatch initializers, CRT printf/heap and handle
+callbacks remain modeled. No native graphics/game parity or instruction equality
+is claimed. Earlier dependency descriptions above record historical scope.

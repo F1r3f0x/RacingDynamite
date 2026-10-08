@@ -21,13 +21,15 @@ from windows_tracking import record_run
 if not __debug__:
     raise RuntimeError('Verification requires assertions')
 ROUTINES = {
+    'Gfx_SelectBackend': (0x56af0,30,'d1fcb40ea924f27f8afef2a4b1e804ee70ce3fed2ff4f9e74a376877e7c3c4cd'),
     'Lisa_PrintVersion': (0x5b4f0,34,'719ae03224b3f4a4ab08fa52985cd65454730bd8de870f8afe632d9216951802'),
     'Input_ResetCallbacks': (0x55ab0,13,'c301c37754413d115bac22b922a9ed480b4080011c559a4485b7ea044270fd59'),
     'Mem_InitSystem': (0x5b170,41,'e4026b0791ef97b56f8fa7013dd568dfd4772d64e2638d850a217c9d338ce2b8'),
     'Mem_ShutdownSystem': (0x5b1a0,16,'75f6e3f589d50b5cb564113e1270c4f2a5df39c0614d41516b520d0d3ee064a3')}
 DEPENDENCIES = {
     'Gfx_InitPrimitiveState': (0x5e610,326,'fd2abfef167ef5b92074ef41c17478dd955591025afb3aad714da050a29704a3'),
-    'Gfx_SelectBackend': (0x56af0,30,'d1fcb40ea924f27f8afef2a4b1e804ee70ce3fed2ff4f9e74a376877e7c3c4cd')}
+    'Gfx_InstallSurfaceDispatch': (0x5b690,146,'3cb7a08c993e9d2ce4db93a2ebe96e9165728ef6bae5b5014371ebaef3de41bf'),
+    'Gfx_InstallSpriteDispatch': (0x56e60,181,'215bc3324a371904ec72c0e780eec9b178b47f01e195eaaac6124781c612a8b6')}
 MEMORY = {'Mem_InitHandles':(0x5b1f0,76), 'Mem_ShutdownHandles':(0x5b240,155),
     'Mem_NextHandleId':(0x5b1b0,58), 'Mem_RegisterHandle':(0x5b360,120),
     'Mem_ReleaseHandleId':(0x5b410,62)}
@@ -42,7 +44,10 @@ BANNER_STRINGS = {0x4bab20: b'Compilation 0.91.0',
 BANNER_ARGS = [(BANNER_STRINGS[0x4bab5c], BANNER_STRINGS[0x4bab20]),
     (BANNER_STRINGS[0x4bab3c],)]
 RESOURCE_FIELDS = [('g_inputKeyEventCallback',0x50de14,4), ('g_inputPollCallback',0x50e678,4)]
-STATE_FIELDS = BOOKKEEPING_FIELDS + RESOURCE_FIELDS
+STATE_FIELDS = BOOKKEEPING_FIELDS + RESOURCE_FIELDS + [('validation_gfxDispatchWords',0x50eb68,136)]
+ISOLATED_HELPERS = ('Lisa_PrintVersion','Input_ResetCallbacks','Gfx_SelectBackend',
+    'Mem_InitPools','Mem_InitHandles','Mem_ShutdownHandles','Mem_ShutdownPools')
+MODELED_STARTUP = set(STARTUP_EXPORTS) - {'Gfx_SelectBackend'}
 INPUTS = ['decomp/src/lisa3d.c', 'decomp/include/lisa3d.h', 'decomp/src/geputget.c','decomp/include/geputget.h','decomp/src/mem.c','decomp/include/mem.h','decomp/target.json',
     'tools/verify_mem_lifecycle.py','tools/verify_mem_destroy.py','tools/verify_mem_pools.py',
     'tools/verify_mem_alloc.py','tools/verify_mem_free.py','tools/verify_matching.py',
@@ -70,13 +75,49 @@ def inspect_original(pe):
         assert fpo[r]==(n,0,1 if name=='Gfx_SelectBackend' else 0,0)
         assert ins[-1].mnemonic==('jmp' if name=='Gfx_InitPrimitiveState' else 'ret')
     for name,(r,n,_) in ROUTINES.items():
-        if name in ('Input_ResetCallbacks','Lisa_PrintVersion'):continue
+        if name in ('Input_ResetCallbacks','Lisa_PrintVersion','Gfx_SelectBackend'):continue
         ins=list(md.disasm(pe.get_data(r,n),0x400000+r))
         expected=[(0x45b170,0x45b4f0),(0x45b175,0x45ad50),(0x45b17a,0x45b1f0),
             (0x45b17f,0x455ab0),(0x45b184,0x45e610),(0x45b18b,0x456af0)] if name=='Mem_InitSystem' else [(0x45b1a0,0x45b240),(0x45b1a5,0x45b140)]
         assert [(i.address,int(i.op_str,16)) for i in ins if i.mnemonic=='call']==expected
         assert len(ins)==(10 if name=='Mem_InitSystem' else 4)
         assert not any(e.type==3 and r<=e.rva<r+n for b in pe.DIRECTORY_ENTRY_BASERELOC for e in b.entries)
+    selector=list(md.disasm(pe.get_data(0x56af0,30),0x456af0))
+    assert [(i.mnemonic,i.op_str) for i in selector]==[
+        ('mov','ecx, dword ptr [esp + 4]'),('test','ecx, ecx'),('jne','0x456b08'),
+        ('call','0x45b690'),('call','0x456e60'),('mov','eax, 1'),('ret',''),
+        ('mov','eax, 2'),('ret','')]
+    assert pe.get_data(0x56b0e,2)==b'\xcc'*2
+    relocations={e.rva:struct.unpack('<I',pe.get_data(e.rva,4))[0]
+        for b in pe.DIRECTORY_ENTRY_BASERELOC for e in b.entries if e.type==3}
+    assert not any(0x56af0<=r<0x56b0e for r in relocations)
+    surface=[0x45b730,0x45b740,0x45bd70,0x45c060,0x45c150,0x45c160,
+        0x45c1d0,0x45c3d0,0x45c4b0,0x45c520,0x45c530,0x45c680,0x45c6d0,0x45c730]
+    sprite=[(0x50eba0+4*i,v) for i,v in enumerate([
+        0x456f20,0x456f30,0x456f40,0x456f50,0x456f60,0x457020,0x457250,0x4571b0,0x45c830])]
+    sprite += [(0x50ebd8,0x461360),(0x50ebd4,0x45c920),(0x50ebdc,0x45c940),
+        (0x50ebe0,0x45c960),(0x50ebe4,0x461a80),(0x50ebec,0x457110),(0x50ebe8,0x457170)]
+    for r,n,stores,calls in [(0x5b690,146,[(0x50eb68+4*i,v) for i,v in enumerate(surface)],[]),
+            (0x56e60,181,sprite,[0x45d840,0x45c9f0,0x45c7f0])]:
+        ins=list(md.disasm(pe.get_data(r,n),0x400000+r))
+        assert fpo[r]==(n,0,0,0)
+        assert [(i.op_str) for i in ins if i.mnemonic=='mov'] == [
+            'dword ptr [%s], %s'%(hex(a),hex(v)) for a,v in stores]+['eax, 1']
+        assert [int(i.op_str,16) for i in ins if i.mnemonic=='call']==calls
+        assert [(e,relocations[e]) for e in sorted(relocations) if r<=e<r+n]==[
+            pair for i,(a,v) in enumerate(stores) for pair in [(r+10*i+2,a),(r+10*i+6,v)]]
+    data=next(s for s in pe.sections if s.Name.rstrip(b'\0')==b'.data')
+    assert data.VirtualAddress+data.SizeOfRawData<=0x10eb68
+    assert 0x10eb68+136<=data.VirtualAddress+data.Misc_VirtualSize
+    assert [i.address for r,(n,_,_,_) in fpo.items()
+        for i in md.disasm(pe.get_data(r,n),0x400000+r)
+        if i.mnemonic=='call' and i.op_str=='0x456af0']==[0x412502,0x45b18b]
+    assert pe.get_data(0x12500,10)==bytes.fromhex('6a00e8e945040083c404')
+    for r,n,digest in [(0x5d840,84,'445faf9112110b216014f95c057ab6d572a81fec3fa64a867b9d5f03739c1d43'),
+            (0x5c9f0,84,'922d88eb43e5d8b7ede3d71df0d81a543dc389bfad921e3faa13815d0ac5468e'),
+            (0x5c7f0,62,'41862be4869238f9f9261e170ab377306cd2aa18afbbd6761a59bf2f32a5b132')]:
+        assert fpo[r]==(n,0,0,0) and hashlib.sha256(pe.get_data(r,n)).hexdigest()==digest
+    assert pe.get_data(0xbace4,8)==bytes(8) # Two lazy allocation flags: file zero.
     banner=list(md.disasm(pe.get_data(0x5b4f0,34),0x45b4f0))
     assert [(i.mnemonic,i.op_str) for i in banner]==[
         ('push','0x4bab20'),('push','0x4bab5c'),('call','0x46a500'),
@@ -163,9 +204,11 @@ class Oracle:
 
     def call(self,name,args=()):
         if name!=self.top:self.events.append(('call',name,args))
-        if name in STARTUP_EXPORTS or (self.isolated and name in ('Lisa_PrintVersion','Input_ResetCallbacks',
-                'Mem_InitPools','Mem_InitHandles','Mem_ShutdownHandles','Mem_ShutdownPools')):
+        if name in MODELED_STARTUP or (self.isolated and name in ISOLATED_HELPERS):
             return self.boundary(name,args)
+        if name=='Gfx_SelectBackend':
+            if args[0]!=0:return 2
+            self.call('Gfx_InstallSurfaceDispatch');self.call('Gfx_InstallSpriteDispatch');return 1
         if name=='Lisa_PrintVersion':
             for arguments in BANNER_ARGS:self.call('printf',arguments)
             return 0
@@ -327,8 +370,8 @@ class LifecycleSession(DestroySession):
             if name=='Mem_CreatePool':
                 assert args==(self.default,);args=('DEFAULT',)
             if name!=self.top:self.events.append(('call',name,args))
-            modeled=name in STARTUP_EXPORTS or name in ('malloc','free','callback','printf') or (
-                self.isolated and name in ('Lisa_PrintVersion','Input_ResetCallbacks','Mem_InitPools','Mem_InitHandles','Mem_ShutdownHandles','Mem_ShutdownPools'))
+            modeled=name in MODELED_STARTUP or name in ('malloc','free','callback','printf') or (
+                self.isolated and name in ISOLATED_HELPERS)
             if modeled:
                 assert self.boundary_index<len(self.expected_boundaries),'Unexpected boundary'
                 expected_name,expected_args,state=self.expected_boundaries[self.boundary_index]
@@ -377,7 +420,7 @@ def verify_mem_lifecycle():
     verify_target();phase='compilation';counts={name:0 for name in ROUTINES}
     try:
         original=pefile.PE(str(TARGET));inspect_original(original);build(dll=DLL)
-        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production Input_ResetCallbacks and Lisa_PrintVersion declarations/bodies; strict C89; provisional Clang/LLD; explicit nonreturning startup and CRT fixtures')
+        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production Input_ResetCallbacks, Lisa_PrintVersion and Gfx_SelectBackend declarations/bodies; strict C89; provisional Clang/LLD; explicit nonreturning startup and CRT fixtures')
         rebuilt=pefile.PE(str(DLL));assert not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
         symbols={s.name.decode():rebuilt.OPTIONAL_HEADER.ImageBase+s.address for s in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if s.name}
         for name,(r,n,_) in ROUTINES.items():
@@ -400,6 +443,23 @@ def verify_mem_lifecycle():
             if name in counts:counts[name]+=1
             if isolated:isolated_counts[name]+=1
             return outputs[0]
+        # Any nonzero raw selector returns 2, even with the sign bit set.
+        # Zero ignores independent initializer results and preserves their mutations.
+        selectors=[1,2,0x7fffffff,0x80000000,0xffffffff]+[rng.getrandbits(32) or 1 for _ in range(128)]
+        for selector in selectors:
+            state=compare('Gfx_SelectBackend',fresh(),(selector,))
+            compare('Gfx_SelectBackend',state,(selector,),reset=False)
+        pairs=[(x,y) for x in [0,1,2,0x80000000,0xffffffff]
+            for y in [0,1,2,0x80000000,0xffffffff]]
+        pairs += [(rng.getrandbits(32),rng.getrandbits(32)) for _ in range(128)]
+        for x,y in pairs:
+            actions={('Gfx_InstallSurfaceDispatch',0):[
+                    ('validation_gfxDispatchWords',0,4,x),('g_inputKeyEventCallback',0,4,x)],
+                ('Gfx_InstallSpriteDispatch',0):[
+                    ('validation_gfxDispatchWords',132,4,y),('g_inputPollCallback',0,4,y)]}
+            returns={'Gfx_InstallSurfaceDispatch':[x],'Gfx_InstallSpriteDispatch':[y]}
+            state=compare('Gfx_SelectBackend',fresh(),(0,),actions=actions,returns=returns)
+            compare('Gfx_SelectBackend',state,(0,),actions=actions,returns=returns,reset=False)
         # Both printf returns are ignored: exercise independent failure/high-bit
         # pairs and repeated execution without resetting the CPU image/state.
         pairs=[(x,y) for x in [0,1,2,0x80000000,0xffffffff]
@@ -442,7 +502,7 @@ def verify_mem_lifecycle():
                     ('g_inputKeyEventCallback',0,4,0xffffffff),('g_inputPollCallback',0,4,0x12345678)],
                 ('printf',1):[('g_inputPollCallback',0,4,0x87654321)],
                 ('Gfx_InitPrimitiveState',0):[('g_memPendingCallback',0,4,CALLBACK)],
-                ('Gfx_SelectBackend',0):[('g_memHandlesInitialized',0,4,0)]}
+                ('Gfx_InstallSpriteDispatch',0):[('g_memHandlesInitialized',0,4,0)]}
             compare('Mem_InitSystem',fresh(2),actions=actions,returns={'malloc':[ARENA]})
         # Every handle slot in both passes; callbacks precede any pool destruction.
         for i in range(200):
@@ -494,13 +554,13 @@ def verify_mem_lifecycle():
         step('Mem_ShutdownSystem')
         for name in ROUTINES:
             record(name,'emulation','pass',cases=counts[name],isolated_cases=isolated_counts[name],
-                persistent_invocations=(153 if name=='Lisa_PrintVersion' else
+                persistent_invocations=(286 if name=='Gfx_SelectBackend' else 153 if name=='Lisa_PrintVersion' else
                     persistent if name in ('Mem_InitSystem','Mem_ShutdownSystem') else 0),
-                persistent_integrated_startups=4 if name in ('Lisa_PrintVersion','Input_ResetCallbacks') else None,
-                integrated_startups=18 if name in ('Input_ResetCallbacks','Lisa_PrintVersion') else None,
-                scope=('306 standalone calls, exact NUL-terminated printf format/vararg bytes and order; independent return pairs, CRT boundary mutations, repeated persistent calls; 18 integrated startups; EAX=0, full tracked state, stack/nonvolatile/DF/unrelated-image checks' if name=='Lisa_PrintVersion' else '266 standalone ordered two-dword clearing calls, repeated persistent clearing; 18 integrated startups; complete tracked state and boundary snapshots; nonvolatile registers/stack/DF/unrelated-image checks; void EAX excluded' if name=='Input_ResetCallbacks' else 'Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration'),
-                limitations='Two startup dependencies, CRT printf/heap and callbacks modeled; no instruction equality, original linked layout, native startup/graphics/heap/game parity, invalid/aliased storage, concurrency or general reentry validation')
-        print('PASS: %d Lisa_PrintVersion; %d Input_ResetCallbacks; %d Mem_InitSystem and %d Mem_ShutdownSystem differential invocations; isolated %s; %d persistent invocations.'%(counts['Lisa_PrintVersion'],counts['Input_ResetCallbacks'],counts['Mem_InitSystem'],counts['Mem_ShutdownSystem'],isolated_counts,persistent))
+                persistent_integrated_startups=4 if name in ('Lisa_PrintVersion','Input_ResetCallbacks','Gfx_SelectBackend') else None,
+                integrated_startups=18 if name in ('Input_ResetCallbacks','Lisa_PrintVersion','Gfx_SelectBackend') else None,
+                scope=('572 standalone selectors: 266 nonzero calls without effects, 306 zero calls with independent ignored initializer returns and boundary mutations; 18 integrated startups; ordered calls, full tracked state and boundary snapshots, EAX/stack/nonvolatile/DF/unrelated-image checks' if name=='Gfx_SelectBackend' else '306 standalone calls, exact NUL-terminated printf format/vararg bytes and order; independent return pairs, CRT boundary mutations, repeated persistent calls; 18 integrated startups; EAX=0, full tracked state, stack/nonvolatile/DF/unrelated-image checks' if name=='Lisa_PrintVersion' else '266 standalone ordered two-dword clearing calls, repeated persistent clearing; 18 integrated startups; complete tracked state and boundary snapshots; nonvolatile registers/stack/DF/unrelated-image checks; void EAX excluded' if name=='Input_ResetCallbacks' else 'Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration'),
+                limitations='Primitive initializer, two dispatch initializers, CRT printf/heap and callbacks modeled; no instruction equality, original linked layout, native startup/graphics/heap/game parity, invalid/aliased storage, concurrency or general reentry validation')
+        print('PASS: %d Gfx_SelectBackend; %d Lisa_PrintVersion; %d Input_ResetCallbacks; %d Mem_InitSystem and %d Mem_ShutdownSystem differential invocations; isolated %s; %d persistent invocations.'%(counts['Gfx_SelectBackend'],counts['Lisa_PrintVersion'],counts['Input_ResetCallbacks'],counts['Mem_InitSystem'],counts['Mem_ShutdownSystem'],isolated_counts,persistent))
         return counts
     except Exception as exc:
         for name in ROUTINES:record(name,phase,'fail',error=str(exc))

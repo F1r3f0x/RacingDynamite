@@ -24,6 +24,20 @@ void Input_ResetCallbacks(void) {
     g_inputPollCallback = 0;
 }
 
+/*
+ * @original Gfx_SelectBackend (IGN_WIN.EXE @ 0x00456AF0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SelectBackend(int backend) {
+    if (backend != 0) {
+        return 2;
+    }
+
+    Gfx_InstallSurfaceDispatch();
+    Gfx_InstallSpriteDispatch();
+    return 1;
+}
+
 /* Global font table matching IGN_WIN.EXE @ 0x0063F2E0 */
 FontSlot g_fonts[MAX_FONTS];
 

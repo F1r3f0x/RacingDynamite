@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:d7928a58ad7a305e01d724f17b1e84637fd3f4c7e28d4b1a1742a7f6061575eb -->
+<!-- snapshot:e197fb9fd2868b5366e8cdc55269870daee03412df36ea9943f48c86d68281ba -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -393,7 +393,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x004564D0` | `0x000564D0` | 397 | `Font_GetTextWidth` | game | reconstructed | [windows_font_get_text_width.md](windows_font_get_text_width.md) |
 | `0x00456660` | `0x00056660` | 978 | `Font_DrawText` | game | reconstructed | [windows_font_draw_text.md](windows_font_draw_text.md) |
 | `0x00456A40` | `0x00056A40` | 172 | `sub_00456A40` | unknown | unidentified | - |
-| `0x00456AF0` | `0x00056AF0` | 30 | `Gfx_SelectBackend` | game | analyzed | [windows_mem_lifecycle.md](windows_mem_lifecycle.md) |
+| `0x00456AF0` | `0x00056AF0` | 30 | `Gfx_SelectBackend` | game | reconstructed | [windows_gfx_backend.md](windows_gfx_backend.md) |
 | `0x00456B10` | `0x00056B10` | 30 | `sub_00456B10` | unknown | unidentified | - |
 | `0x00456B30` | `0x00056B30` | 50 | `sub_00456B30` | unknown | unidentified | - |
 | `0x00456B70` | `0x00056B70` | 55 | `sub_00456B70` | unknown | unidentified | - |
@@ -425,7 +425,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00456E30` | `0x00056E30` | 15 | `sub_00456E30` | unknown | unidentified | - |
 | `0x00456E40` | `0x00056E40` | 15 | `sub_00456E40` | unknown | unidentified | - |
 | `0x00456E50` | `0x00056E50` | 15 | `sub_00456E50` | unknown | unidentified | - |
-| `0x00456E60` | `0x00056E60` | 181 | `sub_00456E60` | unknown | unidentified | - |
+| `0x00456E60` | `0x00056E60` | 181 | `Gfx_InstallSpriteDispatch` | game | analyzed | [windows_gfx_backend.md](windows_gfx_backend.md) |
 | `0x00456F20` | `0x00056F20` | 6 | `sub_00456F20` | unknown | unidentified | - |
 | `0x00456F30` | `0x00056F30` | 6 | `sub_00456F30` | unknown | unidentified | - |
 | `0x00456F40` | `0x00056F40` | 6 | `sub_00456F40` | unknown | unidentified | - |
@@ -543,7 +543,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045B550` | `0x0005B550` | 62 | `sub_0045B550` | unknown | unidentified | - |
 | `0x0045B590` | `0x0005B590` | 38 | `sub_0045B590` | unknown | unidentified | - |
 | `0x0045B5C0` | `0x0005B5C0` | 206 | `sub_0045B5C0` | unknown | unidentified | - |
-| `0x0045B690` | `0x0005B690` | 146 | `sub_0045B690` | unknown | unidentified | - |
+| `0x0045B690` | `0x0005B690` | 146 | `Gfx_InstallSurfaceDispatch` | game | analyzed | [windows_gfx_backend.md](windows_gfx_backend.md) |
 | `0x0045B730` | `0x0005B730` | 6 | `sub_0045B730` | unknown | unidentified | - |
 | `0x0045B740` | `0x0005B740` | 1575 | `sub_0045B740` | unknown | unidentified | - |
 | `0x0045BD70` | `0x0005BD70` | 745 | `sub_0045BD70` | unknown | unidentified | - |

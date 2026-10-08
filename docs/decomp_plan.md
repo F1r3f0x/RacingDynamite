@@ -1,5 +1,17 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded feature (2026-10-08): [graphics backend selector](ghidra/windows_gfx_backend.md)
+at RVA 0x56AF0 is reconstructed in native geputget.c, with zero calling two
+initializers in order and returning 1, every nonzero value returning 2 without
+effects. 572 standalone comparisons and 18 integrated startups execute its
+production body. Coverage retains 306 banner / 266 reset / 112 startup / 519
+shutdown comparisons and ten persistent lifecycle calls. Dispatch initializers
+at RVAs 0x5B690/0x56E60 are independently analyzed only; primitive initialization,
+both dispatch initializers, CRT printf/heap and callbacks remain modeled. Strict
+C89 focused DLL compilation passes; raw prefixes differ. Instruction equality,
+original compiler/link layout and native game parity remain unverified. Next
+bounded candidate: Gfx_InstallSurfaceDispatch, RVA 0x5B690 (146 bytes).
+
 Latest bounded feature (2026-10-08): [Lisa version banner](ghidra/windows_lisa_version.md)
 at RVA 0x5B4F0 is reconstructed in native lisa3d.c with exact Windows format and
 version bytes, two cdecl printf calls and unconditional zero return. 306 standalone
