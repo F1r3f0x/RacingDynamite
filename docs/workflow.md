@@ -70,6 +70,15 @@ running before removing the lock. The lock only coordinates this completion comm
 direct DB commands and verifier invocations do not acquire it. Prefer isolated
 worktrees and one integration owner for harness, SQLite, exports and final commit.
 
+## Delegated work
+
+`AGENTS.md` defines Luna/Gemini Flash roles and single-owner integration. Use the
+skill's [delegation procedure, handoffs and pilot](../.agents/skills/ignition-windows-decomp/references/delegation.md)
+when splitting work. Workers return bounded evidence/edits; the integration owner
+runs preflight, applies shared changes and performs the final sequence once edits
+settle. Direct verifier/DB commands remain outside the completion lock. The pilot
+measures coordination and rework; it creates no Windows validation evidence.
+
 ## What the staged gate checks
 
 - Staged whitespace, protected originals/assets, known build artifacts and raw
