@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:37e970114443b1fbe4958b41aa3f2353564b09a256c6fdda2206924d1b0a67fc -->
+<!-- snapshot:a7c3c6beaab77779b3717d95456d86fc8892a477539caacd9c50256b27601ece -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -525,8 +525,8 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045AD80` | `0x0005AD80` | 132 | `Mem_CreatePool` | game | reconstructed | [windows_mem_pools.md](windows_mem_pools.md) |
 | `0x0045AE10` | `0x0005AE10` | 406 | `Mem_Alloc` | game | reconstructed | [windows_mem_alloc.md](windows_mem_alloc.md) |
 | `0x0045B000` | `0x0005B000` | 127 | `Mem_Free` | game | reconstructed | [windows_mem_free.md](windows_mem_free.md) |
-| `0x0045B080` | `0x0005B080` | 182 | `sub_0045B080` | unknown | unidentified | - |
-| `0x0045B140` | `0x0005B140` | 41 | `sub_0045B140` | unknown | unidentified | - |
+| `0x0045B080` | `0x0005B080` | 182 | `Mem_DestroyPool` | game | reconstructed | [windows_mem_destroy.md](windows_mem_destroy.md) |
+| `0x0045B140` | `0x0005B140` | 41 | `Mem_ShutdownPools` | game | reconstructed | [windows_mem_destroy.md](windows_mem_destroy.md) |
 | `0x0045B170` | `0x0005B170` | 41 | `sub_0045B170` | unknown | unidentified | - |
 | `0x0045B1A0` | `0x0005B1A0` | 16 | `sub_0045B1A0` | unknown | unidentified | - |
 | `0x0045B1B0` | `0x0005B1B0` | 58 | `Mem_NextHandleId` | game | reconstructed | [windows_handles.md](windows_handles.md) |

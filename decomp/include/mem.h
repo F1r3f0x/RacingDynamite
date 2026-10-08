@@ -32,6 +32,13 @@ extern MemPool * volatile g_memPools[MEM_POOL_COUNT];
 int Mem_CreatePool(const char *name);
 /* No arguments; resets roots without freeing, creates DEFAULT, always EAX=1. */
 int Mem_InitPools(void);
+/* One cdecl pool-ID dword; requires a valid root/readable hierarchy.
+ * Frees only nonzero-size payloads, then blocks/pages/root; clears root last.
+ * Leaves record words and hierarchy slots untouched; always returns 1.
+ */
+int Mem_DestroyPool(int pool_id);
+/* Live ascending scan of 256 roots; skips null, destroys nonnull; returns 1. */
+int Mem_ShutdownPools(void);
 /* Two cdecl stack dwords, EAX=1 on first pointer match, 0 on no match.
  * A valid pool and readable hierarchy are required; no bounds/null guards.
  * Ignores size when selecting. Calls CRT free, then clears size only; retains

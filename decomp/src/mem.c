@@ -386,3 +386,58 @@ int Mem_InitPools(void)
     Mem_CreatePool("DEFAULT");
     return 1;
 }
+
+/* @original Mem_DestroyPool (IGN_WIN.EXE @ 0x0045B080, inferred mem.c)
+ * @fidelity EXACT
+ * Ascending size-gated payload release, then blocks/pages/root. No null guard.
+ * Current objects stay cached across CRT calls; later slots are read live.
+ */
+int Mem_DestroyPool(int pool_id)
+{
+    unsigned int pool_address;
+    MemPool *pool;
+    MemAllocationPage *page;
+    MemAllocationRecord *records;
+    int page_index;
+    int block_index;
+    int record_index;
+
+    pool_address = (unsigned int)g_memPools + (unsigned int)pool_id * 4U;
+    pool = *(MemPool * volatile *)pool_address;
+    for (page_index = 0; page_index < MEM_POOL_PAGE_COUNT; ++page_index) {
+        page = pool->pages[page_index];
+        if (page != NULL) {
+            for (block_index = 0; block_index < MEM_POOL_BLOCK_COUNT; ++block_index) {
+                records = page->blocks[block_index];
+                if (records != NULL) {
+                    for (record_index = 0; record_index < MEM_POOL_RECORD_COUNT; ++record_index) {
+                        if (records[record_index].size != 0U) {
+                            free(records[record_index].pointer);
+                        }
+                    }
+                    free(records);
+                }
+            }
+            free(page);
+        }
+    }
+    free(pool);
+    *(MemPool * volatile *)pool_address = NULL;
+    return 1;
+}
+
+/* @original Mem_ShutdownPools (IGN_WIN.EXE @ 0x0045B140, inferred mem.c)
+ * @fidelity EXACT
+ * Live ascending root scan, skipping null roots; always returns 1.
+ */
+int Mem_ShutdownPools(void)
+{
+    int pool_id;
+
+    for (pool_id = 0; pool_id < MEM_POOL_COUNT; ++pool_id) {
+        if (g_memPools[pool_id] != NULL) {
+            Mem_DestroyPool(pool_id);
+        }
+    }
+    return 1;
+}

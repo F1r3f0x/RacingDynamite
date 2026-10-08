@@ -1,5 +1,14 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded feature (2026-10-08): [Windows pool destruction and shutdown](ghidra/windows_mem_destroy.md)
+at RVAs 0x5B080/0x5B140 are reconstructed in production C89 mem.c/mem.h.
+504 destruction and 265 shutdown differential invocations pass, including
+37 persistent invocations through all six real pool lifecycle bodies, allocation
+failures, stale zero-size records, cached/live free-boundary mutations and ABI.
+CRT heap remains modeled; raw prefixes differ. Instruction equality, original
+linked layout and native heap/game parity are unverified. No playable build
+is produced; Font_Load retains its pool fixture.
+
 Latest bounded feature (2026-10-08): [Windows pool initialization and creation](ghidra/windows_mem_pools.md)
 at RVAs 0x5AD50/0x5AD80 are reconstructed in production C89 mem.c/mem.h.
 75 initializer and 745 creator differential invocations pass with complete
