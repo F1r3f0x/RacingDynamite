@@ -11,5 +11,6 @@ long File_GetStreamSize(FileStream *stream);
 long File_GetSize(const char *filename);
 /* Returns 2031 on null fopen, otherwise closes and returns 1. Text mode "r". */
 int File_CheckReadable(const char *filename);
+void *File_LoadToMemory(const char *filename);
 
 #endif

@@ -733,3 +733,6 @@ if __name__ == '__main__':
 
     from verify_file_helpers import verify_file_helpers
     verify_file_helpers()
+
+    from verify_file_load import verify_file_load
+    verify_file_load()

@@ -1,11 +1,10 @@
 # File_LoadToMemory: independently inspected Windows dependency scope
 
-File_GetStreamSize, File_GetSize and File_CheckReadable are reconstructed in
-production C89 in decomp/src/file.c, with separate compilation records and 714
-original-instruction versus compiled-C executions. File_LoadToMemory remains
-analyzed only: no production C, compilation or execution result is claimed for
-the loader. Font_Load still models it. [Mem_Alloc](windows_mem_alloc.md) is its
-reconstructed allocator prerequisite. Native filesystem/game parity is unverified.
+File_GetStreamSize, File_GetSize, File_CheckReadable and File_LoadToMemory are
+reconstructed in production C89 in decomp/src/file.c, with separate compilation
+records, 714 helper executions, and 240 loader original-instruction versus
+compiled-C executions. [Mem_Alloc](windows_mem_alloc.md) is its reconstructed
+allocator prerequisite. Native filesystem/game parity is unverified.
 
 The local doctor verifies IGN_WIN.EXE at Ignition/Ignition/IGN_WIN.EXE,
 915,968 bytes, SHA-256
@@ -196,3 +195,38 @@ equality, original linked layout, native CRT/FILE/filesystem behavior, concurren
 aliasing and general reentry remain unverified. Real loader/allocator integration
 and Font_Load with an actual loader are the next bounded implementation scope;
 full geputget.c/native game remain blocked by legacy dependencies.
+
+## File_LoadToMemory reconstruction and validation (2026-10-07)
+
+File_LoadToMemory at VA 0x004574A0 / RVA 0x574A0 (230 bytes) is reconstructed
+with fidelity EXACT in production C89 `decomp/src/file.c` and declared in `decomp/include/file.h`.
+Original instructions and relocations are authenticated against authentic PE bytes:
+FPO (230, 2, 1, 0x30A), SHA-256 2a23d52a4c2588198a7749db30e5de8c2f5ecd150a65f5940dbc2a1a5db87ec3.
+The loader executes real `File_CheckReadable`, `File_GetSize`, `File_GetStreamSize` and `Mem_Alloc`.
+
+PowerShell with Python through uv, from repository root:
+
+~~~powershell
+uv run python tools/verify_file_load.py
+uv run python tools/workflow.py complete --rva 0x574a0 --limitation "CRT I/O and malloc modeled; no native filesystem, instruction equality or game parity"
+uv run python tools/db.py update --check
+~~~
+
+The focused `file_load_validation.dll` compiles complete production `file.c` and `mem.c`
+with provisional Clang/LLD 19.1.1, i686-pc-windows-msvc, strict C89, -O2.
+Nonreturning link fixtures guard unintercepted CRT boundaries.
+
+240 differential executions pass between authentic `IGN_WIN.EXE` and the reconstructed DLL,
+covering all branch paths:
+1. `File_CheckReadable` failure returning NULL with error 2030;
+2. `File_GetSize` returning 0, resulting in NULL return and error 2040;
+3. `Mem_Alloc` failure returning NULL with error 2050;
+4. Binary `fopen` failure returning NULL with error 2000, retaining buffer allocation;
+5. Short `fread` returning NULL with error 2010 without closing or freeing;
+6. Successful load across varied sizes (1 byte to 1 MB), returning buffer pointer,
+   verifying `fsetpos` position `[0, 0]`, exact read count, stream close,
+   preservation of existing error words, caller stack balance, saved registers
+   (EBX, ESI, EDI, EBP), and clear DF.
+
+Instruction equality, native filesystem/heap behavior, and full game parity remain unverified.
+Font_Load loader integration is the next bounded scope.

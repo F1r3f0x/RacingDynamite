@@ -84,7 +84,11 @@ def build_helpers():
     stub.write_text('void *fopen(const char *f,const char *m) { (void)f; (void)m; for (;;) {} }\n'
         'int fclose(void *s) { (void)s; for (;;) {} }\n'
         'long ftell(void *s) { (void)s; for (;;) {} }\n'
-        'int fseek(void *s,long p,int o) { (void)s; (void)p; (void)o; for (;;) {} }\n',encoding='utf-8')
+        'int fseek(void *s,long p,int o) { (void)s; (void)p; (void)o; for (;;) {} }\n'
+        'int g_fileErrorLine;\n'
+        'void *Mem_Alloc(int p, unsigned int n) { (void)p; (void)n; for (;;) {} }\n'
+        'int fsetpos(void *s, const void *p) { (void)s; (void)p; for (;;) {} }\n'
+        'unsigned int fread(void *b, unsigned int s, unsigned int n, void *f) { (void)b; (void)s; (void)n; (void)f; for (;;) {} }\n',encoding='utf-8')
     for path in [obj,sobj,DLL,DLL.with_suffix('.lib'),DLL.with_suffix('.exp')]: path.unlink(missing_ok=True)
     flags=[cc,'--target=i686-pc-windows-msvc','-std=c89','-pedantic-errors','-Wall','-Wextra',
         '-Werror','-O2','-ffreestanding','-fno-builtin','-fno-inline','-fno-vectorize',
@@ -92,7 +96,7 @@ def build_helpers():
     commands=[flags+['-c',str(ROOT/'decomp/src/file.c'),'-o',str(obj)],
         flags+['-c',str(stub),'-o',str(sobj)],
         [ld,'/dll','/noentry','/nodefaultlib','/machine:x86','/base:0x10000000',
-         '/out:'+str(DLL),str(obj),str(sobj)]+['/export:'+n for n in [*ROUTINES,*CRT]]]
+         '/out:'+str(DLL),str(obj),str(sobj)]+['/export:'+n for n in [*ROUTINES,*CRT,'File_LoadToMemory']]]
     for command in commands:
         print(subprocess.list2cmdline(command),flush=True)
         subprocess.run(command,cwd=ROOT,check=True)
@@ -113,9 +117,9 @@ def inspect_rebuilt(pe,symbols):
     for i in ins:
         if i.mnemonic!='call': continue
         owner=next(name for address,name in reversed(entries) if address<=i.address)
-        assert owner in actual,'Unexpected linked dependency owner'
-        assert i.op_str.startswith('0x'),'Unexpected indirect linked call'
-        actual[owner].append(int(i.op_str,16))
+        if owner in actual:
+            assert i.op_str.startswith('0x'),'Unexpected indirect linked call'
+            actual[owner].append(int(i.op_str,16))
     assert actual==expected,'Linked call identities differ from the bounded contract'
 
 

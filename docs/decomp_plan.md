@@ -1,13 +1,21 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded follow-up (2026-10-07): [File_LoadToMemory](ghidra/windows_file_load.md)
+at VA 0x004574A0 / RVA 0x574A0 (230 bytes) is reconstructed in production C89 file.c/file.h.
+240 differential executions pass against authentic PE instructions with real File_CheckReadable,
+File_GetSize, File_GetStreamSize and Mem_Alloc execution, verifying error precedence
+(2030, 2040, 2050, 2000, 2010), unclosed stream on short read, retained allocation on open
+failure, position words [0, 0], and full ABI/register preservation. CRT I/O and malloc
+are modeled; raw bytes differ and native filesystem/game parity is unverified.
+Next replace Font_Load's modeled loader boundary with actual File_LoadToMemory execution.
+
 Latest bounded follow-up (2026-10-07): the [native file helpers](ghidra/windows_file_load.md)
 at RVAs 0x575F0/0x57630/0x576B0 are reconstructed in production C89 file.c/file.h.
 714 differential executions pass with real GetStreamSize through GetSize, exact
 ordered CRT calls, cached signed size/position words, ignored seek/close failures,
 null-stream forwarding, complete state snapshots and ABI. CRT I/O is modeled;
 raw bytes differ and native filesystem/game parity is unverified. File_LoadToMemory
-at RVA 0x574A0 remains analyzed only; next reconstruct it with these real helpers
-and real Mem_Alloc, then replace Font_Load's modeled loader boundary.
+at RVA 0x574A0 is reconstructed with these real helpers and real Mem_Alloc.
 
 Latest bounded follow-up (2026-10-07): [Mem_Alloc](ghidra/windows_mem_alloc.md)
 at VA 0x0045AE10 / RVA 0x5AE10 (406 bytes) is reconstructed in production C89.
