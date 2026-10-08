@@ -173,8 +173,26 @@ volatile GfxSpriteHandle g_nativeSpriteHandles[GFX_SPRITE_HANDLE_COUNT];
 GfxSpriteHandle *volatile *volatile g_nativeSpriteFreeCursor;
 volatile GfxSpriteDescriptor g_nativeSpriteScratch;
 volatile GfxSpriteDescriptor g_nativeSpriteDefault;
+const char g_nativeSpriteDefaultName[] = "default"; /* VA 0x004BACF8 */
+volatile uint32_t g_nativeNextImageId; /* VA 0x00520380 */
 volatile int32_t g_nativeImageCapacity;
 GfxSpriteDescriptor *volatile *volatile g_nativeImageRecords;
+
+/*
+ * @original Gfx_InitDefaultSpriteDescriptor (IGN_WIN.EXE @ 0x004611D0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InitDefaultSpriteDescriptor(void) {
+    g_nativeSpriteDefault.words[0] = (uint32_t)g_nativeSpriteDefaultName;
+    g_nativeSpriteDefault.words[1] = 0;
+    g_nativeSpriteDefault.words[2] = 0;
+    g_nativeSpriteDefault.words[3] = 0;
+    g_nativeSpriteDefault.words[4] = 0;
+    g_nativeSpriteDefault.words[5] = 0;
+    g_nativeSpriteDefault.words[6] = 0;
+    g_nativeNextImageId = 1;
+    return 0;
+}
 
 /*
  * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0, geputget.c)

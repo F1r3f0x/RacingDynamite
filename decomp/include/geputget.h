@@ -98,6 +98,9 @@ extern volatile GfxSpriteHandle g_nativeSpriteHandles[GFX_SPRITE_HANDLE_COUNT]; 
 extern GfxSpriteHandle *volatile *volatile g_nativeSpriteFreeCursor; /* VA 0x0051A998 */
 extern volatile GfxSpriteDescriptor g_nativeSpriteScratch; /* VA 0x00514B98 */
 extern volatile GfxSpriteDescriptor g_nativeSpriteDefault; /* VA 0x0051FB88 */
+extern const char g_nativeSpriteDefaultName[8]; /* VA 0x004BACF8; includes NUL */
+extern volatile uint32_t g_nativeNextImageId; /* VA 0x00520380; raw search word */
+int Gfx_InitDefaultSpriteDescriptor(void); /* VA 0x004611D0; EAX=0 */
 extern volatile int32_t g_nativeImageCapacity; /* VA 0x00520388; signed */
 extern GfxSpriteDescriptor *volatile *volatile g_nativeImageRecords; /* VA 0x0052038C */
 int Gfx_CopySpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x004612E0 */

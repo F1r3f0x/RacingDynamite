@@ -1,5 +1,23 @@
 # Enforced agent workflow
 
+## Default sprite descriptor initialization (2026-10-08)
+
+[The default initializer](ghidra/windows_gfx_default_descriptor.md), VA
+0x004611D0 / RVA 0x611D0, now has production C89 and independent differential
+coverage: 280 standalone comparisons (132 persistent repeats), exact eight
+ordered stores/no reads, arbitrary nine-word tail preservation and EAX=0.
+It executes 392 real bodies per binary, including 112 startups through an
+explicitly modeled primitive driver. The real primitive initializer remains
+unreconstructed and is not executed. Sixteen real helper/handle consumption
+chains add coverage; existing standalone comparison counts and all prior suites
+remain. Full completion renews compilation/emulation evidence for all 35
+reconstructed routines; inventory remains 1,028 candidates. Instruction equality,
+original compiler/link layout and native graphics/heap/game parity remain
+unverified. CRT/callbacks remain modeled and workspace consumers unreconstructed.
+Use `uv run python tools/workflow.py complete --rva 0x611D0` with an explicit
+limitation. Earlier milestone entries below are historical.
+
+
 ## Real lazy sprite workspaces (2026-10-08)
 
 [Workspaces A/B](ghidra/windows_gfx_sprite_workspaces.md) at RVAs 0x5D840/0x5C9F0
