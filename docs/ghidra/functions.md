@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:a5e8a2bb3d67b6eed13f38ebdb007f7f847a263d0dc1f7ddb06175d5752f0dd4 -->
+<!-- snapshot:2e385999be741dbad85a0d2e19efebe4013a078e0cec5d4a81db3390c95fdc81 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -440,13 +440,13 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x004572C0` | `0x000572C0` | 173 | `sub_004572C0` | unknown | unidentified | - |
 | `0x00457370` | `0x00057370` | 167 | `Gfx_SubmitSpriteRequest` | game | analyzed | [windows_sprite_adapter.md](windows_sprite_adapter.md) |
 | `0x00457420` | `0x00057420` | 123 | `sub_00457420` | unknown | unidentified | - |
-| `0x004574A0` | `0x000574A0` | 230 | `sub_004574A0` | unknown | unidentified | - |
+| `0x004574A0` | `0x000574A0` | 230 | `File_LoadToMemory` | game | analyzed | [windows_file_load.md](windows_file_load.md) |
 | `0x00457590` | `0x00057590` | 84 | `sub_00457590` | unknown | unidentified | - |
-| `0x004575F0` | `0x000575F0` | 60 | `sub_004575F0` | unknown | unidentified | - |
-| `0x00457630` | `0x00057630` | 47 | `sub_00457630` | unknown | unidentified | - |
+| `0x004575F0` | `0x000575F0` | 60 | `File_GetStreamSize` | game | analyzed | [windows_file_load.md](windows_file_load.md) |
+| `0x00457630` | `0x00057630` | 47 | `File_GetSize` | game | analyzed | [windows_file_load.md](windows_file_load.md) |
 | `0x00457660` | `0x00057660` | 29 | `sub_00457660` | unknown | unidentified | - |
 | `0x00457680` | `0x00057680` | 34 | `sub_00457680` | unknown | unidentified | - |
-| `0x004576B0` | `0x000576B0` | 43 | `sub_004576B0` | unknown | unidentified | - |
+| `0x004576B0` | `0x000576B0` | 43 | `File_CheckReadable` | game | analyzed | [windows_file_load.md](windows_file_load.md) |
 | `0x004576E0` | `0x000576E0` | 179 | `sub_004576E0` | unknown | unidentified | - |
 | `0x004577A0` | `0x000577A0` | 237 | `sub_004577A0` | unknown | unidentified | - |
 | `0x00457890` | `0x00057890` | 64 | `sub_00457890` | unknown | unidentified | - |
@@ -521,9 +521,9 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045AB50` | `0x0005AB50` | 225 | `sub_0045AB50` | unknown | unidentified | - |
 | `0x0045AC40` | `0x0005AC40` | 134 | `sub_0045AC40` | unknown | unidentified | - |
 | `0x0045ACD0` | `0x0005ACD0` | 125 | `sub_0045ACD0` | unknown | unidentified | - |
-| `0x0045AD50` | `0x0005AD50` | 35 | `sub_0045AD50` | unknown | unidentified | - |
-| `0x0045AD80` | `0x0005AD80` | 132 | `sub_0045AD80` | unknown | unidentified | - |
-| `0x0045AE10` | `0x0005AE10` | 406 | `sub_0045AE10` | unknown | unidentified | - |
+| `0x0045AD50` | `0x0005AD50` | 35 | `Mem_InitPools` | game | analyzed | [windows_mem_alloc.md](windows_mem_alloc.md) |
+| `0x0045AD80` | `0x0005AD80` | 132 | `Mem_CreatePool` | game | analyzed | [windows_mem_alloc.md](windows_mem_alloc.md) |
+| `0x0045AE10` | `0x0005AE10` | 406 | `Mem_Alloc` | game | reconstructed | [windows_mem_alloc.md](windows_mem_alloc.md) |
 | `0x0045B000` | `0x0005B000` | 127 | `Mem_Free` | game | reconstructed | [windows_mem_free.md](windows_mem_free.md) |
 | `0x0045B080` | `0x0005B080` | 182 | `sub_0045B080` | unknown | unidentified | - |
 | `0x0045B140` | `0x0005B140` | 41 | `sub_0045B140` | unknown | unidentified | - |

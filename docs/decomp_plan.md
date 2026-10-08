@@ -1,5 +1,19 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded follow-up (2026-10-07): [Mem_Alloc](ghidra/windows_mem_alloc.md)
+at VA 0x0045AE10 / RVA 0x5AE10 (406 bytes) is reconstructed in production C89.
+Its focused suite covers 800 differential invocations plus three real Mem_Free
+round trips, exact lookahead reads beyond exhausted arrays, first-size-zero
+selection, all allocation failures and retained partial hierarchy, zero-size
+reuse and cached stores across modeled CRT mutations. CRT heap remains modeled;
+instruction equality and native heap/game parity are unverified. Pool initialization
+and creation at RVAs 0x5AD50/0x5AD80 were independently rechecked and are analyzed
+only. [File_LoadToMemory and size/readability helpers](ghidra/windows_file_load.md)
+at RVAs 0x574A0/0x575F0/0x57630/0x576B0 have bounded static analysis only, with
+no production C or execution results. Next reconstruct those native file wrappers
+and execute real Mem_Alloc through the loader before replacing Font_Load's file
+boundary. Font_Load still models file loading; full geputget.c remains blocked.
+
 Latest bounded follow-up (2026-10-07): [Mem_Free](ghidra/windows_mem_free.md)
 at VA `0x0045B000` / RVA `0x5B000` (127 bytes) is reconstructed in mem.c,
 with independently recovered pool/page/record types and 519 differential

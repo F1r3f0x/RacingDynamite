@@ -6,6 +6,7 @@
 
 /* CRT caller-cleanup free boundary; native heap behavior is not reconstructed. */
 extern void free(void *pointer);
+extern void *malloc(size_t size);
 
 typedef char Mem_UIntMustBe32Bits[(sizeof(unsigned int) == 4) ? 1 : -1];
 typedef char Mem_ShortMustBe16Bits[(sizeof(short) == 2) ? 1 : -1];
@@ -86,6 +87,108 @@ int Mem_Free(int pool_id, void *pointer)
         }
     }
     return 0;
+}
+
+/* @original Mem_Alloc (IGN_WIN.EXE @ 0x0045AE10, inferred mem.c)
+ * @fidelity EXACT
+ * Ascending first-zero-size allocation; retains partial hierarchy on failure.
+ * Lookahead reads at each exhausted array are authentic, even beyond its end.
+ */
+void *Mem_Alloc(int pool_id, unsigned int size)
+{
+    unsigned int pool_address;
+    MemPool *pool;
+    MemAllocationPage *page;
+    MemAllocationRecord *records;
+    void *pointer;
+    int page_index;
+    int block_index;
+    int record_index;
+
+    pool_address = (unsigned int)g_memPools + (unsigned int)pool_id * 4U;
+    pool = *(MemPool * volatile *)pool_address;
+    page_index = 0;
+    /* Integer address calculation keeps the exhausted-array lookahead read
+     * without C array indexing beyond the declared aggregate. Caller storage
+     * must include readable trailing words, as required by native execution.
+     */
+#define MEM_PAGE_AT(i) (*(MemAllocationPage * volatile *)((unsigned int)pool + \
+    offsetof(MemPool, pages) + (unsigned int)(i) * sizeof(page)))
+#define MEM_BLOCK_AT(i) (*(MemAllocationRecord * volatile *)((unsigned int)page + \
+    offsetof(MemAllocationPage, blocks) + (unsigned int)(i) * sizeof(records)))
+#define MEM_SIZE_AT(i) (*(volatile unsigned int *)((unsigned int)records + \
+    offsetof(MemAllocationRecord, size) + (unsigned int)(i) * sizeof(*records)))
+    while (MEM_PAGE_AT(page_index) != NULL && page_index < MEM_POOL_PAGE_COUNT) {
+        page = MEM_PAGE_AT(page_index);
+        block_index = 0;
+        while (MEM_BLOCK_AT(block_index) != NULL && block_index < MEM_POOL_BLOCK_COUNT) {
+            records = MEM_BLOCK_AT(block_index);
+            record_index = 0;
+            while (MEM_SIZE_AT(record_index) != 0U && record_index < MEM_POOL_RECORD_COUNT) {
+                ++record_index;
+            }
+            if (record_index != MEM_POOL_RECORD_COUNT) {
+                pointer = malloc(size);
+                if (pointer == NULL) {
+                    return NULL;
+                }
+                records[record_index].pointer = pointer;
+                records[record_index].size = size;
+                return pointer;
+            }
+            ++block_index;
+        }
+        if (block_index != MEM_POOL_BLOCK_COUNT) {
+            records = (MemAllocationRecord *)malloc(MEM_POOL_RECORD_COUNT * sizeof(*records));
+            if (records == NULL) {
+                return NULL;
+            }
+            page->blocks[block_index] = records;
+            /* Existing-page branch leaves record zero's size untouched until
+             * payload allocation succeeds. Pointer words remain indeterminate.
+             */
+            for (record_index = 1; record_index < MEM_POOL_RECORD_COUNT; ++record_index) {
+                records[record_index].size = 0U;
+            }
+            pointer = malloc(size);
+            if (pointer == NULL) {
+                return NULL;
+            }
+            records[0].pointer = pointer;
+            records[0].size = size;
+            return pointer;
+        }
+        ++page_index;
+    }
+#undef MEM_PAGE_AT
+#undef MEM_BLOCK_AT
+#undef MEM_SIZE_AT
+    if (page_index == MEM_POOL_PAGE_COUNT) {
+        return NULL;
+    }
+    page = (MemAllocationPage *)malloc(sizeof(*page));
+    if (page == NULL) {
+        return NULL;
+    }
+    pool->pages[page_index] = page;
+    for (block_index = 0; block_index < MEM_POOL_BLOCK_COUNT; ++block_index) {
+        page->blocks[block_index] = NULL;
+    }
+    records = (MemAllocationRecord *)malloc(MEM_POOL_RECORD_COUNT * sizeof(*records));
+    if (records == NULL) {
+        return NULL;
+    }
+    page->blocks[0] = records;
+    for (record_index = 0; record_index < MEM_POOL_RECORD_COUNT; ++record_index) {
+        records[record_index].size = 0U;
+    }
+    pointer = malloc(size);
+    if (pointer == NULL) {
+        return NULL;
+    }
+    records[0].pointer = pointer;
+    records[0].size = size;
+    return pointer;
 }
 
 /* @original Mem_ReleaseHandleId (IGN_WIN.EXE @ 0x0045B410, inferred mem.c)

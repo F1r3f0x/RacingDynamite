@@ -9,7 +9,7 @@ from windows_target import ROOT, BUILD, DLL, verify_target
 
 EXPORTS = ['Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
            'g_memHandleIds', 'g_memHandleCursor', 'Mem_RegisterHandle', 'Mem_ShutdownHandles',
-           'Mem_ReleaseHandleId', 'Mem_Free', 'g_memPools', 'free',
+           'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'free', 'malloc',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',
            'g_memHandleCallbacks', 'g_memHandleFlags', 'g_memPendingContext',
            'g_memPendingCallback', 'g_memPendingParameter']
@@ -22,7 +22,7 @@ def build(compiler='clang', linker='lld-link', dll=DLL):
     BUILD.mkdir(parents=True, exist_ok=True)
     obj = BUILD / 'mem.obj'
     stub, stub_obj = BUILD / 'mem_crt_boundary.c', BUILD / 'mem_crt_boundary.obj'
-    stub.write_text('void free(void *p) { (void)p; for (;;) {} }\n', encoding='utf-8')
+    stub.write_text('void free(void *p) { (void)p; for (;;) {} }\nvoid *malloc(unsigned int n) { (void)n; for (;;) {} }\n', encoding='utf-8')
     # Only these explicit fresh products are inputs/outputs; never glob old objects.
     for path in [obj, stub_obj, dll, dll.with_suffix('.lib'), dll.with_suffix('.exp')]:
         path.unlink(missing_ok=True)

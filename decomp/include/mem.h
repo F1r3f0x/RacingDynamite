@@ -32,6 +32,12 @@ extern MemPool * volatile g_memPools[MEM_POOL_COUNT];
  */
 int Mem_Free(int pool_id, void *pointer);
 
+/* Two cdecl dwords. First free size selects a record; zero-size requests
+ * remain reusable. Failures retain any newly attached page/block. No guards.
+ * Requires readable lookahead words beyond full pool/page/record arrays.
+ */
+void *Mem_Alloc(int pool_id, unsigned int size);
+
 #define MEM_HANDLE_COUNT 200
 extern unsigned int g_memHandlesInitialized;
 extern unsigned int g_memHandleStatus[MEM_HANDLE_COUNT];

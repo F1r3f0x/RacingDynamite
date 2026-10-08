@@ -158,3 +158,22 @@ hierarchies, invalid pool IDs, concurrency and reentry are excluded. Bounded
 boundary mutations are not general reentry validation. Full geputget.c and
 native game remain blocked by legacy dependencies; no playable reconstruction
 is produced.
+
+## Mem_Alloc prerequisite follow-up (2026-10-07)
+
+[Mem_Alloc](windows_mem_alloc.md), VA 0x0045AE10 / RVA 0x5AE10, now executes
+through 800 differential allocator invocations and three allocation/free/reuse
+round trips that execute real Mem_Free bodies. CRT malloc/free remain explicit
+modeled heap boundaries. This follow-up leaves Mem_Free's body unchanged and
+refreshes its 519-case verifier plus the existing 333 Font_Load cases. The
+complete memory DLL now has seven direct helper calls: six owned by Mem_Alloc
+targeting malloc and one owned by Mem_Free targeting free. The provenance
+guard verifies both ownership and target, superseding the older count of one.
+Memory/font builders link nonreturning malloc as well as free fixtures because
+they compile complete mem.c. Font_Load still models File_LoadToMemory; it does
+not execute Mem_Alloc until that loader dependency is reconstructed.
+
+Compilation and differential emulation are separately refreshed. Instruction
+equality, native heap/game parity, invalid/aliased hierarchies, concurrency and
+general reentry remain unverified. Allocator validation additionally requires
+readable trailing lookahead words; that is not a new Mem_Free requirement.

@@ -106,7 +106,7 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     if include_loader:
         # Deliberately cannot complete without the explicit CPU boundary model.
         stubs += 'void *File_LoadToMemory(const char *filename) { (void)filename; for (;;) {} }\n'
-    stubs += 'void free(void *p) { (void)p; for (;;) {} }\n'
+    stubs += 'void free(void *p) { (void)p; for (;;) {} }\nvoid *malloc(unsigned int n) { (void)n; for (;;) {} }\n'
     stub.write_text(stubs, encoding='utf-8')
     stub_obj.unlink(missing_ok=True)
     cc, ld = shutil.which('clang'), shutil.which('lld-link')
