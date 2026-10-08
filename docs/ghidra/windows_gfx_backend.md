@@ -164,3 +164,17 @@ unreconstructed; the reserved slot has no observed consumer. Primitive and
 sprite initialization, CRT printf/heap and callbacks remain modeled. Strict C89
 focused compilation passes; raw prefixes differ. Instruction equality and native
 graphics/game parity are unverified. Earlier model descriptions are historical.
+
+## Production sprite installer follow-up (2026-10-08)
+
+[Sprite dispatch installation](windows_gfx_sprite_dispatch.md), RVA 0x56E60,
+now owns sixteen independently typed production globals and executes through
+both the real selector and 18 integrated startups, preserving the real surface
+installer. Fresh coverage: 306 standalone sprite installers, 532 selectors,
+266 standalone surface installers, 48/39 original-only sprite/surface consumer
+ABI checks, 43 original-only downstream initializer contract cases. Existing
+306 banner / 266 reset / 112 startup / 519 shutdown comparisons and ten persistent
+lifecycle calls remain. Three downstream sprite initializers and primitive
+initialization, CRT printf/heap and callbacks are explicitly modeled. Strict C89
+focused compilation passes; raw prefixes differ. Instruction equality and native
+graphics/game parity are unverified. Earlier model descriptions are historical.

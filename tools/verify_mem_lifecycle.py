@@ -8,7 +8,7 @@ import random
 import struct
 import pefile
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
-from unicorn import Uc, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE
+from unicorn import Uc, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE, UC_MEM_WRITE
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ECX, UC_X86_REG_EDX,
     UC_X86_REG_ESP, UC_X86_REG_EIP, UC_X86_REG_EFLAGS)
 from verify_mem_destroy import DestroySession, inspect_original as inspect_destroy
@@ -22,6 +22,7 @@ from windows_tracking import record_run
 if not __debug__:
     raise RuntimeError('Verification requires assertions')
 ROUTINES = {
+    'Gfx_InstallSpriteDispatch': (0x56e60,181,'215bc3324a371904ec72c0e780eec9b178b47f01e195eaaac6124781c612a8b6'),
     'Gfx_InstallSurfaceDispatch': (0x5b690,146,'3cb7a08c993e9d2ce4db93a2ebe96e9165728ef6bae5b5014371ebaef3de41bf'),
     'Gfx_SelectBackend': (0x56af0,30,'d1fcb40ea924f27f8afef2a4b1e804ee70ce3fed2ff4f9e74a376877e7c3c4cd'),
     'Lisa_PrintVersion': (0x5b4f0,34,'719ae03224b3f4a4ab08fa52985cd65454730bd8de870f8afe632d9216951802'),
@@ -29,8 +30,10 @@ ROUTINES = {
     'Mem_InitSystem': (0x5b170,41,'e4026b0791ef97b56f8fa7013dd568dfd4772d64e2638d850a217c9d338ce2b8'),
     'Mem_ShutdownSystem': (0x5b1a0,16,'75f6e3f589d50b5cb564113e1270c4f2a5df39c0614d41516b520d0d3ee064a3')}
 DEPENDENCIES = {
-    'Gfx_InitPrimitiveState': (0x5e610,326,'fd2abfef167ef5b92074ef41c17478dd955591025afb3aad714da050a29704a3'),
-    'Gfx_InstallSpriteDispatch': (0x56e60,181,'215bc3324a371904ec72c0e780eec9b178b47f01e195eaaac6124781c612a8b6')}
+    'Gfx_InitSpriteWorkspaceA': (0x5d840,84,'445faf9112110b216014f95c057ab6d572a81fec3fa64a867b9d5f03739c1d43'),
+    'Gfx_InitSpriteWorkspaceB': (0x5c9f0,84,'922d88eb43e5d8b7ede3d71df0d81a543dc389bfad921e3faa13815d0ac5468e'),
+    'Gfx_InitSpriteHandles': (0x5c7f0,62,'41862be4869238f9f9261e170ab377306cd2aa18afbbd6761a59bf2f32a5b132'),
+    'Gfx_InitPrimitiveState': (0x5e610,326,'fd2abfef167ef5b92074ef41c17478dd955591025afb3aad714da050a29704a3')}
 MEMORY = {'Mem_InitHandles':(0x5b1f0,76), 'Mem_ShutdownHandles':(0x5b240,155),
     'Mem_NextHandleId':(0x5b1b0,58), 'Mem_RegisterHandle':(0x5b360,120),
     'Mem_ReleaseHandleId':(0x5b410,62)}
@@ -46,7 +49,10 @@ BANNER_ARGS = [(BANNER_STRINGS[0x4bab5c], BANNER_STRINGS[0x4bab20]),
     (BANNER_STRINGS[0x4bab3c],)]
 RESOURCE_FIELDS = [('g_inputKeyEventCallback',0x50de14,4), ('g_inputPollCallback',0x50e678,4)]
 SURFACE_SLOTS = [('g_surfaceConfigure', 4568880), ('g_surfaceOpen', 4568896), ('g_surfaceClose', 4570480), ('g_surfaceReset', 4571232), ('g_surfaceConfigureSurface', 4571472), ('g_surfaceBlit', 4571488), ('g_surfaceCopyPixels', 4571600), ('g_surfaceClear', 4572112), ('g_surfacePresent', 4572336), ('g_surfaceReserved', 4572448), ('g_surfaceLock', 4572464), ('g_surfaceUnlock', 4572800), ('g_surfaceSetPalette', 4572880), ('g_surfaceRestore', 4572976)]
-STATE_FIELDS = BOOKKEEPING_FIELDS + RESOURCE_FIELDS + [(name,0x50eb68+4*i,4) for i,(name,_) in enumerate(SURFACE_SLOTS)] + [('validation_gfxDispatchWords',0x50eba0,80)]
+SPRITE_SLOTS = [('g_spriteOpen', 5303200, 4550432, 'Gfx_SpriteOpenNative'), ('g_spriteReset', 5303204, 4550448, 'Gfx_SpriteResetNative'), ('g_spriteClose', 5303208, 4550464, 'Gfx_SpriteCloseNative'), ('g_spriteOption', 5303212, 4550480, 'Gfx_SpriteOptionNative'), ('g_spriteConfigure', 5303216, 4550496, 'Gfx_SpriteConfigureNative'), ('g_spriteSetClip', 5303220, 4550688, 'Gfx_SpriteSetClipNative'), ('g_spriteDrawList', 5303224, 4551248, 'Gfx_SpriteDrawListNative'), ('g_spriteDraw', 5303228, 4551088, 'Gfx_DrawSpriteNative'), ('g_spriteHandleOp', 5303232, 4573232, 'Gfx_SpriteHandleOpNative'), ('g_spriteImageOp', 5303256, 4592480, 'Gfx_SpriteImageOpNative'), ('g_spriteCreateDescriptor', 5303252, 4573472, 'Gfx_SpriteCreateDescriptorNative'), ('g_spriteFreeDescriptor', 5303260, 4573504, 'Gfx_SpriteFreeDescriptorNative'), ('g_spriteCopyDescriptor', 5303264, 4573536, 'Gfx_SpriteCopyDescriptorNative'), ('g_spriteReserved', 5303268, 4594304, 'Gfx_SpriteReservedNative'), ('g_spriteGetState', 5303276, 4550928, 'Gfx_SpriteGetStateNative'), ('g_spriteSetState', 5303272, 4551024, 'Gfx_SpriteSetStateNative')]
+SPRITE_CONSUMERS = [(355264, 19, 0, 0, '52be6802ced83d2ed0f4d075befb6cb8a27c422283385d5948efbf9807fee826'), (355312, 19, 0, 1, '12f76bae9f55a6539d23baf465bf52e0b2450cf8cc41121eb16f100448679412'), (355488, 6, 0, 2, 'f54576d17cf81a5b459c28177c5d638406200de58ced731d331e852d85c3b108'), (355504, 15, 1, 3, 'd5f47caf1c6baad1796a505d1ba148815dc490a6e2214fc8a00f3cc3233a4c64'), (355520, 35, 5, 4, '55920e775768dfba2721249cf60a49b924696a84bfe47a8ad80af5f2da278154'), (355568, 30, 4, 5, '9f7d76bab0660dc8db60d9fea1ab576779f890831a2109d76b88fd01dd461208'), (355600, 15, 1, 6, '12a4a53eb2752ffee638c4a6ad965e4e19bf62d9f28382d673ed854136bc9e0b'), (355616, 25, 3, 7, 'e04def2288d23041976ef0a043cea2b296558f74cf82cce58476bf765e804623'), (355648, 20, 2, 8, 'f76b5ff746f37d91b851c1a25161196baa69ffe94b4bfe1250a607da04aa97bc'), (355776, 20, 2, 14, 'a36dcdae6600a974858cc66f8c213e5b0e94e5aaa755c35fd54d6ea49daf9772'), (355808, 20, 2, 13, '4b892e967e307cfd490ce8c9e026a2c2f96f7ca77b1aceafccf2eb388847f4fc'), (355840, 15, 1, 15, 'ac56b05bb0bb49106928975f6c55be891221b8a15887fc446520ac74fcf4b15c'), (355856, 20, 2, 16, '4df461e4396b427c52bde31bb1c9b2c9173c009db8427aa2fd4cb41f0bdbc1ed'), (355888, 15, 1, 17, 'ed08e50628bdf08f53ad96b88e5d9dab86c6b337186a18f8d8e6951da1221f22'), (355904, 15, 1, 19, '9d4fe8577c937219b06bcef289111aecbca1ca42481219197dc5b00852d4b5e2'), (355920, 15, 1, 18, 'd4a6aa806bb86c3e10bc4475cdc896c4ece70748edf944be89dccc226f876fda')]
+SPRITE_TARGETS = [(356128, 6, '2db31f4e09597946e56e859813bfdad7046d457c32332c3a882654d1e3ffdf67'), (356144, 6, '2db31f4e09597946e56e859813bfdad7046d457c32332c3a882654d1e3ffdf67'), (356160, 6, '2db31f4e09597946e56e859813bfdad7046d457c32332c3a882654d1e3ffdf67'), (356176, 3, '4bc724f3b1d0caf4fe369c18cba3102e6c4ea057f63fe1587e3973134a7f755e'), (356192, 187, 'b9bcf21802d579d076091d7908499681c374a5786d4b5c46ce5d981135950c93'), (356384, 225, '223c2cd20c7f79c950d9fc173d170037f4bde1047b285142be51fe551173dbcb'), (356944, 96, '12d36bd728eefff1bcccf08ecd1e7a52c39ef5d1ce833f2baeee78a7ae52b50d'), (356784, 145, 'f2fe1b07e3a37fe080d3cfcaeadad8e3bae3d2ca326e16c4a99e6ac563e01dac'), (378928, 207, '77a47f976fb496d9826b327cdf81fa38f527ee1a1fb3ce7085124b6ab39a0ec7'), (398176, 329, '81b591def47aa754c8a41dd4255ba978ad5ff82514ca2533537dd607077a2020'), (379168, 24, 'fd5cdd32124a607730e33cc3717641031757e7524d4bc8252ea6d7a0fe506b0e'), (379200, 19, '6fbd0f1c63dd28502523b19906d18ca89eee90c5df9045d4c2471ca7147d7795'), (379232, 24, '7f21b8803e5134922b22aefa7896ec5d43d3aa997dddb3ad20939b8639a7cfc4'), (400000, 3, '4bc724f3b1d0caf4fe369c18cba3102e6c4ea057f63fe1587e3973134a7f755e'), (356624, 92, '9be413481f65ac603e7873f46b10cff7a09f8de06c3a0904b100e8b4f77a18ae'), (356720, 63, '635cc8612df0e75ae8e7760faa6cd17b0730605c52c19d15184a89158f2092c7')]
+STATE_FIELDS = BOOKKEEPING_FIELDS + RESOURCE_FIELDS + [(name,0x50eb68+4*i,4) for i,(name,_) in enumerate(SURFACE_SLOTS)] + [(name,va,4) for name,va,_,_ in SPRITE_SLOTS] + [('validation_gfxDispatchWords',0x50ebc4,16)]
 # Authentic consumer extents/stack contracts; recovered independently of C types.
 SURFACE_CONSUMERS = [
     (0x56b10,30,4,0,'0aefb3b8a35847643dbeb6d4c15ca363c8fb17a65cf8c0bf1a1e9df12262f907'),
@@ -82,7 +88,7 @@ SURFACE_TARGETS = [
 
 ISOLATED_HELPERS = ('Lisa_PrintVersion','Input_ResetCallbacks','Gfx_SelectBackend',
     'Mem_InitPools','Mem_InitHandles','Mem_ShutdownHandles','Mem_ShutdownPools')
-MODELED_STARTUP = set(STARTUP_EXPORTS) - {'Gfx_SelectBackend','Gfx_InstallSurfaceDispatch'}
+MODELED_STARTUP = {'Gfx_InitPrimitiveState','Gfx_InitSpriteWorkspaceA','Gfx_InitSpriteWorkspaceB','Gfx_InitSpriteHandles'}
 INPUTS = ['decomp/src/lisa3d.c', 'decomp/include/lisa3d.h', 'decomp/src/geputget.c','decomp/include/geputget.h','decomp/src/mem.c','decomp/include/mem.h','decomp/target.json',
     'tools/verify_mem_lifecycle.py','tools/verify_mem_destroy.py','tools/verify_mem_pools.py',
     'tools/verify_mem_alloc.py','tools/verify_mem_free.py','tools/verify_matching.py',
@@ -110,7 +116,7 @@ def inspect_original(pe):
         assert fpo[r]==(n,0,1 if name=='Gfx_SelectBackend' else 0,0)
         assert ins[-1].mnemonic==('jmp' if name=='Gfx_InitPrimitiveState' else 'ret')
     for name,(r,n,_) in ROUTINES.items():
-        if name in ('Input_ResetCallbacks','Lisa_PrintVersion','Gfx_SelectBackend','Gfx_InstallSurfaceDispatch'):continue
+        if name in ('Input_ResetCallbacks','Lisa_PrintVersion','Gfx_SelectBackend','Gfx_InstallSurfaceDispatch','Gfx_InstallSpriteDispatch'):continue
         ins=list(md.disasm(pe.get_data(r,n),0x400000+r))
         expected=[(0x45b170,0x45b4f0),(0x45b175,0x45ad50),(0x45b17a,0x45b1f0),
             (0x45b17f,0x455ab0),(0x45b184,0x45e610),(0x45b18b,0x456af0)] if name=='Mem_InitSystem' else [(0x45b1a0,0x45b240),(0x45b1a5,0x45b140)]
@@ -141,6 +147,19 @@ def inspect_original(pe):
         assert [int(i.op_str,16) for i in ins if i.mnemonic=='call']==calls
         assert [(e,relocations[e]) for e in sorted(relocations) if r<=e<r+n]==[
             pair for i,(a,v) in enumerate(stores) for pair in [(r+10*i+2,a),(r+10*i+6,v)]]
+    for r,n,argc,slot,digest in SPRITE_CONSUMERS:
+        assert fpo[r]==(n,0,argc,0)
+        raw=pe.get_data(r,n);assert hashlib.sha256(raw).hexdigest()==digest
+        instructions=list(md.disasm(raw,0x400000+r))
+        assert sum(i.size for i in instructions)==n and instructions[-1].mnemonic in ('ret','jmp')
+        assert any(i.mnemonic in ('call','jmp') and i.op_str=='dword ptr [%s]'%hex(0x50eba0+4*slot) for i in instructions)
+        if argc:
+            assert any(i.mnemonic=='add' and i.op_str=='esp, '+(hex(4*argc) if 4*argc>=10 else str(4*argc)) for i in instructions)
+    for r,n,digest in SPRITE_TARGETS:
+        raw=pe.get_data(r,n);assert fpo[r][0]==n and hashlib.sha256(raw).hexdigest()==digest
+        instructions=list(md.disasm(raw,0x400000+r))
+        assert sum(i.size for i in instructions)==n and instructions[-1].mnemonic=='ret'
+    assert sprite==[(va,target) for _,va,target,_ in SPRITE_SLOTS]
     for r,n,argc,slot,digest in SURFACE_CONSUMERS:
         assert fpo[r]==(n,0,argc,0)
         assert hashlib.sha256(pe.get_data(r,n)).hexdigest()==digest
@@ -171,6 +190,18 @@ def inspect_original(pe):
             (0x5c9f0,84,'922d88eb43e5d8b7ede3d71df0d81a543dc389bfad921e3faa13815d0ac5468e'),
             (0x5c7f0,62,'41862be4869238f9f9261e170ab377306cd2aa18afbbd6761a59bf2f32a5b132')]:
         assert fpo[r]==(n,0,0,0) and hashlib.sha256(pe.get_data(r,n)).hexdigest()==digest
+    # Descriptor forwarding supplies pointer/scalar meaning for the typed slots.
+    for r,n,argc,digest in [
+        (0x61210,143,2,'d1ca418b53f65abb20e0ec43adeb04905cbd9b247a7c5c188818a512b3620dc9'),
+        (0x614b0,31,1,'4b278fe6701f014a83c9ddb65ba7d69c2ca3c12814bedc44e9766dcd98408493'),
+        (0x612e0,114,2,'75f04bc300b71fce757262cbb88c22e365cd785b8fc1a87578179dba1c442858')]:
+        assert fpo[r][0]==n and fpo[r][2]==argc
+        raw=pe.get_data(r,n);assert hashlib.sha256(raw).hexdigest()==digest
+        instructions=list(md.disasm(raw,0x400000+r))
+        assert sum(i.size for i in instructions)==n and instructions[-1].mnemonic=='ret'
+    # A representative caller passes a byte buffer, equal stride/width, height, 8.
+    assert pe.get_data(0x18610,51)==bytes.fromhex(
+        'c7050030550040010000c705103c5600c80000006a0868c80000006840010000684001000068b03d5600e881e6030083c414c3')
     assert pe.get_data(0xbace4,8)==bytes(8) # Two lazy allocation flags: file zero.
     banner=list(md.disasm(pe.get_data(0x5b4f0,34),0x45b4f0))
     assert [(i.mnemonic,i.op_str) for i in banner]==[
@@ -274,6 +305,137 @@ def verify_surface_consumer_abi(pe):
     return cases
 
 
+def verify_sprite_consumer_abi(pe):
+    """Original wrappers with entry sinks; no target graphics bodies execute."""
+    cpu=Uc(UC_ARCH_X86,UC_MODE_32)
+    cpu.mem_map(0x400000,(pe.OPTIONAL_HEADER.SizeOfImage+4095)&~4095)
+    cpu.mem_write(0x400000,pe.get_memory_mapped_image())
+    cpu.mem_map(STACK,0x10000);cpu.mem_map(STOP,0x1000);sp=STACK+0x8000
+    def initialize(uc,address,length,unused):
+        if address in (0x45d840,0x45c9f0,0x45c7f0):
+            current=uc.reg_read(UC_X86_REG_ESP)
+            uc.reg_write(UC_X86_REG_EAX,0)
+            uc.reg_write(UC_X86_REG_ESP,current+4)
+            uc.reg_write(UC_X86_REG_EIP,struct.unpack('<I',uc.mem_read(current,4))[0])
+        else:assert 0x456e60<=address<0x456f15
+    hook=cpu.hook_add(UC_HOOK_CODE,initialize)
+    cpu.mem_write(sp,struct.pack('<I',STOP));cpu.reg_write(UC_X86_REG_ESP,sp)
+    cpu.emu_start(0x456e60,STOP,count=100);cpu.hook_del(hook)
+    assert cpu.reg_read(UC_X86_REG_EAX)==1
+    cases=0;targets={va:target for _,va,target,_ in SPRITE_SLOTS}
+    for r,n,argc,slot,_ in SPRITE_CONSUMERS:
+        target=targets[0x50eba0+4*slot]
+        for seed in (0,0x80000000,0xffffffff):
+            args=tuple((seed+0x1020304*(i+1))&0xffffffff for i in range(argc));seen=[]
+            surface=0x45b740 if slot==0 else 0x45c060 if slot==1 else None
+            if surface:cpu.mem_write(0x50eb6c if slot==0 else 0x50eb74,struct.pack('<I',surface))
+            def sink(uc,address,length,unused):
+                if address in (target,surface):
+                    current=uc.reg_read(UC_X86_REG_ESP)
+                    actual=struct.unpack('<'+'I'*argc,uc.mem_read(current+4,argc*4)) if argc else ()
+                    assert actual==args;seen.append(address)
+                    uc.reg_write(UC_X86_REG_EAX,1 if address==surface else seed)
+                    uc.reg_write(UC_X86_REG_ECX,0xc1c1c1c1);uc.reg_write(UC_X86_REG_EDX,0xd2d2d2d2)
+                    uc.reg_write(UC_X86_REG_ESP,current+4)
+                    uc.reg_write(UC_X86_REG_EIP,struct.unpack('<I',uc.mem_read(current,4))[0])
+                else:assert 0x400000+r<=address<0x400000+r+n
+            hook=cpu.hook_add(UC_HOOK_CODE,sink)
+            cpu.mem_write(sp,struct.pack('<'+'I'*(argc+1),STOP,*args));before=bytes(cpu.mem_read(sp,128))
+            saved=[0x13572468+i for i in range(4)]
+            for register,value in zip(PRESERVED,saved):cpu.reg_write(register,value)
+            cpu.reg_write(UC_X86_REG_ESP,sp);cpu.reg_write(UC_X86_REG_EFLAGS,2)
+            cpu.emu_start(0x400000+r,STOP,count=100)
+            assert seen==([surface,target] if surface else [target])
+            assert cpu.reg_read(UC_X86_REG_ESP)==sp+4 and cpu.reg_read(UC_X86_REG_EAX)==seed
+            assert [cpu.reg_read(register) for register in PRESERVED]==saved
+            assert bytes(cpu.mem_read(sp,128))==before and not cpu.reg_read(UC_X86_REG_EFLAGS)&0x400
+            cpu.hook_del(hook);cases+=1
+    return cases
+
+
+def verify_sprite_initializer_contracts(pe):
+    """Original-only effects. Production downstream bodies remain modeled."""
+    from unicorn import UC_HOOK_MEM_READ, UC_HOOK_MEM_WRITE
+    cpu=Uc(UC_ARCH_X86,UC_MODE_32);size=(pe.OPTIONAL_HEADER.SizeOfImage+4095)&~4095
+    cpu.mem_map(0x400000,size);cpu.mem_map(STACK,0x10000);cpu.mem_map(STOP,0x1000)
+    image=pe.get_memory_mapped_image();sp=STACK+0x8000;cases=0
+    for r,count,flag,pointers in [(0x5d840,0x51aa50,0x4bace8,0x51aa5c),(0x5c9f0,0x51a9cc,0x4bace4,0x51a9d8)]:
+        for enabled in (0,1,2,0x80000000,0xffffffff):
+            for returns in ((0,0,0),(0x7100000,0,0x7104000),(0,0x7102000,0),(0x7100000,0x7102000,0x7104000)):
+                cpu.mem_write(0x400000,image);cpu.mem_write(flag,struct.pack('<I',enabled))
+                cpu.mem_write(count,struct.pack('<I',0x12345678));cpu.mem_write(pointers,struct.pack('<3I',11,22,33))
+                events=[];expected=[('write',count,4,0),('read',flag,4)]
+                if enabled==0:
+                    for i,value in enumerate(returns):expected += [('malloc',0x20d8),('write',pointers+4*i,4,value)]
+                    expected += [('write',flag,4,1)]
+                index=0
+                def access(uc,kind,address,n,value,unused):
+                    if STACK<=address<STACK+0x10000:return
+                    events.append(('write',address,n,value) if kind==UC_MEM_WRITE else ('read',address,n))
+                def boundary(uc,address,n,unused):
+                    nonlocal index
+                    if address==0x469400:
+                        current=uc.reg_read(UC_X86_REG_ESP)
+                        assert struct.unpack('<I',uc.mem_read(current+4,4))[0]==0x20d8
+                        events.append(('malloc',0x20d8));uc.reg_write(UC_X86_REG_EAX,returns[index]);index+=1
+                        uc.reg_write(UC_X86_REG_ECX,0xc1c1c1c1);uc.reg_write(UC_X86_REG_EDX,0xd2d2d2d2)
+                        uc.reg_write(UC_X86_REG_EFLAGS,0x43);uc.reg_write(UC_X86_REG_ESP,current+4)
+                        uc.reg_write(UC_X86_REG_EIP,struct.unpack('<I',uc.mem_read(current,4))[0])
+                    else:assert 0x400000+r<=address<0x400000+r+84
+                hooks=[cpu.hook_add(UC_HOOK_MEM_READ|UC_HOOK_MEM_WRITE,access),cpu.hook_add(UC_HOOK_CODE,boundary)]
+                cpu.mem_write(sp,struct.pack('<I',STOP));stack=bytes(cpu.mem_read(sp,128));before=bytes(cpu.mem_read(0x400000,size))
+                saved=[0x12340000+i for i in range(4)]
+                for register,value in zip(PRESERVED,saved):cpu.reg_write(register,value)
+                cpu.reg_write(UC_X86_REG_ESP,sp);cpu.reg_write(UC_X86_REG_EFLAGS,2)
+                cpu.emu_start(0x400000+r,STOP,count=100)
+                assert events==expected and index==(3 if enabled==0 else 0)
+                assert cpu.reg_read(UC_X86_REG_ESP)==sp+4 and [cpu.reg_read(register) for register in PRESERVED]==saved
+                assert bytes(cpu.mem_read(sp,128))==stack and not cpu.reg_read(UC_X86_REG_EFLAGS)&0x400
+                after=bytearray(cpu.mem_read(0x400000,size));oracle=bytearray(before)
+                struct.pack_into('<I',oracle,count-0x400000,0)
+                if enabled==0:
+                    struct.pack_into('<3I',oracle,pointers-0x400000,*returns);struct.pack_into('<I',oracle,flag-0x400000,1)
+                assert after==oracle
+                for hook in hooks:cpu.hook_del(hook)
+                cases+=1
+    # Handle freelist: 2000 pointer words, 12-byte entries, only entry word zero cleared.
+    for seed in (0,0x80000000,0xffffffff):
+        cpu.mem_write(0x400000,image);rng=random.Random(seed)
+        cpu.mem_write(0x512c58,rng.randbytes(8000));cpu.mem_write(0x514bd8,rng.randbytes(24000))
+        before=bytes(cpu.mem_read(0x400000,size));expected=[];events=[]
+        oracle=bytearray(before);struct.pack_into('<I',oracle,0x11a998,0x514b98)
+        expected.append(('write',0x51a998,4,0x514b98))
+        for i in range(2000):
+            expected += [('write',0x512c58+4*i,4,0x514bd8+12*i),('write',0x514bd8+12*i,4,0)]
+            struct.pack_into('<I',oracle,0x112c58+4*i,0x514bd8+12*i);struct.pack_into('<I',oracle,0x114bd8+12*i,0)
+        def access(uc,kind,address,n,value,unused):
+            if STACK<=address<STACK+0x10000:return
+            events.append(('write',address,n,value) if kind==UC_MEM_WRITE else ('read',address,n))
+        def boundary(uc,address,n,unused):
+            if address==0x4612e0:
+                current=uc.reg_read(UC_X86_REG_ESP)
+                args=struct.unpack('<2I',uc.mem_read(current+4,8));assert args==(0x514b98,0)
+                events.append(('descriptor',args))
+                assert bytes(uc.mem_read(0x400000,size))==bytes(oracle)
+                uc.reg_write(UC_X86_REG_EAX,seed);uc.reg_write(UC_X86_REG_ECX,0xc1c1c1c1);uc.reg_write(UC_X86_REG_EDX,0xd2d2d2d2)
+                uc.reg_write(UC_X86_REG_EFLAGS,0x43);uc.reg_write(UC_X86_REG_ESP,current+4)
+                uc.reg_write(UC_X86_REG_EIP,struct.unpack('<I',uc.mem_read(current,4))[0])
+            else:assert 0x45c7f0<=address<0x45c82e
+        hooks=[cpu.hook_add(UC_HOOK_MEM_READ|UC_HOOK_MEM_WRITE,access),cpu.hook_add(UC_HOOK_CODE,boundary)]
+        cpu.mem_write(sp,struct.pack('<I',STOP));stack=bytes(cpu.mem_read(sp,128))
+        saved=[0x12340000+i for i in range(4)]
+        for register,value in zip(PRESERVED,saved):cpu.reg_write(register,value)
+        cpu.reg_write(UC_X86_REG_ESP,sp);cpu.reg_write(UC_X86_REG_EFLAGS,2)
+        cpu.emu_start(0x45c7f0,STOP,count=20000)
+        assert events==expected+[('descriptor',(0x514b98,0))]
+        assert cpu.reg_read(UC_X86_REG_EAX)==1 and cpu.reg_read(UC_X86_REG_ESP)==sp+4
+        assert [cpu.reg_read(register) for register in PRESERVED]==saved and bytes(cpu.mem_read(sp,128))==stack
+        assert bytes(cpu.mem_read(0x400000,size))==bytes(oracle) and not cpu.reg_read(UC_X86_REG_EFLAGS)&0x400
+        for hook in hooks:cpu.hook_del(hook)
+        cases+=1
+    return cases
+
+
 class Oracle:
     """Independent instruction-derived effects; explicit arbitrary boundary models."""
     def __init__(self,state,isolated=False,actions=None,returns=None):
@@ -306,6 +468,10 @@ class Oracle:
             return self.boundary(name,args)
         if name=='Gfx_InstallSurfaceDispatch':
             for field,target in SURFACE_SLOTS:self.write(field,0,target)
+            return 1
+        if name=='Gfx_InstallSpriteDispatch':
+            for field,_,target,_ in SPRITE_SLOTS:self.write(field,0,target)
+            for dep in ('Gfx_InitSpriteWorkspaceA','Gfx_InitSpriteWorkspaceB','Gfx_InitSpriteHandles'):self.call(dep)
             return 1
         if name=='Gfx_SelectBackend':
             if args[0]!=0:return 2
@@ -407,7 +573,7 @@ class Oracle:
 class LifecycleSession(DestroySession):
     def __init__(self,pe,symbols=None):
         super().__init__(pe,symbols)
-        self.to_original = {} if symbols is None else {symbols['Gfx_Surface'+name[len('g_surface'):]+'Native']:va for name,va in SURFACE_SLOTS}
+        self.to_original = {} if symbols is None else {symbols['Gfx_Surface'+name[len('g_surface'):]+'Native']:va for name,va in SURFACE_SLOTS} | ({symbols[target]:va for _,_,va,target in SPRITE_SLOTS} if symbols else {})
         self.to_rebuilt = {v:k for k,v in self.to_original.items()}
         self.fields=[(name,va if symbols is None else symbols[name],n) for name,va,n in STATE_FIELDS]
         self.entries.update({name:0x400000+r if symbols is None else symbols[name]
@@ -423,19 +589,19 @@ class LifecycleSession(DestroySession):
             'Mem_ShutdownPools','Mem_DestroyPool','Mem_Alloc','Mem_Free','malloc','free','callback','printf'}}
 
     def canonical_word(self,name,value):
-        return self.to_original.get(value,value) if name.startswith('g_surface') else value
+        return self.to_original.get(value,value) if name.startswith(('g_surface','g_sprite')) else value
 
     def state(self):
         return {'table':bytes(self.cpu.mem_read(self.table,1024)),
             'arena':bytes(self.cpu.mem_read(ARENA,ARENA_SIZE)),
             **{name:(struct.pack('<I',self.canonical_word(name,struct.unpack('<I',self.cpu.mem_read(addr,4))[0]))
-                if name.startswith('g_surface') else bytes(self.cpu.mem_read(addr,n))) for name,addr,n in self.fields}}
+                if name.startswith(('g_surface','g_sprite')) else bytes(self.cpu.mem_read(addr,n))) for name,addr,n in self.fields}}
 
     def reset_state(self,state):
         self.reset(state['table'],state['arena'])
         for name,addr,n in self.fields:
             data=state[name]
-            if name.startswith('g_surface'):data=struct.pack('<I',self.to_rebuilt.get(int.from_bytes(data,'little'),int.from_bytes(data,'little')))
+            if name.startswith(('g_surface','g_sprite')):data=struct.pack('<I',self.to_rebuilt.get(int.from_bytes(data,'little'),int.from_bytes(data,'little')))
             self.cpu.mem_write(addr,data)
 
     def region(self,address,n):
@@ -531,8 +697,10 @@ def verify_mem_lifecycle():
     try:
         original=pefile.PE(str(TARGET));inspect_original(original)
         consumer_cases=verify_surface_consumer_abi(original)
+        sprite_consumer_cases=verify_sprite_consumer_abi(original)
+        downstream_cases=verify_sprite_initializer_contracts(original)
         build(dll=DLL)
-        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production Input_ResetCallbacks, Lisa_PrintVersion, Gfx_SelectBackend and Gfx_InstallSurfaceDispatch declarations/bodies plus fourteen typed production globals; strict C89; provisional Clang/LLD; explicit nonreturning startup and CRT fixtures')
+        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production Input_ResetCallbacks, Lisa_PrintVersion, Gfx_SelectBackend and Gfx_InstallSurfaceDispatch declarations/bodies and Gfx_InstallSpriteDispatch plus thirty typed production globals; strict C89; provisional Clang/LLD; explicit nonreturning startup and CRT fixtures')
         rebuilt=pefile.PE(str(DLL));assert not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
         symbols={s.name.decode():rebuilt.OPTIONAL_HEADER.ImageBase+s.address for s in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if s.name}
         for name,(r,n,_) in ROUTINES.items():
@@ -568,13 +736,24 @@ def verify_mem_lifecycle():
             for field,_ in SURFACE_SLOTS:state[field]=struct.pack('<I',value)
             state=compare('Gfx_InstallSurfaceDispatch',state)
             compare('Gfx_InstallSurfaceDispatch',state,reset=False)
-            actions={('Gfx_InstallSpriteDispatch',0):[
-                ('g_surfaceOpen',0,4,value),('validation_gfxDispatchWords',76,4,value),
+            actions={('Gfx_InitSpriteHandles',0):[
+                ('g_surfaceOpen',0,4,value),('validation_gfxDispatchWords',12,4,value),
                 ('g_inputPollCallback',0,4,value)]}
             state=compare('Gfx_SelectBackend',fresh(),(0,),actions=actions,
-                returns={'Gfx_InstallSpriteDispatch':[value]})
+                returns={'Gfx_InitSpriteHandles':[value]})
             compare('Gfx_SelectBackend',state,(0,),actions=actions,
-                returns={'Gfx_InstallSpriteDispatch':[value]},reset=False)
+                returns={'Gfx_InitSpriteHandles':[value]},reset=False)
+        sprite_pairs=[(x,y) for x in [0,1,2,0x80000000,0xffffffff] for y in [0,1,2,0x80000000,0xffffffff]]
+        sprite_pairs += [(rng.getrandbits(32),rng.getrandbits(32)) for _ in range(128)]
+        for x,y in sprite_pairs:
+            state=fresh()
+            for field,_,_,_ in SPRITE_SLOTS:state[field]=struct.pack('<I',x)
+            actions={('Gfx_InitSpriteWorkspaceA',0):[('g_spriteOpen',0,4,x),('g_surfaceOpen',0,4,y)],
+                ('Gfx_InitSpriteWorkspaceB',0):[('g_spriteSetState',0,4,y),('validation_gfxDispatchWords',0,4,x)],
+                ('Gfx_InitSpriteHandles',0):[('g_inputPollCallback',0,4,y)]}
+            returns={'Gfx_InitSpriteWorkspaceA':[x],'Gfx_InitSpriteWorkspaceB':[y],'Gfx_InitSpriteHandles':[x^y]}
+            state=compare('Gfx_InstallSpriteDispatch',state,actions=actions,returns=returns)
+            compare('Gfx_InstallSpriteDispatch',state,actions=actions,returns=returns,reset=False)
         # Both printf returns are ignored: exercise independent failure/high-bit
         # pairs and repeated execution without resetting the CPU image/state.
         pairs=[(x,y) for x in [0,1,2,0x80000000,0xffffffff]
@@ -617,7 +796,7 @@ def verify_mem_lifecycle():
                     ('g_inputKeyEventCallback',0,4,0xffffffff),('g_inputPollCallback',0,4,0x12345678)],
                 ('printf',1):[('g_inputPollCallback',0,4,0x87654321)],
                 ('Gfx_InitPrimitiveState',0):[('g_memPendingCallback',0,4,CALLBACK)],
-                ('Gfx_InstallSpriteDispatch',0):[('g_memHandlesInitialized',0,4,0)]}
+                ('Gfx_InitSpriteHandles',0):[('g_memHandlesInitialized',0,4,0)]}
             compare('Mem_InitSystem',fresh(2),actions=actions,returns={'malloc':[ARENA]})
         # Every handle slot in both passes; callbacks precede any pool destruction.
         for i in range(200):
@@ -669,15 +848,17 @@ def verify_mem_lifecycle():
         step('Mem_ShutdownSystem')
         for name in ROUTINES:
             record(name,'emulation','pass',cases=counts[name],isolated_cases=isolated_counts[name],
-                original_consumer_abi_cases=consumer_cases if name=='Gfx_InstallSurfaceDispatch' else None,
-                persistent_invocations=(133 if name=='Gfx_InstallSurfaceDispatch' else 266 if name=='Gfx_SelectBackend' else 153 if name=='Lisa_PrintVersion' else
+                original_consumer_abi_cases=consumer_cases if name=='Gfx_InstallSurfaceDispatch' else sprite_consumer_cases if name=='Gfx_InstallSpriteDispatch' else None,
+                original_downstream_contract_cases=downstream_cases if name=='Gfx_InstallSpriteDispatch' else None,
+                persistent_invocations=(153 if name=='Gfx_InstallSpriteDispatch' else 133 if name=='Gfx_InstallSurfaceDispatch' else 266 if name=='Gfx_SelectBackend' else 153 if name=='Lisa_PrintVersion' else
                     persistent if name in ('Mem_InitSystem','Mem_ShutdownSystem') else 0),
-                persistent_integrated_startups=4 if name in ('Lisa_PrintVersion','Input_ResetCallbacks','Gfx_SelectBackend','Gfx_InstallSurfaceDispatch') else None,
-                integrated_startups=18 if name in ('Input_ResetCallbacks','Lisa_PrintVersion','Gfx_SelectBackend','Gfx_InstallSurfaceDispatch') else None,
-                scope=('266 standalone fourteen-store installers with arbitrary initial words and persistent repetition; real selector and 18 integrated startups; relocated function identity, exact ordered stores, untouched sprite/holes and full-state/ABI/image checks' if name=='Gfx_InstallSurfaceDispatch' else '532 standalone selectors: 266 nonzero calls without effects, 266 zero calls with real ordered surface installation and ignored sprite boundary returns/mutations; 18 integrated startups; ordered calls, full tracked state and boundary snapshots, EAX/stack/nonvolatile/DF/unrelated-image checks' if name=='Gfx_SelectBackend' else '306 standalone calls, exact NUL-terminated printf format/vararg bytes and order; independent return pairs, CRT boundary mutations, repeated persistent calls; 18 integrated startups; EAX=0, full tracked state, stack/nonvolatile/DF/unrelated-image checks' if name=='Lisa_PrintVersion' else '266 standalone ordered two-dword clearing calls, repeated persistent clearing; 18 integrated startups; complete tracked state and boundary snapshots; nonvolatile registers/stack/DF/unrelated-image checks; void EAX excluded' if name=='Input_ResetCallbacks' else 'Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration'),
-                limitations='Primitive initializer, sprite dispatch initializer, CRT printf/heap and callbacks modeled; no instruction equality, original linked layout, native startup/graphics/heap/game parity, invalid/aliased storage, concurrency or general reentry validation')
+                persistent_integrated_startups=4 if name in ('Lisa_PrintVersion','Input_ResetCallbacks','Gfx_SelectBackend','Gfx_InstallSurfaceDispatch','Gfx_InstallSpriteDispatch') else None,
+                integrated_startups=18 if name in ('Input_ResetCallbacks','Lisa_PrintVersion','Gfx_SelectBackend','Gfx_InstallSurfaceDispatch','Gfx_InstallSpriteDispatch') else None,
+                scope=('306 standalone sixteen-store sprite installers, exact nonmonotonic store and downstream call order; independent return pairs and boundary mutations with persistent repeats; real surface/selector/18 startup integration; full-state/ABI/image checks; original-only consumer and downstream contracts' if name=='Gfx_InstallSpriteDispatch' else '266 standalone fourteen-store installers with arbitrary initial words and persistent repetition; real selector and 18 integrated startups; relocated function identity, exact ordered stores, untouched sprite words/holes during surface-only calls and full-state/ABI/image checks' if name=='Gfx_InstallSurfaceDispatch' else '532 standalone selectors: 266 nonzero calls without effects, 266 zero calls with real ordered surface installation and real sprite installation and ignored downstream returns/mutations; 18 integrated startups; ordered calls, full tracked state and boundary snapshots, EAX/stack/nonvolatile/DF/unrelated-image checks' if name=='Gfx_SelectBackend' else '306 standalone calls, exact NUL-terminated printf format/vararg bytes and order; independent return pairs, CRT boundary mutations, repeated persistent calls; 18 integrated startups; EAX=0, full tracked state, stack/nonvolatile/DF/unrelated-image checks' if name=='Lisa_PrintVersion' else '266 standalone ordered two-dword clearing calls, repeated persistent clearing; 18 integrated startups; complete tracked state and boundary snapshots; nonvolatile registers/stack/DF/unrelated-image checks; void EAX excluded' if name=='Input_ResetCallbacks' else 'Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration'),
+                limitations='Primitive initializer, three downstream sprite initializers, CRT printf/heap and callbacks modeled; no instruction equality, original linked layout, native startup/graphics/heap/game parity, invalid/aliased storage, concurrency or general reentry validation')
         print('PASS: %d Gfx_SelectBackend; %d Lisa_PrintVersion; %d Input_ResetCallbacks; %d Mem_InitSystem and %d Mem_ShutdownSystem differential invocations; isolated %s; %d persistent invocations.'%(counts['Gfx_SelectBackend'],counts['Lisa_PrintVersion'],counts['Input_ResetCallbacks'],counts['Mem_InitSystem'],counts['Mem_ShutdownSystem'],isolated_counts,persistent))
         print('PASS: %d standalone production surface installers; real selector/startup integration.'%counts['Gfx_InstallSurfaceDispatch'])
+        print('PASS: %d standalone production sprite installers; %d original-only sprite consumer ABI and %d downstream contract cases.'%(counts['Gfx_InstallSpriteDispatch'],sprite_consumer_cases,downstream_cases))
         return counts
     except Exception as exc:
         for name in ROUTINES:record(name,phase,'fail',error=str(exc))

@@ -76,6 +76,51 @@ int Gfx_InstallSurfaceDispatch(void) {
     return 1;
 }
 
+/* Windows sprite dispatch words; four intervening words are not installed. */
+GfxSpriteOpenProc volatile g_spriteOpen = 0; /* VA 0x0050EBA0 */
+GfxSpriteResetProc volatile g_spriteReset = 0; /* VA 0x0050EBA4 */
+GfxSpriteCloseProc volatile g_spriteClose = 0; /* VA 0x0050EBA8 */
+GfxSpriteOptionProc volatile g_spriteOption = 0; /* VA 0x0050EBAC */
+GfxSpriteConfigureProc volatile g_spriteConfigure = 0; /* VA 0x0050EBB0 */
+GfxSpriteSetClipProc volatile g_spriteSetClip = 0; /* VA 0x0050EBB4 */
+GfxSpriteDrawListProc volatile g_spriteDrawList = 0; /* VA 0x0050EBB8 */
+GfxSpriteDrawProc volatile g_spriteDraw = 0; /* VA 0x0050EBBC */
+GfxSpriteHandleOpProc volatile g_spriteHandleOp = 0; /* VA 0x0050EBC0 */
+GfxSpriteImageOpProc volatile g_spriteImageOp = 0; /* VA 0x0050EBD8 */
+GfxSpriteCreateDescriptorProc volatile g_spriteCreateDescriptor = 0; /* VA 0x0050EBD4 */
+GfxSpriteFreeDescriptorProc volatile g_spriteFreeDescriptor = 0; /* VA 0x0050EBDC */
+GfxSpriteCopyDescriptorProc volatile g_spriteCopyDescriptor = 0; /* VA 0x0050EBE0 */
+GfxSpriteReservedProc volatile g_spriteReserved = 0; /* VA 0x0050EBE4 */
+GfxSpriteGetStateProc volatile g_spriteGetState = 0; /* VA 0x0050EBEC */
+GfxSpriteSetStateProc volatile g_spriteSetState = 0; /* VA 0x0050EBE8 */
+
+/*
+ * @original Gfx_InstallSpriteDispatch (IGN_WIN.EXE @ 0x00456E60, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InstallSpriteDispatch(void) {
+    g_spriteOpen = Gfx_SpriteOpenNative;
+    g_spriteReset = Gfx_SpriteResetNative;
+    g_spriteClose = Gfx_SpriteCloseNative;
+    g_spriteOption = Gfx_SpriteOptionNative;
+    g_spriteConfigure = Gfx_SpriteConfigureNative;
+    g_spriteSetClip = Gfx_SpriteSetClipNative;
+    g_spriteDrawList = Gfx_SpriteDrawListNative;
+    g_spriteDraw = Gfx_DrawSpriteNative;
+    g_spriteHandleOp = Gfx_SpriteHandleOpNative;
+    g_spriteImageOp = Gfx_SpriteImageOpNative;
+    g_spriteCreateDescriptor = Gfx_SpriteCreateDescriptorNative;
+    g_spriteFreeDescriptor = Gfx_SpriteFreeDescriptorNative;
+    g_spriteCopyDescriptor = Gfx_SpriteCopyDescriptorNative;
+    g_spriteReserved = Gfx_SpriteReservedNative;
+    g_spriteGetState = Gfx_SpriteGetStateNative;
+    g_spriteSetState = Gfx_SpriteSetStateNative;
+    Gfx_InitSpriteWorkspaceA();
+    Gfx_InitSpriteWorkspaceB();
+    Gfx_InitSpriteHandles();
+    return 1;
+}
+
 /* Global font table matching IGN_WIN.EXE @ 0x0063F2E0 */
 FontSlot g_fonts[MAX_FONTS];
 

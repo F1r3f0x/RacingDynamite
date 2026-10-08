@@ -1,5 +1,15 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded feature (2026-10-08): [sprite dispatch installation](ghidra/windows_gfx_sprite_dispatch.md)
+at RVA 0x56E60 is reconstructed with sixteen typed production globals.
+306 standalone sprite installers, 532 selectors and 18 startups execute both
+real installers; 48 sprite consumer ABI and 43 downstream original-only cases
+verify contracts. Surface/lifecycle coverage is retained. Three downstream sprite
+initializers remain modeled. 1,028 candidates, 30 reconstructed routines; current
+compilation/differential evidence, instruction equality/native parity unverified.
+Next bounded candidate: Gfx_InitSpriteHandles, RVA 0x5C7F0, and its default
+descriptor helper RVA 0x612E0. Earlier entries are historical.
+
 Latest bounded feature (2026-10-08): [surface dispatch installation](ghidra/windows_gfx_surface_dispatch.md)
 at RVA 0x5B690 is reconstructed in native geputget.c with fourteen independently
 typed production globals. 266 standalone installers, 532 selectors and 18

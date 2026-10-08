@@ -9,11 +9,14 @@ from windows_target import ROOT, BUILD, DLL, verify_target
 
 # Nonreturning validation-only boundaries: never fake production success.
 STARTUP_BOUNDARY_SOURCE = (
-    'unsigned int validation_gfxDispatchWords[20];\n'
+    '#include <stdint.h>\n'
+    'unsigned int validation_gfxDispatchWords[4];\n'
     'int Lisa_PrintVersion(void);\n'
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
     'void Gfx_InitPrimitiveState(void) { for (;;) {} }\n'
-    'int Gfx_InstallSpriteDispatch(void) { for (;;) {} }\n')
+    'void Gfx_InitSpriteWorkspaceA(void) { for (;;) {} }\n'
+    'void Gfx_InitSpriteWorkspaceB(void) { for (;;) {} }\n'
+    'int Gfx_InitSpriteHandles(void) { for (;;) {} }\n')
 STARTUP_EXPORTS = ['Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
     'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
 
@@ -50,6 +53,7 @@ _lisa_source = (ROOT / 'decomp/src/lisa3d.c').read_text(encoding='utf-8-sig')
 _lisa_start = _lisa_source.index('int Lisa_PrintVersion(void)')
 _lisa_end = _lisa_source.index('\n}', _lisa_start) + 2
 LISA_VERSION_SOURCE = (
+    '#include <stdint.h>\n'
     'extern int printf(const char *format, ...);\n'
     + _lisa_header[_lisa_header.index('int Lisa_PrintVersion(void);'):
         _lisa_header.index('int Lisa_PrintVersion(void);') + len('int Lisa_PrintVersion(void);')]
@@ -67,12 +71,33 @@ LISA_VERSION_SOURCE += (
 
 SURFACE_EXPORTS = ['g_surfaceConfigure', 'g_surfaceOpen', 'g_surfaceClose', 'g_surfaceReset', 'g_surfaceConfigureSurface', 'g_surfaceBlit', 'g_surfaceCopyPixels', 'g_surfaceClear', 'g_surfacePresent', 'g_surfaceReserved', 'g_surfaceLock', 'g_surfaceUnlock', 'g_surfaceSetPalette', 'g_surfaceRestore', 'Gfx_SurfaceConfigureNative', 'Gfx_SurfaceOpenNative', 'Gfx_SurfaceCloseNative', 'Gfx_SurfaceResetNative', 'Gfx_SurfaceConfigureSurfaceNative', 'Gfx_SurfaceBlitNative', 'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceClearNative', 'Gfx_SurfacePresentNative', 'Gfx_SurfaceReservedNative', 'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative', 'Gfx_SurfaceSetPaletteNative', 'Gfx_SurfaceRestoreNative']
 
+# Validation fixtures live separately from the extracted production installer.
+STARTUP_BOUNDARY_SOURCE += (
+    'int Gfx_SpriteOpenNative(void) { for (;;) {} }\n'
+    'int Gfx_SpriteResetNative(void) { for (;;) {} }\n'
+    'int Gfx_SpriteCloseNative(void) { for (;;) {} }\n'
+    'int Gfx_SpriteOptionNative(unsigned int option) { (void)option; for (;;) {} }\n'
+    'int Gfx_SpriteConfigureNative(unsigned char *pixels, int stride, int width, int height, unsigned int option) { (void)pixels; (void)stride; (void)width; (void)height; (void)option; for (;;) {} }\n'
+    'int Gfx_SpriteSetClipNative(int left, int top, int right, int bottom) { (void)left; (void)top; (void)right; (void)bottom; for (;;) {} }\n'
+    'int Gfx_SpriteDrawListNative(const unsigned int *list) { (void)list; for (;;) {} }\n'
+    'int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform) { (void)handle; (void)position; (void)transform; for (;;) {} }\n'
+    'GfxSpriteHandle *Gfx_SpriteHandleOpNative(const GfxSpriteDescriptor *descriptor, GfxSpriteHandle *handle) { (void)descriptor; (void)handle; for (;;) {} }\n'
+    'int Gfx_SpriteImageOpNative(const GfxSpriteDescriptor *descriptor, int image_id) { (void)descriptor; (void)image_id; for (;;) {} }\n'
+    'int Gfx_SpriteCreateDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id) { (void)descriptor; (void)image_id; for (;;) {} }\n'
+    'int Gfx_SpriteFreeDescriptorNative(GfxSpriteDescriptor *descriptor) { (void)descriptor; for (;;) {} }\n'
+    'int Gfx_SpriteCopyDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id) { (void)descriptor; (void)image_id; for (;;) {} }\n'
+    'int Gfx_SpriteReservedNative(unsigned int option) { (void)option; for (;;) {} }\n'
+    'int Gfx_SpriteGetStateNative(GfxSpriteState *state) { (void)state; for (;;) {} }\n'
+    'int Gfx_SpriteSetStateNative(const GfxSpriteState *state) { (void)state; for (;;) {} }\n'
+)
+SPRITE_EXPORTS = ['g_spriteOpen', 'Gfx_SpriteOpenNative', 'g_spriteReset', 'Gfx_SpriteResetNative', 'g_spriteClose', 'Gfx_SpriteCloseNative', 'g_spriteOption', 'Gfx_SpriteOptionNative', 'g_spriteConfigure', 'Gfx_SpriteConfigureNative', 'g_spriteSetClip', 'Gfx_SpriteSetClipNative', 'g_spriteDrawList', 'Gfx_SpriteDrawListNative', 'g_spriteDraw', 'Gfx_DrawSpriteNative', 'g_spriteHandleOp', 'Gfx_SpriteHandleOpNative', 'g_spriteImageOp', 'Gfx_SpriteImageOpNative', 'g_spriteCreateDescriptor', 'Gfx_SpriteCreateDescriptorNative', 'g_spriteFreeDescriptor', 'Gfx_SpriteFreeDescriptorNative', 'g_spriteCopyDescriptor', 'Gfx_SpriteCopyDescriptorNative', 'g_spriteReserved', 'Gfx_SpriteReservedNative', 'g_spriteGetState', 'Gfx_SpriteGetStateNative', 'g_spriteSetState', 'Gfx_SpriteSetStateNative', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles']
+
 EXPORTS = ['validation_gfxDispatchWords', 'Lisa_PrintVersion', 'printf', 'Input_ResetCallbacks', 'g_inputKeyEventCallback', 'g_inputPollCallback', 'Mem_InitSystem', 'Mem_ShutdownSystem', 'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool', 'Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
            'g_memHandleIds', 'g_memHandleCursor', 'Mem_RegisterHandle', 'Mem_ShutdownHandles',
            'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'free', 'malloc',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',
            'g_memHandleCallbacks', 'g_memHandleFlags', 'g_memPendingContext',
-           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS + SURFACE_EXPORTS
+           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS + SURFACE_EXPORTS + SPRITE_EXPORTS
 
 def compile_banner(flags, stem):
     # Separate TU: the production calls must not see the nonreturning printf

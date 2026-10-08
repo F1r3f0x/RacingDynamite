@@ -138,3 +138,13 @@ emulation comparisons for RVAs `0x5B1F0`, `0x5B1B0`, `0x5B360`, `0x5B240`,
 use snapshot `a3bf7f86a261`; the fidelity audit and staged export check passed.
 Raw byte equality differed; instruction equality and native game parity are not
 claimed. No game routines or analysis-stage labels changed in this workflow feature.
+
+## Sprite installer validation follow-up (2026-10-08)
+
+The real verifier now supports Gfx_InstallSpriteDispatch at RVA 0x56E60,
+with sixteen typed globals, three explicit downstream models and preserved
+real surface/selector/lifecycle integration. See
+[the contract and validation scope](ghidra/windows_gfx_sprite_dispatch.md).
+Current coverage adds 306 sprite comparisons, 48 original-only consumer ABI
+checks and 43 original-only initializer contracts. Instruction equality and
+native graphics/game parity remain unverified.

@@ -13,7 +13,7 @@ extern InputPollCallback volatile g_inputPollCallback;
 void Input_ResetCallbacks(void);
 
 /* Windows selector: one caller-cleanup stack dword; zero installs both tables.
- * Surface initializer is reconstructed; sprite initializer remains modeled. */
+ * Both dispatch installers are reconstructed; downstream initialization is modeled. */
 int Gfx_SelectBackend(int backend);
 int Gfx_InstallSurfaceDispatch(void); /* VA 0x0045B690 */
 int Gfx_InstallSpriteDispatch(void);  /* VA 0x00456E60 */
@@ -65,6 +65,82 @@ typedef int (*GfxSurfaceRestoreProc)(void);
 extern GfxSurfaceRestoreProc volatile g_surfaceRestore; /* VA 0x0050EB9C */
 int Gfx_SurfaceRestoreNative(void); /* VA 0x0045C730; body unreconstructed */
 
+/* Windows sprite dispatch. Descriptor/state records are opaque.
+ * Raw no-op option words retain unknown semantics/signedness. */
+typedef struct {
+    int32_t x;
+    int32_t y;
+} Point2D;
+
+/* IGN_WIN.EXE native sprite request: only the consumed handle prefix is known.
+ * Point/origin coordinates use eight fractional bits. No ownership transfer. */
+typedef struct {
+    int32_t image_id;
+    int32_t origin_x;
+    int32_t origin_y;
+} GfxSpriteHandle;
+
+typedef struct {
+    float scale;
+    float angle_radians;
+} GfxSpriteTransform;
+
+typedef struct GfxSpriteDescriptor GfxSpriteDescriptor;
+typedef struct GfxSpriteState GfxSpriteState;
+typedef int (*GfxSpriteOpenProc)(void);
+extern GfxSpriteOpenProc volatile g_spriteOpen; /* VA 0x0050EBA0 */
+int Gfx_SpriteOpenNative(void); /* VA 0x00456F20; body unreconstructed */
+typedef int (*GfxSpriteResetProc)(void);
+extern GfxSpriteResetProc volatile g_spriteReset; /* VA 0x0050EBA4 */
+int Gfx_SpriteResetNative(void); /* VA 0x00456F30; body unreconstructed */
+typedef int (*GfxSpriteCloseProc)(void);
+extern GfxSpriteCloseProc volatile g_spriteClose; /* VA 0x0050EBA8 */
+int Gfx_SpriteCloseNative(void); /* VA 0x00456F40; body unreconstructed */
+typedef int (*GfxSpriteOptionProc)(unsigned int option);
+extern GfxSpriteOptionProc volatile g_spriteOption; /* VA 0x0050EBAC */
+int Gfx_SpriteOptionNative(unsigned int option); /* VA 0x00456F50; body unreconstructed */
+typedef int (*GfxSpriteConfigureProc)(unsigned char *pixels, int stride, int width, int height, unsigned int option);
+extern GfxSpriteConfigureProc volatile g_spriteConfigure; /* VA 0x0050EBB0 */
+int Gfx_SpriteConfigureNative(unsigned char *pixels, int stride, int width, int height, unsigned int option); /* VA 0x00456F60; body unreconstructed */
+typedef int (*GfxSpriteSetClipProc)(int left, int top, int right, int bottom);
+extern GfxSpriteSetClipProc volatile g_spriteSetClip; /* VA 0x0050EBB4 */
+int Gfx_SpriteSetClipNative(int left, int top, int right, int bottom); /* VA 0x00457020; body unreconstructed */
+typedef int (*GfxSpriteDrawListProc)(const unsigned int *list);
+extern GfxSpriteDrawListProc volatile g_spriteDrawList; /* VA 0x0050EBB8 */
+int Gfx_SpriteDrawListNative(const unsigned int *list); /* VA 0x00457250; body unreconstructed */
+typedef int (*GfxSpriteDrawProc)(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform);
+extern GfxSpriteDrawProc volatile g_spriteDraw; /* VA 0x0050EBBC */
+int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform); /* VA 0x004571B0; separately reconstructed */
+typedef GfxSpriteHandle *(*GfxSpriteHandleOpProc)(const GfxSpriteDescriptor *descriptor, GfxSpriteHandle *handle);
+extern GfxSpriteHandleOpProc volatile g_spriteHandleOp; /* VA 0x0050EBC0 */
+GfxSpriteHandle *Gfx_SpriteHandleOpNative(const GfxSpriteDescriptor *descriptor, GfxSpriteHandle *handle); /* VA 0x0045C830; body unreconstructed */
+typedef int (*GfxSpriteImageOpProc)(const GfxSpriteDescriptor *descriptor, int image_id);
+extern GfxSpriteImageOpProc volatile g_spriteImageOp; /* VA 0x0050EBD8 */
+int Gfx_SpriteImageOpNative(const GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x00461360; body unreconstructed */
+typedef int (*GfxSpriteCreateDescriptorProc)(GfxSpriteDescriptor *descriptor, int image_id);
+extern GfxSpriteCreateDescriptorProc volatile g_spriteCreateDescriptor; /* VA 0x0050EBD4 */
+int Gfx_SpriteCreateDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x0045C920; body unreconstructed */
+typedef int (*GfxSpriteFreeDescriptorProc)(GfxSpriteDescriptor *descriptor);
+extern GfxSpriteFreeDescriptorProc volatile g_spriteFreeDescriptor; /* VA 0x0050EBDC */
+int Gfx_SpriteFreeDescriptorNative(GfxSpriteDescriptor *descriptor); /* VA 0x0045C940; body unreconstructed */
+typedef int (*GfxSpriteCopyDescriptorProc)(GfxSpriteDescriptor *descriptor, int image_id);
+extern GfxSpriteCopyDescriptorProc volatile g_spriteCopyDescriptor; /* VA 0x0050EBE0 */
+int Gfx_SpriteCopyDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x0045C960; body unreconstructed */
+typedef int (*GfxSpriteReservedProc)(unsigned int option);
+extern GfxSpriteReservedProc volatile g_spriteReserved; /* VA 0x0050EBE4 */
+int Gfx_SpriteReservedNative(unsigned int option); /* VA 0x00461A80; body unreconstructed */
+typedef int (*GfxSpriteGetStateProc)(GfxSpriteState *state);
+extern GfxSpriteGetStateProc volatile g_spriteGetState; /* VA 0x0050EBEC */
+int Gfx_SpriteGetStateNative(GfxSpriteState *state); /* VA 0x00457110; body unreconstructed */
+typedef int (*GfxSpriteSetStateProc)(const GfxSpriteState *state);
+extern GfxSpriteSetStateProc volatile g_spriteSetState; /* VA 0x0050EBE8 */
+int Gfx_SpriteSetStateNative(const GfxSpriteState *state); /* VA 0x00457170; body unreconstructed */
+
+/* No stack arguments; caller consumes no result. Bodies remain unreconstructed. */
+void Gfx_InitSpriteWorkspaceA(void); /* VA 0x0045D840 */
+void Gfx_InitSpriteWorkspaceB(void); /* VA 0x0045C9F0 */
+int Gfx_InitSpriteHandles(void); /* VA 0x0045C7F0; EAX=1 */
+
 #define MAX_FONTS 30
 #define FONT_GLYPH_COUNT 224
 
@@ -87,24 +163,6 @@ typedef struct {
     void *glyph_handles[FONT_GLYPH_COUNT];    /* 0x100: pointer / sprite handle */
     uint16_t widths[FONT_GLYPH_COUNT];        /* 0x480: glyph widths */
 } FontSlot;
-
-typedef struct {
-    int32_t x;
-    int32_t y;
-} Point2D;
-
-/* IGN_WIN.EXE native sprite request: only the consumed handle prefix is known.
- * Point/origin coordinates use eight fractional bits. No ownership transfer. */
-typedef struct {
-    int32_t image_id;
-    int32_t origin_x;
-    int32_t origin_y;
-} GfxSpriteHandle;
-
-typedef struct {
-    float scale;
-    float angle_radians;
-} GfxSpriteTransform;
 
 /* Native coefficients are deliberately (cosine, sine, sine, cosine).
  * The duplicate positive sine is an original quirk, not a rotation correction. */
