@@ -1,5 +1,17 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded feature (2026-10-08): [surface dispatch installation](ghidra/windows_gfx_surface_dispatch.md)
+at RVA 0x5B690 is reconstructed in native geputget.c with fourteen independently
+typed production globals. 266 standalone installers, 532 selectors and 18
+integrated startups execute its real production body; 39 original-only consumer
+ABI sinks check forwarding and caller cleanup. Fourteen targets and thirteen
+consumers remain analyzed only, including newly inventoried RVA 0x5C1D0 (497
+bytes): 1,028 candidates, 29 reconstructed routines. Primitive and sprite
+initialization, CRT printf/heap and callbacks remain modeled. Strict C89 focused
+compilation passes; raw prefixes differ. Instruction equality, original linked
+layout and native graphics/game parity remain unverified. Next bounded candidate:
+Gfx_InstallSpriteDispatch, RVA 0x56E60 (181 bytes). Earlier entries are historical.
+
 Latest bounded feature (2026-10-08): [graphics backend selector](ghidra/windows_gfx_backend.md)
 at RVA 0x56AF0 is reconstructed in native geputget.c, with zero calling two
 initializers in order and returning 1, every nonzero value returning 2 without

@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:e197fb9fd2868b5366e8cdc55269870daee03412df36ea9943f48c86d68281ba -->
+<!-- snapshot:70d6cc21cdfe188132c99b04738890875426c01797815a2b51b2aafe655ceff1 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -394,19 +394,19 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00456660` | `0x00056660` | 978 | `Font_DrawText` | game | reconstructed | [windows_font_draw_text.md](windows_font_draw_text.md) |
 | `0x00456A40` | `0x00056A40` | 172 | `sub_00456A40` | unknown | unidentified | - |
 | `0x00456AF0` | `0x00056AF0` | 30 | `Gfx_SelectBackend` | game | reconstructed | [windows_gfx_backend.md](windows_gfx_backend.md) |
-| `0x00456B10` | `0x00056B10` | 30 | `sub_00456B10` | unknown | unidentified | - |
-| `0x00456B30` | `0x00056B30` | 50 | `sub_00456B30` | unknown | unidentified | - |
-| `0x00456B70` | `0x00056B70` | 55 | `sub_00456B70` | unknown | unidentified | - |
-| `0x00456BB0` | `0x00056BB0` | 15 | `sub_00456BB0` | unknown | unidentified | - |
-| `0x00456BC0` | `0x00056BC0` | 19 | `sub_00456BC0` | unknown | unidentified | - |
-| `0x00456BE0` | `0x00056BE0` | 6 | `sub_00456BE0` | unknown | unidentified | - |
-| `0x00456BF0` | `0x00056BF0` | 19 | `sub_00456BF0` | unknown | unidentified | - |
-| `0x00456C10` | `0x00056C10` | 20 | `sub_00456C10` | unknown | unidentified | - |
-| `0x00456C30` | `0x00056C30` | 15 | `sub_00456C30` | unknown | unidentified | - |
-| `0x00456C40` | `0x00056C40` | 15 | `sub_00456C40` | unknown | unidentified | - |
-| `0x00456C50` | `0x00056C50` | 6 | `sub_00456C50` | unknown | unidentified | - |
-| `0x00456C60` | `0x00056C60` | 35 | `sub_00456C60` | unknown | unidentified | - |
-| `0x00456C90` | `0x00056C90` | 15 | `sub_00456C90` | unknown | unidentified | - |
+| `0x00456B10` | `0x00056B10` | 30 | `Gfx_SurfaceConfigureDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456B30` | `0x00056B30` | 50 | `Gfx_SurfaceBlitDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456B70` | `0x00056B70` | 55 | `Gfx_SurfaceCopyPixelsDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456BB0` | `0x00056BB0` | 15 | `Gfx_SurfaceClearDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456BC0` | `0x00056BC0` | 19 | `Gfx_SurfaceOpenDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456BE0` | `0x00056BE0` | 6 | `Gfx_SurfaceCloseDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456BF0` | `0x00056BF0` | 19 | `Gfx_SurfaceResetDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456C10` | `0x00056C10` | 20 | `Gfx_SurfaceLockDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456C30` | `0x00056C30` | 15 | `Gfx_SurfaceUnlockDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456C40` | `0x00056C40` | 15 | `Gfx_SurfaceSetPaletteDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456C50` | `0x00056C50` | 6 | `Gfx_SurfaceRestoreDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456C60` | `0x00056C60` | 35 | `Gfx_SurfaceConfigureSurfaceDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456C90` | `0x00056C90` | 15 | `Gfx_SurfacePresentDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x00456CA0` | `0x00056CA0` | 6 | `sub_00456CA0` | unknown | unidentified | - |
 | `0x00456CB0` | `0x00056CB0` | 15 | `sub_00456CB0` | unknown | unidentified | - |
 | `0x00456CC0` | `0x00056CC0` | 35 | `sub_00456CC0` | unknown | unidentified | - |
@@ -543,20 +543,21 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045B550` | `0x0005B550` | 62 | `sub_0045B550` | unknown | unidentified | - |
 | `0x0045B590` | `0x0005B590` | 38 | `sub_0045B590` | unknown | unidentified | - |
 | `0x0045B5C0` | `0x0005B5C0` | 206 | `sub_0045B5C0` | unknown | unidentified | - |
-| `0x0045B690` | `0x0005B690` | 146 | `Gfx_InstallSurfaceDispatch` | game | analyzed | [windows_gfx_backend.md](windows_gfx_backend.md) |
-| `0x0045B730` | `0x0005B730` | 6 | `sub_0045B730` | unknown | unidentified | - |
-| `0x0045B740` | `0x0005B740` | 1575 | `sub_0045B740` | unknown | unidentified | - |
-| `0x0045BD70` | `0x0005BD70` | 745 | `sub_0045BD70` | unknown | unidentified | - |
-| `0x0045C060` | `0x0005C060` | 229 | `sub_0045C060` | unknown | unidentified | - |
-| `0x0045C150` | `0x0005C150` | 6 | `sub_0045C150` | unknown | unidentified | - |
-| `0x0045C160` | `0x0005C160` | 108 | `sub_0045C160` | unknown | unidentified | - |
-| `0x0045C3D0` | `0x0005C3D0` | 210 | `sub_0045C3D0` | unknown | unidentified | - |
-| `0x0045C4B0` | `0x0005C4B0` | 98 | `sub_0045C4B0` | unknown | unidentified | - |
-| `0x0045C520` | `0x0005C520` | 6 | `sub_0045C520` | unknown | unidentified | - |
-| `0x0045C530` | `0x0005C530` | 326 | `sub_0045C530` | unknown | unidentified | - |
-| `0x0045C680` | `0x0005C680` | 71 | `sub_0045C680` | unknown | unidentified | - |
-| `0x0045C6D0` | `0x0005C6D0` | 83 | `sub_0045C6D0` | unknown | unidentified | - |
-| `0x0045C730` | `0x0005C730` | 179 | `sub_0045C730` | unknown | unidentified | - |
+| `0x0045B690` | `0x0005B690` | 146 | `Gfx_InstallSurfaceDispatch` | game | reconstructed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045B730` | `0x0005B730` | 6 | `Gfx_SurfaceConfigureNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045B740` | `0x0005B740` | 1575 | `Gfx_SurfaceOpenNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045BD70` | `0x0005BD70` | 745 | `Gfx_SurfaceCloseNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C060` | `0x0005C060` | 229 | `Gfx_SurfaceResetNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C150` | `0x0005C150` | 6 | `Gfx_SurfaceConfigureSurfaceNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C160` | `0x0005C160` | 108 | `Gfx_SurfaceBlitNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C1D0` | `0x0005C1D0` | 497 | `Gfx_SurfaceCopyPixelsNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C3D0` | `0x0005C3D0` | 210 | `Gfx_SurfaceClearNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C4B0` | `0x0005C4B0` | 98 | `Gfx_SurfacePresentNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C520` | `0x0005C520` | 6 | `Gfx_SurfaceReservedNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C530` | `0x0005C530` | 326 | `Gfx_SurfaceLockNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C680` | `0x0005C680` | 71 | `Gfx_SurfaceUnlockNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C6D0` | `0x0005C6D0` | 83 | `Gfx_SurfaceSetPaletteNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C730` | `0x0005C730` | 179 | `Gfx_SurfaceRestoreNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x0045C7F0` | `0x0005C7F0` | 62 | `sub_0045C7F0` | unknown | unidentified | - |
 | `0x0045C830` | `0x0005C830` | 207 | `sub_0045C830` | unknown | unidentified | - |
 | `0x0045C900` | `0x0005C900` | 19 | `sub_0045C900` | unknown | unidentified | - |

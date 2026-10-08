@@ -13,10 +13,57 @@ extern InputPollCallback volatile g_inputPollCallback;
 void Input_ResetCallbacks(void);
 
 /* Windows selector: one caller-cleanup stack dword; zero installs both tables.
- * Initializer bodies remain unreconstructed; both return 1 in IGN_WIN.EXE. */
+ * Surface initializer is reconstructed; sprite initializer remains modeled. */
 int Gfx_SelectBackend(int backend);
 int Gfx_InstallSurfaceDispatch(void); /* VA 0x0045B690 */
 int Gfx_InstallSpriteDispatch(void);  /* VA 0x00456E60 */
+
+/* Windows surface dispatch. Records remain opaque; only consumer ABI is exposed.
+ * Stub option words retain unknown semantics/signedness. All calls use the x86
+ * ordinary C ABI; no-argument RET alone does not distinguish cdecl/stdcall. */
+typedef struct GfxSurfaceRecord GfxSurfaceRecord;
+typedef int (*GfxSurfaceConfigureProc)(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3);
+extern GfxSurfaceConfigureProc volatile g_surfaceConfigure; /* VA 0x0050EB68 */
+int Gfx_SurfaceConfigureNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3); /* VA 0x0045B730; body unreconstructed */
+typedef int (*GfxSurfaceOpenProc)(void);
+extern GfxSurfaceOpenProc volatile g_surfaceOpen; /* VA 0x0050EB6C */
+int Gfx_SurfaceOpenNative(void); /* VA 0x0045B740; body unreconstructed */
+typedef int (*GfxSurfaceCloseProc)(void);
+extern GfxSurfaceCloseProc volatile g_surfaceClose; /* VA 0x0050EB70 */
+int Gfx_SurfaceCloseNative(void); /* VA 0x0045BD70; body unreconstructed */
+typedef int (*GfxSurfaceResetProc)(void);
+extern GfxSurfaceResetProc volatile g_surfaceReset; /* VA 0x0050EB74 */
+int Gfx_SurfaceResetNative(void); /* VA 0x0045C060; body unreconstructed */
+typedef int (*GfxSurfaceConfigureSurfaceProc)(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4);
+extern GfxSurfaceConfigureSurfaceProc volatile g_surfaceConfigureSurface; /* VA 0x0050EB78 */
+int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4); /* VA 0x0045C150; body unreconstructed */
+typedef int (*GfxSurfaceBlitProc)(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_y, int destination_x);
+extern GfxSurfaceBlitProc volatile g_surfaceBlit; /* VA 0x0050EB7C */
+int Gfx_SurfaceBlitNative(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_y, int destination_x); /* VA 0x0045C160; body unreconstructed */
+typedef int (*GfxSurfaceCopyPixelsProc)(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y);
+extern GfxSurfaceCopyPixelsProc volatile g_surfaceCopyPixels; /* VA 0x0050EB80 */
+int Gfx_SurfaceCopyPixelsNative(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y); /* VA 0x0045C1D0; body unreconstructed */
+typedef int (*GfxSurfaceClearProc)(GfxSurfaceRecord *surface);
+extern GfxSurfaceClearProc volatile g_surfaceClear; /* VA 0x0050EB84 */
+int Gfx_SurfaceClearNative(GfxSurfaceRecord *surface); /* VA 0x0045C3D0; body unreconstructed */
+typedef int (*GfxSurfacePresentProc)(GfxSurfaceRecord *surface);
+extern GfxSurfacePresentProc volatile g_surfacePresent; /* VA 0x0050EB88 */
+int Gfx_SurfacePresentNative(GfxSurfaceRecord *surface); /* VA 0x0045C4B0; body unreconstructed */
+typedef int (*GfxSurfaceReservedProc)(void);
+extern GfxSurfaceReservedProc volatile g_surfaceReserved; /* VA 0x0050EB8C */
+int Gfx_SurfaceReservedNative(void); /* VA 0x0045C520; body unreconstructed */
+typedef int (*GfxSurfaceLockProc)(GfxSurfaceRecord *surface, int mode);
+extern GfxSurfaceLockProc volatile g_surfaceLock; /* VA 0x0050EB90 */
+int Gfx_SurfaceLockNative(GfxSurfaceRecord *surface, int mode); /* VA 0x0045C530; body unreconstructed */
+typedef int (*GfxSurfaceUnlockProc)(GfxSurfaceRecord *surface);
+extern GfxSurfaceUnlockProc volatile g_surfaceUnlock; /* VA 0x0050EB94 */
+int Gfx_SurfaceUnlockNative(GfxSurfaceRecord *surface); /* VA 0x0045C680; body unreconstructed */
+typedef int (*GfxSurfaceSetPaletteProc)(const unsigned char *rgb);
+extern GfxSurfaceSetPaletteProc volatile g_surfaceSetPalette; /* VA 0x0050EB98 */
+int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb); /* VA 0x0045C6D0; body unreconstructed */
+typedef int (*GfxSurfaceRestoreProc)(void);
+extern GfxSurfaceRestoreProc volatile g_surfaceRestore; /* VA 0x0050EB9C */
+int Gfx_SurfaceRestoreNative(void); /* VA 0x0045C730; body unreconstructed */
 
 #define MAX_FONTS 30
 #define FONT_GLYPH_COUNT 224

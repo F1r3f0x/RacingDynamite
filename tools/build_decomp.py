@@ -9,11 +9,10 @@ from windows_target import ROOT, BUILD, DLL, verify_target
 
 # Nonreturning validation-only boundaries: never fake production success.
 STARTUP_BOUNDARY_SOURCE = (
-    'unsigned int validation_gfxDispatchWords[34];\n'
+    'unsigned int validation_gfxDispatchWords[20];\n'
     'int Lisa_PrintVersion(void);\n'
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
     'void Gfx_InitPrimitiveState(void) { for (;;) {} }\n'
-    'int Gfx_InstallSurfaceDispatch(void) { for (;;) {} }\n'
     'int Gfx_InstallSpriteDispatch(void) { for (;;) {} }\n')
 STARTUP_EXPORTS = ['Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
     'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
@@ -26,6 +25,24 @@ STARTUP_BOUNDARY_SOURCE += (
         _resource_header.index('#define MAX_FONTS')]
     + _resource_source[_resource_source.index('InputKeyEventCallback volatile g_inputKeyEventCallback ='):
         _resource_source.index('/*\n * @original Gfx_SelectBackend')])
+
+SURFACE_HEADER = _resource_header[_resource_header.index('/* Windows surface dispatch.'):_resource_header.index('#define MAX_FONTS')]
+STARTUP_BOUNDARY_SOURCE += (
+    'int Gfx_SurfaceConfigureNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3) { (void)option0; (void)option1; (void)option2; (void)option3; for (;;) {} }\n'
+    'int Gfx_SurfaceOpenNative(void) { for (;;) {} }\n'
+    'int Gfx_SurfaceCloseNative(void) { for (;;) {} }\n'
+    'int Gfx_SurfaceResetNative(void) { for (;;) {} }\n'
+    'int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4) { (void)option0; (void)option1; (void)option2; (void)option3; (void)option4; for (;;) {} }\n'
+    'int Gfx_SurfaceBlitNative(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_y, int destination_x) { (void)source; (void)x; (void)y; (void)width; (void)height; (void)destination; (void)destination_y; (void)destination_x; for (;;) {} }\n'
+    'int Gfx_SurfaceCopyPixelsNative(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y) { (void)pixels; (void)stride; (void)source_x; (void)source_y; (void)width; (void)height; (void)destination; (void)destination_x; (void)destination_y; for (;;) {} }\n'
+    'int Gfx_SurfaceClearNative(GfxSurfaceRecord *surface) { (void)surface; for (;;) {} }\n'
+    'int Gfx_SurfacePresentNative(GfxSurfaceRecord *surface) { (void)surface; for (;;) {} }\n'
+    'int Gfx_SurfaceReservedNative(void) { for (;;) {} }\n'
+    'int Gfx_SurfaceLockNative(GfxSurfaceRecord *surface, int mode) { (void)surface; (void)mode; for (;;) {} }\n'
+    'int Gfx_SurfaceUnlockNative(GfxSurfaceRecord *surface) { (void)surface; for (;;) {} }\n'
+    'int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb) { (void)rgb; for (;;) {} }\n'
+    'int Gfx_SurfaceRestoreNative(void) { for (;;) {} }\n'
+)
 
 # Extract the native banner body and its existing public prototype verbatim.
 _lisa_header = (ROOT / 'decomp/include/lisa3d.h').read_text(encoding='utf-8-sig')
@@ -44,14 +61,18 @@ _selector_end = _resource_source.index('\n}', _selector_start) + 2
 LISA_VERSION_SOURCE += (
     _resource_header[_resource_header.index('int Gfx_SelectBackend(int backend);'):
         _resource_header.index('#define MAX_FONTS')]
-    + _resource_source[_selector_start:_selector_end] + '\n')
+    + _resource_source[_selector_start:_selector_end] + '\n'
+    + _resource_source[_resource_source.index('/* Independently recovered Windows dispatch slots;'):
+        _resource_source.index('/* Global font table matching')])
+
+SURFACE_EXPORTS = ['g_surfaceConfigure', 'g_surfaceOpen', 'g_surfaceClose', 'g_surfaceReset', 'g_surfaceConfigureSurface', 'g_surfaceBlit', 'g_surfaceCopyPixels', 'g_surfaceClear', 'g_surfacePresent', 'g_surfaceReserved', 'g_surfaceLock', 'g_surfaceUnlock', 'g_surfaceSetPalette', 'g_surfaceRestore', 'Gfx_SurfaceConfigureNative', 'Gfx_SurfaceOpenNative', 'Gfx_SurfaceCloseNative', 'Gfx_SurfaceResetNative', 'Gfx_SurfaceConfigureSurfaceNative', 'Gfx_SurfaceBlitNative', 'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceClearNative', 'Gfx_SurfacePresentNative', 'Gfx_SurfaceReservedNative', 'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative', 'Gfx_SurfaceSetPaletteNative', 'Gfx_SurfaceRestoreNative']
 
 EXPORTS = ['validation_gfxDispatchWords', 'Lisa_PrintVersion', 'printf', 'Input_ResetCallbacks', 'g_inputKeyEventCallback', 'g_inputPollCallback', 'Mem_InitSystem', 'Mem_ShutdownSystem', 'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool', 'Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
            'g_memHandleIds', 'g_memHandleCursor', 'Mem_RegisterHandle', 'Mem_ShutdownHandles',
            'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'free', 'malloc',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',
            'g_memHandleCallbacks', 'g_memHandleFlags', 'g_memPendingContext',
-           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS
+           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS + SURFACE_EXPORTS
 
 def compile_banner(flags, stem):
     # Separate TU: the production calls must not see the nonreturning printf

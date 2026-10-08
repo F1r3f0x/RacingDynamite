@@ -38,6 +38,44 @@ int Gfx_SelectBackend(int backend) {
     return 1;
 }
 
+/* Independently recovered Windows dispatch slots; loader-zeroed .data tail. */
+GfxSurfaceConfigureProc volatile g_surfaceConfigure = 0; /* VA 0x0050EB68 */
+GfxSurfaceOpenProc volatile g_surfaceOpen = 0; /* VA 0x0050EB6C */
+GfxSurfaceCloseProc volatile g_surfaceClose = 0; /* VA 0x0050EB70 */
+GfxSurfaceResetProc volatile g_surfaceReset = 0; /* VA 0x0050EB74 */
+GfxSurfaceConfigureSurfaceProc volatile g_surfaceConfigureSurface = 0; /* VA 0x0050EB78 */
+GfxSurfaceBlitProc volatile g_surfaceBlit = 0; /* VA 0x0050EB7C */
+GfxSurfaceCopyPixelsProc volatile g_surfaceCopyPixels = 0; /* VA 0x0050EB80 */
+GfxSurfaceClearProc volatile g_surfaceClear = 0; /* VA 0x0050EB84 */
+GfxSurfacePresentProc volatile g_surfacePresent = 0; /* VA 0x0050EB88 */
+GfxSurfaceReservedProc volatile g_surfaceReserved = 0; /* VA 0x0050EB8C */
+GfxSurfaceLockProc volatile g_surfaceLock = 0; /* VA 0x0050EB90 */
+GfxSurfaceUnlockProc volatile g_surfaceUnlock = 0; /* VA 0x0050EB94 */
+GfxSurfaceSetPaletteProc volatile g_surfaceSetPalette = 0; /* VA 0x0050EB98 */
+GfxSurfaceRestoreProc volatile g_surfaceRestore = 0; /* VA 0x0050EB9C */
+
+/*
+ * @original Gfx_InstallSurfaceDispatch (IGN_WIN.EXE @ 0x0045B690, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InstallSurfaceDispatch(void) {
+    g_surfaceConfigure = Gfx_SurfaceConfigureNative;
+    g_surfaceOpen = Gfx_SurfaceOpenNative;
+    g_surfaceClose = Gfx_SurfaceCloseNative;
+    g_surfaceReset = Gfx_SurfaceResetNative;
+    g_surfaceConfigureSurface = Gfx_SurfaceConfigureSurfaceNative;
+    g_surfaceBlit = Gfx_SurfaceBlitNative;
+    g_surfaceCopyPixels = Gfx_SurfaceCopyPixelsNative;
+    g_surfaceClear = Gfx_SurfaceClearNative;
+    g_surfacePresent = Gfx_SurfacePresentNative;
+    g_surfaceReserved = Gfx_SurfaceReservedNative;
+    g_surfaceLock = Gfx_SurfaceLockNative;
+    g_surfaceUnlock = Gfx_SurfaceUnlockNative;
+    g_surfaceSetPalette = Gfx_SurfaceSetPaletteNative;
+    g_surfaceRestore = Gfx_SurfaceRestoreNative;
+    return 1;
+}
+
 /* Global font table matching IGN_WIN.EXE @ 0x0063F2E0 */
 FontSlot g_fonts[MAX_FONTS];
 

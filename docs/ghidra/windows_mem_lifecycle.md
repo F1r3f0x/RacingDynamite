@@ -225,3 +225,16 @@ shutdown comparisons and ten persistent lifecycle calls. Raw prefixes differ.
 Primitive initialization, both dispatch initializers, CRT printf/heap and handle
 callbacks remain modeled. No native graphics/game parity or instruction equality
 is claimed. Earlier dependency descriptions above record historical scope.
+
+## Production surface initializer follow-up (2026-10-08)
+
+[Surface dispatch installation](windows_gfx_surface_dispatch.md), RVA 0x5B690,
+now has fourteen independently typed production globals and a real initializer
+executing through the production selector and 18 integrated startups. Fresh
+coverage: 266 standalone installers, 532 selectors, 306 banner / 266 input reset /
+112 startup / 519 shutdown comparisons, plus 39 original-only forwarding ABI
+sink cases and ten persistent lifecycle calls. Original target bodies remain
+unreconstructed; the reserved slot has no observed consumer. Primitive and
+sprite initialization, CRT printf/heap and callbacks remain modeled. Strict C89
+focused compilation passes; raw prefixes differ. Instruction equality and native
+graphics/game parity are unverified. Earlier model descriptions are historical.
