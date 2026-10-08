@@ -134,6 +134,49 @@ overwrite another feature's records or stage its unrelated edits. Run the final
 export/check after the agreed source changes settle; changes after validation can
 make results stale and require the applicable verification to run again.
 
+## Delegation: Luna and Gemini Flash
+
+Delegate independent, bounded project work when it justifies the coordination
+cost. Keep the current lead model for interpretation, architecture and integration.
+Start with up to two workers; use a third only for an independent task within the
+session's concurrency limit. Small or inseparable tasks stay with the lead.
+Workers do not spawn further agents.
+
+- In Codex, select `gpt-6-luna` explicitly, normally with high reasoning for
+  evidence, implementation and review; use low for mechanical searches. If Luna
+  is unavailable, report it and keep the work with the lead instead of silently
+  switching worker models.
+- In Antigravity or its `agy` CLI, use the Flash path in `GEMINI.md` and the
+  skill's delegation reference. Select an available Flash model explicitly and
+  record its actual model/effort. Do not assume Codex can spawn Gemini through
+  its collaboration tool. Report CLI/auth/model-access blockers honestly.
+- Evidence workers inspect bounded callers, xrefs, constants and initializers.
+  Implementation workers receive an established contract and exclusive file
+  ownership. A different worker reviews binary evidence, C89, branches and coverage.
+  The lead resolves uncertain ABI, layouts and routine boundaries.
+- Default workers to read-only. Declare exact writable files and acceptance
+  criteria before edits. Separate routines in one file do not establish exclusive
+  ownership; hand off the whole file before another agent edits it.
+- One integration owner controls shared harnesses, SQLite writes, result recording,
+  exports, staging and commits. Workers return evidence and proposed shared changes.
+  Only the owner runs preflight and completion; their artifacts are shared too.
+  The completion lock does not protect direct DB commands or verifier runs.
+- Coordinate shared Ghidra mutations through the lead. Workers use bounded reads
+  without renaming, changing types, triggering analysis or switching active programs.
+  Original binaries/assets remain protected for every worker.
+- Send compact context containing repository/skill paths, applicable user constraints,
+  verified VA/RVA provenance, evidence paths, established facts, open questions,
+  allowed files and stop conditions. Use fresh or limited-history Codex spawns when
+  selecting Luna explicitly; full-history forks inherit the parent model.
+- Workers escalate missing or contradictory evidence instead of inventing facts or
+  stubs. The lead handles user questions and reassignment. Worker confidence and
+  review approval never replace real verification or establish fidelity.
+
+Use the skill's [delegation procedure and task/pilot templates](.agents/skills/ignition-windows-decomp/references/delegation.md).
+Measure the next three suitable, authorized routines before increasing concurrency:
+elapsed time, observable usage, lead rework and first-pass verification. Do not
+reconstruct extra routines solely to populate the pilot.
+
 ## Commits and completion
 
 - Install the tracked hooks with `uv run python tools/workflow.py install-hooks`.

@@ -9,6 +9,14 @@ Use this skill from the RacingDynamite repository. Read its current `AGENTS.md`
 and `docs/decomp_plan.md`; those files own project policy. Resolve paths relative
 to that repository, not the chat's projectless directory.
 
+## Delegate bounded work
+
+Apply the delegation policy in `AGENTS.md` when independent tasks justify workers.
+Read [references/delegation.md](references/delegation.md) before assigning work for
+the Luna/Gemini Flash paths, task/return packets and three-routine pilot. The lead
+owns integration and required progress handoff. Workers perform only their assigned
+slice and return; they do not run the feature-wide tracking/export/commit sequence.
+
 ## Establish evidence
 
 Run `uv run python tools/decomp_doctor.py` before trusting addresses or inherited
