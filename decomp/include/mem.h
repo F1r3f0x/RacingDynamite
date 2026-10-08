@@ -25,6 +25,13 @@ typedef struct {
 } MemPool;
 
 extern MemPool * volatile g_memPools[MEM_POOL_COUNT];
+/* Caller-cleanup, one name pointer; first null slot or -1 on full/heap failure.
+ * Null names are empty; copies <=63 bytes, reads byte 63 when reached, preserves tail.
+ * Attaches the 320-byte allocation before name/page initialization.
+ */
+int Mem_CreatePool(const char *name);
+/* No arguments; resets roots without freeing, creates DEFAULT, always EAX=1. */
+int Mem_InitPools(void);
 /* Two cdecl stack dwords, EAX=1 on first pointer match, 0 on no match.
  * A valid pool and readable hierarchy are required; no bounds/null guards.
  * Ignores size when selecting. Calls CRT free, then clears size only; retains

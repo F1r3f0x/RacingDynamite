@@ -329,3 +329,60 @@ int Mem_InitHandles(void)
     g_memHandleCursor = 0;
     return 1;
 }
+
+/* @original Mem_CreatePool (IGN_WIN.EXE @ 0x0045AD80, inferred mem.c)
+ * @fidelity EXACT
+ * First null root; attach before name/pages initialization. Heap tail retained.
+ * Reads the next source byte before the 63-byte copy limit.
+ */
+int Mem_CreatePool(const char *name)
+{
+    int pool_id;
+    int index;
+    MemPool *pool;
+    const volatile char *source;
+    volatile char *destination;
+
+    for (pool_id = 0; pool_id < MEM_POOL_COUNT; ++pool_id) {
+        if (g_memPools[pool_id] == NULL) {
+            break;
+        }
+    }
+    if (pool_id == MEM_POOL_COUNT) {
+        return -1;
+    }
+    pool = (MemPool *)malloc(sizeof(*pool));
+    if (pool == NULL) {
+        return -1;
+    }
+    g_memPools[pool_id] = pool;
+    destination = pool->name;
+    index = 0;
+    if (name != NULL) {
+        source = name;
+        while (source[index] != '\0' && index < 63) {
+            destination[index] = source[index];
+            ++index;
+        }
+    }
+    destination[index] = '\0';
+    for (index = 0; index < MEM_POOL_PAGE_COUNT; ++index) {
+        pool->pages[index] = NULL;
+    }
+    return pool_id;
+}
+
+/* @original Mem_InitPools (IGN_WIN.EXE @ 0x0045AD50, inferred mem.c)
+ * @fidelity EXACT
+ * Unconditional reset without freeing roots; ignores default creation failure.
+ */
+int Mem_InitPools(void)
+{
+    int index;
+
+    for (index = 0; index < MEM_POOL_COUNT; ++index) {
+        g_memPools[index] = NULL;
+    }
+    Mem_CreatePool("DEFAULT");
+    return 1;
+}

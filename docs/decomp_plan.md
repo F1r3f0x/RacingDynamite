@@ -1,5 +1,17 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded feature (2026-10-08): [Windows pool initialization and creation](ghidra/windows_mem_pools.md)
+at RVAs 0x5AD50/0x5AD80 are reconstructed in production C89 mem.c/mem.h.
+75 initializer and 745 creator differential invocations pass with complete
+root/heap/image state, exact ordered accesses, name truncation/tail preservation,
+all first-hole slots and malloc failures, ignored default failure and ABI.
+Twelve persistent invocations include six real Mem_Alloc/Mem_Free calls through
+an actually created pool. CRT malloc/free remain modeled; raw prefixes differ,
+instruction equality, original linked layout and native heap/game parity are
+unverified. Earlier pool-analysis notes below are historical. The existing
+Font_Load verifier retains its pool fixture; no original assets were changed.
+
+
 Latest bounded validation follow-up: [Font_Load](ghidra/windows_font_load.md#real-file-loader-integration-follow-up)
 at VA 0x00456420 / RVA 0x56420 links complete production file.c and mem.c.
 536 real-chain differential invocations execute File_LoadToMemory, its helpers,

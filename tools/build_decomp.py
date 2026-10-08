@@ -7,7 +7,7 @@ import shutil
 import subprocess
 from windows_target import ROOT, BUILD, DLL, verify_target
 
-EXPORTS = ['Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
+EXPORTS = ['Mem_InitPools', 'Mem_CreatePool', 'Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
            'g_memHandleIds', 'g_memHandleCursor', 'Mem_RegisterHandle', 'Mem_ShutdownHandles',
            'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'free', 'malloc',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',
@@ -29,7 +29,7 @@ def build(compiler='clang', linker='lld-link', dll=DLL):
     commands = [
         [cc, '--target=i686-pc-windows-msvc', '-std=c89', '-pedantic-errors',
          '-Wall', '-Wextra', '-Werror', '-O2', '-ffreestanding', '-fno-builtin',
-         '-fno-vectorize', '-fno-slp-vectorize', '-mno-sse', '-mno-sse2',
+         '-fno-inline-functions', '-fno-vectorize', '-fno-slp-vectorize', '-mno-sse', '-mno-sse2',
          '-I', str(ROOT/'decomp/include'), '-c', str(ROOT/'decomp/src/mem.c'),
          '-o', str(obj)],
         [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86',

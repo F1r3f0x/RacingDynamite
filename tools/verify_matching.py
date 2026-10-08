@@ -213,17 +213,19 @@ def verify():
     generated = list(md.disasm(generated_code, lo))
     direct_calls = [i for i in generated if i.mnemonic == 'call' and i.op_str.startswith('0x')]
     code_entries = {name: symbols[name] for name in [
-        'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
+        'Mem_InitPools', 'Mem_CreatePool', 'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc']}
-    assert len(direct_calls) == 7, 'Unexpected direct helper dependency count'
+    assert len(direct_calls) == 9, 'Unexpected direct helper dependency count'
     owners = []
     for call in direct_calls:
         owner = max((name for name, address in code_entries.items() if address <= call.address),
                     key=lambda name: code_entries[name])
-        expected = {'Mem_Free': 'free', 'Mem_Alloc': 'malloc'}.get(owner)
+        expected = {'Mem_Free': 'free', 'Mem_Alloc': 'malloc', 'Mem_CreatePool': 'malloc',
+                    'Mem_InitPools': 'Mem_CreatePool'}.get(owner)
         assert expected is not None and int(call.op_str, 16) == symbols[expected], 'Unexpected direct helper dependency'
         owners.append(owner)
-    assert owners.count('Mem_Free') == 1 and owners.count('Mem_Alloc') == 6
+    assert {name: owners.count(name) for name in set(owners)} == {
+        'Mem_Free': 1, 'Mem_Alloc': 6, 'Mem_CreatePool': 1, 'Mem_InitPools': 1}
     print(f'Original: 76 bytes, {len(instructions)} instructions; compiled .text: {text.Misc_VirtualSize} bytes.')
     print(f'Raw code-byte equality: {original_code == generated_code}; relocation-aware equality not evaluated.')
     print('Instruction equality: not claimed (modern provisional Clang code generation).')
@@ -736,3 +738,6 @@ if __name__ == '__main__':
 
     from verify_file_load import verify_file_load
     verify_file_load()
+
+    from verify_mem_pools import verify_mem_pools
+    verify_mem_pools()
