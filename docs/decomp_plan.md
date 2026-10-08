@@ -1,5 +1,14 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded follow-up (2026-10-07): the [native file helpers](ghidra/windows_file_load.md)
+at RVAs 0x575F0/0x57630/0x576B0 are reconstructed in production C89 file.c/file.h.
+714 differential executions pass with real GetStreamSize through GetSize, exact
+ordered CRT calls, cached signed size/position words, ignored seek/close failures,
+null-stream forwarding, complete state snapshots and ABI. CRT I/O is modeled;
+raw bytes differ and native filesystem/game parity is unverified. File_LoadToMemory
+at RVA 0x574A0 remains analyzed only; next reconstruct it with these real helpers
+and real Mem_Alloc, then replace Font_Load's modeled loader boundary.
+
 Latest bounded follow-up (2026-10-07): [Mem_Alloc](ghidra/windows_mem_alloc.md)
 at VA 0x0045AE10 / RVA 0x5AE10 (406 bytes) is reconstructed in production C89.
 Its focused suite covers 800 differential invocations plus three real Mem_Free

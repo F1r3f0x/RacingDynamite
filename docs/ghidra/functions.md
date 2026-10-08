@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:2e385999be741dbad85a0d2e19efebe4013a078e0cec5d4a81db3390c95fdc81 -->
+<!-- snapshot:ee7c25f5215bee6fae233054979143316c1df99da003dce4bf0777ce699a3ab9 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -442,11 +442,11 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00457420` | `0x00057420` | 123 | `sub_00457420` | unknown | unidentified | - |
 | `0x004574A0` | `0x000574A0` | 230 | `File_LoadToMemory` | game | analyzed | [windows_file_load.md](windows_file_load.md) |
 | `0x00457590` | `0x00057590` | 84 | `sub_00457590` | unknown | unidentified | - |
-| `0x004575F0` | `0x000575F0` | 60 | `File_GetStreamSize` | game | analyzed | [windows_file_load.md](windows_file_load.md) |
-| `0x00457630` | `0x00057630` | 47 | `File_GetSize` | game | analyzed | [windows_file_load.md](windows_file_load.md) |
+| `0x004575F0` | `0x000575F0` | 60 | `File_GetStreamSize` | game | reconstructed | [windows_file_load.md](windows_file_load.md) |
+| `0x00457630` | `0x00057630` | 47 | `File_GetSize` | game | reconstructed | [windows_file_load.md](windows_file_load.md) |
 | `0x00457660` | `0x00057660` | 29 | `sub_00457660` | unknown | unidentified | - |
 | `0x00457680` | `0x00057680` | 34 | `sub_00457680` | unknown | unidentified | - |
-| `0x004576B0` | `0x000576B0` | 43 | `File_CheckReadable` | game | analyzed | [windows_file_load.md](windows_file_load.md) |
+| `0x004576B0` | `0x000576B0` | 43 | `File_CheckReadable` | game | reconstructed | [windows_file_load.md](windows_file_load.md) |
 | `0x004576E0` | `0x000576E0` | 179 | `sub_004576E0` | unknown | unidentified | - |
 | `0x004577A0` | `0x000577A0` | 237 | `sub_004577A0` | unknown | unidentified | - |
 | `0x00457890` | `0x00057890` | 64 | `sub_00457890` | unknown | unidentified | - |

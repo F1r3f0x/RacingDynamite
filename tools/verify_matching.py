@@ -730,3 +730,6 @@ if __name__ == '__main__':
 
     from verify_mem_alloc import verify_mem_alloc
     verify_mem_alloc()
+
+    from verify_file_helpers import verify_file_helpers
+    verify_file_helpers()
