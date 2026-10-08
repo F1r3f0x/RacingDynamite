@@ -229,4 +229,6 @@ covering all branch paths:
    (EBX, ESI, EDI, EBP), and clear DF.
 
 Instruction equality, native filesystem/heap behavior, and full game parity remain unverified.
-Font_Load loader integration is the next bounded scope.
+Font_Load now executes this real loader with allocation, parsing and freeing; see
+[the composed validation scope](windows_font_load.md#real-file-loader-integration-follow-up).
+Earlier next-scope guidance in this document is historical.

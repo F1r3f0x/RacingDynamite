@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:c461ab5485a3c8edc01f23d31facdd558d6ad7b32f2359168f50c0dbd6f2bc2f -->
+<!-- snapshot:e10c37df8567b38cecd8c37afdfd43d124776c75a65ab726edb1b2ac601b893d -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.

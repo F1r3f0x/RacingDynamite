@@ -1,5 +1,18 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded validation follow-up: [Font_Load](ghidra/windows_font_load.md#real-file-loader-integration-follow-up)
+at VA 0x00456420 / RVA 0x56420 links complete production file.c and mem.c.
+536 real-chain differential invocations execute File_LoadToMemory, its helpers,
+Mem_Alloc, Font_Parse, lazy initialization/handle bookkeeping and Mem_Free;
+333 isolated wrapper comparisons are retained (869 total). Full pool hierarchy,
+CRT-entry state, transferred payload, leakage/error precedence, ABI and three
+persistent allocation/free/reuse sequences are checked against independent
+oracles. CRT I/O/heap and sprites remain modeled; pool creation is a fixture.
+No production game body changed or new routine reconstructed. Instruction
+matching and native filesystem/heap/game parity remain unverified. Full
+geputget.c remains blocked by legacy dependencies. Pool initialization/creation
+at RVAs 0x5AD50/0x5AD80 remain suitable bounded reconstruction candidates.
+
 Latest bounded follow-up (2026-10-07): [File_LoadToMemory](ghidra/windows_file_load.md)
 at VA 0x004574A0 / RVA 0x574A0 (230 bytes) is reconstructed in production C89 file.c/file.h.
 240 differential executions pass against authentic PE instructions with real File_CheckReadable,
@@ -7,7 +20,7 @@ File_GetSize, File_GetStreamSize and Mem_Alloc execution, verifying error preced
 (2030, 2040, 2050, 2000, 2010), unclosed stream on short read, retained allocation on open
 failure, position words [0, 0], and full ABI/register preservation. CRT I/O and malloc
 are modeled; raw bytes differ and native filesystem/game parity is unverified.
-Next replace Font_Load's modeled loader boundary with actual File_LoadToMemory execution.
+Font_Load now executes the real file-loader chain as recorded above.
 
 Latest bounded follow-up (2026-10-07): the [native file helpers](ghidra/windows_file_load.md)
 at RVAs 0x575F0/0x57630/0x576B0 are reconstructed in production C89 file.c/file.h.

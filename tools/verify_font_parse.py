@@ -59,7 +59,8 @@ def inspect_original(pe):
         (0x5640f, 0x63f2e0)]
 
 
-def build_parser(dll=DLL, include_loader=False):
+def build_parser(dll=DLL, include_loader=False, real_file=False):
+    assert not real_file or include_loader
     source = (ROOT / 'decomp/src/geputget.c').read_text(encoding='utf-8-sig')
     def extract(name):
         start = source.index('int ' + name + '(')
@@ -103,10 +104,18 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     stub = BUILD / (stem + '_boundary_stub.c')
     stub_obj = BUILD / (stem + '_boundary_stub.obj')
     stubs = 'void *Gfx_SpriteOp(void *desc, int op) { (void)desc; (void)op; return 0; }\n'
-    if include_loader:
+    if include_loader and not real_file:
         # Deliberately cannot complete without the explicit CPU boundary model.
         stubs += 'void *File_LoadToMemory(const char *filename) { (void)filename; for (;;) {} }\n'
     stubs += 'void free(void *p) { (void)p; for (;;) {} }\nvoid *malloc(unsigned int n) { (void)n; for (;;) {} }\n'
+    if real_file:
+        stubs += (
+            'void *fopen(const char *f, const char *m) { (void)f; (void)m; for (;;) {} }\n'
+            'int fclose(void *s) { (void)s; for (;;) {} }\n'
+            'long ftell(void *s) { (void)s; for (;;) {} }\n'
+            'int fseek(void *s, long p, int o) { (void)s; (void)p; (void)o; for (;;) {} }\n'
+            'int fsetpos(void *s, const void *p) { (void)s; (void)p; for (;;) {} }\n'
+            'unsigned int fread(void *b, unsigned int s, unsigned int n, void *f) { (void)b; (void)s; (void)n; (void)f; for (;;) {} }\n')
     stub.write_text(stubs, encoding='utf-8')
     stub_obj.unlink(missing_ok=True)
     cc, ld = shutil.which('clang'), shutil.which('lld-link')
@@ -125,7 +134,7 @@ extern void *Gfx_SpriteOp(void *desc, int op);
         [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/base:0x10000000',
          '/out:' + str(dll), str(obj), str(stub_obj)] + ['/export:' + n for n in exports]]
     commands.insert(1, [cc, '--target=i686-pc-windows-msvc', '-std=c89', '-pedantic-errors',
-        '-Wall', '-Wextra', '-Werror', '-O2', '-c', str(stub), '-o', str(stub_obj)])
+        '-Wall', '-Wextra', '-Werror', '-O2', '-ffreestanding', '-fno-builtin', '-c', str(stub), '-o', str(stub_obj)])
     if include_loader:
         # Separate translation unit prevents dead-argument optimization of unused.
         loader_path, loader_obj = BUILD / (stem + '_wrapper.c'), BUILD / (stem + '_wrapper.obj')
@@ -135,6 +144,13 @@ extern void *Gfx_SpriteOp(void *desc, int op);
         loader_obj.unlink(missing_ok=True)
         commands.insert(1, commands[0][:-4] + ['-c', str(loader_path), '-o', str(loader_obj)])
         commands[-1].append(str(loader_obj))
+    if real_file:
+        file_obj = BUILD / (stem + '_file.obj')
+        file_obj.unlink(missing_ok=True)
+        commands.insert(1, commands[0][:-4] + ['-c', str(ROOT / 'decomp/src/file.c'), '-o', str(file_obj)])
+        commands[-1] += [str(file_obj)] + ['/export:' + n for n in [
+            'File_CheckReadable', 'File_GetSize', 'File_GetStreamSize', 'Mem_Alloc',
+            'fopen', 'fclose', 'ftell', 'fseek', 'fsetpos', 'fread', 'malloc']]
     for command in commands:
         subprocess.run(command, check=True)
     return commands

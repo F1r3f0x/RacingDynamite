@@ -259,3 +259,72 @@ and write ordering. Fresh compilation and emulation records remain separate.
 CRT heap freeing, native file I/O and sprite creation are unverified. No native
 resource management, instruction equality, original linked layout or game
 parity is claimed. Full geputget.c remains blocked by legacy dependencies.
+
+
+## Real file-loader integration follow-up
+
+The current Font_Load verifier links complete production file.c and mem.c into
+font_load_validation.dll and executes File_LoadToMemory, File_CheckReadable,
+File_GetSize, File_GetStreamSize, Mem_Alloc, Font_Parse (with lazy initialization
+and real handle allocation/registration), and Mem_Free. The separate Font_Load
+translation unit remains necessary to preserve its second parser argument.
+Production game bodies required no edit. Earlier boundary-model coverage above
+is historical and retained as an isolated wrapper suite.
+
+**869 differential invocations pass:** 536 execute the real file chain and 333
+retain the previous isolated wrapper contract (35 null loader, 266 real parser,
+32 modeled parser returns). The real chain includes 15 unreadable files, 15 zero
+sizes, 30 failures across all six allocation points of existing-record/new-block/
+new-page paths, 15 binary-open failures, 15 short reads, 443 successful file
+loads (including parser rejection), and three persistent reuse invocations.
+Each reuse follows a real allocation/free round trip on the same CPUs and uses
+the hierarchy left by the first invocation; malloc returns only the new payload.
+
+All 30 font slots and empty/sparse/full glyph sets execute with each allocation
+branch. Lazy initialization exercises noncanonical flags, disabled/exhausted
+handle allocation and first/last/full registration tables. Invalid magic bytes,
+versions, full font tables, signed metrics, raw glyph offsets, null/arbitrary
+sprite handles and modeled error mutations retain parser coverage. Every null
+loader result is overwritten with Font_Load error 1000 and skips parse/free.
+Binary-open and short-read failures retain allocated records; short read does
+not close its binary stream. Parser rejection still frees the loaded buffer.
+
+CRT fread actually copies the fixture bytes into the malloc-returned buffer;
+the buffer starts poisoned rather than containing a preloaded font. Independent
+instruction-derived allocation, parser and release oracles check each binary
+before differential comparison. Checks include exact nested game/CRT call order
+and arguments, text/binary modes, fsetpos words [0,0], ignored seek/close returns,
+cached initial ftell -1 restoration, complete font/handle/error/pool-table state,
+complete arena at every CRT entry and return, parser/sprite/free snapshots,
+loaded payload and guards, retained pointer/cleared size after freeing, no reads
+after buffer poisoning, unrelated image bytes, caller stack, all cdecl saved
+registers, ESP and clear DF. Internal allocation/free read/write ordering remains
+covered by their standalone suites, rather than duplicated in this composition.
+
+CRT malloc VA 0x00469400 and free VA 0x004693B0 are authenticated by the memory
+verifiers. The integrated free boundary uses the actual Mem_Free call target;
+the unused free entry in the loader-only verifier is not used for this chain.
+Strict C89 Clang/LLD 19.1.1, i686-pc-windows-msvc, -O2, freestanding/no-builtin,
+no inline/SSE/SSE2 compile the extracted font unit, separate wrapper, complete
+file.c and boundary fixtures. Compilation/emulation have separate fresh records;
+raw prefix differs and instruction equality is not claimed.
+
+~~~powershell
+uv run python tools/verify_font_load.py
+uv run python tools/workflow.py complete --rva 0x56420 --limitation "CRT I/O/heap and sprites modeled; no native filesystem/heap/game parity or instruction equality"
+uv run python tools/db.py update --check
+~~~
+
+Only CRT I/O/heap and sprite creation are modeled in the real-chain cases.
+Pool-0 creation is a valid fixture; Mem_InitPools/Mem_CreatePool remain analyzed.
+The composed file size is zero or 4096, so negative final-size propagation is
+not covered here. Invalid/aliased buffers, concurrency/reentry, native filesystem/
+heap/game parity, original linked layout and complete geputget.c/game builds
+remain unverified. No new reconstruction or playable game is claimed.
+
+The lead owned all harness, SQLite, export and commit work. A gpt-6-luna/high
+worker reviewed the contract and integrated oracle read-only; no worker wrote
+files or validation records. Its initial free-order review concern was rejected
+against authentic instructions (size clears after CRT free), then withdrawn.
+Per-task token/cost metrics were unavailable. This is a validation extension,
+not an additional routine reconstructed solely for the delegation pilot.
