@@ -262,6 +262,35 @@ unsigned char *Gfx_AllocAlignedBytes(uint32_t size, uint32_t alignment) {
 }
 
 /*
+ * @original Gfx_AddSpritePackingPage (IGN_WIN.EXE @ 0x004617E0, geputget.c)
+ * @fidelity EXACT
+ */
+void *Gfx_AddSpritePackingPage(void) {
+    volatile GfxSpritePackingNode *page;
+    GfxSpritePackingNode *repair;
+    unsigned char *result;
+
+    page = (GfxSpritePackingNode *)Gfx_AllocBytes(24u);
+    page->range_start = g_spritePackingTemplate.range_start;
+    page->range_end = g_spritePackingTemplate.range_end;
+    page->pixels = g_spritePackingTemplate.pixels;
+    page->children = g_spritePackingTemplate.children;
+    page->previous = g_spritePackingTemplate.previous;
+    page->next = g_spritePackingTemplate.next;
+    page->next = g_spritePackingPages;
+    result = Gfx_AllocAlignedBytes(0x10000u, 0x10000u);
+    page->pixels = result;
+    if (g_spritePackingPages != 0) {
+        repair = g_spritePackingPages;
+        ((volatile GfxSpritePackingNode *)repair)->previous =
+            (GfxSpritePackingNode *)page;
+        result = (unsigned char *)repair;
+    }
+    g_spritePackingPages = (GfxSpritePackingNode *)page;
+    return result;
+}
+
+/*
  * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0, geputget.c)
  * @fidelity EXACT
  */

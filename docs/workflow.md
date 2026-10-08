@@ -1,5 +1,19 @@
 # Enforced agent workflow
 
+## Sprite packing page allocation (2026-10-08)
+
+[Page allocation](ghidra/windows_gfx_sprite_packing_pages.md), RVA 0x617E0,
+is reconstructed with both [real allocation helpers](ghidra/windows_gfx_alloc_aligned.md).
+It retains ordered template copying, live head rereads, repair before publication,
+incidental EAX and unchecked failure effects. 1,574 page comparisons include
+816 persistent follow-ups, 134 real-dependency cases and six fault cases.
+The 48/512 standalone helper comparisons and all prior lifecycle/memory/font/
+file/backend suites remain. Inventory: 1,028 candidates, 40 reconstructed.
+CRT heap is modeled; packing callers remain unreconstructed. Instruction
+equality, original compiler/link layout and native graphics/heap/game parity
+remain unverified. No playable rebuilt executable is certified.
+
+
 ## Graphics aligned allocation dependencies (2026-10-08)
 
 [Allocation dependencies](ghidra/windows_gfx_alloc_aligned.md), RVAs

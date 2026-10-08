@@ -77,3 +77,12 @@ renews all applicable compilation/emulation evidence, audits and exports.
 The page allocator RVA 0x617E0 remains a separate feature until reconstructed
 and independently verified. Existing lifecycle and memory/font/file/backend
 suites remain intact, including 864 link comparisons and 810 packing resets.
+
+
+## Real page caller integration follow-up
+
+[Page allocation](windows_gfx_sprite_packing_pages.md) now executes these real
+helpers in 134 page cases, including six failure cases, alongside its isolated
+boundary cases. Standalone helper counts stay 48/512. The preceding separate
+feature description is historical; page publication is now reconstructed.
+CRT remains modeled; native heap/runtime and instruction matching are unverified.

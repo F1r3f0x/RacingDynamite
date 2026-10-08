@@ -121,6 +121,8 @@ void *Gfx_AllocBytes(uint32_t size); /* VA 0x0045F4A0 */
 /* Unsigned 32-bit size/alignment arithmetic; back-pointer precedes result.
  * No zero-alignment or allocation-failure guard exists in the original. */
 unsigned char *Gfx_AllocAlignedBytes(uint32_t size, uint32_t alignment); /* VA 0x00461840 */
+/* Incidental EAX: pixel allocation or live head; callers discard it. */
+void *Gfx_AddSpritePackingPage(void); /* VA 0x004617E0 */
 int Gfx_InitSpritePackingState(void); /* VA 0x004614D0; EAX=0 */
 /* Returns the unchanged previous argument (incidental original EAX).
  * Current must be writable; exact node aliases retain ordered stores. */
