@@ -1,5 +1,20 @@
 # Enforced agent workflow
 
+## Real lazy sprite workspaces (2026-10-08)
+
+[Workspaces A/B](ghidra/windows_gfx_sprite_workspaces.md) at RVAs 0x5D840/0x5C9F0
+execute production C89 bodies through sprite installation, backend selection and
+18 lifecycle startups. Each adds 167 standalone comparisons, 83 persistent repeats
+and 757 total real executions per binary. All allocation-failure combinations,
+exact-zero/noncanonical flags, immediate pointer stores, skipped preservation and
+forced-zero orphaning are checked with CRT malloc modeled. Existing descriptor,
+handle, surface, banner, input, memory/font/file/backend coverage is retained.
+Four direct consumers are analyzed only; heap buffers remain opaque. Primitive
+startup, CRT and callbacks remain modeled. Instruction equality, original linked
+layout and native graphics/heap/game parity remain unverified. Full completion
+uses `uv run python tools/workflow.py complete --rva 0x5D840 --rva 0x5C9F0`;
+the verifier regenerates current compilation/emulation evidence for all 34 routines.
+
 `AGENTS.md` owns project policy. `tools/workflow.py` makes selected rules executable;
 it does not certify whether an implementation preserves the original game architecture.
 

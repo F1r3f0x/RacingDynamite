@@ -22,6 +22,8 @@ from windows_tracking import record_run
 if not __debug__:
     raise RuntimeError('Verification requires assertions')
 ROUTINES = {
+    'Gfx_InitSpriteWorkspaceA': (0x5d840,84,'445faf9112110b216014f95c057ab6d572a81fec3fa64a867b9d5f03739c1d43'),
+    'Gfx_InitSpriteWorkspaceB': (0x5c9f0,84,'922d88eb43e5d8b7ede3d71df0d81a543dc389bfad921e3faa13815d0ac5468e'),
     'Gfx_InitSpriteHandles': (0x5c7f0,62,'41862be4869238f9f9261e170ab377306cd2aa18afbbd6761a59bf2f32a5b132'),
     'Gfx_CopySpriteDescriptor': (0x612e0,114,'75f04bc300b71fce757262cbb88c22e365cd785b8fc1a87578179dba1c442858'),
     'Gfx_InstallSpriteDispatch': (0x56e60,181,'215bc3324a371904ec72c0e780eec9b178b47f01e195eaaac6124781c612a8b6'),
@@ -32,8 +34,6 @@ ROUTINES = {
     'Mem_InitSystem': (0x5b170,41,'e4026b0791ef97b56f8fa7013dd568dfd4772d64e2638d850a217c9d338ce2b8'),
     'Mem_ShutdownSystem': (0x5b1a0,16,'75f6e3f589d50b5cb564113e1270c4f2a5df39c0614d41516b520d0d3ee064a3')}
 DEPENDENCIES = {
-    'Gfx_InitSpriteWorkspaceA': (0x5d840,84,'445faf9112110b216014f95c057ab6d572a81fec3fa64a867b9d5f03739c1d43'),
-    'Gfx_InitSpriteWorkspaceB': (0x5c9f0,84,'922d88eb43e5d8b7ede3d71df0d81a543dc389bfad921e3faa13815d0ac5468e'),
     'Gfx_InitPrimitiveState': (0x5e610,326,'fd2abfef167ef5b92074ef41c17478dd955591025afb3aad714da050a29704a3')}
 MEMORY = {'Mem_InitHandles':(0x5b1f0,76), 'Mem_ShutdownHandles':(0x5b240,155),
     'Mem_NextHandleId':(0x5b1b0,58), 'Mem_RegisterHandle':(0x5b360,120),
@@ -57,7 +57,11 @@ SPRITE_STORAGE = [('g_nativeSpriteFreeList',0x512c58,8000),
     ('g_nativeSpriteScratch',0x514b98,64), ('g_nativeSpriteHandles',0x514bd8,24000),
     ('g_nativeSpriteFreeCursor',0x51a998,4), ('g_nativeSpriteDefault',0x51fb88,64),
     ('g_nativeImageCapacity',0x520388,4), ('g_nativeImageRecords',0x52038c,4)]
-STATE_FIELDS = SPRITE_STORAGE + BOOKKEEPING_FIELDS + RESOURCE_FIELDS + [(name,0x50eb68+4*i,4) for i,(name,_) in enumerate(SURFACE_SLOTS)] + [(name,va,4) for name,va,_,_ in SPRITE_SLOTS] + [('validation_gfxDispatchWords',0x50ebc4,16)]
+WORKSPACE_FIELDS = [('g_spriteWorkspace'+side+field,va,4)
+    for side,addresses in [('A',(0x4bace8,0x51aa50,0x51aa5c,0x51aa60,0x51aa64)),
+                          ('B',(0x4bace4,0x51a9cc,0x51a9d8,0x51a9dc,0x51a9e0))]
+    for field,va in zip(('Allocated','Count','Buffer0','Buffer1','Buffer2'),addresses)]
+STATE_FIELDS = WORKSPACE_FIELDS + SPRITE_STORAGE + BOOKKEEPING_FIELDS + RESOURCE_FIELDS + [(name,0x50eb68+4*i,4) for i,(name,_) in enumerate(SURFACE_SLOTS)] + [(name,va,4) for name,va,_,_ in SPRITE_SLOTS] + [('validation_gfxDispatchWords',0x50ebc4,16)]
 # Authentic consumer extents/stack contracts; recovered independently of C types.
 SURFACE_CONSUMERS = [
     (0x56b10,30,4,0,'0aefb3b8a35847643dbeb6d4c15ca363c8fb17a65cf8c0bf1a1e9df12262f907'),
@@ -93,7 +97,7 @@ SURFACE_TARGETS = [
 
 ISOLATED_HELPERS = ('Lisa_PrintVersion','Input_ResetCallbacks','Gfx_SelectBackend',
     'Mem_InitPools','Mem_InitHandles','Mem_ShutdownHandles','Mem_ShutdownPools')
-MODELED_STARTUP = {'Gfx_InitPrimitiveState','Gfx_InitSpriteWorkspaceA','Gfx_InitSpriteWorkspaceB'}
+MODELED_STARTUP = {'Gfx_InitPrimitiveState'}
 INPUTS = ['decomp/src/lisa3d.c', 'decomp/include/lisa3d.h', 'decomp/src/geputget.c','decomp/include/geputget.h','decomp/src/mem.c','decomp/include/mem.h','decomp/target.json',
     'tools/verify_mem_lifecycle.py','tools/verify_mem_destroy.py','tools/verify_mem_pools.py',
     'tools/verify_mem_alloc.py','tools/verify_mem_free.py','tools/verify_matching.py',
@@ -122,7 +126,7 @@ def inspect_original(pe):
         assert fpo[r]==expected_fpo
         assert ins[-1].mnemonic==('jmp' if name=='Gfx_InitPrimitiveState' else 'ret')
     for name,(r,n,_) in ROUTINES.items():
-        if name in ('Input_ResetCallbacks','Lisa_PrintVersion','Gfx_SelectBackend','Gfx_InstallSurfaceDispatch','Gfx_InstallSpriteDispatch','Gfx_InitSpriteHandles','Gfx_CopySpriteDescriptor'):continue
+        if name not in ('Mem_InitSystem','Mem_ShutdownSystem'):continue
         ins=list(md.disasm(pe.get_data(r,n),0x400000+r))
         expected=[(0x45b170,0x45b4f0),(0x45b175,0x45ad50),(0x45b17a,0x45b1f0),
             (0x45b17f,0x455ab0),(0x45b184,0x45e610),(0x45b18b,0x456af0)] if name=='Mem_InitSystem' else [(0x45b1a0,0x45b240),(0x45b1a5,0x45b140)]
@@ -209,6 +213,45 @@ def inspect_original(pe):
     assert pe.get_data(0x18610,51)==bytes.fromhex(
         'c7050030550040010000c705103c5600c80000006a0868c80000006840010000684001000068b03d5600e881e6030083c414c3')
     assert pe.get_data(0xbace4,8)==bytes(8) # Two lazy allocation flags: file zero.
+    # Full independently decoded workspace contracts, including every relocated
+    # operand. Buffer contents/layout are deliberately outside these bodies.
+    for side,r,count,flag,pointers in [('A',0x5d840,0x51aa50,0x4bace8,0x51aa5c),
+                                    ('B',0x5c9f0,0x51a9cc,0x4bace4,0x51a9d8)]:
+        instructions=list(md.disasm(pe.get_data(r,84),0x400000+r))
+        assert len(instructions)==17 and pe.get_data(r+84,12)==b'\xcc'*12
+        assert [(i.mnemonic,i.op_str) for i in instructions]==[
+            ('mov',f'dword ptr [{hex(count)}], 0'),('cmp',f'dword ptr [{hex(flag)}], 0'),
+            ('jne',hex(0x400000+r+83))] + [item for index in range(3) for item in [
+                ('push','0x20d8'),('call','0x469400'),('add','esp, 4'),
+                ('mov',f'dword ptr [{hex(pointers+4*index)}], eax')]] + [
+            ('mov',f'dword ptr [{hex(flag)}], 1'),('ret','')]
+        assert [(x,relocations[x]) for x in sorted(relocations) if r<=x<r+84]==[
+            (r+2,count),(r+12,flag),(r+33,pointers),(r+51,pointers+4),
+            (r+69,pointers+8),(r+75,flag)]
+        for va in (count,pointers,pointers+4,pointers+8):
+            assert data.VirtualAddress+data.SizeOfRawData<=va-0x400000<data.VirtualAddress+data.Misc_VirtualSize
+        assert [x for x in sorted(relocations) if relocations[x]==flag]==[r+12,r+75]
+        assert [x for x in sorted(relocations) if relocations[x]==count]==[r+2]
+    # Independently recovered consumers establish buffer use, without declaring
+    # a complete production buffer layout from allocation size or legacy types.
+    consumers=[(0x5d8a0,1805,'78d4b4b04194828bc6b6683a6890568822a230369f947edda82cb6222c4640c4'),
+        (0x5dfb0,1561,'739bf60339f6915a8460f79fdaeb474af0426aab014e2b386bd74c2e37ac433e'),
+        (0x5ca50,1813,'4458bb7690590a3289e6ce7d99b3a80338382fe2afc3b67a25891b2af0e5f8bf'),
+        (0x5d170,1569,'d1d8d33f6f947f949ae7160d07da0fcc3e66d4a67168ad30c5eb80fa62f175f7')]
+    for r,n,digest in consumers:
+        raw=pe.get_data(r,n);instructions=list(md.disasm(raw,0x400000+r))
+        assert fpo[r][0]==n and fpo[r][2]==1 and hashlib.sha256(raw).hexdigest()==digest
+        assert sum(i.size for i in instructions)==n and instructions[-1].mnemonic=='ret'
+    for side,r,start,pointers in [('A',0x5d840,0x5d8a0,0x51aa5c),('B',0x5c9f0,0x5ca50,0x51a9d8)]:
+        ranges=consumers[:2] if side=='A' else consumers[2:]
+        decoded=[i for cr,n,_ in ranges for i in md.disasm(pe.get_data(cr,n),0x400000+cr)]
+        for index in range(3):
+            refs=[x for x in sorted(relocations) if relocations[x]==pointers+4*index]
+            assert len(refs)==(20 if index==0 else 17 if index==1 else 18)
+            assert refs[0]==r+33+18*index
+            for operand in refs[1:]:
+                instruction=next(i for i in decoded if i.address-0x400000<=operand<i.address-0x400000+i.size)
+                assert instruction.mnemonic=='mov' and instruction.op_str.split(', ')[1]==f'dword ptr [{hex(pointers+4*index)}]'
     banner=list(md.disasm(pe.get_data(0x5b4f0,34),0x45b4f0))
     assert [(i.mnemonic,i.op_str) for i in banner]==[
         ('push','0x4bab20'),('push','0x4bab5c'),('call','0x46a500'),
@@ -523,6 +566,15 @@ class Oracle:
         if name!=self.top:self.events.append(('call',name,args))
         if name in MODELED_STARTUP or (self.isolated and name in ISOLATED_HELPERS):
             return self.boundary(name,args)
+        if name in ('Gfx_InitSpriteWorkspaceA','Gfx_InitSpriteWorkspaceB'):
+            prefix='g_spriteWorkspace'+name[-1]
+            self.write(prefix+'Count',0,0)
+            if self.read(prefix+'Allocated')==0:
+                for index in range(3):
+                    pointer=self.call('malloc',(0x20d8,))
+                    self.write(prefix+'Buffer'+str(index),0,pointer)
+                self.write(prefix+'Allocated',0,1)
+            return None # Original EAX is incidental; callers consume no result.
         if name=='Gfx_InitSpriteHandles':
             self.write('g_nativeSpriteFreeCursor',0,0x514b98)
             for i in range(2000):
@@ -678,10 +730,10 @@ class LifecycleSession(DestroySession):
         if name=='g_nativeSpriteFreeCursor' and self.symbols:
             start=self.symbols['g_nativeSpriteFreeList']
             if start<=value<=start+8000:return 0x512c58+value-start
-        return self.to_original.get(value,value) if name.startswith(('g_surface','g_sprite')) else value
+        return self.to_original.get(value,value) if name.startswith(('g_surface','g_sprite')) and not name.startswith('g_spriteWorkspace') else value
 
     def translated_bytes(self,name,data,rebuilt=False):
-        if name.startswith(('g_surface','g_sprite')) or name in ('g_nativeSpriteFreeList','g_nativeSpriteFreeCursor'):
+        if (name.startswith(('g_surface','g_sprite')) and not name.startswith('g_spriteWorkspace')) or name in ('g_nativeSpriteFreeList','g_nativeSpriteFreeCursor'):
             values=struct.unpack('<'+'I'*(len(data)//4),data)
             if rebuilt:
                 if name=='g_nativeSpriteFreeList':
@@ -806,7 +858,7 @@ def verify_mem_lifecycle():
         downstream_cases=verify_sprite_initializer_contracts(original)
         default_cases=verify_default_initializer(original)
         build(dll=DLL)
-        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production Input_ResetCallbacks, Lisa_PrintVersion, Gfx_SelectBackend and Gfx_InstallSurfaceDispatch declarations/bodies and Gfx_InstallSpriteDispatch, Gfx_InitSpriteHandles, Gfx_CopySpriteDescriptor plus thirty typed dispatch globals and independently recovered sprite storage; strict C89; provisional Clang/LLD; explicit nonreturning startup and CRT fixtures')
+        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production banner/input/selector/surface/sprite/handle/descriptor and both workspace bodies, thirty dispatch globals and independently recovered sprite/workspace storage; strict C89; provisional Clang/LLD; primitive and CRT fixtures')
         rebuilt=pefile.PE(str(DLL));assert not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
         symbols={s.name.decode():rebuilt.OPTIONAL_HEADER.ImageBase+s.address for s in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if s.name}
         for name,(r,n,_) in ROUTINES.items():
@@ -862,6 +914,37 @@ def verify_mem_lifecycle():
         for _ in range(24):
             state=compare('Gfx_InitSpriteHandles',fresh())
             compare('Gfx_InitSpriteHandles',state,reset=False)
+        # All eight independent failure combinations, exact-zero/noncanonical
+        # flags, stale pointers, persistent skip and forced-zero orphaning.
+        workspace_persistent={side:0 for side in ('A','B')}
+        for side in ('A','B'):
+            routine='Gfx_InitSpriteWorkspace'+side;prefix='g_spriteWorkspace'+side
+            patterns=[tuple(ARENA+0x80000+0x3000*i if mask&(1<<i) else 0 for i in range(3)) for mask in range(8)]
+            for flag in (0,1,2,0x7fffffff,0x80000000,0xffffffff):
+                for pointers in patterns:
+                    state=fresh();state[prefix+'Allocated']=struct.pack('<I',flag)
+                    for i in range(3):state[prefix+'Buffer'+str(i)]=struct.pack('<I',[0,0x80000000,0xffffffff][i])
+                    state=compare(routine,state,returns={'malloc':pointers})
+                    compare(routine,state,returns={'malloc':(0,0,0)},reset=False)
+                    workspace_persistent[side]+=1
+            for _ in range(32):
+                state=fresh();state[prefix+'Allocated']=bytes(4)
+                pointers=tuple(rng.getrandbits(32) for i in range(3))
+                # The allocator may mutate a flag/pointer/count between calls;
+                # the already-taken branch is not rechecked or rolled back.
+                actions={('malloc',0):[(prefix+'Allocated',0,4,0xffffffff),
+                    (prefix+'Count',0,4,rng.getrandbits(32))],
+                    ('malloc',1):[(prefix+'Buffer0',0,4,rng.getrandbits(32))]}
+                state=compare(routine,state,actions=actions,returns={'malloc':pointers})
+                compare(routine,state,reset=False);workspace_persistent[side]+=1
+            state=fresh();state[prefix+'Allocated']=bytes(4)
+            state=compare(routine,state,returns={'malloc':patterns[-1]})
+            for i in range(3):
+                # Explicit client clears flag; old allocations are overwritten
+                # without free. Contents of every arena byte stay unchanged.
+                state[prefix+'Allocated']=bytes(4)
+                state=compare(routine,state,returns={'malloc':patterns[i]})
+                compare(routine,state,reset=False);workspace_persistent[side]+=1
         # Any nonzero raw selector returns 2, even with the sign bit set.
         # Zero ignores independent initializer results and preserves their mutations.
         selectors=[1,2,0x7fffffff,0x80000000,0xffffffff]+[rng.getrandbits(32) or 1 for _ in range(128)]
@@ -875,23 +958,24 @@ def verify_mem_lifecycle():
             for field,_ in SURFACE_SLOTS:state[field]=struct.pack('<I',value)
             state=compare('Gfx_InstallSurfaceDispatch',state)
             compare('Gfx_InstallSurfaceDispatch',state,reset=False)
-            actions={('Gfx_InitSpriteWorkspaceB',0):[
+            state=fresh();state['g_spriteWorkspaceBAllocated']=bytes(4)
+            actions={('malloc',2):[
                 ('g_surfaceOpen',0,4,value),('validation_gfxDispatchWords',12,4,value),
                 ('g_inputPollCallback',0,4,value)]}
-            state=compare('Gfx_SelectBackend',fresh(),(0,),actions=actions,
-                returns={'Gfx_InitSpriteWorkspaceB':[value]})
-            compare('Gfx_SelectBackend',state,(0,),actions=actions,
-                returns={'Gfx_InitSpriteWorkspaceB':[value]},reset=False)
+            state=compare('Gfx_SelectBackend',state,(0,),actions=actions,
+                returns={'malloc':[0,value,0]})
+            compare('Gfx_SelectBackend',state,(0,),reset=False)
         sprite_pairs=[(x,y) for x in [0,1,2,0x80000000,0xffffffff] for y in [0,1,2,0x80000000,0xffffffff]]
         sprite_pairs += [(rng.getrandbits(32),rng.getrandbits(32)) for _ in range(128)]
         for x,y in sprite_pairs:
             state=fresh()
+            state['g_spriteWorkspaceAAllocated']=bytes(4);state['g_spriteWorkspaceBAllocated']=bytes(4)
             for field,_,_,_ in SPRITE_SLOTS:state[field]=struct.pack('<I',x)
-            actions={('Gfx_InitSpriteWorkspaceA',0):[('g_spriteOpen',0,4,x),('g_surfaceOpen',0,4,y)],
-                ('Gfx_InitSpriteWorkspaceB',0):[('g_spriteSetState',0,4,y),('validation_gfxDispatchWords',0,4,x),('g_inputPollCallback',0,4,y)]}
-            returns={'Gfx_InitSpriteWorkspaceA':[x],'Gfx_InitSpriteWorkspaceB':[y]}
+            actions={('malloc',0):[('g_spriteOpen',0,4,x),('g_surfaceOpen',0,4,y)],
+                ('malloc',3):[('g_spriteSetState',0,4,y),('validation_gfxDispatchWords',0,4,x),('g_inputPollCallback',0,4,y)]}
+            returns={'malloc':[x,0,y,y,0,x]}
             state=compare('Gfx_InstallSpriteDispatch',state,actions=actions,returns=returns)
-            compare('Gfx_InstallSpriteDispatch',state,actions=actions,returns=returns,reset=False)
+            compare('Gfx_InstallSpriteDispatch',state,reset=False)
         # Both printf returns are ignored: exercise independent failure/high-bit
         # pairs and repeated execution without resetting the CPU image/state.
         pairs=[(x,y) for x in [0,1,2,0x80000000,0xffffffff]
@@ -926,15 +1010,18 @@ def verify_mem_lifecycle():
         for flag in [0,1,2,0x80000000,0xffffffff]:
             for pointer in [0,ARENA]:
                 state=fresh(flag);state['table']=rng.randbytes(1024)
-                compare('Mem_InitSystem',state,returns={'malloc':[pointer]})
+                state['g_spriteWorkspaceAAllocated']=struct.pack('<I',flag)
+                state['g_spriteWorkspaceBAllocated']=struct.pack('<I',[0xffffffff,0,0x80000000,2,1][[0,1,2,0x80000000,0xffffffff].index(flag)])
+                compare('Mem_InitSystem',state,returns={'malloc':[pointer,0,ARENA+0x80000,0,ARENA+0x83000,0,ARENA+0x86000]})
         # Changes made by early/late startup boundaries are observed by real helpers.
         for flag in [0,1,2,0xffffffff]:
             actions={
                 ('printf',0):[('g_memHandlesInitialized',0,4,flag),
                     ('g_inputKeyEventCallback',0,4,0xffffffff),('g_inputPollCallback',0,4,0x12345678)],
                 ('printf',1):[('g_inputPollCallback',0,4,0x87654321)],
-                ('Gfx_InitPrimitiveState',0):[('g_memPendingCallback',0,4,CALLBACK)],
-                ('Gfx_InitSpriteWorkspaceB',0):[('g_memHandlesInitialized',0,4,0)]}
+                ('Gfx_InitPrimitiveState',0):[('g_memPendingCallback',0,4,CALLBACK),
+                    ('g_spriteWorkspaceAAllocated',0,4,0),('g_spriteWorkspaceBAllocated',0,4,0)],
+                ('malloc',4):[('g_memHandlesInitialized',0,4,0)]}
             compare('Mem_InitSystem',fresh(2),actions=actions,returns={'malloc':[ARENA]})
         # Every handle slot in both passes; callbacks precede any pool destruction.
         for i in range(200):
@@ -967,11 +1054,12 @@ def verify_mem_lifecycle():
         # Persistent startup, real allocation/registration, callback -> pool teardown,
         # repeated shutdown, default failure, and repeated startup orphaning.
         state=fresh(0)
+        state['g_spriteWorkspaceAAllocated']=bytes(4);state['g_spriteWorkspaceBAllocated']=bytes(4)
         for s in (a,b):s.reset_state(state)
         def step(name,args=(),actions=None,returns=None):
             nonlocal state,persistent
             state=compare(name,state,args,actions=actions,returns=returns,reset=False);persistent+=1
-        step('Mem_InitSystem',returns={'malloc':[ARENA]})
+        step('Mem_InitSystem',returns={'malloc':[ARENA,ARENA+0x80000,0,ARENA+0x83000,0,ARENA+0x86000,0]})
         step('Mem_Alloc',(0,123),returns={'malloc':[ARENA+0xc0000,ARENA+0xc1000,ARENA+0xc2000]})
         for key,value in [('g_memPendingCallback',CALLBACK),('g_memPendingParameter',0xffffffff)]:
             state[key]=struct.pack('<I',value)
@@ -991,14 +1079,17 @@ def verify_mem_lifecycle():
                 original_consumer_abi_cases=consumer_cases if name=='Gfx_InstallSurfaceDispatch' else sprite_consumer_cases if name=='Gfx_InstallSpriteDispatch' else None,
                 original_default_initializer_cases=default_cases if name in ('Gfx_InitSpriteHandles','Gfx_CopySpriteDescriptor') else None,
                 original_downstream_contract_cases=downstream_cases if name=='Gfx_InstallSpriteDispatch' else None,
-                persistent_invocations=(153 if name=='Gfx_InstallSpriteDispatch' else 133 if name=='Gfx_InstallSurfaceDispatch' else 266 if name=='Gfx_SelectBackend' else 153 if name=='Lisa_PrintVersion' else
+                persistent_invocations=(workspace_persistent[name[-1]] if name.startswith('Gfx_InitSpriteWorkspace') else 153 if name=='Gfx_InstallSpriteDispatch' else 133 if name=='Gfx_InstallSurfaceDispatch' else 266 if name=='Gfx_SelectBackend' else 153 if name=='Lisa_PrintVersion' else
                     persistent if name in ('Mem_InitSystem','Mem_ShutdownSystem') else 24 if name=='Gfx_InitSpriteHandles' else 243 if name=='Gfx_CopySpriteDescriptor' else 0),
-                persistent_integrated_startups=4 if name in ('Lisa_PrintVersion','Input_ResetCallbacks','Gfx_SelectBackend','Gfx_InstallSurfaceDispatch','Gfx_InstallSpriteDispatch','Gfx_InitSpriteHandles','Gfx_CopySpriteDescriptor') else None,
-                integrated_startups=18 if name in ('Input_ResetCallbacks','Lisa_PrintVersion','Gfx_SelectBackend','Gfx_InstallSurfaceDispatch','Gfx_InstallSpriteDispatch','Gfx_InitSpriteHandles','Gfx_CopySpriteDescriptor') else None,
-                scope=('Sixteen-word copies with every signed ID/default/null/live branch, conditional ownership-slot clearing, source preservation and EAX; real helper through handles/installers/selector/startup, complete state/access/ABI checks' if name=='Gfx_CopySpriteDescriptor' else '2000 interleaved freelist stores/first-dword clears, tail preservation, real descriptor helper, persistent reinitialization and real installer/selector/startup integration' if name=='Gfx_InitSpriteHandles' else '306 standalone sixteen-store sprite installers, exact nonmonotonic store and downstream call order; independent return pairs and boundary mutations with persistent repeats; real surface/selector/18 startup integration; full-state/ABI/image checks; original-only consumer and downstream contracts' if name=='Gfx_InstallSpriteDispatch' else '266 standalone fourteen-store installers with arbitrary initial words and persistent repetition; real selector and 18 integrated startups; relocated function identity, exact ordered stores, untouched sprite words/holes during surface-only calls and full-state/ABI/image checks' if name=='Gfx_InstallSurfaceDispatch' else '532 standalone selectors: 266 nonzero calls without effects, 266 zero calls with real ordered surface installation and real sprite installation and ignored downstream returns/mutations; 18 integrated startups; ordered calls, full tracked state and boundary snapshots, EAX/stack/nonvolatile/DF/unrelated-image checks' if name=='Gfx_SelectBackend' else '306 standalone calls, exact NUL-terminated printf format/vararg bytes and order; independent return pairs, CRT boundary mutations, repeated persistent calls; 18 integrated startups; EAX=0, full tracked state, stack/nonvolatile/DF/unrelated-image checks' if name=='Lisa_PrintVersion' else '266 standalone ordered two-dword clearing calls, repeated persistent clearing; 18 integrated startups; complete tracked state and boundary snapshots; nonvolatile registers/stack/DF/unrelated-image checks; void EAX excluded' if name=='Input_ResetCallbacks' else 'Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration'),
-                limitations='Primitive initializer, two workspace sprite initializers, CRT printf/heap and callbacks modeled; no instruction equality, original linked layout, native startup/graphics/heap/game parity, invalid/unmapped storage, partial overlap, concurrency or general reentry validation; exact live source/destination alias tested')
+                persistent_integrated_startups=4 if name not in ('Mem_InitSystem','Mem_ShutdownSystem') else None,
+                integrated_startups=18 if name not in ('Mem_InitSystem','Mem_ShutdownSystem') else None,
+                scope=('167 standalone workspace invocations including 83 persistent repeats, every independent allocation failure, exact-zero/noncanonical flags, immediate stores, skipped pointer preservation, allocator mutations and forced-zero orphaning; both real workspaces through installer/selector/18 startups; full state/access/ABI checks; void EAX excluded' if name.startswith('Gfx_InitSpriteWorkspace') else 'Sixteen-word copies with every signed ID/default/null/live branch, conditional ownership-slot clearing, source preservation and EAX; real helper through handles/installers/selector/startup, complete state/access/ABI checks' if name=='Gfx_CopySpriteDescriptor' else '2000 interleaved freelist stores/first-dword clears, tail preservation, real descriptor helper, persistent reinitialization and real installer/selector/startup integration' if name=='Gfx_InitSpriteHandles' else '306 standalone sixteen-store sprite installers, exact nonmonotonic store and downstream call order; independent return pairs and boundary mutations with persistent repeats; real surface/selector/18 startup integration; full-state/ABI/image checks; original-only consumer and downstream contracts' if name=='Gfx_InstallSpriteDispatch' else '266 standalone fourteen-store installers with arbitrary initial words and persistent repetition; real selector and 18 integrated startups; relocated function identity, exact ordered stores, untouched sprite words/holes during surface-only calls and full-state/ABI/image checks' if name=='Gfx_InstallSurfaceDispatch' else '532 standalone selectors: 266 nonzero calls without effects, 266 zero calls with real ordered surface installation and real sprite installation and ignored downstream returns/mutations; 18 integrated startups; ordered calls, full tracked state and boundary snapshots, EAX/stack/nonvolatile/DF/unrelated-image checks' if name=='Gfx_SelectBackend' else '306 standalone calls, exact NUL-terminated printf format/vararg bytes and order; independent return pairs, CRT boundary mutations, repeated persistent calls; 18 integrated startups; EAX=0, full tracked state, stack/nonvolatile/DF/unrelated-image checks' if name=='Lisa_PrintVersion' else '266 standalone ordered two-dword clearing calls, repeated persistent clearing; 18 integrated startups; complete tracked state and boundary snapshots; nonvolatile registers/stack/DF/unrelated-image checks; void EAX excluded' if name=='Input_ResetCallbacks' else 'Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration'),
+                workspace_contract=('Exact-zero guard, unconditional count reset, three ordered 0x20d8 allocations/immediate stores including all independent failures, noncanonical flags, skipped pointer preservation, persistent repetition/forced-zero orphaning and allocator mutations; no EAX result contract' if name.startswith('Gfx_InitSpriteWorkspace') else None),
+                limitations='Primitive initializer, CRT printf/heap and callbacks modeled; workspace buffers opaque, consumers unreconstructed; no instruction equality, original linked layout, native startup/graphics/heap/game parity, invalid/unmapped storage, partial overlap, concurrency or general reentry validation; exact live source/destination alias tested')
         print('PASS: %d Gfx_SelectBackend; %d Lisa_PrintVersion; %d Input_ResetCallbacks; %d Mem_InitSystem and %d Mem_ShutdownSystem differential invocations; isolated %s; %d persistent invocations.'%(counts['Gfx_SelectBackend'],counts['Lisa_PrintVersion'],counts['Input_ResetCallbacks'],counts['Mem_InitSystem'],counts['Mem_ShutdownSystem'],isolated_counts,persistent))
         print('PASS: %d descriptor helpers and %d handle initializers with real integration.'%(counts['Gfx_CopySpriteDescriptor'],counts['Gfx_InitSpriteHandles']))
+        print('PASS: workspace standalone counts %s; real body counts %s.'%(
+            {n:counts[n] for n in ROUTINES if n.startswith('Gfx_InitSpriteWorkspace')},a.executed))
         print('PASS: %d standalone production surface installers; real selector/startup integration.'%counts['Gfx_InstallSurfaceDispatch'])
         print('PASS: %d standalone production sprite installers; %d original-only sprite consumer ABI and %d downstream contract cases.'%(counts['Gfx_InstallSpriteDispatch'],sprite_consumer_cases,downstream_cases))
         return counts

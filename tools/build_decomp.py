@@ -13,9 +13,7 @@ STARTUP_BOUNDARY_SOURCE = (
     'unsigned int validation_gfxDispatchWords[4];\n'
     'int Lisa_PrintVersion(void);\n'
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
-    'void Gfx_InitPrimitiveState(void) { for (;;) {} }\n'
-    'void Gfx_InitSpriteWorkspaceA(void) { for (;;) {} }\n'
-    'void Gfx_InitSpriteWorkspaceB(void) { for (;;) {} }\n')
+    'void Gfx_InitPrimitiveState(void) { for (;;) {} }\n')
 STARTUP_EXPORTS = ['Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
     'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
 
@@ -62,7 +60,8 @@ LISA_VERSION_SOURCE = (
 _selector_start = _resource_source.index('int Gfx_SelectBackend(int backend)')
 _selector_end = _resource_source.index('\n}', _selector_start) + 2
 LISA_VERSION_SOURCE += (
-    _resource_header[_resource_header.index('int Gfx_SelectBackend(int backend);'):
+    'extern void *malloc(unsigned int size);\n'
+    + _resource_header[_resource_header.index('int Gfx_SelectBackend(int backend);'):
         _resource_header.index('#define MAX_FONTS')]
     + _resource_source[_selector_start:_selector_end] + '\n'
     + _resource_source[_resource_source.index('/* Independently recovered Windows dispatch slots;'):
@@ -91,7 +90,10 @@ STARTUP_BOUNDARY_SOURCE += (
 )
 SPRITE_EXPORTS = ['g_spriteOpen', 'Gfx_SpriteOpenNative', 'g_spriteReset', 'Gfx_SpriteResetNative', 'g_spriteClose', 'Gfx_SpriteCloseNative', 'g_spriteOption', 'Gfx_SpriteOptionNative', 'g_spriteConfigure', 'Gfx_SpriteConfigureNative', 'g_spriteSetClip', 'Gfx_SpriteSetClipNative', 'g_spriteDrawList', 'Gfx_SpriteDrawListNative', 'g_spriteDraw', 'Gfx_DrawSpriteNative', 'g_spriteHandleOp', 'Gfx_SpriteHandleOpNative', 'g_spriteImageOp', 'Gfx_SpriteImageOpNative', 'g_spriteCreateDescriptor', 'Gfx_SpriteCreateDescriptorNative', 'g_spriteFreeDescriptor', 'Gfx_SpriteFreeDescriptorNative', 'g_spriteCopyDescriptor', 'Gfx_SpriteCopyDescriptorNative', 'g_spriteReserved', 'Gfx_SpriteReservedNative', 'g_spriteGetState', 'Gfx_SpriteGetStateNative', 'g_spriteSetState', 'Gfx_SpriteSetStateNative', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'g_nativeSpriteFreeList', 'g_nativeSpriteHandles', 'g_nativeSpriteFreeCursor', 'g_nativeSpriteScratch', 'g_nativeSpriteDefault', 'g_nativeImageCapacity', 'g_nativeImageRecords']
 
-EXPORTS = ['validation_gfxDispatchWords', 'Lisa_PrintVersion', 'printf', 'Input_ResetCallbacks', 'g_inputKeyEventCallback', 'g_inputPollCallback', 'Mem_InitSystem', 'Mem_ShutdownSystem', 'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool', 'Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
+WORKSPACE_EXPORTS = ['g_spriteWorkspace' + side + field for side in ('A', 'B')
+    for field in ('Allocated', 'Count', 'Buffer0', 'Buffer1', 'Buffer2')]
+
+EXPORTS = WORKSPACE_EXPORTS + ['validation_gfxDispatchWords', 'Lisa_PrintVersion', 'printf', 'Input_ResetCallbacks', 'g_inputKeyEventCallback', 'g_inputPollCallback', 'Mem_InitSystem', 'Mem_ShutdownSystem', 'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool', 'Mem_InitHandles', 'Mem_NextHandleId', 'g_memHandlesInitialized', 'g_memHandleStatus',
            'g_memHandleIds', 'g_memHandleCursor', 'Mem_RegisterHandle', 'Mem_ShutdownHandles',
            'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'free', 'malloc',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',

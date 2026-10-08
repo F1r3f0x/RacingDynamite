@@ -221,6 +221,8 @@ def verify():
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
     expected_calls = {
+        'Gfx_InitSpriteWorkspaceA': ['malloc'] * 3,
+        'Gfx_InitSpriteWorkspaceB': ['malloc'] * 3,
         'Gfx_InitSpriteHandles': ['Gfx_CopySpriteDescriptor'],
         'Gfx_InstallSpriteDispatch': ['Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles'],
         'Gfx_SelectBackend': ['Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch'],

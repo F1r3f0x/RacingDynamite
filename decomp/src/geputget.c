@@ -10,6 +10,7 @@
 #include <fcntl.h>
 extern int g_MemoryAllocated;
 #include <string.h>
+#include <stdlib.h>
 
 /* Windows input callback state. Both words are loader-zeroed .data tail. */
 InputKeyEventCallback volatile g_inputKeyEventCallback = 0; /* VA 0x0050DE14 */
@@ -119,6 +120,48 @@ int Gfx_InstallSpriteDispatch(void) {
     Gfx_InitSpriteWorkspaceB();
     Gfx_InitSpriteHandles();
     return 1;
+}
+
+/* Flags are file-backed zero words; reset/pointer words are separate BSS
+ * storage. Allocations remain owned by these workspaces across reinitialization.
+ * A nonzero flag retains all pointers, even after an unchecked allocation failure. */
+volatile uint32_t g_spriteWorkspaceAAllocated = 0;
+volatile uint32_t g_spriteWorkspaceACount;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer0;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer1;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer2;
+volatile uint32_t g_spriteWorkspaceBAllocated = 0;
+volatile uint32_t g_spriteWorkspaceBCount;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer0;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer1;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer2;
+
+/*
+ * @original Gfx_InitSpriteWorkspaceA (IGN_WIN.EXE @ 0x0045D840, geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_InitSpriteWorkspaceA(void) {
+    g_spriteWorkspaceACount = 0;
+    if (g_spriteWorkspaceAAllocated == 0) {
+        g_spriteWorkspaceABuffer0 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceABuffer1 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceABuffer2 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceAAllocated = 1;
+    }
+}
+
+/*
+ * @original Gfx_InitSpriteWorkspaceB (IGN_WIN.EXE @ 0x0045C9F0, geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_InitSpriteWorkspaceB(void) {
+    g_spriteWorkspaceBCount = 0;
+    if (g_spriteWorkspaceBAllocated == 0) {
+        g_spriteWorkspaceBBuffer0 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceBBuffer1 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceBBuffer2 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceBAllocated = 1;
+    }
 }
 
 /* Statically owned handle pool and copied descriptor views. The default record

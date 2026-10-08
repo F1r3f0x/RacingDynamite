@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:139a0544961ce826f9e80b4ef94e5e189e13e13aa86c6cff28d7bc30cc3e588b -->
+<!-- snapshot:3c3f1f1cd280d9433efef2f9376a801d3287180b0b20851e5fedcfa9ae5cc1a8 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -568,16 +568,16 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045C990` | `0x0005C990` | 24 | `Gfx_SetTriangleSpanState` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
 | `0x0045C9B0` | `0x0005C9B0` | 32 | `Gfx_DrawTriangleSpan` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
 | `0x0045C9D0` | `0x0005C9D0` | 28 | `Gfx_DrawClippedTriangleSpan` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
-| `0x0045C9F0` | `0x0005C9F0` | 84 | `Gfx_InitSpriteWorkspaceB` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
+| `0x0045C9F0` | `0x0005C9F0` | 84 | `Gfx_InitSpriteWorkspaceB` | game | reconstructed | [windows_gfx_sprite_workspaces.md](windows_gfx_sprite_workspaces.md) |
 | `0x0045CA50` | `0x0005CA50` | 1813 | `Gfx_RasterizeTexturedTriangle` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
 | `0x0045D170` | `0x0005D170` | 1569 | `Gfx_RasterizeClippedTriangle` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
 | `0x0045D7A0` | `0x0005D7A0` | 53 | `Gfx_ComputeTriangleEdgeSlope` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
 | `0x0045D7E0` | `0x0005D7E0` | 20 | `sub_0045D7E0` | unknown | unidentified | - |
 | `0x0045D800` | `0x0005D800` | 32 | `sub_0045D800` | unknown | unidentified | - |
 | `0x0045D820` | `0x0005D820` | 28 | `sub_0045D820` | unknown | unidentified | - |
-| `0x0045D840` | `0x0005D840` | 84 | `Gfx_InitSpriteWorkspaceA` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x0045D8A0` | `0x0005D8A0` | 1805 | `sub_0045D8A0` | unknown | unidentified | - |
-| `0x0045DFB0` | `0x0005DFB0` | 1561 | `sub_0045DFB0` | unknown | unidentified | - |
+| `0x0045D840` | `0x0005D840` | 84 | `Gfx_InitSpriteWorkspaceA` | game | reconstructed | [windows_gfx_sprite_workspaces.md](windows_gfx_sprite_workspaces.md) |
+| `0x0045D8A0` | `0x0005D8A0` | 1805 | `Gfx_RasterizeWorkspaceATriangle` | game | analyzed | [windows_gfx_sprite_workspaces.md](windows_gfx_sprite_workspaces.md) |
+| `0x0045DFB0` | `0x0005DFB0` | 1561 | `Gfx_RasterizeWorkspaceAClippedTriangle` | game | analyzed | [windows_gfx_sprite_workspaces.md](windows_gfx_sprite_workspaces.md) |
 | `0x0045E5D0` | `0x0005E5D0` | 53 | `sub_0045E5D0` | unknown | unidentified | - |
 | `0x0045E610` | `0x0005E610` | 326 | `Gfx_InitPrimitiveState` | game | analyzed | [windows_mem_lifecycle.md](windows_mem_lifecycle.md) |
 | `0x0045E760` | `0x0005E760` | 284 | `sub_0045E760` | unknown | unidentified | - |

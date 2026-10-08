@@ -151,8 +151,20 @@ typedef int (*GfxSpriteSetStateProc)(const GfxSpriteState *state);
 extern GfxSpriteSetStateProc volatile g_spriteSetState; /* VA 0x0050EBE8 */
 int Gfx_SpriteSetStateNative(const GfxSpriteState *state); /* VA 0x00457170; body unreconstructed */
 
-/* Lazy workspace boundaries: no stack arguments or consumed result.
- * These two bodies remain unreconstructed. */
+/* Separately owned lazy work buffers. Consumers use a two-dword header and
+ * twelve-byte stepping, but a complete layout/capacity is not established. */
+typedef struct GfxSpriteWorkspaceBuffer GfxSpriteWorkspaceBuffer;
+extern volatile uint32_t g_spriteWorkspaceAAllocated; /* VA 0x004BACE8 */
+extern volatile uint32_t g_spriteWorkspaceACount; /* VA 0x0051AA50; reset word */
+extern GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer0; /* VA 0x0051AA5C */
+extern GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer1; /* VA 0x0051AA60 */
+extern GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer2; /* VA 0x0051AA64 */
+extern volatile uint32_t g_spriteWorkspaceBAllocated; /* VA 0x004BACE4 */
+extern volatile uint32_t g_spriteWorkspaceBCount; /* VA 0x0051A9CC; reset word */
+extern GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer0; /* VA 0x0051A9D8 */
+extern GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer1; /* VA 0x0051A9DC */
+extern GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer2; /* VA 0x0051A9E0 */
+/* No stack arguments or consumed result. Null allocations remain installed. */
 void Gfx_InitSpriteWorkspaceA(void); /* VA 0x0045D840 */
 void Gfx_InitSpriteWorkspaceB(void); /* VA 0x0045C9F0 */
 
