@@ -17,6 +17,7 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ECX, UC_X86_REG_EDX,
     UC_X86_REG_ESP, UC_X86_REG_EIP, UC_X86_REG_EFLAGS)
 
 from verify_font_cleanup import SAVED, STACK, STOP
+from build_decomp import STARTUP_BOUNDARY_SOURCE
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -29,6 +30,7 @@ DLL = BUILD / 'file_load_validation.dll'
 DATA, DATA_SIZE = 0x7400000, 0x10000
 ARENA, ARENA_SIZE = 0x8000000, 0x200000
 INPUTS = [
+    'tools/build_decomp.py',
     'decomp/src/file.c', 'decomp/include/file.h',
     'decomp/src/mem.c', 'decomp/include/mem.h',
     'decomp/target.json', 'tools/verify_file_load.py',
@@ -98,6 +100,7 @@ def build_loader():
     stub = BUILD / 'file_load_boundary.c'
     sobj = BUILD / 'file_load_boundary.obj'
     stub.write_text(
+        STARTUP_BOUNDARY_SOURCE +
         'void *fopen(const char *f, const char *m) { (void)f; (void)m; for (;;) {} }\n'
         'int fclose(void *s) { (void)s; for (;;) {} }\n'
         'long ftell(void *s) { (void)s; for (;;) {} }\n'

@@ -98,4 +98,12 @@ int Mem_InitHandles(void);
  */
 int Mem_NextHandleId(void);
 
+/* Engine lifecycle wrappers, no arguments, ordinary RET, always EAX=1.
+ * Startup: banner, pools, handles, graphics-resource flags, primitive state,
+ * backend zero, unconditionally. Teardown: handle callbacks before pool frees.
+ * Startup has no guard; repeated calls can orphan pools/reset resource flags.
+ */
+int Mem_InitSystem(void);
+int Mem_ShutdownSystem(void);
+
 #endif

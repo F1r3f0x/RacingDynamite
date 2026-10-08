@@ -13,6 +13,7 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ESP, UC_X86_REG_EIP,
                               UC_X86_REG_EFLAGS)
 from verify_font_cleanup import FontLifecycleCPU, LIFECYCLE_FIELDS, SAVED, STACK, STOP
+from build_decomp import STARTUP_BOUNDARY_SOURCE
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -21,7 +22,7 @@ if not __debug__:
 RVA, SIZE = 0x56270, 429
 DLL = BUILD / 'font_parse_validation.dll'
 BUFFER = 0x7400000
-INPUTS = ['decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/include/mem.h',
+INPUTS = ['tools/build_decomp.py', 'decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/include/mem.h',
           'decomp/src/mem.c', 'decomp/target.json', 'tools/verify_font_parse.py',
           'tools/verify_font_cleanup.py', 'tools/verify_matching.py',
           'tools/windows_target.py', 'tools/windows_tracking.py']
@@ -107,7 +108,7 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     if include_loader and not real_file:
         # Deliberately cannot complete without the explicit CPU boundary model.
         stubs += 'void *File_LoadToMemory(const char *filename) { (void)filename; for (;;) {} }\n'
-    stubs += 'void free(void *p) { (void)p; for (;;) {} }\nvoid *malloc(unsigned int n) { (void)n; for (;;) {} }\n'
+    stubs += STARTUP_BOUNDARY_SOURCE + 'void free(void *p) { (void)p; for (;;) {} }\nvoid *malloc(unsigned int n) { (void)n; for (;;) {} }\n'
     if real_file:
         stubs += (
             'void *fopen(const char *f, const char *m) { (void)f; (void)m; for (;;) {} }\n'

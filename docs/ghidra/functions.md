@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:a7c3c6beaab77779b3717d95456d86fc8892a477539caacd9c50256b27601ece -->
+<!-- snapshot:1b2c239ebb88bc46b1703b16bf0898a99a076d6358e185dceb60da804128cd45 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -371,7 +371,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x004516F0` | `0x000516F0` | 64 | `sub_004516F0` | unknown | unidentified | - |
 | `0x00452010` | `0x00052010` | 56 | `sub_00452010` | unknown | unidentified | - |
 | `0x00452770` | `0x00052770` | 136 | `sub_00452770` | unknown | unidentified | - |
-| `0x00455AB0` | `0x00055AB0` | 13 | `sub_00455AB0` | unknown | unidentified | - |
+| `0x00455AB0` | `0x00055AB0` | 13 | `Gfx_ResetResourceFlags` | game | analyzed | [windows_mem_lifecycle.md](windows_mem_lifecycle.md) |
 | `0x00455AC0` | `0x00055AC0` | 406 | `sub_00455AC0` | unknown | unidentified | - |
 | `0x00455C60` | `0x00055C60` | 436 | `sub_00455C60` | unknown | unidentified | - |
 | `0x00455E20` | `0x00055E20` | 117 | `sub_00455E20` | unknown | unidentified | - |
@@ -393,7 +393,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x004564D0` | `0x000564D0` | 397 | `Font_GetTextWidth` | game | reconstructed | [windows_font_get_text_width.md](windows_font_get_text_width.md) |
 | `0x00456660` | `0x00056660` | 978 | `Font_DrawText` | game | reconstructed | [windows_font_draw_text.md](windows_font_draw_text.md) |
 | `0x00456A40` | `0x00056A40` | 172 | `sub_00456A40` | unknown | unidentified | - |
-| `0x00456AF0` | `0x00056AF0` | 30 | `sub_00456AF0` | unknown | unidentified | - |
+| `0x00456AF0` | `0x00056AF0` | 30 | `Gfx_SelectBackend` | game | analyzed | [windows_mem_lifecycle.md](windows_mem_lifecycle.md) |
 | `0x00456B10` | `0x00056B10` | 30 | `sub_00456B10` | unknown | unidentified | - |
 | `0x00456B30` | `0x00056B30` | 50 | `sub_00456B30` | unknown | unidentified | - |
 | `0x00456B70` | `0x00056B70` | 55 | `sub_00456B70` | unknown | unidentified | - |
@@ -527,8 +527,8 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045B000` | `0x0005B000` | 127 | `Mem_Free` | game | reconstructed | [windows_mem_free.md](windows_mem_free.md) |
 | `0x0045B080` | `0x0005B080` | 182 | `Mem_DestroyPool` | game | reconstructed | [windows_mem_destroy.md](windows_mem_destroy.md) |
 | `0x0045B140` | `0x0005B140` | 41 | `Mem_ShutdownPools` | game | reconstructed | [windows_mem_destroy.md](windows_mem_destroy.md) |
-| `0x0045B170` | `0x0005B170` | 41 | `sub_0045B170` | unknown | unidentified | - |
-| `0x0045B1A0` | `0x0005B1A0` | 16 | `sub_0045B1A0` | unknown | unidentified | - |
+| `0x0045B170` | `0x0005B170` | 41 | `Mem_InitSystem` | game | reconstructed | [windows_mem_lifecycle.md](windows_mem_lifecycle.md) |
+| `0x0045B1A0` | `0x0005B1A0` | 16 | `Mem_ShutdownSystem` | game | reconstructed | [windows_mem_lifecycle.md](windows_mem_lifecycle.md) |
 | `0x0045B1B0` | `0x0005B1B0` | 58 | `Mem_NextHandleId` | game | reconstructed | [windows_handles.md](windows_handles.md) |
 | `0x0045B1F0` | `0x0005B1F0` | 76 | `Mem_InitHandles` | game | reconstructed | [windows_startup.md](windows_startup.md) |
 | `0x0045B240` | `0x0005B240` | 155 | `Mem_ShutdownHandles` | game | reconstructed | [windows_handle_shutdown.md](windows_handle_shutdown.md) |
@@ -538,7 +538,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045B410` | `0x0005B410` | 62 | `Mem_ReleaseHandleId` | game | reconstructed | [windows_handle_release.md](windows_handle_release.md) |
 | `0x0045B450` | `0x0005B450` | 51 | `sub_0045B450` | unknown | unidentified | - |
 | `0x0045B490` | `0x0005B490` | 84 | `sub_0045B490` | unknown | unidentified | - |
-| `0x0045B4F0` | `0x0005B4F0` | 34 | `sub_0045B4F0` | unknown | unidentified | - |
+| `0x0045B4F0` | `0x0005B4F0` | 34 | `Lisa_PrintVersion` | game | analyzed | [windows_mem_lifecycle.md](windows_mem_lifecycle.md) |
 | `0x0045B520` | `0x0005B520` | 43 | `sub_0045B520` | unknown | unidentified | - |
 | `0x0045B550` | `0x0005B550` | 62 | `sub_0045B550` | unknown | unidentified | - |
 | `0x0045B590` | `0x0005B590` | 38 | `sub_0045B590` | unknown | unidentified | - |
@@ -578,7 +578,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045D8A0` | `0x0005D8A0` | 1805 | `sub_0045D8A0` | unknown | unidentified | - |
 | `0x0045DFB0` | `0x0005DFB0` | 1561 | `sub_0045DFB0` | unknown | unidentified | - |
 | `0x0045E5D0` | `0x0005E5D0` | 53 | `sub_0045E5D0` | unknown | unidentified | - |
-| `0x0045E610` | `0x0005E610` | 326 | `sub_0045E610` | unknown | unidentified | - |
+| `0x0045E610` | `0x0005E610` | 326 | `Gfx_InitPrimitiveState` | game | analyzed | [windows_mem_lifecycle.md](windows_mem_lifecycle.md) |
 | `0x0045E760` | `0x0005E760` | 284 | `sub_0045E760` | unknown | unidentified | - |
 | `0x0045E880` | `0x0005E880` | 412 | `sub_0045E880` | unknown | unidentified | - |
 | `0x0045EA20` | `0x0005EA20` | 282 | `sub_0045EA20` | unknown | unidentified | - |

@@ -1,5 +1,17 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded feature (2026-10-08): [memory-system lifecycle wrappers](ghidra/windows_mem_lifecycle.md)
+at RVAs 0x5B170/0x5B1A0 are reconstructed in production C89 mem.c/mem.h.
+112 startup and 519 shutdown differential invocations pass, including 94/74
+isolated dependency contracts, real memory bodies, all 200 callback slots in both
+passes, cross-phase mutations and ten persistent allocation/registration/lifecycle
+calls. Startup has six dependencies (including four analysis-only boundaries),
+ignores all results and always returns 1; teardown invokes handle callbacks before
+pool destruction. CRT heap and callbacks remain modeled; instruction equality,
+original compiler/link layout and native startup/graphics/heap/game parity are
+unverified. No playable build is produced. See linked evidence for boundaries
+at RVAs 0x5B4F0/0x55AB0/0x5E610/0x56AF0 and remaining limitations.
+
 Latest bounded feature (2026-10-08): [Windows pool destruction and shutdown](ghidra/windows_mem_destroy.md)
 at RVAs 0x5B080/0x5B140 are reconstructed in production C89 mem.c/mem.h.
 504 destruction and 265 shutdown differential invocations pass, including

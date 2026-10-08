@@ -8,6 +8,15 @@
 extern void free(void *pointer);
 extern void *malloc(size_t size);
 
+/* Independently inspected Windows startup dependencies. Bodies remain outside
+ * this bounded reconstruction; names are semantic, not original symbols.
+ * VAs: 0x0045B4F0, 0x00455AB0, 0x0045E610, 0x00456AF0 respectively.
+ */
+extern int Lisa_PrintVersion(void);
+extern void Gfx_ResetResourceFlags(void);
+extern void Gfx_InitPrimitiveState(void);
+extern int Gfx_SelectBackend(int backend);
+
 typedef char Mem_UIntMustBe32Bits[(sizeof(unsigned int) == 4) ? 1 : -1];
 typedef char Mem_ShortMustBe16Bits[(sizeof(short) == 2) ? 1 : -1];
 typedef char Mem_PointerMustBe32Bits[(sizeof(void *) == 4) ? 1 : -1];
@@ -439,5 +448,31 @@ int Mem_ShutdownPools(void)
             Mem_DestroyPool(pool_id);
         }
     }
+    return 1;
+}
+
+/* @original Mem_InitSystem (IGN_WIN.EXE @ 0x0045B170, inferred mem.c)
+ * @fidelity EXACT
+ * Engine startup wrapper; all six dependency results are ignored. No guard.
+ */
+int Mem_InitSystem(void)
+{
+    Lisa_PrintVersion();
+    Mem_InitPools();
+    Mem_InitHandles();
+    Gfx_ResetResourceFlags();
+    Gfx_InitPrimitiveState();
+    Gfx_SelectBackend(0);
+    return 1;
+}
+
+/* @original Mem_ShutdownSystem (IGN_WIN.EXE @ 0x0045B1A0, inferred mem.c)
+ * @fidelity EXACT
+ * Dispatch registered callbacks while pools exist, then destroy remaining pools.
+ */
+int Mem_ShutdownSystem(void)
+{
+    Mem_ShutdownHandles();
+    Mem_ShutdownPools();
     return 1;
 }

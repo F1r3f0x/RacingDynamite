@@ -213,21 +213,27 @@ def verify():
     generated = list(md.disasm(generated_code, lo))
     direct_calls = [i for i in generated if i.mnemonic == 'call' and i.op_str.startswith('0x')]
     code_entries = {name: symbols[name] for name in [
-        'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool', 'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
+        'Mem_InitSystem', 'Mem_ShutdownSystem', 'Lisa_PrintVersion',
+        'Gfx_ResetResourceFlags', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
+        'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool',
+        'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc']}
-    assert len(direct_calls) == 13, 'Unexpected direct helper dependency count'
-    owners = []
+    expected_calls = {
+        'Mem_Free': ['free'], 'Mem_Alloc': ['malloc'] * 5,
+        'Mem_CreatePool': ['malloc'], 'Mem_InitPools': ['Mem_CreatePool'],
+        'Mem_DestroyPool': ['free'] * 4, 'Mem_ShutdownPools': ['Mem_DestroyPool'],
+        'Mem_InitSystem': ['Lisa_PrintVersion', 'Mem_InitPools', 'Mem_InitHandles',
+            'Gfx_ResetResourceFlags', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend'],
+        'Mem_ShutdownSystem': ['Mem_ShutdownHandles', 'Mem_ShutdownPools']}
+    assert len(direct_calls) == 21, 'Unexpected direct helper dependency count'
+    actual_calls = {}
     for call in direct_calls:
         owner = max((name for name, address in code_entries.items() if address <= call.address),
                     key=lambda name: code_entries[name])
-        expected = {'Mem_Free': 'free', 'Mem_Alloc': 'malloc', 'Mem_CreatePool': 'malloc',
-                    'Mem_InitPools': 'Mem_CreatePool', 'Mem_DestroyPool': 'free',
-                    'Mem_ShutdownPools': 'Mem_DestroyPool'}.get(owner)
-        assert expected is not None and int(call.op_str, 16) == symbols[expected], 'Unexpected direct helper dependency'
-        owners.append(owner)
-    assert {name: owners.count(name) for name in set(owners)} == {
-        'Mem_Free': 1, 'Mem_Alloc': 5, 'Mem_CreatePool': 1, 'Mem_InitPools': 1,
-        'Mem_DestroyPool': 4, 'Mem_ShutdownPools': 1}
+        assert owner in expected_calls, 'Unexpected direct helper owner'
+        actual_calls.setdefault(owner, []).append(int(call.op_str, 16))
+    assert actual_calls == {owner: [symbols[name] for name in targets]
+                            for owner, targets in expected_calls.items()}, 'Ordered symbolic targets differ'
     print(f'Original: 76 bytes, {len(instructions)} instructions; compiled .text: {text.Misc_VirtualSize} bytes.')
     print(f'Raw code-byte equality: {original_code == generated_code}; relocation-aware equality not evaluated.')
     print('Instruction equality: not claimed (modern provisional Clang code generation).')
@@ -746,3 +752,6 @@ if __name__ == '__main__':
 
     from verify_mem_destroy import verify_mem_destroy
     verify_mem_destroy()
+
+    from verify_mem_lifecycle import verify_mem_lifecycle
+    verify_mem_lifecycle()

@@ -21,6 +21,7 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ESI,
     UC_X86_REG_EDI, UC_X86_REG_EBP, UC_X86_REG_ESP, UC_X86_REG_EIP,
     UC_X86_REG_EFLAGS)
 
+from build_decomp import STARTUP_BOUNDARY_SOURCE
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -40,6 +41,7 @@ SHA_UNLOAD = 'd398726038e727ae65ae4041981d9970b581fa2078b75d4e946c1dc0147a4009'
 
 DLL = BUILD / 'font_cleanup_validation.dll'
 INPUTS = [
+    'tools/build_decomp.py',
     'decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/include/mem.h',
     'decomp/src/mem.c', 'decomp/target.json', 'tools/verify_font_cleanup.py',
     'tools/verify_matching.py', 'tools/windows_target.py', 'tools/windows_tracking.py'
@@ -177,7 +179,7 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     return 0;
 }
 """
-    stub_c += 'void free(void *p) { (void)p; for (;;) {} }\nvoid *malloc(unsigned int n) { (void)n; for (;;) {} }\n'
+    stub_c += STARTUP_BOUNDARY_SOURCE + 'void free(void *p) { (void)p; for (;;) {} }\nvoid *malloc(unsigned int n) { (void)n; for (;;) {} }\n'
     stub_path = BUILD / 'sprite_op_stub.c'
     stub_obj = BUILD / 'sprite_op_stub.obj'
     stub_path.write_text(stub_c, encoding='utf-8')
