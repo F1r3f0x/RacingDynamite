@@ -117,6 +117,10 @@ extern volatile GfxSpritePackingNode g_spritePackingTemplate; /* VA 0x0051FC00 *
 extern GfxSpritePackingBucket *volatile g_spritePackingBuckets[GFX_SPRITE_PACKING_BUCKET_COUNT]; /* VA 0x0051FF58 */
 extern GfxSpritePackingNode *volatile g_spritePackingPages; /* VA 0x0051FE40 */
 int Gfx_InitSpritePackingState(void); /* VA 0x004614D0; EAX=0 */
+/* Returns the unchanged previous argument (incidental original EAX).
+ * Current must be writable; exact node aliases retain ordered stores. */
+GfxSpritePackingNode *Gfx_LinkSpritePackingNode(GfxSpritePackingNode *previous,
+    GfxSpritePackingNode *current, GfxSpritePackingNode *next); /* VA 0x00461690 */
 extern volatile int32_t g_nativeImageCapacity; /* VA 0x00520388; signed */
 extern GfxSpriteDescriptor *volatile *volatile g_nativeImageRecords; /* VA 0x0052038C */
 int Gfx_CopySpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x004612E0 */

@@ -218,6 +218,23 @@ int Gfx_InitSpritePackingState(void) {
 }
 
 /*
+ * @original Gfx_LinkSpritePackingNode (IGN_WIN.EXE @ 0x00461690, geputget.c)
+ * @fidelity EXACT
+ */
+GfxSpritePackingNode *Gfx_LinkSpritePackingNode(GfxSpritePackingNode *previous,
+    GfxSpritePackingNode *current, GfxSpritePackingNode *next) {
+    ((volatile GfxSpritePackingNode *)current)->next = next;
+    ((volatile GfxSpritePackingNode *)current)->previous = previous;
+    if (previous) {
+        ((volatile GfxSpritePackingNode *)previous)->next = current;
+    }
+    if (next) {
+        ((volatile GfxSpritePackingNode *)next)->previous = current;
+    }
+    return previous;
+}
+
+/*
  * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0, geputget.c)
  * @fidelity EXACT
  */

@@ -22,6 +22,7 @@ from windows_tracking import record_run
 if not __debug__:
     raise RuntimeError('Verification requires assertions')
 ROUTINES = {
+    'Gfx_LinkSpritePackingNode': (0x61690,33,'698f357becf28ec039300d9e01f27d48f7a04c675486b3506e7ca6107dded174'),
     'Gfx_InitSpritePackingState': (0x614d0,61,'c7c2d85ffd985343137e2d89bee0193091d6bc304ebb041e360202275906b7e5'),
     'Gfx_InitDefaultSpriteDescriptor': (0x611d0,53,'bb24fdcef5b8b3fdd31746c899ca6523d467479ebc00098f5be527e9e414d70a'),
     'Gfx_InitSpriteWorkspaceA': (0x5d840,84,'445faf9112110b216014f95c057ab6d572a81fec3fa64a867b9d5f03739c1d43'),
@@ -40,7 +41,7 @@ DEPENDENCIES = {
 MEMORY = {'Mem_InitHandles':(0x5b1f0,76), 'Mem_ShutdownHandles':(0x5b240,155),
     'Mem_NextHandleId':(0x5b1b0,58), 'Mem_RegisterHandle':(0x5b360,120),
     'Mem_ReleaseHandleId':(0x5b410,62)}
-ARGUMENTS = {'Gfx_CopySpriteDescriptor':2, 'Gfx_SelectBackend':1, 'Mem_CreatePool':1, 'Mem_DestroyPool':1,
+ARGUMENTS = {'Gfx_LinkSpritePackingNode':3, 'Gfx_CopySpriteDescriptor':2, 'Gfx_SelectBackend':1, 'Mem_CreatePool':1, 'Mem_DestroyPool':1,
     'Mem_RegisterHandle':1, 'Mem_ReleaseHandleId':1, 'Mem_Alloc':2, 'Mem_Free':2,
     'malloc':1, 'free':1, 'callback':1}
 CALLBACK = 0x7200000
@@ -127,7 +128,7 @@ def inspect_original(pe):
         raw=pe.get_data(r,n);ins=list(md.disasm(raw,0x400000+r))
         assert hashlib.sha256(raw).hexdigest()==digest
         assert sum(i.size for i in ins)==n
-        expected_fpo=(n,0,0,0x103) if name=='Gfx_InitSpritePackingState' else (n,0,2,0x208) if name=='Gfx_CopySpriteDescriptor' else (n,0,1 if name=='Gfx_SelectBackend' else 0,0)
+        expected_fpo=(n,0,3,0) if name=='Gfx_LinkSpritePackingNode' else (n,0,0,0x103) if name=='Gfx_InitSpritePackingState' else (n,0,2,0x208) if name=='Gfx_CopySpriteDescriptor' else (n,0,1 if name=='Gfx_SelectBackend' else 0,0)
         assert fpo[r]==expected_fpo
         assert ins[-1].mnemonic==('jmp' if name=='Gfx_InitPrimitiveState' else 'ret')
     for name,(r,n,_) in ROUTINES.items():
@@ -146,6 +147,33 @@ def inspect_original(pe):
     assert pe.get_data(0x56b0e,2)==b'\xcc'*2
     relocations={e.rva:struct.unpack('<I',pe.get_data(e.rva,4))[0]
         for b in pe.DIRECTORY_ENTRY_BASERELOC for e in b.entries if e.type==3}
+    link=list(md.disasm(pe.get_data(0x61690,33),0x461690))
+    assert [(i.mnemonic,i.op_str) for i in link]==[
+        ('mov','edx, dword ptr [esp + 0xc]'),('mov','ecx, dword ptr [esp + 8]'),
+        ('mov','eax, dword ptr [esp + 4]'),('mov','dword ptr [ecx + 0x14], edx'),
+        ('mov','dword ptr [ecx + 0x10], eax'),('test','eax, eax'),
+        ('je','0x4616a9'),('mov','dword ptr [eax + 0x14], ecx'),
+        ('test','edx, edx'),('je','0x4616b0'),
+        ('mov','dword ptr [edx + 0x10], ecx'),('ret','')]
+    assert pe.get_data(0x616b1,15)==b'\xcc'*15
+    assert not any(0x61690<=r<0x616b1 or v==0x461690 for r,v in relocations.items())
+    assert [(r,i.address) for r,(n,_,_,_) in fpo.items()
+        for i in md.disasm(pe.get_data(r,n),0x400000+r)
+        if i.mnemonic=='call' and i.op_str=='0x461690']==[
+            (0x61530,0x461652),(0x616c0,0x46179f)]
+    # Both callers supply (old node, new node, old next), clean three words,
+    # and overwrite EAX before use. No caller body is executed by link tests.
+    for r,n,lo,hi,expected in [
+        (0x61530,350,0x46164c,0x461665,[
+            ('mov','eax, dword ptr [edx + 0x14]'),('push','eax'),('push','ecx'),
+            ('push','edx'),('call','0x461690'),('add','esp, 0xc'),
+            ('lea','edi, [esp + 0x18]'),('mov','esi, ebx'),('mov','ecx, 0x10')]),
+        (0x616c0,273,0x461799,0x4617ae,[
+            ('mov','eax, dword ptr [ebp + 0x14]'),('push','eax'),('push','edx'),
+            ('push','ebp'),('call','0x461690'),('add','esp, 0xc'),
+            ('push','8'),('call','0x45f4a0')])]:
+        assert [(i.mnemonic,i.op_str) for i in md.disasm(pe.get_data(r,n),0x400000+r)
+            if lo<=i.address<hi]==expected
     packing=list(md.disasm(pe.get_data(0x614d0,61),0x4614d0))
     assert [(i.mnemonic,i.op_str) for i in packing]==[
         ('push','edi'),('xor','edx, edx'),
@@ -620,6 +648,14 @@ class Oracle:
         if name!=self.top:self.events.append(('call',name,args))
         if name in MODELED_STARTUP or (self.isolated and name in ISOLATED_HELPERS):
             return self.boundary(name,args)
+        if name=='Gfx_LinkSpritePackingNode':
+            previous,current,next_node=args
+            # Raw verified dword offsets, independent of production node fields.
+            self.write('arena',current-ARENA+20,next_node)
+            self.write('arena',current-ARENA+16,previous)
+            if previous:self.write('arena',previous-ARENA+20,current)
+            if next_node:self.write('arena',next_node-ARENA+16,current)
+            return previous
         if name=='Gfx_InitSpritePackingState':
             for off in (16,20,12,0,4,8):self.write('g_spritePackingTemplate',off,0)
             for off in range(0,1028,4):self.write('g_spritePackingBuckets',off,0)
@@ -950,7 +986,7 @@ def verify_mem_lifecycle():
         downstream_cases=verify_sprite_initializer_contracts(original)
         default_cases=verify_default_initializer(original)
         build(dll=DLL)
-        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production banner/input/selector/surface/sprite/handle/descriptor and both workspace bodies, thirty dispatch globals and independently recovered sprite/workspace storage; strict C89; provisional Clang/LLD; default initializer and primitive/CRT fixtures')
+        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production banner/input/selector/surface/sprite/handle/descriptor and both workspace bodies and packing link helper, thirty dispatch globals and independently recovered sprite/workspace storage; strict C89; provisional Clang/LLD; default initializer and primitive/CRT fixtures')
         rebuilt=pefile.PE(str(DLL));assert not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
         symbols={s.name.decode():rebuilt.OPTIONAL_HEADER.ImageBase+s.address for s in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if s.name}
         for name,(r,n,_) in ROUTINES.items():
@@ -1209,6 +1245,31 @@ def verify_mem_lifecycle():
         step('Mem_InitSystem',returns={'malloc':[ARENA+0x2000]})
         step('Mem_InitSystem',returns={'malloc':[ARENA]})
         step('Mem_ShutdownSystem')
+        # Three adjacent 24-byte nodes; all 48 argument combinations include
+        # null neighbors, distinct nodes, every pair alias and the triple alias.
+        # Arbitrary link words are never followed/read. Full arena checks retain
+        # range/pixel/child words, absent-neighbor fields and surrounding bytes.
+        link_rng=random.Random(0x461690)
+        nodes=tuple(ARENA+0x90000+24*i for i in range(3))
+        link_patterns=[bytes(72),b'\xff'*72,struct.pack('<18I',*([0x80000000]*18)),
+            struct.pack('<18I',*range(18))]+[link_rng.randbytes(72) for _ in range(4)]
+        for pattern in link_patterns:
+            for current in nodes:
+                for previous in (0,)+nodes:
+                    for next_node in (0,)+nodes:
+                        state=fresh();arena=bytearray(state['arena'])
+                        arena[0x90000:0x90000+72]=pattern;state['arena']=bytes(arena)
+                        args=(previous,current,next_node)
+                        state=compare('Gfx_LinkSpritePackingNode',state,args)
+                        compare('Gfx_LinkSpritePackingNode',state,args,reset=False)
+        # Persistent client-driven relinking is explicit, without invented
+        # packing caller/reset integration or a reset between the six calls.
+        for _ in range(16):
+            state=fresh();arena=bytearray(state['arena'])
+            arena[0x90000:0x90000+72]=link_rng.randbytes(72);state['arena']=bytes(arena)
+            x,y,z=nodes
+            for index,args in enumerate([(0,x,y),(x,y,z),(y,z,0),(z,x,z),(x,x,x),(0,y,0)]):
+                state=compare('Gfx_LinkSpritePackingNode',state,args,reset=index==0)
         assert a.executed==b.executed
         for name in ROUTINES:
             record(name,'emulation','pass',cases=counts[name],isolated_cases=isolated_counts[name],
@@ -1218,14 +1279,15 @@ def verify_mem_lifecycle():
                 original_consumer_abi_cases=consumer_cases if name=='Gfx_InstallSurfaceDispatch' else sprite_consumer_cases if name=='Gfx_InstallSpriteDispatch' else None,
                 original_default_initializer_cases=default_cases if name in ('Gfx_InitSpriteHandles','Gfx_CopySpriteDescriptor') else None,
                 original_downstream_contract_cases=downstream_cases if name=='Gfx_InstallSpriteDispatch' else None,
-                persistent_invocations=(405 if name=='Gfx_InitSpritePackingState' else 132 if name=='Gfx_InitDefaultSpriteDescriptor' else workspace_persistent[name[-1]] if name.startswith('Gfx_InitSpriteWorkspace') else 153 if name=='Gfx_InstallSpriteDispatch' else 133 if name=='Gfx_InstallSurfaceDispatch' else 266 if name=='Gfx_SelectBackend' else 153 if name=='Lisa_PrintVersion' else
+                persistent_invocations=(464 if name=='Gfx_LinkSpritePackingNode' else 405 if name=='Gfx_InitSpritePackingState' else 132 if name=='Gfx_InitDefaultSpriteDescriptor' else workspace_persistent[name[-1]] if name.startswith('Gfx_InitSpriteWorkspace') else 153 if name=='Gfx_InstallSpriteDispatch' else 133 if name=='Gfx_InstallSurfaceDispatch' else 266 if name=='Gfx_SelectBackend' else 153 if name=='Lisa_PrintVersion' else
                     persistent if name in ('Mem_InitSystem','Mem_ShutdownSystem') else 24 if name=='Gfx_InitSpriteHandles' else 243 if name=='Gfx_CopySpriteDescriptor' else 0),
-                persistent_integrated_startups=4 if name not in ('Mem_InitSystem','Mem_ShutdownSystem') else None,
-                integrated_startups=18 if name not in ('Mem_InitSystem','Mem_ShutdownSystem') else None,
-                scope=('810 standalone resets, 405 persistent repeats, all 257 buckets and raw pointer states, exact 264-store order/no reads, template layout/page/bucket independence, persistent root reinsertion without free, EAX=0, complete state/arena/ABI; 112 startups through modeled primitive driver executing real reset leaves in caller order; primitive body unexecuted' if name=='Gfx_InitSpritePackingState' else '280 standalone real initializations, 132 persistent repeats, arbitrary nine-word tails, exact eight ordered stores, no reads, EAX=0; sixteen real helper/handle consumption chains; modeled primitive driver executes real default body in 112 startups; primitive body is not executed' if name=='Gfx_InitDefaultSpriteDescriptor' else '167 standalone workspace invocations including 83 persistent repeats, every independent allocation failure, exact-zero/noncanonical flags, immediate stores, skipped pointer preservation, allocator mutations and forced-zero orphaning; both real workspaces through installer/selector/18 startups; full state/access/ABI checks; void EAX excluded' if name.startswith('Gfx_InitSpriteWorkspace') else 'Sixteen-word copies with every signed ID/default/null/live branch, conditional ownership-slot clearing, source preservation and EAX; real helper through handles/installers/selector/startup, complete state/access/ABI checks' if name=='Gfx_CopySpriteDescriptor' else '2000 interleaved freelist stores/first-dword clears, tail preservation, real descriptor helper, persistent reinitialization and real installer/selector/startup integration' if name=='Gfx_InitSpriteHandles' else '306 standalone sixteen-store sprite installers, exact nonmonotonic store and downstream call order; independent return pairs and boundary mutations with persistent repeats; real surface/selector/18 startup integration; full-state/ABI/image checks; original-only consumer and downstream contracts' if name=='Gfx_InstallSpriteDispatch' else '266 standalone fourteen-store installers with arbitrary initial words and persistent repetition; real selector and 18 integrated startups; relocated function identity, exact ordered stores, untouched sprite words/holes during surface-only calls and full-state/ABI/image checks' if name=='Gfx_InstallSurfaceDispatch' else '532 standalone selectors: 266 nonzero calls without effects, 266 zero calls with real ordered surface installation and real sprite installation and ignored downstream returns/mutations; 18 integrated startups; ordered calls, full tracked state and boundary snapshots, EAX/stack/nonvolatile/DF/unrelated-image checks' if name=='Gfx_SelectBackend' else '306 standalone calls, exact NUL-terminated printf format/vararg bytes and order; independent return pairs, CRT boundary mutations, repeated persistent calls; 18 integrated startups; EAX=0, full tracked state, stack/nonvolatile/DF/unrelated-image checks' if name=='Lisa_PrintVersion' else '266 standalone ordered two-dword clearing calls, repeated persistent clearing; 18 integrated startups; complete tracked state and boundary snapshots; nonvolatile registers/stack/DF/unrelated-image checks; void EAX excluded' if name=='Input_ResetCallbacks' else 'Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration'),
+                persistent_integrated_startups=0 if name=='Gfx_LinkSpritePackingNode' else 4 if name not in ('Mem_InitSystem','Mem_ShutdownSystem') else None,
+                integrated_startups=0 if name=='Gfx_LinkSpritePackingNode' else 18 if name not in ('Mem_InitSystem','Mem_ShutdownSystem') else None,
+                scope=('864 standalone link invocations: 384 initial cases, 384 persistent repeats and 16 six-call persistent relinking sequences (80 later calls); all 48 null/distinct/exact-alias configurations, eight node patterns, exact ordered two-to-four dword stores, no node reads/calls, unrelated node fields/complete arena and state preservation, previous-pointer EAX, stack/nonvolatile/DF; no packing caller integration' if name=='Gfx_LinkSpritePackingNode' else '810 standalone resets, 405 persistent repeats, all 257 buckets and raw pointer states, exact 264-store order/no reads, template layout/page/bucket independence, persistent root reinsertion without free, EAX=0, complete state/arena/ABI; 112 startups through modeled primitive driver executing real reset leaves in caller order; primitive body unexecuted' if name=='Gfx_InitSpritePackingState' else '280 standalone real initializations, 132 persistent repeats, arbitrary nine-word tails, exact eight ordered stores, no reads, EAX=0; sixteen real helper/handle consumption chains; modeled primitive driver executes real default body in 112 startups; primitive body is not executed' if name=='Gfx_InitDefaultSpriteDescriptor' else '167 standalone workspace invocations including 83 persistent repeats, every independent allocation failure, exact-zero/noncanonical flags, immediate stores, skipped pointer preservation, allocator mutations and forced-zero orphaning; both real workspaces through installer/selector/18 startups; full state/access/ABI checks; void EAX excluded' if name.startswith('Gfx_InitSpriteWorkspace') else 'Sixteen-word copies with every signed ID/default/null/live branch, conditional ownership-slot clearing, source preservation and EAX; real helper through handles/installers/selector/startup, complete state/access/ABI checks' if name=='Gfx_CopySpriteDescriptor' else '2000 interleaved freelist stores/first-dword clears, tail preservation, real descriptor helper, persistent reinitialization and real installer/selector/startup integration' if name=='Gfx_InitSpriteHandles' else '306 standalone sixteen-store sprite installers, exact nonmonotonic store and downstream call order; independent return pairs and boundary mutations with persistent repeats; real surface/selector/18 startup integration; full-state/ABI/image checks; original-only consumer and downstream contracts' if name=='Gfx_InstallSpriteDispatch' else '266 standalone fourteen-store installers with arbitrary initial words and persistent repetition; real selector and 18 integrated startups; relocated function identity, exact ordered stores, untouched sprite words/holes during surface-only calls and full-state/ABI/image checks' if name=='Gfx_InstallSurfaceDispatch' else '532 standalone selectors: 266 nonzero calls without effects, 266 zero calls with real ordered surface installation and real sprite installation and ignored downstream returns/mutations; 18 integrated startups; ordered calls, full tracked state and boundary snapshots, EAX/stack/nonvolatile/DF/unrelated-image checks' if name=='Gfx_SelectBackend' else '306 standalone calls, exact NUL-terminated printf format/vararg bytes and order; independent return pairs, CRT boundary mutations, repeated persistent calls; 18 integrated startups; EAX=0, full tracked state, stack/nonvolatile/DF/unrelated-image checks' if name=='Lisa_PrintVersion' else '266 standalone ordered two-dword clearing calls, repeated persistent clearing; 18 integrated startups; complete tracked state and boundary snapshots; nonvolatile registers/stack/DF/unrelated-image checks; void EAX excluded' if name=='Input_ResetCallbacks' else 'Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration'),
                 workspace_contract=('Exact-zero guard, unconditional count reset, three ordered 0x20d8 allocations/immediate stores including all independent failures, noncanonical flags, skipped pointer preservation, persistent repetition/forced-zero orphaning and allocator mutations; no EAX result contract' if name.startswith('Gfx_InitSpriteWorkspace') else None),
                 limitations='Primitive initializer, CRT printf/heap and callbacks modeled; workspace buffers opaque, consumers unreconstructed; no instruction equality, original linked layout, native startup/graphics/heap/game parity, invalid/unmapped storage, partial overlap, concurrency or general reentry validation; exact live source/destination alias tested')
         print('PASS: %d Gfx_SelectBackend; %d Lisa_PrintVersion; %d Input_ResetCallbacks; %d Mem_InitSystem and %d Mem_ShutdownSystem differential invocations; isolated %s; %d persistent invocations.'%(counts['Gfx_SelectBackend'],counts['Lisa_PrintVersion'],counts['Input_ResetCallbacks'],counts['Mem_InitSystem'],counts['Mem_ShutdownSystem'],isolated_counts,persistent))
+        print('PASS: %d packing links; 464 persistent invocations; no packing caller integration.'%counts['Gfx_LinkSpritePackingNode'])
         print('PASS: %d sprite packing resets; 405 persistent repeats; real primitive-driver integration.'%counts['Gfx_InitSpritePackingState'])
         print('PASS: %d default initializer comparisons; 132 persistent repeats; real modeled-driver integration.'%counts['Gfx_InitDefaultSpriteDescriptor'])
         print('PASS: %d descriptor helpers and %d handle initializers with real integration.'%(counts['Gfx_CopySpriteDescriptor'],counts['Gfx_InitSpriteHandles']))

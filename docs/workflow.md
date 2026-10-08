@@ -1,5 +1,21 @@
 # Enforced agent workflow
 
+## Sprite packing node links (2026-10-08)
+
+[The link helper](ghidra/windows_gfx_sprite_packing_links.md), VA 0x00461690 /
+RVA 0x61690, now has production C89 preserving its ordered two-to-four node
+stores and incidental previous-pointer EAX. 864 standalone differential calls
+per binary include all null/distinct/exact-alias configurations and 464
+persistent follow-ups, including sixteen six-call relinking sequences. Node
+reads, traversal and calls are absent. Both callers are inspected statically;
+no packing-caller/startup integration is claimed. All prior coverage remains,
+including 810 packing resets / 922 real bodies and 280 default initializers /
+392 real bodies through the explicit modeled primitive driver. Full completion
+renews compilation/emulation evidence for all 37 reconstructed routines among
+1,028 candidates. Instruction equality, original compiler/link layout and native
+graphics/heap/game parity remain unverified. Packing callers are unreconstructed;
+primitive/CRT/callback boundaries remain modeled.
+
 ## Sprite packing state reset (2026-10-08)
 
 [The packing reset](ghidra/windows_gfx_sprite_packing_reset.md), RVA 0x614D0,
