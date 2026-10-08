@@ -24,7 +24,7 @@ from build_decomp import build
 from windows_target import TARGET, DLL, ROUTINE_SHA256, verify_target, ROOT
 from windows_tracking import record_run
 
-TRACKING_INPUTS = ['decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/src/mem.c', 'decomp/include/mem.h', 'decomp/target.json',
+TRACKING_INPUTS = ['decomp/src/lisa3d.c', 'decomp/include/lisa3d.h', 'decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/src/mem.c', 'decomp/include/mem.h', 'decomp/target.json',
                    'tools/build_decomp.py', 'tools/verify_matching.py',
                    'tools/windows_target.py', 'tools/windows_tracking.py']
 
@@ -217,15 +217,16 @@ def verify():
         'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
         'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
-        'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc']}
+        'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
     expected_calls = {
+        'Lisa_PrintVersion': ['printf', 'printf'],
         'Mem_Free': ['free'], 'Mem_Alloc': ['malloc'] * 5,
         'Mem_CreatePool': ['malloc'], 'Mem_InitPools': ['Mem_CreatePool'],
         'Mem_DestroyPool': ['free'] * 4, 'Mem_ShutdownPools': ['Mem_DestroyPool'],
         'Mem_InitSystem': ['Lisa_PrintVersion', 'Mem_InitPools', 'Mem_InitHandles',
             'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend'],
         'Mem_ShutdownSystem': ['Mem_ShutdownHandles', 'Mem_ShutdownPools']}
-    assert len(direct_calls) == 21, 'Unexpected direct helper dependency count'
+    assert len(direct_calls) == sum(map(len, expected_calls.values())), 'Unexpected direct helper dependency count'
     actual_calls = {}
     for call in direct_calls:
         owner = max((name for name, address in code_entries.items() if address <= call.address),

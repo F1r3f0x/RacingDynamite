@@ -192,3 +192,20 @@ emulation are separately recorded for the two reconstructed RVAs.
 The current verifier also records 266 standalone Input_ResetCallbacks comparisons;
 its real body clears both callback words through 18 integrated startups.
 See windows_resource_reset.md for ABI recovery, extraction and limitations.
+
+## Production Lisa banner integration follow-up (2026-10-08)
+
+[Lisa_PrintVersion](windows_lisa_version.md) at RVA 0x5B4F0 now executes the
+extracted production lisa3d.c body through all 18 integrated startups, alongside
+the real reset, pools and handles. Its exact Windows formats and string vararg
+are checked at two modeled CRT printf boundaries. Both printf returns are
+ignored; boundary mutations occur before initialization/reset, and startup
+still returns 1. The 94 isolated startup dependency cases retain modeled banner
+returns to test the wrapper independently. Shutdown coverage is unchanged.
+
+Fresh coverage: 306 standalone banner, 266 standalone reset, 112 startup and
+519 shutdown comparisons; ten persistent lifecycle calls. Two graphics startup
+dependencies, CRT printf/heap and handle callbacks remain modeled. Separate
+banner compilation prevents optimization based on the nonreturning CRT fixture.
+See linked evidence for ABI, provenance, commands and exact validation limits.
+Earlier banner-as-boundary descriptions above record the original scope.

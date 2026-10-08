@@ -1,5 +1,16 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+Latest bounded feature (2026-10-08): [Lisa version banner](ghidra/windows_lisa_version.md)
+at RVA 0x5B4F0 is reconstructed in native lisa3d.c with exact Windows format and
+version bytes, two cdecl printf calls and unconditional zero return. 306 standalone
+differential comparisons and 18 integrated startups execute the production body.
+Coverage retains 266 reset / 112 startup / 519 shutdown comparisons and ten
+persistent lifecycle calls. Two graphics dependencies, CRT printf/heap and handle
+callbacks remain modeled. Strict C89 focused DLL compilation passes; raw prefixes
+differ. Instruction equality, original compiler/link layout, native console/game
+parity and playable rebuilding remain unverified. Next bounded candidate:
+Gfx_SelectBackend at RVA 0x56AF0 (30 bytes).
+
 Latest bounded feature (2026-10-08): [input callback reset](ghidra/windows_resource_reset.md)
 at RVA 0x55AB0 is reconstructed in native geputget.c as Input_ResetCallbacks.
 Its former Gfx_ResetResourceFlags name was provisional: consumers establish two

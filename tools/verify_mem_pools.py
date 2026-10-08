@@ -26,7 +26,7 @@ ROUTINES = {'Mem_InitPools': (0x5ad50, 35,
     '8beca914f2291a89e320f0ad75559b562a336f5a0c020f9553de979bba923743')}
 DLL = BUILD / 'mem_pools_validation.dll'
 NAME = ARENA + 0x80000
-INPUTS = ['decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/src/mem.c', 'decomp/include/mem.h', 'decomp/target.json',
+INPUTS = ['decomp/src/lisa3d.c', 'decomp/include/lisa3d.h', 'decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/src/mem.c', 'decomp/include/mem.h', 'decomp/target.json',
     'tools/verify_mem_pools.py', 'tools/verify_mem_alloc.py', 'tools/verify_mem_free.py',
     'tools/build_decomp.py', 'tools/verify_matching.py', 'tools/verify_font_cleanup.py',
     'tools/windows_target.py', 'tools/windows_tracking.py']

@@ -21,11 +21,11 @@ from windows_tracking import record_run
 if not __debug__:
     raise RuntimeError('Verification requires assertions')
 ROUTINES = {
+    'Lisa_PrintVersion': (0x5b4f0,34,'719ae03224b3f4a4ab08fa52985cd65454730bd8de870f8afe632d9216951802'),
     'Input_ResetCallbacks': (0x55ab0,13,'c301c37754413d115bac22b922a9ed480b4080011c559a4485b7ea044270fd59'),
     'Mem_InitSystem': (0x5b170,41,'e4026b0791ef97b56f8fa7013dd568dfd4772d64e2638d850a217c9d338ce2b8'),
     'Mem_ShutdownSystem': (0x5b1a0,16,'75f6e3f589d50b5cb564113e1270c4f2a5df39c0614d41516b520d0d3ee064a3')}
 DEPENDENCIES = {
-    'Lisa_PrintVersion': (0x5b4f0,34,'719ae03224b3f4a4ab08fa52985cd65454730bd8de870f8afe632d9216951802'),
     'Gfx_InitPrimitiveState': (0x5e610,326,'fd2abfef167ef5b92074ef41c17478dd955591025afb3aad714da050a29704a3'),
     'Gfx_SelectBackend': (0x56af0,30,'d1fcb40ea924f27f8afef2a4b1e804ee70ce3fed2ff4f9e74a376877e7c3c4cd')}
 MEMORY = {'Mem_InitHandles':(0x5b1f0,76), 'Mem_ShutdownHandles':(0x5b240,155),
@@ -36,9 +36,14 @@ ARGUMENTS = {'Gfx_SelectBackend':1, 'Mem_CreatePool':1, 'Mem_DestroyPool':1,
     'malloc':1, 'free':1, 'callback':1}
 CALLBACK = 0x7200000
 DLL = BUILD / 'mem_lifecycle_validation.dll'
+BANNER_STRINGS = {0x4bab20: b'Compilation 0.91.0',
+    0x4bab5c: b'\nLisa 2 Development System, %s\n',
+    0x4bab3c: b'Copyright (c) UDS, 1995-1996\n\n'}
+BANNER_ARGS = [(BANNER_STRINGS[0x4bab5c], BANNER_STRINGS[0x4bab20]),
+    (BANNER_STRINGS[0x4bab3c],)]
 RESOURCE_FIELDS = [('g_inputKeyEventCallback',0x50de14,4), ('g_inputPollCallback',0x50e678,4)]
 STATE_FIELDS = BOOKKEEPING_FIELDS + RESOURCE_FIELDS
-INPUTS = ['decomp/src/geputget.c','decomp/include/geputget.h','decomp/src/mem.c','decomp/include/mem.h','decomp/target.json',
+INPUTS = ['decomp/src/lisa3d.c', 'decomp/include/lisa3d.h', 'decomp/src/geputget.c','decomp/include/geputget.h','decomp/src/mem.c','decomp/include/mem.h','decomp/target.json',
     'tools/verify_mem_lifecycle.py','tools/verify_mem_destroy.py','tools/verify_mem_pools.py',
     'tools/verify_mem_alloc.py','tools/verify_mem_free.py','tools/verify_matching.py',
     'tools/build_decomp.py','tools/verify_font_cleanup.py','tools/windows_target.py',
@@ -65,13 +70,34 @@ def inspect_original(pe):
         assert fpo[r]==(n,0,1 if name=='Gfx_SelectBackend' else 0,0)
         assert ins[-1].mnemonic==('jmp' if name=='Gfx_InitPrimitiveState' else 'ret')
     for name,(r,n,_) in ROUTINES.items():
-        if name=='Input_ResetCallbacks':continue
+        if name in ('Input_ResetCallbacks','Lisa_PrintVersion'):continue
         ins=list(md.disasm(pe.get_data(r,n),0x400000+r))
         expected=[(0x45b170,0x45b4f0),(0x45b175,0x45ad50),(0x45b17a,0x45b1f0),
             (0x45b17f,0x455ab0),(0x45b184,0x45e610),(0x45b18b,0x456af0)] if name=='Mem_InitSystem' else [(0x45b1a0,0x45b240),(0x45b1a5,0x45b140)]
         assert [(i.address,int(i.op_str,16)) for i in ins if i.mnemonic=='call']==expected
         assert len(ins)==(10 if name=='Mem_InitSystem' else 4)
         assert not any(e.type==3 and r<=e.rva<r+n for b in pe.DIRECTORY_ENTRY_BASERELOC for e in b.entries)
+    banner=list(md.disasm(pe.get_data(0x5b4f0,34),0x45b4f0))
+    assert [(i.mnemonic,i.op_str) for i in banner]==[
+        ('push','0x4bab20'),('push','0x4bab5c'),('call','0x46a500'),
+        ('add','esp, 8'),('push','0x4bab3c'),('call','0x46a500'),
+        ('add','esp, 4'),('xor','eax, eax'),('ret','')]
+    assert [(e.rva,struct.unpack('<I',pe.get_data(e.rva,4))[0])
+        for b in pe.DIRECTORY_ENTRY_BASERELOC for e in b.entries
+        if e.type==3 and 0x5b4f0<=e.rva<0x5b512]==[
+            (0x5b4f1,0x4bab20),(0x5b4f6,0x4bab5c),(0x5b503,0x4bab3c)]
+    assert pe.get_data(0x5b512,14)==b'\xcc'*14
+    for va,value in BANNER_STRINGS.items():
+        assert pe.get_data(va-0x400000,len(value)+1)==value+b'\0'
+        section=pe.get_section_by_rva(va-0x400000)
+        assert section.Name.rstrip(b'\0')==b'.data'
+        assert va-0x400000+len(value)+1<=section.VirtualAddress+section.SizeOfRawData
+    assert fpo[0x6a500]==(61,0,1,0x202)
+    assert hashlib.sha256(pe.get_data(0x6a500,61)).hexdigest()==        'ed5882e648efe6314e582da142973e428c0c42ba90e311b3da568581151fc447'
+    assert [i.address for r,(n,_,_,_) in fpo.items()
+        for i in md.disasm(pe.get_data(r,n),0x400000+r)
+        if i.mnemonic=='call' and i.op_str=='0x45b4f0']==[0x45b170]
+
     # Independently authenticate consumer ABI/ownership, not inherited names.
     for r,n,digest in [(0x560c0,26,'3b23ff815d34e56903eb4477a3cb227730eae66e254731b7902b62fed7d10a8b'),
             (0x56160,19,'2d1dd1ad615325f87eae45141b3a1d7f53a09f9d2646d1adcd17f93e16c76f58'),
@@ -137,9 +163,12 @@ class Oracle:
 
     def call(self,name,args=()):
         if name!=self.top:self.events.append(('call',name,args))
-        if name in STARTUP_EXPORTS or (self.isolated and name in ('Input_ResetCallbacks',
+        if name in STARTUP_EXPORTS or (self.isolated and name in ('Lisa_PrintVersion','Input_ResetCallbacks',
                 'Mem_InitPools','Mem_InitHandles','Mem_ShutdownHandles','Mem_ShutdownPools')):
             return self.boundary(name,args)
+        if name=='Lisa_PrintVersion':
+            for arguments in BANNER_ARGS:self.call('printf',arguments)
+            return 0
         if name=='Input_ResetCallbacks':
             self.write('g_inputKeyEventCallback',0,0);self.write('g_inputPollCallback',0,0);return None
         if name=='Mem_InitSystem':
@@ -223,7 +252,7 @@ class Oracle:
                     size,pointer=rest;assert self.call('malloc',(size,))==pointer
                 else:raise AssertionError(event)
             assert bytes(self.state['arena'])==final;return result
-        if name in ('malloc','free','callback'):return self.boundary(name,args)
+        if name in ('malloc','free','callback','printf'):return self.boundary(name,args)
         raise AssertionError('Unmodeled routine '+name)
 
     def invoke(self,name,args=()):
@@ -238,13 +267,14 @@ class LifecycleSession(DestroySession):
         self.entries.update({name:0x400000+r if symbols is None else symbols[name]
             for name,(r,_,_) in (ROUTINES|DEPENDENCIES).items()})
         self.entries.update({name:0x400000+r if symbols is None else symbols[name] for name,(r,n) in MEMORY.items()})
-        self.entries.update(malloc=self.malloc,free=self.free,callback=CALLBACK)
+        self.entries.update(malloc=self.malloc,free=self.free,callback=CALLBACK,
+            printf=0x46a500 if symbols is None else symbols['printf'])
         if symbols is None:self.ranges.extend((0x400000+r,n) for r,n in MEMORY.values())
         self.ranges.extend((0x400000+r,n) for r,n,_ in ROUTINES.values()) if symbols is None else None
         self.cpu.mem_map(CALLBACK,0x1000)
         self.by_address={addr:name for name,addr in self.entries.items() if name in
             set(ROUTINES)|set(DEPENDENCIES)|set(MEMORY)|{'Mem_InitPools','Mem_CreatePool',
-            'Mem_ShutdownPools','Mem_DestroyPool','Mem_Alloc','Mem_Free','malloc','free','callback'}}
+            'Mem_ShutdownPools','Mem_DestroyPool','Mem_Alloc','Mem_Free','malloc','free','callback','printf'}}
 
     def state(self):
         return {'table':bytes(self.cpu.mem_read(self.table,1024)),
@@ -277,11 +307,28 @@ class LifecycleSession(DestroySession):
         if name:
             sp=cpu.reg_read(UC_X86_REG_ESP);argc=ARGUMENTS.get(name,0)
             args=struct.unpack('<'+'I'*argc,cpu.mem_read(sp+4,argc*4)) if argc else ()
+            if name=='printf':
+                # Decode actual stack pointers, including terminating NUL bytes.
+                # The second call has no vararg: its caller stack is not read as one.
+                pointer=struct.unpack('<I',cpu.mem_read(sp+4,4))[0]
+                def string_at(pointer):
+                    assert self.base<=pointer<self.base+self.image_size
+                    raw=bytes(cpu.mem_read(pointer,min(128,self.base+self.image_size-pointer)))
+                    assert b'\0' in raw
+                    return raw.split(b'\0',1)[0]
+                fmt=string_at(pointer)
+                assert fmt in (BANNER_ARGS[0][0],BANNER_ARGS[1][0])
+                args=(fmt,)
+                if fmt==BANNER_ARGS[0][0]:
+                    args+=(string_at(struct.unpack('<I',cpu.mem_read(sp+8,4))[0]),)
+                if self.base==0x400000:
+                    assert pointer==(0x4bab5c if len(args)==2 else 0x4bab3c)
+                    if len(args)==2:assert struct.unpack('<I',cpu.mem_read(sp+8,4))[0]==0x4bab20
             if name=='Mem_CreatePool':
                 assert args==(self.default,);args=('DEFAULT',)
             if name!=self.top:self.events.append(('call',name,args))
-            modeled=name in STARTUP_EXPORTS or name in ('malloc','free','callback') or (
-                self.isolated and name in ('Input_ResetCallbacks','Mem_InitPools','Mem_InitHandles','Mem_ShutdownHandles','Mem_ShutdownPools'))
+            modeled=name in STARTUP_EXPORTS or name in ('malloc','free','callback','printf') or (
+                self.isolated and name in ('Lisa_PrintVersion','Input_ResetCallbacks','Mem_InitPools','Mem_InitHandles','Mem_ShutdownHandles','Mem_ShutdownPools'))
             if modeled:
                 assert self.boundary_index<len(self.expected_boundaries),'Unexpected boundary'
                 expected_name,expected_args,state=self.expected_boundaries[self.boundary_index]
@@ -330,7 +377,7 @@ def verify_mem_lifecycle():
     verify_target();phase='compilation';counts={name:0 for name in ROUTINES}
     try:
         original=pefile.PE(str(TARGET));inspect_original(original);build(dll=DLL)
-        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production Input_ResetCallbacks declarations/body; strict C89; provisional Clang/LLD; explicit nonreturning startup and CRT fixtures')
+        for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production Input_ResetCallbacks and Lisa_PrintVersion declarations/bodies; strict C89; provisional Clang/LLD; explicit nonreturning startup and CRT fixtures')
         rebuilt=pefile.PE(str(DLL));assert not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
         symbols={s.name.decode():rebuilt.OPTIONAL_HEADER.ImageBase+s.address for s in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if s.name}
         for name,(r,n,_) in ROUTINES.items():
@@ -353,6 +400,17 @@ def verify_mem_lifecycle():
             if name in counts:counts[name]+=1
             if isolated:isolated_counts[name]+=1
             return outputs[0]
+        # Both printf returns are ignored: exercise independent failure/high-bit
+        # pairs and repeated execution without resetting the CPU image/state.
+        pairs=[(x,y) for x in [0,1,2,0x80000000,0xffffffff]
+            for y in [0,1,2,0x80000000,0xffffffff]]
+        pairs += [(rng.getrandbits(32),rng.getrandbits(32)) for _ in range(128)]
+        for x,y in pairs:
+            actions={('printf',0):[('g_inputKeyEventCallback',0,4,x)],
+                ('printf',1):[('g_inputPollCallback',0,4,y)]}
+            state=compare('Lisa_PrintVersion',fresh(),actions=actions,returns={'printf':[x,y]})
+            compare('Lisa_PrintVersion',state,actions=actions,returns={'printf':[y,x]},reset=False)
+
         # Standalone reset covers arbitrary raw pointer words and repeated clearing.
         for value in [0,1,2,0x80000000,0xffffffff]+[rng.getrandbits(32) for _ in range(128)]:
             state=fresh();state['g_inputKeyEventCallback']=struct.pack('<I',value)
@@ -380,8 +438,9 @@ def verify_mem_lifecycle():
         # Changes made by early/late startup boundaries are observed by real helpers.
         for flag in [0,1,2,0xffffffff]:
             actions={
-                ('Lisa_PrintVersion',0):[('g_memHandlesInitialized',0,4,flag),
+                ('printf',0):[('g_memHandlesInitialized',0,4,flag),
                     ('g_inputKeyEventCallback',0,4,0xffffffff),('g_inputPollCallback',0,4,0x12345678)],
+                ('printf',1):[('g_inputPollCallback',0,4,0x87654321)],
                 ('Gfx_InitPrimitiveState',0):[('g_memPendingCallback',0,4,CALLBACK)],
                 ('Gfx_SelectBackend',0):[('g_memHandlesInitialized',0,4,0)]}
             compare('Mem_InitSystem',fresh(2),actions=actions,returns={'malloc':[ARENA]})
@@ -435,11 +494,13 @@ def verify_mem_lifecycle():
         step('Mem_ShutdownSystem')
         for name in ROUTINES:
             record(name,'emulation','pass',cases=counts[name],isolated_cases=isolated_counts[name],
-                persistent_invocations=persistent if name!='Input_ResetCallbacks' else 0,
-                integrated_startups=18 if name=='Input_ResetCallbacks' else None,
-                scope=('266 standalone ordered two-dword clearing calls, repeated persistent clearing; 18 integrated startups; complete tracked state and boundary snapshots; nonvolatile registers/stack/DF/unrelated-image checks; void EAX excluded' if name=='Input_ResetCallbacks' else 'Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration'),
-                limitations='Three startup dependencies, CRT heap and callbacks modeled; no instruction equality, original linked layout, native startup/graphics/heap/game parity, invalid/aliased storage, concurrency or general reentry validation')
-        print('PASS: %d Input_ResetCallbacks; %d Mem_InitSystem and %d Mem_ShutdownSystem differential invocations; isolated %s; %d persistent invocations.'%(counts['Input_ResetCallbacks'],counts['Mem_InitSystem'],counts['Mem_ShutdownSystem'],isolated_counts,persistent))
+                persistent_invocations=(153 if name=='Lisa_PrintVersion' else
+                    persistent if name in ('Mem_InitSystem','Mem_ShutdownSystem') else 0),
+                persistent_integrated_startups=4 if name in ('Lisa_PrintVersion','Input_ResetCallbacks') else None,
+                integrated_startups=18 if name in ('Input_ResetCallbacks','Lisa_PrintVersion') else None,
+                scope=('306 standalone calls, exact NUL-terminated printf format/vararg bytes and order; independent return pairs, CRT boundary mutations, repeated persistent calls; 18 integrated startups; EAX=0, full tracked state, stack/nonvolatile/DF/unrelated-image checks' if name=='Lisa_PrintVersion' else '266 standalone ordered two-dword clearing calls, repeated persistent clearing; 18 integrated startups; complete tracked state and boundary snapshots; nonvolatile registers/stack/DF/unrelated-image checks; void EAX excluded' if name=='Input_ResetCallbacks' else 'Exact ordered calls/arguments and accesses; complete handles, roots, one-MiB heap and boundary-entry snapshots; ABI/stack/unrelated-image checks; real pool/handle initialization and teardown; 400 callback slot/pass cases, cross-phase mutation and persistent real allocation/registration'),
+                limitations='Two startup dependencies, CRT printf/heap and callbacks modeled; no instruction equality, original linked layout, native startup/graphics/heap/game parity, invalid/aliased storage, concurrency or general reentry validation')
+        print('PASS: %d Lisa_PrintVersion; %d Input_ResetCallbacks; %d Mem_InitSystem and %d Mem_ShutdownSystem differential invocations; isolated %s; %d persistent invocations.'%(counts['Lisa_PrintVersion'],counts['Input_ResetCallbacks'],counts['Mem_InitSystem'],counts['Mem_ShutdownSystem'],isolated_counts,persistent))
         return counts
     except Exception as exc:
         for name in ROUTINES:record(name,phase,'fail',error=str(exc))

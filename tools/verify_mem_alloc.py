@@ -21,7 +21,7 @@ if not __debug__:
     raise RuntimeError('Verification requires assertions')
 RVA, SIZE = 0x5ae10, 406
 DLL = BUILD / 'mem_alloc_validation.dll'
-INPUTS = ['decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/src/mem.c', 'decomp/include/mem.h', 'decomp/target.json',
+INPUTS = ['decomp/src/lisa3d.c', 'decomp/include/lisa3d.h', 'decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/src/mem.c', 'decomp/include/mem.h', 'decomp/target.json',
     'tools/verify_mem_alloc.py', 'tools/verify_mem_free.py', 'tools/build_decomp.py',
     'tools/verify_matching.py', 'tools/verify_font_cleanup.py',
     'tools/windows_target.py', 'tools/windows_tracking.py']

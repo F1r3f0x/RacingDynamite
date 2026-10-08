@@ -13,7 +13,7 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ESP, UC_X86_REG_EIP,
                               UC_X86_REG_EFLAGS)
 from verify_font_cleanup import FontLifecycleCPU, LIFECYCLE_FIELDS, SAVED, STACK, STOP
-from build_decomp import STARTUP_BOUNDARY_SOURCE
+from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -22,7 +22,7 @@ if not __debug__:
 RVA, SIZE = 0x56270, 429
 DLL = BUILD / 'font_parse_validation.dll'
 BUFFER = 0x7400000
-INPUTS = ['tools/build_decomp.py', 'decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/include/mem.h',
+INPUTS = ['decomp/src/lisa3d.c', 'decomp/include/lisa3d.h', 'tools/build_decomp.py', 'decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/include/mem.h',
           'decomp/src/mem.c', 'decomp/target.json', 'tools/verify_font_parse.py',
           'tools/verify_font_cleanup.py', 'tools/verify_matching.py',
           'tools/windows_target.py', 'tools/windows_tracking.py']
@@ -122,7 +122,7 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     cc, ld = shutil.which('clang'), shutil.which('lld-link')
     if not cc or not ld:
         raise RuntimeError('Clang/LLD required')
-    exports = [n for n, _, _ in LIFECYCLE_FIELDS] + ['Font_Parse', 'Font_InitSystem',
+    exports = [n for n, _, _ in LIFECYCLE_FIELDS] + ['Lisa_PrintVersion', 'printf', 'Font_Parse', 'Font_InitSystem',
         'Font_Shutdown', 'Font_Unload', 'Mem_NextHandleId', 'Mem_RegisterHandle',
         'Mem_ReleaseHandleId', 'Mem_InitHandles', 'Gfx_SpriteOp',
         'validation_fontExitContext', 'g_fileErrorLine', 'g_memPools', 'Mem_Free', 'free']
@@ -152,9 +152,11 @@ extern void *Gfx_SpriteOp(void *desc, int op);
         commands[-1] += [str(file_obj)] + ['/export:' + n for n in [
             'File_CheckReadable', 'File_GetSize', 'File_GetStreamSize', 'Mem_Alloc',
             'fopen', 'fclose', 'ftell', 'fseek', 'fsetpos', 'fread', 'malloc']]
+    banner_obj, banner_cmd = compile_banner(commands[0][:-4], dll.stem)
+    commands[-1].append(str(banner_obj))
     for command in commands:
         subprocess.run(command, check=True)
-    return commands
+    return commands[:-1] + [banner_cmd, commands[-1]]
 
 
 class ParserCPU(FontLifecycleCPU):

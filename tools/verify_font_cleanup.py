@@ -21,7 +21,7 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ESI,
     UC_X86_REG_EDI, UC_X86_REG_EBP, UC_X86_REG_ESP, UC_X86_REG_EIP,
     UC_X86_REG_EFLAGS)
 
-from build_decomp import STARTUP_BOUNDARY_SOURCE
+from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -40,7 +40,7 @@ SHA_SHUTDOWN = '93eb65fc8f1076b5a1ec14a6b4e1b603893a3eb1bc30f17017e5ab54809a604c
 SHA_UNLOAD = 'd398726038e727ae65ae4041981d9970b581fa2078b75d4e946c1dc0147a4009'
 
 DLL = BUILD / 'font_cleanup_validation.dll'
-INPUTS = [
+INPUTS = ['decomp/src/lisa3d.c', 'decomp/include/lisa3d.h',
     'tools/build_decomp.py',
     'decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/include/mem.h',
     'decomp/src/mem.c', 'decomp/target.json', 'tools/verify_font_cleanup.py',
@@ -217,9 +217,11 @@ extern void *Gfx_SpriteOp(void *desc, int op);
                 '/base:0x10000000', '/out:' + str(DLL), str(obj_path), str(stub_obj)] + [
                     '/export:' + e for e in exports
                 ]
+    banner_obj, banner_cmd = compile_banner(compile_cmd[:-4], DLL.stem)
+    link_cmd.append(str(banner_obj))
     subprocess.run(link_cmd, check=True)
     assert obj_path.stat().st_size and DLL.stat().st_size
-    return [compile_cmd, compile_stub_cmd, link_cmd]
+    return [compile_cmd, compile_stub_cmd, banner_cmd, link_cmd]
 
 
 def execute_unload(pe, entry, fonts_addr, sprite_op_addr, font_id, fonts_data, seed, original=False):

@@ -17,7 +17,7 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ECX, UC_X86_REG_EDX,
     UC_X86_REG_ESP, UC_X86_REG_EIP, UC_X86_REG_EFLAGS)
 
 from verify_font_cleanup import SAVED, STACK, STOP
-from build_decomp import STARTUP_BOUNDARY_SOURCE
+from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -29,7 +29,7 @@ ROUTINE_SHA = '2a23d52a4c2588198a7749db30e5de8c2f5ecd150a65f5940dbc2a1a5db87ec3'
 DLL = BUILD / 'file_load_validation.dll'
 DATA, DATA_SIZE = 0x7400000, 0x10000
 ARENA, ARENA_SIZE = 0x8000000, 0x200000
-INPUTS = [
+INPUTS = ['decomp/src/lisa3d.c', 'decomp/include/lisa3d.h',
     'decomp/src/geputget.c', 'decomp/include/geputget.h',
     'tools/build_decomp.py',
     'decomp/src/file.c', 'decomp/include/file.h',
@@ -119,6 +119,7 @@ def build_loader():
         '-fno-inline', '-fno-vectorize', '-fno-slp-vectorize', '-mno-sse', '-mno-sse2',
         '-I', str(ROOT / 'decomp/include')]
     exports = [
+        'Lisa_PrintVersion', 'printf',
         'File_LoadToMemory', 'File_CheckReadable', 'File_GetSize', 'File_GetStreamSize',
         'Mem_InitHandles', 'Mem_NextHandleId', 'Mem_RegisterHandle', 'Mem_ShutdownHandles',
         'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'g_fileErrorLine',
@@ -131,6 +132,8 @@ def build_loader():
         [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/base:0x10000000',
          '/out:' + str(DLL), str(fobj), str(mobj), str(sobj)] + ['/export:' + s for s in exports]
     ]
+    banner_obj, _ = compile_banner(flags, DLL.stem)
+    commands[-1].append(str(banner_obj))
     for cmd in commands:
         subprocess.run(cmd, cwd=ROOT, check=True)
     assert all(p.is_file() and p.stat().st_size for p in [fobj, mobj, sobj, DLL])

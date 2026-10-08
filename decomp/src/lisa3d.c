@@ -55,13 +55,13 @@ int32_t g_LisaCullFlag = 0;
 int32_t g_LisaMipmapTable[16] = {0};
 
 /**
- * @original Lisa_PrintVersion (MAINDOS.EXE @ 0x0005571c, lisa3d.c)
+ * @original Lisa_PrintVersion (IGN_WIN.EXE @ 0x0045B4F0, lisa3d.c)
  * @fidelity EXACT
  * @notes Prints Lisa 2 Development System version and UDS copyright header.
  */
 int Lisa_PrintVersion(void) {
-    printf("Lisa 2 Development System: %s\n", "Compilation 0.91.0");
-    printf("Copyright (c) UDS, 1995-1996\n");
+    printf("\nLisa 2 Development System, %s\n", "Compilation 0.91.0");
+    printf("Copyright (c) UDS, 1995-1996\n\n");
     return 0;
 }
 

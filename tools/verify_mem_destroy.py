@@ -21,7 +21,7 @@ ROUTINES = {
     'Mem_DestroyPool': (0x5b080,182,'5d94bbebd22cf4806b9abdee9a916457043581b24f1fe69b907c320596cb7e62'),
     'Mem_ShutdownPools': (0x5b140,41,'caa0affb689af0a88ea17b0af2829cec7f498ea2613b8ede871badc5afff2444')}
 DLL = BUILD / 'mem_destroy_validation.dll'
-INPUTS = ['decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/src/mem.c','decomp/include/mem.h','decomp/target.json',
+INPUTS = ['decomp/src/lisa3d.c', 'decomp/include/lisa3d.h', 'decomp/src/geputget.c', 'decomp/include/geputget.h', 'decomp/src/mem.c','decomp/include/mem.h','decomp/target.json',
     'tools/verify_mem_destroy.py','tools/verify_mem_pools.py','tools/verify_mem_alloc.py',
     'tools/verify_mem_free.py','tools/build_decomp.py','tools/verify_matching.py',
     'tools/verify_font_cleanup.py','tools/windows_target.py','tools/windows_tracking.py']
