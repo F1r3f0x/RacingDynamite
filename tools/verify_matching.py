@@ -15,6 +15,7 @@ import subprocess
 import shutil
 import unicorn
 import pefile
+from windows_target import validation_symbols
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn import Uc, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE, UC_HOOK_MEM_WRITE, UC_HOOK_MEM_READ
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ESI,
@@ -197,8 +198,7 @@ def verify():
     original, rebuilt = pefile.PE(str(TARGET)), pefile.PE(str(DLL))
     assert rebuilt.FILE_HEADER.Machine == 0x14c
     assert not hasattr(rebuilt, 'DIRECTORY_ENTRY_IMPORT'), 'Unexpected dependencies'
-    symbols = {e.name.decode(): rebuilt.OPTIONAL_HEADER.ImageBase+e.address
-               for e in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
+    symbols = validation_symbols(rebuilt)
     fields = [(name, symbols[name], n) for name,_,n in FIELDS]
     print('Validation globals:', fields)
     original_code = original.get_data(0x5b1f0, 76)
@@ -216,11 +216,15 @@ def verify():
         'Mem_InitSystem', 'Mem_ShutdownSystem', 'Lisa_PrintVersion',
         'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
         'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
-        'Gfx_GrowPointerTable', 'Gfx_CopyAllocatedString', 'Gfx_ReleaseSpritePackingStorage', 'Gfx_FreeBytes', 'Gfx_FreeAlignedBytes', 'Gfx_AssignSpritePackingStorage', 'Gfx_CopySpriteDescriptorPixels', 'Gfx_AddSpritePackingBucket', 'Gfx_FindSpritePackingGap', 'Gfx_AddSpritePackingPage', 'Gfx_AllocBytes', 'Gfx_AllocAlignedBytes', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'Gfx_InitDefaultSpriteDescriptor', 'Gfx_InitSpritePackingState', 'Gfx_LinkSpritePackingNode',
+        'Gfx_SpriteImageOpNative', 'Gfx_GrowPointerTable', 'Gfx_CopyAllocatedString', 'Gfx_ReleaseSpritePackingStorage', 'Gfx_FreeBytes', 'Gfx_FreeAlignedBytes', 'Gfx_AssignSpritePackingStorage', 'Gfx_CopySpriteDescriptorPixels', 'Gfx_AddSpritePackingBucket', 'Gfx_FindSpritePackingGap', 'Gfx_AddSpritePackingPage', 'Gfx_AllocBytes', 'Gfx_AllocAlignedBytes', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'Gfx_InitDefaultSpriteDescriptor', 'Gfx_InitSpritePackingState', 'Gfx_LinkSpritePackingNode',
         'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
     expected_calls = {
+        'Gfx_SpriteImageOpNative': ['Gfx_GrowPointerTable','Gfx_FreeBytes',
+            'Gfx_ReleaseSpritePackingStorage','Gfx_FreeBytes',
+            'Gfx_ReleaseSpritePackingStorage','Gfx_FreeBytes','Gfx_AllocBytes',
+            'Gfx_CopyAllocatedString','Gfx_AssignSpritePackingStorage'],
         'Gfx_GrowPointerTable': ['malloc', 'free'],
         'Gfx_CopyAllocatedString': ['Gfx_AllocBytes'],
         'Gfx_ReleaseSpritePackingStorage': ['Gfx_FreeAlignedBytes'] + ['Gfx_FreeBytes'] * 4,
@@ -787,3 +791,6 @@ if __name__ == '__main__':
     verify_sprite_release()
     from verify_sprite_storage import verify_sprite_storage
     verify_sprite_storage()
+
+    from verify_sprite_imageop import verify_sprite_imageop
+    verify_sprite_imageop()

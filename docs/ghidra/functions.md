@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:92eaba99c6192a9983172cfcbe0953e23f783acdefb9a86ae635217f5b7b804a -->
+<!-- snapshot:89c1aec583e0237e66949afef6acf9a4557eb22c019b57fad3565c2f164e6734 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -645,7 +645,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00461210` | `0x00061210` | 143 | `Gfx_CreateSpriteDescriptor` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
 | `0x004612A0` | `0x000612A0` | 61 | `Gfx_CopySpriteDescriptorPixels` | game | reconstructed | [windows_gfx_sprite_pixels.md](windows_gfx_sprite_pixels.md) |
 | `0x004612E0` | `0x000612E0` | 114 | `Gfx_CopySpriteDescriptor` | game | reconstructed | [windows_gfx_sprite_handles.md](windows_gfx_sprite_handles.md) |
-| `0x00461360` | `0x00061360` | 329 | `Gfx_SpriteImageOpNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
+| `0x00461360` | `0x00061360` | 329 | `Gfx_SpriteImageOpNative` | game | reconstructed | [windows_gfx_imageop.md](windows_gfx_imageop.md) |
 | `0x004614B0` | `0x000614B0` | 31 | `Gfx_FreeSpriteDescriptor` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
 | `0x004614D0` | `0x000614D0` | 61 | `Gfx_InitSpritePackingState` | game | reconstructed | [windows_gfx_sprite_packing_reset.md](windows_gfx_sprite_packing_reset.md) |
 | `0x00461510` | `0x00061510` | 3 | `sub_00461510` | unknown | unidentified | - |

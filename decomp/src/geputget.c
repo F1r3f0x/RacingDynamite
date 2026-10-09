@@ -174,12 +174,10 @@ GfxSpriteHandle *volatile *volatile g_nativeSpriteFreeCursor;
 volatile GfxSpriteDescriptor g_nativeSpriteScratch;
 volatile GfxSpriteDescriptor g_nativeSpriteDefault;
 const char g_nativeSpriteDefaultName[] = "default"; /* VA 0x004BACF8 */
-volatile uint32_t g_nativeNextImageId; /* VA 0x00520380 */
+volatile GfxPointerTable g_nativeImageControl; /* VA 0x00520380..8C */
 volatile GfxSpritePackingNode g_spritePackingTemplate;
 GfxSpritePackingBucket *volatile g_spritePackingBuckets[GFX_SPRITE_PACKING_BUCKET_COUNT];
 GfxSpritePackingNode *volatile g_spritePackingPages;
-volatile int32_t g_nativeImageCapacity;
-GfxSpriteDescriptor *volatile *volatile g_nativeImageRecords;
 
 /*
  * @original Gfx_InitDefaultSpriteDescriptor (IGN_WIN.EXE @ 0x004611D0, geputget.c)
@@ -412,6 +410,105 @@ GfxSpritePackingBucket *Gfx_AddSpritePackingBucket(int32_t size,
     bucket->node = (GfxSpritePackingNode *)node;
     *slot = (GfxSpritePackingBucket *)bucket;
     return (GfxSpritePackingBucket *)bucket;
+}
+
+/*
+ * @original Gfx_SpriteImageOpNative (IGN_WIN.EXE @ 0x00461360, inferred geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteImageOpNative(const GfxSpriteDescriptor *descriptor, int image_id) {
+    uint32_t selected;
+    uint32_t candidate;
+    uint32_t records;
+    uint32_t scan;
+    uint32_t record;
+    uint32_t allocation;
+    uint32_t name;
+    uint32_t word;
+    uint32_t index;
+    volatile uint32_t *slot;
+
+    selected = (uint32_t)image_id;
+    for (;;) {
+        if (descriptor == 0) {
+            if ((int32_t)selected <= 0) {
+                return 0;
+            }
+            if (g_nativeImageCapacity <= (int32_t)selected) {
+                return 0;
+            }
+            records = (uint32_t)g_nativeImageRecords;
+            record = *(const volatile uint32_t *)(records + (selected << 2));
+            if (record != 0) {
+                name = ((const volatile GfxSpriteDescriptor *)record)->words[0];
+                Gfx_FreeBytes((void *)name);
+                records = (uint32_t)g_nativeImageRecords;
+                record = *(const volatile uint32_t *)(records + (selected << 2));
+                Gfx_ReleaseSpritePackingStorage((GfxSpriteDescriptor *)record);
+            }
+            if ((int32_t)g_nativeNextImageId > (int32_t)selected) {
+                g_nativeNextImageId = selected;
+            }
+            records = (uint32_t)g_nativeImageRecords;
+            record = *(const volatile uint32_t *)(records + (selected << 2));
+            Gfx_FreeBytes((void *)record);
+            records = (uint32_t)g_nativeImageRecords;
+            *(volatile uint32_t *)(records + (selected << 2)) = 0;
+            return 0;
+        }
+        if (selected != 0) {
+            if ((int32_t)selected < 0) {
+                return 0;
+            }
+            if (g_nativeImageCapacity <= (int32_t)selected) {
+                return 0;
+            }
+            break;
+        }
+        candidate = g_nativeNextImageId;
+        if (g_nativeImageCapacity <= (int32_t)candidate) {
+            Gfx_GrowPointerTable((GfxPointerTable *)&g_nativeImageControl);
+            continue;
+        }
+        selected = g_nativeNextImageId;
+        candidate = selected + 1u;
+        if ((int32_t)candidate < g_nativeImageCapacity) {
+            records = (uint32_t)g_nativeImageRecords;
+            scan = records + (candidate << 2);
+            while (*(const volatile uint32_t *)scan != 0) {
+                scan += 4u;
+                candidate++;
+                if ((int32_t)candidate >= g_nativeImageCapacity) {
+                    break;
+                }
+            }
+        }
+        g_nativeNextImageId = candidate;
+        break;
+    }
+    records = (uint32_t)g_nativeImageRecords;
+    slot = (volatile uint32_t *)(records + (selected << 2));
+    record = *slot;
+    if (record == 0) {
+        allocation = (uint32_t)Gfx_AllocBytes(64u);
+        *slot = allocation;
+    } else {
+        name = ((const volatile GfxSpriteDescriptor *)record)->words[0];
+        Gfx_FreeBytes((void *)name);
+        records = (uint32_t)g_nativeImageRecords;
+        record = *(const volatile uint32_t *)(records + (selected << 2));
+        Gfx_ReleaseSpritePackingStorage((GfxSpriteDescriptor *)record);
+    }
+    records = (uint32_t)g_nativeImageRecords;
+    record = *(const volatile uint32_t *)(records + (selected << 2));
+    for (index = 0; index < 16u; index++) {
+        word = ((const volatile GfxSpriteDescriptor *)descriptor)->words[index];
+        ((volatile GfxSpriteDescriptor *)record)->words[index] = word;
+    }
+    name = ((const volatile GfxSpriteDescriptor *)record)->words[0];
+    Gfx_CopyAllocatedString((const char *)name, (char **)record);
+    Gfx_AssignSpritePackingStorage((GfxSpriteDescriptor *)record);
+    return (int32_t)selected;
 }
 
 /*

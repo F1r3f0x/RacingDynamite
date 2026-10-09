@@ -7,6 +7,7 @@ import hashlib
 import random
 import struct
 import pefile
+from windows_target import validation_symbols
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn import (Uc, UcError, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE,
     UC_HOOK_MEM_READ, UC_HOOK_MEM_WRITE, UC_HOOK_MEM_INVALID, UC_HOOK_INTR,
@@ -323,8 +324,7 @@ class Session:
         self.uc.mem_map(STOP,0x1000)
         self.symbols = ({name:0x400000+data[0] for name,data in ROUTINES.items()} |
             {'malloc':0x469400,'Gfx_LinkSpritePackingNode':0x461690,
-                'g_spritePackingTemplate':TEMPLATE,'g_spritePackingPages':HEAD,'g_spritePackingBuckets':TABLE}) if original else {
-            e.name.decode():self.base+e.address for e in pe.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
+                'g_spritePackingTemplate':TEMPLATE,'g_spritePackingPages':HEAD,'g_spritePackingBuckets':TABLE}) if original else validation_symbols(pe)
         self.fields = [(TEMPLATE,self.symbols['g_spritePackingTemplate'],24),
             (HEAD,self.symbols['g_spritePackingPages'],4),
             (TABLE,self.symbols['g_spritePackingBuckets'],1028)]
@@ -711,7 +711,7 @@ def verify_sprite_packing():
     rebuilt = pefile.PE(str(DLL))
     assert rebuilt.FILE_HEADER.Machine == 0x14c and not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
     # Clang uses a conditional tail transfer for the nonzero allocation path.
-    symbols = {e.name.decode():rebuilt.OPTIONAL_HEADER.ImageBase+e.address for e in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
+    symbols = validation_symbols(rebuilt)
     md = Cs(CS_ARCH_X86,CS_MODE_32)
     entry = symbols['Gfx_AllocBytes']
     instructions = list(md.disasm(rebuilt.get_data(entry-rebuilt.OPTIONAL_HEADER.ImageBase,14),entry))

@@ -32,3 +32,24 @@ def verify_target(path=TARGET):
     if (machine, magic, entry, base) != (0x14c, 0x10b, 0x69950, 0x400000):
         raise ValueError('Unexpected Windows PE headers')
     return data
+
+
+def validation_symbols(pe):
+    """Exported PE addresses plus verified image-control member bindings.
+
+    The aliases are harness addresses inside the single production control
+    object, not extra globals or linker-contiguity assumptions. Keep legacy
+    standalone validation images readable when they export the three fields.
+    """
+    base = pe.OPTIONAL_HEADER.ImageBase
+    symbols = {e.name.decode():base+e.address
+        for e in pe.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
+    control = symbols.get('g_nativeImageControl')
+    if control is not None:
+        for name,offset in (('g_nativeNextImageId',0),
+                ('g_nativeImageCapacity',8),('g_nativeImageRecords',12)):
+            address = control+offset
+            if name in symbols and symbols[name] != address:
+                raise ValueError('Conflicting image-control export: '+name)
+            symbols[name] = address
+    return symbols

@@ -1,5 +1,21 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Complete native image operation (2026-10-09)
+
+[ImageOp](ghidra/windows_gfx_imageop.md), VA 0x00461360 / RVA 0x61360, now
+executes production C89 with real growth/string/storage/release/allocation
+helpers and coherent 16-byte image control. 361 differential comparisons include
+204 persistent follow-ups, 16 faults, eight aliases, six boundary mutation calls,
+16 packed calls and one bounded observation prefix. The full workflow renews
+all 50 reconstructed routines among 1,028 candidates, including default
+initialization RVA 0x611D0 and descriptor copying RVA 0x612E0 with the new backing.
+Next authenticate native handle-operation RVA 0x5C830 and its caller dependencies.
+CRT and primitive boundaries remain modeled; instruction equality, original
+toolchain/link layout and native startup/menu/render/input/audio/race validation
+remain open. Cross-page dword fault atomicity and arbitrary reentry are unverified.
+This focused DLL is not a playable game. Earlier entries are historical.
+
+
 ## Generic pointer-table growth (2026-10-09)
 
 [Table growth](ghidra/windows_gfx_pointer_table.md), VA 0x0045F560 / RVA

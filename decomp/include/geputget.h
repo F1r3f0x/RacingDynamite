@@ -92,6 +92,15 @@ typedef struct GfxSpriteDescriptor {
     uint32_t words[16];
 } GfxSpriteDescriptor;
 
+/* Windows pointer-table control: only capacity/base semantics are consumed by
+ * the grower. Other users interpret the two prefix words independently. */
+typedef struct GfxPointerTable {
+    uint32_t opaque_prefix[2];
+    int32_t capacity;
+    uint32_t *records;
+} GfxPointerTable;
+void Gfx_GrowPointerTable(GfxPointerTable *control); /* VA 0x0045F560; EAX discarded */
+
 /* Independently verified pixel-copy prefix; the other descriptor words remain
  * opaque. Pointer and stride representations are unsigned 32-bit words. */
 typedef struct GfxSpritePixelView {
@@ -118,7 +127,12 @@ extern GfxSpriteHandle *volatile *volatile g_nativeSpriteFreeCursor; /* VA 0x005
 extern volatile GfxSpriteDescriptor g_nativeSpriteScratch; /* VA 0x00514B98 */
 extern volatile GfxSpriteDescriptor g_nativeSpriteDefault; /* VA 0x0051FB88 */
 extern const char g_nativeSpriteDefaultName[8]; /* VA 0x004BACF8; includes NUL */
-extern volatile uint32_t g_nativeNextImageId; /* VA 0x00520380; raw search word */
+/* One real four-word image control block at VA 0x00520380. The second
+ * prefix word remains opaque; these aliases name verified member semantics. */
+extern volatile GfxPointerTable g_nativeImageControl;
+#define g_nativeNextImageId (g_nativeImageControl.opaque_prefix[0])
+#define g_nativeImageCapacity (g_nativeImageControl.capacity)
+#define g_nativeImageRecords ((GfxSpriteDescriptor *volatile *)g_nativeImageControl.records)
 int Gfx_InitDefaultSpriteDescriptor(void); /* VA 0x004611D0; EAX=0 */
 /* Verified six-dword packing-node copy view. Range words retain raw bits;
  * consumers establish pixel/child/previous/next links, not allocator fidelity. */
@@ -139,14 +153,6 @@ typedef struct GfxSpritePackingBucket {
 extern volatile GfxSpritePackingNode g_spritePackingTemplate; /* VA 0x0051FC00 */
 extern GfxSpritePackingBucket *volatile g_spritePackingBuckets[GFX_SPRITE_PACKING_BUCKET_COUNT]; /* VA 0x0051FF58 */
 extern GfxSpritePackingNode *volatile g_spritePackingPages; /* VA 0x0051FE40 */
-/* Windows pointer-table control: only capacity/base semantics are consumed by
- * the grower. Other users interpret the two prefix words independently. */
-typedef struct GfxPointerTable {
-    uint32_t opaque_prefix[2];
-    int32_t capacity;
-    uint32_t *records;
-} GfxPointerTable;
-void Gfx_GrowPointerTable(GfxPointerTable *control); /* VA 0x0045F560; EAX discarded */
 /* Native graphics allocation: zero bytes bypass CRT malloc. */
 void *Gfx_AllocBytes(uint32_t size); /* VA 0x0045F4A0 */
 /* Both callers discard incidental EAX; only the byte wrapper skips null. */
@@ -173,8 +179,6 @@ int Gfx_InitSpritePackingState(void); /* VA 0x004614D0; EAX=0 */
  * Current must be writable; exact node aliases retain ordered stores. */
 GfxSpritePackingNode *Gfx_LinkSpritePackingNode(GfxSpritePackingNode *previous,
     GfxSpritePackingNode *current, GfxSpritePackingNode *next); /* VA 0x00461690 */
-extern volatile int32_t g_nativeImageCapacity; /* VA 0x00520388; signed */
-extern GfxSpriteDescriptor *volatile *volatile g_nativeImageRecords; /* VA 0x0052038C */
 int Gfx_CopySpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x004612E0 */
 typedef struct GfxSpriteState GfxSpriteState;
 typedef int (*GfxSpriteOpenProc)(void);
