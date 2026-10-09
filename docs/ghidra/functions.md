@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:ca8c9d298b02dcbf5c60e4654855d33f8ebb1cfd5053bcabbbaf3478cc35cf38 -->
+<!-- snapshot:830ac0b60d89ea0da80495bb8c70a33a4ffc24eeebededdf981e8adba3ea8cc4 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -650,12 +650,12 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x004614D0` | `0x000614D0` | 61 | `Gfx_InitSpritePackingState` | game | reconstructed | [windows_gfx_sprite_packing_reset.md](windows_gfx_sprite_packing_reset.md) |
 | `0x00461510` | `0x00061510` | 3 | `sub_00461510` | unknown | unidentified | - |
 | `0x00461520` | `0x00061520` | 1 | `sub_00461520` | unknown | unidentified | - |
-| `0x00461530` | `0x00061530` | 350 | `Gfx_AssignSpritePackingStorage` | game | analyzed | [windows_gfx_sprite_packing_reset.md](windows_gfx_sprite_packing_reset.md) |
+| `0x00461530` | `0x00061530` | 350 | `Gfx_AssignSpritePackingStorage` | game | analyzed | [windows_gfx_sprite_packing_gap.md](windows_gfx_sprite_packing_gap.md) |
 | `0x00461690` | `0x00061690` | 33 | `Gfx_LinkSpritePackingNode` | game | reconstructed | [windows_gfx_sprite_packing_links.md](windows_gfx_sprite_packing_links.md) |
-| `0x004616C0` | `0x000616C0` | 273 | `Gfx_AddSpritePackingBucket` | game | analyzed | [windows_gfx_sprite_packing_pages.md](windows_gfx_sprite_packing_pages.md) |
+| `0x004616C0` | `0x000616C0` | 273 | `Gfx_AddSpritePackingBucket` | game | analyzed | [windows_gfx_sprite_packing_gap.md](windows_gfx_sprite_packing_gap.md) |
 | `0x004617E0` | `0x000617E0` | 85 | `Gfx_AddSpritePackingPage` | game | reconstructed | [windows_gfx_sprite_packing_pages.md](windows_gfx_sprite_packing_pages.md) |
 | `0x00461840` | `0x00061840` | 47 | `Gfx_AllocAlignedBytes` | game | reconstructed | [windows_gfx_alloc_aligned.md](windows_gfx_alloc_aligned.md) |
-| `0x00461870` | `0x00061870` | 62 | `sub_00461870` | unknown | unidentified | - |
+| `0x00461870` | `0x00061870` | 62 | `Gfx_FindSpritePackingGap` | game | reconstructed | [windows_gfx_sprite_packing_gap.md](windows_gfx_sprite_packing_gap.md) |
 | `0x004618B0` | `0x000618B0` | 419 | `Gfx_ReleaseSpritePackingStorage` | game | analyzed | [windows_gfx_sprite_packing_reset.md](windows_gfx_sprite_packing_reset.md) |
 | `0x00461A60` | `0x00061A60` | 17 | `sub_00461A60` | unknown | unidentified | - |
 | `0x00461A80` | `0x00061A80` | 3 | `Gfx_SpriteReservedNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |

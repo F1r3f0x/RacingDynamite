@@ -2,7 +2,7 @@
 # requires-python = ">=3.13"
 # dependencies = ["pefile==2024.8.26", "capstone==5.0.7", "unicorn==2.1.4"]
 # ///
-"""Packing allocation contracts; CRT heap is an explicit validation boundary."""
+"""Packing allocation and gap search; CRT heap is an explicit validation boundary."""
 import hashlib
 import random
 import struct
@@ -10,7 +10,7 @@ import pefile
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn import (Uc, UcError, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE,
     UC_HOOK_MEM_READ, UC_HOOK_MEM_WRITE, UC_HOOK_MEM_INVALID, UC_HOOK_INTR,
-    UC_MEM_WRITE, UC_MEM_WRITE_UNMAPPED)
+    UC_MEM_WRITE, UC_MEM_WRITE_UNMAPPED, UC_MEM_READ_UNMAPPED)
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ECX, UC_X86_REG_EDX,
     UC_X86_REG_EIP, UC_X86_REG_ESP, UC_X86_REG_EFLAGS)
 from verify_matching import PRESERVED, STACK, STOP
@@ -26,6 +26,7 @@ ARENA, SIZE = 0x3000000, 0x100000
 TEMPLATE, HEAD = 0x51fc00, 0x51fe40
 DLL = BUILD / 'sprite_packing_validation.dll'
 ROUTINES = {
+    'Gfx_FindSpritePackingGap': (0x61870,62,0,2,0x105,'9fec91b9a7a79937df056da6cea0f29c91ccd4aa4549a1eef45cf0716a71872d'),
     'Gfx_AddSpritePackingPage': (0x617e0,85,0,0,0x308,'3e028a97ebd2430f4181d83bd55f460261c9506827cddcee83adce2ea65650b9'),
     'Gfx_AllocBytes': (0x5f4a0,21,0,1,0,'2a7819df61b5e4eddd3b8f22a5a85e18f39ff17301f5ab6db1733e69913da9f6'),
     'Gfx_AllocAlignedBytes': (0x61840,47,0,2,0x20a,'02150c922745d67bfe77182db1c615fb172490b6f730092ffb3e6c460b3f3b34')}
@@ -71,6 +72,42 @@ def inspect(pe):
         ins = list(md.disasm(pe.get_data(site,16),site+0x400000))
         assert [(i.mnemonic,i.op_str) for i in ins[:3]] == [('call','0x4617e0'),('mov','ebx, dword ptr [0x51fe40]'),('jmp','0x4616cb')]
 
+    assert pe.get_data(0x618ae,2) == b'\xcc'*2
+    gap_instructions = [(i.mnemonic,i.op_str) for i in md.disasm(pe.get_data(0x61870,62),0x461870)]
+    assert gap_instructions == [
+        ('mov','eax, dword ptr [esp + 8]'),('push','esi'),('test','eax, eax'),
+        ('jne','0x461880'),('mov','eax, 0xffffffff'),('pop','esi'),('ret',''),
+        ('mov','ecx, dword ptr [esp + 8]'),('cmp','dword ptr [eax], ecx'),
+        ('jl','0x46188f'),('mov','eax, 0xffffffff'),('pop','esi'),('ret',''),
+        ('mov','edx, dword ptr [eax + 0x14]'),('mov','esi, 0x100'),
+        ('test','edx, edx'),('je','0x46189d'),('mov','esi, dword ptr [edx]'),
+        ('sub','esi, dword ptr [eax + 4]'),('cmp','esi, ecx'),('jge','0x4618ac'),
+        ('mov','eax, edx'),('test','edx, edx'),('jne','0x46188f'),
+        ('xor','eax, eax'),('pop','esi'),('ret','')]
+    assert [(r,i.address) for r,(n,*_) in fpo.items()
+        for i in md.disasm(pe.get_data(r,n),r+0x400000)
+        if i.mnemonic in ('call','jmp') and i.op_str == '0x461870'] == [
+            (0x61530,0x46158d),(0x616c0,0x4616e9)]
+    assert hashlib.sha256(pe.get_data(0x61530,350)).hexdigest() == '028b7432fafcd6c13a8ea0d675bda862a30ca19e99fbd6a3ec3e9a4344f9c394'
+    assert fpo[0x61530] == (350,18,1,0x140b)
+    assert fpo[0x616c0] == (273,1,2,0x140b)
+    for site,expected in (
+        (0x61582,[('mov','ebp, dword ptr [esi + 4]'),('mov','ecx, dword ptr [ebx + 4]'),
+            ('mov','eax, dword ptr [ebp + 0xc]'),('push','eax'),('push','ecx'),
+            ('call','0x461870'),('mov','dword ptr [esp + 0x1c], eax'),('add','esp, 8'),
+            ('test','eax, eax'),('jne','0x4615a1'),('mov','esi, dword ptr [esi]'),
+            ('jmp','0x46157e'),('cmp','dword ptr [esp + 0x14], -1')]),
+        (0x616e0,[('mov','eax, dword ptr [ebx + 0xc]'),('mov','ecx, dword ptr [esp + 0x18]'),
+            ('push','eax'),('push','ecx'),('call','0x461870'),('add','esp, 8'),
+            ('mov','ebp, eax'),('test','ebp, ebp'),('jne','0x4616fc'),
+            ('mov','ebx, dword ptr [ebx + 0x14]'),('jmp','0x4616dc'),
+            ('push','0x18'),('cmp','ebp, -1')])):
+        decoded = list(md.disasm(pe.get_data(site,64),site+0x400000))
+        assert [(i.mnemonic,i.op_str) for i in decoded[:len(expected)]] == expected
+
+
+class GapStop(Exception):
+    pass
 
 
 class State:
@@ -97,7 +134,9 @@ class State:
 
     def read(self, address):
         data,offset = self.region(address,4)
-        assert data is not None
+        if data is None:
+            self.fault = ('read',address,4)
+            raise GapStop
         value = struct.unpack_from('<I',data,offset)[0]
         self.events.append(('read',address,4,value))
         return value
@@ -134,6 +173,31 @@ class State:
             return None
         return (header+4)&MASK
 
+
+    def gap(self, request, first, read_limit=None):
+        def read(address):
+            value = self.read(address)
+            if read_limit is not None and len(self.events) == read_limit:
+                self.fault = ('budget',read_limit)
+                raise GapStop
+            return value
+        def signed(word):
+            return word if word < 0x80000000 else word-0x100000000
+        try:
+            if first == 0 or signed(read(first)) >= signed(request):
+                return MASK
+            cursor = first
+            while True:
+                successor = read(cursor+20)
+                upper = read(successor) if successor else 256
+                available = (upper-read(cursor+4))&MASK
+                if signed(available) >= signed(request):
+                    return cursor
+                cursor = successor
+                if cursor == 0:
+                    return 0
+        except GapStop:
+            return None
 
     def boundary(self, name, args):
         self.events.append(('entry',name,tuple(args),self.snapshot()))
@@ -215,12 +279,19 @@ class Session:
             kind = 'write'
         else:
             kind = 'read'
+            if not (self.base <= address and address+size <= self.base+self.size or
+                    ARENA <= address and address+size <= ARENA+SIZE):
+                return  # The invalid-access hook records the attempted read.
             value = int.from_bytes(uc.mem_read(address,size),'little')
         self.events.append((kind,self.normalize(address),size,value))
+        if self.read_limit is not None and len(self.events) == self.read_limit:
+            assert kind == 'read'
+            self.fault = ('budget',self.read_limit)
+            uc.emu_stop()
 
     def invalid(self, uc, access, address, size, value, _):
-        assert access == UC_MEM_WRITE_UNMAPPED, (access,hex(address))
-        self.fault = ('write',address,size)
+        assert access in (UC_MEM_WRITE_UNMAPPED,UC_MEM_READ_UNMAPPED), (access,hex(address))
+        self.fault = ('write' if access == UC_MEM_WRITE_UNMAPPED else 'read',address,size)
         return False
 
     def interrupt(self, uc, number, _):
@@ -263,8 +334,9 @@ class Session:
             uc.reg_write(UC_X86_REG_ESP,sp+4)
             uc.reg_write(UC_X86_REG_EIP,ret)
 
-    def run(self, name, args, replies, expected, eax, seed, page_mode=None):
+    def run(self, name, args, replies, expected, eax, seed, page_mode=None, read_limit=None):
         self.page_mode = page_mode
+        self.read_limit = read_limit
         uc = self.uc
         self.events,self.fault,self.replies = [],None,list(replies)
         sp = STACK+0x8000
@@ -295,6 +367,85 @@ class Session:
             assert [uc.reg_read(r) for r in PRESERVED] == saved
             assert uc.reg_read(UC_X86_REG_EFLAGS)&0x400 == 0
             assert bytes(uc.mem_read(sp,0x8000)) == caller
+
+
+def verify_gap(original, rebuilt):
+    name = 'Gfx_FindSpritePackingGap'
+    coverage = {'comparisons':0,'persistent_followups':0,'faults':0,
+        'cycle_prefixes':0,'sentinels':0,'exhausted':0,'predecessors':0}
+    nodes = [ARENA+0x100+24*k for k in range(8)]
+    boundaries = [0,1,2,255,256,257,0x7ffffffe,0x7fffffff,
+        0x80000000,0x80000001,0xfffffffe,0xffffffff]
+    def sequence(seed, records, requests, first=None, read_limit=None, expected_results=None):
+        state = State(seed)
+        # Random unconsumed pixels/children/previous words remain untouched.
+        for index,(start,end,next_pointer) in enumerate(records):
+            struct.pack_into('<II',state.arena,nodes[index]-ARENA,start&MASK,end&MASK)
+            struct.pack_into('<I',state.arena,nodes[index]-ARENA+20,next_pointer)
+        if first == ARENA+SIZE-4:
+            struct.pack_into('<I',state.arena,SIZE-4,0)
+        sessions = [Session(p,state,o) for p,o in ((original,True),(rebuilt,False))]
+        for index,request in enumerate(requests):
+            state.events,state.fault = [],None
+            head = nodes[0] if first is None else first
+            result = state.gap(request&MASK,head,read_limit)
+            if expected_results is not None:
+                assert result == expected_results[index], (records,request,result,expected_results[index])
+            for session in sessions:
+                session.run(name,(request&MASK,head),[],state,result,seed+index,read_limit=read_limit)
+            coverage['comparisons'] += 1
+            coverage['persistent_followups'] += int(index != 0)
+            coverage['faults'] += int(state.fault is not None and state.fault[0] != 'budget')
+            coverage['cycle_prefixes'] += int(state.fault is not None and state.fault[0] == 'budget')
+            if state.fault is None:
+                category = 'sentinels' if result == MASK else 'exhausted' if result == 0 else 'predecessors'
+                coverage[category] += 1
+            if state.fault is not None:
+                break
+    for request in boundaries:
+        sequence(request,[],[request]*2,first=0,expected_results=[MASK]*2)
+    # Early prefix exits must avoid reading an invalid successor. Other paths fault.
+    for start in boundaries:
+        for request in boundaries:
+            sequence(start^request,[(start,0,0x80000000)],[request]*2)
+    # Fixed 256 tail boundary with raw signed/wrapping endpoint words.
+    for end in boundaries:
+        for request in boundaries:
+            sequence(end^request,[(0x80000000,end,0)],[request]*2)
+    # Every neighboring boundary pair, requests exactly at and around its
+    # wrapping difference; keep arbitrary unsorted and overlapping ranges.
+    for end in boundaries:
+        for successor in boundaries:
+            gap = (successor-end)&MASK
+            for request in ((gap-1)&MASK,gap,(gap+1)&MASK):
+                sequence(end^successor^request,[(0x80000000,end,nodes[1]),
+                    (successor,256,0)],[request]*2)
+    rng = random.Random(0x61870)
+    for seed in range(128):
+        length = rng.randrange(1,9)
+        records = [(rng.getrandbits(32),rng.getrandbits(32),nodes[k+1] if k+1<length else 0)
+            for k in range(length)]
+        requests = [rng.getrandbits(32) for _ in range(2)]
+        sequence(10000+seed,records,requests)
+    # Hand-derived return contracts, including late first-match and exhaustion.
+    for seed in range(16):
+        sequence(20000+seed,[(0,16,nodes[1]),(32,64,nodes[2]),(128,240,0)],
+            [0,16,17,64,65,1],expected_results=[MASK,nodes[0],nodes[1],nodes[1],0,nodes[0]])
+        sequence(21000+seed,[(0xffffffff,0xfffffffe,nodes[0])],[1,0],expected_results=[nodes[0],nodes[0]])
+    for seed in range(16):
+        records = [(32*k,32*(k+1),nodes[k+1] if k<7 else 0) for k in range(8)]
+        records[-1] = (224,255,0)
+        sequence(22000+seed,records,[1,2,1],expected_results=[nodes[7],0,nodes[7]])
+    for bad in (0x80000000,ARENA+SIZE):
+        sequence(30000+bad,[],[1],first=bad)
+    # Mapped start, missing next field; no invented pointer validation.
+    sequence(31000,[(0,0,0)],[1],first=ARENA+SIZE-4)
+    # Nonproductive cycles preserve repeated reads, without returning. Stop
+    # externally after 31 reads, rather than adding a production cycle guard.
+    sequence(32000,[(0,256,nodes[0])],[1],read_limit=31)
+    sequence(32001,[(0,256,nodes[1]),(0,256,nodes[0])],[1],read_limit=31)
+    print('Gap coverage:',coverage,flush=True)
+    return coverage
 
 
 def verify_sprite_packing():
@@ -385,12 +536,19 @@ def verify_sprite_packing():
     counts['Gfx_AddSpritePackingPage'] = page_counts['isolated']+page_counts['real']
     faults['Gfx_AddSpritePackingPage'] = page_counts['faults']
     print('Page coverage:',page_counts,flush=True)
+    gap_counts = verify_gap(original,rebuilt)
+    counts['Gfx_FindSpritePackingGap'] = gap_counts['comparisons']
+    faults['Gfx_FindSpritePackingGap'] = gap_counts['faults']
     for name,data in ROUTINES.items():
         details = {'scope':'Real allocator bodies; modeled CRT malloc; ordered accesses and CRT-entry arena/template/head snapshots; full state/image preservation; return ABI on normal completion; fault kind/address and preceding effects on failure',
             'persistent_repeats':page_counts['persistent_followups'] if name == 'Gfx_AddSpritePackingPage' else (counts[name]-faults[name])//2,'fault_cases':faults[name],
             'limitations':'No native heap/runtime parity, instruction equality, arbitrary reentry or original compiler/link layout; emulated fault comparison is not defined portable C behavior',
             'page_coverage':page_counts if name == 'Gfx_AddSpritePackingPage' else None,
             'compiler':'Provisional Clang/LLD; strict C89 PE32 extracted production bodies'}
+        if name == 'Gfx_FindSpritePackingGap':
+            details.update(scope='Read-only packing gap search; raw-offset signed/wrapping oracle; exact ordered reads, full arena/template/head/image preservation, normal EAX/stack/nonvolatile/DF ABI; unmapped read effects and bounded nonreturning cycle prefixes',
+                persistent_repeats=gap_counts['persistent_followups'],gap_coverage=gap_counts,
+                limitations='Packing callers are statically analyzed only; no instruction equality, original compiler/link layout, native fault/runtime or game parity; cycle prefixes do not prove general liveness')
         for kind in ('compilation','emulation'):
             record_run(data[0],kind,'pass',inputs=INPUTS,artifact=DLL.relative_to(ROOT).as_posix(),
                 cases=counts[name] if kind == 'emulation' else 0,

@@ -123,6 +123,11 @@ void *Gfx_AllocBytes(uint32_t size); /* VA 0x0045F4A0 */
 unsigned char *Gfx_AllocAlignedBytes(uint32_t size, uint32_t alignment); /* VA 0x00461840 */
 /* Incidental EAX: pixel allocation or live head; callers discard it. */
 void *Gfx_AddSpritePackingPage(void); /* VA 0x004617E0 */
+/* Signed request/comparisons with wrapping 32-bit gap subtraction.
+ * Returns (node *)0xFFFFFFFF for empty/prefix space, predecessor for a gap,
+ * or null when exhausted. Does not validate ranges, pointers or cycles. */
+GfxSpritePackingNode *Gfx_FindSpritePackingGap(int32_t size,
+    GfxSpritePackingNode *first); /* VA 0x00461870 */
 int Gfx_InitSpritePackingState(void); /* VA 0x004614D0; EAX=0 */
 /* Returns the unchanged previous argument (incidental original EAX).
  * Current must be writable; exact node aliases retain ordered stores. */

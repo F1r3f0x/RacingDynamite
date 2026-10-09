@@ -1,5 +1,20 @@
 # Enforced agent workflow
 
+## Sprite packing gap search (2026-10-08)
+
+[The bounded gap search](ghidra/windows_gfx_sprite_packing_gap.md), VA 0x00461870 /
+RVA 0x61870, is reconstructed in production C89. Signed prefix/gap comparisons,
+wrapping subtraction, three distinct returns and ordered read-only traversal
+are preserved without invented request/pointer/cycle guards. 1,835 differential
+comparisons per binary include 922 persistent follow-ups, 69 read faults and
+two externally bounded nonreturning cycle prefixes. Both callers are statically
+authenticated only. All prior allocation/page/link/reset/lifecycle/memory/font/
+file/backend coverage remains. Inventory: 1,028 candidates, 41 reconstructed.
+Instruction equality, original compiler/link layout and native graphics/heap/game
+parity remain unverified. Primitive/CRT/callbacks are modeled; packing callers
+and workspace renderers remain unreconstructed. No playable build is certified.
+
+
 ## Sprite packing page allocation (2026-10-08)
 
 [Page allocation](ghidra/windows_gfx_sprite_packing_pages.md), RVA 0x617E0,

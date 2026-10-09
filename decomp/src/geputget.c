@@ -291,6 +291,41 @@ void *Gfx_AddSpritePackingPage(void) {
 }
 
 /*
+ * @original Gfx_FindSpritePackingGap (IGN_WIN.EXE @ 0x00461870, geputget.c)
+ * @fidelity EXACT
+ */
+GfxSpritePackingNode *Gfx_FindSpritePackingGap(int32_t size,
+    GfxSpritePackingNode *first) {
+    const volatile GfxSpritePackingNode *current;
+    GfxSpritePackingNode *next;
+    uint32_t limit;
+    uint32_t gap;
+
+    if (first == 0) {
+        return (GfxSpritePackingNode *)0xFFFFFFFFu;
+    }
+    current = first;
+    if ((int32_t)current->range_start >= size) {
+        return (GfxSpritePackingNode *)0xFFFFFFFFu;
+    }
+    for (;;) {
+        next = current->next;
+        limit = 256u;
+        if (next != 0) {
+            limit = ((const volatile GfxSpritePackingNode *)next)->range_start;
+        }
+        gap = limit - current->range_end;
+        if ((int32_t)gap >= size) {
+            return (GfxSpritePackingNode *)current;
+        }
+        if (next == 0) {
+            return 0;
+        }
+        current = next;
+    }
+}
+
+/*
  * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0, geputget.c)
  * @fidelity EXACT
  */
