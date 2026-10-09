@@ -8,6 +8,7 @@
 
 #include "geputget.h"
 #include <math.h>
+#include <ddraw.h>
 #include <io.h>
 #include <fcntl.h>
 extern int g_MemoryAllocated;
@@ -39,6 +40,125 @@ int Gfx_SelectBackend(int backend) {
     Gfx_InstallSurfaceDispatch();
     Gfx_InstallSpriteDispatch();
     return 1;
+}
+
+volatile GfxSurfaceRecord g_nativePrimarySurface;
+volatile GfxSurfaceRecord g_nativeType1Surfaces[5];
+volatile GfxSurfaceRecord g_nativeType2Surfaces[20];
+
+/*
+ * @original Gfx_InitSurfaceRecords (IGN_WIN.EXE @ 0x00456A40, inferred geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InitSurfaceRecords(void) {
+    volatile GfxSurfaceRecord *record;
+    int index;
+
+    record = &g_nativePrimarySurface;
+    record->active = 0;
+    record->restore_marker = 0;
+    record->opaque_words[0] = 0;
+    record->opaque_words[1] = 0;
+    record->opaque_words[2] = 0;
+    record->opaque_words[3] = 0;
+    record->opaque_words[4] = 0;
+    record->opaque_words[5] = 0;
+    record->opaque_words[6] = 0;
+    record->opaque_words[7] = 0;
+    record->storage_kind = 0;
+    record->surface = 0;
+    for (index = 0; index < 5; index++) {
+        record = &g_nativeType1Surfaces[index];
+        record->active = 0;
+        record->restore_marker = 0;
+        record->opaque_words[0] = 0;
+        record->opaque_words[1] = 0;
+        record->opaque_words[2] = 0;
+        record->opaque_words[3] = 0;
+        record->opaque_words[4] = 0;
+        record->opaque_words[5] = 0;
+        record->opaque_words[6] = 0;
+        record->opaque_words[7] = 0;
+        record->storage_kind = 1;
+        record->surface = 0;
+    }
+    for (index = 0; index < 20; index++) {
+        record = &g_nativeType2Surfaces[index];
+        record->active = 0;
+        record->restore_marker = 0;
+        record->opaque_words[0] = 0;
+        record->opaque_words[1] = 0;
+        record->opaque_words[2] = 0;
+        record->opaque_words[3] = 0;
+        record->opaque_words[4] = 0;
+        record->opaque_words[5] = 0;
+        record->opaque_words[6] = 0;
+        record->opaque_words[7] = 0;
+        record->storage_kind = 2;
+        record->surface = 0;
+    }
+    return 1;
+}
+
+/*
+ * @original Gfx_SurfaceConfigureNative (IGN_WIN.EXE @ 0x0045B730, inferred geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceConfigureNative(unsigned int option0, unsigned int option1,
+        unsigned int option2, unsigned int option3) {
+    (void)option0;
+    (void)option1;
+    (void)option2;
+    (void)option3;
+    return 2;
+}
+
+/*
+ * @original Gfx_SurfaceRestoreNative (IGN_WIN.EXE @ 0x0045C730, inferred geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceRestoreNative(void) {
+    volatile GfxSurfaceRecord *record;
+    LPDIRECTDRAWSURFACE surface;
+    int restored;
+    int index;
+
+    restored = 0;
+    record = &g_nativePrimarySurface;
+    if (record->active == 1) {
+        surface = record->surface;
+        if (surface->lpVtbl->IsLost(surface) == DDERR_SURFACELOST) {
+            restored = 1;
+            surface = record->surface;
+            surface->lpVtbl->Restore(surface);
+            record->restore_marker = 1;
+        }
+    }
+    for (index = 0; index < 5; index++) {
+        record = &g_nativeType1Surfaces[index];
+        if (record->active == 1) {
+            surface = record->surface;
+            if (surface->lpVtbl->IsLost(surface) == DDERR_SURFACELOST) {
+                restored++;
+                surface = record->surface;
+                surface->lpVtbl->Restore(surface);
+                record->restore_marker = 1;
+            }
+        }
+    }
+    for (index = 0; index < 20; index++) {
+        record = &g_nativeType2Surfaces[index];
+        if (record->active == 1) {
+            surface = record->surface;
+            if (surface->lpVtbl->IsLost(surface) == DDERR_SURFACELOST) {
+                restored++;
+                surface = record->surface;
+                surface->lpVtbl->Restore(surface);
+                record->restore_marker = 1;
+            }
+        }
+    }
+    return restored <= 0;
 }
 
 /* Independently recovered Windows dispatch slots; loader-zeroed .data tail. */

@@ -1,5 +1,17 @@
 # Enforced agent workflow
 
+## Surface lifecycle dependencies (2026-10-09)
+
+[Surface lifecycle](ghidra/windows_surface_lifecycle.md) now reconstructs record
+initialization RVA 0x56A40, configure RVA 0x5B730 and restoration RVA 0x5C730.
+The 48-byte record layout and real SDK IsLost/Restore calls are verified; eight
+record words remain opaque. Focused contracts pass 48/48/1,160 comparisons,
+including 108 object/vtable faults, 106 callback mutation calls and persistent
+initialization/restoration. COM replies are modeled in emulation. Native
+DirectDraw/window/game parity, instruction equality and original compiler/link
+layout remain open. Next recover complete Open/Close/Reset and authentic
+WinMain/WndProc dependencies. The focused DLL is not a playable game.
+
 ## Complete primitive initialization (2026-10-09)
 
 [Primitive startup](ghidra/windows_primitive_startup.md) now has all eight real

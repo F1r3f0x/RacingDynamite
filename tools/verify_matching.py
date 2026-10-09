@@ -810,3 +810,6 @@ if __name__ == '__main__':
 
     from verify_primitive_init import verify_primitive_init
     verify_primitive_init()
+
+    from verify_surface_lifecycle import verify_surface_lifecycle
+    verify_surface_lifecycle()

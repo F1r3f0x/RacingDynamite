@@ -26,13 +26,26 @@ int Gfx_SelectBackend(int backend);
 int Gfx_InstallSurfaceDispatch(void); /* VA 0x0045B690 */
 int Gfx_InstallSpriteDispatch(void);  /* VA 0x00456E60 */
 
-/* Windows surface dispatch. Records remain opaque; only consumer ABI is exposed.
+/* Windows surface dispatch. Record fields are recovered per verified consumer.
  * Stub option words retain unknown semantics/signedness. All calls use the x86
  * ordinary C ABI; no-argument RET alone does not distinguish cdecl/stdcall. */
-typedef struct GfxSurfaceRecord GfxSurfaceRecord;
+/* Independently verified 48-byte native record banks. Geometry words remain
+ * opaque until each consumer is authenticated; surface is a real COM object. */
+struct IDirectDrawSurface;
+typedef struct GfxSurfaceRecord {
+    int32_t active;
+    uint32_t restore_marker;
+    uint32_t opaque_words[8];
+    uint32_t storage_kind;
+    struct IDirectDrawSurface *surface;
+} GfxSurfaceRecord;
+extern volatile GfxSurfaceRecord g_nativePrimarySurface; /* VA 0x0050E778 */
+extern volatile GfxSurfaceRecord g_nativeType1Surfaces[5]; /* VA 0x0050E688 */
+extern volatile GfxSurfaceRecord g_nativeType2Surfaces[20]; /* VA 0x0050E7A8 */
+int Gfx_InitSurfaceRecords(void); /* VA 0x00456A40; EAX=1 */
 typedef int (*GfxSurfaceConfigureProc)(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3);
 extern GfxSurfaceConfigureProc volatile g_surfaceConfigure; /* VA 0x0050EB68 */
-int Gfx_SurfaceConfigureNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3); /* VA 0x0045B730; body unreconstructed */
+int Gfx_SurfaceConfigureNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3); /* VA 0x0045B730 */
 typedef int (*GfxSurfaceOpenProc)(void);
 extern GfxSurfaceOpenProc volatile g_surfaceOpen; /* VA 0x0050EB6C */
 int Gfx_SurfaceOpenNative(void); /* VA 0x0045B740; body unreconstructed */
@@ -71,7 +84,7 @@ extern GfxSurfaceSetPaletteProc volatile g_surfaceSetPalette; /* VA 0x0050EB98 *
 int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb); /* VA 0x0045C6D0; body unreconstructed */
 typedef int (*GfxSurfaceRestoreProc)(void);
 extern GfxSurfaceRestoreProc volatile g_surfaceRestore; /* VA 0x0050EB9C */
-int Gfx_SurfaceRestoreNative(void); /* VA 0x0045C730; body unreconstructed */
+int Gfx_SurfaceRestoreNative(void); /* VA 0x0045C730 */
 
 /* Windows sprite dispatch. State remains opaque; descriptor copy footprint is verified.
  * Raw no-op option words retain unknown semantics/signedness. */

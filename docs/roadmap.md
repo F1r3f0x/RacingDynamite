@@ -4,6 +4,18 @@ This document defines the complete engineering roadmap and milestone plan for **
 
 ---
 
+## Surface lifecycle dependencies (2026-10-09)
+
+[Surface lifecycle](ghidra/windows_surface_lifecycle.md) now reconstructs record
+initialization RVA 0x56A40, configure RVA 0x5B730 and restoration RVA 0x5C730.
+The 48-byte record layout and real SDK IsLost/Restore calls are verified; eight
+record words remain opaque. Focused contracts pass 48/48/1,160 comparisons,
+including 108 object/vtable faults, 106 callback mutation calls and persistent
+initialization/restoration. COM replies are modeled in emulation. Native
+DirectDraw/window/game parity, instruction equality and original compiler/link
+layout remain open. Next recover complete Open/Close/Reset and authentic
+WinMain/WndProc dependencies. The focused DLL is not a playable game.
+
 ## Persistent Windows execution roadmap (2026-10-09)
 
 The persistent goal is a playable rebuilt standard Windows game with documented
@@ -22,8 +34,8 @@ and 361 focused comparisons with coherent control and real helpers. Its shared
 control backing also renews default initialization 0x611D0 and descriptor copying
 0x612E0 coverage. HandleOp 0x5C830 now has production C89 and 150 focused comparisons with
 real ImageOp descendants, persistent packed lifecycle and verified static
-freelist/scratch/pool/cursor bindings. Next recover complete primitive startup
-0x5E610 through its original initialization dependencies. Rendering register-ABI blockers remain
+freelist/scratch/pool/cursor bindings. Primitive startup
+0x5E610 now executes its real initialization dependencies. Rendering register-ABI blockers remain
 in windows_triangle.md; pursue unblocked resource/platform work while resolving
 a pure-C integration strategy. Native startup/presentation baseline and executable
 linking, original toolchain evidence, input/audio, menus and race systems remain

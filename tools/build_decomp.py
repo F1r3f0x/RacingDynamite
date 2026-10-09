@@ -28,7 +28,6 @@ STARTUP_BOUNDARY_SOURCE += (
 
 SURFACE_HEADER = _resource_header[_resource_header.index('/* Windows surface dispatch.'):_resource_header.index('#define MAX_FONTS')]
 STARTUP_BOUNDARY_SOURCE += (
-    'int Gfx_SurfaceConfigureNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3) { (void)option0; (void)option1; (void)option2; (void)option3; for (;;) {} }\n'
     'int Gfx_SurfaceOpenNative(void) { for (;;) {} }\n'
     'int Gfx_SurfaceCloseNative(void) { for (;;) {} }\n'
     'int Gfx_SurfaceResetNative(void) { for (;;) {} }\n'
@@ -41,7 +40,6 @@ STARTUP_BOUNDARY_SOURCE += (
     'int Gfx_SurfaceLockNative(GfxSurfaceRecord *surface, int mode) { (void)surface; (void)mode; for (;;) {} }\n'
     'int Gfx_SurfaceUnlockNative(GfxSurfaceRecord *surface) { (void)surface; for (;;) {} }\n'
     'int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb) { (void)rgb; for (;;) {} }\n'
-    'int Gfx_SurfaceRestoreNative(void) { for (;;) {} }\n'
 )
 
 # Extract the native banner body and its existing public prototype verbatim.
@@ -68,6 +66,22 @@ LISA_VERSION_SOURCE += (
     + _resource_source[_resource_source.index('/* Independently recovered Windows dispatch slots;'):
         _resource_source.index('/* Global font table matching')])
 
+_surface_records_start = _resource_source.index('volatile GfxSurfaceRecord g_nativePrimarySurface;')
+_surface_records_end = _resource_source.index('/* Independently recovered Windows dispatch slots;')
+LISA_VERSION_SOURCE += _resource_source[_surface_records_start:_surface_records_end]
+
+# Compile the real COM method calls using the local Win32 SDK declarations.
+_restore_start = _resource_source.index('int Gfx_SurfaceRestoreNative(void)')
+_restore_end = _resource_source.index('\n}', _restore_start) + 2
+RESTORE_BODY = _resource_source[_restore_start:_restore_end]
+LISA_VERSION_SOURCE = LISA_VERSION_SOURCE.replace(RESTORE_BODY, 'int Gfx_SurfaceRestoreNative(void);')
+SURFACE_SOURCE = ('#include <ddraw.h>\n#include <stddef.h>\n#include "geputget.h"\n'
+    'typedef char surface_record_size[(sizeof(GfxSurfaceRecord)==48)?1:-1];\n'
+    'typedef char surface_pointer_offset[(offsetof(GfxSurfaceRecord,surface)==44)?1:-1];\n'
+    'typedef char surface_is_lost_slot[(offsetof(IDirectDrawSurfaceVtbl,IsLost)==0x60)?1:-1];\n'
+    'typedef char surface_restore_slot[(offsetof(IDirectDrawSurfaceVtbl,Restore)==0x6c)?1:-1];\n'
+    + RESTORE_BODY + '\n')
+
 # Standard C89 sin/cast body compiled separately with independently probed x87
 # flags. This provisional GCC/Clang mix does not identify the original compiler.
 _sine_start = _resource_source.index('int32_t Gfx_InitSineTable(void)')
@@ -85,7 +99,8 @@ PRIMITIVE_EXPORTS = ['Gfx_InitPairStorageControl', 'Gfx_InitGraphicsPairStorage'
 SINE_EXPORTS = ['Gfx_InitSineTable', 'g_nativeSineTable', 'g_nativeSineStep',
     'g_nativeSineFullCircle', 'g_nativeSineAmplitude']
 
-SURFACE_EXPORTS = ['g_surfaceConfigure', 'g_surfaceOpen', 'g_surfaceClose', 'g_surfaceReset', 'g_surfaceConfigureSurface', 'g_surfaceBlit', 'g_surfaceCopyPixels', 'g_surfaceClear', 'g_surfacePresent', 'g_surfaceReserved', 'g_surfaceLock', 'g_surfaceUnlock', 'g_surfaceSetPalette', 'g_surfaceRestore', 'Gfx_SurfaceConfigureNative', 'Gfx_SurfaceOpenNative', 'Gfx_SurfaceCloseNative', 'Gfx_SurfaceResetNative', 'Gfx_SurfaceConfigureSurfaceNative', 'Gfx_SurfaceBlitNative', 'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceClearNative', 'Gfx_SurfacePresentNative', 'Gfx_SurfaceReservedNative', 'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative', 'Gfx_SurfaceSetPaletteNative', 'Gfx_SurfaceRestoreNative']
+SURFACE_EXPORTS = ['Gfx_InitSurfaceRecords', 'g_nativePrimarySurface',
+    'g_nativeType1Surfaces', 'g_nativeType2Surfaces', 'g_surfaceConfigure', 'g_surfaceOpen', 'g_surfaceClose', 'g_surfaceReset', 'g_surfaceConfigureSurface', 'g_surfaceBlit', 'g_surfaceCopyPixels', 'g_surfaceClear', 'g_surfacePresent', 'g_surfaceReserved', 'g_surfaceLock', 'g_surfaceUnlock', 'g_surfaceSetPalette', 'g_surfaceRestore', 'Gfx_SurfaceConfigureNative', 'Gfx_SurfaceOpenNative', 'Gfx_SurfaceCloseNative', 'Gfx_SurfaceResetNative', 'Gfx_SurfaceConfigureSurfaceNative', 'Gfx_SurfaceBlitNative', 'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceClearNative', 'Gfx_SurfacePresentNative', 'Gfx_SurfaceReservedNative', 'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative', 'Gfx_SurfaceSetPaletteNative', 'Gfx_SurfaceRestoreNative']
 
 # Validation fixtures live separately from the extracted production installer.
 STARTUP_BOUNDARY_SOURCE += (
@@ -141,6 +156,21 @@ def compile_sine(stem):
     subprocess.run(command, cwd=ROOT, check=True)
     return obj, command
 
+def compile_surface(stem):
+    cc = shutil.which('gcc')
+    if not cc:
+        raise RuntimeError('GCC i386 Win32 SDK compiler required')
+    source, obj = BUILD/(stem+'_surface.c'), BUILD/(stem+'_surface.obj')
+    source.write_text(SURFACE_SOURCE, encoding='utf-8', newline='\n')
+    obj.unlink(missing_ok=True)
+    command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
+        '-Werror', '-O2', '-I', str(ROOT/'decomp/include'),
+        '-c', str(source), '-o', str(obj)]
+    print(subprocess.list2cmdline(command), flush=True)
+    subprocess.run(command, cwd=ROOT, check=True)
+    return obj, command
+
+
 def build(compiler='clang', linker='lld-link', dll=DLL):
     verify_target()
     cc, ld = shutil.which(compiler), shutil.which(linker)
@@ -166,7 +196,8 @@ def build(compiler='clang', linker='lld-link', dll=DLL):
     commands.insert(1, commands[0][:-4] + ['-c', str(stub), '-o', str(stub_obj)])
     banner_obj, _ = compile_banner(commands[0][:-4], dll.stem)
     sine_obj, _ = compile_sine(dll.stem)
-    commands[-1].extend([str(banner_obj), str(sine_obj)])
+    surface_obj, _ = compile_surface(dll.stem)
+    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj)])
     for command in commands:
         print(subprocess.list2cmdline(command), flush=True)
         subprocess.run(command, cwd=ROOT, check=True)
