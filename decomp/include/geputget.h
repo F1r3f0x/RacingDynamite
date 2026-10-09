@@ -207,7 +207,7 @@ extern GfxSpriteDrawProc volatile g_spriteDraw; /* VA 0x0050EBBC */
 int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform); /* VA 0x004571B0; separately reconstructed */
 typedef GfxSpriteHandle *(*GfxSpriteHandleOpProc)(const GfxSpriteDescriptor *descriptor, GfxSpriteHandle *handle);
 extern GfxSpriteHandleOpProc volatile g_spriteHandleOp; /* VA 0x0050EBC0 */
-GfxSpriteHandle *Gfx_SpriteHandleOpNative(const GfxSpriteDescriptor *descriptor, GfxSpriteHandle *handle); /* VA 0x0045C830; body unreconstructed */
+GfxSpriteHandle *Gfx_SpriteHandleOpNative(const GfxSpriteDescriptor *descriptor, GfxSpriteHandle *handle); /* VA 0x0045C830; real ImageOp dependency */
 typedef int (*GfxSpriteImageOpProc)(const GfxSpriteDescriptor *descriptor, int image_id);
 extern GfxSpriteImageOpProc volatile g_spriteImageOp; /* VA 0x0050EBD8 */
 int Gfx_SpriteImageOpNative(const GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x00461360; body unreconstructed */

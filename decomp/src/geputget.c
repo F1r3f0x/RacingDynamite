@@ -413,6 +413,65 @@ GfxSpritePackingBucket *Gfx_AddSpritePackingBucket(int32_t size,
 }
 
 /*
+ * @original Gfx_SpriteHandleOpNative (IGN_WIN.EXE @ 0x0045C830, inferred geputget.c)
+ * @fidelity EXACT
+ */
+GfxSpriteHandle *Gfx_SpriteHandleOpNative(const GfxSpriteDescriptor *descriptor,
+    GfxSpriteHandle *handle) {
+    volatile GfxSpriteHandle *selected;
+    const volatile GfxSpriteDescriptor *source;
+    uint32_t word;
+    uint32_t image_id;
+    uint32_t index;
+    uint32_t cursor;
+    int result;
+
+    selected = handle;
+    if (selected == 0) {
+        if (descriptor == 0) {
+            return 0;
+        }
+        if (g_nativeSpriteFreeCursor == g_nativeSpriteFreeList) {
+            return 0;
+        }
+        cursor = (uint32_t)g_nativeSpriteFreeCursor - 4u;
+        g_nativeSpriteFreeCursor = (GfxSpriteHandle *volatile *)cursor;
+        cursor = (uint32_t)g_nativeSpriteFreeCursor;
+        selected = (volatile GfxSpriteHandle *)*(const volatile uint32_t *)cursor;
+        selected->image_id = 0;
+    } else {
+        image_id = (uint32_t)selected->image_id;
+        if (image_id == 0) {
+            return 0;
+        }
+        if (descriptor == 0) {
+            Gfx_SpriteImageOpNative(0, (int32_t)image_id);
+            selected->image_id = 0;
+            cursor = (uint32_t)g_nativeSpriteFreeCursor;
+            *(volatile uint32_t *)cursor = (uint32_t)selected;
+            g_nativeSpriteFreeCursor = (GfxSpriteHandle *volatile *)
+                ((uint32_t)g_nativeSpriteFreeCursor + 4u);
+            return 0;
+        }
+    }
+    source = descriptor;
+    g_nativeSpriteScratch.words[0] = 0;
+    for (index = 1; index < 6u; index++) {
+        word = source->words[index];
+        g_nativeSpriteScratch.words[index] = word;
+    }
+    image_id = (uint32_t)selected->image_id;
+    result = Gfx_SpriteImageOpNative((const GfxSpriteDescriptor *)&g_nativeSpriteScratch,
+        (int32_t)image_id);
+    selected->image_id = result;
+    word = source->words[6];
+    selected->origin_x = (int32_t)word;
+    word = source->words[7];
+    selected->origin_y = (int32_t)word;
+    return (GfxSpriteHandle *)selected;
+}
+
+/*
  * @original Gfx_SpriteImageOpNative (IGN_WIN.EXE @ 0x00461360, inferred geputget.c)
  * @fidelity EXACT
  */

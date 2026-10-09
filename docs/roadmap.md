@@ -20,8 +20,10 @@ a documented Unicorn cross-page store limitation. Pointer-table growth
 controls verified statically. Complete ImageOp 0x61360 now has production C89
 and 361 focused comparisons with coherent control and real helpers. Its shared
 control backing also renews default initialization 0x611D0 and descriptor copying
-0x612E0 coverage. Next authenticate native handle-operation 0x5C830 and its
-verified caller/dependency graph. Rendering register-ABI blockers remain
+0x612E0 coverage. HandleOp 0x5C830 now has production C89 and 150 focused comparisons with
+real ImageOp descendants, persistent packed lifecycle and verified static
+freelist/scratch/pool/cursor bindings. Next recover complete primitive startup
+0x5E610 through its original initialization dependencies. Rendering register-ABI blockers remain
 in windows_triangle.md; pursue unblocked resource/platform work while resolving
 a pure-C integration strategy. Native startup/presentation baseline and executable
 linking, original toolchain evidence, input/audio, menus and race systems remain

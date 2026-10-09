@@ -80,7 +80,6 @@ STARTUP_BOUNDARY_SOURCE += (
     'int Gfx_SpriteSetClipNative(int left, int top, int right, int bottom) { (void)left; (void)top; (void)right; (void)bottom; for (;;) {} }\n'
     'int Gfx_SpriteDrawListNative(const unsigned int *list) { (void)list; for (;;) {} }\n'
     'int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform) { (void)handle; (void)position; (void)transform; for (;;) {} }\n'
-    'GfxSpriteHandle *Gfx_SpriteHandleOpNative(const GfxSpriteDescriptor *descriptor, GfxSpriteHandle *handle) { (void)descriptor; (void)handle; for (;;) {} }\n'
     'int Gfx_SpriteCreateDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id) { (void)descriptor; (void)image_id; for (;;) {} }\n'
     'int Gfx_SpriteFreeDescriptorNative(GfxSpriteDescriptor *descriptor) { (void)descriptor; for (;;) {} }\n'
     'int Gfx_SpriteCopyDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id) { (void)descriptor; (void)image_id; for (;;) {} }\n'

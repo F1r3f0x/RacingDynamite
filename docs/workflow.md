@@ -1,5 +1,20 @@
 # Enforced agent workflow
 
+## Complete native sprite handle operation (2026-10-09)
+
+[HandleOp](ghidra/windows_gfx_handleop.md), VA 0x0045C830 / RVA 0x5C830, now
+executes production C89 with real ImageOp and all resource descendants. Its
+150 comparisons include 75 persistent follow-ups, 15 packed calls, six aliases,
+four CRT mutations and 14 faults. The full workflow renews all 51 reconstructed
+routines among 1,028 candidates. Static freelist/pool/scratch/cursor bindings,
+retained scratch tails and live origins after child calls are checked. Only CRT
+heap boundaries are modeled in this focused contract. Next recover complete
+primitive startup RVA 0x5E610 through its verified initialization dependency graph.
+Native startup/menus/render/input/audio/races, original compiler/link layout,
+instruction equality, arbitrary reentry and native fault frames/atomicity remain
+open. This focused DLL is not a playable game. Earlier entries are historical.
+
+
 ## Complete native image operation (2026-10-09)
 
 [ImageOp](ghidra/windows_gfx_imageop.md), VA 0x00461360 / RVA 0x61360, now
