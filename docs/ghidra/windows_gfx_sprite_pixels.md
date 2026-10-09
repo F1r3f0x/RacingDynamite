@@ -2,7 +2,9 @@
 
 Production reconstruction, 2026-10-09. This supersedes only the pixel-leaf
 analysis-only limitation in [storage analysis](windows_gfx_sprite_packing_storage.md).
-Storage RVA 0x61530 remains analyzed and unreconstructed.
+Storage RVA 0x61530 is now reconstructed and differentially validated; see
+[the storage feature](windows_gfx_sprite_packing_storage.md). Earlier leaf-only
+coverage and limitations below describe this preceding feature.
 
 Authentic input: Ignition/Ignition/IGN_WIN.EXE, 915,968 bytes, SHA-256
 7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782,

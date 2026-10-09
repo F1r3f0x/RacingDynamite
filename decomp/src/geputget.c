@@ -427,6 +427,113 @@ const GfxSpriteDescriptor *Gfx_CopySpriteDescriptorPixels(
 }
 
 /*
+ * @original Gfx_AssignSpritePackingStorage (IGN_WIN.EXE @ 0x00461530, geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_AssignSpritePackingStorage(GfxSpriteDescriptor *descriptor) {
+    volatile GfxSpritePixelView *view;
+    volatile GfxSpritePackingBucket *bucket;
+    volatile GfxSpritePackingNode *container;
+    volatile GfxSpritePackingNode *previous;
+    volatile GfxSpritePackingNode *node;
+    GfxSpritePackingNode *next;
+    GfxSpritePackingNode *page;
+    volatile GfxSpriteDescriptor snapshot;
+    int32_t height;
+    /* Keep the live width load before children and call-argument evaluation. */
+    volatile int32_t width;
+    uint32_t pixels;
+    uint32_t start;
+    uint32_t end;
+    int word;
+
+    view = (volatile GfxSpritePixelView *)descriptor;
+    if (view->height <= 0) {
+        return;
+    }
+    for (;;) {
+        height = view->height;
+        if (height > 256) {
+            return;
+        }
+        width = view->width;
+        if (width <= 0 || width > 256) {
+            return;
+        }
+        bucket = g_spritePackingBuckets[height];
+        if (bucket == 0) {
+            /* Initially empty slots consume the already loaded height. */
+            page = g_spritePackingPages;
+        } else {
+            for (;;) {
+                container = bucket->node;
+                width = view->width;
+                next = container->children;
+                previous = Gfx_FindSpritePackingGap(width, next);
+                if (previous != 0) {
+                    break;
+                }
+                bucket = bucket->next;
+                if (bucket == 0) {
+                    break;
+                }
+            }
+            if (bucket != 0) {
+                break;
+            }
+            /* Exhaustion reads page head before a fresh descriptor height. */
+            page = g_spritePackingPages;
+            height = view->height;
+        }
+        Gfx_AddSpritePackingBucket(height, page);
+        if (view->height <= 0) {
+            return;
+        }
+    }
+    node = (GfxSpritePackingNode *)Gfx_AllocBytes(24u);
+    node->range_start = g_spritePackingTemplate.range_start;
+    node->range_end = g_spritePackingTemplate.range_end;
+    node->pixels = g_spritePackingTemplate.pixels;
+    node->children = g_spritePackingTemplate.children;
+    node->previous = g_spritePackingTemplate.previous;
+    node->next = g_spritePackingTemplate.next;
+    if (previous == (GfxSpritePackingNode *)0xFFFFFFFFu) {
+        node->range_end = (uint32_t)view->width;
+        pixels = (uint32_t)container->pixels;
+        start = node->range_start;
+        node->pixels = (unsigned char *)(pixels + start);
+        next = container->children;
+        node->next = next;
+        if (next != 0) {
+            ((volatile GfxSpritePackingNode *)next)->previous =
+                (GfxSpritePackingNode *)node;
+        }
+        container->children = (GfxSpritePackingNode *)node;
+    } else {
+        node->range_start = previous->range_end;
+        width = view->width;
+        end = previous->range_end;
+        node->range_end = (uint32_t)width + end;
+        pixels = (uint32_t)container->pixels;
+        start = node->range_start;
+        node->pixels = (unsigned char *)(pixels + start);
+        next = previous->next;
+        Gfx_LinkSpritePackingNode((GfxSpritePackingNode *)previous,
+            (GfxSpritePackingNode *)node, next);
+    }
+    /* Snapshot after linking, before either descriptor pixel-field rewrite. */
+    for (word = 0; word < 16; ++word) {
+        snapshot.words[word] =
+            ((const volatile GfxSpriteDescriptor *)descriptor)->words[word];
+    }
+    pixels = (uint32_t)node->pixels;
+    view->pixels = pixels;
+    view->stride = 256u;
+    Gfx_CopySpriteDescriptorPixels((const GfxSpriteDescriptor *)&snapshot,
+        descriptor);
+}
+
+/*
  * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0, geputget.c)
  * @fidelity EXACT
  */

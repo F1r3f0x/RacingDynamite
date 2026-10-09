@@ -1,5 +1,19 @@
 # Enforced agent workflow
 
+## Sprite storage assignment (2026-10-09)
+
+[Storage assignment](ghidra/windows_gfx_sprite_packing_storage.md), RVA 0x61530,
+now executes production C89 with real packing/allocation/pixel dependencies.
+960 differential comparisons per binary include 424 persistent follow-ups,
+28 faults and two bounded cycle prefixes. Full completion renews all 44
+reconstructed routines among 1,028 candidates and retains prior coverage.
+Use `workflow.py complete --rva 0x61530` with explicit limitations, check LF
+working/index input bytes, synchronize exports and pass staged gate/hooks.
+Compilation and emulation are separate; instruction equality, original compiler/
+link layout, whole ImageOp integration and native graphics/heap/game/fault parity
+remain unverified. CRT/primitive/callbacks remain modeled; ImageOp/release/
+renderers remain unreconstructed. Earlier milestone entries below are historical.
+
 ## Sprite descriptor pixel leaf (2026-10-09)
 
 [Pixel copying](ghidra/windows_gfx_sprite_pixels.md), VA 0x004612A0 / RVA

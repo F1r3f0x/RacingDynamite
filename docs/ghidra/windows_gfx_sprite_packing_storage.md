@@ -1,7 +1,9 @@
 # Windows sprite storage assignment and pixel-copy boundary
 
-Analysis feature, 2026-10-09. Neither routine below has production C or new
-compilation/differential records. Authentic input: Ignition/Ignition/IGN_WIN.EXE,
+Original analysis and production reconstruction, 2026-10-09. Both routines
+now have production C89 and independent differential contracts; the pixel leaf
+was completed in the preceding feature. Historical original-only analysis below
+remains explicitly distinct from current compiled-C evidence. Authentic input: Ignition/Ignition/IGN_WIN.EXE,
 915,968 bytes, SHA-256
 7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782,
 PE32 i386, preferred image base VA 0x00400000. The target doctor authenticates
@@ -46,16 +48,16 @@ Storage has no meaningful uniform EAX result. On initial height rejection,
 EAX is untouched; width rejection leaves the loaded width in EAX. A stop
 immediately after bucket creation retains bucket EAX. Successful pixel copy
 leaves EAX equal to the local snapshot address because the leaf retains its
-first argument. The sole caller discards every form. A future void storage
-prototype should exclude EAX from differential return comparisons, rather
-than inventing a success code or preserving a compiler-dependent local address.
+first argument. The sole caller discards every form. The production void storage
+prototype excludes EAX from differential return comparisons, without inventing
+a success code or preserving a compiler-dependent local address.
 Normal returns preserve caller stack/nonvolatile registers and clear DF.
 
 ## Descriptor and packing views
 
 The descriptor is the existing verified sixteen-dword, 64-byte copy footprint.
 This feature independently establishes the following consumed prefix; it does
-not claim a complete semantic layout or change production declarations:
+not claim a complete semantic layout. Production uses GfxSpritePixelView:
 
 | Byte offset | Observed use |
 | --- | --- |
@@ -191,12 +193,13 @@ fault at the ordered attempted access. A bad source pixel pointer faults only
 after insertion, snapshot, descriptor rewrites and entry to the pixel leaf.
 There is no rollback, leak correction or clean null result.
 
-Exact node/container/predecessor/descriptor aliases are consequences of the
-ordered accesses above; they are statically recovered here, not exhaustively
-executed. Template/global-storage/caller-stack aliases, partial overlaps,
+Exact node/container/predecessor/descriptor aliases follow the ordered
+accesses above. The production verifier executes selected exact and partial
+arena aliases; exhaustive combinations remain unverified. Template/global-storage/caller-stack aliases, partial overlaps,
 fault-time register/stack frames, general reentry/concurrency and native heap
 exceptions are not certified. Storage and dependency list cycles can fail to
-terminate; this feature adds no execution evidence for cycle prefixes.
+terminate. The original analysis added no execution evidence for cycle prefixes;
+production validation below adds two externally bounded prefixes.
 
 ## Original-only probes and completion scope
 
@@ -231,26 +234,86 @@ expectations above are the committed evidence. No new verification_runs are
 created for either analyzed RVA. Future reconstruction must extend the real
 verifier with reproducible differential contracts and independent expectations.
 
-PowerShell uses UV_CACHE_DIR=build/uv-cache and UV_OFFLINE=1. Completion:
-`uv run python tools/workflow.py complete --analysis-only --rva 0x61530 --rva 0x612A0 --limitation "Storage and pixel leaf analyzed only; original-only probes with modeled malloc; no new compilation/differential evidence or native graphics/heap/game parity"`.
-Then review the explicit feature files, verify recorded LF working/index inputs,
-run the staged gate and tracked hooks, and commit the synchronized exports.
+## Production reconstruction and differential completion (2026-10-09)
 
-Inventory remains 1,028 candidates and 42 reconstructed routines. All retained
-reconstruction inputs and artifacts are audited for freshness; no shared source,
-builder or verifier changes require rerunning their suites for this analysis.
-Retained counts include bucket 2,734 (1,140 persistent, 127 faults, two cycle
-prefixes), page 1,574 (816 persistent, 134 real-dependency, six faults), wrapper/
-aligned 48/512, gap 1,835, link 864, reset 810, default 280, descriptor helper
-486, handles 48, each workspace 167, installers 306/266, selector 532, banner/
-input 306/266, startup/shutdown 112/519, 18 integrated startups and ten persistent
-lifecycle calls; memory/font/file/backend coverage is unchanged. These counts
-are retained evidence, not freshly rerun cases in this analysis feature.
+Fresh localhost:8080 disassembly/decompilation/xrefs for storage, its sole caller
+and all seven dependencies agree with independent local decoding. FPO, all
+350 bytes/hash, both RETs/padding, five HIGHLOW operands, loader-zeroed .data virtual-tail
+template/head/table locations, caller hash/argument cleanup and ownership effects
+are reauthenticated. Active authentic Ghidra selection remains a user-provided
+assumption. The original compiler/link configuration remains unknown.
 
-Next production feature: reconstruct the 61-byte pixel leaf with live bounds,
-ordered byte/stride accesses, wrapping pointers, overlap and fault cases; then
-reconstruct storage using its real body and all real packing dependencies.
-Instruction equality, original compiler/link layout, native graphics/heap/game
-parity and playable rebuilding remain unverified. Release RVA 0x618B0, workspace
-renderers and real primitive startup remain unreconstructed; CRT and callbacks
-retain their modeled boundaries.
+Production geputget.c now implements Gfx_AssignSpritePackingStorage as void:
+incidental EAX is unspecified and the caller discards it. Semantic prefix fields,
+volatile node/view/template accesses and a volatile width local preserve ordered
+loads/stores. The width local is required with the provisional Clang compiler:
+without it, call-argument folding moved the width load after children. The
+independent ordered-access verifier detects that divergence. Six ascending
+alternating template reads/stores, cached/live height paths, wrapping horizontal
+pixel arithmetic, real gap/link/bucket/page/allocation dependencies, all sixteen
+snapshot values and the real pixel-copy body are retained. No allocation, pointer,
+cycle, ownership or rollback guard, source free or success stub was added.
+The existing focused builder extracts this production body and exports it.
+Strict C89 PE32 uses Clang/LLD, -O2, no builtin/inlining/unrolling/vectorization/SSE;
+this is behavioral validation, not recovery of original code generation.
+
+Run `uv run python tools/verify_sprite_storage.py`. Its raw-offset oracle derives
+storage expectations from authentic instructions, reusing independently recovered
+dependency oracles from verify_sprite_packing.py. Both x86 images execute every
+real dependency; only CRT malloc is intercepted with explicit result/mutation
+schedules and volatile-register clobbering. Check complete arena/low/high/global
+bytes, ordered external reads/writes, dependency arguments and entry snapshots,
+sixteen local snapshot values at real pixel entry, unchanged unrelated image
+and caller-stack bytes, and normal cdecl stack/nonvolatile/clear-DF ABI. Local
+stack placement and EAX are compiler dependent and deliberately not compared.
+
+**960 comparisons per binary** include **424 persistent follow-ups**, **28
+faults**, **31 alias calls**, **four wrapping calls**, **six read-mutation calls**
+and **two externally bounded cycle prefixes**. All admitted height indexes 1..256,
+signed rejection, four 1/256 corners, prefix/interior/tail/later-bucket paths,
+real page creation, empty/exhausted cached/live heights, post-allocation changes,
+retry exits, exact/partial arena aliases, descriptor-as-container/predecessor,
+snapshot timing, real forward-overlap propagation and wrapping interval/pixel
+addition are covered. Faults include unmapped null allocation, partial nodes/
+descriptors, bucket/container/child reads, prefix repair/link writes, real page/
+bucket allocations and first/later pixel accesses. Prior insertion and descriptor
+rewrites survive final copy faults. Mapped zero-page probes are separate from
+unmapped null faults. Observer read mutations are applied after the accessing
+instruction; they are explicit deterministic schedules, not native concurrency
+or reentry claims. Negative second-read heights addressing outside the verified
+table remain excluded without introducing a production guard.
+
+Real dependency entries per binary in this suite: bucket 23, page 12, gap 909,
+link 458, wrapper 932, aligned allocation 11 and pixel leaf 860. These are added
+storage integrations; standalone dependency counts below are unchanged.
+
+Full completion: `uv run python tools/workflow.py complete --rva 0x61530
+--limitation "Storage differential validation; ImageOp/release/renderers unreconstructed;
+CRT/primitive/callbacks modeled; no instruction equality, original compiler/link layout
+or native graphics/heap/game/fault parity"`. It renews all **44 reconstructed
+routines among 1,028 candidates**, audits provenance and synchronizes exports.
+LF working text inputs are checked before verification and compared with index
+blobs after staging. Tracked hooks and the staged gate remain required.
+
+Retained coverage: pixel leaf 659 (376 persistent, 14 faults); bucket 2,734
+(1,140 persistent, 127 faults, two cycle prefixes); page 1,574 (816 persistent,
+134 real-dependency cases, six faults); wrapper/aligned 48/512 (24/252 repeats,
+eight aligned faults); gap 1,835 (922 persistent, 69 faults, two cycle prefixes);
+link 864 (464 persistent); reset 810 (405 repeats, 922 real bodies); default 280
+(132 repeats, 392 real bodies); descriptor helper 486 (1,156 real bodies);
+handles 48 (654 real bodies); each workspace 167 (83 repeats, 757 real bodies);
+installers 306/266; selector 532; banner/input 306/266; startup/shutdown 112/519;
+18 integrated startups and ten persistent lifecycle calls; original-only consumer
+ABI 48/39; downstream/default contracts 43/16; all memory/font/file/backend suites.
+The primitive driver executes real default initialization then real reset in all
+112 startups, not real RVA 0x5E610. Remaining primitive effects/CRT/callbacks
+remain modeled.
+
+Compilation and differential emulation pass separately. Instruction equality,
+original compiler/link layout, whole ImageOp integration and native graphics/
+heap/game/fault parity remain unverified; no playable rebuilt game is certified.
+Template/global/caller-stack pointer aliases, exhaustive partial overlap,
+out-of-table negative retry heights, arbitrary reentry/concurrency and portable
+unchecked-fault guarantees remain outside this bounded validation. Release RVA
+0x618B0 and workspace renderers remain unreconstructed; the sole ImageOp caller
+RVA 0x61360 is authenticated statically only.

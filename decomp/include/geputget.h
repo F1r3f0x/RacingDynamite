@@ -107,6 +107,9 @@ typedef struct GfxSpritePixelView {
 const GfxSpriteDescriptor *Gfx_CopySpriteDescriptorPixels(
     const GfxSpriteDescriptor *source, const GfxSpriteDescriptor *destination); /* VA 0x004612A0 */
 
+/* Incidental, path-dependent EAX is discarded by the image-operation caller. */
+void Gfx_AssignSpritePackingStorage(GfxSpriteDescriptor *descriptor); /* VA 0x00461530 */
+
 #define GFX_SPRITE_HANDLE_COUNT 2000
 extern GfxSpriteHandle *volatile g_nativeSpriteFreeList[GFX_SPRITE_HANDLE_COUNT]; /* VA 0x00512C58 */
 extern volatile GfxSpriteHandle g_nativeSpriteHandles[GFX_SPRITE_HANDLE_COUNT]; /* VA 0x00514BD8 */

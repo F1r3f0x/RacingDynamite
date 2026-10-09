@@ -216,11 +216,12 @@ def verify():
         'Mem_InitSystem', 'Mem_ShutdownSystem', 'Lisa_PrintVersion',
         'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
         'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
-        'Gfx_CopySpriteDescriptorPixels', 'Gfx_AddSpritePackingBucket', 'Gfx_FindSpritePackingGap', 'Gfx_AddSpritePackingPage', 'Gfx_AllocBytes', 'Gfx_AllocAlignedBytes', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'Gfx_InitDefaultSpriteDescriptor', 'Gfx_InitSpritePackingState', 'Gfx_LinkSpritePackingNode',
+        'Gfx_AssignSpritePackingStorage', 'Gfx_CopySpriteDescriptorPixels', 'Gfx_AddSpritePackingBucket', 'Gfx_FindSpritePackingGap', 'Gfx_AddSpritePackingPage', 'Gfx_AllocBytes', 'Gfx_AllocAlignedBytes', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'Gfx_InitDefaultSpriteDescriptor', 'Gfx_InitSpritePackingState', 'Gfx_LinkSpritePackingNode',
         'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
     expected_calls = {
+        'Gfx_AssignSpritePackingStorage': ['Gfx_FindSpritePackingGap','Gfx_AddSpritePackingBucket','Gfx_AllocBytes','Gfx_LinkSpritePackingNode','Gfx_CopySpriteDescriptorPixels'],
         'Gfx_AddSpritePackingBucket': ['Gfx_AddSpritePackingPage','Gfx_FindSpritePackingGap','Gfx_AllocBytes','Gfx_LinkSpritePackingNode','Gfx_AllocBytes'],
         'Gfx_AddSpritePackingPage': ['Gfx_AllocBytes','Gfx_AllocAlignedBytes'],
         'Gfx_AllocAlignedBytes': ['Gfx_AllocBytes'],
@@ -771,3 +772,6 @@ if __name__ == '__main__':
 
     from verify_sprite_pixels import verify_sprite_pixels
     verify_sprite_pixels()
+
+    from verify_sprite_storage import verify_sprite_storage
+    verify_sprite_storage()
