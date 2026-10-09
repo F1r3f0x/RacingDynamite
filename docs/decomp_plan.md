@@ -1,5 +1,20 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Storage assignment and pixel-copy analysis (2026-10-09)
+
+[Complete bounded contracts](ghidra/windows_gfx_sprite_packing_storage.md) for
+storage RVA 0x61530 (350 bytes) and its pixel-copy leaf RVA 0x612A0 (61 bytes)
+are independently authenticated with local FPO/hashes, full instructions,
+relocations, Ghidra and callers. Thirty-two original-only hand-derived probes
+corroborate insertion, live allocator mutations, bucket retry exits, snapshot/
+pixel rewrites, forward overlap and faults; CRT malloc is modeled. Both stay
+analysis-only with no new compilation/differential records. Next reconstruct
+the pixel leaf, then storage with all real dependencies. Existing 42
+reconstructed routines among 1,028 candidates retain current recorded evidence;
+no source/verifier inputs changed or suites rerun for this analysis. Instruction
+equality, original compiler/link layout and native parity remain unverified.
+No playable rebuilt executable is certified. Earlier entries are historical.
+
 ## Sprite packing bucket insertion (2026-10-09)
 
 [Bucket insertion](ghidra/windows_gfx_sprite_packing_buckets.md), VA 0x004616C0 /

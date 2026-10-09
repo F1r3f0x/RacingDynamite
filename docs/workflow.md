@@ -1,5 +1,18 @@
 # Enforced agent workflow
 
+## Storage assignment analysis completion (2026-10-09)
+
+[Storage and pixel-leaf contracts](ghidra/windows_gfx_sprite_packing_storage.md)
+at RVAs 0x61530/0x612A0 are analyzed only. Thirty-two original-only probes
+corroborate hand-derived expectations with modeled CRT malloc; they create no
+compilation/differential records. Complete with `workflow.py complete
+--analysis-only --rva 0x61530 --rva 0x612A0` and an explicit limitation.
+Audit retained input/artifact freshness, synchronize exports, verify LF
+working/index input hashes and pass the staged gate/hooks. Shared production
+source, builder and verifiers remain unchanged; their 42 reconstructed routine
+records are retained, not newly rerun. Production reconstruction must add real
+pixel-leaf and storage differential contracts before ordinary completion.
+
 ## Sprite packing bucket insertion (2026-10-09)
 
 [Bucket insertion](ghidra/windows_gfx_sprite_packing_buckets.md), VA 0x004616C0 /
