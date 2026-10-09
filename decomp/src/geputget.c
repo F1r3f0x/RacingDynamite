@@ -415,6 +415,127 @@ GfxSpritePackingBucket *Gfx_AddSpritePackingBucket(int32_t size,
 }
 
 /*
+ * @original Gfx_ReleaseSpritePackingStorage (IGN_WIN.EXE @ 0x004618B0, geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_ReleaseSpritePackingStorage(GfxSpriteDescriptor *descriptor) {
+    const volatile GfxSpritePixelView *view;
+    volatile GfxSpritePackingNode *page;
+    volatile GfxSpritePackingNode *container;
+    volatile GfxSpritePackingNode *leaf;
+    volatile GfxSpritePackingBucket *bucket;
+    volatile GfxSpritePackingBucket *previous_bucket;
+    GfxSpritePackingNode *previous;
+    GfxSpritePackingNode *next;
+    GfxSpritePackingBucket *next_bucket;
+    GfxSpritePackingBucket *volatile *slot;
+    int32_t height;
+    int32_t width;
+    uint32_t pixels;
+
+    view = (const volatile GfxSpritePixelView *)descriptor;
+    height = view->height;
+    if (height <= 0 || height > 256) {
+        return;
+    }
+    width = view->width;
+    if (width <= 0 || width > 256) {
+        return;
+    }
+    page = g_spritePackingPages;
+    pixels = view->pixels;
+    while (page != 0) {
+        if ((uint32_t)page->pixels == (pixels & 0xFFFF0000u)) {
+            break;
+        }
+        page = page->next;
+    }
+    if (page == 0) {
+        return;
+    }
+    container = page->children;
+    while ((uint32_t)container->pixels != (pixels & 0xFFFFFF00u)) {
+        container = container->next;
+        if (container == 0) {
+            return;
+        }
+    }
+    leaf = container->children;
+    while ((uint32_t)leaf->pixels != pixels) {
+        leaf = leaf->next;
+        if (leaf == 0) {
+            return;
+        }
+    }
+    previous_bucket = 0;
+    bucket = g_spritePackingBuckets[height];
+    while (bucket->node != (GfxSpritePackingNode *)container) {
+        previous_bucket = bucket;
+        bucket = bucket->next;
+        if (bucket == 0) {
+            return;
+        }
+    }
+    next = leaf->next;
+    if (next == 0 && leaf->previous == 0) {
+        next = container->next;
+        if (next == 0 && container->previous == 0) {
+            Gfx_FreeAlignedBytes(page->pixels);
+            previous = page->previous;
+            next = page->next;
+            if (previous != 0) {
+                ((volatile GfxSpritePackingNode *)previous)->next = next;
+            } else {
+                g_spritePackingPages = next;
+            }
+            next = page->next;
+            if (next != 0) {
+                previous = page->previous;
+                ((volatile GfxSpritePackingNode *)next)->previous = previous;
+            }
+            Gfx_FreeBytes((GfxSpritePackingNode *)page);
+        } else {
+            previous = container->previous;
+            if (previous != 0) {
+                ((volatile GfxSpritePackingNode *)previous)->next = next;
+            } else {
+                page->children = next;
+            }
+            next = container->next;
+            if (next != 0) {
+                previous = container->previous;
+                ((volatile GfxSpritePackingNode *)next)->previous = previous;
+            }
+        }
+        next_bucket = bucket->next;
+        if (previous_bucket != 0) {
+            previous_bucket->next = next_bucket;
+        } else {
+            height = view->height;
+            slot = (GfxSpritePackingBucket *volatile *)
+                ((uint32_t)g_spritePackingBuckets + ((uint32_t)height << 2));
+            *slot = next_bucket;
+        }
+        Gfx_FreeBytes((GfxSpritePackingBucket *)bucket);
+        Gfx_FreeBytes((GfxSpritePackingNode *)container);
+    } else {
+        previous = leaf->previous;
+        if (previous != 0) {
+            ((volatile GfxSpritePackingNode *)previous)->next = next;
+        } else {
+            container->children = next;
+        }
+        next = leaf->next;
+        if (next != 0) {
+            previous = leaf->previous;
+            ((volatile GfxSpritePackingNode *)next)->previous = previous;
+        }
+    }
+    Gfx_FreeBytes((GfxSpritePackingNode *)leaf);
+}
+
+
+/*
  * @original Gfx_CopySpriteDescriptorPixels (IGN_WIN.EXE @ 0x004612A0, geputget.c)
  * @fidelity EXACT
  */

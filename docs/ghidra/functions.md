@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:6e7c3321c936925a6ce6ce02ed0b112bb033b7252992cc6fc58ff71d6662dde0 -->
+<!-- snapshot:d738c5aeeba23e2a968409daef01bca2ca0655b03714434cd132a25ccd7bba6c -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -656,7 +656,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x004617E0` | `0x000617E0` | 85 | `Gfx_AddSpritePackingPage` | game | reconstructed | [windows_gfx_sprite_packing_pages.md](windows_gfx_sprite_packing_pages.md) |
 | `0x00461840` | `0x00061840` | 47 | `Gfx_AllocAlignedBytes` | game | reconstructed | [windows_gfx_alloc_aligned.md](windows_gfx_alloc_aligned.md) |
 | `0x00461870` | `0x00061870` | 62 | `Gfx_FindSpritePackingGap` | game | reconstructed | [windows_gfx_sprite_packing_gap.md](windows_gfx_sprite_packing_gap.md) |
-| `0x004618B0` | `0x000618B0` | 419 | `Gfx_ReleaseSpritePackingStorage` | game | analyzed | [windows_gfx_sprite_packing_reset.md](windows_gfx_sprite_packing_reset.md) |
+| `0x004618B0` | `0x000618B0` | 419 | `Gfx_ReleaseSpritePackingStorage` | game | reconstructed | [windows_gfx_sprite_packing_release.md](windows_gfx_sprite_packing_release.md) |
 | `0x00461A60` | `0x00061A60` | 17 | `Gfx_FreeAlignedBytes` | game | reconstructed | [windows_gfx_free.md](windows_gfx_free.md) |
 | `0x00461A80` | `0x00061A80` | 3 | `Gfx_SpriteReservedNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
 | `0x00461A90` | `0x00061A90` | 260 | `sub_00461A90` | unknown | unidentified | - |

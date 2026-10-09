@@ -1,5 +1,19 @@
 # Enforced agent workflow
 
+## Sprite packing storage release (2026-10-09)
+
+[Storage release](ghidra/windows_gfx_sprite_packing_release.md), VA 0x004618B0 /
+RVA 0x618B0, now executes production C89 with real aligned/byte free helpers.
+1,267 differential comparisons per binary include 603 persistent follow-ups,
+24 faults, 74 alias calls, 35 CRT mutation calls and four bounded cycle prefixes.
+Full completion renews all 47 reconstructed routines among 1,028 candidates and
+retains prior coverage. Next authenticate ImageOp RVA 0x61360's name-copy/table-
+growth dependencies, then reconstruct the complete native image operation.
+CRT/primitive/callbacks remain modeled; instruction equality, original compiler/
+link layout and native heap/graphics/game/fault parity remain unverified.
+No playable rebuilt executable is certified. Earlier entries are historical.
+
+
 ## Graphics free dependencies (2026-10-09)
 
 [Byte/aligned free](ghidra/windows_gfx_free.md), RVAs 0x5F8B0/0x61A60,

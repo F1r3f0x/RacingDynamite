@@ -13,9 +13,9 @@ The clean starting checkout was 169c493; local target fingerprint and live Ghidr
 reachability pass. Active program selection is a user-provided assumption.
 
 Current dependency path: pixel leaf 0x612A0 and storage 0x61530 are reconstructed;
-byte/aligned free 0x5F8B0/0x61A60 add real release dependencies. Next reconstruct
-packing release 0x618B0, then recover remaining ImageOp 0x61360 dependencies
-before implementing the whole operation. Rendering register-ABI blockers remain
+byte/aligned free 0x5F8B0/0x61A60 add real release dependencies. Packing release 0x618B0 now has production C89 and 1,267 focused comparisons
+with real free dependencies. Next authenticate ImageOp 0x61360 name-copy and
+image-table-growth dependencies before implementing the whole operation. Rendering register-ABI blockers remain
 in windows_triangle.md; pursue unblocked resource/platform work while resolving
 a pure-C integration strategy. Native startup/presentation baseline and executable
 linking, original toolchain evidence, input/audio, menus and race systems remain

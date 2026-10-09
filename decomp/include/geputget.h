@@ -109,6 +109,7 @@ const GfxSpriteDescriptor *Gfx_CopySpriteDescriptorPixels(
 
 /* Incidental, path-dependent EAX is discarded by the image-operation caller. */
 void Gfx_AssignSpritePackingStorage(GfxSpriteDescriptor *descriptor); /* VA 0x00461530 */
+void Gfx_ReleaseSpritePackingStorage(GfxSpriteDescriptor *descriptor); /* VA 0x004618B0; EAX discarded */
 
 #define GFX_SPRITE_HANDLE_COUNT 2000
 extern GfxSpriteHandle *volatile g_nativeSpriteFreeList[GFX_SPRITE_HANDLE_COUNT]; /* VA 0x00512C58 */
