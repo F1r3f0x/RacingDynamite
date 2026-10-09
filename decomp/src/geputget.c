@@ -10,6 +10,7 @@
 #include <fcntl.h>
 extern int g_MemoryAllocated;
 #include <string.h>
+#include <stdlib.h>
 
 /* Windows input callback state. Both words are loader-zeroed .data tail. */
 InputKeyEventCallback volatile g_inputKeyEventCallback = 0; /* VA 0x0050DE14 */
@@ -35,6 +36,408 @@ int Gfx_SelectBackend(int backend) {
 
     Gfx_InstallSurfaceDispatch();
     Gfx_InstallSpriteDispatch();
+    return 1;
+}
+
+/* Independently recovered Windows dispatch slots; loader-zeroed .data tail. */
+GfxSurfaceConfigureProc volatile g_surfaceConfigure = 0; /* VA 0x0050EB68 */
+GfxSurfaceOpenProc volatile g_surfaceOpen = 0; /* VA 0x0050EB6C */
+GfxSurfaceCloseProc volatile g_surfaceClose = 0; /* VA 0x0050EB70 */
+GfxSurfaceResetProc volatile g_surfaceReset = 0; /* VA 0x0050EB74 */
+GfxSurfaceConfigureSurfaceProc volatile g_surfaceConfigureSurface = 0; /* VA 0x0050EB78 */
+GfxSurfaceBlitProc volatile g_surfaceBlit = 0; /* VA 0x0050EB7C */
+GfxSurfaceCopyPixelsProc volatile g_surfaceCopyPixels = 0; /* VA 0x0050EB80 */
+GfxSurfaceClearProc volatile g_surfaceClear = 0; /* VA 0x0050EB84 */
+GfxSurfacePresentProc volatile g_surfacePresent = 0; /* VA 0x0050EB88 */
+GfxSurfaceReservedProc volatile g_surfaceReserved = 0; /* VA 0x0050EB8C */
+GfxSurfaceLockProc volatile g_surfaceLock = 0; /* VA 0x0050EB90 */
+GfxSurfaceUnlockProc volatile g_surfaceUnlock = 0; /* VA 0x0050EB94 */
+GfxSurfaceSetPaletteProc volatile g_surfaceSetPalette = 0; /* VA 0x0050EB98 */
+GfxSurfaceRestoreProc volatile g_surfaceRestore = 0; /* VA 0x0050EB9C */
+
+/*
+ * @original Gfx_InstallSurfaceDispatch (IGN_WIN.EXE @ 0x0045B690, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InstallSurfaceDispatch(void) {
+    g_surfaceConfigure = Gfx_SurfaceConfigureNative;
+    g_surfaceOpen = Gfx_SurfaceOpenNative;
+    g_surfaceClose = Gfx_SurfaceCloseNative;
+    g_surfaceReset = Gfx_SurfaceResetNative;
+    g_surfaceConfigureSurface = Gfx_SurfaceConfigureSurfaceNative;
+    g_surfaceBlit = Gfx_SurfaceBlitNative;
+    g_surfaceCopyPixels = Gfx_SurfaceCopyPixelsNative;
+    g_surfaceClear = Gfx_SurfaceClearNative;
+    g_surfacePresent = Gfx_SurfacePresentNative;
+    g_surfaceReserved = Gfx_SurfaceReservedNative;
+    g_surfaceLock = Gfx_SurfaceLockNative;
+    g_surfaceUnlock = Gfx_SurfaceUnlockNative;
+    g_surfaceSetPalette = Gfx_SurfaceSetPaletteNative;
+    g_surfaceRestore = Gfx_SurfaceRestoreNative;
+    return 1;
+}
+
+/* Windows sprite dispatch words; four intervening words are not installed. */
+GfxSpriteOpenProc volatile g_spriteOpen = 0; /* VA 0x0050EBA0 */
+GfxSpriteResetProc volatile g_spriteReset = 0; /* VA 0x0050EBA4 */
+GfxSpriteCloseProc volatile g_spriteClose = 0; /* VA 0x0050EBA8 */
+GfxSpriteOptionProc volatile g_spriteOption = 0; /* VA 0x0050EBAC */
+GfxSpriteConfigureProc volatile g_spriteConfigure = 0; /* VA 0x0050EBB0 */
+GfxSpriteSetClipProc volatile g_spriteSetClip = 0; /* VA 0x0050EBB4 */
+GfxSpriteDrawListProc volatile g_spriteDrawList = 0; /* VA 0x0050EBB8 */
+GfxSpriteDrawProc volatile g_spriteDraw = 0; /* VA 0x0050EBBC */
+GfxSpriteHandleOpProc volatile g_spriteHandleOp = 0; /* VA 0x0050EBC0 */
+GfxSpriteImageOpProc volatile g_spriteImageOp = 0; /* VA 0x0050EBD8 */
+GfxSpriteCreateDescriptorProc volatile g_spriteCreateDescriptor = 0; /* VA 0x0050EBD4 */
+GfxSpriteFreeDescriptorProc volatile g_spriteFreeDescriptor = 0; /* VA 0x0050EBDC */
+GfxSpriteCopyDescriptorProc volatile g_spriteCopyDescriptor = 0; /* VA 0x0050EBE0 */
+GfxSpriteReservedProc volatile g_spriteReserved = 0; /* VA 0x0050EBE4 */
+GfxSpriteGetStateProc volatile g_spriteGetState = 0; /* VA 0x0050EBEC */
+GfxSpriteSetStateProc volatile g_spriteSetState = 0; /* VA 0x0050EBE8 */
+
+/*
+ * @original Gfx_InstallSpriteDispatch (IGN_WIN.EXE @ 0x00456E60, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InstallSpriteDispatch(void) {
+    g_spriteOpen = Gfx_SpriteOpenNative;
+    g_spriteReset = Gfx_SpriteResetNative;
+    g_spriteClose = Gfx_SpriteCloseNative;
+    g_spriteOption = Gfx_SpriteOptionNative;
+    g_spriteConfigure = Gfx_SpriteConfigureNative;
+    g_spriteSetClip = Gfx_SpriteSetClipNative;
+    g_spriteDrawList = Gfx_SpriteDrawListNative;
+    g_spriteDraw = Gfx_DrawSpriteNative;
+    g_spriteHandleOp = Gfx_SpriteHandleOpNative;
+    g_spriteImageOp = Gfx_SpriteImageOpNative;
+    g_spriteCreateDescriptor = Gfx_SpriteCreateDescriptorNative;
+    g_spriteFreeDescriptor = Gfx_SpriteFreeDescriptorNative;
+    g_spriteCopyDescriptor = Gfx_SpriteCopyDescriptorNative;
+    g_spriteReserved = Gfx_SpriteReservedNative;
+    g_spriteGetState = Gfx_SpriteGetStateNative;
+    g_spriteSetState = Gfx_SpriteSetStateNative;
+    Gfx_InitSpriteWorkspaceA();
+    Gfx_InitSpriteWorkspaceB();
+    Gfx_InitSpriteHandles();
+    return 1;
+}
+
+/* Flags are file-backed zero words; reset/pointer words are separate BSS
+ * storage. Allocations remain owned by these workspaces across reinitialization.
+ * A nonzero flag retains all pointers, even after an unchecked allocation failure. */
+volatile uint32_t g_spriteWorkspaceAAllocated = 0;
+volatile uint32_t g_spriteWorkspaceACount;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer0;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer1;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer2;
+volatile uint32_t g_spriteWorkspaceBAllocated = 0;
+volatile uint32_t g_spriteWorkspaceBCount;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer0;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer1;
+GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer2;
+
+/*
+ * @original Gfx_InitSpriteWorkspaceA (IGN_WIN.EXE @ 0x0045D840, geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_InitSpriteWorkspaceA(void) {
+    g_spriteWorkspaceACount = 0;
+    if (g_spriteWorkspaceAAllocated == 0) {
+        g_spriteWorkspaceABuffer0 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceABuffer1 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceABuffer2 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceAAllocated = 1;
+    }
+}
+
+/*
+ * @original Gfx_InitSpriteWorkspaceB (IGN_WIN.EXE @ 0x0045C9F0, geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_InitSpriteWorkspaceB(void) {
+    g_spriteWorkspaceBCount = 0;
+    if (g_spriteWorkspaceBAllocated == 0) {
+        g_spriteWorkspaceBBuffer0 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceBBuffer1 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceBBuffer2 = (GfxSpriteWorkspaceBuffer *)malloc(0x20D8);
+        g_spriteWorkspaceBAllocated = 1;
+    }
+}
+
+/* Statically owned handle pool and copied descriptor views. The default record
+ * is loader-zeroed, then RVA 0x611D0 writes only words 0..6; remaining words
+ * must survive subsequent initialization. Image records/table belong to the
+ * unreconstructed image allocator, not this copy helper. */
+GfxSpriteHandle *volatile g_nativeSpriteFreeList[GFX_SPRITE_HANDLE_COUNT];
+volatile GfxSpriteHandle g_nativeSpriteHandles[GFX_SPRITE_HANDLE_COUNT];
+GfxSpriteHandle *volatile *volatile g_nativeSpriteFreeCursor;
+volatile GfxSpriteDescriptor g_nativeSpriteScratch;
+volatile GfxSpriteDescriptor g_nativeSpriteDefault;
+const char g_nativeSpriteDefaultName[] = "default"; /* VA 0x004BACF8 */
+volatile uint32_t g_nativeNextImageId; /* VA 0x00520380 */
+volatile GfxSpritePackingNode g_spritePackingTemplate;
+GfxSpritePackingBucket *volatile g_spritePackingBuckets[GFX_SPRITE_PACKING_BUCKET_COUNT];
+GfxSpritePackingNode *volatile g_spritePackingPages;
+volatile int32_t g_nativeImageCapacity;
+GfxSpriteDescriptor *volatile *volatile g_nativeImageRecords;
+
+/*
+ * @original Gfx_InitDefaultSpriteDescriptor (IGN_WIN.EXE @ 0x004611D0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InitDefaultSpriteDescriptor(void) {
+    g_nativeSpriteDefault.words[0] = (uint32_t)g_nativeSpriteDefaultName;
+    g_nativeSpriteDefault.words[1] = 0;
+    g_nativeSpriteDefault.words[2] = 0;
+    g_nativeSpriteDefault.words[3] = 0;
+    g_nativeSpriteDefault.words[4] = 0;
+    g_nativeSpriteDefault.words[5] = 0;
+    g_nativeSpriteDefault.words[6] = 0;
+    g_nativeNextImageId = 1;
+    return 0;
+}
+
+/*
+ * @original Gfx_InitSpritePackingState (IGN_WIN.EXE @ 0x004614D0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InitSpritePackingState(void) {
+    int bucket;
+
+    g_spritePackingTemplate.previous = 0;
+    g_spritePackingTemplate.next = 0;
+    g_spritePackingTemplate.children = 0;
+    g_spritePackingTemplate.range_start = 0;
+    g_spritePackingTemplate.range_end = 0;
+    g_spritePackingTemplate.pixels = 0;
+    for (bucket = 0; bucket < GFX_SPRITE_PACKING_BUCKET_COUNT; ++bucket) {
+        g_spritePackingBuckets[bucket] = 0;
+    }
+    g_spritePackingPages = 0;
+    return 0;
+}
+
+/*
+ * @original Gfx_LinkSpritePackingNode (IGN_WIN.EXE @ 0x00461690, geputget.c)
+ * @fidelity EXACT
+ */
+GfxSpritePackingNode *Gfx_LinkSpritePackingNode(GfxSpritePackingNode *previous,
+    GfxSpritePackingNode *current, GfxSpritePackingNode *next) {
+    ((volatile GfxSpritePackingNode *)current)->next = next;
+    ((volatile GfxSpritePackingNode *)current)->previous = previous;
+    if (previous) {
+        ((volatile GfxSpritePackingNode *)previous)->next = current;
+    }
+    if (next) {
+        ((volatile GfxSpritePackingNode *)next)->previous = current;
+    }
+    return previous;
+}
+
+/*
+ * @original Gfx_AllocBytes (IGN_WIN.EXE @ 0x0045F4A0, geputget.c)
+ * @fidelity EXACT
+ */
+void *Gfx_AllocBytes(uint32_t size) {
+    if (size == 0) {
+        return 0;
+    }
+    return malloc(size);
+}
+
+/*
+ * @original Gfx_AllocAlignedBytes (IGN_WIN.EXE @ 0x00461840, geputget.c)
+ * @fidelity EXACT
+ */
+unsigned char *Gfx_AllocAlignedBytes(uint32_t size, uint32_t alignment) {
+    uint32_t allocation;
+    uint32_t remainder;
+    uint32_t header;
+
+    allocation = (uint32_t)Gfx_AllocBytes(size + alignment + 4u);
+    remainder = (allocation + 4u) % alignment;
+    header = allocation - remainder + alignment;
+    *(volatile uint32_t *)header = allocation;
+    return (unsigned char *)(header + 4u);
+}
+
+/*
+ * @original Gfx_AddSpritePackingPage (IGN_WIN.EXE @ 0x004617E0, geputget.c)
+ * @fidelity EXACT
+ */
+void *Gfx_AddSpritePackingPage(void) {
+    volatile GfxSpritePackingNode *page;
+    GfxSpritePackingNode *repair;
+    unsigned char *result;
+
+    page = (GfxSpritePackingNode *)Gfx_AllocBytes(24u);
+    page->range_start = g_spritePackingTemplate.range_start;
+    page->range_end = g_spritePackingTemplate.range_end;
+    page->pixels = g_spritePackingTemplate.pixels;
+    page->children = g_spritePackingTemplate.children;
+    page->previous = g_spritePackingTemplate.previous;
+    page->next = g_spritePackingTemplate.next;
+    page->next = g_spritePackingPages;
+    result = Gfx_AllocAlignedBytes(0x10000u, 0x10000u);
+    page->pixels = result;
+    if (g_spritePackingPages != 0) {
+        repair = g_spritePackingPages;
+        ((volatile GfxSpritePackingNode *)repair)->previous =
+            (GfxSpritePackingNode *)page;
+        result = (unsigned char *)repair;
+    }
+    g_spritePackingPages = (GfxSpritePackingNode *)page;
+    return result;
+}
+
+/*
+ * @original Gfx_FindSpritePackingGap (IGN_WIN.EXE @ 0x00461870, geputget.c)
+ * @fidelity EXACT
+ */
+GfxSpritePackingNode *Gfx_FindSpritePackingGap(int32_t size,
+    GfxSpritePackingNode *first) {
+    const volatile GfxSpritePackingNode *current;
+    GfxSpritePackingNode *next;
+    uint32_t limit;
+    uint32_t gap;
+
+    if (first == 0) {
+        return (GfxSpritePackingNode *)0xFFFFFFFFu;
+    }
+    current = first;
+    if ((int32_t)current->range_start >= size) {
+        return (GfxSpritePackingNode *)0xFFFFFFFFu;
+    }
+    for (;;) {
+        next = current->next;
+        limit = 256u;
+        if (next != 0) {
+            limit = ((const volatile GfxSpritePackingNode *)next)->range_start;
+        }
+        gap = limit - current->range_end;
+        if ((int32_t)gap >= size) {
+            return (GfxSpritePackingNode *)current;
+        }
+        if (next == 0) {
+            return 0;
+        }
+        current = next;
+    }
+}
+
+/*
+ * @original Gfx_AddSpritePackingBucket (IGN_WIN.EXE @ 0x004616C0, geputget.c)
+ * @fidelity EXACT
+ */
+GfxSpritePackingBucket *Gfx_AddSpritePackingBucket(int32_t size,
+    GfxSpritePackingNode *first_page) {
+    volatile GfxSpritePackingNode *page;
+    volatile GfxSpritePackingNode *node;
+    volatile GfxSpritePackingNode *previous;
+    GfxSpritePackingNode *next;
+    volatile GfxSpritePackingBucket *bucket;
+    GfxSpritePackingBucket *volatile *slot;
+    GfxSpritePackingBucket *old_bucket;
+    unsigned char *pixels;
+    uint32_t offset;
+
+    page = first_page;
+    for (;;) {
+        if (page == 0) {
+            Gfx_AddSpritePackingPage();
+            page = g_spritePackingPages;
+            continue;
+        }
+        previous = Gfx_FindSpritePackingGap(size, page->children);
+        if (previous != 0) {
+            break;
+        }
+        page = page->next;
+    }
+    node = (GfxSpritePackingNode *)Gfx_AllocBytes(24u);
+    node->range_start = g_spritePackingTemplate.range_start;
+    node->range_end = g_spritePackingTemplate.range_end;
+    node->pixels = g_spritePackingTemplate.pixels;
+    node->children = g_spritePackingTemplate.children;
+    node->previous = g_spritePackingTemplate.previous;
+    node->next = g_spritePackingTemplate.next;
+    if (previous == (GfxSpritePackingNode *)0xFFFFFFFFu) {
+        node->range_end = (uint32_t)size;
+        pixels = page->pixels;
+        offset = node->range_start << 8;
+        node->pixels = (unsigned char *)((uint32_t)pixels + offset);
+        next = page->children;
+        node->next = next;
+        if (next != 0) {
+            ((volatile GfxSpritePackingNode *)next)->previous =
+                (GfxSpritePackingNode *)node;
+        }
+        page->children = (GfxSpritePackingNode *)node;
+    } else {
+        node->range_start = previous->range_end;
+        node->range_end = previous->range_end + (uint32_t)size;
+        offset = node->range_start << 8;
+        pixels = page->pixels;
+        node->pixels = (unsigned char *)((uint32_t)pixels + offset);
+        next = previous->next;
+        Gfx_LinkSpritePackingNode((GfxSpritePackingNode *)previous,
+            (GfxSpritePackingNode *)node, next);
+    }
+    bucket = (GfxSpritePackingBucket *)Gfx_AllocBytes(8u);
+    slot = (GfxSpritePackingBucket *volatile *)
+        ((uint32_t)g_spritePackingBuckets + ((uint32_t)size << 2));
+    old_bucket = *slot;
+    bucket->next = old_bucket;
+    bucket->node = (GfxSpritePackingNode *)node;
+    *slot = (GfxSpritePackingBucket *)bucket;
+    return (GfxSpritePackingBucket *)bucket;
+}
+
+/*
+ * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_CopySpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id) {
+    const volatile GfxSpriteDescriptor *source;
+    volatile GfxSpriteDescriptor *destination;
+    int live_record;
+    int word;
+
+    source = &g_nativeSpriteDefault;
+    live_record = 0;
+    if (image_id > 0 && image_id < g_nativeImageCapacity) {
+        source = g_nativeImageRecords[image_id];
+        if (source != 0) {
+            live_record = 1;
+        } else {
+            source = &g_nativeSpriteDefault;
+        }
+    }
+    destination = descriptor;
+    for (word = 0; word < 16; ++word) {
+        destination->words[word] = source->words[word];
+    }
+    if (live_record) {
+        destination->words[6] = 0;
+        destination->words[7] = 0;
+        return 0;
+    }
+    return image_id;
+}
+
+/*
+ * @original Gfx_InitSpriteHandles (IGN_WIN.EXE @ 0x0045C7F0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InitSpriteHandles(void) {
+    int handle;
+
+    g_nativeSpriteFreeCursor = g_nativeSpriteFreeList + GFX_SPRITE_HANDLE_COUNT;
+    for (handle = 0; handle < GFX_SPRITE_HANDLE_COUNT; ++handle) {
+        g_nativeSpriteFreeList[handle] = (GfxSpriteHandle *)&g_nativeSpriteHandles[handle];
+        g_nativeSpriteHandles[handle].image_id = 0;
+    }
+    Gfx_CopySpriteDescriptor((GfxSpriteDescriptor *)&g_nativeSpriteScratch, 0);
     return 1;
 }
 

@@ -1,5 +1,174 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Storage assignment and pixel-copy analysis (2026-10-09)
+
+[Complete bounded contracts](ghidra/windows_gfx_sprite_packing_storage.md) for
+storage RVA 0x61530 (350 bytes) and its pixel-copy leaf RVA 0x612A0 (61 bytes)
+are independently authenticated with local FPO/hashes, full instructions,
+relocations, Ghidra and callers. Thirty-two original-only hand-derived probes
+corroborate insertion, live allocator mutations, bucket retry exits, snapshot/
+pixel rewrites, forward overlap and faults; CRT malloc is modeled. Both stay
+analysis-only with no new compilation/differential records. Next reconstruct
+the pixel leaf, then storage with all real dependencies. Existing 42
+reconstructed routines among 1,028 candidates retain current recorded evidence;
+no source/verifier inputs changed or suites rerun for this analysis. Instruction
+equality, original compiler/link layout and native parity remain unverified.
+No playable rebuilt executable is certified. Earlier entries are historical.
+
+## Sprite packing bucket insertion (2026-10-09)
+
+[Bucket insertion](ghidra/windows_gfx_sprite_packing_buckets.md), VA 0x004616C0 /
+RVA 0x616C0, now has production C89 with the verified eight-byte bucket view.
+Real page/gap/link/allocation bodies preserve ordered copies/links, live rereads,
+wrapping range/pixel/table arithmetic, exact arena aliases and unchecked failure
+effects. 2,734 comparisons per binary include 1,140 persistent follow-ups, 127
+faults and two externally bounded cycle prefixes. All prior packing/lifecycle/
+memory/font/file/backend coverage remains. Inventory: 1,028 candidates, 42
+reconstructed routines. Storage assignment RVA 0x61530 and release RVA 0x618B0
+remain analysis-only; primitive/CRT/callbacks stay modeled. Instruction equality,
+original compiler/link layout and native graphics/heap/game parity are unverified.
+No playable rebuilt executable is certified. Earlier entries below are historical.
+
+
+## Sprite packing gap search (2026-10-08)
+
+[The bounded gap search](ghidra/windows_gfx_sprite_packing_gap.md), VA 0x00461870 /
+RVA 0x61870, is reconstructed in production C89. Signed prefix/gap comparisons,
+wrapping subtraction, three distinct returns and ordered read-only traversal
+are preserved without invented request/pointer/cycle guards. 1,835 differential
+comparisons per binary include 922 persistent follow-ups, 69 read faults and
+two externally bounded nonreturning cycle prefixes. Both callers are statically
+authenticated only. All prior allocation/page/link/reset/lifecycle/memory/font/
+file/backend coverage remains. Inventory: 1,028 candidates, 41 reconstructed.
+Instruction equality, original compiler/link layout and native graphics/heap/game
+parity remain unverified. Primitive/CRT/callbacks are modeled; packing callers
+and workspace renderers remain unreconstructed. No playable build is certified.
+
+
+## Sprite packing page allocation (2026-10-08)
+
+[Page allocation](ghidra/windows_gfx_sprite_packing_pages.md), RVA 0x617E0,
+is reconstructed with both [real allocation helpers](ghidra/windows_gfx_alloc_aligned.md).
+It retains ordered template copying, live head rereads, repair before publication,
+incidental EAX and unchecked failure effects. 1,574 page comparisons include
+816 persistent follow-ups, 134 real-dependency cases and six fault cases.
+The 48/512 standalone helper comparisons and all prior lifecycle/memory/font/
+file/backend suites remain. Inventory: 1,028 candidates, 40 reconstructed.
+CRT heap is modeled; packing callers remain unreconstructed. Instruction
+equality, original compiler/link layout and native graphics/heap/game parity
+remain unverified. No playable rebuilt executable is certified.
+
+
+## Graphics aligned allocation dependencies (2026-10-08)
+
+[Allocation dependencies](ghidra/windows_gfx_alloc_aligned.md), RVAs
+0x5F4A0/0x61840, now have readable production C89. The zero-size wrapper and
+unsigned aligned allocator retain unchecked failure behavior and back-pointer
+placement. 48/512 differential comparisons include 24/252 persistent repeats
+and eight aligned-helper fault cases; CRT malloc is modeled. Prior suites
+remain intact. Inventory: 1,028 candidates, 39 reconstructed routines.
+Page allocation RVA 0x617E0 remains the next separate feature. Instruction
+equality, original compiler/link layout and native heap/game parity are unverified.
+
+
+## Sprite packing node links (2026-10-08)
+
+[The link helper](ghidra/windows_gfx_sprite_packing_links.md), VA 0x00461690 /
+RVA 0x61690, now has production C89 preserving its ordered two-to-four node
+stores and incidental previous-pointer EAX. 864 standalone differential calls
+per binary include all null/distinct/exact-alias configurations and 464
+persistent follow-ups, including sixteen six-call relinking sequences. Node
+reads, traversal and calls are absent. Both callers are inspected statically;
+no packing-caller/startup integration is claimed. All prior coverage remains,
+including 810 packing resets / 922 real bodies and 280 default initializers /
+392 real bodies through the explicit modeled primitive driver. Full completion
+renews compilation/emulation evidence for all 37 reconstructed routines among
+1,028 candidates. Instruction equality, original compiler/link layout and native
+graphics/heap/game parity remain unverified. Packing callers are unreconstructed;
+primitive/CRT/callback boundaries remain modeled.
+
+## Sprite packing state reset (2026-10-08)
+
+[The packing reset](ghidra/windows_gfx_sprite_packing_reset.md), RVA 0x614D0,
+now has production C89 with an independently recovered 24-byte node template,
+257 opaque bucket pointers and separate page head. It preserves exact store
+order and repeated orphaning without free. 810 standalone comparisons include
+405 persistent repeats; 922 real executions per binary include 112 startups
+through the explicitly modeled primitive driver. Default initialization executes
+first. Four consumers have static ownership/layout analysis only; no consumer
+production or native packing parity is claimed. All prior suites remain intact.
+Inventory: 1,028 candidates, 36 reconstructed routines; instruction equality,
+original compiler/link layout and native graphics/heap/game parity unverified.
+Earlier milestone entries below are historical.
+
+
+## Default sprite descriptor initialization (2026-10-08)
+
+[The default initializer](ghidra/windows_gfx_default_descriptor.md), VA
+0x004611D0 / RVA 0x611D0, now has production C89 and independent differential
+coverage: 280 standalone comparisons (132 persistent repeats), exact eight
+ordered stores/no reads, arbitrary nine-word tail preservation and EAX=0.
+It executes 392 real bodies per binary, including 112 startups through an
+explicitly modeled primitive driver. The real primitive initializer remains
+unreconstructed and is not executed. Sixteen real helper/handle consumption
+chains add coverage; existing standalone comparison counts and all prior suites
+remain. Full completion renews compilation/emulation evidence for all 35
+reconstructed routines; inventory remains 1,028 candidates. Instruction equality,
+original compiler/link layout and native graphics/heap/game parity remain
+unverified. CRT/callbacks remain modeled and workspace consumers unreconstructed.
+Use `uv run python tools/workflow.py complete --rva 0x611D0` with an explicit
+limitation. Earlier milestone entries below are historical.
+
+
+Latest bounded feature (2026-10-08): [lazy sprite workspaces](ghidra/windows_gfx_sprite_workspaces.md)
+at RVAs 0x5D840/0x5C9F0 are reconstructed with ten independently owned globals
+and opaque heap buffers. Each has 167 standalone comparisons (83 persistent
+repeats) and 757 real executions per binary through real sprite installation,
+selector and 18 startups. Exact-zero guards, three immediate malloc stores,
+all independent failures, skipped pointer preservation and reinitialization
+consequences are preserved. Descriptor/handle/surface and all prior validation
+remain. 1,028 candidates, 34 reconstructed routines; compilation/differential
+evidence passes, instruction equality/original layout/native parity unverified.
+Primitive startup and CRT/callback boundaries remain modeled. Four buffer
+consumers are analyzed only; complete layout and renderer behavior remain unknown.
+Next bounded candidate: default descriptor initialization RVA 0x611D0 (53 bytes),
+whose seven-word writes and nine-word preservation have original-only evidence.
+Earlier entries are historical.
+
+Latest bounded feature (2026-10-08): [sprite handles and descriptor copy](ghidra/windows_gfx_sprite_handles.md)
+at RVAs 0x5C7F0/0x612E0 are reconstructed with independently recovered storage
+and seven-word default initialization (nine words preserved). 486 helper and
+48 handle differential comparisons execute real bodies; helper also executes
+through real sprite/surface installation, selector and 18 startups. All prior
+validation is retained, plus 16 original-only default initializer checks.
+Two sprite workspaces, primitive startup and CRT/callback boundaries remain
+modeled. 1,028 candidates, 32 reconstructed routines; current compilation and
+differential evidence, instruction equality/original layout/native parity
+unverified. Next bounded candidates: lazy sprite workspaces at RVAs
+0x5D840/0x5C9F0 with real allocation/failure contracts. Earlier entries are historical.
+
+Latest bounded feature (2026-10-08): [sprite dispatch installation](ghidra/windows_gfx_sprite_dispatch.md)
+at RVA 0x56E60 is reconstructed with sixteen typed production globals.
+306 standalone sprite installers, 532 selectors and 18 startups execute both
+real installers; 48 sprite consumer ABI and 43 downstream original-only cases
+verify contracts. Surface/lifecycle coverage is retained. Three downstream sprite
+initializers remain modeled. 1,028 candidates, 30 reconstructed routines; current
+compilation/differential evidence, instruction equality/native parity unverified.
+Next bounded candidate: Gfx_InitSpriteHandles, RVA 0x5C7F0, and its default
+descriptor helper RVA 0x612E0. Earlier entries are historical.
+
+Latest bounded feature (2026-10-08): [surface dispatch installation](ghidra/windows_gfx_surface_dispatch.md)
+at RVA 0x5B690 is reconstructed in native geputget.c with fourteen independently
+typed production globals. 266 standalone installers, 532 selectors and 18
+integrated startups execute its real production body; 39 original-only consumer
+ABI sinks check forwarding and caller cleanup. Fourteen targets and thirteen
+consumers remain analyzed only, including newly inventoried RVA 0x5C1D0 (497
+bytes): 1,028 candidates, 29 reconstructed routines. Primitive and sprite
+initialization, CRT printf/heap and callbacks remain modeled. Strict C89 focused
+compilation passes; raw prefixes differ. Instruction equality, original linked
+layout and native graphics/game parity remain unverified. Next bounded candidate:
+Gfx_InstallSpriteDispatch, RVA 0x56E60 (181 bytes). Earlier entries are historical.
+
 Latest bounded feature (2026-10-08): [graphics backend selector](ghidra/windows_gfx_backend.md)
 at RVA 0x56AF0 is reconstructed in native geputget.c, with zero calling two
 initializers in order and returning 1, every nonzero value returning 2 without

@@ -151,3 +151,45 @@ Tracking records both initializers as analyzed only, without compilation or
 emulation evidence. Next bounded candidate: Gfx_InstallSurfaceDispatch,
 VA 0x0045B690 / RVA 0x5B690, 146 bytes; independently recover each slot's
 consumer ABI before adding typed production dispatch globals and executing it.
+
+## Production surface initializer follow-up (2026-10-08)
+
+[Surface dispatch installation](windows_gfx_surface_dispatch.md), RVA 0x5B690,
+now has fourteen independently typed production globals and a real initializer
+executing through the production selector and 18 integrated startups. Fresh
+coverage: 266 standalone installers, 532 selectors, 306 banner / 266 input reset /
+112 startup / 519 shutdown comparisons, plus 39 original-only forwarding ABI
+sink cases and ten persistent lifecycle calls. Original target bodies remain
+unreconstructed; the reserved slot has no observed consumer. Primitive and
+sprite initialization, CRT printf/heap and callbacks remain modeled. Strict C89
+focused compilation passes; raw prefixes differ. Instruction equality and native
+graphics/game parity are unverified. Earlier model descriptions are historical.
+
+## Production sprite installer follow-up (2026-10-08)
+
+[Sprite dispatch installation](windows_gfx_sprite_dispatch.md), RVA 0x56E60,
+now owns sixteen independently typed production globals and executes through
+both the real selector and 18 integrated startups, preserving the real surface
+installer. Fresh coverage: 306 standalone sprite installers, 532 selectors,
+266 standalone surface installers, 48/39 original-only sprite/surface consumer
+ABI checks, 43 original-only downstream initializer contract cases. Existing
+306 banner / 266 reset / 112 startup / 519 shutdown comparisons and ten persistent
+lifecycle calls remain. Three downstream sprite initializers and primitive
+initialization, CRT printf/heap and callbacks are explicitly modeled. Strict C89
+focused compilation passes; raw prefixes differ. Instruction equality and native
+graphics/game parity are unverified. Earlier model descriptions are historical.
+
+## Real sprite handle/helper follow-up (2026-10-08)
+
+[Handle initialization and descriptor copying](windows_gfx_sprite_handles.md)
+reconstruct RVAs 0x5C7F0/0x612E0 and execute the real helper through real handles,
+sprite installation, selector and 18 lifecycle startups. Fresh coverage adds
+486 helper and 48 handle comparisons, plus 16 original-only default initializer
+checks; existing 306/266 sprite/surface installers, 532 selectors, 48/39 consumer
+ABI and 43 downstream contracts, banner/input/memory validation remain.
+Default initialization writes seven words and preserves nine; only live copies
+clear +0x18/+0x1C. Two workspace initializers and primitive/CRT/callback boundaries
+remain modeled. Strict C89 compilation and differential emulation pass;
+instruction equality, original compiler/link layout and native graphics/game
+parity remain unverified. Earlier model/opaque-descriptor descriptions are
+historical. Inventory: 1,028 candidates, 32 reconstructed routines.

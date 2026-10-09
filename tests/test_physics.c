@@ -464,7 +464,7 @@ static void Test_AustriaAndBrazilStability(void) {
 
         char out_bmp[256];
         snprintf(out_bmp, sizeof(out_bmp),
-                 "C:/Users/Patricio/.gemini/antigravity/brain/2b5d164d-6934-430b-9f87-32444f8c3b63/scratch/test_%s_chase_cam.bmp",
+                 "test_%s_chase_cam.bmp",
                  name);
         SaveBMP24(out_bmp, ctx.framebuffer, &ctx.active_palette, NATIVE_WIDTH, NATIVE_HEIGHT);
         printf("  [%s] Verified & saved %s\n", name, out_bmp);
