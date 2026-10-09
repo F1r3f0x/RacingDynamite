@@ -5,6 +5,14 @@
 #include <stddef.h>
 #include "mem.h"
 
+/* Native fixed sine construction; binary64 constants are independently verified.
+ * The behavior compiler must preserve x87 FSIN and multiplication ordering. */
+extern volatile const double g_nativeSineStep;
+extern volatile const double g_nativeSineFullCircle;
+extern volatile const double g_nativeSineAmplitude;
+extern volatile int32_t g_nativeSineTable[4096];
+int32_t Gfx_InitSineTable(void); /* VA 0x00460740; last converted integer */
+
 /* Windows input callback ABI; semantic names, original symbols unknown. */
 typedef void (*InputKeyEventCallback)(int pressed, int scan_code);
 typedef void (*InputPollCallback)(void);
@@ -100,6 +108,43 @@ typedef struct GfxPointerTable {
     uint32_t *records;
 } GfxPointerTable;
 void Gfx_GrowPointerTable(GfxPointerTable *control); /* VA 0x0045F560; EAX discarded */
+
+/* Independent native initialization views. Pair-control prefix meanings remain
+ * opaque; initialization publishes 32 words, then limit/prefix constants. */
+typedef struct GfxPairStorageControl {
+    uint32_t opaque_prefix[2];
+    uint32_t limit;
+    uint32_t *storage;
+} GfxPairStorageControl;
+#pragma pack(push, 1)
+typedef struct GfxNamedPrimitiveDefault {
+    const char *name;
+    uint32_t opaque4;
+    uint32_t opaque8;
+    uint32_t scalar_bits[4];
+    uint32_t opaque28;
+    uint8_t flag;
+    uint32_t *parameters;
+} GfxNamedPrimitiveDefault;
+#pragma pack(pop)
+extern volatile GfxPointerTable g_nativeEmptyControl;
+extern volatile GfxPointerTable g_nativePrimitiveControl;
+extern volatile GfxPointerTable g_nativeNamedControl;
+extern volatile GfxPointerTable g_nativeSecondaryControl;
+extern volatile GfxPointerTable g_nativeLineControl;
+extern volatile GfxPointerTable g_nativePrimitiveRecordControl;
+extern volatile GfxPointerTable g_nativeAuxiliaryControl;
+extern volatile GfxPairStorageControl g_nativeGraphicsPairStorage;
+extern volatile GfxPairStorageControl g_nativeNamedPairStorage;
+extern volatile GfxNamedPrimitiveDefault g_nativeNamedPrimitiveDefault;
+extern volatile uint32_t g_nativeSecondaryDefaultWords[11];
+uint32_t *Gfx_InitPairStorageControl(GfxPairStorageControl *control);
+uint32_t *Gfx_InitGraphicsPairStorage(void);
+void Gfx_EnablePrimitiveControl(void);
+int Gfx_InitSecondaryDefaultWords(void);
+void Gfx_InitPrimitiveLineControl(void);
+uint32_t *Gfx_InitNamedPrimitiveDefault(void);
+void Gfx_InitPrimitiveState(void);
 
 /* Independently verified pixel-copy prefix; the other descriptor words remain
  * opaque. Pointer and stride representations are unsigned 32-bit words. */

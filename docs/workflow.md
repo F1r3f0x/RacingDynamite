@@ -1,5 +1,22 @@
 # Enforced agent workflow
 
+## Complete primitive initialization (2026-10-09)
+
+[Primitive startup](ghidra/windows_primitive_startup.md) now has all eight real
+C89 bodies: RVAs0x5E610,0x5F490,0x60740,0x607C0,0x5F640,0x5FA50,0x60B50,
+0x63AB0. Full chain and leaf contracts pass247 comparisons including96 persistent
+follow-ups,32 faults,18 aliases and12 mutations. Sine production executes native
+Win32 with4096 values in twelve masked x87 modes; its native evidence is confined
+to RVA0x60740. The full workflow renews59 reconstructed routines, retaining prior
+coverage. Coherent controls and a packed37-byte default are verified independently.
+GCC ordered x87 sin/cast compilation is provisional alongside current Clang/LLD;
+original compiler/link layout remains unresolved. Native heap/whole startup,
+menus/render/input/audio/races and unmasked/nonempty-x87/FPSW/fault-frame behavior
+remain unverified. A focused DLL is not a playable game. Next recover native
+surface initialization through its authentic Windows/DirectDraw dependencies.
+Earlier entries are historical.
+
+
 ## Complete native sprite handle operation (2026-10-09)
 
 [HandleOp](ghidra/windows_gfx_handleop.md), VA 0x0045C830 / RVA 0x5C830, now

@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:35e43c385f50e10e4424471ce94d3c43f0b8eaf49acb4f74a2ac0b0c9f83ea98 -->
+<!-- snapshot:125cd0c139af2e0d805e660da5e06d6c35ee6643e2bd9282014a28a6809e70a9 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -579,7 +579,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045D8A0` | `0x0005D8A0` | 1805 | `Gfx_RasterizeWorkspaceATriangle` | game | analyzed | [windows_gfx_sprite_workspaces.md](windows_gfx_sprite_workspaces.md) |
 | `0x0045DFB0` | `0x0005DFB0` | 1561 | `Gfx_RasterizeWorkspaceAClippedTriangle` | game | analyzed | [windows_gfx_sprite_workspaces.md](windows_gfx_sprite_workspaces.md) |
 | `0x0045E5D0` | `0x0005E5D0` | 53 | `sub_0045E5D0` | unknown | unidentified | - |
-| `0x0045E610` | `0x0005E610` | 326 | `Gfx_InitPrimitiveState` | game | analyzed | [windows_mem_lifecycle.md](windows_mem_lifecycle.md) |
+| `0x0045E610` | `0x0005E610` | 326 | `Gfx_InitPrimitiveState` | game | reconstructed | [windows_primitive_startup.md](windows_primitive_startup.md) |
 | `0x0045E760` | `0x0005E760` | 284 | `sub_0045E760` | unknown | unidentified | - |
 | `0x0045E880` | `0x0005E880` | 412 | `sub_0045E880` | unknown | unidentified | - |
 | `0x0045EA20` | `0x0005EA20` | 282 | `sub_0045EA20` | unknown | unidentified | - |
@@ -590,12 +590,12 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045F030` | `0x0005F030` | 853 | `sub_0045F030` | unknown | unidentified | - |
 | `0x0045F390` | `0x0005F390` | 66 | `sub_0045F390` | unknown | unidentified | - |
 | `0x0045F3E0` | `0x0005F3E0` | 166 | `sub_0045F3E0` | unknown | unidentified | - |
-| `0x0045F490` | `0x0005F490` | 14 | `sub_0045F490` | unknown | unidentified | - |
+| `0x0045F490` | `0x0005F490` | 14 | `Gfx_InitGraphicsPairStorage` | game | reconstructed | [windows_primitive_startup.md](windows_primitive_startup.md) |
 | `0x0045F4A0` | `0x0005F4A0` | 21 | `Gfx_AllocBytes` | game | reconstructed | [windows_gfx_alloc_aligned.md](windows_gfx_alloc_aligned.md) |
 | `0x0045F4C0` | `0x0005F4C0` | 151 | `sub_0045F4C0` | unknown | unidentified | - |
 | `0x0045F560` | `0x0005F560` | 133 | `Gfx_GrowPointerTable` | game | reconstructed | [windows_gfx_pointer_table.md](windows_gfx_pointer_table.md) |
 | `0x0045F5F0` | `0x0005F5F0` | 79 | `sub_0045F5F0` | unknown | unidentified | - |
-| `0x0045F640` | `0x0005F640` | 68 | `sub_0045F640` | unknown | unidentified | - |
+| `0x0045F640` | `0x0005F640` | 68 | `Gfx_InitSecondaryDefaultWords` | game | reconstructed | [windows_primitive_startup.md](windows_primitive_startup.md) |
 | `0x0045F690` | `0x0005F690` | 86 | `sub_0045F690` | unknown | unidentified | - |
 | `0x0045F6F0` | `0x0005F6F0` | 19 | `sub_0045F6F0` | unknown | unidentified | - |
 | `0x0045F710` | `0x0005F710` | 19 | `sub_0045F710` | unknown | unidentified | - |
@@ -607,7 +607,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045F8D0` | `0x0005F8D0` | 61 | `sub_0045F8D0` | unknown | unidentified | - |
 | `0x0045F910` | `0x0005F910` | 61 | `sub_0045F910` | unknown | unidentified | - |
 | `0x0045F950` | `0x0005F950` | 246 | `sub_0045F950` | unknown | unidentified | - |
-| `0x0045FA50` | `0x0005FA50` | 11 | `sub_0045FA50` | unknown | unidentified | - |
+| `0x0045FA50` | `0x0005FA50` | 11 | `Gfx_InitPrimitiveLineControl` | game | reconstructed | [windows_primitive_startup.md](windows_primitive_startup.md) |
 | `0x0045FA60` | `0x0005FA60` | 134 | `sub_0045FA60` | unknown | unidentified | - |
 | `0x0045FAF0` | `0x0005FAF0` | 240 | `sub_0045FAF0` | unknown | unidentified | - |
 | `0x0045FBE0` | `0x0005FBE0` | 99 | `sub_0045FBE0` | unknown | unidentified | - |
@@ -625,14 +625,14 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x004604D0` | `0x000604D0` | 499 | `sub_004604D0` | unknown | unidentified | - |
 | `0x004606D0` | `0x000606D0` | 78 | `sub_004606D0` | unknown | unidentified | - |
 | `0x00460720` | `0x00060720` | 18 | `sub_00460720` | unknown | unidentified | - |
-| `0x00460740` | `0x00060740` | 60 | `sub_00460740` | unknown | unidentified | - |
+| `0x00460740` | `0x00060740` | 60 | `Gfx_InitSineTable` | game | reconstructed | [windows_primitive_startup.md](windows_primitive_startup.md) |
 | `0x00460780` | `0x00060780` | 19 | `sub_00460780` | unknown | unidentified | - |
 | `0x004607A0` | `0x000607A0` | 24 | `sub_004607A0` | unknown | unidentified | - |
-| `0x004607C0` | `0x000607C0` | 11 | `sub_004607C0` | unknown | unidentified | - |
+| `0x004607C0` | `0x000607C0` | 11 | `Gfx_EnablePrimitiveControl` | game | reconstructed | [windows_primitive_startup.md](windows_primitive_startup.md) |
 | `0x004607D0` | `0x000607D0` | 137 | `sub_004607D0` | unknown | unidentified | - |
 | `0x00460860` | `0x00060860` | 646 | `sub_00460860` | unknown | unidentified | - |
 | `0x00460AF0` | `0x00060AF0` | 82 | `sub_00460AF0` | unknown | unidentified | - |
-| `0x00460B50` | `0x00060B50` | 130 | `sub_00460B50` | unknown | unidentified | - |
+| `0x00460B50` | `0x00060B50` | 130 | `Gfx_InitNamedPrimitiveDefault` | game | reconstructed | [windows_primitive_startup.md](windows_primitive_startup.md) |
 | `0x00460BE0` | `0x00060BE0` | 154 | `sub_00460BE0` | unknown | unidentified | - |
 | `0x00460C80` | `0x00060C80` | 36 | `sub_00460C80` | unknown | unidentified | - |
 | `0x00460CB0` | `0x00060CB0` | 63 | `sub_00460CB0` | unknown | unidentified | - |
@@ -686,7 +686,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00463950` | `0x00063950` | 79 | `sub_00463950` | unknown | unidentified | - |
 | `0x004639A0` | `0x000639A0` | 120 | `sub_004639A0` | unknown | unidentified | - |
 | `0x00463A20` | `0x00063A20` | 133 | `sub_00463A20` | unknown | unidentified | - |
-| `0x00463AB0` | `0x00063AB0` | 72 | `sub_00463AB0` | unknown | unidentified | - |
+| `0x00463AB0` | `0x00063AB0` | 72 | `Gfx_InitPairStorageControl` | game | reconstructed | [windows_primitive_startup.md](windows_primitive_startup.md) |
 | `0x00463B00` | `0x00063B00` | 112 | `sub_00463B00` | unknown | unidentified | - |
 | `0x00463B70` | `0x00063B70` | 66 | `sub_00463B70` | unknown | unidentified | - |
 | `0x00463BC0` | `0x00063BC0` | 154 | `sub_00463BC0` | unknown | unidentified | - |

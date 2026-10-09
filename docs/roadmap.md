@@ -29,6 +29,16 @@ a pure-C integration strategy. Native startup/presentation baseline and executab
 linking, original toolchain evidence, input/audio, menus and race systems remain
 open. Focused DLL/emulation evidence does not certify any of those milestones.
 
+Primitive initialization now has eight production bodies and247 leaf/whole-chain
+comparisons. The real dependency graph executes; only CRT malloc is modeled in
+emulation. The production sine initializer also passes native Win32 comparison of
+4096 entries under twelve masked x87 modes. This native evidence is restricted to
+the sine routine, while full native primitive/heap/startup remains open. See
+[primitive evidence](ghidra/windows_primitive_startup.md). Next recover native
+surface initialization and its real Windows/DirectDraw dependencies. Original
+toolchain/link layout, menus/render/input/audio/races and a playable rebuild remain
+unverified; focused DLL, inventory labels and emulation do not certify those.
+
 Protected originals, unrelated edits, tests/test_physics.c and the deleted
 tools/dump_456470.py remain untouched. Each feature must retain existing suites,
 check LF working/index bytes, update affected SQLite RVAs/evidence and generated

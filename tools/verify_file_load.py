@@ -17,7 +17,7 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ECX, UC_X86_REG_EDX,
     UC_X86_REG_ESP, UC_X86_REG_EIP, UC_X86_REG_EFLAGS)
 
 from verify_font_cleanup import SAVED, STACK, STOP
-from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner
+from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -129,11 +129,12 @@ def build_loader():
         flags + ['-c', str(ROOT / 'decomp/src/file.c'), '-o', str(fobj)],
         flags + ['-c', str(ROOT / 'decomp/src/mem.c'), '-o', str(mobj)],
         flags + ['-c', str(stub), '-o', str(sobj)],
-        [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/base:0x10000000',
+        [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/safeseh:no', '/base:0x10000000',
          '/out:' + str(DLL), str(fobj), str(mobj), str(sobj)] + ['/export:' + s for s in exports]
     ]
     banner_obj, _ = compile_banner(flags, DLL.stem)
-    commands[-1].append(str(banner_obj))
+    sine_obj, _ = compile_sine(DLL.stem)
+    commands[-1].extend([str(banner_obj), str(sine_obj)])
     for cmd in commands:
         subprocess.run(cmd, cwd=ROOT, check=True)
     assert all(p.is_file() and p.stat().st_size for p in [fobj, mobj, sobj, DLL])

@@ -13,7 +13,7 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ESP, UC_X86_REG_EIP,
                               UC_X86_REG_EFLAGS)
 from verify_font_cleanup import FontLifecycleCPU, LIFECYCLE_FIELDS, SAVED, STACK, STOP
-from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner
+from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -132,7 +132,7 @@ extern void *Gfx_SpriteOp(void *desc, int op);
         '-Wall', '-Wextra', '-Werror', '-O2', '-ffreestanding', '-fno-builtin',
         '-fno-inline', '-mno-sse', '-mno-sse2', '-I', str(ROOT / 'decomp/include'),
         '-c', str(path), '-o', str(obj)],
-        [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/base:0x10000000',
+        [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/safeseh:no', '/base:0x10000000',
          '/out:' + str(dll), str(obj), str(stub_obj)] + ['/export:' + n for n in exports]]
     commands.insert(1, [cc, '--target=i686-pc-windows-msvc', '-std=c89', '-pedantic-errors',
         '-Wall', '-Wextra', '-Werror', '-O2', '-ffreestanding', '-fno-builtin', '-c', str(stub), '-o', str(stub_obj)])
@@ -153,10 +153,11 @@ extern void *Gfx_SpriteOp(void *desc, int op);
             'File_CheckReadable', 'File_GetSize', 'File_GetStreamSize', 'Mem_Alloc',
             'fopen', 'fclose', 'ftell', 'fseek', 'fsetpos', 'fread', 'malloc']]
     banner_obj, banner_cmd = compile_banner(commands[0][:-4], dll.stem)
-    commands[-1].append(str(banner_obj))
+    sine_obj, sine_cmd = compile_sine(dll.stem)
+    commands[-1].extend([str(banner_obj), str(sine_obj)])
     for command in commands:
         subprocess.run(command, check=True)
-    return commands[:-1] + [banner_cmd, commands[-1]]
+    return commands[:-1] + [banner_cmd, sine_cmd, commands[-1]]
 
 
 class ParserCPU(FontLifecycleCPU):

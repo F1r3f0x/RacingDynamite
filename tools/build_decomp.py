@@ -13,7 +13,7 @@ STARTUP_BOUNDARY_SOURCE = (
     'unsigned int validation_gfxDispatchWords[4];\n'
     'int Lisa_PrintVersion(void);\n'
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
-    'void Gfx_InitPrimitiveState(void) { for (;;) {} }\n')
+    '')
 STARTUP_EXPORTS = ['Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
     'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
 
@@ -68,6 +68,23 @@ LISA_VERSION_SOURCE += (
     + _resource_source[_resource_source.index('/* Independently recovered Windows dispatch slots;'):
         _resource_source.index('/* Global font table matching')])
 
+# Standard C89 sin/cast body compiled separately with independently probed x87
+# flags. This provisional GCC/Clang mix does not identify the original compiler.
+_sine_start = _resource_source.index('int32_t Gfx_InitSineTable(void)')
+_sine_end = _resource_source.index('\n}', _sine_start) + 2
+SINE_BODY = _resource_source[_sine_start:_sine_end]
+LISA_VERSION_SOURCE = LISA_VERSION_SOURCE.replace(SINE_BODY, 'int32_t Gfx_InitSineTable(void);')
+SINE_SOURCE = '#include <math.h>\n#include "geputget.h"\n' + SINE_BODY + '\n'
+PRIMITIVE_EXPORTS = ['Gfx_InitPairStorageControl', 'Gfx_InitGraphicsPairStorage',
+    'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords',
+    'Gfx_InitPrimitiveLineControl', 'Gfx_InitNamedPrimitiveDefault',
+    'g_nativeEmptyControl', 'g_nativePrimitiveControl', 'g_nativeNamedControl',
+    'g_nativeSecondaryControl', 'g_nativeLineControl', 'g_nativePrimitiveRecordControl',
+    'g_nativeAuxiliaryControl', 'g_nativeGraphicsPairStorage', 'g_nativeNamedPairStorage',
+    'g_nativeNamedPrimitiveDefault', 'g_nativeSecondaryDefaultWords']
+SINE_EXPORTS = ['Gfx_InitSineTable', 'g_nativeSineTable', 'g_nativeSineStep',
+    'g_nativeSineFullCircle', 'g_nativeSineAmplitude']
+
 SURFACE_EXPORTS = ['g_surfaceConfigure', 'g_surfaceOpen', 'g_surfaceClose', 'g_surfaceReset', 'g_surfaceConfigureSurface', 'g_surfaceBlit', 'g_surfaceCopyPixels', 'g_surfaceClear', 'g_surfacePresent', 'g_surfaceReserved', 'g_surfaceLock', 'g_surfaceUnlock', 'g_surfaceSetPalette', 'g_surfaceRestore', 'Gfx_SurfaceConfigureNative', 'Gfx_SurfaceOpenNative', 'Gfx_SurfaceCloseNative', 'Gfx_SurfaceResetNative', 'Gfx_SurfaceConfigureSurfaceNative', 'Gfx_SurfaceBlitNative', 'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceClearNative', 'Gfx_SurfacePresentNative', 'Gfx_SurfaceReservedNative', 'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative', 'Gfx_SurfaceSetPaletteNative', 'Gfx_SurfaceRestoreNative']
 
 # Validation fixtures live separately from the extracted production installer.
@@ -97,7 +114,7 @@ EXPORTS = WORKSPACE_EXPORTS + ['validation_gfxDispatchWords', 'Lisa_PrintVersion
            'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'free', 'malloc',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',
            'g_memHandleCallbacks', 'g_memHandleFlags', 'g_memPendingContext',
-           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS + SURFACE_EXPORTS + SPRITE_EXPORTS
+           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS + SURFACE_EXPORTS + SPRITE_EXPORTS + SINE_EXPORTS + PRIMITIVE_EXPORTS
 
 def compile_banner(flags, stem):
     # Separate TU: the production calls must not see the nonreturning printf
@@ -106,6 +123,21 @@ def compile_banner(flags, stem):
     source.write_text(LISA_VERSION_SOURCE, encoding='utf-8', newline='\n')
     obj.unlink(missing_ok=True)
     command = flags + ['-c', str(source), '-o', str(obj)]
+    subprocess.run(command, cwd=ROOT, check=True)
+    return obj, command
+
+def compile_sine(stem):
+    cc = shutil.which('gcc')
+    if not cc:
+        raise RuntimeError('Probed GCC i386 x87 math compiler required; no sin fixture fallback')
+    source, obj = BUILD/(stem+'_sine.c'), BUILD/(stem+'_sine.obj')
+    source.write_text(SINE_SOURCE, encoding='utf-8', newline='\n')
+    obj.unlink(missing_ok=True)
+    command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
+        '-Werror', '-O2', '-ffast-math', '-fno-associative-math',
+        '-fexcess-precision=fast', '-mno-sse', '-mfpmath=387',
+        '-I', str(ROOT/'decomp/include'), '-c', str(source), '-o', str(obj)]
+    print(subprocess.list2cmdline(command), flush=True)
     subprocess.run(command, cwd=ROOT, check=True)
     return obj, command
 
@@ -127,13 +159,14 @@ def build(compiler='clang', linker='lld-link', dll=DLL):
          '-fno-inline-functions', '-fno-unroll-loops', '-fno-vectorize', '-fno-slp-vectorize', '-mno-sse', '-mno-sse2',
          '-I', str(ROOT/'decomp/include'), '-c', str(ROOT/'decomp/src/mem.c'),
          '-o', str(obj)],
-        [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86',
+        [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/safeseh:no',
          '/base:0x10000000', '/out:'+str(dll), str(obj), str(stub_obj)] +
         ['/export:'+s for s in EXPORTS],
     ]
     commands.insert(1, commands[0][:-4] + ['-c', str(stub), '-o', str(stub_obj)])
     banner_obj, _ = compile_banner(commands[0][:-4], dll.stem)
-    commands[-1].append(str(banner_obj))
+    sine_obj, _ = compile_sine(dll.stem)
+    commands[-1].extend([str(banner_obj), str(sine_obj)])
     for command in commands:
         print(subprocess.list2cmdline(command), flush=True)
         subprocess.run(command, cwd=ROOT, check=True)

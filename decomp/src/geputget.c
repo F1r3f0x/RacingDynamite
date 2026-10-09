@@ -1,11 +1,13 @@
 /*
- * geputget.c - 2D Graphics blitting, font rasterization, and palette management
- * Original file: geputget.c
- * Target: MAINDOS.EXE (Watcom C/C++ 10.6, 32-bit flat protected mode)
- *         MAINDOS.EXE (MSVC 4.x / 5.0, Win32)
+ * geputget.c - Native graphics, sprite resources and font operations.
+ * Reconstructed native functions target authentic IGN_WIN.EXE. Remaining
+ * historical DOS bodies require independent Windows validation; their original
+ * annotations retain MAINDOS.EXE provenance. Original Windows compiler/version
+ * and full playable build remain unresolved.
  */
 
 #include "geputget.h"
+#include <math.h>
 #include <io.h>
 #include <fcntl.h>
 extern int g_MemoryAllocated;
@@ -178,6 +180,200 @@ volatile GfxPointerTable g_nativeImageControl; /* VA 0x00520380..8C */
 volatile GfxSpritePackingNode g_spritePackingTemplate;
 GfxSpritePackingBucket *volatile g_spritePackingBuckets[GFX_SPRITE_PACKING_BUCKET_COUNT];
 GfxSpritePackingNode *volatile g_spritePackingPages;
+
+volatile GfxPointerTable g_nativeEmptyControl; /* VA 0x0051FD00 */
+volatile GfxPointerTable g_nativePrimitiveControl; /* VA 0x0051FE98 */
+volatile GfxPointerTable g_nativeNamedControl; /* VA 0x005203B8 */
+volatile GfxPointerTable g_nativeSecondaryControl; /* VA 0x00520360 */
+volatile GfxPointerTable g_nativeLineControl; /* VA 0x0051FE30 */
+volatile GfxPointerTable g_nativePrimitiveRecordControl; /* VA 0x0051FC88 */
+volatile GfxPointerTable g_nativeAuxiliaryControl; /* VA 0x005203A0 */
+volatile GfxPairStorageControl g_nativeGraphicsPairStorage; /* VA 0x0051FC20 */
+volatile GfxPairStorageControl g_nativeNamedPairStorage; /* VA 0x00520370 */
+volatile GfxNamedPrimitiveDefault g_nativeNamedPrimitiveDefault; /* VA 0x0051AAE0..AB04 */
+volatile uint32_t g_nativeSecondaryDefaultWords[11]; /* VA 0x0051FBC8..FBF0 */
+
+/* File-backed binary64 sine constants; volatile reads retain the original
+ * arithmetic sequence under the provisional x87 compiler contract. */
+volatile const double g_nativeSineStep = 0.000244140625; /* VA 0x0047AF48 */
+volatile const double g_nativeSineFullCircle = 6.283192; /* VA 0x0047AF50 */
+volatile const double g_nativeSineAmplitude = 2147418112.0; /* VA 0x0047AF58 */
+volatile int32_t g_nativeSineTable[4096]; /* VA 0x0051BB60 */
+
+/*
+ * @original Gfx_InitSineTable (IGN_WIN.EXE @ 0x00460740, inferred geputget.c)
+ * @fidelity EXACT
+ */
+int32_t Gfx_InitSineTable(void) {
+    int32_t index;
+    int32_t result;
+
+    for (index = 0; index < 4096; index++) {
+        result = (int32_t)(sin((double)index * g_nativeSineStep *
+            g_nativeSineFullCircle) * g_nativeSineAmplitude);
+        g_nativeSineTable[index] = result;
+    }
+    return result;
+}
+
+/*
+ * @original Gfx_InitPairStorageControl (IGN_WIN.EXE @ 0x00463AB0, inferred geputget.c)
+ * @fidelity EXACT
+ */
+uint32_t *Gfx_InitPairStorageControl(GfxPairStorageControl *control) {
+    volatile GfxPairStorageControl *view;
+    uint32_t *storage;
+    uint32_t index;
+
+    view = control;
+    view->storage = (uint32_t *)Gfx_AllocBytes(128u);
+    for (index = 0; index < 16u; index++) {
+        storage = view->storage;
+        *(volatile uint32_t *)((uint32_t)storage + index * 8u) = 0;
+        storage = view->storage;
+        *(volatile uint32_t *)((uint32_t)storage + index * 8u + 4u) = 0;
+    }
+    view->limit = 15u;
+    view->opaque_prefix[1] = 0;
+    view->opaque_prefix[0] = 16u;
+    return storage;
+}
+
+/*
+ * @original Gfx_InitGraphicsPairStorage (IGN_WIN.EXE @ 0x0045F490, inferred geputget.c)
+ * @fidelity EXACT
+ */
+uint32_t *Gfx_InitGraphicsPairStorage(void) {
+    return Gfx_InitPairStorageControl((GfxPairStorageControl *)&g_nativeGraphicsPairStorage);
+}
+
+/*
+ * @original Gfx_EnablePrimitiveControl (IGN_WIN.EXE @ 0x004607C0, inferred geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_EnablePrimitiveControl(void) {
+    g_nativePrimitiveControl.opaque_prefix[0] = 1u;
+}
+
+/*
+ * @original Gfx_InitSecondaryDefaultWords (IGN_WIN.EXE @ 0x0045F640, inferred geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_InitSecondaryDefaultWords(void) {
+    g_nativeSecondaryDefaultWords[0] = 0;
+    g_nativeSecondaryDefaultWords[2] = 0;
+    g_nativeSecondaryDefaultWords[1] = 0;
+    g_nativeSecondaryDefaultWords[3] = 0;
+    g_nativeSecondaryDefaultWords[4] = 0;
+    g_nativeSecondaryDefaultWords[6] = 0;
+    g_nativeSecondaryDefaultWords[5] = 0;
+    g_nativeSecondaryDefaultWords[7] = 0;
+    g_nativeSecondaryDefaultWords[8] = 0;
+    g_nativeSecondaryDefaultWords[9] = 0;
+    g_nativeSecondaryControl.opaque_prefix[0] = 1u;
+    g_nativeSecondaryDefaultWords[10] = 0;
+    return 0;
+}
+
+/*
+ * @original Gfx_InitPrimitiveLineControl (IGN_WIN.EXE @ 0x0045FA50, inferred geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_InitPrimitiveLineControl(void) {
+    g_nativeLineControl.opaque_prefix[0] = 8u;
+}
+
+/*
+ * @original Gfx_InitNamedPrimitiveDefault (IGN_WIN.EXE @ 0x00460B50, inferred geputget.c)
+ * @fidelity EXACT
+ */
+uint32_t *Gfx_InitNamedPrimitiveDefault(void) {
+    uint32_t *parameters;
+
+    Gfx_InitPairStorageControl((GfxPairStorageControl *)&g_nativeNamedPairStorage);
+    g_nativeNamedPrimitiveDefault.name = g_nativeSpriteDefaultName;
+    g_nativeNamedPrimitiveDefault.scalar_bits[0] = 0x3f800000u;
+    g_nativeNamedPrimitiveDefault.opaque28 = 0;
+    g_nativeNamedPrimitiveDefault.opaque4 = 0;
+    g_nativeNamedPrimitiveDefault.flag = 0;
+    g_nativeNamedPrimitiveDefault.scalar_bits[3] = 0x3ecccccdu;
+    g_nativeNamedPrimitiveDefault.scalar_bits[2] = 0x3f000000u;
+    g_nativeNamedPrimitiveDefault.scalar_bits[1] = 0x3dcccccdu;
+    parameters = (uint32_t *)Gfx_AllocBytes(16u);
+    g_nativeNamedPrimitiveDefault.parameters = parameters;
+    ((volatile uint32_t *)parameters)[0] = 12u;
+    ((volatile uint32_t *)parameters)[1] = 0;
+    ((volatile uint32_t *)parameters)[2] = 4095u;
+    ((volatile uint32_t *)parameters)[3] = 0;
+    g_nativeNamedControl.opaque_prefix[0] = 1u;
+    return parameters;
+}
+
+/*
+ * @original Gfx_InitPrimitiveState (IGN_WIN.EXE @ 0x0045E610, inferred geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_InitPrimitiveState(void) {
+    uint32_t last_word;
+    uint32_t *last_pointer;
+    uint32_t next_word;
+
+    g_nativeEmptyControl.opaque_prefix[0] = 0;
+    g_nativeEmptyControl.opaque_prefix[1] = 0;
+    g_nativeEmptyControl.capacity = 0;
+    g_nativeEmptyControl.records = 0;
+    g_nativePrimitiveControl.opaque_prefix[0] = g_nativeEmptyControl.opaque_prefix[0];
+    g_nativePrimitiveControl.opaque_prefix[1] = g_nativeEmptyControl.opaque_prefix[1];
+    last_word = (uint32_t)g_nativeEmptyControl.capacity;
+    last_pointer = g_nativeEmptyControl.records;
+    g_nativePrimitiveControl.capacity = (int32_t)last_word;
+    g_nativePrimitiveControl.records = last_pointer;
+    g_nativeNamedControl.opaque_prefix[0] = g_nativeEmptyControl.opaque_prefix[0];
+    g_nativeNamedControl.opaque_prefix[1] = g_nativeEmptyControl.opaque_prefix[1];
+    last_word = (uint32_t)g_nativeEmptyControl.capacity;
+    last_pointer = g_nativeEmptyControl.records;
+    g_nativeNamedControl.capacity = (int32_t)last_word;
+    g_nativeNamedControl.records = last_pointer;
+    g_nativeSecondaryControl.opaque_prefix[0] = g_nativeEmptyControl.opaque_prefix[0];
+    g_nativeSecondaryControl.opaque_prefix[1] = g_nativeEmptyControl.opaque_prefix[1];
+    last_word = (uint32_t)g_nativeEmptyControl.capacity;
+    last_pointer = g_nativeEmptyControl.records;
+    g_nativeSecondaryControl.capacity = (int32_t)last_word;
+    g_nativeSecondaryControl.records = last_pointer;
+    g_nativeLineControl.opaque_prefix[0] = g_nativeEmptyControl.opaque_prefix[0];
+    g_nativeLineControl.opaque_prefix[1] = g_nativeEmptyControl.opaque_prefix[1];
+    last_word = (uint32_t)g_nativeEmptyControl.capacity;
+    last_pointer = g_nativeEmptyControl.records;
+    g_nativeLineControl.capacity = (int32_t)last_word;
+    g_nativeLineControl.records = last_pointer;
+    g_nativePrimitiveRecordControl.opaque_prefix[0] = g_nativeEmptyControl.opaque_prefix[0];
+    g_nativePrimitiveRecordControl.opaque_prefix[1] = g_nativeEmptyControl.opaque_prefix[1];
+    last_word = (uint32_t)g_nativeEmptyControl.capacity;
+    last_pointer = g_nativeEmptyControl.records;
+    g_nativePrimitiveRecordControl.capacity = (int32_t)last_word;
+    g_nativePrimitiveRecordControl.records = last_pointer;
+    g_nativeAuxiliaryControl.opaque_prefix[0] = g_nativeEmptyControl.opaque_prefix[0];
+    g_nativeAuxiliaryControl.opaque_prefix[1] = g_nativeEmptyControl.opaque_prefix[1];
+    last_word = (uint32_t)g_nativeEmptyControl.capacity;
+    last_pointer = g_nativeEmptyControl.records;
+    g_nativeAuxiliaryControl.capacity = (int32_t)last_word;
+    next_word = g_nativeEmptyControl.opaque_prefix[0];
+    g_nativeAuxiliaryControl.records = last_pointer;
+    g_nativeImageControl.opaque_prefix[0] = next_word;
+    g_nativeImageControl.opaque_prefix[1] = g_nativeEmptyControl.opaque_prefix[1];
+    last_word = (uint32_t)g_nativeEmptyControl.capacity;
+    last_pointer = g_nativeEmptyControl.records;
+    g_nativeImageControl.capacity = (int32_t)last_word;
+    g_nativeImageControl.records = last_pointer;
+    Gfx_InitGraphicsPairStorage();
+    Gfx_InitSineTable();
+    Gfx_InitDefaultSpriteDescriptor();
+    Gfx_InitSpritePackingState();
+    Gfx_EnablePrimitiveControl();
+    Gfx_InitSecondaryDefaultWords();
+    Gfx_InitPrimitiveLineControl();
+    Gfx_InitNamedPrimitiveDefault();
+}
 
 /*
  * @original Gfx_InitDefaultSpriteDescriptor (IGN_WIN.EXE @ 0x004611D0, geputget.c)
