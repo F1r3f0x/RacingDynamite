@@ -116,3 +116,15 @@ Use UV_CACHE_DIR=build/uv-cache, UV_OFFLINE=1 and Python through uv.
 runs the real aggregate verifier, fidelity audit and SQLite export/check.
 LF working/index input checks and staged gates precede commit.
 Inventory: 1,028 candidates, 40 reconstructed routines.
+
+
+## Real bucket caller integration follow-up (2026-10-09)
+
+[Bucket insertion](windows_gfx_sprite_packing_buckets.md), RVA 0x616C0, now
+executes the real page/gap/link/allocation bodies in 2,734 differential bucket
+calls per binary. These enter the page helper 64 times, gap helper 2,753 times
+and link helper 352 times, including fault/nonreturning paths. Existing standalone
+counts remain unchanged. This supersedes earlier analysis-only bucket statements;
+storage assignment RVA 0x61530 and release RVA 0x618B0 remain analysis-only.
+CRT malloc is modeled. No instruction equality, native heap/graphics/game parity,
+original compiler/link layout or new startup integration is claimed.

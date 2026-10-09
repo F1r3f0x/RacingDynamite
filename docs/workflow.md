@@ -1,5 +1,20 @@
 # Enforced agent workflow
 
+## Sprite packing bucket insertion (2026-10-09)
+
+[Bucket insertion](ghidra/windows_gfx_sprite_packing_buckets.md), VA 0x004616C0 /
+RVA 0x616C0, now has production C89 with the verified eight-byte bucket view.
+Real page/gap/link/allocation bodies preserve ordered copies/links, live rereads,
+wrapping range/pixel/table arithmetic, exact arena aliases and unchecked failure
+effects. 2,734 comparisons per binary include 1,140 persistent follow-ups, 127
+faults and two externally bounded cycle prefixes. All prior packing/lifecycle/
+memory/font/file/backend coverage remains. Inventory: 1,028 candidates, 42
+reconstructed routines. Storage assignment RVA 0x61530 and release RVA 0x618B0
+remain analysis-only; primitive/CRT/callbacks stay modeled. Instruction equality,
+original compiler/link layout and native graphics/heap/game parity are unverified.
+No playable rebuilt executable is certified. Earlier entries below are historical.
+
+
 ## Sprite packing gap search (2026-10-08)
 
 [The bounded gap search](ghidra/windows_gfx_sprite_packing_gap.md), VA 0x00461870 /

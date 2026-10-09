@@ -2,7 +2,7 @@
 # requires-python = ">=3.13"
 # dependencies = ["pefile==2024.8.26", "capstone==5.0.7", "unicorn==2.1.4"]
 # ///
-"""Packing allocation and gap search; CRT heap is an explicit validation boundary."""
+"""Packing bucket insertion, allocation and gap search; CRT heap is an explicit validation boundary."""
 import hashlib
 import random
 import struct
@@ -23,9 +23,10 @@ if not __debug__:
 
 MASK = 0xffffffff
 ARENA, SIZE = 0x3000000, 0x100000
-TEMPLATE, HEAD = 0x51fc00, 0x51fe40
+TEMPLATE, HEAD, TABLE = 0x51fc00, 0x51fe40, 0x51ff58
 DLL = BUILD / 'sprite_packing_validation.dll'
 ROUTINES = {
+    'Gfx_AddSpritePackingBucket': (0x616c0,273,1,2,0x140b,'6da9083d32b7bd4186fb626b6fb5fe0fc099a6d769e332c98805b6d9686700ed'),
     'Gfx_FindSpritePackingGap': (0x61870,62,0,2,0x105,'9fec91b9a7a79937df056da6cea0f29c91ccd4aa4549a1eef45cf0716a71872d'),
     'Gfx_AddSpritePackingPage': (0x617e0,85,0,0,0x308,'3e028a97ebd2430f4181d83bd55f460261c9506827cddcee83adce2ea65650b9'),
     'Gfx_AllocBytes': (0x5f4a0,21,0,1,0,'2a7819df61b5e4eddd3b8f22a5a85e18f39ff17301f5ab6db1733e69913da9f6'),
@@ -49,10 +50,11 @@ def inspect(pe):
         assert fpo[r] == (n,l,a,b) and hashlib.sha256(raw).hexdigest() == digest
         assert sum(i.size for i in ins) == n and ins[-1].mnemonic == 'ret'
         assert not any(struct.unpack('<I',pe.get_data(e,4))[0] == r+0x400000 for e in reloc)
-        expected_relocs = {0x617e4,0x617fe,0x6181c,0x61824,0x6182e} if r == 0x617e0 else set()
+        expected_relocs = ({0x617e4,0x617fe,0x6181c,0x61824,0x6182e} if r == 0x617e0 else
+            {0x616d6,0x61704,0x61756,0x61760,0x617bc} if r == 0x616c0 else set())
         assert {e for e in reloc if r <= e < r+n} == expected_relocs
         for e in expected_relocs:
-            assert struct.unpack('<I',pe.get_data(e,4))[0] == (TEMPLATE if e == 0x617e4 else HEAD)
+            assert struct.unpack('<I',pe.get_data(e,4))[0] == (TEMPLATE if e in (0x617e4,0x61704,0x61760) else TABLE if e == 0x617bc else HEAD)
     assert [(i.address,i.op_str) for i in md.disasm(pe.get_data(0x5f4a0,21),0x45f4a0)
         if i.mnemonic == 'call'] == [(0x45f4ac,'0x469400')]
     assert [(i.address,i.op_str) for i in md.disasm(pe.get_data(0x61840,47),0x461840)
@@ -72,6 +74,13 @@ def inspect(pe):
         ins = list(md.disasm(pe.get_data(site,16),site+0x400000))
         assert [(i.mnemonic,i.op_str) for i in ins[:3]] == [('call','0x4617e0'),('mov','ebx, dword ptr [0x51fe40]'),('jmp','0x4616cb')]
 
+    assert pe.get_data(0x617d1,15) == b'\xcc'*15
+    assert [(r,i.address) for r,(n,*_) in fpo.items()
+        for i in md.disasm(pe.get_data(r,n),r+0x400000)
+        if i.mnemonic in ('call','jmp') and i.op_str == '0x4616c0'] == [(0x61530,0x4615f6)]
+    assert [(i.mnemonic,i.op_str) for i in md.disasm(pe.get_data(0x615ec,24),0x4615ec)][:6] == [
+        ('mov','eax, dword ptr [0x51fe40]'),('mov','ecx, dword ptr [ebx + 8]'),
+        ('push','eax'),('push','ecx'),('call','0x4616c0'),('add','esp, 8')]
     assert pe.get_data(0x618ae,2) == b'\xcc'*2
     gap_instructions = [(i.mnemonic,i.op_str) for i in md.disasm(pe.get_data(0x61870,62),0x461870)]
     assert gap_instructions == [
@@ -120,28 +129,37 @@ class State:
             words = ([0]*6, [MASK]*6, [0x80000000]*6, list(range(6)))[seed]
             self.template[:] = struct.pack('<6I',*words)
         self.head = bytearray(4)
+        self.table = bytearray(rng.randbytes(1028))
+        self.read_budget = None
+        self.read_count = 0
         self.events = []
         self.fault = None
 
     def region(self, address, size):
-        for base,data in ((ARENA,self.arena),(TEMPLATE,self.template),(HEAD,self.head)):
+        for base,data in ((ARENA,self.arena),(TEMPLATE,self.template),(HEAD,self.head),(TABLE,self.table)):
             if base <= address and address+size <= base+len(data):
                 return data,address-base
         return None,None
 
     def snapshot(self):
-        return (bytes(self.arena),bytes(self.template),bytes(self.head))
+        return (bytes(self.arena),bytes(self.template),bytes(self.head),bytes(self.table))
 
     def read(self, address):
+        address &= MASK
         data,offset = self.region(address,4)
         if data is None:
             self.fault = ('read',address,4)
             raise GapStop
         value = struct.unpack_from('<I',data,offset)[0]
         self.events.append(('read',address,4,value))
+        self.read_count += 1
+        if self.read_budget is not None and self.read_count == self.read_budget:
+            self.fault = ('budget',self.read_budget)
+            raise GapStop
         return value
 
     def write(self, address, value):
+        address &= MASK
         data,offset = self.region(address,4)
         if data is None:
             self.fault = ('write',address,4)
@@ -229,6 +247,70 @@ class State:
         return result
 
 
+    def bucket(self, request, first, replies, read_budget=None):
+        self.read_budget,self.read_count = read_budget,0
+        def put(address,value):
+            if not self.write(address,value&MASK):
+                raise GapStop
+        try:
+            page = first
+            while True:
+                if page == 0:
+                    self.boundary('Gfx_AddSpritePackingPage',())
+                    self.page(replies,'real')
+                    if self.fault:
+                        return None
+                    page = self.read(HEAD)
+                    continue
+                child = self.read(page+12)
+                self.boundary('Gfx_FindSpritePackingGap',(request,child))
+                previous = self.gap(request,child)
+                if self.fault:
+                    return None
+                if previous:
+                    break
+                page = self.read(page+20)
+            self.boundary('Gfx_AllocBytes',(24,))
+            node = self.allocate(24,replies)
+            for k in range(6):
+                put(node+4*k,self.read(TEMPLATE+4*k))
+            if previous == MASK:
+                put(node+4,request)
+                pixels = self.read(page+8)
+                start = self.read(node)
+                put(node+8,pixels+((start<<8)&MASK))
+                following = self.read(page+12)
+                put(node+20,following)
+                if following:
+                    put(following+16,node)
+                put(page+12,node)
+            else:
+                put(node,self.read(previous+4))
+                put(node+4,self.read(previous+4)+request)
+                start = self.read(node)
+                pixels = self.read(page+8)
+                put(node+8,pixels+((start<<8)&MASK))
+                following = self.read(previous+20)
+                self.boundary('Gfx_LinkSpritePackingNode',(previous,node,following))
+                put(node+20,following)
+                put(node+16,previous)
+                put(previous+20,node)
+                if following:
+                    put(following+16,node)
+            self.boundary('Gfx_AllocBytes',(8,))
+            bucket = self.allocate(8,replies)
+            slot = (TABLE+((request<<2)&MASK))&MASK
+            old = self.read(slot)
+            put(bucket,old)
+            put(bucket+4,node)
+            put(slot,bucket)
+            return bucket
+        except GapStop:
+            return None
+        finally:
+            self.read_budget = None
+
+
 class Session:
     def __init__(self, pe, state, original):
         self.uc = Uc(UC_ARCH_X86,UC_MODE_32)
@@ -240,11 +322,13 @@ class Session:
         self.uc.mem_map(STACK,0x10000)
         self.uc.mem_map(STOP,0x1000)
         self.symbols = ({name:0x400000+data[0] for name,data in ROUTINES.items()} |
-            {'malloc':0x469400,'g_spritePackingTemplate':TEMPLATE,'g_spritePackingPages':HEAD}) if original else {
+            {'malloc':0x469400,'Gfx_LinkSpritePackingNode':0x461690,
+                'g_spritePackingTemplate':TEMPLATE,'g_spritePackingPages':HEAD,'g_spritePackingBuckets':TABLE}) if original else {
             e.name.decode():self.base+e.address for e in pe.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
         self.fields = [(TEMPLATE,self.symbols['g_spritePackingTemplate'],24),
-            (HEAD,self.symbols['g_spritePackingPages'],4)]
-        for address,data in ((ARENA,state.arena),(self.fields[0][1],state.template),(self.fields[1][1],state.head)):
+            (HEAD,self.symbols['g_spritePackingPages'],4),
+            (TABLE,self.symbols['g_spritePackingBuckets'],1028)]
+        for address,data in ((ARENA,state.arena),(self.fields[0][1],state.template),(self.fields[1][1],state.head),(self.fields[2][1],state.table)):
             self.uc.mem_write(address,bytes(data))
         self.uc.hook_add(UC_HOOK_CODE,self.code)
         self.uc.hook_add(UC_HOOK_MEM_READ | UC_HOOK_MEM_WRITE,self.memory)
@@ -252,6 +336,8 @@ class Session:
         self.uc.hook_add(UC_HOOK_INTR,self.interrupt)
 
     def normalize(self, address):
+        if self.bucket_mode and address == self.slot[1]:
+            return self.slot[0]
         for logical,physical,n in self.fields:
             if physical <= address < physical+n:
                 return logical+address-physical
@@ -266,7 +352,8 @@ class Session:
     def snapshot(self):
         return (bytes(self.uc.mem_read(ARENA,SIZE)),
             bytes(self.uc.mem_read(self.fields[0][1],24)),
-            bytes(self.uc.mem_read(self.fields[1][1],4)))
+            bytes(self.uc.mem_read(self.fields[1][1],4)),
+            bytes(self.uc.mem_read(self.fields[2][1],1028)))
 
     def memory(self, uc, access, address, size, value, _):
         if STACK <= address < STACK+0x10000:
@@ -284,14 +371,15 @@ class Session:
                 return  # The invalid-access hook records the attempted read.
             value = int.from_bytes(uc.mem_read(address,size),'little')
         self.events.append((kind,self.normalize(address),size,value))
-        if self.read_limit is not None and len(self.events) == self.read_limit:
+        self.read_count += int(kind == 'read')
+        if self.read_limit is not None and (self.read_count if self.bucket_mode else len(self.events)) == self.read_limit:
             assert kind == 'read'
             self.fault = ('budget',self.read_limit)
             uc.emu_stop()
 
     def invalid(self, uc, access, address, size, value, _):
         assert access in (UC_MEM_WRITE_UNMAPPED,UC_MEM_READ_UNMAPPED), (access,hex(address))
-        self.fault = ('write' if access == UC_MEM_WRITE_UNMAPPED else 'read',address,size)
+        self.fault = ('write' if access == UC_MEM_WRITE_UNMAPPED else 'read',self.normalize(address),size)
         return False
 
     def interrupt(self, uc, number, _):
@@ -300,6 +388,12 @@ class Session:
         uc.emu_stop()
 
     def code(self, uc, address, size, _):
+        if self.bucket_mode:
+            for name,argc in (('Gfx_AddSpritePackingPage',0),('Gfx_FindSpritePackingGap',2),('Gfx_LinkSpritePackingNode',3)):
+                if address == self.symbols[name]:
+                    sp = uc.reg_read(UC_X86_REG_ESP)
+                    args = struct.unpack('<'+'I'*argc,uc.mem_read(sp+4,4*argc)) if argc else ()
+                    self.events.append(('entry',name,args,self.snapshot()))
         if self.page_mode:
             for name,argc in (('Gfx_AllocBytes',1),('Gfx_AllocAlignedBytes',2)):
                 if address == self.symbols[name]:
@@ -335,6 +429,11 @@ class Session:
             uc.reg_write(UC_X86_REG_EIP,ret)
 
     def run(self, name, args, replies, expected, eax, seed, page_mode=None, read_limit=None):
+        self.bucket_mode = name == 'Gfx_AddSpritePackingBucket'
+        if self.bucket_mode:
+            offset = (args[0]<<2)&MASK
+            self.slot = ((TABLE+offset)&MASK,(self.symbols['g_spritePackingBuckets']+offset)&MASK)
+        self.read_count = 0
         self.page_mode = page_mode
         self.read_limit = read_limit
         uc = self.uc
@@ -448,6 +547,162 @@ def verify_gap(original, rebuilt):
     return coverage
 
 
+def verify_bucket(original, rebuilt):
+    coverage = {'comparisons':0,'persistent_followups':0,'faults':0,
+        'cycle_prefixes':0,'page_entries':0,'gap_entries':0,'link_entries':0,
+        'prefix_insertions':0,'interior_insertions':0}
+    page,other,child,following,node,bucket = [ARENA+x for x in (0x100,0x180,0x200,0x280,0x400,0x600)]
+    def state_for(seed, records=()):
+        state = State(seed)
+        # Unconsumed template fields retain arbitrary bits. Its children can be
+        # copied into newly allocated pages, so use a valid empty child list.
+        struct.pack_into('<I',state.template,12,0)
+        for address,words in records:
+            struct.pack_into('<6I',state.arena,address-ARENA,*[x&MASK for x in words])
+        return state
+    def record(start=0,end=0,pixels=0xabcdef00,children=0,previous=0x98765432,next=0):
+        return (start,end,pixels,children,previous,next)
+    def sequence(state, calls, budget=None):
+        sessions = [Session(p,state,o) for p,o in ((original,True),(rebuilt,False))]
+        for index,(request,first,replies,mutations) in enumerate(calls):
+            for dest,word in mutations:
+                data,offset = state.region(dest,4)
+                struct.pack_into('<I',data,offset,word&MASK)
+                for session in sessions:
+                    session.uc.mem_write(session.physical(dest),struct.pack('<I',word&MASK))
+            state.events,state.fault = [],None
+            pending = list(replies)
+            result = state.bucket(request,first,pending,budget)
+            consumed = replies[:len(replies)-len(pending)]
+            for session in sessions:
+                session.run('Gfx_AddSpritePackingBucket',(request,first),consumed,state,result,
+                    coverage['comparisons']+index,page_mode='real',read_limit=budget)
+            coverage['comparisons'] += 1
+            coverage['persistent_followups'] += int(index != 0)
+            coverage['faults'] += int(state.fault is not None and state.fault[0] != 'budget')
+            coverage['cycle_prefixes'] += int(state.fault is not None and state.fault[0] == 'budget')
+            entries = [e[1] for e in state.events if e[0] == 'entry']
+            for name,key in (('Gfx_AddSpritePackingPage','page_entries'),('Gfx_FindSpritePackingGap','gap_entries'),('Gfx_LinkSpritePackingNode','link_entries')):
+                coverage[key] += entries.count(name)
+            if state.fault is None:
+                coverage['interior_insertions' if 'Gfx_LinkSpritePackingNode' in entries else 'prefix_insertions'] += 1
+                assert result == replies[-1][0]
+            if state.fault is not None:
+                break
+    # Every ordinary table slot, including zero/256. Calls reuse the same CPU
+    # and memory while consuming two separate empty page child lists.
+    for request in range(257):
+        for seed in range(4):
+            state = state_for(seed,[(page,record()),(other,record(pixels=0x80000000))])
+            sequence(state,[(request,page,[(node,[]),(bucket,[])],[]),
+                (request,other,[(node+24,[]),(bucket+8,[])],[])])
+    print('Bucket table-slot coverage:',coverage['comparisons'],flush=True)
+    requests = (0,1,16,255,256,0x40000001,0x80000001,0xc0000001,0x800000ff)
+    # Exact prefix equality and negative/high-bit requests. Shifted table
+    # indexing wraps as a dword without a signed extent guard.
+    for seed in range(8):
+        for request in requests:
+            state = state_for(seed,[(page,record(children=child)),
+                (child,record(start=request,end=MASK,next=0x80000000))])
+            sequence(state,[(request,page,[(node,[]),(bucket,[])],[])])
+    # Interior fit; predecessor end is reread after the first node store.
+    # Five allocation targets and five bucket targets cover exact aliases with
+    # page, predecessor, successor and each other, beyond distinct allocations.
+    for seed in range(8):
+        for target in (node,page,child,following):
+            for result in (bucket,page,child,following,target):
+                state = state_for(seed,[(page,record(children=child)),
+                    (child,record(end=16,next=following)),(following,record(start=64,end=256))])
+                sequence(state,[(16,page,[(target,[]),(result,[])],[])])
+    for seed in range(8):
+        for target in (node,page,child):
+            for result in (bucket,page,child,target):
+                state = state_for(seed,[(page,record(children=child)),(child,record(start=64))])
+                sequence(state,[(16,page,[(target,[]),(result,[])],[])])
+    print('Bucket alias coverage:',coverage['comparisons'],flush=True)
+    # Wrapped range sums and pixel shifts; size aliases slot 1 under dword
+    # multiplication, with hand-picked gap inequalities rather than range guards.
+    for request,end in ((1,0xffffffff),(256,0xffffffff),(0x40000001,0xc00000ff),
+            (0x80000001,16),(0xc0000001,16),(0x800000ff,16)):
+        for seed in range(8):
+            state = state_for(seed,[(page,record(children=child)),
+                (child,record(start=0x80000000,end=end))])
+            sequence(state,[(request,page,[(node,[]),(bucket,[])],[])])
+    # Existing page exhausted, next page fits; both gap calls execute real code.
+    for seed in range(16):
+        state = state_for(seed,[(page,record(children=child,next=other)),
+            (child,record(end=256)),(other,record())])
+        sequence(state,[(16,page,[(node,[]),(bucket,[])],[])])
+    # Page creation reached through initial null and through list exhaustion.
+    # Use the real page/aligned/wrapper bodies and modeled CRT only.
+    for seed in range(16):
+        for first in (0,page):
+            state = state_for(seed,[(page,record(children=child)),(child,record(end=256))])
+            struct.pack_into('<I',state.head,0,page if first else 0)
+            replies = [(other,[]),(ARENA+0x40000+seed,[]),(node,[]),(bucket,[])]
+            sequence(state,[(16,first,replies,[])])
+    # Bounded allocator mutations distinguish saved page/predecessor addresses
+    # from live range, child, pixel, template and table reads after allocation.
+    for seed in range(16):
+        for interior in (False,True):
+            state = state_for(seed,[(page,record(children=child)),
+                (child,record(start=0 if interior else 64,end=16,next=following)),
+                (following,record(start=64,end=256)),(other,record())])
+            first_mutations = [(HEAD,other),(TEMPLATE,0x80000001),
+                (page+8,0xfffffff0),(page+12,following),(child+4,0xfffffffe),(child+20,0)]
+            last_mutations = [(TABLE+64,0xaabbccdd),(node+4,0x11111111),(HEAD,0)]
+            sequence(state,[(16,page,[(node,first_mutations),(bucket,last_mutations)],[])])
+    # Persistent eight-bucket chain consumes actual newly linked nodes each time.
+    for seed in range(16):
+        state = state_for(seed,[(page,record())])
+        struct.pack_into('<I',state.template,0,0)
+        struct.pack_into('<I',state.table,64,0)
+        calls = [(16,page,[(node+24*k,[]),(bucket+8*k,[])],[]) for k in range(8)]
+        sequence(state,calls)
+        # Hand-derived eight-node/bucket result independently constrains the
+        # oracle, including first-prefix previous preservation and final head.
+        template_previous = struct.unpack_from('<I',state.template,16)[0]
+        for k in range(8):
+            assert struct.unpack_from('<6I',state.arena,node+24*k-ARENA) == (
+                16*k,16*(k+1),(0xabcdef00+(16*k<<8))&MASK,0,
+                node+24*(k-1) if k else template_previous,
+                node+24*(k+1) if k<7 else 0)
+            assert struct.unpack_from('<2I',state.arena,bucket+8*k-ARENA) == (
+                bucket+8*(k-1) if k else 0,node+24*k)
+        assert struct.unpack_from('<I',state.table,64)[0] == bucket+56
+    # Unchecked malloc failures at node/page/pixels/bucket; invalid initial page,
+    # predecessor-successor, prefix repair, and cached page pixel read.
+    for seed in range(8):
+        for interior in (False,True):
+            records = [(page,record(children=child)),(child,record(start=0 if interior else 64,end=16))]
+            for replies in ([(0,[])],[(node,[]),(0,[])],
+                    [(node,[(child+20,0x80000000)])] if interior else [(node,[(page+12,0x80000000)])]):
+                state = state_for(seed,records)
+                sequence(state,[(16,page,replies,[])])
+        for replies in ([(0,[])],[(other,[]),(0,[])],
+                [(other,[]),(ARENA+0x40000,[]),(0,[])],
+                [(other,[]),(ARENA+0x40000,[]),(node,[]),(0,[])]):
+            state = state_for(seed)
+            sequence(state,[(16,0,replies,[])])
+    sequence(state_for(500),[(16,0x80000000,[],[])])
+    sequence(state_for(501,[(page,record(children=0x80000000))]),[(16,page,[],[])])
+    # Truncated node/page mappings preserve read/write fault location and prefix.
+    sequence(state_for(502),[(16,ARENA+SIZE-4,[],[])])
+    sequence(state_for(503,[(page,record())]),[(16,page,[(ARENA+SIZE-8,[])],[])])
+    # An unchecked out-of-table slot faults only after insertion and bucket
+    # allocation. Normalize its relocated address without mapping it.
+    for seed in range(8):
+        state = state_for(seed,[(page,record())])
+        sequence(state,[(0x01000000,page,[(node,[]),(bucket,[])],[])])
+    # Nonproductive child and page cycles: externally stop after 31 reads.
+    state = state_for(600,[(page,record(children=child)),(child,record(end=256,next=child))])
+    sequence(state,[(16,page,[],[])],budget=31)
+    state = state_for(601,[(page,record(children=child,next=page)),(child,record(end=256))])
+    sequence(state,[(16,page,[],[])],budget=31)
+    print('Bucket coverage:',coverage,flush=True)
+    return coverage
+
+
 def verify_sprite_packing():
     verify_target()
     original = pefile.PE(str(TARGET))
@@ -539,6 +794,9 @@ def verify_sprite_packing():
     gap_counts = verify_gap(original,rebuilt)
     counts['Gfx_FindSpritePackingGap'] = gap_counts['comparisons']
     faults['Gfx_FindSpritePackingGap'] = gap_counts['faults']
+    bucket_counts = verify_bucket(original,rebuilt)
+    counts['Gfx_AddSpritePackingBucket'] = bucket_counts['comparisons']
+    faults['Gfx_AddSpritePackingBucket'] = bucket_counts['faults']
     for name,data in ROUTINES.items():
         details = {'scope':'Real allocator bodies; modeled CRT malloc; ordered accesses and CRT-entry arena/template/head snapshots; full state/image preservation; return ABI on normal completion; fault kind/address and preceding effects on failure',
             'persistent_repeats':page_counts['persistent_followups'] if name == 'Gfx_AddSpritePackingPage' else (counts[name]-faults[name])//2,'fault_cases':faults[name],
@@ -548,7 +806,12 @@ def verify_sprite_packing():
         if name == 'Gfx_FindSpritePackingGap':
             details.update(scope='Read-only packing gap search; raw-offset signed/wrapping oracle; exact ordered reads, full arena/template/head/image preservation, normal EAX/stack/nonvolatile/DF ABI; unmapped read effects and bounded nonreturning cycle prefixes',
                 persistent_repeats=gap_counts['persistent_followups'],gap_coverage=gap_counts,
-                limitations='Packing callers are statically analyzed only; no instruction equality, original compiler/link layout, native fault/runtime or game parity; cycle prefixes do not prove general liveness')
+                bucket_integration=bucket_counts,
+                limitations='Storage assignment remains statically analyzed only; bucket insertion executes real gap calls; no instruction equality, original compiler/link layout, native fault/runtime or game parity; cycle prefixes do not prove general liveness')
+        if name == 'Gfx_AddSpritePackingBucket':
+            details.update(scope='Real page/gap/link/allocation bodies with modeled CRT; independent raw-offset oracle; ordered accesses and boundary snapshots including the full bucket table; exact aliases, mutations, persistent insertion chains, normal return ABI, fault effects and bounded cycle prefixes',
+                persistent_repeats=bucket_counts['persistent_followups'],bucket_coverage=bucket_counts,
+                limitations='Storage/release callers and workspace renderers unreconstructed; no instruction equality, original compiler/link layout or native heap/graphics/game/fault parity; external cycle prefixes do not establish liveness')
         for kind in ('compilation','emulation'):
             record_run(data[0],kind,'pass',inputs=INPUTS,artifact=DLL.relative_to(ROOT).as_posix(),
                 cases=counts[name] if kind == 'emulation' else 0,

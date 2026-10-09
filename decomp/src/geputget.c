@@ -326,6 +326,74 @@ GfxSpritePackingNode *Gfx_FindSpritePackingGap(int32_t size,
 }
 
 /*
+ * @original Gfx_AddSpritePackingBucket (IGN_WIN.EXE @ 0x004616C0, geputget.c)
+ * @fidelity EXACT
+ */
+GfxSpritePackingBucket *Gfx_AddSpritePackingBucket(int32_t size,
+    GfxSpritePackingNode *first_page) {
+    volatile GfxSpritePackingNode *page;
+    volatile GfxSpritePackingNode *node;
+    volatile GfxSpritePackingNode *previous;
+    GfxSpritePackingNode *next;
+    volatile GfxSpritePackingBucket *bucket;
+    GfxSpritePackingBucket *volatile *slot;
+    GfxSpritePackingBucket *old_bucket;
+    unsigned char *pixels;
+    uint32_t offset;
+
+    page = first_page;
+    for (;;) {
+        if (page == 0) {
+            Gfx_AddSpritePackingPage();
+            page = g_spritePackingPages;
+            continue;
+        }
+        previous = Gfx_FindSpritePackingGap(size, page->children);
+        if (previous != 0) {
+            break;
+        }
+        page = page->next;
+    }
+    node = (GfxSpritePackingNode *)Gfx_AllocBytes(24u);
+    node->range_start = g_spritePackingTemplate.range_start;
+    node->range_end = g_spritePackingTemplate.range_end;
+    node->pixels = g_spritePackingTemplate.pixels;
+    node->children = g_spritePackingTemplate.children;
+    node->previous = g_spritePackingTemplate.previous;
+    node->next = g_spritePackingTemplate.next;
+    if (previous == (GfxSpritePackingNode *)0xFFFFFFFFu) {
+        node->range_end = (uint32_t)size;
+        pixels = page->pixels;
+        offset = node->range_start << 8;
+        node->pixels = (unsigned char *)((uint32_t)pixels + offset);
+        next = page->children;
+        node->next = next;
+        if (next != 0) {
+            ((volatile GfxSpritePackingNode *)next)->previous =
+                (GfxSpritePackingNode *)node;
+        }
+        page->children = (GfxSpritePackingNode *)node;
+    } else {
+        node->range_start = previous->range_end;
+        node->range_end = previous->range_end + (uint32_t)size;
+        offset = node->range_start << 8;
+        pixels = page->pixels;
+        node->pixels = (unsigned char *)((uint32_t)pixels + offset);
+        next = previous->next;
+        Gfx_LinkSpritePackingNode((GfxSpritePackingNode *)previous,
+            (GfxSpritePackingNode *)node, next);
+    }
+    bucket = (GfxSpritePackingBucket *)Gfx_AllocBytes(8u);
+    slot = (GfxSpritePackingBucket *volatile *)
+        ((uint32_t)g_spritePackingBuckets + ((uint32_t)size << 2));
+    old_bucket = *slot;
+    bucket->next = old_bucket;
+    bucket->node = (GfxSpritePackingNode *)node;
+    *slot = (GfxSpritePackingBucket *)bucket;
+    return (GfxSpritePackingBucket *)bucket;
+}
+
+/*
  * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0, geputget.c)
  * @fidelity EXACT
  */

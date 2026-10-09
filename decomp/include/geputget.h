@@ -111,7 +111,11 @@ typedef struct GfxSpritePackingNode {
     struct GfxSpritePackingNode *previous;
     struct GfxSpritePackingNode *next;
 } GfxSpritePackingNode;
-typedef struct GfxSpritePackingBucket GfxSpritePackingBucket;
+/* Eight-byte Windows bucket: next list entry, then its packing node. */
+typedef struct GfxSpritePackingBucket {
+    struct GfxSpritePackingBucket *next;
+    GfxSpritePackingNode *node;
+} GfxSpritePackingBucket;
 #define GFX_SPRITE_PACKING_BUCKET_COUNT 257
 extern volatile GfxSpritePackingNode g_spritePackingTemplate; /* VA 0x0051FC00 */
 extern GfxSpritePackingBucket *volatile g_spritePackingBuckets[GFX_SPRITE_PACKING_BUCKET_COUNT]; /* VA 0x0051FF58 */
@@ -128,6 +132,10 @@ void *Gfx_AddSpritePackingPage(void); /* VA 0x004617E0 */
  * or null when exhausted. Does not validate ranges, pointers or cycles. */
 GfxSpritePackingNode *Gfx_FindSpritePackingGap(int32_t size,
     GfxSpritePackingNode *first); /* VA 0x00461870 */
+/* Signed extent, initial page head; returns the published bucket (incidental
+ * EAX, discarded by the sole direct caller). No validation or failure guards. */
+GfxSpritePackingBucket *Gfx_AddSpritePackingBucket(int32_t size,
+    GfxSpritePackingNode *first_page); /* VA 0x004616C0 */
 int Gfx_InitSpritePackingState(void); /* VA 0x004614D0; EAX=0 */
 /* Returns the unchanged previous argument (incidental original EAX).
  * Current must be writable; exact node aliases retain ordered stores. */
