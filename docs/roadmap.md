@@ -4,6 +4,28 @@ This document defines the complete engineering roadmap and milestone plan for **
 
 ---
 
+## Persistent Windows execution roadmap (2026-10-09)
+
+The persistent goal is a playable rebuilt standard Windows game with documented
+native startup, menus, rendering, input, audio and representative races. Continue
+across independently authenticated, validated and separately committed features.
+The clean starting checkout was 169c493; local target fingerprint and live Ghidra
+reachability pass. Active program selection is a user-provided assumption.
+
+Current dependency path: pixel leaf 0x612A0 and storage 0x61530 are reconstructed;
+byte/aligned free 0x5F8B0/0x61A60 add real release dependencies. Next reconstruct
+packing release 0x618B0, then recover remaining ImageOp 0x61360 dependencies
+before implementing the whole operation. Rendering register-ABI blockers remain
+in windows_triangle.md; pursue unblocked resource/platform work while resolving
+a pure-C integration strategy. Native startup/presentation baseline and executable
+linking, original toolchain evidence, input/audio, menus and race systems remain
+open. Focused DLL/emulation evidence does not certify any of those milestones.
+
+Protected originals, unrelated edits, tests/test_physics.c and the deleted
+tools/dump_456470.py remain untouched. Each feature must retain existing suites,
+check LF working/index bytes, update affected SQLite RVAs/evidence and generated
+exports, pass workflow gates/hooks and commit before moving to the next feature.
+
 ## Active Windows Reconstruction Milestones (2026-10-07)
 
 The [Windows decompilation plan](decomp_plan.md) governs current priorities:

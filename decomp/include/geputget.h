@@ -140,6 +140,9 @@ extern GfxSpritePackingBucket *volatile g_spritePackingBuckets[GFX_SPRITE_PACKIN
 extern GfxSpritePackingNode *volatile g_spritePackingPages; /* VA 0x0051FE40 */
 /* Native graphics allocation: zero bytes bypass CRT malloc. */
 void *Gfx_AllocBytes(uint32_t size); /* VA 0x0045F4A0 */
+/* Both callers discard incidental EAX; only the byte wrapper skips null. */
+void Gfx_FreeBytes(void *pointer); /* VA 0x0045F8B0 */
+void Gfx_FreeAlignedBytes(unsigned char *pointer); /* VA 0x00461A60 */
 /* Unsigned 32-bit size/alignment arithmetic; back-pointer precedes result.
  * No zero-alignment or allocation-failure guard exists in the original. */
 unsigned char *Gfx_AllocAlignedBytes(uint32_t size, uint32_t alignment); /* VA 0x00461840 */

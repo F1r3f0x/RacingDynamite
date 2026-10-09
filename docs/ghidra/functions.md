@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:9fe447a6ac27b5bec7caaa61ab3e4c76e0a3d5723c31229d932e0d17929abd57 -->
+<!-- snapshot:6e7c3321c936925a6ce6ce02ed0b112bb033b7252992cc6fc58ff71d6662dde0 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -603,7 +603,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045F750` | `0x0005F750` | 19 | `sub_0045F750` | unknown | unidentified | - |
 | `0x0045F770` | `0x0005F770` | 61 | `sub_0045F770` | unknown | unidentified | - |
 | `0x0045F7B0` | `0x0005F7B0` | 245 | `sub_0045F7B0` | unknown | unidentified | - |
-| `0x0045F8B0` | `0x0005F8B0` | 18 | `sub_0045F8B0` | unknown | unidentified | - |
+| `0x0045F8B0` | `0x0005F8B0` | 18 | `Gfx_FreeBytes` | game | reconstructed | [windows_gfx_free.md](windows_gfx_free.md) |
 | `0x0045F8D0` | `0x0005F8D0` | 61 | `sub_0045F8D0` | unknown | unidentified | - |
 | `0x0045F910` | `0x0005F910` | 61 | `sub_0045F910` | unknown | unidentified | - |
 | `0x0045F950` | `0x0005F950` | 246 | `sub_0045F950` | unknown | unidentified | - |
@@ -657,7 +657,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00461840` | `0x00061840` | 47 | `Gfx_AllocAlignedBytes` | game | reconstructed | [windows_gfx_alloc_aligned.md](windows_gfx_alloc_aligned.md) |
 | `0x00461870` | `0x00061870` | 62 | `Gfx_FindSpritePackingGap` | game | reconstructed | [windows_gfx_sprite_packing_gap.md](windows_gfx_sprite_packing_gap.md) |
 | `0x004618B0` | `0x000618B0` | 419 | `Gfx_ReleaseSpritePackingStorage` | game | analyzed | [windows_gfx_sprite_packing_reset.md](windows_gfx_sprite_packing_reset.md) |
-| `0x00461A60` | `0x00061A60` | 17 | `sub_00461A60` | unknown | unidentified | - |
+| `0x00461A60` | `0x00061A60` | 17 | `Gfx_FreeAlignedBytes` | game | reconstructed | [windows_gfx_free.md](windows_gfx_free.md) |
 | `0x00461A80` | `0x00061A80` | 3 | `Gfx_SpriteReservedNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
 | `0x00461A90` | `0x00061A90` | 260 | `sub_00461A90` | unknown | unidentified | - |
 | `0x00461BA0` | `0x00061BA0` | 448 | `sub_00461BA0` | unknown | unidentified | - |

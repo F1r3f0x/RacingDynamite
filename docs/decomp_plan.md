@@ -1,5 +1,18 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Graphics free dependencies (2026-10-09)
+
+[Byte/aligned free](ghidra/windows_gfx_free.md), RVAs 0x5F8B0/0x61A60,
+now execute production C89 through a real helper chain. 216/920 differential
+comparisons include 144/608 persistent follow-ups and eight aligned-header
+faults, retaining all existing coverage. Packing release RVA 0x618B0 is next,
+then native ImageOp RVA 0x61360 with its independently authenticated dependencies.
+Original compiler/link layout, instruction equality and native heap/graphics/
+game/fault parity remain unverified; the CRT is modeled. The current build is
+a focused validation DLL, not a playable rebuilt game. Earlier entries below
+are historical.
+
+
 ## Sprite descriptor pixel leaf (2026-10-09)
 
 [Pixel copying](ghidra/windows_gfx_sprite_pixels.md), VA 0x004612A0 / RVA

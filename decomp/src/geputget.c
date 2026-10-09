@@ -262,6 +262,27 @@ unsigned char *Gfx_AllocAlignedBytes(uint32_t size, uint32_t alignment) {
 }
 
 /*
+ * @original Gfx_FreeBytes (IGN_WIN.EXE @ 0x0045F8B0, geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_FreeBytes(void *pointer) {
+    if (pointer != 0) {
+        free(pointer);
+    }
+}
+
+/*
+ * @original Gfx_FreeAlignedBytes (IGN_WIN.EXE @ 0x00461A60, geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_FreeAlignedBytes(unsigned char *pointer) {
+    uint32_t allocation;
+
+    allocation = *(const volatile uint32_t *)((uint32_t)pointer - 4u);
+    Gfx_FreeBytes((void *)allocation);
+}
+
+/*
  * @original Gfx_AddSpritePackingPage (IGN_WIN.EXE @ 0x004617E0, geputget.c)
  * @fidelity EXACT
  */
