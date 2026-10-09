@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:45ee88c8d4832b13b9865e12e3ecbff8babc8f6c6e62d8029eb55c1bfe3ad960 -->
+<!-- snapshot:92eaba99c6192a9983172cfcbe0953e23f783acdefb9a86ae635217f5b7b804a -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -593,7 +593,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045F490` | `0x0005F490` | 14 | `sub_0045F490` | unknown | unidentified | - |
 | `0x0045F4A0` | `0x0005F4A0` | 21 | `Gfx_AllocBytes` | game | reconstructed | [windows_gfx_alloc_aligned.md](windows_gfx_alloc_aligned.md) |
 | `0x0045F4C0` | `0x0005F4C0` | 151 | `sub_0045F4C0` | unknown | unidentified | - |
-| `0x0045F560` | `0x0005F560` | 133 | `Gfx_GrowImagePointerTable` | game | analyzed | [windows_gfx_sprite_handles.md](windows_gfx_sprite_handles.md) |
+| `0x0045F560` | `0x0005F560` | 133 | `Gfx_GrowPointerTable` | game | reconstructed | [windows_gfx_pointer_table.md](windows_gfx_pointer_table.md) |
 | `0x0045F5F0` | `0x0005F5F0` | 79 | `sub_0045F5F0` | unknown | unidentified | - |
 | `0x0045F640` | `0x0005F640` | 68 | `sub_0045F640` | unknown | unidentified | - |
 | `0x0045F690` | `0x0005F690` | 86 | `sub_0045F690` | unknown | unidentified | - |

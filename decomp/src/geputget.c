@@ -415,6 +415,42 @@ GfxSpritePackingBucket *Gfx_AddSpritePackingBucket(int32_t size,
 }
 
 /*
+ * @original Gfx_GrowPointerTable (IGN_WIN.EXE @ 0x0045F560, inferred geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_GrowPointerTable(GfxPointerTable *control) {
+    volatile GfxPointerTable *table;
+    uint32_t old_records;
+    uint32_t records;
+    uint32_t index;
+    uint32_t count;
+    uint32_t value;
+
+    table = control;
+    old_records = (uint32_t)table->records;
+    count = (uint32_t)table->capacity;
+    table->records = (uint32_t *)malloc((count << 2) + 4000u);
+    index = 0;
+    while (table->capacity > (int32_t)index) {
+        value = *(const volatile uint32_t *)(old_records + (index << 2));
+        records = (uint32_t)table->records;
+        *(volatile uint32_t *)(records + (index << 2)) = value;
+        index++;
+    }
+    index = (uint32_t)table->capacity;
+    if ((int32_t)(index + 1000u) > (int32_t)index) {
+        do {
+            records = (uint32_t)table->records;
+            *(volatile uint32_t *)(records + (index << 2)) = 0;
+            index++;
+            count = (uint32_t)table->capacity;
+        } while ((int32_t)(count + 1000u) > (int32_t)index);
+    }
+    table->capacity = (int32_t)((uint32_t)table->capacity + 1000u);
+    free((void *)old_records);
+}
+
+/*
  * @original Gfx_CopyAllocatedString (IGN_WIN.EXE @ 0x00460480, inferred geputget.c)
  * @fidelity EXACT
  */

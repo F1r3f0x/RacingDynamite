@@ -15,9 +15,10 @@ reachability pass. Active program selection is a user-provided assumption.
 Current dependency path: pixel leaf 0x612A0 and storage 0x61530 are reconstructed;
 byte/aligned free 0x5F8B0/0x61A60 add real release dependencies. Packing release 0x618B0 now has production C89 and 1,267 focused comparisons
 with real free dependencies. String-copy 0x60480 now has production C89 and 941 focused comparisons, with
-a documented Unicorn cross-page store limitation. Next recover pointer-table
-growth 0x5F560 and ImageOp 0x61360 coherent 16-byte control-block layout before
-implementing the whole operation; separate compiler globals cannot be assumed
+a documented Unicorn cross-page store limitation. Pointer-table growth
+0x5F560 now has production C89 and 363 focused comparisons, with six distinct
+controls verified statically. Next recover ImageOp 0x61360 coherent 16-byte
+control-block layout and implement the whole operation with its real dependencies; separate compiler globals cannot be assumed
 contiguous merely because their authentic binary fields are adjacent. Rendering register-ABI blockers remain
 in windows_triangle.md; pursue unblocked resource/platform work while resolving
 a pure-C integration strategy. Native startup/presentation baseline and executable

@@ -152,3 +152,16 @@ updates for 0x611D0/0x5F560/0x5E610/0x5D840/0x5C9F0. The real completion perform
 full verification, fidelity audit, export and export check. Recorded input hashes
 must agree with LF working bytes and Git index blobs before staged gates/commit.
 Inventory stays at 1,028 candidates, with 32 reconstructed routines.
+
+
+## Generic table-growth follow-up (2026-10-09)
+
+The prior image-only analysis name at RVA 0x5F560 is now superseded by
+[Gfx_GrowPointerTable](windows_gfx_pointer_table.md), whose seven authenticated
+calls operate six controls. Its production C89 and 363 differential comparisons
+recover ordered live copying/clearing, signed/wrapping behavior, immediate
+publication and unconditional old-pointer CRT free. Standalone reconstruction
+does not establish whole ImageOp integration or compiler-global contiguity.
+CRT remains modeled and native heap/graphics/game/fault parity unverified.
+Earlier analysis notes above are historical; coherent control ownership and
+first-word semantics still require independent integration evidence.

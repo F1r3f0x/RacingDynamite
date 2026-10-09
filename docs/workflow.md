@@ -1,5 +1,21 @@
 # Enforced agent workflow
 
+## Generic pointer-table growth (2026-10-09)
+
+[Table growth](ghidra/windows_gfx_pointer_table.md), VA 0x0045F560 / RVA
+0x5F560, now executes production C89 through direct CRT malloc/free boundaries.
+363 differential comparisons include 153 persistent follow-ups, 45 faults, 93
+aliases, 15 boundary mutation calls, two zero-size mallocs and five bounded
+copy prefixes. Seven static caller sites cover six distinct controls. Full
+completion renews all 49 reconstructed routines among 1,028 candidates and
+retains all prior coverage. Next recover coherent ImageOp control layout and
+RVA 0x61360 with its real growth/string/storage/release dependencies.
+CRT/primitive/callbacks remain modeled; whole caller integration, instruction
+equality, original compiler/link layout and native heap/graphics/game/fault
+parity remain unverified. No playable rebuilt executable is certified.
+Earlier entries are historical.
+
+
 ## Graphics allocated-string copy (2026-10-09)
 
 [Allocated-string copying](ghidra/windows_gfx_string.md), VA 0x00460480 /
