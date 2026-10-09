@@ -1,5 +1,20 @@
 # Enforced agent workflow
 
+## Graphics allocated-string copy (2026-10-09)
+
+[Allocated-string copying](ghidra/windows_gfx_string.md), VA 0x00460480 /
+RVA 0x60480, now executes production C89 with real Gfx_AllocBytes. 941
+differential comparisons include 434 persistent follow-ups, seven faults, 226
+alias calls and 65 allocation-boundary mutation calls. A cross-page dword store
+is explicitly excluded for Unicorn partial-write behavior; native fault atomicity
+is unobserved. Full completion renews all 48 reconstructed routines among 1,028
+candidates and retains prior coverage. Next recover pointer-table growth RVA
+0x5F560 and ImageOp's coherent global control-block layout before the caller.
+CRT/primitive/callbacks remain modeled; instruction equality, original compiler/
+link layout and native heap/graphics/game/fault parity remain unverified.
+No playable rebuilt executable is certified. Earlier entries are historical.
+
+
 ## Sprite packing storage release (2026-10-09)
 
 [Storage release](ghidra/windows_gfx_sprite_packing_release.md), VA 0x004618B0 /

@@ -143,6 +143,8 @@ extern GfxSpritePackingNode *volatile g_spritePackingPages; /* VA 0x0051FE40 */
 void *Gfx_AllocBytes(uint32_t size); /* VA 0x0045F4A0 */
 /* Both callers discard incidental EAX; only the byte wrapper skips null. */
 void Gfx_FreeBytes(void *pointer); /* VA 0x0045F8B0 */
+/* Publishes allocated storage before forward copying the scanned byte count. */
+void Gfx_CopyAllocatedString(const char *source, char **destination); /* VA 0x00460480; EAX discarded */
 void Gfx_FreeAlignedBytes(unsigned char *pointer); /* VA 0x00461A60 */
 /* Unsigned 32-bit size/alignment arithmetic; back-pointer precedes result.
  * No zero-alignment or allocation-failure guard exists in the original. */

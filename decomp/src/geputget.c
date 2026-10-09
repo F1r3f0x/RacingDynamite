@@ -415,6 +415,35 @@ GfxSpritePackingBucket *Gfx_AddSpritePackingBucket(int32_t size,
 }
 
 /*
+ * @original Gfx_CopyAllocatedString (IGN_WIN.EXE @ 0x00460480, inferred geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_CopyAllocatedString(const char *source, char **destination) {
+    uint32_t input;
+    uint32_t output;
+    uint32_t count;
+    uint32_t index;
+    unsigned char value;
+
+    if (source == 0) {
+        *(char *volatile *)destination = 0;
+        return;
+    }
+    input = (uint32_t)source;
+    count = 0;
+    while (*(const volatile unsigned char *)(input + count) != 0) {
+        ++count;
+    }
+    ++count;
+    output = (uint32_t)Gfx_AllocBytes(count);
+    *(char *volatile *)destination = (char *)output;
+    for (index = 0; (int32_t)index < (int32_t)count; ++index) {
+        value = *(const volatile unsigned char *)(input + index);
+        *(volatile unsigned char *)(output + index) = value;
+    }
+}
+
+/*
  * @original Gfx_ReleaseSpritePackingStorage (IGN_WIN.EXE @ 0x004618B0, geputget.c)
  * @fidelity EXACT
  */
