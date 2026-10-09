@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:073bfd3382a405eb8a491892c3bd7bbf49a04875ee4f145d57c140ebd008c1a9 -->
+<!-- snapshot:7522691843c410f5ee5210921997fa7713b2c933319bd256266609b37a4ba188 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -643,7 +643,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x004611B0` | `0x000611B0` | 31 | `sub_004611B0` | unknown | unidentified | - |
 | `0x004611D0` | `0x000611D0` | 53 | `Gfx_InitDefaultSpriteDescriptor` | game | reconstructed | [windows_gfx_default_descriptor.md](windows_gfx_default_descriptor.md) |
 | `0x00461210` | `0x00061210` | 143 | `Gfx_CreateSpriteDescriptor` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x004612A0` | `0x000612A0` | 61 | `Gfx_CopySpriteDescriptorPixels` | game | analyzed | [windows_gfx_sprite_packing_storage.md](windows_gfx_sprite_packing_storage.md) |
+| `0x004612A0` | `0x000612A0` | 61 | `Gfx_CopySpriteDescriptorPixels` | game | reconstructed | [windows_gfx_sprite_pixels.md](windows_gfx_sprite_pixels.md) |
 | `0x004612E0` | `0x000612E0` | 114 | `Gfx_CopySpriteDescriptor` | game | reconstructed | [windows_gfx_sprite_handles.md](windows_gfx_sprite_handles.md) |
 | `0x00461360` | `0x00061360` | 329 | `Gfx_SpriteImageOpNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
 | `0x004614B0` | `0x000614B0` | 31 | `Gfx_FreeSpriteDescriptor` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |

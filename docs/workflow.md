@@ -1,5 +1,20 @@
 # Enforced agent workflow
 
+## Sprite descriptor pixel leaf (2026-10-09)
+
+[Pixel copying](ghidra/windows_gfx_sprite_pixels.md), VA 0x004612A0 / RVA
+0x612A0, now has production C89 preserving pointer capture order, signed live
+bounds, ordered byte/stride accesses, unsigned wrapping and forward overlap.
+Fresh compilation and 659 differential comparisons include 376 persistent
+follow-ups, 14 faults, 62 live-alias calls and ten wrapping calls. Full completion
+renews all 43 reconstructed routines among 1,028 candidates and retains existing
+packing/lifecycle/memory/font/file/backend coverage. Instruction equality,
+original compiler/link layout and native graphics/game/fault parity remain
+unverified. Storage RVA 0x61530 is the next separate production feature; both
+callers remain unreconstructed. No playable rebuilt executable is certified.
+Earlier milestone entries below are historical.
+
+
 ## Storage assignment analysis completion (2026-10-09)
 
 [Storage and pixel-leaf contracts](ghidra/windows_gfx_sprite_packing_storage.md)

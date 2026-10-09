@@ -92,6 +92,21 @@ typedef struct GfxSpriteDescriptor {
     uint32_t words[16];
 } GfxSpriteDescriptor;
 
+/* Independently verified pixel-copy prefix; the other descriptor words remain
+ * opaque. Pointer and stride representations are unsigned 32-bit words. */
+typedef struct GfxSpritePixelView {
+    uint32_t opaque0;
+    int32_t width;
+    int32_t height;
+    uint32_t opaque3;
+    uint32_t pixels;
+    uint32_t stride;
+} GfxSpritePixelView;
+
+/* Incidental EAX retains source; both arguments use caller cleanup. */
+const GfxSpriteDescriptor *Gfx_CopySpriteDescriptorPixels(
+    const GfxSpriteDescriptor *source, const GfxSpriteDescriptor *destination); /* VA 0x004612A0 */
+
 #define GFX_SPRITE_HANDLE_COUNT 2000
 extern GfxSpriteHandle *volatile g_nativeSpriteFreeList[GFX_SPRITE_HANDLE_COUNT]; /* VA 0x00512C58 */
 extern volatile GfxSpriteHandle g_nativeSpriteHandles[GFX_SPRITE_HANDLE_COUNT]; /* VA 0x00514BD8 */

@@ -394,6 +394,39 @@ GfxSpritePackingBucket *Gfx_AddSpritePackingBucket(int32_t size,
 }
 
 /*
+ * @original Gfx_CopySpriteDescriptorPixels (IGN_WIN.EXE @ 0x004612A0, geputget.c)
+ * @fidelity EXACT
+ */
+const GfxSpriteDescriptor *Gfx_CopySpriteDescriptorPixels(
+    const GfxSpriteDescriptor *source, const GfxSpriteDescriptor *destination) {
+    const volatile GfxSpritePixelView *source_view;
+    const volatile GfxSpritePixelView *destination_view;
+    uint32_t source_row;
+    uint32_t destination_row;
+    uint32_t row;
+    uint32_t column;
+    unsigned char pixel;
+
+    source_view = (const volatile GfxSpritePixelView *)source;
+    destination_view = (const volatile GfxSpritePixelView *)destination;
+    source_row = source_view->pixels;
+    destination_row = destination_view->pixels;
+    row = 0;
+    while (source_view->height > (int32_t)row) {
+        column = 0;
+        while (source_view->width > (int32_t)column) {
+            pixel = *(const volatile unsigned char *)(source_row + column);
+            *(volatile unsigned char *)(destination_row + column) = pixel;
+            column++;
+        }
+        source_row += source_view->stride;
+        destination_row += destination_view->stride;
+        row++;
+    }
+    return source;
+}
+
+/*
  * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0, geputget.c)
  * @fidelity EXACT
  */
