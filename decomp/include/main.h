@@ -358,4 +358,13 @@ extern int FixedMul10(int a, int b);
     "shrd eax, edx, 10" \
     parm [eax] [edx] value [eax] modify [edx];
 
+/* Native Windows platform backing, independently verified from WinMain/Open. */
+#ifdef _WINDEF_
+extern HINSTANCE volatile g_nativeWindowInstance; /* VA 0x004C5398 */
+extern HWND volatile g_nativeWindow; /* VA 0x004C539C */
+extern const char g_nativeWindowClassName[]; /* VA 0x00493740 */
+extern const char g_nativeWindowTitle[]; /* VA 0x00493778 */
+#endif
+/* End native Windows platform backing. */
+
 #endif /* MAIN_H */

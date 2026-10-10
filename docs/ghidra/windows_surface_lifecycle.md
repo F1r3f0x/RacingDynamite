@@ -87,3 +87,13 @@ Original WinMain RVA 0x120A0 (390 bytes, stdcall four words) registers the Ignit
 class with actual window procedure VA 0x4122D0. Recover that procedure and startup
 caller before certifying native class/window integration. The constructor's
 remaining instructions and all failure branches still require hand recovery.
+
+## Constructor integration (2026-10-10)
+
+[Constructor](windows_surface_open.md) independently identifies record words
++28/+32/+36 as width/height/bit depth. Five words remain opaque; stride and
+initializer order stay unchanged. Production Open executes real initialization/
+restoration and actual SDK APIs. Native evidence is limited to the constructor's
+windowed scenarios with an authenticated original WndProc reference boundary.
+The prior 1,256 dependency comparisons are retained. Original shutdown/rebuild,
+complete native startup and game behavior remain pending.

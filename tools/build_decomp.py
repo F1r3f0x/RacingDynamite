@@ -28,7 +28,6 @@ STARTUP_BOUNDARY_SOURCE += (
 
 SURFACE_HEADER = _resource_header[_resource_header.index('/* Windows surface dispatch.'):_resource_header.index('#define MAX_FONTS')]
 STARTUP_BOUNDARY_SOURCE += (
-    'int Gfx_SurfaceOpenNative(void) { for (;;) {} }\n'
     'int Gfx_SurfaceCloseNative(void) { for (;;) {} }\n'
     'int Gfx_SurfaceResetNative(void) { for (;;) {} }\n'
     'int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4) { (void)option0; (void)option1; (void)option2; (void)option3; (void)option4; for (;;) {} }\n'
@@ -77,6 +76,10 @@ RESTORE_BODY = _resource_source[_restore_start:_restore_end]
 LISA_VERSION_SOURCE = LISA_VERSION_SOURCE.replace(RESTORE_BODY, 'int Gfx_SurfaceRestoreNative(void);')
 SURFACE_SOURCE = ('#include <ddraw.h>\n#include <stddef.h>\n#include "geputget.h"\n'
     'typedef char surface_record_size[(sizeof(GfxSurfaceRecord)==48)?1:-1];\n'
+    'typedef char surface_width_offset[(offsetof(GfxSurfaceRecord,width)==28)?1:-1];\n'
+    'typedef char surface_height_offset[(offsetof(GfxSurfaceRecord,height)==32)?1:-1];\n'
+    'typedef char surface_depth_offset[(offsetof(GfxSurfaceRecord,bit_depth)==36)?1:-1];\n'
+    'typedef char surface_descriptor_size[(sizeof(DDSURFACEDESC)==108)?1:-1];\n'
     'typedef char surface_pointer_offset[(offsetof(GfxSurfaceRecord,surface)==44)?1:-1];\n'
     'typedef char surface_is_lost_slot[(offsetof(IDirectDrawSurfaceVtbl,IsLost)==0x60)?1:-1];\n'
     'typedef char surface_restore_slot[(offsetof(IDirectDrawSurfaceVtbl,Restore)==0x6c)?1:-1];\n'
@@ -89,6 +92,23 @@ _sine_end = _resource_source.index('\n}', _sine_start) + 2
 SINE_BODY = _resource_source[_sine_start:_sine_end]
 LISA_VERSION_SOURCE = LISA_VERSION_SOURCE.replace(SINE_BODY, 'int32_t Gfx_InitSineTable(void);')
 SINE_SOURCE = '#include <math.h>\n#include "geputget.h"\n' + SINE_BODY + '\n'
+_window_header = (ROOT/'decomp/include/main.h').read_text(encoding='utf-8-sig')
+_window_source = (ROOT/'decomp/src/main.c').read_text(encoding='utf-8-sig')
+_window_marker = '/* Native Windows platform backing, independently verified from WinMain/Open. */'
+_window_end = '/* End native Windows platform backing. */'
+WINDOW_HEADER = _window_header[_window_header.index(_window_marker):_window_header.index(_window_end)]
+WINDOW_SOURCE = _window_source[_window_source.index(_window_marker):_window_source.index(_window_end)]
+_open_marker = '/* Native surface constructor state; independently recovered Windows initializers. */'
+_open_end = '/* End native surface constructor. */'
+OPEN_SOURCE = _resource_source[_resource_source.index(_open_marker):_resource_source.index(_open_end)]
+SURFACE_SOURCE += '#include <string.h>\n' + WINDOW_HEADER + WINDOW_SOURCE + OPEN_SOURCE.replace('#include "main.h"', '')
+SURFACE_EXPORTS_EXTRA = ['g_nativeDirectDraw', 'g_nativeClipper', 'g_nativePalette',
+    'g_nativePaletteEntries', 'g_nativeSurfaceWindow', 'g_nativeFullscreen',
+    'g_nativeSurfaceWidth', 'g_nativeSurfaceHeight', 'g_nativeSurfaceBitDepth',
+    'g_nativeBackbufferCount', 'g_nativeDesktopBitDepth', 'g_nativeWindowInstance',
+    'g_nativeWindow', 'g_nativeWindowClassName', 'g_nativeWindowTitle',
+    'g_nativeBackbufferMessage', 'g_nativeBackbufferLimitMessage']
+
 PRIMITIVE_EXPORTS = ['Gfx_InitPairStorageControl', 'Gfx_InitGraphicsPairStorage',
     'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords',
     'Gfx_InitPrimitiveLineControl', 'Gfx_InitNamedPrimitiveDefault',
@@ -100,7 +120,7 @@ SINE_EXPORTS = ['Gfx_InitSineTable', 'g_nativeSineTable', 'g_nativeSineStep',
     'g_nativeSineFullCircle', 'g_nativeSineAmplitude']
 
 SURFACE_EXPORTS = ['Gfx_InitSurfaceRecords', 'g_nativePrimarySurface',
-    'g_nativeType1Surfaces', 'g_nativeType2Surfaces', 'g_surfaceConfigure', 'g_surfaceOpen', 'g_surfaceClose', 'g_surfaceReset', 'g_surfaceConfigureSurface', 'g_surfaceBlit', 'g_surfaceCopyPixels', 'g_surfaceClear', 'g_surfacePresent', 'g_surfaceReserved', 'g_surfaceLock', 'g_surfaceUnlock', 'g_surfaceSetPalette', 'g_surfaceRestore', 'Gfx_SurfaceConfigureNative', 'Gfx_SurfaceOpenNative', 'Gfx_SurfaceCloseNative', 'Gfx_SurfaceResetNative', 'Gfx_SurfaceConfigureSurfaceNative', 'Gfx_SurfaceBlitNative', 'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceClearNative', 'Gfx_SurfacePresentNative', 'Gfx_SurfaceReservedNative', 'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative', 'Gfx_SurfaceSetPaletteNative', 'Gfx_SurfaceRestoreNative']
+    'g_nativeType1Surfaces', 'g_nativeType2Surfaces', 'g_surfaceConfigure', 'g_surfaceOpen', 'g_surfaceClose', 'g_surfaceReset', 'g_surfaceConfigureSurface', 'g_surfaceBlit', 'g_surfaceCopyPixels', 'g_surfaceClear', 'g_surfacePresent', 'g_surfaceReserved', 'g_surfaceLock', 'g_surfaceUnlock', 'g_surfaceSetPalette', 'g_surfaceRestore', 'Gfx_SurfaceConfigureNative', 'Gfx_SurfaceOpenNative', 'Gfx_SurfaceCloseNative', 'Gfx_SurfaceResetNative', 'Gfx_SurfaceConfigureSurfaceNative', 'Gfx_SurfaceBlitNative', 'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceClearNative', 'Gfx_SurfacePresentNative', 'Gfx_SurfaceReservedNative', 'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative', 'Gfx_SurfaceSetPaletteNative', 'Gfx_SurfaceRestoreNative'] + SURFACE_EXPORTS_EXTRA
 
 # Validation fixtures live separately from the extracted production installer.
 STARTUP_BOUNDARY_SOURCE += (
@@ -171,6 +191,30 @@ def compile_surface(stem):
     return obj, command
 
 
+def surface_import_libraries(stem):
+    dlltool = shutil.which('llvm-dlltool')
+    if not dlltool:
+        raise RuntimeError('LLVM dlltool required for native i386 Win32 imports')
+    groups = {'DDRAW':['DirectDrawCreate@12'],
+        'USER32':['GetSystemMetrics@4','CreateWindowExA@48','UpdateWindow@4',
+            'SetFocus@4','GetDC@4','ReleaseDC@8','GetWindowLongA@8',
+            'SetWindowLongA@12','SetRect@20','GetMenu@4','AdjustWindowRectEx@16',
+            'SetWindowPos@28','SystemParametersInfoA@16','GetWindowRect@8',
+            'MessageBoxA@16','ShowWindow@8'],
+        'GDI32':['GetDeviceCaps@8']}
+    libraries = []
+    for dll,exports in groups.items():
+        definition = BUILD/(stem+'_'+dll.lower()+'.def')
+        lib = BUILD/(stem+'_'+dll.lower()+'.lib')
+        definition.write_text('LIBRARY '+dll+'.dll\nEXPORTS\n'+
+            '\n'.join(exports)+'\n', encoding='utf-8', newline='\n')
+        lib.unlink(missing_ok=True)
+        subprocess.run([dlltool,'-m','i386','-d',str(definition),'-l',str(lib),
+            '--kill-at'],cwd=ROOT,check=True)
+        libraries.append(str(lib))
+    return libraries
+
+
 def build(compiler='clang', linker='lld-link', dll=DLL):
     verify_target()
     cc, ld = shutil.which(compiler), shutil.which(linker)
@@ -197,7 +241,7 @@ def build(compiler='clang', linker='lld-link', dll=DLL):
     banner_obj, _ = compile_banner(commands[0][:-4], dll.stem)
     sine_obj, _ = compile_sine(dll.stem)
     surface_obj, _ = compile_surface(dll.stem)
-    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj)])
+    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj)] + surface_import_libraries(dll.stem))
     for command in commands:
         print(subprocess.list2cmdline(command), flush=True)
         subprocess.run(command, cwd=ROOT, check=True)

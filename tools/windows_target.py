@@ -53,3 +53,28 @@ def validation_symbols(pe):
                 raise ValueError('Conflicting image-control export: '+name)
             symbols[name] = address
     return symbols
+
+
+def validate_platform_imports(pe):
+    """Require exactly the authenticated constructor's SDK dependencies.
+
+    Validation DLLs containing the real surface constructor now import APIs.
+    This replaces the obsolete no-import assumption, not the dependency audit.
+    """
+    expected={('DDRAW.dll','DirectDrawCreate'),('GDI32.dll','GetDeviceCaps')}
+    expected.update(('USER32.dll',name) for name in (
+        'GetSystemMetrics','CreateWindowExA','UpdateWindow','SetFocus','GetDC',
+        'ReleaseDC','GetWindowLongA','SetWindowLongA','SetRect','GetMenu',
+        'AdjustWindowRectEx','SetWindowPos','SystemParametersInfoA','GetWindowRect',
+        'MessageBoxA','ShowWindow'))
+    actual={(group.dll.decode(),entry.name.decode() if entry.name else '')
+        for group in getattr(pe,'DIRECTORY_ENTRY_IMPORT',()) for entry in group.imports}
+    if actual!=expected:
+        raise ValueError('Unexpected platform dependencies: '+repr(actual.symmetric_difference(expected)))
+    import pefile
+    original=pefile.PE(data=verify_target())
+    authentic={(group.dll.decode(),entry.name.decode() if entry.name else '')
+        for group in original.DIRECTORY_ENTRY_IMPORT for entry in group.imports}
+    if not actual.issubset(authentic):
+        raise ValueError('Dependencies absent from authentic standard Windows target')
+    return actual

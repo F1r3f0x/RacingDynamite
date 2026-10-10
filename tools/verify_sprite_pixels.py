@@ -15,6 +15,7 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ESP,
     UC_X86_REG_EIP, UC_X86_REG_EFLAGS)
 from verify_matching import STACK, STOP, PRESERVED
 from build_decomp import build
+from windows_target import validate_platform_imports
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -207,7 +208,7 @@ def verify_sprite_pixels():
     inspect(original)
     build(dll=DLL)
     rebuilt = pefile.PE(str(DLL))
-    assert rebuilt.FILE_HEADER.Machine == 0x14c and not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
+    assert rebuilt.FILE_HEADER.Machine == 0x14c;validate_platform_imports(rebuilt)
     coverage = {'comparisons':0,'persistent_followups':0,'faults':0,'live_aliases':0,'wrapping':0}
 
     def sequence(state, source=S, destination=D, repeats=2, category=None):

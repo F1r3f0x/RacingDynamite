@@ -331,7 +331,7 @@ def verify_sprite_backend():
         inspect_original(original)
         symbols = {e.name.decode():rebuilt.OPTIONAL_HEADER.ImageBase+e.address
             for e in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
-        assert not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
+        assert not hasattr(rebuilt, 'DIRECTORY_ENTRY_IMPORT')
         text = next(s for s in rebuilt.sections if s.Name.rstrip(b'\0')==b'.text')
         decoded = list(Cs(CS_ARCH_X86,CS_MODE_32).disasm(text.get_data(),rebuilt.OPTIONAL_HEADER.ImageBase+text.VirtualAddress))
         assert any(i.mnemonic=='fcos' for i in decoded)

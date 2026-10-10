@@ -15,7 +15,7 @@ import subprocess
 import shutil
 import unicorn
 import pefile
-from windows_target import validation_symbols
+from windows_target import validation_symbols, validate_platform_imports
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn import Uc, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE, UC_HOOK_MEM_WRITE, UC_HOOK_MEM_READ
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ESI,
@@ -197,7 +197,7 @@ def verify():
     build()  # Always fresh; no --skip-build and no stale DOS inputs.
     original, rebuilt = pefile.PE(str(TARGET)), pefile.PE(str(DLL))
     assert rebuilt.FILE_HEADER.Machine == 0x14c
-    assert not hasattr(rebuilt, 'DIRECTORY_ENTRY_IMPORT'), 'Unexpected dependencies'
+    validate_platform_imports(rebuilt)
     symbols = validation_symbols(rebuilt)
     fields = [(name, symbols[name], n) for name,_,n in FIELDS]
     print('Validation globals:', fields)
@@ -216,6 +216,7 @@ def verify():
         'Mem_InitSystem', 'Mem_ShutdownSystem', 'Lisa_PrintVersion',
         'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
         'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
+        'Gfx_SurfaceOpenNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
         'Gfx_InitGraphicsPairStorage', 'Gfx_InitPairStorageControl', 'Gfx_InitSineTable',
         'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords',
         'Gfx_InitPrimitiveLineControl', 'Gfx_InitNamedPrimitiveDefault',
@@ -223,7 +224,15 @@ def verify():
         'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
+    draw_iat=next(entry.address for group in rebuilt.DIRECTORY_ENTRY_IMPORT
+        for entry in group.imports if group.dll==b'DDRAW.dll' and entry.name==b'DirectDrawCreate')
+    draw_thunks=[instruction.address for instruction in generated
+        if instruction.mnemonic=='jmp' and instruction.bytes==b'\xff\x25'+struct.pack('<I',draw_iat)]
+    assert len(draw_thunks)==1, 'Expected one SDK DirectDrawCreate import veneer'
+    code_entries['DirectDrawCreate_import']=draw_thunks[0]
+    symbols['DirectDrawCreate_import']=draw_thunks[0]
     expected_calls = {
+        'Gfx_SurfaceOpenNative': ['Gfx_InitSurfaceRecords', 'DirectDrawCreate_import', 'Gfx_SurfaceRestoreNative'],
         'Gfx_InitPrimitiveState': ['Gfx_InitGraphicsPairStorage', 'Gfx_InitSineTable',
             'Gfx_InitDefaultSpriteDescriptor', 'Gfx_InitSpritePackingState',
             'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords', 'Gfx_InitPrimitiveLineControl'],
@@ -813,3 +822,6 @@ if __name__ == '__main__':
 
     from verify_surface_lifecycle import verify_surface_lifecycle
     verify_surface_lifecycle()
+
+    from verify_surface_open import verify_surface_open
+    verify_surface_open()

@@ -282,7 +282,7 @@ def verify_font_draw():
         commands = build_font()
         original, rebuilt = pefile.PE(str(TARGET)),pefile.PE(str(DLL))
         inspect_original(original)
-        assert not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
+        assert not hasattr(rebuilt, 'DIRECTORY_ENTRY_IMPORT')
         symbols = {e.name.decode():rebuilt.OPTIONAL_HEADER.ImageBase+e.address
                    for e in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
         details = {'scope':'extracted production C; original dispatch wrapper and _ftol; modeled renderer boundary',

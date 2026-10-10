@@ -7,6 +7,7 @@ import hashlib
 import random
 import struct
 import pefile
+from windows_target import validate_platform_imports
 from windows_target import validation_symbols
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn import (Uc, UcError, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE,
@@ -709,7 +710,7 @@ def verify_sprite_packing():
     inspect(original)
     build(dll=DLL)
     rebuilt = pefile.PE(str(DLL))
-    assert rebuilt.FILE_HEADER.Machine == 0x14c and not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
+    assert rebuilt.FILE_HEADER.Machine == 0x14c;validate_platform_imports(rebuilt)
     # Clang uses a conditional tail transfer for the nonzero allocation path.
     symbols = validation_symbols(rebuilt)
     md = Cs(CS_ARCH_X86,CS_MODE_32)

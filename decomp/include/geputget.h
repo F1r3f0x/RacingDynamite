@@ -29,13 +29,16 @@ int Gfx_InstallSpriteDispatch(void);  /* VA 0x00456E60 */
 /* Windows surface dispatch. Record fields are recovered per verified consumer.
  * Stub option words retain unknown semantics/signedness. All calls use the x86
  * ordinary C ABI; no-argument RET alone does not distinguish cdecl/stdcall. */
-/* Independently verified 48-byte native record banks. Geometry words remain
+/* Independently verified 48-byte native record banks. Five remaining words stay
  * opaque until each consumer is authenticated; surface is a real COM object. */
 struct IDirectDrawSurface;
 typedef struct GfxSurfaceRecord {
     int32_t active;
     uint32_t restore_marker;
-    uint32_t opaque_words[8];
+    uint32_t opaque_words[5];
+    uint32_t width;
+    uint32_t height;
+    uint32_t bit_depth;
     uint32_t storage_kind;
     struct IDirectDrawSurface *surface;
 } GfxSurfaceRecord;
@@ -48,7 +51,7 @@ extern GfxSurfaceConfigureProc volatile g_surfaceConfigure; /* VA 0x0050EB68 */
 int Gfx_SurfaceConfigureNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3); /* VA 0x0045B730 */
 typedef int (*GfxSurfaceOpenProc)(void);
 extern GfxSurfaceOpenProc volatile g_surfaceOpen; /* VA 0x0050EB6C */
-int Gfx_SurfaceOpenNative(void); /* VA 0x0045B740; body unreconstructed */
+int Gfx_SurfaceOpenNative(void); /* VA 0x0045B740 */
 typedef int (*GfxSurfaceCloseProc)(void);
 extern GfxSurfaceCloseProc volatile g_surfaceClose; /* VA 0x0050EB70 */
 int Gfx_SurfaceCloseNative(void); /* VA 0x0045BD70; body unreconstructed */

@@ -62,9 +62,9 @@ int Gfx_InitSurfaceRecords(void) {
     record->opaque_words[2] = 0;
     record->opaque_words[3] = 0;
     record->opaque_words[4] = 0;
-    record->opaque_words[5] = 0;
-    record->opaque_words[6] = 0;
-    record->opaque_words[7] = 0;
+    record->width = 0;
+    record->height = 0;
+    record->bit_depth = 0;
     record->storage_kind = 0;
     record->surface = 0;
     for (index = 0; index < 5; index++) {
@@ -76,9 +76,9 @@ int Gfx_InitSurfaceRecords(void) {
         record->opaque_words[2] = 0;
         record->opaque_words[3] = 0;
         record->opaque_words[4] = 0;
-        record->opaque_words[5] = 0;
-        record->opaque_words[6] = 0;
-        record->opaque_words[7] = 0;
+        record->width = 0;
+        record->height = 0;
+        record->bit_depth = 0;
         record->storage_kind = 1;
         record->surface = 0;
     }
@@ -91,9 +91,9 @@ int Gfx_InitSurfaceRecords(void) {
         record->opaque_words[2] = 0;
         record->opaque_words[3] = 0;
         record->opaque_words[4] = 0;
-        record->opaque_words[5] = 0;
-        record->opaque_words[6] = 0;
-        record->opaque_words[7] = 0;
+        record->width = 0;
+        record->height = 0;
+        record->bit_depth = 0;
         record->storage_kind = 2;
         record->surface = 0;
     }
@@ -2111,3 +2111,252 @@ char *Input_GetQueuedKey(char *query_str) {
     }
     return match;
 }
+
+/* Native surface constructor state; independently recovered Windows initializers. */
+#include "main.h"
+LPDIRECTDRAW volatile g_nativeDirectDraw = 0; /* VA 0x00512C50 */
+LPDIRECTDRAWCLIPPER volatile g_nativeClipper = 0; /* VA 0x004BAC8C */
+LPDIRECTDRAWPALETTE volatile g_nativePalette = 0; /* VA 0x00512448 */
+volatile PALETTEENTRY g_nativePaletteEntries[256]; /* VA 0x00512048 */
+HWND volatile g_nativeSurfaceWindow = 0; /* VA 0x00493738 */
+volatile int32_t g_nativeFullscreen = 1; /* VA 0x00493728 */
+volatile int32_t g_nativeSurfaceWidth = 640; /* VA 0x004BA6E0 */
+volatile int32_t g_nativeSurfaceHeight = 480; /* VA 0x004BA6E4 */
+volatile int32_t g_nativeSurfaceBitDepth = 8; /* VA 0x004BA6E8 */
+volatile int32_t g_nativeBackbufferCount = 1; /* VA 0x004BA6EC */
+volatile int32_t g_nativeDesktopBitDepth = 8; /* VA 0x004BAC90 */
+const char g_nativeBackbufferMessage[] = "Backbuffer couldn't be obtained";
+const char g_nativeBackbufferLimitMessage[] = "The maximum amount of backbuffers is exceeded";
+
+/*
+ * @original Gfx_SurfaceOpenNative (IGN_WIN.EXE @ 0x0045B740, inferred geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceOpenNative(void) {
+    HINSTANCE instance;
+    HWND window;
+    LPDIRECTDRAW draw;
+    LPDIRECTDRAWSURFACE chain;
+    LPDIRECTDRAWCLIPPER clipper;
+    LPDIRECTDRAWPALETTE palette;
+    DDSURFACEDESC descriptor;
+    DDSCAPS caps;
+    RECT rectangle;
+    RECT work_area;
+    HDC dc;
+    LONG style;
+    LONG extended_style;
+    BOOL has_menu;
+    int screen_width;
+    int screen_height;
+    int width;
+    int height;
+    int depth;
+    int index;
+    int backbuffer_limit;
+    DWORD flags;
+    volatile GfxSurfaceRecord *record;
+
+    Gfx_InitSurfaceRecords();
+    instance = g_nativeWindowInstance;
+    screen_height = GetSystemMetrics(SM_CYSCREEN);
+    screen_width = GetSystemMetrics(SM_CXSCREEN);
+    window = CreateWindowExA(WS_EX_APPWINDOW, g_nativeWindowClassName,
+        g_nativeWindowTitle, WS_POPUP | WS_SYSMENU, 0, 0,
+        screen_width, screen_height, 0, 0, instance, 0);
+    g_nativeWindow = window;
+    g_nativeSurfaceWindow = window;
+    if (!window) {
+        return 0;
+    }
+    UpdateWindow(g_nativeWindow);
+    SetFocus(g_nativeWindow);
+    if (DirectDrawCreate(0, (LPDIRECTDRAW *)&g_nativeDirectDraw, 0) != DD_OK) {
+        return 0;
+    }
+    flags = g_nativeFullscreen != 0 ? 0x53 : DDSCL_NORMAL;
+    window = g_nativeWindow;
+    draw = g_nativeDirectDraw;
+    if (draw->lpVtbl->SetCooperativeLevel(draw, window, flags) != DD_OK) {
+        return 0;
+    }
+    if (g_nativeFullscreen != 0) {
+        depth = g_nativeSurfaceBitDepth;
+        height = g_nativeSurfaceHeight;
+        width = g_nativeSurfaceWidth;
+        draw = g_nativeDirectDraw;
+        if (draw->lpVtbl->SetDisplayMode(draw, width, height, depth) != DD_OK) {
+            return 0;
+        }
+    } else {
+        dc = GetDC(0);
+        depth = GetDeviceCaps(dc, BITSPIXEL);
+        depth = (int32_t)((uint32_t)depth * (uint32_t)GetDeviceCaps(dc, PLANES));
+        g_nativeDesktopBitDepth = depth;
+        ReleaseDC(0, dc);
+        style = GetWindowLongA(g_nativeWindow, GWL_STYLE);
+        style = (style & 0x7fffffffL) | 0xc60000L;
+        SetWindowLongA(g_nativeWindow, GWL_STYLE, style);
+        SetRect(&rectangle, 0, 0, 640, 480);
+        extended_style = GetWindowLongA(g_nativeWindow, GWL_EXSTYLE);
+        has_menu = GetMenu(g_nativeWindow) != 0;
+        style = GetWindowLongA(g_nativeWindow, GWL_STYLE);
+        AdjustWindowRectEx(&rectangle, style, has_menu, extended_style);
+        height = (int32_t)((uint32_t)rectangle.bottom - (uint32_t)rectangle.top);
+        width = (int32_t)((uint32_t)rectangle.right - (uint32_t)rectangle.left);
+        SetWindowPos(g_nativeWindow, 0, 0, 0, width, height, 0x16);
+        SetWindowPos(g_nativeWindow, HWND_NOTOPMOST, 0, 0, 0, 0, 0x13);
+        SystemParametersInfoA(SPI_GETWORKAREA, 0, &work_area, 0);
+        GetWindowRect(g_nativeWindow, &rectangle);
+        if (rectangle.left < work_area.left) {
+            rectangle.left = work_area.left;
+        }
+        if (rectangle.top < work_area.top) {
+            rectangle.top = work_area.top;
+        }
+        SetWindowPos(g_nativeWindow, 0, rectangle.left, rectangle.top, 0, 0, 0x15);
+    }
+    memset(&descriptor, 0, sizeof(descriptor));
+    descriptor.dwSize = sizeof(descriptor);
+    if (g_nativeFullscreen != 0) {
+        descriptor.dwBackBufferCount = g_nativeBackbufferCount;
+        descriptor.dwFlags = DDSD_CAPS | DDSD_BACKBUFFERCOUNT;
+        descriptor.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_FLIP | DDSCAPS_COMPLEX;
+        draw = g_nativeDirectDraw;
+        if (draw->lpVtbl->CreateSurface(draw, &descriptor,
+                (LPDIRECTDRAWSURFACE *)&g_nativePrimarySurface.surface, 0) != DD_OK) {
+            return 0;
+        }
+        width = g_nativeSurfaceWidth;
+        height = g_nativeSurfaceHeight;
+        g_nativePrimarySurface.active = 1;
+        g_nativePrimarySurface.restore_marker = 1;
+        g_nativePrimarySurface.width = width;
+        depth = g_nativeSurfaceBitDepth;
+        g_nativePrimarySurface.height = height;
+        index = g_nativeBackbufferCount;
+        g_nativePrimarySurface.bit_depth = depth;
+        if (index >= 5) {
+            MessageBoxA(g_nativeWindow, g_nativeBackbufferLimitMessage, 0, 0);
+            return 0;
+        }
+        if (g_nativeBackbufferCount > 0) {
+            chain = g_nativePrimarySurface.surface;
+            caps.dwCaps = DDSCAPS_BACKBUFFER;
+            index = 0;
+            do {
+                record = &g_nativeType1Surfaces[index];
+                if (index != 0) {
+                    caps.dwCaps = DDSCAPS_FLIP;
+                }
+                if (chain->lpVtbl->GetAttachedSurface(chain, &caps, &chain) != DD_OK) {
+                    MessageBoxA(g_nativeWindow, g_nativeBackbufferMessage, 0, 0);
+                    return 0;
+                }
+                width = g_nativeSurfaceWidth;
+                record->surface = chain;
+                height = g_nativeSurfaceHeight;
+                record->active = 1;
+                depth = g_nativeSurfaceBitDepth;
+                record->restore_marker = 1;
+                record->width = width;
+                record->height = height;
+                index++;
+                backbuffer_limit = g_nativeBackbufferCount;
+                record->bit_depth = depth;
+            } while (index < backbuffer_limit);
+        }
+    } else {
+        descriptor.dwFlags = DDSD_CAPS;
+        descriptor.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
+        draw = g_nativeDirectDraw;
+        if (draw->lpVtbl->CreateSurface(draw, &descriptor,
+                (LPDIRECTDRAWSURFACE *)&g_nativePrimarySurface.surface, 0) != DD_OK) {
+            return 0;
+        }
+        width = g_nativeSurfaceWidth;
+        height = g_nativeSurfaceHeight;
+        g_nativePrimarySurface.active = 1;
+        g_nativePrimarySurface.restore_marker = 1;
+        g_nativePrimarySurface.width = width;
+        depth = g_nativeSurfaceBitDepth;
+        g_nativePrimarySurface.height = height;
+        descriptor.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
+        descriptor.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+        descriptor.dwWidth = 640;
+        descriptor.dwHeight = 480;
+        index = g_nativeBackbufferCount;
+        g_nativePrimarySurface.bit_depth = depth;
+        if (index >= 5) {
+            MessageBoxA(g_nativeWindow, g_nativeBackbufferLimitMessage, 0, 0);
+            return 0;
+        }
+        if (g_nativeBackbufferCount > 0) {
+            index = 0;
+            do {
+                record = &g_nativeType1Surfaces[index];
+                draw = g_nativeDirectDraw;
+                if (draw->lpVtbl->CreateSurface(draw, &descriptor,
+                        (LPDIRECTDRAWSURFACE *)&record->surface, 0) != DD_OK) {
+                    return 0;
+                }
+                record->active = 1;
+                width = g_nativeSurfaceWidth;
+                record->restore_marker = 1;
+                height = g_nativeSurfaceHeight;
+                record->width = width;
+                depth = g_nativeSurfaceBitDepth;
+                record->height = height;
+                record->bit_depth = depth;
+                index++;
+            } while (index < g_nativeBackbufferCount);
+        }
+        draw = g_nativeDirectDraw;
+        if (draw->lpVtbl->CreateClipper(draw, 0, (LPDIRECTDRAWCLIPPER *)&g_nativeClipper, 0) != DD_OK) {
+            return 0;
+        }
+        window = g_nativeWindow;
+        clipper = g_nativeClipper;
+        if (clipper->lpVtbl->SetHWnd(clipper, 0, window) != DD_OK) {
+            return 0;
+        }
+        clipper = g_nativeClipper;
+        chain = g_nativePrimarySurface.surface;
+        if (chain->lpVtbl->SetClipper(chain, clipper) != DD_OK) {
+            /* VA 0x0045BD11 returns success before restoration/show here. */
+            return 1;
+        }
+    }
+    descriptor.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
+    descriptor.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+    if (g_nativeFullscreen != 0) {
+        if (g_nativePalette != 0) {
+            palette = g_nativePalette;
+            palette->lpVtbl->Release(palette);
+            g_nativePalette = 0;
+        }
+        g_nativePaletteEntries[0].peRed = 0;
+        g_nativePaletteEntries[0].peGreen = 0;
+        g_nativePaletteEntries[0].peBlue = 0;
+        for (index = 1; index < 256; index++) {
+            g_nativePaletteEntries[index].peRed = 255;
+            g_nativePaletteEntries[index].peGreen = 255;
+            g_nativePaletteEntries[index].peBlue = 255;
+        }
+        draw = g_nativeDirectDraw;
+        if (draw->lpVtbl->CreatePalette(draw, DDPCAPS_8BIT | DDPCAPS_ALLOW256,
+                (LPPALETTEENTRY)g_nativePaletteEntries, (LPDIRECTDRAWPALETTE *)&g_nativePalette, 0) != DD_OK) {
+            return 0;
+        }
+        palette = g_nativePalette;
+        chain = g_nativePrimarySurface.surface;
+        if (chain->lpVtbl->SetPalette(chain, palette) != DD_OK) {
+            return 0;
+        }
+    }
+    Gfx_SurfaceRestoreNative();
+    ShowWindow(g_nativeWindow, SW_SHOW);
+    return 1;
+}
+
+/* End native surface constructor. */

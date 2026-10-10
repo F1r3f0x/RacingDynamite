@@ -3544,3 +3544,11 @@ int Timer_Init(void) {
     
     return 1;
 }
+
+/* Native Windows platform backing, independently verified from WinMain/Open. */
+#include <windows.h>
+HINSTANCE volatile g_nativeWindowInstance = 0; /* VA 0x004C5398; WinMain assigns it */
+HWND volatile g_nativeWindow = 0; /* VA 0x004C539C; constructor publishes it */
+const char g_nativeWindowClassName[] = "Ignition"; /* VA 0x00493740 */
+const char g_nativeWindowTitle[] = "Ignition"; /* VA 0x00493778 */
+/* End native Windows platform backing. */

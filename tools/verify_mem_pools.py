@@ -15,6 +15,7 @@ from verify_font_cleanup import SAVED, STACK, STOP
 from verify_mem_free import ARENA, ARENA_SIZE, oracle as free_oracle, inspect_original as inspect_free
 from verify_mem_alloc import oracle as alloc_oracle, inspect_original as inspect_alloc
 from build_decomp import build
+from windows_target import validate_platform_imports
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -217,7 +218,7 @@ def verify_mem_pools():
         for name in ROUTINES:
             record(name,'compilation','pass',scope='Complete production mem.c, strict C89; Clang/LLD provisional, nonreturning CRT boundaries')
         rebuilt=pefile.PE(str(DLL))
-        assert not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
+        validate_platform_imports(rebuilt)
         symbols={s.name.decode():rebuilt.OPTIONAL_HEADER.ImageBase+s.address for s in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if s.name}
         for name,(rva,n,_) in ROUTINES.items():
             prefix=rebuilt.get_data(symbols[name]-rebuilt.OPTIONAL_HEADER.ImageBase,n)

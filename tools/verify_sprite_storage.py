@@ -17,6 +17,7 @@ from verify_sprite_packing import (State as PackingState, Session as PackingSess
 from verify_sprite_pixels import inspect as inspect_pixels
 from verify_matching import STACK, STOP, PRESERVED
 from build_decomp import build
+from windows_target import validate_platform_imports
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -358,7 +359,7 @@ def verify_sprite_storage():
     inspect(original)
     build(dll=DLL)
     rebuilt = pefile.PE(str(DLL))
-    assert rebuilt.FILE_HEADER.Machine == 0x14c and not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
+    assert rebuilt.FILE_HEADER.Machine == 0x14c;validate_platform_imports(rebuilt)
     coverage = {'comparisons':0,'persistent_followups':0,'faults':0,'cycle_prefixes':0,
         'aliases':0,'wrapping':0,'read_mutations':0,'pixel_entries':0}
     bodies = {name:0 for name in ARGUMENTS}

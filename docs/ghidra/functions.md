@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:b05cd5a96140d1dd27945c8019e0a615afddc400fe8460673a9bbe232cba54cb -->
+<!-- snapshot:f51a2cfd6f60c8ef44a0dedd1238db4b3cbb918ba5952a41ebe09f7c6549e5b2 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -116,7 +116,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00411DC0` | `0x00011DC0` | 734 | `sub_00411DC0` | unknown | unidentified | - |
 | `0x004120A0` | `0x000120A0` | 390 | `sub_004120A0` | unknown | unidentified | - |
 | `0x00412230` | `0x00012230` | 154 | `sub_00412230` | unknown | unidentified | - |
-| `0x004122D0` | `0x000122D0` | 400 | `sub_004122D0` | unknown | unidentified | - |
+| `0x004122D0` | `0x000122D0` | 400 | `Game_WindowProc` | game | analyzed | [windows_surface_open.md](windows_surface_open.md) |
 | `0x00412460` | `0x00012460` | 152 | `sub_00412460` | unknown | unidentified | - |
 | `0x00412500` | `0x00012500` | 47 | `sub_00412500` | unknown | unidentified | - |
 | `0x00412530` | `0x00012530` | 21 | `sub_00412530` | unknown | unidentified | - |
@@ -545,7 +545,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045B5C0` | `0x0005B5C0` | 206 | `sub_0045B5C0` | unknown | unidentified | - |
 | `0x0045B690` | `0x0005B690` | 146 | `Gfx_InstallSurfaceDispatch` | game | reconstructed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x0045B730` | `0x0005B730` | 6 | `Gfx_SurfaceConfigureNative` | game | reconstructed | [windows_surface_lifecycle.md](windows_surface_lifecycle.md) |
-| `0x0045B740` | `0x0005B740` | 1575 | `Gfx_SurfaceOpenNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045B740` | `0x0005B740` | 1575 | `Gfx_SurfaceOpenNative` | game | reconstructed | [windows_surface_open.md](windows_surface_open.md) |
 | `0x0045BD70` | `0x0005BD70` | 745 | `Gfx_SurfaceCloseNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x0045C060` | `0x0005C060` | 229 | `Gfx_SurfaceResetNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x0045C150` | `0x0005C150` | 6 | `Gfx_SurfaceConfigureSurfaceNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |

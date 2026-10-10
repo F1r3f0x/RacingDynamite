@@ -185,6 +185,12 @@ def record_run(rva, kind, outcome, *, inputs, artifact=None, cases=0, command, d
     if kind not in KINDS or outcome not in ('pass','fail','different','unverified'):
         raise ValueError('Invalid verification kind or outcome')
     target, _ = load_target(root)
+    # The shared builder now extracts real Win32 platform backing from main.
+    # Persist these transitive inputs so later main edits cannot leave evidence
+    # looking current merely because the caller listed only the builder script.
+    inputs = list(inputs)
+    if 'tools/build_decomp.py' in inputs:
+        inputs = list(dict.fromkeys(inputs + ['decomp/src/main.c', 'decomp/include/main.h']))
     digest = input_hash(root, inputs)
     artifact_hash = sha(inside(root,artifact).read_bytes()) if artifact else None
     with connect(root, True) as conn:

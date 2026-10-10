@@ -21,7 +21,8 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ESI,
     UC_X86_REG_EDI, UC_X86_REG_EBP, UC_X86_REG_ESP, UC_X86_REG_EIP,
     UC_X86_REG_EFLAGS)
 
-from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine, compile_surface
+from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine, compile_surface, surface_import_libraries
+from windows_target import validate_platform_imports
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -220,7 +221,7 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     banner_obj, banner_cmd = compile_banner(compile_cmd[:-4], DLL.stem)
     sine_obj, sine_cmd = compile_sine(DLL.stem)
     surface_obj, _ = compile_surface(DLL.stem)
-    link_cmd.extend([str(banner_obj), str(sine_obj), str(surface_obj)])
+    link_cmd.extend([str(banner_obj), str(sine_obj), str(surface_obj)] + surface_import_libraries(DLL.stem))
     subprocess.run(link_cmd, check=True)
     assert obj_path.stat().st_size and DLL.stat().st_size
     return [compile_cmd, compile_stub_cmd, banner_cmd, sine_cmd, link_cmd]
@@ -627,7 +628,7 @@ def verify_font_cleanup():
     rebuilt = pefile.PE(str(DLL))
 
     inspect_original(original)
-    assert not hasattr(rebuilt, 'DIRECTORY_ENTRY_IMPORT')
+    validate_platform_imports(rebuilt)
 
     symbols = {e.name.decode(): rebuilt.OPTIONAL_HEADER.ImageBase + e.address
                for e in rebuilt.DIRECTORY_ENTRY_EXPORT.symbols if e.name}

@@ -7,6 +7,7 @@ import hashlib
 import random
 import struct
 import pefile
+from windows_target import validate_platform_imports
 from windows_target import validation_symbols
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn import Uc, UC_ARCH_X86, UC_MODE_32, UC_HOOK_CODE, UC_MEM_WRITE
@@ -988,7 +989,7 @@ def verify_mem_lifecycle():
         default_cases=verify_default_initializer(original)
         build(dll=DLL)
         for name in ROUTINES:record(name,'compilation','pass',scope='Complete production mem.c plus extracted production banner/input/selector/surface/sprite/handle/descriptor and both workspace bodies and packing link helper, thirty dispatch globals and independently recovered sprite/workspace storage; strict C89; provisional Clang/LLD; default initializer and primitive/CRT fixtures')
-        rebuilt=pefile.PE(str(DLL));assert not hasattr(rebuilt,'DIRECTORY_ENTRY_IMPORT')
+        rebuilt=pefile.PE(str(DLL));validate_platform_imports(rebuilt)
         symbols=validation_symbols(rebuilt)
         for name,(r,n,_) in ROUTINES.items():
             equal=rebuilt.get_data(symbols[name]-rebuilt.OPTIONAL_HEADER.ImageBase,n)==original.get_data(r,n)

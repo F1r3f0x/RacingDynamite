@@ -13,7 +13,7 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ESP, UC_X86_REG_EIP,
                               UC_X86_REG_EFLAGS)
 from verify_font_cleanup import FontLifecycleCPU, LIFECYCLE_FIELDS, SAVED, STACK, STOP
-from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine, compile_surface
+from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine, compile_surface, surface_import_libraries
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -155,7 +155,7 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     banner_obj, banner_cmd = compile_banner(commands[0][:-4], dll.stem)
     sine_obj, sine_cmd = compile_sine(dll.stem)
     surface_obj, _ = compile_surface(dll.stem)
-    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj)])
+    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj)] + surface_import_libraries(dll.stem))
     for command in commands:
         subprocess.run(command, check=True)
     return commands[:-1] + [banner_cmd, sine_cmd, commands[-1]]

@@ -1,5 +1,19 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Native surface constructor (2026-10-10)
+
+[Surface constructor](ghidra/windows_surface_open.md), RVA 0x5B740, has real C89
+Win32/GDI/DirectDraw behavior and real initialization/restoration dependencies.
+242 differential comparisons include 108 persistent follow-ups, four interface
+faults and 37 executed mutation calls. Four paired native scenarios pass actual
+API/COM execution: missing class and windowed 0/1/4 backbuffers, using authenticated
+original WndProc as a reference boundary. This does not certify a rebuilt WndProc
+or native game startup. Width/height/depth fields and real stdcall import libraries
+are independently verified. Native fullscreen/lost-device, complete game behavior
+and original compiler/link layout remain open. Next reconstruct actual display
+resource shutdown/rebuild and then input/WinMain dependencies. The focused DLL
+and probe remain validation artifacts.
+
 This document defines the complete engineering roadmap and milestone plan for **Racing Dynamite**, the clean-room reverse engineering and modern C11/SDL2 source port of **Ignition** (1997, Unique Development Studios / Virgin Interactive), targeting standard Windows `IGN_WIN.EXE`, with `MAINDOS.EXE` retained as a secondary DOS reference.
 
 ---
