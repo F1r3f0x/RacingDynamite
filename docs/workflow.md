@@ -1,5 +1,18 @@
 # Enforced agent workflow
 
+## Native graphics entry validation (2026-10-10)
+
+Run `uv run tools/verify_graphics_entry.py` for RVAs 0x56BC0/0x56BE0/0x56BF0/
+0x56F20/0x56F30. It authenticates local PE/FPO and builds production C89 bodies,
+then executes 525 differential comparisons and four paired native entry scenarios.
+Real surface installation/lifecycle and sprite leaves execute; two sprite slots
+are explicitly bound by the native host, with allocating sprite installation outside
+its scope. Existing installer differential coverage remains in the full verifier.
+RVA0x56E60 binding-name changes require its existing fresh results and trailer too.
+See [evidence and limits](ghidra/windows_graphics_entry.md). Complete the full
+workflow, synchronized exports, LF working/index checks, staged gate and hooks
+before committing. Focused entry validation does not certify native full game parity.
+
 ## Native surface rebuild (2026-10-10)
 
 [Surface rebuild](ghidra/windows_surface_rebuild.md), RVA0x5BD70, now implements

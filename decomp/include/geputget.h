@@ -244,10 +244,13 @@ int Gfx_CopySpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id); /* 
 typedef struct GfxSpriteState GfxSpriteState;
 typedef int (*GfxSpriteOpenProc)(void);
 extern GfxSpriteOpenProc volatile g_spriteOpen; /* VA 0x0050EBA0 */
-int Gfx_SpriteOpenNative(void); /* VA 0x00456F20; body unreconstructed */
-typedef int (*GfxSpriteResetProc)(void);
-extern GfxSpriteResetProc volatile g_spriteReset; /* VA 0x0050EBA4 */
-int Gfx_SpriteResetNative(void); /* VA 0x00456F30; body unreconstructed */
+int Gfx_SpriteOpenNative(void); /* VA 0x00456F20 */
+typedef int (*GfxSpriteShutdownProc)(void);
+extern GfxSpriteShutdownProc volatile g_spriteShutdown; /* VA 0x0050EBA4 */
+int Gfx_SpriteShutdownNative(void); /* VA 0x00456F30 */
+int Gfx_Open(void); /* VA 0x00456BC0 */
+int Gfx_Rebuild(void); /* VA 0x00456BE0 */
+int Gfx_Shutdown(void); /* VA 0x00456BF0 */
 typedef int (*GfxSpriteCloseProc)(void);
 extern GfxSpriteCloseProc volatile g_spriteClose; /* VA 0x0050EBA8 */
 int Gfx_SpriteCloseNative(void); /* VA 0x00456F40; body unreconstructed */

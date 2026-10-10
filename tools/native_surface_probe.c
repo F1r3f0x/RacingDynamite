@@ -2,6 +2,10 @@
 #include <ddraw.h>
 #include <stdint.h>
 
+#ifdef SURFACE_TEST_ENTRY
+#define SURFACE_TEST_REBUILD
+#endif
+
 typedef int (__cdecl *OpenFn)(void);
 typedef struct NativeRecord {
     uint32_t active, marker, opaque[5], width, height, depth, kind;
@@ -217,8 +221,26 @@ void WINAPI NativeEntry(void) {
     }
     compiled=LoadLibraryA("surface_open_validation.dll");
     if (!compiled) { fail("FAIL native production DLL load\n",38); }
+#ifdef SURFACE_TEST_ENTRY
+    /* Execute the real surface installer. Sprite installation also allocates
+     * workspaces, outside this host's scope; bind only its authenticated two
+     * lifecycle slots to their real original/rebuilt bodies. */
+    binding.bytes=image+0x5b690;
+    if (binding.open()!=1) { fail("FAIL native original surface installer\n",58); }
+    binding.generic=symbol(compiled,"Gfx_InstallSurfaceDispatch");
+    if (binding.open()!=1) { fail("FAIL native rebuilt surface installer\n",59); }
+    binding.bytes=image+0x56f20;*(OpenFn volatile *)(image+0x10eba0)=binding.open;
+    binding.bytes=image+0x56f30;*(OpenFn volatile *)(image+0x10eba4)=binding.open;
+    binding.generic=symbol(compiled,"Gfx_SpriteOpenNative");
+    *(OpenFn volatile *)data_symbol(compiled,"g_spriteOpen")=binding.open;
+    binding.generic=symbol(compiled,"Gfx_SpriteShutdownNative");
+    *(OpenFn volatile *)data_symbol(compiled,"g_spriteShutdown")=binding.open;
+    binding.bytes=image+0x56bc0;original_fn=binding.open;
+    binding.generic=symbol(compiled,"Gfx_Open");rebuilt_fn=binding.open;
+#else
     binding.bytes=image+0x5b740;original_fn=binding.open;
     binding.generic=symbol(compiled,"Gfx_SurfaceOpenNative");rebuilt_fn=binding.open;
+#endif
     records[0][0]=(NativeRecord *)(image+0x10e778);
     records[0][1]=(NativeRecord *)(image+0x10e688);
     records[0][2]=(NativeRecord *)(image+0x10e7a8);
@@ -245,10 +267,17 @@ void WINAPI NativeEntry(void) {
     counts[1]=(volatile int32_t *)data_symbol(compiled,"g_nativeBackbufferCount");
 #if defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
 #ifdef SURFACE_TEST_REBUILD
+#ifdef SURFACE_TEST_ENTRY
+    binding.bytes=image+0x56be0;shutdown_fn[0]=binding.open;
+    binding.generic=symbol(compiled,"Gfx_Rebuild");shutdown_fn[1]=binding.open;
+    binding.bytes=image+0x56bf0;finalize_fn[0]=binding.open;
+    binding.generic=symbol(compiled,"Gfx_Shutdown");finalize_fn[1]=binding.open;
+#else
     binding.bytes=image+0x5bd70;shutdown_fn[0]=binding.open;
     binding.generic=symbol(compiled,"Gfx_SurfaceRebuildNative");shutdown_fn[1]=binding.open;
     binding.bytes=image+0x5c060;finalize_fn[0]=binding.open;
     binding.generic=symbol(compiled,"Gfx_SurfaceShutdownNative");finalize_fn[1]=binding.open;
+#endif
 #else
     binding.bytes=image+0x5c060;shutdown_fn[0]=binding.open;
     binding.generic=symbol(compiled,"Gfx_SurfaceShutdownNative");shutdown_fn[1]=binding.open;
@@ -405,7 +434,11 @@ void WINAPI NativeEntry(void) {
     if (!UnregisterClassA("Ignition",instance)) { fail("FAIL native class disposal\n",49); }
 #if defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
 #ifdef SURFACE_TEST_REBUILD
+#ifdef SURFACE_TEST_ENTRY
+    output("PASS native Win32/DirectDraw original versus C89 entry: real surface installer, graphics open/repeated rebuild/shutdown and real sprite leaves; missing class and windowed 0/1/4 backbuffers; original WndProc reference boundary; no native game parity\n");
+#else
     output("PASS native Win32/DirectDraw original versus C89 rebuild: windowed 0/1/4 backbuffers and type2 boundary releases; repeated real rebuild clears records while retaining primary/type1 interfaces; original WndProc reference boundary; no native game parity\n");
+#endif
 #else
     output("PASS native Win32/DirectDraw original versus C89 shutdown: missing class and 0/1/4 windowed backbuffers; real production releases and retained clipper/record metadata; original WndProc reference boundary; no native game parity\n");
 #endif

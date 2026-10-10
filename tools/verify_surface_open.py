@@ -302,7 +302,7 @@ class Session(SurfaceSession):
             assert not uc.reg_read(UC_X86_REG_EFLAGS)&0x400
             assert uc.reg_read(UC_X86_REG_EAX)==result
 
-def native_surface(dll,shutdown=False,rebuild=False):
+def native_surface(dll,shutdown=False,rebuild=False,entry=False):
     import shutil
     import subprocess
     from windows_target import TARGET
@@ -334,16 +334,25 @@ def native_surface(dll,shutdown=False,rebuild=False):
       '-c',str(ROOT/'tools/native_surface_probe.c'),'-o',str(obj)],
       [linker,'/entry:NativeEntry@0','/subsystem:console','/nodefaultlib','/machine:x86',
        '/safeseh:no','/base:0x20000000','/dynamicbase:no','/out:'+str(exe),str(obj)]+libraries])
-    if rebuild:commands[-2].insert(1,'-DSURFACE_TEST_REBUILD')
+    if entry:commands[-2].insert(1,'-DSURFACE_TEST_ENTRY')
+    elif rebuild:commands[-2].insert(1,'-DSURFACE_TEST_REBUILD')
     elif shutdown:commands[-2].insert(1,'-DSURFACE_TEST_SHUTDOWN')
     for command in commands[-2:]:subprocess.run(command,cwd=ROOT,check=True)
     result=subprocess.run([str(exe)],cwd=runtime,capture_output=True,text=True,timeout=45)
     (runtime/'result.log').write_text(result.stdout+result.stderr,encoding='utf-8',newline='\n')
-    expected='PASS native Win32/DirectDraw original versus C89 '+('rebuild:' if rebuild else 'shutdown:' if shutdown else 'constructor:')
+    expected='PASS native Win32/DirectDraw original versus C89 '+('entry:' if entry else 'rebuild:' if rebuild else 'shutdown:' if shutdown else 'constructor:')
     if result.returncode or not result.stdout.startswith(expected):
         raise RuntimeError(('Native surface probe failed',result.returncode,result.stdout,result.stderr))
     verify_target(copied)
     assert hashlib.sha256(dll.read_bytes()).digest()==hashlib.sha256((runtime/'surface_open_validation.dll').read_bytes()).digest()
+    if entry:
+        return {'variant':'entry','cases':4,'paired_executions':8,
+          'routine_executions':{'Gfx_Open':8,'Gfx_Rebuild':12,'Gfx_Shutdown':6,'Gfx_SpriteOpenNative':6,'Gfx_SpriteShutdownNative':6},
+          'stdout':result.stdout,'exit_code':result.returncode,
+          'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
+          'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
+          'scope':'Actual surface installer and graphics lifecycle wrappers through real surface/sprite bodies. Missing-class failure and paired registered windowed 0/1/4 scenarios with repeated rebuild and shutdown, real type2 releases and retained interfaces. Two sprite lifecycle slots bound by host to authenticated real bodies; full allocating sprite installer is outside native scope. Original WndProc reference boundary.',
+          'limitations':'No rebuilt WndProc/full game/startup/menu/render/input/audio/races, fullscreen/lost-device native certification or original compiler/link layout/instruction equality.'}
     return {'variant':'rebuild' if rebuild else 'shutdown' if shutdown else 'constructor','cases':3 if rebuild else 4,'paired_executions':6 if rebuild else 8,'lifecycle_invocations':12 if rebuild else 8 if shutdown else 0,'stdout':result.stdout,'exit_code':result.returncode,
       'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
       'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),

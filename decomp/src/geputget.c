@@ -201,7 +201,7 @@ int Gfx_InstallSurfaceDispatch(void) {
 
 /* Windows sprite dispatch words; four intervening words are not installed. */
 GfxSpriteOpenProc volatile g_spriteOpen = 0; /* VA 0x0050EBA0 */
-GfxSpriteResetProc volatile g_spriteReset = 0; /* VA 0x0050EBA4 */
+GfxSpriteShutdownProc volatile g_spriteShutdown = 0; /* VA 0x0050EBA4 */
 GfxSpriteCloseProc volatile g_spriteClose = 0; /* VA 0x0050EBA8 */
 GfxSpriteOptionProc volatile g_spriteOption = 0; /* VA 0x0050EBAC */
 GfxSpriteConfigureProc volatile g_spriteConfigure = 0; /* VA 0x0050EBB0 */
@@ -223,7 +223,7 @@ GfxSpriteSetStateProc volatile g_spriteSetState = 0; /* VA 0x0050EBE8 */
  */
 int Gfx_InstallSpriteDispatch(void) {
     g_spriteOpen = Gfx_SpriteOpenNative;
-    g_spriteReset = Gfx_SpriteResetNative;
+    g_spriteShutdown = Gfx_SpriteShutdownNative;
     g_spriteClose = Gfx_SpriteCloseNative;
     g_spriteOption = Gfx_SpriteOptionNative;
     g_spriteConfigure = Gfx_SpriteConfigureNative;
@@ -2559,3 +2559,51 @@ int Gfx_SurfaceRebuildNative(void) {
 }
 
 /* End native surface rebuild. */
+
+/* Native graphics lifecycle entry points. */
+/*
+ * @original Gfx_SpriteOpenNative (IGN_WIN.EXE @ 0x00456F20, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteOpenNative(void) {
+    return 1;
+}
+
+/*
+ * @original Gfx_SpriteShutdownNative (IGN_WIN.EXE @ 0x00456F30, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteShutdownNative(void) {
+    return 1;
+}
+
+/*
+ * @original Gfx_Open (IGN_WIN.EXE @ 0x00456BC0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_Open(void) {
+    if (g_surfaceOpen() == 0) {
+        return 0;
+    }
+    return g_spriteOpen();
+}
+
+/*
+ * @original Gfx_Rebuild (IGN_WIN.EXE @ 0x00456BE0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_Rebuild(void) {
+    return g_surfaceRebuild();
+}
+
+/*
+ * @original Gfx_Shutdown (IGN_WIN.EXE @ 0x00456BF0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_Shutdown(void) {
+    if (g_surfaceShutdown() == 0) {
+        return 0;
+    }
+    return g_spriteShutdown();
+}
+/* End native graphics lifecycle entry points. */

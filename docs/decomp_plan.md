@@ -1,5 +1,23 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Graphics lifecycle entry points (2026-10-10)
+
+Rebuild is committed as `34b7f6d`, snapshot `4a5be4c9cd9e`, with all 65 existing
+reconstructions revalidated. The next dependency feature is
+[graphics entry points](ghidra/windows_graphics_entry.md): RVAs 0x56BC0,
+0x56BE0, 0x56BF0, 0x56F20 and 0x56F30, plus installer binding names at 0x56E60.
+Authenticated C89 bodies compile using real surface dependencies. 525 differential
+comparisons include 47 faults and 140 persistent follow-ups; four paired native
+entry scenarios execute real surface installation and lifecycle bodies. The host
+binds two real sprite leaves explicitly; allocating sprite installation remains
+outside native scope. The full workflow renews all 70 reconstructed routines,
+with 70 compilation/emulation records and nine scoped native records. Audit and
+exports pass at snapshot `5ed35d7ce096`. The five new routine stages reflect
+actual reconstruction evidence; no instruction equality is claimed.
+Then recover real input shutdown and startup/WndProc dependencies. Input-init
+arguments on Alt-Enter remain an explicit ABI question. Playable game completion
+still requires native startup, menus, rendering, input, audio and race validation.
+
 ## Native surface rebuild (2026-10-10)
 
 [Surface rebuild](ghidra/windows_surface_rebuild.md), RVA0x5BD70, now implements

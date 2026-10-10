@@ -216,6 +216,7 @@ def verify():
         'Mem_InitSystem', 'Mem_ShutdownSystem', 'Lisa_PrintVersion',
         'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
         'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
+        'Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_SpriteOpenNative', 'Gfx_SpriteShutdownNative',
         'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
         'Gfx_InitGraphicsPairStorage', 'Gfx_InitPairStorageControl', 'Gfx_InitSineTable',
         'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords',
@@ -832,3 +833,5 @@ if __name__ == '__main__':
 
     from verify_surface_rebuild import verify_surface_rebuild
     verify_surface_rebuild()
+    from verify_graphics_entry import verify_graphics_entry
+    verify_graphics_entry()

@@ -14,7 +14,7 @@ STARTUP_BOUNDARY_SOURCE = (
     'int Lisa_PrintVersion(void);\n'
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
     '')
-STARTUP_EXPORTS = ['Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
+STARTUP_EXPORTS = ['Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
     'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
 
 # Extract these verified production declarations/body, rather than duplicating C.
@@ -62,6 +62,10 @@ LISA_VERSION_SOURCE += (
     + _resource_source[_selector_start:_selector_end] + '\n'
     + _resource_source[_resource_source.index('/* Independently recovered Windows dispatch slots;'):
         _resource_source.index('/* Global font table matching')])
+
+_entry_marker = '/* Native graphics lifecycle entry points. */'
+_entry_end = '/* End native graphics lifecycle entry points. */'
+LISA_VERSION_SOURCE += _resource_source[_resource_source.index(_entry_marker):_resource_source.index(_entry_end)] + '\n'
 
 _surface_records_start = _resource_source.index('volatile GfxSurfaceRecord g_nativePrimarySurface;')
 _surface_records_end = _resource_source.index('/* Independently recovered Windows dispatch slots;')
@@ -128,8 +132,6 @@ SURFACE_EXPORTS = ['Gfx_InitSurfaceRecords', 'g_nativePrimarySurface',
 
 # Validation fixtures live separately from the extracted production installer.
 STARTUP_BOUNDARY_SOURCE += (
-    'int Gfx_SpriteOpenNative(void) { for (;;) {} }\n'
-    'int Gfx_SpriteResetNative(void) { for (;;) {} }\n'
     'int Gfx_SpriteCloseNative(void) { for (;;) {} }\n'
     'int Gfx_SpriteOptionNative(unsigned int option) { (void)option; for (;;) {} }\n'
     'int Gfx_SpriteConfigureNative(unsigned char *pixels, int stride, int width, int height, unsigned int option) { (void)pixels; (void)stride; (void)width; (void)height; (void)option; for (;;) {} }\n'
@@ -143,7 +145,7 @@ STARTUP_BOUNDARY_SOURCE += (
     'int Gfx_SpriteGetStateNative(GfxSpriteState *state) { (void)state; for (;;) {} }\n'
     'int Gfx_SpriteSetStateNative(const GfxSpriteState *state) { (void)state; for (;;) {} }\n'
 )
-SPRITE_EXPORTS = ['Gfx_GrowPointerTable', 'Gfx_CopyAllocatedString', 'Gfx_ReleaseSpritePackingStorage', 'Gfx_FreeBytes', 'Gfx_FreeAlignedBytes', 'Gfx_AssignSpritePackingStorage', 'Gfx_CopySpriteDescriptorPixels', 'Gfx_AddSpritePackingBucket', 'Gfx_FindSpritePackingGap', 'Gfx_AddSpritePackingPage', 'Gfx_AllocBytes', 'Gfx_AllocAlignedBytes', 'Gfx_InitSpritePackingState', 'Gfx_LinkSpritePackingNode', 'g_spritePackingTemplate', 'g_spritePackingBuckets', 'g_spritePackingPages', 'Gfx_InitDefaultSpriteDescriptor', 'g_nativeSpriteDefaultName', 'g_nativeImageControl', 'g_spriteOpen', 'Gfx_SpriteOpenNative', 'g_spriteReset', 'Gfx_SpriteResetNative', 'g_spriteClose', 'Gfx_SpriteCloseNative', 'g_spriteOption', 'Gfx_SpriteOptionNative', 'g_spriteConfigure', 'Gfx_SpriteConfigureNative', 'g_spriteSetClip', 'Gfx_SpriteSetClipNative', 'g_spriteDrawList', 'Gfx_SpriteDrawListNative', 'g_spriteDraw', 'Gfx_DrawSpriteNative', 'g_spriteHandleOp', 'Gfx_SpriteHandleOpNative', 'g_spriteImageOp', 'Gfx_SpriteImageOpNative', 'g_spriteCreateDescriptor', 'Gfx_SpriteCreateDescriptorNative', 'g_spriteFreeDescriptor', 'Gfx_SpriteFreeDescriptorNative', 'g_spriteCopyDescriptor', 'Gfx_SpriteCopyDescriptorNative', 'g_spriteReserved', 'Gfx_SpriteReservedNative', 'g_spriteGetState', 'Gfx_SpriteGetStateNative', 'g_spriteSetState', 'Gfx_SpriteSetStateNative', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'g_nativeSpriteFreeList', 'g_nativeSpriteHandles', 'g_nativeSpriteFreeCursor', 'g_nativeSpriteScratch', 'g_nativeSpriteDefault']
+SPRITE_EXPORTS = ['Gfx_GrowPointerTable', 'Gfx_CopyAllocatedString', 'Gfx_ReleaseSpritePackingStorage', 'Gfx_FreeBytes', 'Gfx_FreeAlignedBytes', 'Gfx_AssignSpritePackingStorage', 'Gfx_CopySpriteDescriptorPixels', 'Gfx_AddSpritePackingBucket', 'Gfx_FindSpritePackingGap', 'Gfx_AddSpritePackingPage', 'Gfx_AllocBytes', 'Gfx_AllocAlignedBytes', 'Gfx_InitSpritePackingState', 'Gfx_LinkSpritePackingNode', 'g_spritePackingTemplate', 'g_spritePackingBuckets', 'g_spritePackingPages', 'Gfx_InitDefaultSpriteDescriptor', 'g_nativeSpriteDefaultName', 'g_nativeImageControl', 'g_spriteOpen', 'Gfx_SpriteOpenNative', 'g_spriteShutdown', 'Gfx_SpriteShutdownNative', 'g_spriteClose', 'Gfx_SpriteCloseNative', 'g_spriteOption', 'Gfx_SpriteOptionNative', 'g_spriteConfigure', 'Gfx_SpriteConfigureNative', 'g_spriteSetClip', 'Gfx_SpriteSetClipNative', 'g_spriteDrawList', 'Gfx_SpriteDrawListNative', 'g_spriteDraw', 'Gfx_DrawSpriteNative', 'g_spriteHandleOp', 'Gfx_SpriteHandleOpNative', 'g_spriteImageOp', 'Gfx_SpriteImageOpNative', 'g_spriteCreateDescriptor', 'Gfx_SpriteCreateDescriptorNative', 'g_spriteFreeDescriptor', 'Gfx_SpriteFreeDescriptorNative', 'g_spriteCopyDescriptor', 'Gfx_SpriteCopyDescriptorNative', 'g_spriteReserved', 'Gfx_SpriteReservedNative', 'g_spriteGetState', 'Gfx_SpriteGetStateNative', 'g_spriteSetState', 'Gfx_SpriteSetStateNative', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'g_nativeSpriteFreeList', 'g_nativeSpriteHandles', 'g_nativeSpriteFreeCursor', 'g_nativeSpriteScratch', 'g_nativeSpriteDefault']
 
 WORKSPACE_EXPORTS = ['g_spriteWorkspace' + side + field for side in ('A', 'B')
     for field in ('Allocated', 'Count', 'Buffer0', 'Buffer1', 'Buffer2')]

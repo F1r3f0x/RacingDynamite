@@ -1,5 +1,18 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Native graphics entry points (2026-10-10)
+
+[Graphics entry points](ghidra/windows_graphics_entry.md) now reconstruct Open,
+Rebuild and Shutdown plus authentic sprite Open/Shutdown leaves. 525 differential
+comparisons include 47 faults and 140 follow-ups; four paired native scenarios
+execute real surface installation and lifecycle bodies with the original WndProc
+reference boundary. Sprite lifecycle slots use real bodies, while allocating sprite
+installation stays outside this native scope. The full workflow renews all 70
+reconstructions and audit/exports pass at snapshot `5ed35d7ce096`. Next recover
+native input shutdown, then independently resolve input-init repeat timing
+arguments and real WinMain/WndProc/game dependencies. The playable standard
+Windows game and native menus/render/input/audio/race validation remain incomplete.
+
 ## Native surface rebuild (2026-10-10)
 
 [Surface rebuild](ghidra/windows_surface_rebuild.md), RVA0x5BD70, now implements
