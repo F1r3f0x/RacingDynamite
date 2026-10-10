@@ -106,3 +106,11 @@ installer bindings retain the same original address. Native windowed release
 scenarios extend constructor evidence, with type2 boundary interfaces supplied
 by test setup. Complete native WndProc/game/fullscreen/palette behavior remains
 unverified. Surface rebuild RVA0x5BD70 is next.
+
+## Native surface rebuild (2026-10-10)
+
+[Rebuild](windows_surface_rebuild.md), RVA0x5BD70, has real SDK behavior and an
+independent contract including separate palette backing. Historical Close labels
+are corrected while dispatch retains the verified address. Native windowed cases
+observe repeated clearing, retained interfaces and subsequent production shutdown.
+Original WndProc/full game/fullscreen/palette behavior remains outside this evidence.

@@ -164,7 +164,7 @@ int Gfx_SurfaceRestoreNative(void) {
 /* Independently recovered Windows dispatch slots; loader-zeroed .data tail. */
 GfxSurfaceConfigureProc volatile g_surfaceConfigure = 0; /* VA 0x0050EB68 */
 GfxSurfaceOpenProc volatile g_surfaceOpen = 0; /* VA 0x0050EB6C */
-GfxSurfaceCloseProc volatile g_surfaceClose = 0; /* VA 0x0050EB70 */
+GfxSurfaceRebuildProc volatile g_surfaceRebuild = 0; /* VA 0x0050EB70 */
 GfxSurfaceShutdownProc volatile g_surfaceShutdown = 0; /* VA 0x0050EB74 */
 GfxSurfaceConfigureSurfaceProc volatile g_surfaceConfigureSurface = 0; /* VA 0x0050EB78 */
 GfxSurfaceBlitProc volatile g_surfaceBlit = 0; /* VA 0x0050EB7C */
@@ -184,7 +184,7 @@ GfxSurfaceRestoreProc volatile g_surfaceRestore = 0; /* VA 0x0050EB9C */
 int Gfx_InstallSurfaceDispatch(void) {
     g_surfaceConfigure = Gfx_SurfaceConfigureNative;
     g_surfaceOpen = Gfx_SurfaceOpenNative;
-    g_surfaceClose = Gfx_SurfaceCloseNative;
+    g_surfaceRebuild = Gfx_SurfaceRebuildNative;
     g_surfaceShutdown = Gfx_SurfaceShutdownNative;
     g_surfaceConfigureSurface = Gfx_SurfaceConfigureSurfaceNative;
     g_surfaceBlit = Gfx_SurfaceBlitNative;
@@ -2421,3 +2421,141 @@ int Gfx_SurfaceShutdownNative(void) {
 }
 
 /* End native surface resource shutdown. */
+
+/* Native surface rebuild and its independently recovered palette backing. */
+volatile PALETTEENTRY g_nativeRebuildPaletteEntries[256]; /* VA 0x00512850 */
+/*
+ * @original Gfx_SurfaceRebuildNative (IGN_WIN.EXE @ 0x0045BD70, inferred geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceRebuildNative(void) {
+    LPDIRECTDRAWSURFACE surface;
+    LPDIRECTDRAWPALETTE palette;
+    LPDIRECTDRAW draw;
+    volatile GfxSurfaceRecord *record;
+    DDSURFACEDESC descriptor;
+    DDSCAPS caps;
+    int width;
+    int height;
+    int depth;
+    int index;
+    int limit;
+
+    record = &g_nativePrimarySurface;
+    if (g_nativeFullscreen != 0) {
+        surface = record->surface;
+        if (surface != 0) {
+            surface->lpVtbl->Release(surface);
+            record->surface = 0;
+            record->active = 0;
+        }
+    }
+    for (index = 0; index < 20; index++) {
+        record = &g_nativeType2Surfaces[index];
+        surface = record->surface;
+        if (surface != 0) {
+            surface->lpVtbl->Release(surface);
+            record->surface = 0;
+            record->active = 0;
+        }
+    }
+    if (g_nativeFullscreen != 0 && g_nativePalette != 0) {
+        palette = g_nativePalette;
+        palette->lpVtbl->Release(palette);
+        g_nativePalette = 0;
+    }
+    Gfx_InitSurfaceRecords();
+    if (g_nativeFullscreen != 0) {
+        depth = g_nativeSurfaceBitDepth;
+        height = g_nativeSurfaceHeight;
+        width = g_nativeSurfaceWidth;
+        draw = g_nativeDirectDraw;
+        if (draw->lpVtbl->SetDisplayMode(draw, width, height, depth) != DD_OK) {
+            return 0;
+        }
+    }
+    memset(&descriptor, 0, sizeof(descriptor));
+    descriptor.dwSize = sizeof(descriptor);
+    if (g_nativeFullscreen != 0) {
+        descriptor.dwBackBufferCount = g_nativeBackbufferCount;
+        descriptor.dwFlags = DDSD_CAPS | DDSD_BACKBUFFERCOUNT;
+        descriptor.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_FLIP | DDSCAPS_COMPLEX;
+        draw = g_nativeDirectDraw;
+        if (draw->lpVtbl->CreateSurface(draw, &descriptor,
+                (LPDIRECTDRAWSURFACE *)&g_nativePrimarySurface.surface, 0) != DD_OK) {
+            return 0;
+        }
+        width = g_nativeSurfaceWidth;
+        height = g_nativeSurfaceHeight;
+        g_nativePrimarySurface.active = 1;
+        g_nativePrimarySurface.restore_marker = 1;
+        g_nativePrimarySurface.width = width;
+        depth = g_nativeSurfaceBitDepth;
+        g_nativePrimarySurface.height = height;
+        limit = g_nativeBackbufferCount;
+        g_nativePrimarySurface.bit_depth = depth;
+        if (limit >= 5) {
+            MessageBoxA(g_nativeWindow, g_nativeBackbufferLimitMessage, 0, 0);
+            return 0;
+        }
+        if (g_nativeBackbufferCount > 0) {
+            surface = g_nativePrimarySurface.surface;
+            caps.dwCaps = DDSCAPS_BACKBUFFER;
+            index = 0;
+            do {
+                record = &g_nativeType1Surfaces[index];
+                if (index != 0) {
+                    caps.dwCaps = DDSCAPS_FLIP;
+                }
+                if (surface->lpVtbl->GetAttachedSurface(surface, &caps, &surface) != DD_OK) {
+                    MessageBoxA(g_nativeWindow, g_nativeBackbufferMessage, 0, 0);
+                    return 0;
+                }
+                width = g_nativeSurfaceWidth;
+                record->surface = surface;
+                height = g_nativeSurfaceHeight;
+                record->active = 1;
+                depth = g_nativeSurfaceBitDepth;
+                record->restore_marker = 1;
+                record->width = width;
+                record->height = height;
+                index++;
+                limit = g_nativeBackbufferCount;
+                record->bit_depth = depth;
+            } while (index < limit);
+        }
+    }
+    descriptor.dwFlags = DDSD_CAPS | DDSD_WIDTH | DDSD_HEIGHT;
+    descriptor.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+    if (g_nativeFullscreen != 0) {
+        if (g_nativePalette != 0) {
+            palette = g_nativePalette;
+            palette->lpVtbl->Release(palette);
+            g_nativePalette = 0;
+        }
+        g_nativeRebuildPaletteEntries[0].peRed = 0;
+        g_nativeRebuildPaletteEntries[0].peGreen = 0;
+        g_nativeRebuildPaletteEntries[0].peBlue = 0;
+        for (index = 1; index < 256; index++) {
+            g_nativeRebuildPaletteEntries[index].peRed = 255;
+            g_nativeRebuildPaletteEntries[index].peGreen = 255;
+            g_nativeRebuildPaletteEntries[index].peBlue = 255;
+        }
+        draw = g_nativeDirectDraw;
+        if (draw->lpVtbl->CreatePalette(draw, DDPCAPS_8BIT | DDPCAPS_ALLOW256,
+                (LPPALETTEENTRY)g_nativeRebuildPaletteEntries,
+                (LPDIRECTDRAWPALETTE *)&g_nativePalette, 0) != DD_OK) {
+            return 0;
+        }
+        palette = g_nativePalette;
+        surface = g_nativePrimarySurface.surface;
+        if (surface->lpVtbl->SetPalette(surface, palette) != DD_OK) {
+            return 0;
+        }
+    }
+    Gfx_SurfaceRestoreNative();
+    ShowWindow(g_nativeWindow, SW_SHOW);
+    return 1;
+}
+
+/* End native surface rebuild. */

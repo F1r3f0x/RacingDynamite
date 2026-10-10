@@ -216,7 +216,7 @@ def verify():
         'Mem_InitSystem', 'Mem_ShutdownSystem', 'Lisa_PrintVersion',
         'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
         'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
-        'Gfx_SurfaceOpenNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
+        'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
         'Gfx_InitGraphicsPairStorage', 'Gfx_InitPairStorageControl', 'Gfx_InitSineTable',
         'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords',
         'Gfx_InitPrimitiveLineControl', 'Gfx_InitNamedPrimitiveDefault',
@@ -232,6 +232,7 @@ def verify():
     code_entries['DirectDrawCreate_import']=draw_thunks[0]
     symbols['DirectDrawCreate_import']=draw_thunks[0]
     expected_calls = {
+        'Gfx_SurfaceRebuildNative': ['Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative'],
         'Gfx_SurfaceOpenNative': ['Gfx_InitSurfaceRecords', 'DirectDrawCreate_import', 'Gfx_SurfaceRestoreNative'],
         'Gfx_InitPrimitiveState': ['Gfx_InitGraphicsPairStorage', 'Gfx_InitSineTable',
             'Gfx_InitDefaultSpriteDescriptor', 'Gfx_InitSpritePackingState',
@@ -828,3 +829,6 @@ if __name__ == '__main__':
 
     from verify_surface_shutdown import verify_surface_shutdown
     verify_surface_shutdown()
+
+    from verify_surface_rebuild import verify_surface_rebuild
+    verify_surface_rebuild()

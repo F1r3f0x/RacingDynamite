@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:c11a9669aa49d5ce3ae09f076e1ae0d25d16a703f191140105c4bf41f2da3573 -->
+<!-- snapshot:4a5be4c9cd9e38c48c8edc5882cdced0359be6e10759abe9dbf921831fa08c9a -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -546,7 +546,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045B690` | `0x0005B690` | 146 | `Gfx_InstallSurfaceDispatch` | game | reconstructed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x0045B730` | `0x0005B730` | 6 | `Gfx_SurfaceConfigureNative` | game | reconstructed | [windows_surface_lifecycle.md](windows_surface_lifecycle.md) |
 | `0x0045B740` | `0x0005B740` | 1575 | `Gfx_SurfaceOpenNative` | game | reconstructed | [windows_surface_open.md](windows_surface_open.md) |
-| `0x0045BD70` | `0x0005BD70` | 745 | `Gfx_SurfaceCloseNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045BD70` | `0x0005BD70` | 745 | `Gfx_SurfaceRebuildNative` | game | reconstructed | [windows_surface_rebuild.md](windows_surface_rebuild.md) |
 | `0x0045C060` | `0x0005C060` | 229 | `Gfx_SurfaceShutdownNative` | game | reconstructed | [windows_surface_shutdown.md](windows_surface_shutdown.md) |
 | `0x0045C150` | `0x0005C150` | 6 | `Gfx_SurfaceConfigureSurfaceNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x0045C160` | `0x0005C160` | 108 | `Gfx_SurfaceBlitNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |

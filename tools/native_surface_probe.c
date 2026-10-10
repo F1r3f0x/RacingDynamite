@@ -96,8 +96,13 @@ void WINAPI NativeEntry(void) {
     HINSTANCE instance;
     HCURSOR cursor;
     OpenFn original_fn, rebuilt_fn;
-#ifdef SURFACE_TEST_SHUTDOWN
+#if defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
     OpenFn shutdown_fn[2];
+#ifdef SURFACE_TEST_REBUILD
+    OpenFn finalize_fn[2];
+    LPDIRECTDRAWSURFACE retained_surfaces[6];
+    LPDIRECTDRAW retained_draw;
+#endif
     LPDIRECTDRAWCLIPPER retained_clipper;
     DDSURFACEDESC extra_desc;
 #endif
@@ -109,7 +114,7 @@ void WINAPI NativeEntry(void) {
     volatile LPDIRECTDRAWPALETTE *palettes[2];
     volatile int32_t *modes[2], *widths[2], *heights[2], *depths[2], *counts[2];
     int pass, side, bank, count, result, k;
-#ifndef SURFACE_TEST_SHUTDOWN
+#if !defined(SURFACE_TEST_SHUTDOWN) && !defined(SURFACE_TEST_REBUILD)
     int index;
 #endif
     HWND window, clip_window;
@@ -238,9 +243,16 @@ void WINAPI NativeEntry(void) {
     heights[1]=(volatile int32_t *)data_symbol(compiled,"g_nativeSurfaceHeight");
     depths[1]=(volatile int32_t *)data_symbol(compiled,"g_nativeSurfaceBitDepth");
     counts[1]=(volatile int32_t *)data_symbol(compiled,"g_nativeBackbufferCount");
-#ifdef SURFACE_TEST_SHUTDOWN
+#if defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
+#ifdef SURFACE_TEST_REBUILD
+    binding.bytes=image+0x5bd70;shutdown_fn[0]=binding.open;
+    binding.generic=symbol(compiled,"Gfx_SurfaceRebuildNative");shutdown_fn[1]=binding.open;
+    binding.bytes=image+0x5c060;finalize_fn[0]=binding.open;
+    binding.generic=symbol(compiled,"Gfx_SurfaceShutdownNative");finalize_fn[1]=binding.open;
+#else
     binding.bytes=image+0x5c060;shutdown_fn[0]=binding.open;
     binding.generic=symbol(compiled,"Gfx_SurfaceShutdownNative");shutdown_fn[1]=binding.open;
+#endif
 #endif
     instance=GetModuleHandleA(0);
     cursor=LoadCursorA(0,MAKEINTRESOURCEA(32512));
@@ -306,7 +318,7 @@ void WINAPI NativeEntry(void) {
                 fail("FAIL native installed clipper\n",47);
             }
             installed->lpVtbl->Release(installed);
-#ifdef SURFACE_TEST_SHUTDOWN
+#if defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
             {
                 unsigned char *bytes;
                 bytes=(unsigned char *)&extra_desc;
@@ -325,7 +337,35 @@ void WINAPI NativeEntry(void) {
                     record->width=32;record->height=16;record->depth=8;
                 }
             }
+#ifdef SURFACE_TEST_REBUILD
+            retained_draw=*draws[side];
+            retained_surfaces[0]=records[side][0]->surface;
+            for (j=0; j<(unsigned int)count; j++) { retained_surfaces[j+1]=records[side][1][j].surface; }
+#endif
             retained_clipper=*clippers[side];
+#ifdef SURFACE_TEST_REBUILD
+            if (shutdown_fn[side]()!=1 || *draws[side]!=retained_draw || *clippers[side]!=retained_clipper ||
+                    *windows[side]!=window || !IsWindowVisible(window)) {
+                fail("FAIL native rebuild retained globals\n",54);
+            }
+            check_records(records[side][0],records[side][1],records[side][2],0,0,8);
+            if (shutdown_fn[side]()!=1 || *draws[side]!=retained_draw) { fail("FAIL repeated native rebuild\n",55); }
+            check_records(records[side][0],records[side][1],records[side][2],0,0,8);
+            for (j=0; j<(unsigned int)count+1; j++) {
+                unsigned char *bytes;
+                bytes=(unsigned char *)&extra_desc;
+                for (k=0; k<(int)sizeof(extra_desc); k++) { bytes[k]=0; }
+                extra_desc.dwSize=sizeof(extra_desc);
+                if (retained_surfaces[j]->lpVtbl->GetSurfaceDesc(retained_surfaces[j],&extra_desc)!=DD_OK) {
+                    fail("FAIL native rebuild unexpectedly released retained surface\n",56);
+                }
+                retained_surfaces[j]->lpVtbl->Release(retained_surfaces[j]);
+            }
+            if (finalize_fn[side]()!=1 || *draws[side] || *clippers[side]!=retained_clipper ||
+                    !IsWindow(window)) {
+                fail("FAIL native rebuild/shutdown production sequence\n",57);
+            }
+#else
             if (shutdown_fn[side]()!=1 || *draws[side] || *clippers[side]!=retained_clipper ||
                     *windows[side]!=window || !IsWindow(window)) {
                 fail("FAIL native shutdown retained globals\n",51);
@@ -347,6 +387,7 @@ void WINAPI NativeEntry(void) {
                     }
                 }
             }
+#endif
 #else
             /* Test-owned cleanup. Rebuilt native shutdown remains a next
              * feature; this cleanup is not production behavior or evidence. */
@@ -362,8 +403,12 @@ void WINAPI NativeEntry(void) {
         }
     }
     if (!UnregisterClassA("Ignition",instance)) { fail("FAIL native class disposal\n",49); }
-#ifdef SURFACE_TEST_SHUTDOWN
+#if defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
+#ifdef SURFACE_TEST_REBUILD
+    output("PASS native Win32/DirectDraw original versus C89 rebuild: windowed 0/1/4 backbuffers and type2 boundary releases; repeated real rebuild clears records while retaining primary/type1 interfaces; original WndProc reference boundary; no native game parity\n");
+#else
     output("PASS native Win32/DirectDraw original versus C89 shutdown: missing class and 0/1/4 windowed backbuffers; real production releases and retained clipper/record metadata; original WndProc reference boundary; no native game parity\n");
+#endif
 #else
     output("PASS native Win32/DirectDraw original versus C89 constructor: missing class and 0/1/4 windowed backbuffers; authenticated original WndProc reference boundary; no native game parity\n");
 #endif

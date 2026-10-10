@@ -229,13 +229,14 @@ class State(SurfaceState):
         except Fault:return None
 
 class Session(SurfaceSession):
+    field_specs=FIELDS
     def __init__(self,pe,state,original):
         self.uc=Uc(UC_ARCH_X86,UC_MODE_32);self.base=pe.OPTIONAL_HEADER.ImageBase
         self.size=(pe.OPTIONAL_HEADER.SizeOfImage+4095)&~4095
         self.uc.mem_map(self.base,self.size);self.uc.mem_write(self.base,pe.get_memory_mapped_image())
         self.uc.mem_map(ARENA,SIZE);self.uc.mem_map(STACK,0x10000);self.uc.mem_map(STOP,4096)
-        self.symbols=({name:p for name,p,_ in FIELDS}|{'Gfx_SurfaceOpenNative':0x45b740,'Gfx_InitSurfaceRecords':0x456a40,'Gfx_SurfaceRestoreNative':0x45c730}) if original else validation_symbols(pe)
-        self.fields=[(p,self.symbols[name],n) for name,p,n in FIELDS]
+        self.symbols=({name:p for name,p,_ in self.field_specs}|{'Gfx_SurfaceOpenNative':0x45b740,'Gfx_InitSurfaceRecords':0x456a40,'Gfx_SurfaceRestoreNative':0x45c730}) if original else validation_symbols(pe)
+        self.fields=[(p,self.symbols[name],n) for name,p,n in self.field_specs]
         for p,b in state.data.items():self.uc.mem_write(self.physical(p),bytes(b))
         for group in pe.DIRECTORY_ENTRY_IMPORT:
             for entry in group.imports:
@@ -245,7 +246,7 @@ class Session(SurfaceSession):
         self.uc.hook_add(UC_HOOK_MEM_INVALID,self.invalid)
         self.callbacks={p:name for name,p in FUNCTIONS.items()}
 
-    def snapshot(self):return tuple(bytes(self.uc.mem_read(self.physical(p),n)) for p,n in [(ARENA,SIZE)]+[(p,n) for _,p,n in FIELDS])
+    def snapshot(self):return tuple(bytes(self.uc.mem_read(self.physical(p),n)) for p,n in [(ARENA,SIZE)]+[(p,n) for _,p,n in self.field_specs])
 
     def code(self,uc,a,n,data):
         for name in ('Gfx_InitSurfaceRecords','Gfx_SurfaceRestoreNative'):
@@ -301,7 +302,7 @@ class Session(SurfaceSession):
             assert not uc.reg_read(UC_X86_REG_EFLAGS)&0x400
             assert uc.reg_read(UC_X86_REG_EAX)==result
 
-def native_surface(dll,shutdown=False):
+def native_surface(dll,shutdown=False,rebuild=False):
     import shutil
     import subprocess
     from windows_target import TARGET
@@ -333,19 +334,20 @@ def native_surface(dll,shutdown=False):
       '-c',str(ROOT/'tools/native_surface_probe.c'),'-o',str(obj)],
       [linker,'/entry:NativeEntry@0','/subsystem:console','/nodefaultlib','/machine:x86',
        '/safeseh:no','/base:0x20000000','/dynamicbase:no','/out:'+str(exe),str(obj)]+libraries])
-    if shutdown:commands[-2].insert(1,'-DSURFACE_TEST_SHUTDOWN')
+    if rebuild:commands[-2].insert(1,'-DSURFACE_TEST_REBUILD')
+    elif shutdown:commands[-2].insert(1,'-DSURFACE_TEST_SHUTDOWN')
     for command in commands[-2:]:subprocess.run(command,cwd=ROOT,check=True)
     result=subprocess.run([str(exe)],cwd=runtime,capture_output=True,text=True,timeout=45)
     (runtime/'result.log').write_text(result.stdout+result.stderr,encoding='utf-8',newline='\n')
-    expected='PASS native Win32/DirectDraw original versus C89 '+('shutdown:' if shutdown else 'constructor:')
+    expected='PASS native Win32/DirectDraw original versus C89 '+('rebuild:' if rebuild else 'shutdown:' if shutdown else 'constructor:')
     if result.returncode or not result.stdout.startswith(expected):
         raise RuntimeError(('Native surface probe failed',result.returncode,result.stdout,result.stderr))
     verify_target(copied)
     assert hashlib.sha256(dll.read_bytes()).digest()==hashlib.sha256((runtime/'surface_open_validation.dll').read_bytes()).digest()
-    return {'variant':'shutdown' if shutdown else 'constructor','cases':4,'paired_executions':8,'stdout':result.stdout,'exit_code':result.returncode,
+    return {'variant':'rebuild' if rebuild else 'shutdown' if shutdown else 'constructor','cases':3 if rebuild else 4,'paired_executions':6 if rebuild else 8,'lifecycle_invocations':12 if rebuild else 8 if shutdown else 0,'stdout':result.stdout,'exit_code':result.returncode,
       'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
       'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
-      'scope':('Native constructor plus actual original/rebuilt SDK shutdown: missing-class and registered windowed 0/1/4 backbuffers; real production releases including actual offscreen type2 bank boundaries, retained clipper/markers/geometry, HWND remains until test-owned window disposal. Original WndProc reference boundary; game/input paths prevented.' if shutdown else 'Native Win32/DirectDraw constructor: missing-class failure and registered windowed 0/1/4 backbuffer lifecycles. Actual authenticated original WndProc is an explicit reference class boundary; game/input/shutdown paths prevented, test-owned SDK cleanup.'),
+      'scope':('Native original/rebuilt windowed rebuild after actual constructors: 0/1/4 backbuffers, real type2 boundary releases, repeated clearing while primary/type1 references remain alive outside records; actual SDK surface queries prove retention. Real production shutdown follows; test-owned cleanup only releases interfaces intentionally lost from records and disposes HWND. Original WndProc reference boundary.' if rebuild else 'Native constructor plus actual original/rebuilt SDK shutdown: missing-class and registered windowed 0/1/4 backbuffers; real production releases including actual offscreen type2 bank boundaries, retained clipper/markers/geometry, HWND remains until test-owned window disposal. Original WndProc reference boundary; game/input paths prevented.' if shutdown else 'Native Win32/DirectDraw constructor: missing-class failure and registered windowed 0/1/4 backbuffer lifecycles. Actual authenticated original WndProc is an explicit reference class boundary; game/input/shutdown paths prevented, test-owned SDK cleanup.'),
       'limitations':'No rebuilt WndProc/native game/startup/menu/render/input/audio/race parity, fullscreen/display switching or lost-device hardware validation. No instruction equality/original toolchain claim.'}
 
 

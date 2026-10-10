@@ -1,5 +1,17 @@
 # Enforced agent workflow
 
+## Native surface rebuild (2026-10-10)
+
+[Surface rebuild](ghidra/windows_surface_rebuild.md), RVA0x5BD70, now implements
+actual SDK release/create/palette behavior with real initialization/restoration.
+Historical Close is renamed Rebuild. 360 comparisons include164 follow-ups,
+43 faults and22 executed mutations. Three paired native windowed scenarios execute
+two rebuilds plus production shutdown, proving record clearing while primary/type1
+interfaces remain alive outside records. Both palette buffers are tracked separately.
+Original WndProc is a reference boundary; native full game/startup/fullscreen/palette
+and original compiler/link configuration remain open. Next recover sprite shutdown
+and real graphics/WinMain dependencies. The focused DLL/host are not the rebuilt game.
+
 ## Native graphics resource shutdown (2026-10-10)
 
 [Resource shutdown](ghidra/windows_surface_shutdown.md), RVA 0x5C060, now uses

@@ -28,7 +28,6 @@ STARTUP_BOUNDARY_SOURCE += (
 
 SURFACE_HEADER = _resource_header[_resource_header.index('/* Windows surface dispatch.'):_resource_header.index('#define MAX_FONTS')]
 STARTUP_BOUNDARY_SOURCE += (
-    'int Gfx_SurfaceCloseNative(void) { for (;;) {} }\n'
     'int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4) { (void)option0; (void)option1; (void)option2; (void)option3; (void)option4; for (;;) {} }\n'
     'int Gfx_SurfaceBlitNative(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_y, int destination_x) { (void)source; (void)x; (void)y; (void)width; (void)height; (void)destination; (void)destination_y; (void)destination_x; for (;;) {} }\n'
     'int Gfx_SurfaceCopyPixelsNative(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y) { (void)pixels; (void)stride; (void)source_x; (void)source_y; (void)width; (void)height; (void)destination; (void)destination_x; (void)destination_y; for (;;) {} }\n'
@@ -104,7 +103,10 @@ SURFACE_SOURCE += '#include <string.h>\n' + WINDOW_HEADER + WINDOW_SOURCE + OPEN
 _shutdown_marker = '/* Native surface resource shutdown. */'
 _shutdown_end = '/* End native surface resource shutdown. */'
 SURFACE_SOURCE += _resource_source[_resource_source.index(_shutdown_marker):_resource_source.index(_shutdown_end)]
-SURFACE_EXPORTS_EXTRA = ['g_nativeDirectDraw', 'g_nativeClipper', 'g_nativePalette',
+_rebuild_marker = '/* Native surface rebuild and its independently recovered palette backing. */'
+_rebuild_end = '/* End native surface rebuild. */'
+SURFACE_SOURCE += _resource_source[_resource_source.index(_rebuild_marker):_resource_source.index(_rebuild_end)]
+SURFACE_EXPORTS_EXTRA = ['g_nativeRebuildPaletteEntries', 'g_nativeDirectDraw', 'g_nativeClipper', 'g_nativePalette',
     'g_nativePaletteEntries', 'g_nativeSurfaceWindow', 'g_nativeFullscreen',
     'g_nativeSurfaceWidth', 'g_nativeSurfaceHeight', 'g_nativeSurfaceBitDepth',
     'g_nativeBackbufferCount', 'g_nativeDesktopBitDepth', 'g_nativeWindowInstance',
@@ -122,7 +124,7 @@ SINE_EXPORTS = ['Gfx_InitSineTable', 'g_nativeSineTable', 'g_nativeSineStep',
     'g_nativeSineFullCircle', 'g_nativeSineAmplitude']
 
 SURFACE_EXPORTS = ['Gfx_InitSurfaceRecords', 'g_nativePrimarySurface',
-    'g_nativeType1Surfaces', 'g_nativeType2Surfaces', 'g_surfaceConfigure', 'g_surfaceOpen', 'g_surfaceClose', 'g_surfaceShutdown', 'g_surfaceConfigureSurface', 'g_surfaceBlit', 'g_surfaceCopyPixels', 'g_surfaceClear', 'g_surfacePresent', 'g_surfaceReserved', 'g_surfaceLock', 'g_surfaceUnlock', 'g_surfaceSetPalette', 'g_surfaceRestore', 'Gfx_SurfaceConfigureNative', 'Gfx_SurfaceOpenNative', 'Gfx_SurfaceCloseNative', 'Gfx_SurfaceShutdownNative', 'Gfx_SurfaceConfigureSurfaceNative', 'Gfx_SurfaceBlitNative', 'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceClearNative', 'Gfx_SurfacePresentNative', 'Gfx_SurfaceReservedNative', 'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative', 'Gfx_SurfaceSetPaletteNative', 'Gfx_SurfaceRestoreNative'] + SURFACE_EXPORTS_EXTRA
+    'g_nativeType1Surfaces', 'g_nativeType2Surfaces', 'g_surfaceConfigure', 'g_surfaceOpen', 'g_surfaceRebuild', 'g_surfaceShutdown', 'g_surfaceConfigureSurface', 'g_surfaceBlit', 'g_surfaceCopyPixels', 'g_surfaceClear', 'g_surfacePresent', 'g_surfaceReserved', 'g_surfaceLock', 'g_surfaceUnlock', 'g_surfaceSetPalette', 'g_surfaceRestore', 'Gfx_SurfaceConfigureNative', 'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_SurfaceShutdownNative', 'Gfx_SurfaceConfigureSurfaceNative', 'Gfx_SurfaceBlitNative', 'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceClearNative', 'Gfx_SurfacePresentNative', 'Gfx_SurfaceReservedNative', 'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative', 'Gfx_SurfaceSetPaletteNative', 'Gfx_SurfaceRestoreNative'] + SURFACE_EXPORTS_EXTRA
 
 # Validation fixtures live separately from the extracted production installer.
 STARTUP_BOUNDARY_SOURCE += (
