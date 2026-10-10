@@ -1,5 +1,17 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Native graphics resource shutdown (2026-10-10)
+
+[Resource shutdown](ghidra/windows_surface_shutdown.md), RVA 0x5C060, now uses
+actual SDK Release methods with verified mode-conditioned bank ordering. The
+historical Reset name is corrected to Shutdown. 384 differential comparisons
+include 173 follow-ups, 51 faults, 18 executed mutations and shared interfaces.
+Four paired native constructor/shutdown scenarios use real interfaces, including
+type2 bank boundaries, and preserve stale clipper/markers/geometry/HWND behavior.
+The original WndProc remains a reference boundary; native full game/startup,
+fullscreen/palette branches and original compiler/link layout remain open.
+Next reconstruct surface rebuild RVA0x5BD70 and its caller dependencies.
+
 ## Native surface constructor (2026-10-10)
 
 [Surface constructor](ghidra/windows_surface_open.md), RVA 0x5B740, has real C89

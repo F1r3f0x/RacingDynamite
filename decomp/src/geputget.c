@@ -165,7 +165,7 @@ int Gfx_SurfaceRestoreNative(void) {
 GfxSurfaceConfigureProc volatile g_surfaceConfigure = 0; /* VA 0x0050EB68 */
 GfxSurfaceOpenProc volatile g_surfaceOpen = 0; /* VA 0x0050EB6C */
 GfxSurfaceCloseProc volatile g_surfaceClose = 0; /* VA 0x0050EB70 */
-GfxSurfaceResetProc volatile g_surfaceReset = 0; /* VA 0x0050EB74 */
+GfxSurfaceShutdownProc volatile g_surfaceShutdown = 0; /* VA 0x0050EB74 */
 GfxSurfaceConfigureSurfaceProc volatile g_surfaceConfigureSurface = 0; /* VA 0x0050EB78 */
 GfxSurfaceBlitProc volatile g_surfaceBlit = 0; /* VA 0x0050EB7C */
 GfxSurfaceCopyPixelsProc volatile g_surfaceCopyPixels = 0; /* VA 0x0050EB80 */
@@ -185,7 +185,7 @@ int Gfx_InstallSurfaceDispatch(void) {
     g_surfaceConfigure = Gfx_SurfaceConfigureNative;
     g_surfaceOpen = Gfx_SurfaceOpenNative;
     g_surfaceClose = Gfx_SurfaceCloseNative;
-    g_surfaceReset = Gfx_SurfaceResetNative;
+    g_surfaceShutdown = Gfx_SurfaceShutdownNative;
     g_surfaceConfigureSurface = Gfx_SurfaceConfigureSurfaceNative;
     g_surfaceBlit = Gfx_SurfaceBlitNative;
     g_surfaceCopyPixels = Gfx_SurfaceCopyPixelsNative;
@@ -2360,3 +2360,64 @@ int Gfx_SurfaceOpenNative(void) {
 }
 
 /* End native surface constructor. */
+
+/* Native surface resource shutdown. */
+/*
+ * @original Gfx_SurfaceShutdownNative (IGN_WIN.EXE @ 0x0045C060, inferred geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceShutdownNative(void) {
+    LPDIRECTDRAWCLIPPER clipper;
+    LPDIRECTDRAWSURFACE surface;
+    LPDIRECTDRAWPALETTE palette;
+    LPDIRECTDRAW draw;
+    volatile GfxSurfaceRecord *record;
+    int index;
+
+    if (g_nativeFullscreen == 0 && g_nativeClipper != 0) {
+        clipper = g_nativeClipper;
+        clipper->lpVtbl->Release(clipper);
+    }
+    record = &g_nativePrimarySurface;
+    if (g_nativeFullscreen == 0) {
+        surface = record->surface;
+        if (surface != 0) {
+            surface->lpVtbl->Release(surface);
+            record->surface = 0;
+            record->active = 0;
+        }
+    }
+    for (index = 0; index < 5; index++) {
+        record = &g_nativeType1Surfaces[index];
+        if (g_nativeFullscreen == 0) {
+            surface = record->surface;
+            if (surface != 0) {
+                surface->lpVtbl->Release(surface);
+                record->surface = 0;
+                record->active = 0;
+            }
+        }
+    }
+    for (index = 0; index < 20; index++) {
+        record = &g_nativeType2Surfaces[index];
+        surface = record->surface;
+        if (surface != 0) {
+            surface->lpVtbl->Release(surface);
+            record->surface = 0;
+            record->active = 0;
+        }
+    }
+    if (g_nativeFullscreen != 0 && g_nativePalette != 0) {
+        palette = g_nativePalette;
+        palette->lpVtbl->Release(palette);
+        g_nativePalette = 0;
+    }
+    if (g_nativeDirectDraw != 0) {
+        draw = g_nativeDirectDraw;
+        draw->lpVtbl->Release(draw);
+        g_nativeDirectDraw = 0;
+    }
+    return 1;
+}
+
+/* End native surface resource shutdown. */

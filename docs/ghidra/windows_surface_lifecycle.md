@@ -97,3 +97,12 @@ restoration and actual SDK APIs. Native evidence is limited to the constructor's
 windowed scenarios with an authenticated original WndProc reference boundary.
 The prior 1,256 dependency comparisons are retained. Original shutdown/rebuild,
 complete native startup and game behavior remain pending.
+
+## Native resource shutdown (2026-10-10)
+
+[Shutdown](windows_surface_shutdown.md) implements RVA0x5C060 with actual SDK
+Release calls. Historical Reset slot names now describe verified shutdown;
+installer bindings retain the same original address. Native windowed release
+scenarios extend constructor evidence, with type2 boundary interfaces supplied
+by test setup. Complete native WndProc/game/fullscreen/palette behavior remains
+unverified. Surface rebuild RVA0x5BD70 is next.

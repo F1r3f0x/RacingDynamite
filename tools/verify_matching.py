@@ -825,3 +825,6 @@ if __name__ == '__main__':
 
     from verify_surface_open import verify_surface_open
     verify_surface_open()
+
+    from verify_surface_shutdown import verify_surface_shutdown
+    verify_surface_shutdown()

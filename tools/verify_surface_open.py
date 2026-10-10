@@ -301,7 +301,7 @@ class Session(SurfaceSession):
             assert not uc.reg_read(UC_X86_REG_EFLAGS)&0x400
             assert uc.reg_read(UC_X86_REG_EAX)==result
 
-def native_surface(dll):
+def native_surface(dll,shutdown=False):
     import shutil
     import subprocess
     from windows_target import TARGET
@@ -333,17 +333,19 @@ def native_surface(dll):
       '-c',str(ROOT/'tools/native_surface_probe.c'),'-o',str(obj)],
       [linker,'/entry:NativeEntry@0','/subsystem:console','/nodefaultlib','/machine:x86',
        '/safeseh:no','/base:0x20000000','/dynamicbase:no','/out:'+str(exe),str(obj)]+libraries])
+    if shutdown:commands[-2].insert(1,'-DSURFACE_TEST_SHUTDOWN')
     for command in commands[-2:]:subprocess.run(command,cwd=ROOT,check=True)
     result=subprocess.run([str(exe)],cwd=runtime,capture_output=True,text=True,timeout=45)
     (runtime/'result.log').write_text(result.stdout+result.stderr,encoding='utf-8',newline='\n')
-    if result.returncode or not result.stdout.startswith('PASS native Win32/DirectDraw original versus C89 constructor:'):
+    expected='PASS native Win32/DirectDraw original versus C89 '+('shutdown:' if shutdown else 'constructor:')
+    if result.returncode or not result.stdout.startswith(expected):
         raise RuntimeError(('Native surface probe failed',result.returncode,result.stdout,result.stderr))
     verify_target(copied)
     assert hashlib.sha256(dll.read_bytes()).digest()==hashlib.sha256((runtime/'surface_open_validation.dll').read_bytes()).digest()
-    return {'cases':4,'paired_executions':8,'stdout':result.stdout,'exit_code':result.returncode,
+    return {'variant':'shutdown' if shutdown else 'constructor','cases':4,'paired_executions':8,'stdout':result.stdout,'exit_code':result.returncode,
       'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
       'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
-      'scope':'Native Win32/DirectDraw constructor: missing-class failure and registered windowed 0/1/4 backbuffer lifecycles. Actual authenticated original WndProc is an explicit reference class boundary; game/input/shutdown paths prevented, test-owned SDK cleanup.',
+      'scope':('Native constructor plus actual original/rebuilt SDK shutdown: missing-class and registered windowed 0/1/4 backbuffers; real production releases including actual offscreen type2 bank boundaries, retained clipper/markers/geometry, HWND remains until test-owned window disposal. Original WndProc reference boundary; game/input paths prevented.' if shutdown else 'Native Win32/DirectDraw constructor: missing-class failure and registered windowed 0/1/4 backbuffer lifecycles. Actual authenticated original WndProc is an explicit reference class boundary; game/input/shutdown paths prevented, test-owned SDK cleanup.'),
       'limitations':'No rebuilt WndProc/native game/startup/menu/render/input/audio/race parity, fullscreen/display switching or lost-device hardware validation. No instruction equality/original toolchain claim.'}
 
 

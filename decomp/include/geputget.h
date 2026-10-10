@@ -55,9 +55,9 @@ int Gfx_SurfaceOpenNative(void); /* VA 0x0045B740 */
 typedef int (*GfxSurfaceCloseProc)(void);
 extern GfxSurfaceCloseProc volatile g_surfaceClose; /* VA 0x0050EB70 */
 int Gfx_SurfaceCloseNative(void); /* VA 0x0045BD70; body unreconstructed */
-typedef int (*GfxSurfaceResetProc)(void);
-extern GfxSurfaceResetProc volatile g_surfaceReset; /* VA 0x0050EB74 */
-int Gfx_SurfaceResetNative(void); /* VA 0x0045C060; body unreconstructed */
+typedef int (*GfxSurfaceShutdownProc)(void);
+extern GfxSurfaceShutdownProc volatile g_surfaceShutdown; /* VA 0x0050EB74 */
+int Gfx_SurfaceShutdownNative(void); /* VA 0x0045C060; resource shutdown, clipper pointer retained */
 typedef int (*GfxSurfaceConfigureSurfaceProc)(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4);
 extern GfxSurfaceConfigureSurfaceProc volatile g_surfaceConfigureSurface; /* VA 0x0050EB78 */
 int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4); /* VA 0x0045C150; body unreconstructed */
