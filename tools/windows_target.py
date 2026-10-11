@@ -56,12 +56,13 @@ def validation_symbols(pe):
 
 
 def validate_platform_imports(pe):
-    """Require exactly the authenticated constructor's SDK dependencies.
+    """Require exactly the authenticated surface/input SDK dependencies.
 
-    Validation DLLs containing the real surface constructor now import APIs.
+    Validation DLLs containing real surface/input lifecycle bodies import APIs.
     This replaces the obsolete no-import assumption, not the dependency audit.
     """
-    expected={('DDRAW.dll','DirectDrawCreate'),('GDI32.dll','GetDeviceCaps')}
+    expected={('DDRAW.dll','DirectDrawCreate'),('GDI32.dll','GetDeviceCaps'),
+        ('DINPUT.dll','DirectInputCreateA'),('WINMM.dll','timeKillEvent')}
     expected.update(('USER32.dll',name) for name in (
         'GetSystemMetrics','CreateWindowExA','UpdateWindow','SetFocus','GetDC',
         'ReleaseDC','GetWindowLongA','SetWindowLongA','SetRect','GetMenu',

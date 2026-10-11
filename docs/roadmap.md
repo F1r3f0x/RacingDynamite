@@ -1,5 +1,16 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Native input dependencies (2026-10-10)
+
+[Input lifecycle](ghidra/windows_input_lifecycle.md) reconstructs real keyboard
+setup and teardown RVAs0x55AC0/0x55E20, with 272 differential cases and actual
+paired native driver/timer lifecycles. Preserve the verified repeat timing caller
+anomaly. Next recover polling RVA0x55EF0 through its real character-ring and key
+event consumers, then real window/startup/game paths. Full workflow renewal,
+audit and exports pass at snapshot `924c053b83b0` for all 72 reconstructions.
+Native game input/events, menus/render/audio/races,
+timed polling/reentry and original compiler/link layout remain unverified.
+
 ## Native graphics entry points (2026-10-10)
 
 [Graphics entry points](ghidra/windows_graphics_entry.md) now reconstruct Open,

@@ -2,6 +2,16 @@
 #include <ddraw.h>
 #include <stdint.h>
 
+#ifdef SURFACE_TEST_INPUT
+#define SURFACE_TEST_SHUTDOWN
+#include <dinput.h>
+#include <mmsystem.h>
+typedef int (__cdecl *InputInitFn)(int32_t, int32_t);
+static void CALLBACK input_timer_probe(UINT id, UINT message, DWORD_PTR user, DWORD_PTR first, DWORD_PTR second) {
+    (void)id; (void)message; (void)user; (void)first; (void)second;
+}
+#endif
+
 #ifdef SURFACE_TEST_ENTRY
 #define SURFACE_TEST_REBUILD
 #endif
@@ -100,6 +110,15 @@ void WINAPI NativeEntry(void) {
     HINSTANCE instance;
     HCURSOR cursor;
     OpenFn original_fn, rebuilt_fn;
+#ifdef SURFACE_TEST_INPUT
+    InputInitFn input_init[2];
+    OpenFn input_shutdown[2];
+    volatile LPDIRECTINPUTA *inputs[2];
+    volatile LPDIRECTINPUTDEVICEA *keyboards[2];
+    volatile uint32_t *acquired[2], *timer_active[2], *timer_id[2];
+    int input_cycle;
+    UINT owned_timer;
+#endif
 #if defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
     OpenFn shutdown_fn[2];
 #ifdef SURFACE_TEST_REBUILD
@@ -126,7 +145,11 @@ void WINAPI NativeEntry(void) {
     LPDIRECTDRAWCLIPPER installed;
     LONG style;
     uint32_t *words;
-    union { unsigned char *bytes; OpenFn open; WNDPROC window; FARPROC generic; } binding;
+    union { unsigned char *bytes; OpenFn open; WNDPROC window; FARPROC generic;
+#ifdef SURFACE_TEST_INPUT
+        InputInitFn input;
+#endif
+    } binding;
     file = CreateFileA("IGN_WIN.EXE", GENERIC_READ, FILE_SHARE_READ, 0,
         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
     if (file == INVALID_HANDLE_VALUE) {
@@ -204,7 +227,11 @@ void WINAPI NativeEntry(void) {
     while (import->Name) {
         const char *name;
         name=(const char *)(image+import->Name);
-        if (equal_text(name,"USER32.dll") || equal_text(name,"GDI32.dll") || equal_text(name,"DDRAW.dll")) {
+        if (equal_text(name,"USER32.dll") || equal_text(name,"GDI32.dll") || equal_text(name,"DDRAW.dll")
+#ifdef SURFACE_TEST_INPUT
+                || equal_text(name,"DINPUT.dll") || equal_text(name,"WINMM.dll")
+#endif
+                ) {
             module=LoadLibraryA(name);
             if (!module) { fail("FAIL native platform module\n",36); }
             lookup=(IMAGE_THUNK_DATA32 *)(image+import->OriginalFirstThunk);
@@ -265,6 +292,21 @@ void WINAPI NativeEntry(void) {
     heights[1]=(volatile int32_t *)data_symbol(compiled,"g_nativeSurfaceHeight");
     depths[1]=(volatile int32_t *)data_symbol(compiled,"g_nativeSurfaceBitDepth");
     counts[1]=(volatile int32_t *)data_symbol(compiled,"g_nativeBackbufferCount");
+#ifdef SURFACE_TEST_INPUT
+    binding.bytes=image+0x55ac0;input_init[0]=binding.input;
+    binding.generic=symbol(compiled,"Input_InitNative");input_init[1]=binding.input;
+    binding.bytes=image+0x55e20;input_shutdown[0]=binding.open;
+    binding.generic=symbol(compiled,"Input_ShutdownNative");input_shutdown[1]=binding.open;
+    inputs[0]=(volatile LPDIRECTINPUTA *)(image+0x10df60);
+    keyboards[0]=(volatile LPDIRECTINPUTDEVICEA *)(image+0x10e26c);
+    acquired[0]=(volatile uint32_t *)(image+0x10e270);
+    timer_active[0]=(volatile uint32_t *)(image+0xba65c);timer_id[0]=(volatile uint32_t *)(image+0xba658);
+    inputs[1]=(volatile LPDIRECTINPUTA *)data_symbol(compiled,"g_nativeDirectInput");
+    keyboards[1]=(volatile LPDIRECTINPUTDEVICEA *)data_symbol(compiled,"g_nativeKeyboardDevice");
+    acquired[1]=(volatile uint32_t *)data_symbol(compiled,"g_nativeKeyboardAcquired");
+    timer_active[1]=(volatile uint32_t *)data_symbol(compiled,"g_nativeInputTimerActive");
+    timer_id[1]=(volatile uint32_t *)data_symbol(compiled,"g_nativeInputTimerId");
+#endif
 #if defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
 #ifdef SURFACE_TEST_REBUILD
 #ifdef SURFACE_TEST_ENTRY
@@ -321,6 +363,11 @@ void WINAPI NativeEntry(void) {
             if (result!=(pass!=0)) { fail("FAIL native constructor result\n",40); }
             check_records(records[side][0],records[side][1],records[side][2],count,pass!=0,8);
             if (pass==0) {
+#ifdef SURFACE_TEST_INPUT
+                if (input_shutdown[side]()!=1 || *inputs[side] || *keyboards[side] || *acquired[side]) {
+                    fail("FAIL empty native input shutdown\n",60);
+                }
+#endif
                 if (*windows[side] || *duplicates[side] || *draws[side]) { fail("FAIL missing-class retained state\n",41); }
 #ifdef SURFACE_TEST_SHUTDOWN
                 if (shutdown_fn[side]()!=1 || *draws[side] || *clippers[side]) {
@@ -347,6 +394,29 @@ void WINAPI NativeEntry(void) {
                 fail("FAIL native installed clipper\n",47);
             }
             installed->lpVtbl->Release(installed);
+#ifdef SURFACE_TEST_INPUT
+            for (input_cycle=0; input_cycle<2; input_cycle++) {
+                if (input_init[side](300,30)!=1 || !*inputs[side] || !*keyboards[side] || *acquired[side]>1 ||
+                        *timer_active[side] || *timer_id[side]) {
+                    fail("FAIL actual DirectInput setup\n",61);
+                }
+                owned_timer=0;
+                if (input_cycle!=0) {
+                    /* Test-owned real multimedia timer; production timed input
+                     * initialization/poll callback remains outside this scope. */
+                    owned_timer=timeSetEvent(10,1,input_timer_probe,0,TIME_PERIODIC);
+                    if (!owned_timer) { fail("FAIL native timer setup\n",62); }
+                    *timer_active[side]=1;*timer_id[side]=owned_timer;
+                }
+                if (input_shutdown[side]()!=1 || *inputs[side] || *keyboards[side] || *acquired[side] ||
+                        *timer_active[side]!=(uint32_t)(input_cycle!=0) || *timer_id[side]!=owned_timer || !IsWindow(window)) {
+                    fail("FAIL native input shutdown state\n",63);
+                }
+                if (owned_timer && timeKillEvent(owned_timer)==TIMERR_NOERROR) {
+                    fail("FAIL native production timer cancellation\n",64);
+                }
+            }
+#endif
 #if defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
             {
                 unsigned char *bytes;
@@ -432,7 +502,9 @@ void WINAPI NativeEntry(void) {
         }
     }
     if (!UnregisterClassA("Ignition",instance)) { fail("FAIL native class disposal\n",49); }
-#if defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
+#ifdef SURFACE_TEST_INPUT
+    output("PASS native Win32/DirectDraw original versus C89 input: real DirectInput setup/shutdown and multimedia timer cancellation; paired windowed 0/1/4 scenarios, empty shutdown; original WndProc reference; no native polling/game parity\n");
+#elif defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
 #ifdef SURFACE_TEST_REBUILD
 #ifdef SURFACE_TEST_ENTRY
     output("PASS native Win32/DirectDraw original versus C89 entry: real surface installer, graphics open/repeated rebuild/shutdown and real sprite leaves; missing class and windowed 0/1/4 backbuffers; original WndProc reference boundary; no native game parity\n");

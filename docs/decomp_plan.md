@@ -1,5 +1,19 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Native DirectInput lifecycle (2026-10-10)
+
+[Input lifecycle](ghidra/windows_input_lifecycle.md), RVAs0x55AC0/0x55E20,
+now uses production C89 and real DirectInput/multimedia timer APIs. 272 differential
+comparisons include 177 follow-ups, twelve faults and ten callback mutations.
+Native paired windowed scenarios execute twelve setup/shutdown cycles plus two
+empty shutdowns, including real timer cancellation. Original WndProc is a reference
+boundary; native polling, timed initializer, full startup/game and original compiler
+remain unverified. Full workflow renewal, audit and exports pass for all 72
+reconstructed routines at snapshot `924c053b83b0`; eleven have scoped native evidence.
+Next recover keyboard polling and its real character/event consumers, then actual
+WinMain/WndProc/game dependencies. No-push startup/Alt-Enter timing arguments are
+verified authentic caller behavior and remain an explicit reconstruction question.
+
 ## Graphics lifecycle entry points (2026-10-10)
 
 Rebuild is committed as `34b7f6d`, snapshot `4a5be4c9cd9e`, with all 65 existing

@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:5ed35d7ce096a58a49aa31a9e3ca560381e6115ad05006efa9e90b63f876a6c5 -->
+<!-- snapshot:924c053b83b01d4360c5ae15c8f749318c467b6d02c6cac1f9e106e67fb01401 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -372,9 +372,9 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00452010` | `0x00052010` | 56 | `sub_00452010` | unknown | unidentified | - |
 | `0x00452770` | `0x00052770` | 136 | `sub_00452770` | unknown | unidentified | - |
 | `0x00455AB0` | `0x00055AB0` | 13 | `Input_ResetCallbacks` | game | reconstructed | [windows_resource_reset.md](windows_resource_reset.md) |
-| `0x00455AC0` | `0x00055AC0` | 406 | `sub_00455AC0` | unknown | unidentified | - |
+| `0x00455AC0` | `0x00055AC0` | 406 | `Input_InitNative` | game | reconstructed | [windows_input_lifecycle.md](windows_input_lifecycle.md) |
 | `0x00455C60` | `0x00055C60` | 436 | `Input_InitKeyboardTimer` | game | analyzed | [windows_resource_reset.md](windows_resource_reset.md) |
-| `0x00455E20` | `0x00055E20` | 117 | `sub_00455E20` | unknown | unidentified | - |
+| `0x00455E20` | `0x00055E20` | 117 | `Input_ShutdownNative` | game | reconstructed | [windows_input_lifecycle.md](windows_input_lifecycle.md) |
 | `0x00455EA0` | `0x00055EA0` | 11 | `sub_00455EA0` | unknown | unidentified | - |
 | `0x00455EB0` | `0x00055EB0` | 57 | `sub_00455EB0` | unknown | unidentified | - |
 | `0x00455EF0` | `0x00055EF0` | 376 | `Input_PollKeyboard` | game | analyzed | [windows_resource_reset.md](windows_resource_reset.md) |

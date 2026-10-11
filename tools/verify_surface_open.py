@@ -302,7 +302,7 @@ class Session(SurfaceSession):
             assert not uc.reg_read(UC_X86_REG_EFLAGS)&0x400
             assert uc.reg_read(UC_X86_REG_EAX)==result
 
-def native_surface(dll,shutdown=False,rebuild=False,entry=False):
+def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False):
     import shutil
     import subprocess
     from windows_target import TARGET
@@ -320,6 +320,7 @@ def native_surface(dll,shutdown=False,rebuild=False,entry=False):
         'GetClientRect@8','GetWindowLongA@8','DestroyWindow@4','UnregisterClassA@8'],
       'GDI32':['GetStockObject@4']}
     libraries=[];commands=[]
+    if input_test:groups['WINMM']=['timeSetEvent@20','timeKillEvent@4']
     for module,exports in groups.items():
         definition=runtime/(module.lower()+'.def');lib=runtime/(module.lower()+'.lib')
         definition.write_text('LIBRARY '+module+'.dll\nEXPORTS\n'+
@@ -334,17 +335,25 @@ def native_surface(dll,shutdown=False,rebuild=False,entry=False):
       '-c',str(ROOT/'tools/native_surface_probe.c'),'-o',str(obj)],
       [linker,'/entry:NativeEntry@0','/subsystem:console','/nodefaultlib','/machine:x86',
        '/safeseh:no','/base:0x20000000','/dynamicbase:no','/out:'+str(exe),str(obj)]+libraries])
-    if entry:commands[-2].insert(1,'-DSURFACE_TEST_ENTRY')
+    if input_test:commands[-2].insert(1,'-DSURFACE_TEST_INPUT')
+    elif entry:commands[-2].insert(1,'-DSURFACE_TEST_ENTRY')
     elif rebuild:commands[-2].insert(1,'-DSURFACE_TEST_REBUILD')
     elif shutdown:commands[-2].insert(1,'-DSURFACE_TEST_SHUTDOWN')
     for command in commands[-2:]:subprocess.run(command,cwd=ROOT,check=True)
     result=subprocess.run([str(exe)],cwd=runtime,capture_output=True,text=True,timeout=45)
     (runtime/'result.log').write_text(result.stdout+result.stderr,encoding='utf-8',newline='\n')
-    expected='PASS native Win32/DirectDraw original versus C89 '+('entry:' if entry else 'rebuild:' if rebuild else 'shutdown:' if shutdown else 'constructor:')
+    expected='PASS native Win32/DirectDraw original versus C89 '+('input:' if input_test else 'entry:' if entry else 'rebuild:' if rebuild else 'shutdown:' if shutdown else 'constructor:')
     if result.returncode or not result.stdout.startswith(expected):
         raise RuntimeError(('Native surface probe failed',result.returncode,result.stdout,result.stderr))
     verify_target(copied)
     assert hashlib.sha256(dll.read_bytes()).digest()==hashlib.sha256((runtime/'surface_open_validation.dll').read_bytes()).digest()
+    if input_test:
+        return {'variant':'input','cases':4,'paired_executions':8,'init_executions':12,'shutdown_executions':14,
+          'stdout':result.stdout,'exit_code':result.returncode,
+          'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
+          'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
+          'scope':'Actual original/C89 DirectInput creation, keyboard setup and shutdown after real paired windowed surface constructors; twelve init/shutdown cycles plus two empty shutdowns. Six cycles cancel actual test-owned multimedia timers via production timeKillEvent, retaining timer metadata. Original WndProc reference boundary; allocating/timed input initializer and input event polling excluded. Acquire may fail due actual foreground state; authentic initialization still succeeds and flag remains Boolean.',
+          'limitations':'No native input events/polling/game/startup/menu/render/audio/races or fullscreen, original compiler/link layout/instruction equality proof. Asynchronous input timer/reentry outside scope.'}
     if entry:
         return {'variant':'entry','cases':4,'paired_executions':8,
           'routine_executions':{'Gfx_Open':8,'Gfx_Rebuild':12,'Gfx_Shutdown':6,'Gfx_SpriteOpenNative':6,'Gfx_SpriteShutdownNative':6},

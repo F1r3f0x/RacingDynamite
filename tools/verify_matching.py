@@ -215,6 +215,7 @@ def verify():
     code_entries = {name: symbols[name] for name in [
         'Mem_InitSystem', 'Mem_ShutdownSystem', 'Lisa_PrintVersion',
         'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
+        'Input_InitNative', 'Input_ShutdownNative',
         'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
         'Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_SpriteOpenNative', 'Gfx_SpriteShutdownNative',
         'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
@@ -232,7 +233,15 @@ def verify():
     assert len(draw_thunks)==1, 'Expected one SDK DirectDrawCreate import veneer'
     code_entries['DirectDrawCreate_import']=draw_thunks[0]
     symbols['DirectDrawCreate_import']=draw_thunks[0]
+    input_iat=next(entry.address for group in rebuilt.DIRECTORY_ENTRY_IMPORT
+        for entry in group.imports if group.dll==b'DINPUT.dll' and entry.name==b'DirectInputCreateA')
+    input_thunks=[instruction.address for instruction in generated
+        if instruction.mnemonic=='jmp' and instruction.bytes==b'\xff\x25'+struct.pack('<I',input_iat)]
+    assert len(input_thunks)==1, 'Expected one SDK DirectInputCreateA import veneer'
+    code_entries['DirectInputCreateA_import']=input_thunks[0]
+    symbols['DirectInputCreateA_import']=input_thunks[0]
     expected_calls = {
+        'Input_InitNative': ['DirectInputCreateA_import'],
         'Gfx_SurfaceRebuildNative': ['Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative'],
         'Gfx_SurfaceOpenNative': ['Gfx_InitSurfaceRecords', 'DirectDrawCreate_import', 'Gfx_SurfaceRestoreNative'],
         'Gfx_InitPrimitiveState': ['Gfx_InitGraphicsPairStorage', 'Gfx_InitSineTable',
@@ -835,3 +844,5 @@ if __name__ == '__main__':
     verify_surface_rebuild()
     from verify_graphics_entry import verify_graphics_entry
     verify_graphics_entry()
+    from verify_input_lifecycle import verify_input_lifecycle
+    verify_input_lifecycle()

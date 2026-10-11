@@ -110,6 +110,17 @@ SURFACE_SOURCE += _resource_source[_resource_source.index(_shutdown_marker):_res
 _rebuild_marker = '/* Native surface rebuild and its independently recovered palette backing. */'
 _rebuild_end = '/* End native surface rebuild. */'
 SURFACE_SOURCE += _resource_source[_resource_source.index(_rebuild_marker):_resource_source.index(_rebuild_end)]
+_input_marker = '/* Native DirectInput lifecycle implementation. */'
+_input_end = '/* End native DirectInput lifecycle implementation. */'
+SURFACE_SOURCE += _resource_source[_resource_source.index(_input_marker):_resource_source.index(_input_end)]
+INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'g_nativeDirectInput',
+    'g_nativeKeyboardDevice', 'g_nativeKeyboardAcquired', 'g_nativeInputTimerActive',
+    'g_nativeInputTimerId', 'g_nativeInputClock', 'g_nativeRepeatDelay',
+    'g_nativeRepeatInterval', 'g_nativeRepeatEpoch', 'g_nativeCharacterQueue',
+    'g_nativeCharacterQueueCursor', 'g_nativeCharacterQueueEnd', 'g_nativeKeyboardHeld',
+    'g_nativeKeyboardPressEvents', 'g_nativeKeyboardTableA', 'g_nativeKeyboardTableB',
+    'g_nativeRepeatCounters', 'g_nativeKeyboardDeviceGuid', 'g_nativeKeyGuid',
+    'g_nativeKeyboardObjects', 'g_nativeKeyboardFormat']
 SURFACE_EXPORTS_EXTRA = ['g_nativeRebuildPaletteEntries', 'g_nativeDirectDraw', 'g_nativeClipper', 'g_nativePalette',
     'g_nativePaletteEntries', 'g_nativeSurfaceWindow', 'g_nativeFullscreen',
     'g_nativeSurfaceWidth', 'g_nativeSurfaceHeight', 'g_nativeSurfaceBitDepth',
@@ -155,7 +166,7 @@ EXPORTS = WORKSPACE_EXPORTS + ['validation_gfxDispatchWords', 'Lisa_PrintVersion
            'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'free', 'malloc',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',
            'g_memHandleCallbacks', 'g_memHandleFlags', 'g_memPendingContext',
-           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS + SURFACE_EXPORTS + SPRITE_EXPORTS + SINE_EXPORTS + PRIMITIVE_EXPORTS
+           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS + SURFACE_EXPORTS + SPRITE_EXPORTS + SINE_EXPORTS + PRIMITIVE_EXPORTS + INPUT_EXPORTS
 
 def compile_banner(flags, stem):
     # Separate TU: the production calls must not see the nonreturning printf
@@ -207,7 +218,8 @@ def surface_import_libraries(stem):
             'SetWindowLongA@12','SetRect@20','GetMenu@4','AdjustWindowRectEx@16',
             'SetWindowPos@28','SystemParametersInfoA@16','GetWindowRect@8',
             'MessageBoxA@16','ShowWindow@8'],
-        'GDI32':['GetDeviceCaps@8']}
+        'GDI32':['GetDeviceCaps@8'], 'DINPUT':['DirectInputCreateA@16'],
+        'WINMM':['timeKillEvent@4']}
     libraries = []
     for dll,exports in groups.items():
         definition = BUILD/(stem+'_'+dll.lower()+'.def')

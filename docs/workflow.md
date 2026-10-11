@@ -1,5 +1,18 @@
 # Enforced agent workflow
 
+## Native input validation (2026-10-10)
+
+Run `uv run tools/verify_input_lifecycle.py` for native keyboard setup/shutdown
+RVAs0x55AC0/0x55E20. It authenticates FPO/hash and the complete SDK keyboard
+format, builds production C89 with real DINPUT/WINMM imports, then compares 272
+original/C executions including persistent state, faults, aliases and callbacks.
+Native host variant SURFACE_TEST_INPUT uses actual constructors, original/C
+DirectInput setup/shutdown and test-owned real multimedia timers cancelled by
+production shutdown; original WndProc remains a reference boundary. Input event
+polling and timed initializer are excluded. Finish full workflow/audit/export/check,
+LF working/index checks, staged gate and tracked hooks before a separate commit.
+See [evidence and limitations](ghidra/windows_input_lifecycle.md).
+
 ## Native graphics entry validation (2026-10-10)
 
 Run `uv run tools/verify_graphics_entry.py` for RVAs 0x56BC0/0x56BE0/0x56BF0/

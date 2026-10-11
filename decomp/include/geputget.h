@@ -20,6 +20,35 @@ extern InputKeyEventCallback volatile g_inputKeyEventCallback;
 extern InputPollCallback volatile g_inputPollCallback;
 void Input_ResetCallbacks(void);
 
+/* Native DirectInput lifecycle; independent Windows backing and SDK layouts. */
+struct IDirectInputA;
+struct IDirectInputDeviceA;
+extern struct IDirectInputA *volatile g_nativeDirectInput; /* VA0x0050DF60 */
+extern struct IDirectInputDeviceA *volatile g_nativeKeyboardDevice; /* VA0x0050E26C */
+extern volatile int32_t g_nativeKeyboardAcquired; /* VA0x0050E270 */
+extern volatile uint32_t g_nativeInputTimerActive; /* VA0x004BA65C */
+extern volatile unsigned int g_nativeInputTimerId; /* VA0x004BA658 */
+extern volatile uint32_t g_nativeInputClock; /* VA0x0049373C */
+extern volatile int32_t g_nativeRepeatDelay; /* VA0x0050DF64 */
+extern volatile int32_t g_nativeRepeatInterval; /* VA0x0050E274 */
+extern volatile uint32_t g_nativeRepeatEpoch; /* VA0x0050E268 */
+extern volatile uint32_t g_nativeCharacterQueue[16]; /* VA0x0050DE18 */
+extern volatile uint32_t *volatile g_nativeCharacterQueueCursor; /* VA0x0050DE10 */
+extern volatile unsigned char g_nativeCharacterQueueEnd; /* VA0x0050DE58 */
+typedef union NativeKeyboardByteState {
+    unsigned char bytes[256];
+    uint32_t words[64];
+} NativeKeyboardByteState;
+extern volatile NativeKeyboardByteState g_nativeKeyboardHeld; /* VA0x0050DE60 */
+extern volatile NativeKeyboardByteState g_nativeKeyboardPressEvents; /* VA0x0050DF68 */
+extern volatile unsigned char g_nativeKeyboardTableA[256]; /* VA0x0050E068 */
+extern volatile unsigned char g_nativeKeyboardTableB[256]; /* VA0x0050E168 */
+extern volatile uint32_t g_nativeRepeatCounters[256]; /* VA0x0050E278 */
+int Input_InitNative(int32_t repeat_delay, int32_t repeat_interval); /* VA0x00455AC0 */
+int Input_ShutdownNative(void); /* VA0x00455E20 */
+/* End native DirectInput declarations. */
+
+
 /* Windows selector: one caller-cleanup stack dword; zero installs both tables.
  * Both dispatch installers are reconstructed; downstream initialization is modeled. */
 int Gfx_SelectBackend(int backend);
