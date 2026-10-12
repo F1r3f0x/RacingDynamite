@@ -32,6 +32,7 @@ extern volatile uint32_t g_nativeInputClock; /* VA0x0049373C */
 extern volatile int32_t g_nativeRepeatDelay; /* VA0x0050DF64 */
 extern volatile int32_t g_nativeRepeatInterval; /* VA0x0050E274 */
 extern volatile uint32_t g_nativeRepeatEpoch; /* VA0x0050E268 */
+extern volatile uint32_t g_nativeInputPeriod; /* VA0x0050E67C */
 typedef union NativeCharacterRing {
     unsigned char bytes[64];
     uint32_t words[16];
@@ -45,11 +46,17 @@ typedef union NativeKeyboardByteState {
 } NativeKeyboardByteState;
 extern volatile NativeKeyboardByteState g_nativeKeyboardHeld; /* VA0x0050DE60 */
 extern volatile NativeKeyboardByteState g_nativeKeyboardPressEvents; /* VA0x0050DF68 */
-extern volatile unsigned char g_nativeKeyboardTableA[256]; /* VA0x0050E068 */
-extern volatile unsigned char g_nativeKeyboardTableB[256]; /* VA0x0050E168 */
+extern volatile unsigned char g_nativeKeyboardPressEdges[256]; /* VA0x0050E068 */
+extern volatile unsigned char g_nativeKeyboardPressLatch[256]; /* VA0x0050E168 */
 extern volatile uint32_t g_nativeRepeatCounters[256]; /* VA0x0050E278 */
 int Input_InitNative(int32_t repeat_delay, int32_t repeat_interval); /* VA0x00455AC0 */
 int Input_ShutdownNative(void); /* VA0x00455E20 */
+int Input_InitTimedNative(uint32_t period, int32_t repeat_delay, int32_t repeat_interval); /* VA0x00455C60 */
+int Input_ShutdownNativeEntry(void); /* VA0x00455EA0 */
+int Input_ReinitializeNative(void); /* VA0x00455EB0 */
+int Input_ReadHeldNative(int scan_code); /* VA0x00456070, low byte index */
+int Input_ConsumePressNative(int scan_code); /* VA0x00456080, low byte index */
+int Input_ConsumeRepeatNative(int scan_code); /* VA0x004560A0, low byte index */
 void Input_PollNative(void); /* VA0x00455EF0 */
 void Input_DispatchKeyNative(int pressed, int scan_code); /* VA0x004560C0 */
 void Input_QueueCharacterNative(int unused, int scan_code); /* VA0x004560E0 */
@@ -496,9 +503,6 @@ extern const uint8_t g_ScancodeToAsciiTable[84];
 
 int  Input_InitKeyboard(int initial_delay, int repeat_interval);
 int  Input_ShutdownKeyboard(void);
-int  Input_IsKeyDown(int scancode);
-int  Input_WasKeyPressed(int scancode);
-int  Input_WasKeyRepeated(int scancode);
 void Input_SetKeyCallback(void (*cb)(int, int));
 char *Input_GetQueuedKey(char *query_str);
 int  Input_InitKeyTables(void);

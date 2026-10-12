@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:ca2851cbbf7ee1bc440d4ce9698d96dc5d91bfcbb0d23d617faebe2aa1845393 -->
+<!-- snapshot:28f372557d7ab25623f85ff0247c5c5c4a71568369c6b09c0149494f76359104 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -373,14 +373,14 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00452770` | `0x00052770` | 136 | `sub_00452770` | unknown | unidentified | - |
 | `0x00455AB0` | `0x00055AB0` | 13 | `Input_ResetCallbacks` | game | reconstructed | [windows_resource_reset.md](windows_resource_reset.md) |
 | `0x00455AC0` | `0x00055AC0` | 406 | `Input_InitNative` | game | reconstructed | [windows_input_lifecycle.md](windows_input_lifecycle.md) |
-| `0x00455C60` | `0x00055C60` | 436 | `Input_InitKeyboardTimer` | game | analyzed | [windows_resource_reset.md](windows_resource_reset.md) |
+| `0x00455C60` | `0x00055C60` | 436 | `Input_InitTimedNative` | game | reconstructed | [windows_input_timed.md](windows_input_timed.md) |
 | `0x00455E20` | `0x00055E20` | 117 | `Input_ShutdownNative` | game | reconstructed | [windows_input_lifecycle.md](windows_input_lifecycle.md) |
-| `0x00455EA0` | `0x00055EA0` | 11 | `sub_00455EA0` | unknown | unidentified | - |
-| `0x00455EB0` | `0x00055EB0` | 57 | `sub_00455EB0` | unknown | unidentified | - |
+| `0x00455EA0` | `0x00055EA0` | 11 | `Input_ShutdownNativeEntry` | game | reconstructed | [windows_input_timed.md](windows_input_timed.md) |
+| `0x00455EB0` | `0x00055EB0` | 57 | `Input_ReinitializeNative` | game | reconstructed | [windows_input_timed.md](windows_input_timed.md) |
 | `0x00455EF0` | `0x00055EF0` | 376 | `Input_PollNative` | game | reconstructed | [windows_input_polling.md](windows_input_polling.md) |
-| `0x00456070` | `0x00056070` | 15 | `sub_00456070` | unknown | unidentified | - |
-| `0x00456080` | `0x00056080` | 28 | `sub_00456080` | unknown | unidentified | - |
-| `0x004560A0` | `0x000560A0` | 28 | `sub_004560A0` | unknown | unidentified | - |
+| `0x00456070` | `0x00056070` | 15 | `Input_ReadHeldNative` | game | reconstructed | [windows_input_timed.md](windows_input_timed.md) |
+| `0x00456080` | `0x00056080` | 28 | `Input_ConsumePressNative` | game | reconstructed | [windows_input_timed.md](windows_input_timed.md) |
+| `0x004560A0` | `0x000560A0` | 28 | `Input_ConsumeRepeatNative` | game | reconstructed | [windows_input_timed.md](windows_input_timed.md) |
 | `0x004560C0` | `0x000560C0` | 26 | `Input_DispatchKeyNative` | game | reconstructed | [windows_input_polling.md](windows_input_polling.md) |
 | `0x004560E0` | `0x000560E0` | 59 | `Input_QueueCharacterNative` | game | reconstructed | [windows_input_polling.md](windows_input_polling.md) |
 | `0x00456120` | `0x00056120` | 55 | `sub_00456120` | unknown | unidentified | - |

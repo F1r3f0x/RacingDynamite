@@ -217,6 +217,8 @@ def verify():
         'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
         'Input_InitNative', 'Input_ShutdownNative',
         'Input_PollNative', 'Input_DispatchKeyNative', 'Input_QueueCharacterNative', 'Input_TimerCallbackNative',
+        'Input_InitTimedNative', 'Input_ShutdownNativeEntry', 'Input_ReinitializeNative',
+        'Input_ReadHeldNative', 'Input_ConsumePressNative', 'Input_ConsumeRepeatNative',
         'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
         'Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_SpriteOpenNative', 'Gfx_SpriteShutdownNative',
         'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
@@ -245,6 +247,9 @@ def verify():
         'Input_InitNative': ['DirectInputCreateA_import'],
         'Input_PollNative': ['Input_DispatchKeyNative', 'Input_QueueCharacterNative', 'Input_DispatchKeyNative'],
         'Input_TimerCallbackNative': ['Input_PollNative'],
+        'Input_InitTimedNative': ['DirectInputCreateA_import'],
+        'Input_ShutdownNativeEntry': ['Input_ShutdownNative'],
+        'Input_ReinitializeNative': ['Input_InitTimedNative', 'Input_InitNative'],
         'Gfx_SurfaceRebuildNative': ['Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative'],
         'Gfx_SurfaceOpenNative': ['Gfx_InitSurfaceRecords', 'DirectDrawCreate_import', 'Gfx_SurfaceRestoreNative'],
         'Gfx_InitPrimitiveState': ['Gfx_InitGraphicsPairStorage', 'Gfx_InitSineTable',
@@ -851,3 +856,5 @@ if __name__ == '__main__':
     verify_input_lifecycle()
     from verify_input_polling import verify_input_polling
     verify_input_polling()
+    from verify_input_timed import verify_input_timed
+    verify_input_timed()

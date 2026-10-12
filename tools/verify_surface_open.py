@@ -302,7 +302,8 @@ class Session(SurfaceSession):
             assert not uc.reg_read(UC_X86_REG_EFLAGS)&0x400
             assert uc.reg_read(UC_X86_REG_EAX)==result
 
-def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False,poll_test=False):
+def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False,poll_test=False,timed_test=False):
+    poll_test=poll_test or timed_test
     input_test=input_test or poll_test
     import shutil
     import subprocess
@@ -340,7 +341,8 @@ def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False
       '-c',str(ROOT/'tools/native_surface_probe.c'),'-o',str(obj)],
       [linker,'/entry:NativeEntry@0','/subsystem:console','/nodefaultlib','/machine:x86',
        '/safeseh:no','/base:0x20000000','/dynamicbase:no','/out:'+str(exe),str(obj)]+libraries])
-    if poll_test:commands[-2].insert(1,'-DSURFACE_TEST_POLL')
+    if timed_test:commands[-2].insert(1,'-DSURFACE_TEST_TIMED')
+    elif poll_test:commands[-2].insert(1,'-DSURFACE_TEST_POLL')
     elif input_test:commands[-2].insert(1,'-DSURFACE_TEST_INPUT')
     elif entry:commands[-2].insert(1,'-DSURFACE_TEST_ENTRY')
     elif rebuild:commands[-2].insert(1,'-DSURFACE_TEST_REBUILD')
@@ -348,11 +350,18 @@ def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False
     for command in commands[-2:]:subprocess.run(command,cwd=ROOT,check=True)
     result=subprocess.run([str(exe)],cwd=runtime,capture_output=True,text=True,timeout=45)
     (runtime/'result.log').write_text(result.stdout+result.stderr,encoding='utf-8',newline='\n')
-    expected='PASS native Win32/DirectDraw original versus C89 '+('polling:' if poll_test else 'input:' if input_test else 'entry:' if entry else 'rebuild:' if rebuild else 'shutdown:' if shutdown else 'constructor:')
+    expected='PASS native Win32/DirectDraw original versus C89 '+('timed:' if timed_test else 'polling:' if poll_test else 'input:' if input_test else 'entry:' if entry else 'rebuild:' if rebuild else 'shutdown:' if shutdown else 'constructor:')
     if result.returncode or not result.stdout.startswith(expected):
         raise RuntimeError(('Native surface probe failed',result.returncode,result.stdout,result.stderr))
     verify_target(copied)
     assert hashlib.sha256(dll.read_bytes()).digest()==hashlib.sha256((runtime/'surface_open_validation.dll').read_bytes()).digest()
+    if timed_test:
+        return {'variant':'timed','cases':3,'paired_executions':6,'input_cycles':12,
+          'stdout':result.stdout,'exit_code':result.returncode,
+          'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
+          'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
+          'scope':'Actual paired original/C89 timed setup and reinit use real multimedia timers and asynchronous production polling/notification. Twelve scan30 press/release cycles check raw held and consumed press/repeat state, mirrored character bytes, synchronous callback ABI and shutdown wrapper. Actual SDK/input/surface lifecycles with original WndProc reference.',
+          'limitations':'Test-owned timer cancellation and50ms quiescence before production teardown; arbitrary asynchronous teardown/reentry/concurrency unverified. One scan code; no full game/startup/menu/render/audio/races/fullscreen/original compiler proof.'}
     if poll_test:
         return {'variant':'polling','cases':3,'paired_executions':6,'input_cycles':12,
           'stdout':result.stdout,'exit_code':result.returncode,

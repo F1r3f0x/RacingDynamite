@@ -1985,34 +1985,6 @@ int Input_ShutdownKeyboard(void) {
     return 1;
 }
 
-// @original Input_IsKeyDown (MAINDOS.EXE @ 0x55c28, geputget.c)
-// @fidelity EXACT
-int Input_IsKeyDown(int scancode) {
-    return (int)g_KeyboardState[scancode & 0xFF];
-}
-
-// @original Input_WasKeyPressed (MAINDOS.EXE @ 0x55c3c, geputget.c)
-// @fidelity EXACT
-int Input_WasKeyPressed(int scancode) {
-    scancode &= 0xFF;
-    if (g_KeyJustPressed[scancode] != 0) {
-        g_KeyJustPressed[scancode] = 0;
-        return 1;
-    }
-    return 0;
-}
-
-// @original Input_WasKeyRepeated (MAINDOS.EXE @ 0x55c60, geputget.c)
-// @fidelity EXACT
-int Input_WasKeyRepeated(int scancode) {
-    scancode &= 0xFF;
-    if (g_KeyRepeatTriggered[scancode] != 0) {
-        g_KeyRepeatTriggered[scancode] = 0;
-        return 1;
-    }
-    return 0;
-}
-
 // @original Input_SetKeyCallback (MAINDOS.EXE @ 0x55c84, geputget.c)
 // @fidelity EXACT
 void Input_SetKeyCallback(void (*cb)(int, int)) {
@@ -2633,8 +2605,8 @@ volatile unsigned char *volatile g_nativeCharacterQueueCursor; /* VA50DE10 */
 volatile unsigned char g_nativeCharacterQueueEnd; /* VA50DE58 */
 volatile NativeKeyboardByteState g_nativeKeyboardHeld; /* VA50DE60 */
 volatile NativeKeyboardByteState g_nativeKeyboardPressEvents; /* VA50DF68 */
-volatile unsigned char g_nativeKeyboardTableA[256]; /* VA50E068, meaning pending */
-volatile unsigned char g_nativeKeyboardTableB[256]; /* VA50E168, meaning pending */
+volatile unsigned char g_nativeKeyboardPressEdges[256]; /* VA50E068, consumed press edges */
+volatile unsigned char g_nativeKeyboardPressLatch[256]; /* VA50E168, press latch until release */
 volatile uint32_t g_nativeRepeatCounters[256]; /* VA50E278 */
 
 /* @original Input_InitNative (IGN_WIN.EXE @ 0x00455AC0, inferred input.c)
@@ -2697,9 +2669,9 @@ int Input_InitNative(int32_t repeat_delay, int32_t repeat_interval) {
         g_nativeKeyboardHeld.words[index] = 0;
     }
     for (index = 0; index < 256; index++) {
-        g_nativeKeyboardTableA[index] = 0;
+        g_nativeKeyboardPressEdges[index] = 0;
         g_nativeRepeatCounters[index] = 0;
-        g_nativeKeyboardTableB[index] = 0;
+        g_nativeKeyboardPressLatch[index] = 0;
     }
     now = g_nativeInputClock;
     g_nativeRepeatDelay = repeat_delay;
@@ -2799,9 +2771,9 @@ void Input_PollNative(void) {
             scan_code = (int)(record->dwOfs & 255u);
             if ((record->dwData & 128u) != 0) {
                 g_nativeKeyboardHeld.bytes[scan_code] = 1;
-                if (g_nativeKeyboardTableB[scan_code] == 0) {
-                    g_nativeKeyboardTableA[scan_code] = 1;
-                    g_nativeKeyboardTableB[scan_code] = 1;
+                if (g_nativeKeyboardPressLatch[scan_code] == 0) {
+                    g_nativeKeyboardPressEdges[scan_code] = 1;
+                    g_nativeKeyboardPressLatch[scan_code] = 1;
                 }
                 if (g_nativeRepeatCounters[scan_code] == 0) {
                     g_nativeKeyboardPressEvents.bytes[scan_code] = 1;
@@ -2811,8 +2783,8 @@ void Input_PollNative(void) {
                 Input_QueueCharacterNative(1, scan_code);
             } else {
                 g_nativeKeyboardHeld.bytes[scan_code] = 0;
-                g_nativeKeyboardTableA[scan_code] = 0;
-                g_nativeKeyboardTableB[scan_code] = 0;
+                g_nativeKeyboardPressEdges[scan_code] = 0;
+                g_nativeKeyboardPressLatch[scan_code] = 0;
                 g_nativeKeyboardPressEvents.bytes[scan_code] = 0;
                 g_nativeRepeatCounters[scan_code] = 0;
                 Input_DispatchKeyNative(0, scan_code);
@@ -2838,6 +2810,139 @@ void __stdcall Input_TimerCallbackNative(unsigned int timer_id, unsigned int mes
     if (callback != 0) {
         callback();
     }
+}
+
+volatile uint32_t g_nativeInputPeriod; /* VA0x0050E67C, loader-zero .data tail */
+
+/* @original Input_InitTimedNative (IGN_WIN.EXE @ 0x00455C60, inferred input.c)
+ * @fidelity EXACT */
+int Input_InitTimedNative(uint32_t period, int32_t repeat_delay, int32_t repeat_interval) {
+    GUID keyboard_guid;
+    DIPROPDWORD buffer_property;
+    LPDIRECTINPUTA input;
+    LPDIRECTINPUTDEVICEA keyboard;
+    HRESULT result;
+    HWND window;
+    uint32_t now;
+    UINT timer_id;
+    int index;
+
+    keyboard_guid = g_nativeKeyboardDeviceGuid;
+    buffer_property.diph.dwSize = 20;
+    buffer_property.diph.dwHeaderSize = 16;
+    buffer_property.diph.dwObj = 0;
+    buffer_property.diph.dwHow = 0;
+    buffer_property.dwData = 32;
+    if (DirectInputCreateA(g_nativeWindowInstance, 0x300,
+            (LPDIRECTINPUTA *)&g_nativeDirectInput, 0) != 0) {
+        return 0;
+    }
+    input = g_nativeDirectInput;
+    if (input->lpVtbl->CreateDevice(input, &keyboard_guid,
+            (LPDIRECTINPUTDEVICEA *)&g_nativeKeyboardDevice, 0) != 0) {
+        return 0;
+    }
+    keyboard = g_nativeKeyboardDevice;
+    if (keyboard->lpVtbl->SetDataFormat(keyboard, &g_nativeKeyboardFormat) != 0) {
+        return 0;
+    }
+    window = g_nativeWindow;
+    keyboard = g_nativeKeyboardDevice;
+    if (keyboard->lpVtbl->SetCooperativeLevel(keyboard, window, 6) != 0) {
+        return 0;
+    }
+    keyboard = g_nativeKeyboardDevice;
+    if (keyboard->lpVtbl->SetProperty(keyboard, DIPROP_BUFFERSIZE,
+            &buffer_property.diph) != 0) {
+        return 0;
+    }
+    keyboard = g_nativeKeyboardDevice;
+    result = keyboard->lpVtbl->Acquire(keyboard);
+    g_nativeKeyboardAcquired = 1;
+    if (result < 0) {
+        g_nativeKeyboardAcquired = 0;
+    }
+    g_nativeCharacterQueueCursor = g_nativeCharacterQueue.bytes;
+    for (index = 0; index < 16; index++) {
+        g_nativeCharacterQueue.words[index] = 0xffffffffu;
+    }
+    g_nativeCharacterQueueEnd = 0;
+    for (index = 0; index < 64; index++) {
+        g_nativeKeyboardPressEvents.words[index] = 0;
+    }
+    for (index = 0; index < 64; index++) {
+        g_nativeKeyboardHeld.words[index] = 0;
+    }
+    for (index = 0; index < 256; index++) {
+        g_nativeKeyboardPressEdges[index] = 0;
+        g_nativeRepeatCounters[index] = 0;
+        g_nativeKeyboardPressLatch[index] = 0;
+    }
+    now = g_nativeInputClock;
+    g_nativeRepeatDelay = repeat_delay;
+    g_nativeRepeatInterval = repeat_interval;
+    g_nativeInputPeriod = period;
+    g_nativeRepeatEpoch = now;
+    g_nativeInputTimerActive = 1;
+    timer_id = timeSetEvent(period, period, Input_TimerCallbackNative, 0, TIME_PERIODIC);
+    g_nativeInputTimerId = timer_id;
+    return timer_id != 0;
+}
+
+/* @original Input_ShutdownNativeEntry (IGN_WIN.EXE @ 0x00455EA0, inferred input.c)
+ * @fidelity EXACT */
+int Input_ShutdownNativeEntry(void) {
+    Input_ShutdownNative();
+    return 1;
+}
+
+/* @original Input_ReinitializeNative (IGN_WIN.EXE @ 0x00455EB0, inferred input.c)
+ * @fidelity EXACT */
+int Input_ReinitializeNative(void) {
+    int32_t interval, delay;
+    uint32_t period;
+
+    interval = g_nativeRepeatInterval;
+    delay = g_nativeRepeatDelay;
+    if (g_nativeInputTimerActive != 0) {
+        period = g_nativeInputPeriod;
+        Input_InitTimedNative(period, delay, interval);
+    } else {
+        Input_InitNative(delay, interval);
+    }
+    return 1;
+}
+
+/* @original Input_ReadHeldNative (IGN_WIN.EXE @ 0x00456070, inferred input.c)
+ * @fidelity EXACT */
+int Input_ReadHeldNative(int scan_code) {
+    return g_nativeKeyboardHeld.bytes[(unsigned char)scan_code];
+}
+
+/* @original Input_ConsumePressNative (IGN_WIN.EXE @ 0x00456080, inferred input.c)
+ * @fidelity EXACT */
+int Input_ConsumePressNative(int scan_code) {
+    unsigned char index;
+
+    index = (unsigned char)scan_code;
+    if (g_nativeKeyboardPressEdges[index] != 0) {
+        g_nativeKeyboardPressEdges[index] = 0;
+        return 1;
+    }
+    return 0;
+}
+
+/* @original Input_ConsumeRepeatNative (IGN_WIN.EXE @ 0x004560A0, inferred input.c)
+ * @fidelity EXACT */
+int Input_ConsumeRepeatNative(int scan_code) {
+    unsigned char index;
+
+    index = (unsigned char)scan_code;
+    if (g_nativeKeyboardPressEvents.bytes[index] != 0) {
+        g_nativeKeyboardPressEvents.bytes[index] = 0;
+        return 1;
+    }
+    return 0;
 }
 
 /* End native DirectInput lifecycle implementation. */

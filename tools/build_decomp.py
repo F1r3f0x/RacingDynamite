@@ -114,13 +114,15 @@ _input_marker = '/* Native DirectInput lifecycle implementation. */'
 _input_end = '/* End native DirectInput lifecycle implementation. */'
 SURFACE_SOURCE += _resource_source[_resource_source.index(_input_marker):_resource_source.index(_input_end)]
 INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'Input_PollNative',
+    'Input_InitTimedNative', 'Input_ShutdownNativeEntry', 'Input_ReinitializeNative',
+    'Input_ReadHeldNative', 'Input_ConsumePressNative', 'Input_ConsumeRepeatNative', 'g_nativeInputPeriod',
     'Input_DispatchKeyNative', 'Input_QueueCharacterNative', 'Input_TimerCallbackNative',
     'g_nativeCharacterMap', 'g_nativeDirectInput',
     'g_nativeKeyboardDevice', 'g_nativeKeyboardAcquired', 'g_nativeInputTimerActive',
     'g_nativeInputTimerId', 'g_nativeInputClock', 'g_nativeRepeatDelay',
     'g_nativeRepeatInterval', 'g_nativeRepeatEpoch', 'g_nativeCharacterQueue',
     'g_nativeCharacterQueueCursor', 'g_nativeCharacterQueueEnd', 'g_nativeKeyboardHeld',
-    'g_nativeKeyboardPressEvents', 'g_nativeKeyboardTableA', 'g_nativeKeyboardTableB',
+    'g_nativeKeyboardPressEvents', 'g_nativeKeyboardPressEdges', 'g_nativeKeyboardPressLatch',
     'g_nativeRepeatCounters', 'g_nativeKeyboardDeviceGuid', 'g_nativeKeyGuid',
     'g_nativeKeyboardObjects', 'g_nativeKeyboardFormat']
 SURFACE_EXPORTS_EXTRA = ['g_nativeRebuildPaletteEntries', 'g_nativeDirectDraw', 'g_nativeClipper', 'g_nativePalette',
@@ -203,7 +205,7 @@ def compile_surface(stem):
     source.write_text(SURFACE_SOURCE, encoding='utf-8', newline='\n')
     obj.unlink(missing_ok=True)
     command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
-        '-Werror', '-O2', '-fno-inline', '-I', str(ROOT/'decomp/include'),
+        '-Werror', '-O2', '-fno-inline', '-fno-optimize-sibling-calls', '-I', str(ROOT/'decomp/include'),
         '-c', str(source), '-o', str(obj)]
     print(subprocess.list2cmdline(command), flush=True)
     subprocess.run(command, cwd=ROOT, check=True)
@@ -221,7 +223,7 @@ def surface_import_libraries(stem):
             'SetWindowPos@28','SystemParametersInfoA@16','GetWindowRect@8',
             'MessageBoxA@16','ShowWindow@8'],
         'GDI32':['GetDeviceCaps@8'], 'DINPUT':['DirectInputCreateA@16'],
-        'WINMM':['timeKillEvent@4']}
+        'WINMM':['timeKillEvent@4','timeSetEvent@20']}
     libraries = []
     for dll,exports in groups.items():
         definition = BUILD/(stem+'_'+dll.lower()+'.def')

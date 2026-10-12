@@ -62,7 +62,7 @@ def validate_platform_imports(pe):
     This replaces the obsolete no-import assumption, not the dependency audit.
     """
     expected={('DDRAW.dll','DirectDrawCreate'),('GDI32.dll','GetDeviceCaps'),
-        ('DINPUT.dll','DirectInputCreateA'),('WINMM.dll','timeKillEvent')}
+        ('DINPUT.dll','DirectInputCreateA'),('WINMM.dll','timeKillEvent'),('WINMM.dll','timeSetEvent')}
     expected.update(('USER32.dll',name) for name in (
         'GetSystemMetrics','CreateWindowExA','UpdateWindow','SetFocus','GetDC',
         'ReleaseDC','GetWindowLongA','SetWindowLongA','SetRect','GetMenu',

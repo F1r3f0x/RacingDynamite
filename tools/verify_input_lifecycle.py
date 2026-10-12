@@ -29,7 +29,7 @@ FIELDS=[('g_native'+name,p,n) for name,p,n in (
  ('InputTimerId',IDENTIFIER,4),('WindowInstance',INSTANCE,4),('Window',WINDOW,4),('InputClock',CLOCK,4),
  ('RepeatDelay',DELAY,4),('RepeatInterval',INTERVAL,4),('RepeatEpoch',EPOCH,4),('CharacterQueue',QUEUE,64),
  ('CharacterQueueCursor',CURSOR,4),('CharacterQueueEnd',END,1),('KeyboardHeld',HELD,256),('KeyboardPressEvents',EVENTS,256),
- ('KeyboardTableA',TABLEA,256),('KeyboardTableB',TABLEB,256),('RepeatCounters',COUNTERS,1024))]
+ ('KeyboardPressEdges',TABLEA,256),('KeyboardPressLatch',TABLEB,256),('RepeatCounters',COUNTERS,1024))]
 ARGC={'DirectInputCreateA':4,'CreateDevice':4,'SetDataFormat':2,'SetCooperativeLevel':3,'SetProperty':3,
  'Acquire':1,'Unacquire':1,'Release':1,'timeKillEvent':1}
 FUNCTIONS={name:ARENA+0x3000+16*k for k,name in enumerate(ARGC)}

@@ -1,5 +1,17 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Timed input subsystem (2026-10-12)
+
+[Six real input routines](ghidra/windows_input_timed.md) pass 6,448 differential
+comparisons and native asynchronous timer polling with state consumption, shutdown
+entry and reinit. The opaque keyboard arrays now have verified press-edge/latch
+names; initialization/polling regressions are included. Full workflow, audit and exports pass for all 82 reconstructions at
+snapshot `28f372557d7a`. Staged gates and tracked hooks follow. Native teardown uses test-owned timer quiescence; arbitrary reentry/
+concurrent teardown and no-push timing callers remain explicit limitations.
+Next advance native graphics presentation/rendering and real startup/WndProc.
+Queued-character helpers and original toolchain remain unresolved. Full playable
+game startup, menus, rendering, input, audio and representative races remain required.
+
 ## Buffered keyboard dependency chain (2026-10-12)
 
 [Native polling](ghidra/windows_input_polling.md) implements real DirectInput data

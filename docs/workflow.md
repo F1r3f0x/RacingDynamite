@@ -1,5 +1,18 @@
 # Enforced agent workflow
 
+## Timed input subsystem validation (2026-10-12)
+
+`uv run tools/verify_input_timed.py` checks six authentic routine extents, the
+loader-zero period initializer, SDK data and real setup/shutdown/reinit contracts.
+Its 6,448 comparisons include 3,268 follow-ups, four faults and eighteen executed
+mutations. `SURFACE_TEST_TIMED` executes actual paired asynchronous multimedia
+timer polling, scan30 events and held/press/repeat consumers, with test-owned timer
+quiescence before teardown. Initialization 0x55AC0 and polling 0x55EF0 require fresh
+regression for the verified press-edge/latch names. Real timeSetEvent joins the
+authenticated SDK import contract. See [evidence and limits](ghidra/windows_input_timed.md).
+Finish full renewal, audit/export/check, LF/index checks, staged gate and hooks;
+native full game and arbitrary concurrent teardown remain unverified.
+
 ## Native buffered input validation (2026-10-12)
 
 `uv run tools/verify_input_polling.py` authenticates FPO/hash and translation data,

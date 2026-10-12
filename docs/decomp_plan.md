@@ -1,5 +1,19 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Timed native input and state consumption (2026-10-12)
+
+[Timed input](ghidra/windows_input_timed.md) reconstructs real timed setup,
+shutdown entry, reinitialization and three state consumers at RVAs 0x55C60,
+0x55EA0, 0x55EB0, 0x56070, 0x56080 and 0x560A0. Focused 6,448 comparisons
+and paired native asynchronous timer/scan30 paths pass. Verified press-edge/latch
+names replace opaque bindings in initialization 0x55AC0 and polling 0x55EF0.
+Full renewal, fidelity audit and exports pass at snapshot `28f372557d7a` for all
+82 reconstructions, with 21 scoped native records. Staged gates and hooks follow. Native teardown uses test-owned timer
+quiescence; arbitrary concurrency remains open. Next continue authentic graphics
+presentation/rendering and WndProc/startup dependencies. Queued-reader helpers,
+no-push timing arguments, original compiler/linker and full game validation remain
+unresolved. Completion still requires a playable native game with menus/audio/races.
+
 ## Buffered native keyboard input (2026-10-12)
 
 [Polling and consumers](ghidra/windows_input_polling.md), RVAs0x55EF0/0x560C0/
