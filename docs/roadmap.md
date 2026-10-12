@@ -1,5 +1,16 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Buffered keyboard dependency chain (2026-10-12)
+
+[Native polling](ghidra/windows_input_polling.md) implements real DirectInput data
+access with key callback, character ring and five-word timer callback.1,166 focused
+comparisons and paired native scan30 press/release paths pass; full renewal, audit and exports pass for all 76 reconstructions at snapshot
+`ca2851cbbf7e`. Staged gates and tracked hooks follow. Initialization backing at0x55AC0 is part of the regression scope.
+Next authenticate and reconstruct actual held/edge/repeat/queue consumers, timed
+setup and reinitialization, followed by WndProc/WinMain dependencies. Preserve the
+authentic missing timing arguments. Asynchronous timing, original compiler/linker,
+native full startup/menu/render/audio/races and playable rebuilt game remain open.
+
 ## Native input dependencies (2026-10-10)
 
 [Input lifecycle](ghidra/windows_input_lifecycle.md) reconstructs real keyboard

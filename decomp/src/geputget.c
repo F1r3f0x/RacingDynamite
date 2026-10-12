@@ -1985,64 +1985,6 @@ int Input_ShutdownKeyboard(void) {
     return 1;
 }
 
-// @original Input_PollKeyboard (MAINDOS.EXE @ 0x55ae4, geputget.c)
-// @fidelity EXACT
-void Input_PollKeyboard(void) {
-    int delta = g_TickInt - g_KeyLastPollTick;
-    int threshold = g_KeyRepeatInitialDelay + g_KeyRepeatInterval;
-    int i;
-
-    /* 1. Advance repeat timers and trigger auto-repeat pulses */
-    for (i = 0; i < 256; i++) {
-        if (g_KeyboardState[i] == 1) {
-            g_KeyRepeatActiveTimer[i] += delta;
-            if (g_KeyRepeatActiveTimer[i] >= threshold) {
-                g_KeyRepeatTriggered[i] = 1;
-                g_KeyRepeatActiveTimer[i] -= g_KeyRepeatInterval;
-            }
-        }
-    }
-
-    /* 2. Update keydown and just-pressed edge states */
-    for (i = 0; i < 256; i++) {
-        uint8_t raw = g_KeyRawState[i];
-        if (raw == 1) {
-            uint8_t prev = g_KeyPreviousDown[i];
-            g_KeyboardState[i] = 1;
-            if (prev == 0) {
-                g_KeyJustPressed[i] = 1;
-                g_KeyPreviousDown[i] = 1;
-            }
-            if (g_KeyRepeatActiveTimer[i] == 0) {
-                g_KeyRepeatTriggered[i] = 1;
-            }
-            if (g_KeyCallback != NULL) {
-                g_KeyCallback(1, i);
-            }
-            if (i <= 0x53) {
-                char ch = (char)g_ScancodeToAsciiTable[i];
-                *g_KeyAsciiRingWritePtr = ch;
-                g_KeyAsciiRingWritePtr[32] = ch;
-                g_KeyAsciiRingWritePtr++;
-                if (g_KeyAsciiRingWritePtr == g_KeyAsciiRingBuf + 32) {
-                    g_KeyAsciiRingWritePtr = g_KeyAsciiRingBuf;
-                }
-            }
-        } else {
-            g_KeyJustPressed[i] = 0;
-            g_KeyboardState[i] = 0;
-            g_KeyPreviousDown[i] = 0;
-            g_KeyRepeatTriggered[i] = 0;
-            g_KeyRepeatActiveTimer[i] = 0;
-            if (g_KeyCallback != NULL) {
-                g_KeyCallback(0, i);
-            }
-        }
-    }
-
-    g_KeyLastPollTick = g_TickInt;
-}
-
 // @original Input_IsKeyDown (MAINDOS.EXE @ 0x55c28, geputget.c)
 // @fidelity EXACT
 int Input_IsKeyDown(int scancode) {
@@ -2077,20 +2019,6 @@ void Input_SetKeyCallback(void (*cb)(int, int)) {
     g_KeyCallback = cb;
     if (g_KeyCallback != NULL) {
         g_KeyCallback(0, 0);
-    }
-}
-
-// @original Input_EnqueueAscii (MAINDOS.EXE @ 0x55ca0, geputget.c)
-// @fidelity EXACT
-void Input_EnqueueAscii(int scancode) {
-    if (scancode <= 0x53) {
-        char ch = (char)g_ScancodeToAsciiTable[scancode];
-        *g_KeyAsciiRingWritePtr = ch;
-        g_KeyAsciiRingWritePtr[32] = ch;
-        g_KeyAsciiRingWritePtr++;
-        if (g_KeyAsciiRingWritePtr == g_KeyAsciiRingBuf + 32) {
-            g_KeyAsciiRingWritePtr = g_KeyAsciiRingBuf;
-        }
     }
 }
 
@@ -2700,8 +2628,8 @@ volatile uint32_t g_nativeInputClock; /* VA49373C, clock ownership pending */
 volatile int32_t g_nativeRepeatDelay; /* VA50DF64 */
 volatile int32_t g_nativeRepeatInterval; /* VA50E274 */
 volatile uint32_t g_nativeRepeatEpoch; /* VA50E268 */
-volatile uint32_t g_nativeCharacterQueue[16]; /* VA50DE18 */
-volatile uint32_t *volatile g_nativeCharacterQueueCursor; /* VA50DE10 */
+volatile NativeCharacterRing g_nativeCharacterQueue; /* VA50DE18 */
+volatile unsigned char *volatile g_nativeCharacterQueueCursor; /* VA50DE10 */
 volatile unsigned char g_nativeCharacterQueueEnd; /* VA50DE58 */
 volatile NativeKeyboardByteState g_nativeKeyboardHeld; /* VA50DE60 */
 volatile NativeKeyboardByteState g_nativeKeyboardPressEvents; /* VA50DF68 */
@@ -2757,9 +2685,9 @@ int Input_InitNative(int32_t repeat_delay, int32_t repeat_interval) {
     if (result < 0) {
         g_nativeKeyboardAcquired = 0;
     }
-    g_nativeCharacterQueueCursor = g_nativeCharacterQueue;
+    g_nativeCharacterQueueCursor = g_nativeCharacterQueue.bytes;
     for (index = 0; index < 16; index++) {
-        g_nativeCharacterQueue[index] = 0xffffffffu;
+        g_nativeCharacterQueue.words[index] = 0xffffffffu;
     }
     g_nativeCharacterQueueEnd = 0;
     for (index = 0; index < 64; index++) {
@@ -2780,6 +2708,136 @@ int Input_InitNative(int32_t repeat_delay, int32_t repeat_interval) {
     g_nativeInputTimerActive = 0;
     g_nativeInputTimerId = 0;
     return 1;
+}
+
+/* Original US keyboard translation, including literal 0xff entries. */
+const unsigned char g_nativeCharacterMap[84] = {
+    255,255,49,50,51,52,53,54,55,56,57,48,45,61,255,255,
+    81,87,69,82,84,89,85,73,79,80,123,125,255,255,65,83,
+    68,70,71,72,74,75,76,59,39,255,255,92,90,88,67,86,
+    66,78,77,44,46,47,255,42,255,32,255,255,255,255,255,255,
+    255,255,255,255,255,255,255,55,56,57,45,52,53,54,43,49,
+    50,51,48,46
+};
+
+typedef char native_input_record_size[(sizeof(DIDEVICEOBJECTDATA) == 16) ? 1 : -1];
+typedef char native_input_data_slot[(offsetof(IDirectInputDeviceAVtbl, GetDeviceData) == 0x28) ? 1 : -1];
+typedef char native_character_ring_size[(sizeof(NativeCharacterRing) == 64) ? 1 : -1];
+
+/* @original Input_DispatchKeyNative (IGN_WIN.EXE @ 0x004560C0, inferred input.c)
+ * @fidelity EXACT */
+void Input_DispatchKeyNative(int pressed, int scan_code) {
+    InputKeyEventCallback callback;
+
+    callback = g_inputKeyEventCallback;
+    if (callback != 0) {
+        callback(pressed, scan_code);
+    }
+}
+
+/* @original Input_QueueCharacterNative (IGN_WIN.EXE @ 0x004560E0, inferred input.c)
+ * @fidelity EXACT */
+void Input_QueueCharacterNative(int unused, int scan_code) {
+    unsigned char character;
+
+    (void)unused;
+    if (scan_code > 83) {
+        return;
+    }
+    /* Poll supplies a masked scan code. Negative standalone indices are
+     * outside the independently validated translation-table contract. */
+    character = g_nativeCharacterMap[scan_code];
+    *g_nativeCharacterQueueCursor = character;
+    g_nativeCharacterQueueCursor[32] = character;
+    ++g_nativeCharacterQueueCursor;
+    if (g_nativeCharacterQueueCursor == g_nativeCharacterQueue.bytes + 32) {
+        g_nativeCharacterQueueCursor = g_nativeCharacterQueue.bytes;
+    }
+}
+
+/* @original Input_PollNative (IGN_WIN.EXE @ 0x00455EF0, inferred input.c)
+ * @fidelity EXACT */
+void Input_PollNative(void) {
+    DIDEVICEOBJECTDATA records[32];
+    volatile DWORD count;
+    volatile DIDEVICEOBJECTDATA *record;
+    LPDIRECTINPUTDEVICEA keyboard;
+    HRESULT result;
+    uint32_t counter, threshold;
+    int index, scan_code;
+
+    count = 32;
+    for (index = 0; index < 256; ++index) {
+        if (g_nativeKeyboardHeld.bytes[index] == 1) {
+            counter = g_nativeRepeatCounters[index];
+            threshold = (uint32_t)g_nativeRepeatDelay;
+            counter -= g_nativeRepeatEpoch;
+            threshold += (uint32_t)g_nativeRepeatInterval;
+            counter += g_nativeInputClock;
+            g_nativeRepeatCounters[index] = counter;
+            if ((int32_t)counter >= (int32_t)threshold) {
+                counter -= (uint32_t)g_nativeRepeatInterval;
+                g_nativeKeyboardPressEvents.bytes[index] = 1;
+                g_nativeRepeatCounters[index] = counter;
+            }
+        }
+    }
+    keyboard = g_nativeKeyboardDevice;
+    result = keyboard->lpVtbl->GetDeviceData(keyboard, 16, records, (LPDWORD)&count, 0);
+    if ((uint32_t)result == 0x8007001eu) {
+        g_nativeKeyboardAcquired = 0;
+        keyboard = g_nativeKeyboardDevice;
+        result = keyboard->lpVtbl->Acquire(keyboard);
+        if (result >= 0) {
+            g_nativeKeyboardAcquired = 1;
+        }
+        return;
+    }
+    if (result == 0 || result == 1) {
+        record = records;
+        for (index = 0; index < (int32_t)count; ++index, ++record) {
+            scan_code = (int)(record->dwOfs & 255u);
+            if ((record->dwData & 128u) != 0) {
+                g_nativeKeyboardHeld.bytes[scan_code] = 1;
+                if (g_nativeKeyboardTableB[scan_code] == 0) {
+                    g_nativeKeyboardTableA[scan_code] = 1;
+                    g_nativeKeyboardTableB[scan_code] = 1;
+                }
+                if (g_nativeRepeatCounters[scan_code] == 0) {
+                    g_nativeKeyboardPressEvents.bytes[scan_code] = 1;
+                }
+                Input_DispatchKeyNative(1, scan_code);
+                scan_code = (int)(record->dwOfs & 255u);
+                Input_QueueCharacterNative(1, scan_code);
+            } else {
+                g_nativeKeyboardHeld.bytes[scan_code] = 0;
+                g_nativeKeyboardTableA[scan_code] = 0;
+                g_nativeKeyboardTableB[scan_code] = 0;
+                g_nativeKeyboardPressEvents.bytes[scan_code] = 0;
+                g_nativeRepeatCounters[scan_code] = 0;
+                Input_DispatchKeyNative(0, scan_code);
+            }
+        }
+    }
+    g_nativeRepeatEpoch = g_nativeInputClock;
+}
+
+/* @original Input_TimerCallbackNative (IGN_WIN.EXE @ 0x00456160, inferred input.c)
+ * @fidelity EXACT */
+void __stdcall Input_TimerCallbackNative(unsigned int timer_id, unsigned int message,
+        unsigned long user, unsigned long value1, unsigned long value2) {
+    InputPollCallback callback;
+
+    (void)timer_id;
+    (void)message;
+    (void)user;
+    (void)value1;
+    (void)value2;
+    Input_PollNative();
+    callback = g_inputPollCallback;
+    if (callback != 0) {
+        callback();
+    }
 }
 
 /* End native DirectInput lifecycle implementation. */

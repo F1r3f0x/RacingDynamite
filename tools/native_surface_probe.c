@@ -2,6 +2,10 @@
 #include <ddraw.h>
 #include <stdint.h>
 
+#ifdef SURFACE_TEST_POLL
+#define SURFACE_TEST_INPUT
+#endif
+
 #ifdef SURFACE_TEST_INPUT
 #define SURFACE_TEST_SHUTDOWN
 #include <dinput.h>
@@ -49,6 +53,76 @@ static void *data_symbol(HMODULE module, const char *name) {
     binding.function=symbol(module,name);
     return binding.object;
 }
+
+#ifdef SURFACE_TEST_POLL
+static unsigned int native_presses, native_releases, native_notifications;
+static void __cdecl native_key_observer(int pressed, int scan) {
+    if (scan==30) {
+        if (pressed) { native_presses++; } else { native_releases++; }
+    }
+}
+static void __cdecl native_poll_observer(void) { native_notifications++; }
+static void pump_input_window(void) {
+    MSG message;
+    while (PeekMessageA(&message,0,0,0,PM_REMOVE)) {
+        TranslateMessage(&message);DispatchMessageA(&message);
+    }
+}
+static void check_native_poll(unsigned char *image, HMODULE compiled, int side, HWND window) {
+    typedef void (__cdecl *PollFn)(void);
+    typedef void (__cdecl *KeyFn)(int,int);
+    typedef void (CALLBACK *TimerFn)(UINT,UINT,DWORD_PTR,DWORD_PTR,DWORD_PTR);
+    union { unsigned char *bytes; FARPROC generic; PollFn poll; TimerFn timer; } binding;
+    PollFn poll;
+    TimerFn timer;
+    KeyFn volatile *key_callback;
+    PollFn volatile *poll_callback;
+    volatile unsigned char *held, *events, *queue;
+    INPUT event;
+    unsigned char *bytes;
+    unsigned int k, attempt;
+    int failed;
+
+    if (side==0) {
+        binding.bytes=image+0x55ef0;poll=binding.poll;
+        binding.bytes=image+0x56160;timer=binding.timer;
+        key_callback=(KeyFn volatile *)(image+0x10de14);
+        poll_callback=(PollFn volatile *)(image+0x10e678);
+        held=image+0x10de60;events=image+0x10df68;queue=image+0x10de18;
+    } else {
+        binding.generic=symbol(compiled,"Input_PollNative");poll=binding.poll;
+        binding.generic=symbol(compiled,"Input_TimerCallbackNative");timer=binding.timer;
+        key_callback=(KeyFn volatile *)data_symbol(compiled,"g_inputKeyEventCallback");
+        poll_callback=(PollFn volatile *)data_symbol(compiled,"g_inputPollCallback");
+        held=(volatile unsigned char *)data_symbol(compiled,"g_nativeKeyboardHeld");
+        events=(volatile unsigned char *)data_symbol(compiled,"g_nativeKeyboardPressEvents");
+        queue=(volatile unsigned char *)data_symbol(compiled,"g_nativeCharacterQueue");
+    }
+    native_presses=0;native_releases=0;native_notifications=0;
+    *key_callback=native_key_observer;*poll_callback=native_poll_observer;
+    SetForegroundWindow(window);SetFocus(window);pump_input_window();
+    for (attempt=0; attempt<10; attempt++) { poll();Sleep(10);pump_input_window(); }
+    bytes=(unsigned char *)&event;
+    for (k=0; k<sizeof(event); k++) { bytes[k]=0; }
+    event.type=INPUT_KEYBOARD;event.ki.wScan=30;event.ki.dwFlags=KEYEVENTF_SCANCODE;
+    if (SendInput(1,&event,sizeof(event))!=1) { fail("FAIL native key injection\n",65); }
+    for (attempt=0; attempt<100 && !native_presses; attempt++) {
+        Sleep(10);pump_input_window();poll();
+    }
+    failed=!native_presses || held[30]!=1 || events[30]!=1;
+    event.ki.dwFlags=KEYEVENTF_SCANCODE|KEYEVENTF_KEYUP;
+    if (SendInput(1,&event,sizeof(event))!=1) { fail("FAIL native key release injection\n",66); }
+    for (attempt=0; attempt<100 && !native_releases; attempt++) {
+        Sleep(10);pump_input_window();poll();
+    }
+    if (failed || !native_releases || held[30]!=0 || events[30]!=0 || queue[0]!='A' || queue[32]!='A') {
+        fail("FAIL actual buffered native key press/release/ring\n",67);
+    }
+    timer(1,2,3,4,5);
+    if (native_notifications!=1) { fail("FAIL actual native timer callback ABI/notification\n",68); }
+    *key_callback=0;*poll_callback=0;
+}
+#endif
 
 static void check_records(NativeRecord *primary, NativeRecord *bank1,
         NativeRecord *bank2, int count, int success, uint32_t depth) {
@@ -401,6 +475,9 @@ void WINAPI NativeEntry(void) {
                     fail("FAIL actual DirectInput setup\n",61);
                 }
                 owned_timer=0;
+#ifdef SURFACE_TEST_POLL
+                check_native_poll(image,compiled,side,window);
+#endif
                 if (input_cycle!=0) {
                     /* Test-owned real multimedia timer; production timed input
                      * initialization/poll callback remains outside this scope. */
@@ -503,7 +580,11 @@ void WINAPI NativeEntry(void) {
     }
     if (!UnregisterClassA("Ignition",instance)) { fail("FAIL native class disposal\n",49); }
 #ifdef SURFACE_TEST_INPUT
+#ifdef SURFACE_TEST_POLL
+    output("PASS native Win32/DirectDraw original versus C89 polling: real buffered key press/release, mirrored character ring and timer callback; paired windowed 0/1/4 lifecycles; original WndProc reference\n");
+#else
     output("PASS native Win32/DirectDraw original versus C89 input: real DirectInput setup/shutdown and multimedia timer cancellation; paired windowed 0/1/4 scenarios, empty shutdown; original WndProc reference; no native polling/game parity\n");
+#endif
 #elif defined(SURFACE_TEST_SHUTDOWN) || defined(SURFACE_TEST_REBUILD)
 #ifdef SURFACE_TEST_REBUILD
 #ifdef SURFACE_TEST_ENTRY

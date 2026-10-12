@@ -1,5 +1,19 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Buffered native keyboard input (2026-10-12)
+
+[Polling and consumers](ghidra/windows_input_polling.md), RVAs0x55EF0/0x560C0/
+0x560E0/0x56160, now execute real SDK buffered input, callbacks and mirrored
+character-ring insertion. Focused1,166 differential comparisons and native paired
+scan30 press/release paths pass, including synchronous timer callback ABI checks.
+Initialization0x55AC0 retains its sixteen DWORD clears with corrected byte cursor
+backing. Full workflow renewal, audit and exports pass at snapshot `ca2851cbbf7e` for all
+76 reconstructions; fifteen have scoped native evidence. Commit gates follow.
+Next authenticate
+held/edge/repeat/queued-character consumers and timed setup/reinitialization, then
+continue real WndProc/startup/game dependencies. Original toolchain, asynchronous
+timing, full menus/render/audio/races and playable native game remain unresolved.
+
 ## Native DirectInput lifecycle (2026-10-10)
 
 [Input lifecycle](ghidra/windows_input_lifecycle.md), RVAs0x55AC0/0x55E20,

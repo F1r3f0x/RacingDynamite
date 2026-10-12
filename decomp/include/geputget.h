@@ -32,8 +32,12 @@ extern volatile uint32_t g_nativeInputClock; /* VA0x0049373C */
 extern volatile int32_t g_nativeRepeatDelay; /* VA0x0050DF64 */
 extern volatile int32_t g_nativeRepeatInterval; /* VA0x0050E274 */
 extern volatile uint32_t g_nativeRepeatEpoch; /* VA0x0050E268 */
-extern volatile uint32_t g_nativeCharacterQueue[16]; /* VA0x0050DE18 */
-extern volatile uint32_t *volatile g_nativeCharacterQueueCursor; /* VA0x0050DE10 */
+typedef union NativeCharacterRing {
+    unsigned char bytes[64];
+    uint32_t words[16];
+} NativeCharacterRing;
+extern volatile NativeCharacterRing g_nativeCharacterQueue; /* VA0x0050DE18 */
+extern volatile unsigned char *volatile g_nativeCharacterQueueCursor; /* VA0x0050DE10 */
 extern volatile unsigned char g_nativeCharacterQueueEnd; /* VA0x0050DE58 */
 typedef union NativeKeyboardByteState {
     unsigned char bytes[256];
@@ -46,6 +50,12 @@ extern volatile unsigned char g_nativeKeyboardTableB[256]; /* VA0x0050E168 */
 extern volatile uint32_t g_nativeRepeatCounters[256]; /* VA0x0050E278 */
 int Input_InitNative(int32_t repeat_delay, int32_t repeat_interval); /* VA0x00455AC0 */
 int Input_ShutdownNative(void); /* VA0x00455E20 */
+void Input_PollNative(void); /* VA0x00455EF0 */
+void Input_DispatchKeyNative(int pressed, int scan_code); /* VA0x004560C0 */
+void Input_QueueCharacterNative(int unused, int scan_code); /* VA0x004560E0 */
+void __stdcall Input_TimerCallbackNative(unsigned int timer_id, unsigned int message,
+    unsigned long user, unsigned long value1, unsigned long value2); /* VA0x00456160 */
+extern const unsigned char g_nativeCharacterMap[84]; /* VA0x004BA660 */
 /* End native DirectInput declarations. */
 
 
@@ -486,12 +496,10 @@ extern const uint8_t g_ScancodeToAsciiTable[84];
 
 int  Input_InitKeyboard(int initial_delay, int repeat_interval);
 int  Input_ShutdownKeyboard(void);
-void Input_PollKeyboard(void);
 int  Input_IsKeyDown(int scancode);
 int  Input_WasKeyPressed(int scancode);
 int  Input_WasKeyRepeated(int scancode);
 void Input_SetKeyCallback(void (*cb)(int, int));
-void Input_EnqueueAscii(int scancode);
 char *Input_GetQueuedKey(char *query_str);
 int  Input_InitKeyTables(void);
 

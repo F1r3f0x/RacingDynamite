@@ -1,5 +1,18 @@
 # Enforced agent workflow
 
+## Native buffered input validation (2026-10-12)
+
+`uv run tools/verify_input_polling.py` authenticates FPO/hash and translation data,
+then validates RVAs 0x55EF0/0x560C0/0x560E0/0x56160 through the real four-routine
+production chain. Its 1,166 comparisons include 630 follow-ups, two faults and 24
+executed mutations. `SURFACE_TEST_POLL` adds actual original/C89 buffered scan30
+press/release, mirrored character bytes and synchronous five-word timer callback
+checks in twelve native input cycles. The original WndProc remains a reference
+boundary. Preserve initialization RVA 0x55AC0 regression for the ring backing type.
+See [evidence and limitations](ghidra/windows_input_polling.md). Run full completion,
+fidelity/export checks, LF working/index checks, staged gate and tracked hooks.
+No asynchronous timer dispatch or playable game completion is established.
+
 ## Native input validation (2026-10-10)
 
 Run `uv run tools/verify_input_lifecycle.py` for native keyboard setup/shutdown

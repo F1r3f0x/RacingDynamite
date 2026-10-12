@@ -216,6 +216,7 @@ def verify():
         'Mem_InitSystem', 'Mem_ShutdownSystem', 'Lisa_PrintVersion',
         'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
         'Input_InitNative', 'Input_ShutdownNative',
+        'Input_PollNative', 'Input_DispatchKeyNative', 'Input_QueueCharacterNative', 'Input_TimerCallbackNative',
         'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
         'Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_SpriteOpenNative', 'Gfx_SpriteShutdownNative',
         'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
@@ -242,6 +243,8 @@ def verify():
     symbols['DirectInputCreateA_import']=input_thunks[0]
     expected_calls = {
         'Input_InitNative': ['DirectInputCreateA_import'],
+        'Input_PollNative': ['Input_DispatchKeyNative', 'Input_QueueCharacterNative', 'Input_DispatchKeyNative'],
+        'Input_TimerCallbackNative': ['Input_PollNative'],
         'Gfx_SurfaceRebuildNative': ['Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative'],
         'Gfx_SurfaceOpenNative': ['Gfx_InitSurfaceRecords', 'DirectDrawCreate_import', 'Gfx_SurfaceRestoreNative'],
         'Gfx_InitPrimitiveState': ['Gfx_InitGraphicsPairStorage', 'Gfx_InitSineTable',
@@ -846,3 +849,5 @@ if __name__ == '__main__':
     verify_graphics_entry()
     from verify_input_lifecycle import verify_input_lifecycle
     verify_input_lifecycle()
+    from verify_input_polling import verify_input_polling
+    verify_input_polling()

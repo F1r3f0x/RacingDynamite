@@ -113,7 +113,9 @@ SURFACE_SOURCE += _resource_source[_resource_source.index(_rebuild_marker):_reso
 _input_marker = '/* Native DirectInput lifecycle implementation. */'
 _input_end = '/* End native DirectInput lifecycle implementation. */'
 SURFACE_SOURCE += _resource_source[_resource_source.index(_input_marker):_resource_source.index(_input_end)]
-INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'g_nativeDirectInput',
+INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'Input_PollNative',
+    'Input_DispatchKeyNative', 'Input_QueueCharacterNative', 'Input_TimerCallbackNative',
+    'g_nativeCharacterMap', 'g_nativeDirectInput',
     'g_nativeKeyboardDevice', 'g_nativeKeyboardAcquired', 'g_nativeInputTimerActive',
     'g_nativeInputTimerId', 'g_nativeInputClock', 'g_nativeRepeatDelay',
     'g_nativeRepeatInterval', 'g_nativeRepeatEpoch', 'g_nativeCharacterQueue',
@@ -201,7 +203,7 @@ def compile_surface(stem):
     source.write_text(SURFACE_SOURCE, encoding='utf-8', newline='\n')
     obj.unlink(missing_ok=True)
     command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
-        '-Werror', '-O2', '-I', str(ROOT/'decomp/include'),
+        '-Werror', '-O2', '-fno-inline', '-I', str(ROOT/'decomp/include'),
         '-c', str(source), '-o', str(obj)]
     print(subprocess.list2cmdline(command), flush=True)
     subprocess.run(command, cwd=ROOT, check=True)
