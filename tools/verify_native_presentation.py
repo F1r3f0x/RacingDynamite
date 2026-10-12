@@ -2,18 +2,18 @@
 import hashlib,shutil,subprocess
 from windows_target import ROOT,TARGET,verify_target
 
-def native_presentation(dll):
-    runtime=ROOT/'build/runtime/present_frames_native';runtime.mkdir(parents=True,exist_ok=True)
+def native_surface_host(dll, helper_path, runtime_name, call_site, calls, expected):
+    if not __debug__:raise RuntimeError("Verification requires assertions")
+    runtime=ROOT/'build/runtime'/runtime_name;runtime.mkdir(parents=True,exist_ok=True)
     shutil.copyfile(TARGET,runtime/'IGN_WIN.EXE');verify_target(runtime/'IGN_WIN.EXE')
     shutil.copyfile(dll,runtime/'surface_open_validation.dll')
     source=(ROOT/'tools/native_surface_probe.c').read_text()
     marker='static void check_records(NativeRecord *primary, NativeRecord *bank1,'
-    helper=(ROOT/'tools/native_present_frames.c').read_text()
+    helper=(ROOT/helper_path).read_text()
     assert marker in source;source=source.replace(marker,helper+marker,1)
-    assert '    if (!UnregisterClassA("Ignition",instance))' in source
-    source=source.replace('    if (!UnregisterClassA("Ignition",instance))',
-     '    probe_native_fullscreen(image,compiled,0);\n    probe_native_fullscreen(image,compiled,1);\n    if (!UnregisterClassA("Ignition",instance))',1)
-    host=runtime/'native_surface_lock_original.c';host.write_text(source,encoding='utf-8',newline='\n')
+    assert call_site in source
+    source=source.replace(call_site,calls+call_site,1)
+    host=runtime/'native_surface_host.c';host.write_text(source,encoding='utf-8',newline='\n')
     groups={'KERNEL32':['CreateFileA@28','ReadFile@20','GetFileSize@8','CloseHandle@4','VirtualAlloc@16',
      'LoadLibraryA@4','GetProcAddress@8','GetStdHandle@4','WriteFile@20','ExitProcess@4','GetModuleHandleA@4'],
      'USER32':['LoadCursorA@8','LoadIconA@8','RegisterClassA@4','IsWindow@4','IsWindowVisible@4','GetClientRect@8',
@@ -32,9 +32,17 @@ def native_presentation(dll):
     result=subprocess.run([str(exe)],cwd=runtime,capture_output=True,text=True,timeout=45)
     (runtime/'result.log').write_text(result.stdout+result.stderr,encoding='utf-8',newline='\n')
     verify_target(runtime/'IGN_WIN.EXE')
-    assert result.returncode==0 and 'PASS original fullscreen' in result.stdout and 'PASS rebuilt fullscreen' in result.stdout,(result.returncode,result.stdout,result.stderr)
+    assert result.returncode==0 and all(marker in result.stdout for marker in expected),(result.returncode,result.stdout,result.stderr)
     assert hashlib.sha256(dll.read_bytes()).digest()==hashlib.sha256((runtime/'surface_open_validation.dll').read_bytes()).digest()
-    return {'variant':'fullscreen_frames','cases':1,'paired_executions':2,'flips':8,'primary_pixels_checked':2457600,
-     'stdout':result.stdout,'exit_code':result.returncode,'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
+    return {'stdout':result.stdout,'exit_code':result.returncode,
+        'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest()}
+
+
+def native_presentation(dll):
+    result=native_surface_host(dll,'tools/native_present_frames.c','present_frames_native',
+        '    if (!UnregisterClassA("Ignition",instance))',
+        '    probe_native_fullscreen(image,compiled,0);\n    probe_native_fullscreen(image,compiled,1);\n',
+        ('PASS original fullscreen','PASS rebuilt fullscreen'))
+    return result | {'variant':'fullscreen_frames','cases':1,'paired_executions':2,'flips':8,'primary_pixels_checked':2457600,
      'scope':'Actual paired fullscreen640x480x8 constructor/installer/Present body and entry. Four frames per side checked across all307200 primary pixels, real GetCaps/Flip and SDK test-owned fills. Test-owned display restoration and interface disposal.',
      'limitations':'One mode/one backbuffer/eight flips; original WndProc reference; SDK test-owned fills are not production renderer; no complete native startup/menu/input/audio/races or original toolchain proof.'}

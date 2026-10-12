@@ -1,5 +1,17 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Native palette body and installed entry (2026-10-12)
+
+[Palette evidence](ghidra/windows_surface_palette.md), RVAs 0x5C6D0/0x56C40,
+now uses real SDK SetEntries, a separately verified third entry bank and retained
+flag bytes. Focused 1,376 comparisons, 24 actual paired SDK updates and 48 null guards
+pass. The shared native host also preserves eight paired fullscreen presentation
+flips; RVAs 0x5C4B0/0x56C90 receive renewed evidence. Full renewal, fidelity audit and exports pass for all 90 reconstructions, with
+29 scoped native records, at snapshot `166b80e3a1ac`. Staged gates/hooks follow.
+Next reconstruct real pixel blitting/copying/rendering and startup/window-message
+dependencies. Palette object updates and test-owned frame fills do not complete
+production rendering; playable menus/audio/races and original toolchain remain open.
+
 ## Native presentation body and installed entry (2026-10-12)
 
 [Presentation evidence](ghidra/windows_surface_present.md), RVAs 0x5C4B0/0x56C90,

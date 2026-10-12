@@ -2518,6 +2518,12 @@ int Gfx_PresentSurfaceNative(GfxSurfaceRecord *surface) {
     return g_surfacePresent(surface);
 }
 
+/* @original Gfx_SetPaletteNative (IGN_WIN.EXE @ 0x00456C40, inferred graphics entry)
+ * @fidelity EXACT */
+int Gfx_SetPaletteNative(const unsigned char *rgb) {
+    return g_surfaceSetPalette(rgb);
+}
+
 /* End native graphics lifecycle entry points. */
 
 /* Native surface access implementation. */
@@ -2678,6 +2684,29 @@ int Gfx_SurfacePresentNative(GfxSurfaceRecord *surface) {
         result = primary->lpVtbl->Flip(primary, target, 0);
     } while ((uint32_t)result == 0x8876021cu);
     return result == 0;
+}
+
+volatile PALETTEENTRY g_nativeSetPaletteEntries[256]; /* VA 0x00512450, separate from constructor/rebuild */
+
+/* @original Gfx_SurfaceSetPaletteNative (IGN_WIN.EXE @ 0x0045C6D0, inferred surface backend)
+ * @fidelity EXACT */
+int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb) {
+    const volatile unsigned char *bytes;
+    LPDIRECTDRAWPALETTE palette;
+    uint32_t index;
+
+    if (g_nativePalette == 0) {
+        return 0;
+    }
+    bytes = rgb;
+    for (index = 0; index < 256; ++index) {
+        g_nativeSetPaletteEntries[index].peRed = bytes[3 * index];
+        g_nativeSetPaletteEntries[index].peGreen = bytes[3 * index + 1];
+        g_nativeSetPaletteEntries[index].peBlue = bytes[3 * index + 2];
+    }
+    palette = g_nativePalette;
+    return palette->lpVtbl->SetEntries(palette, 0, 0, 256,
+            (LPPALETTEENTRY)g_nativeSetPaletteEntries) == DD_OK;
 }
 
 /* End native surface access implementation. */

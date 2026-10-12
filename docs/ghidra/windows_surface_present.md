@@ -77,3 +77,8 @@ Full renewal, fidelity audit and generated exports pass at snapshot `e607f844ec6
 for all 88 reconstructions, with 27 scoped native records. LF working/index checks,
 staged gate and tracked hooks follow. Continue with real palette,
 rendering and startup/window-message dependencies after the separate commit.
+
+
+Palette feature renews both presentation RVAs with the shared host-builder refactor.
+The frame helper/body/entry semantics and eight-flip/native pixel scope are unchanged;
+loader/platform setup is reused by actual SDK palette observation as well.

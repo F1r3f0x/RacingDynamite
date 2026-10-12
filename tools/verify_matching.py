@@ -225,6 +225,7 @@ def verify():
         'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative',
         'Gfx_SurfaceClearNative', 'Gfx_ClearSurfaceNative',
         'Gfx_SurfacePresentNative', 'Gfx_PresentSurfaceNative',
+        'Gfx_SurfaceSetPaletteNative', 'Gfx_SetPaletteNative',
         'Gfx_InitGraphicsPairStorage', 'Gfx_InitPairStorageControl', 'Gfx_InitSineTable',
         'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords',
         'Gfx_InitPrimitiveLineControl', 'Gfx_InitNamedPrimitiveDefault',
@@ -869,3 +870,5 @@ if __name__ == '__main__':
     verify_surface_clear()
     from verify_surface_present import verify_surface_present
     verify_surface_present()
+    from verify_surface_palette import verify_surface_palette
+    verify_surface_palette()

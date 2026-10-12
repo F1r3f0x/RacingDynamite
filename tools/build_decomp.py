@@ -14,7 +14,7 @@ STARTUP_BOUNDARY_SOURCE = (
     'int Lisa_PrintVersion(void);\n'
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
     '')
-STARTUP_EXPORTS = ['Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_ClearSurfaceNative', 'Gfx_PresentSurfaceNative', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
+STARTUP_EXPORTS = ['Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_ClearSurfaceNative', 'Gfx_PresentSurfaceNative', 'Gfx_SetPaletteNative', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
     'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
 
 # Extract these verified production declarations/body, rather than duplicating C.
@@ -32,7 +32,6 @@ STARTUP_BOUNDARY_SOURCE += (
     'int Gfx_SurfaceBlitNative(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_y, int destination_x) { (void)source; (void)x; (void)y; (void)width; (void)height; (void)destination; (void)destination_y; (void)destination_x; for (;;) {} }\n'
     'int Gfx_SurfaceCopyPixelsNative(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y) { (void)pixels; (void)stride; (void)source_x; (void)source_y; (void)width; (void)height; (void)destination; (void)destination_x; (void)destination_y; for (;;) {} }\n'
     'int Gfx_SurfaceReservedNative(void) { for (;;) {} }\n'
-    'int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb) { (void)rgb; for (;;) {} }\n'
 )
 
 # Extract the native banner body and its existing public prototype verbatim.
@@ -133,7 +132,7 @@ INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'Input_PollNative',
     'g_nativeKeyboardPressEvents', 'g_nativeKeyboardPressEdges', 'g_nativeKeyboardPressLatch',
     'g_nativeRepeatCounters', 'g_nativeKeyboardDeviceGuid', 'g_nativeKeyGuid',
     'g_nativeKeyboardObjects', 'g_nativeKeyboardFormat']
-SURFACE_EXPORTS_EXTRA = ['g_nativeRebuildPaletteEntries', 'g_nativeDirectDraw', 'g_nativeClipper', 'g_nativePalette',
+SURFACE_EXPORTS_EXTRA = ['g_nativeSetPaletteEntries', 'g_nativeRebuildPaletteEntries', 'g_nativeDirectDraw', 'g_nativeClipper', 'g_nativePalette',
     'g_nativePaletteEntries', 'g_nativeSurfaceWindow', 'g_nativeFullscreen',
     'g_nativeSurfaceWidth', 'g_nativeSurfaceHeight', 'g_nativeSurfaceBitDepth',
     'g_nativeBackbufferCount', 'g_nativeDesktopBitDepth', 'g_nativeWindowInstance',

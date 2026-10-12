@@ -136,7 +136,8 @@ extern GfxSurfaceUnlockProc volatile g_surfaceUnlock; /* VA 0x0050EB94 */
 int Gfx_SurfaceUnlockNative(GfxSurfaceRecord *surface); /* VA 0x0045C680; body unreconstructed */
 typedef int (*GfxSurfaceSetPaletteProc)(const unsigned char *rgb);
 extern GfxSurfaceSetPaletteProc volatile g_surfaceSetPalette; /* VA 0x0050EB98 */
-int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb); /* VA 0x0045C6D0; body unreconstructed */
+int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb); /* VA 0x0045C6D0 */
+int Gfx_SetPaletteNative(const unsigned char *rgb); /* VA 0x00456C40, installed-table entry */
 typedef int (*GfxSurfaceRestoreProc)(void);
 extern GfxSurfaceRestoreProc volatile g_surfaceRestore; /* VA 0x0050EB9C */
 int Gfx_SurfaceRestoreNative(void); /* VA 0x0045C730 */
