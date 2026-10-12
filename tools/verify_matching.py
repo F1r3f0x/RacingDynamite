@@ -223,6 +223,7 @@ def verify():
         'Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_SpriteOpenNative', 'Gfx_SpriteShutdownNative',
         'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
         'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative',
+        'Gfx_SurfaceClearNative', 'Gfx_ClearSurfaceNative',
         'Gfx_InitGraphicsPairStorage', 'Gfx_InitPairStorageControl', 'Gfx_InitSineTable',
         'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords',
         'Gfx_InitPrimitiveLineControl', 'Gfx_InitNamedPrimitiveDefault',
@@ -245,6 +246,8 @@ def verify():
     code_entries['DirectInputCreateA_import']=input_thunks[0]
     symbols['DirectInputCreateA_import']=input_thunks[0]
     expected_calls = {
+        'Gfx_SurfaceClearNative': ['Gfx_SurfaceUnlockNative', 'Gfx_SurfaceLockNative',
+            'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative'],
         'Input_InitNative': ['DirectInputCreateA_import'],
         'Input_PollNative': ['Input_DispatchKeyNative', 'Input_QueueCharacterNative', 'Input_DispatchKeyNative'],
         'Input_TimerCallbackNative': ['Input_PollNative'],
@@ -861,3 +864,5 @@ if __name__ == '__main__':
     verify_input_timed()
     from verify_surface_access import verify_surface_access
     verify_surface_access()
+    from verify_surface_clear import verify_surface_clear
+    verify_surface_clear()

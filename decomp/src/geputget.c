@@ -2506,6 +2506,12 @@ int Gfx_Shutdown(void) {
     }
     return g_spriteShutdown();
 }
+/* @original Gfx_ClearSurfaceNative (IGN_WIN.EXE @ 0x00456BB0, inferred graphics entry)
+ * @fidelity EXACT */
+int Gfx_ClearSurfaceNative(GfxSurfaceRecord *surface) {
+    return g_surfaceClear(surface);
+}
+
 /* End native graphics lifecycle entry points. */
 
 /* Native surface access implementation. */
@@ -2595,6 +2601,47 @@ int Gfx_SurfaceUnlockNative(GfxSurfaceRecord *surface) {
     }
     record->locked = 0;
     record->lock_mode = 0;
+    return 1;
+}
+
+/* @original Gfx_SurfaceClearNative (IGN_WIN.EXE @ 0x0045C3D0, inferred surface backend)
+ * @fidelity EXACT */
+int Gfx_SurfaceClearNative(GfxSurfaceRecord *surface) {
+    volatile GfxSurfaceRecord *record;
+    volatile uint32_t *pixels;
+    int32_t old_mode, row, column;
+    uint32_t offset;
+
+    record = surface;
+    if (record->active == 0) {
+        return 0;
+    }
+    old_mode = record->lock_mode;
+    if (old_mode == 0) {
+        if (!Gfx_SurfaceLockNative(surface, 3)) {
+            return 0;
+        }
+    } else if (old_mode == 1) {
+        if (!Gfx_SurfaceUnlockNative(surface) || !Gfx_SurfaceLockNative(surface, 3)) {
+            return 0;
+        }
+    }
+    pixels = (volatile uint32_t *)record->write_pixels;
+    for (row = 0; row < (int32_t)record->height; ++row) {
+        for (column = 0; column < (int32_t)record->width; ++column) {
+            /* Authentic code uses SDK byte pitch as a DWORD index. */
+            offset = (uint32_t)record->pitch_bytes * (uint32_t)row + (uint32_t)column;
+            pixels[offset] = 0;
+        }
+    }
+    if (record->lock_mode != old_mode) {
+        if (!Gfx_SurfaceUnlockNative(surface)) {
+            return 0;
+        }
+        if (old_mode != 0 && !Gfx_SurfaceLockNative(surface, old_mode)) {
+            return 0;
+        }
+    }
     return 1;
 }
 

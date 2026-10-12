@@ -2,6 +2,10 @@
 #include <ddraw.h>
 #include <stdint.h>
 
+#ifdef SURFACE_TEST_CLEAR
+#define SURFACE_TEST_SHUTDOWN
+#endif
+
 #ifdef SURFACE_TEST_ACCESS
 #define SURFACE_TEST_SHUTDOWN
 #endif
@@ -65,6 +69,76 @@ static void *data_symbol(HMODULE module, const char *name) {
     binding.function=symbol(module,name);
     return binding.object;
 }
+
+#ifdef SURFACE_TEST_CLEAR
+static void check_native_clear(unsigned char *image, HMODULE compiled, int side, NativeRecord *record) {
+    typedef int (__cdecl *LockFn)(NativeRecord *, int);
+    typedef int (__cdecl *UnaryFn)(NativeRecord *);
+    union { unsigned char *bytes; FARPROC generic; LockFn lock; UnaryFn unary; OpenFn install; } binding;
+    OpenFn install;
+    UnaryFn entry;
+    UnaryFn *installed;
+    LockFn lock;
+    UnaryFn unlock, clear;
+    DDSURFACEDESC desc;
+    unsigned char *bytes;
+    volatile unsigned char *pixels;
+    uint32_t width, height, pitch, n, index, row, column;
+    int mode, k, zero;
+
+    if (side==0) {
+        binding.bytes=image+0x5c530;lock=binding.lock;
+        binding.bytes=image+0x5c680;unlock=binding.unary;
+        binding.bytes=image+0x5c3d0;clear=binding.unary;
+        binding.bytes=image+0x56bb0;entry=binding.unary;
+        binding.bytes=image+0x5b690;install=binding.install;
+        installed=(UnaryFn *)(image+0x10eb84);
+    } else {
+        binding.generic=symbol(compiled,"Gfx_SurfaceLockNative");lock=binding.lock;
+        binding.generic=symbol(compiled,"Gfx_SurfaceUnlockNative");unlock=binding.unary;
+        binding.generic=symbol(compiled,"Gfx_SurfaceClearNative");clear=binding.unary;
+        binding.generic=symbol(compiled,"Gfx_ClearSurfaceNative");entry=binding.unary;
+        binding.generic=symbol(compiled,"Gfx_InstallSurfaceDispatch");install=binding.install;
+        installed=(UnaryFn *)data_symbol(compiled,"g_surfaceClear");
+    }
+    if (install()!=1 || *installed!=clear) { fail("FAIL native Clear real installer\n",99); }
+    width=record->width;height=record->height;
+    bytes=(unsigned char *)&desc;
+    for (k=0; k<(int)sizeof(desc); k++) { bytes[k]=0; }
+    desc.dwSize=sizeof(desc);
+    if (record->surface->lpVtbl->GetSurfaceDesc(record->surface,&desc)!=DD_OK || desc.dwHeight<32) {
+        fail("FAIL paired native bounded Clear dimensions\n",90);
+    }
+    for (mode=0; mode<=3; mode++) {
+        if (lock(record,2)!=1) { fail("FAIL paired native Clear seed lock\n",91); }
+        pixels=(volatile unsigned char *)(uintptr_t)record->opaque[3];pitch=record->opaque[4];
+        if (pitch<32 || pitch>0x100000) { fail("FAIL paired native Clear pitch bound\n",92); }
+        n=32*pitch;
+        for (index=0; index<n; index++) { pixels[index]=0xa5; }
+        if (unlock(record)!=1 || (mode && lock(record,mode)!=1)) {
+            fail("FAIL paired native Clear initial mode\n",93);
+        }
+        record->width=8;record->height=8;
+        if ((mode%2 ? entry(record) : clear(record))!=1 || record->opaque[1]!=(uint32_t)mode || record->opaque[0]!=(uint32_t)(mode!=0)) {
+            fail("FAIL paired native Clear restored mode\n",94);
+        }
+        record->width=width;record->height=height;
+        if (unlock(record)!=1 || lock(record,2)!=1) { fail("FAIL paired native Clear inspection lock\n",95); }
+        pixels=(volatile unsigned char *)(uintptr_t)record->opaque[2];
+        if (record->opaque[4]!=pitch) { fail("FAIL paired native Clear inspection pitch change\n",96); }
+        for (index=0; index<n; index++) {
+            row=index/(4*pitch);column=index%(4*pitch);
+            zero=row<8 && column<32;
+            if (pixels[index]!=(unsigned char)(zero ? 0 : 0xa5)) {
+                fail("FAIL paired native DWORD-scaled byte-pitch pattern\n",97);
+            }
+        }
+        if (unlock(record)!=1) { fail("FAIL paired native Clear final unlock\n",98); }
+    }
+}
+
+
+#endif
 
 #ifdef SURFACE_TEST_ACCESS
 static void check_native_access(unsigned char *image, HMODULE compiled, int side, NativeRecord *record) {
@@ -640,6 +714,9 @@ void WINAPI NativeEntry(void) {
                 fail("FAIL native installed clipper\n",47);
             }
             installed->lpVtbl->Release(installed);
+#ifdef SURFACE_TEST_CLEAR
+            if (count) { check_native_clear(image,compiled,side,records[side][1]); }
+#endif
 #ifdef SURFACE_TEST_ACCESS
             check_native_access(image,compiled,side,records[side][0]);
             if (count) { check_native_access(image,compiled,side,records[side][1]); }
@@ -769,7 +846,9 @@ void WINAPI NativeEntry(void) {
         }
     }
     if (!UnregisterClassA("Ignition",instance)) { fail("FAIL native class disposal\n",49); }
-#ifdef SURFACE_TEST_ACCESS
+#ifdef SURFACE_TEST_CLEAR
+    output("PASS native Win32/DirectDraw original versus C89 clear: bounded offscreen DWORD-scaled byte-pitch writes, mode restoration and real installed-table entry; 16 paired clears\n");
+#elif defined(SURFACE_TEST_ACCESS)
     output("PASS native Win32/DirectDraw original versus C89 access: real lock roles/pitch, same-mode and changed-mode access, surface-field-address unlock, stale pointers/pitch and repeated unlock; primary/backbuffers in paired windowed0/1/4 scenarios\n");
 #elif defined(SURFACE_TEST_INPUT)
 #ifdef SURFACE_TEST_TIMED

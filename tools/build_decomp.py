@@ -14,7 +14,7 @@ STARTUP_BOUNDARY_SOURCE = (
     'int Lisa_PrintVersion(void);\n'
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
     '')
-STARTUP_EXPORTS = ['Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
+STARTUP_EXPORTS = ['Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_ClearSurfaceNative', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
     'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
 
 # Extract these verified production declarations/body, rather than duplicating C.
@@ -31,7 +31,6 @@ STARTUP_BOUNDARY_SOURCE += (
     'int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4) { (void)option0; (void)option1; (void)option2; (void)option3; (void)option4; for (;;) {} }\n'
     'int Gfx_SurfaceBlitNative(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_y, int destination_x) { (void)source; (void)x; (void)y; (void)width; (void)height; (void)destination; (void)destination_y; (void)destination_x; for (;;) {} }\n'
     'int Gfx_SurfaceCopyPixelsNative(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y) { (void)pixels; (void)stride; (void)source_x; (void)source_y; (void)width; (void)height; (void)destination; (void)destination_x; (void)destination_y; for (;;) {} }\n'
-    'int Gfx_SurfaceClearNative(GfxSurfaceRecord *surface) { (void)surface; for (;;) {} }\n'
     'int Gfx_SurfacePresentNative(GfxSurfaceRecord *surface) { (void)surface; for (;;) {} }\n'
     'int Gfx_SurfaceReservedNative(void) { for (;;) {} }\n'
     'int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb) { (void)rgb; for (;;) {} }\n'

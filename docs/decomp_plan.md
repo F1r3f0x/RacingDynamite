@@ -1,5 +1,16 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Native surface Clear and installed-table entry (2026-10-12)
+
+[Clear evidence](ghidra/windows_surface_clear.md), RVAs 0x5C3D0/0x56BB0,
+now uses real production Lock/Unlock and authentic installation. Focused 2,996
+comparisons and 16 actual paired bounded offscreen clears pass. Preserve the
+observed DWORD-scaled SDK byte-pitch bug and original mode restoration. Full
+renewal, fidelity audit and exports pass for all 86 reconstructions, with 25
+scoped native records, at snapshot `21647812d76d`. Staged gates/hooks follow. Next reconstruct authentic presentation,
+palette and real rendering/startup dependencies. Full-frame/native fault behavior,
+original compiler and playable menus/audio/races remain unresolved.
+
 ## Native surface access (2026-10-12)
 
 [Lock/Unlock](ghidra/windows_surface_access.md), RVAs 0x5C530/0x5C680,

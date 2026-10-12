@@ -119,7 +119,8 @@ extern GfxSurfaceCopyPixelsProc volatile g_surfaceCopyPixels; /* VA 0x0050EB80 *
 int Gfx_SurfaceCopyPixelsNative(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y); /* VA 0x0045C1D0; body unreconstructed */
 typedef int (*GfxSurfaceClearProc)(GfxSurfaceRecord *surface);
 extern GfxSurfaceClearProc volatile g_surfaceClear; /* VA 0x0050EB84 */
-int Gfx_SurfaceClearNative(GfxSurfaceRecord *surface); /* VA 0x0045C3D0; body unreconstructed */
+int Gfx_SurfaceClearNative(GfxSurfaceRecord *surface); /* VA 0x0045C3D0 */
+int Gfx_ClearSurfaceNative(GfxSurfaceRecord *surface); /* VA 0x00456BB0, installed-table entry */
 typedef int (*GfxSurfacePresentProc)(GfxSurfaceRecord *surface);
 extern GfxSurfacePresentProc volatile g_surfacePresent; /* VA 0x0050EB88 */
 int Gfx_SurfacePresentNative(GfxSurfaceRecord *surface); /* VA 0x0045C4B0; body unreconstructed */
