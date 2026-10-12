@@ -1,5 +1,18 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Native surface access (2026-10-12)
+
+[Lock/Unlock](ghidra/windows_surface_access.md), RVAs 0x5C530/0x5C680,
+now use real SDK calls with independently verified access fields in the 48-byte
+record. Focused 1,920 comparisons and paired native primary/backbuffer mode tests
+pass, including the original surface-field-address Unlock argument. Initializer
+0x56A40 retains DWORD clearing order with named fields. Full renewal, audit and exports pass for all 84 reconstructions at snapshot
+`af3bc931c777`, with 23 scoped native records. Staged gates/hooks follow. Failed Lock with absent descriptor outputs exposes original uninitialized
+transients and remains unverified. Next authenticate Clear's pitch indexing and
+real presentation/palette/rendering, then startup/WndProc/game dependencies.
+The playable native game, original compiler/linker and full race/audio/menu proof
+remain incomplete.
+
 ## Timed native input and state consumption (2026-10-12)
 
 [Timed input](ghidra/windows_input_timed.md) reconstructs real timed setup,

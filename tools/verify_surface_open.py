@@ -302,7 +302,7 @@ class Session(SurfaceSession):
             assert not uc.reg_read(UC_X86_REG_EFLAGS)&0x400
             assert uc.reg_read(UC_X86_REG_EAX)==result
 
-def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False,poll_test=False,timed_test=False):
+def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False,poll_test=False,timed_test=False,access_test=False):
     poll_test=poll_test or timed_test
     input_test=input_test or poll_test
     import shutil
@@ -326,7 +326,7 @@ def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False
     if poll_test:
         groups['KERNEL32'].append('Sleep@4')
         groups['USER32']+=['PeekMessageA@20','TranslateMessage@4','DispatchMessageA@4',
-            'SetForegroundWindow@4','SetFocus@4','SendInput@12']
+            'SetForegroundWindow@4','GetForegroundWindow@0','SetFocus@4','SendInput@12']
     for module,exports in groups.items():
         definition=runtime/(module.lower()+'.def');lib=runtime/(module.lower()+'.lib')
         definition.write_text('LIBRARY '+module+'.dll\nEXPORTS\n'+
@@ -341,7 +341,8 @@ def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False
       '-c',str(ROOT/'tools/native_surface_probe.c'),'-o',str(obj)],
       [linker,'/entry:NativeEntry@0','/subsystem:console','/nodefaultlib','/machine:x86',
        '/safeseh:no','/base:0x20000000','/dynamicbase:no','/out:'+str(exe),str(obj)]+libraries])
-    if timed_test:commands[-2].insert(1,'-DSURFACE_TEST_TIMED')
+    if access_test:commands[-2].insert(1,'-DSURFACE_TEST_ACCESS')
+    elif timed_test:commands[-2].insert(1,'-DSURFACE_TEST_TIMED')
     elif poll_test:commands[-2].insert(1,'-DSURFACE_TEST_POLL')
     elif input_test:commands[-2].insert(1,'-DSURFACE_TEST_INPUT')
     elif entry:commands[-2].insert(1,'-DSURFACE_TEST_ENTRY')
@@ -350,11 +351,18 @@ def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False
     for command in commands[-2:]:subprocess.run(command,cwd=ROOT,check=True)
     result=subprocess.run([str(exe)],cwd=runtime,capture_output=True,text=True,timeout=45)
     (runtime/'result.log').write_text(result.stdout+result.stderr,encoding='utf-8',newline='\n')
-    expected='PASS native Win32/DirectDraw original versus C89 '+('timed:' if timed_test else 'polling:' if poll_test else 'input:' if input_test else 'entry:' if entry else 'rebuild:' if rebuild else 'shutdown:' if shutdown else 'constructor:')
+    expected='PASS native Win32/DirectDraw original versus C89 '+('access:' if access_test else 'timed:' if timed_test else 'polling:' if poll_test else 'input:' if input_test else 'entry:' if entry else 'rebuild:' if rebuild else 'shutdown:' if shutdown else 'constructor:')
     if result.returncode or not result.stdout.startswith(expected):
         raise RuntimeError(('Native surface probe failed',result.returncode,result.stdout,result.stderr))
     verify_target(copied)
     assert hashlib.sha256(dll.read_bytes()).digest()==hashlib.sha256((runtime/'surface_open_validation.dll').read_bytes()).digest()
+    if access_test:
+        return {'variant':'access','cases':3,'paired_executions':6,'lock_invocations':90,'unlock_invocations':60,
+          'stdout':result.stdout,'exit_code':result.returncode,
+          'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
+          'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
+          'scope':'Actual paired original/C89 primary/backbuffer Lock/Unlock after windowed0/1/4 constructors: mode1/2/3 pointer roles and pitch, same-mode state, real changed-mode SDK unlock/relock, unusual surface-field-address argument, retained pointers/pitch and repeated unlock. Actual resource shutdown follows; original WndProc reference.',
+          'limitations':'Native success/normal access only; lost device, failed Lock with absent descriptor outputs, arbitrary aliases/reentry, full native rendering/startup/menu/input/audio/races and original toolchain unverified.'}
     if timed_test:
         return {'variant':'timed','cases':3,'paired_executions':6,'input_cycles':12,
           'stdout':result.stdout,'exit_code':result.returncode,

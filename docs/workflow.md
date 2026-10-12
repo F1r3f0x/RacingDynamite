@@ -1,5 +1,17 @@
 # Enforced agent workflow
 
+## Native surface access validation (2026-10-12)
+
+`uv run tools/verify_surface_access.py` authenticates RVAs 0x5C530/0x5C680,
+compiles real SDK Lock/Unlock bodies and checks 1,920 differential comparisons,
+with 1,116 follow-ups, four faults and eight mutations. `SURFACE_TEST_ACCESS`
+adds actual paired primary/backbuffer mode access, automatic relocking, field-address
+Unlock and retained pointer/pitch checks (90 Lock/60 Unlock calls). Initializer
+0x56A40 requires fresh regression for the five named fields. See
+[contract and limits](ghidra/windows_surface_access.md), including undefined
+failed-descriptor transients. Finish full renewal/audit/export/check, LF/index,
+staged gate and tracked hooks; no complete native rendering/game proof is claimed.
+
 ## Timed input subsystem validation (2026-10-12)
 
 `uv run tools/verify_input_timed.py` checks six authentic routine extents, the

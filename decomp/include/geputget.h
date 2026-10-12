@@ -81,7 +81,11 @@ struct IDirectDrawSurface;
 typedef struct GfxSurfaceRecord {
     int32_t active;
     uint32_t restore_marker;
-    uint32_t opaque_words[5];
+    uint32_t locked;
+    int32_t lock_mode;
+    const unsigned char *read_pixels;
+    unsigned char *write_pixels;
+    int32_t pitch_bytes;
     uint32_t width;
     uint32_t height;
     uint32_t bit_depth;

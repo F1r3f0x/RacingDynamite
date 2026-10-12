@@ -57,11 +57,11 @@ int Gfx_InitSurfaceRecords(void) {
     record = &g_nativePrimarySurface;
     record->active = 0;
     record->restore_marker = 0;
-    record->opaque_words[0] = 0;
-    record->opaque_words[1] = 0;
-    record->opaque_words[2] = 0;
-    record->opaque_words[3] = 0;
-    record->opaque_words[4] = 0;
+    record->locked = 0;
+    record->lock_mode = 0;
+    record->read_pixels = 0;
+    record->write_pixels = 0;
+    record->pitch_bytes = 0;
     record->width = 0;
     record->height = 0;
     record->bit_depth = 0;
@@ -71,11 +71,11 @@ int Gfx_InitSurfaceRecords(void) {
         record = &g_nativeType1Surfaces[index];
         record->active = 0;
         record->restore_marker = 0;
-        record->opaque_words[0] = 0;
-        record->opaque_words[1] = 0;
-        record->opaque_words[2] = 0;
-        record->opaque_words[3] = 0;
-        record->opaque_words[4] = 0;
+        record->locked = 0;
+        record->lock_mode = 0;
+        record->read_pixels = 0;
+        record->write_pixels = 0;
+        record->pitch_bytes = 0;
         record->width = 0;
         record->height = 0;
         record->bit_depth = 0;
@@ -86,11 +86,11 @@ int Gfx_InitSurfaceRecords(void) {
         record = &g_nativeType2Surfaces[index];
         record->active = 0;
         record->restore_marker = 0;
-        record->opaque_words[0] = 0;
-        record->opaque_words[1] = 0;
-        record->opaque_words[2] = 0;
-        record->opaque_words[3] = 0;
-        record->opaque_words[4] = 0;
+        record->locked = 0;
+        record->lock_mode = 0;
+        record->read_pixels = 0;
+        record->write_pixels = 0;
+        record->pitch_bytes = 0;
         record->width = 0;
         record->height = 0;
         record->bit_depth = 0;
@@ -2507,6 +2507,98 @@ int Gfx_Shutdown(void) {
     return g_spriteShutdown();
 }
 /* End native graphics lifecycle entry points. */
+
+/* Native surface access implementation. */
+/* @original Gfx_SurfaceLockNative (IGN_WIN.EXE @ 0x0045C530, inferred surface backend)
+ * @fidelity EXACT */
+int Gfx_SurfaceLockNative(GfxSurfaceRecord *surface, int mode) {
+    volatile GfxSurfaceRecord *record;
+    LPDIRECTDRAWSURFACE object;
+    DDSURFACEDESC descriptor;
+    HRESULT result;
+    unsigned char *pixels;
+
+    record = surface;
+    if (record->active == 0) {
+        return 0;
+    }
+    if (record->locked == 1) {
+        if (record->lock_mode == mode) {
+            return 1;
+        }
+        object = record->surface;
+        result = object->lpVtbl->Unlock(object, (void *)&record->surface);
+        if (result != 0) {
+            return 0;
+        }
+        record->lock_mode = 0;
+    }
+    object = record->surface;
+    result = object->lpVtbl->IsLost(object);
+    if ((uint32_t)result == 0x887601c2u) {
+        object = record->surface;
+        object->lpVtbl->Restore(object);
+        record->restore_marker = 1;
+    }
+    descriptor.dwSize = 108;
+    /* The original stores lpSurface before checking HRESULT. A failed API
+     * call that leaves this output unwritten exposes uninitialized data. */
+    if (mode == 1) {
+        object = record->surface;
+        result = object->lpVtbl->Lock(object, 0, &descriptor, DDLOCK_WAIT | DDLOCK_READONLY, 0);
+        pixels = (unsigned char *)descriptor.lpSurface;
+        record->read_pixels = pixels;
+        record->write_pixels = 0;
+    } else if (mode == 2) {
+        object = record->surface;
+        result = object->lpVtbl->Lock(object, 0, &descriptor, DDLOCK_WAIT, 0);
+        pixels = (unsigned char *)descriptor.lpSurface;
+        record->read_pixels = pixels;
+        record->write_pixels = pixels;
+    } else if (mode == 3) {
+        object = record->surface;
+        result = object->lpVtbl->Lock(object, 0, &descriptor, DDLOCK_WAIT | DDLOCK_WRITEONLY, 0);
+        pixels = (unsigned char *)descriptor.lpSurface;
+        record->read_pixels = 0;
+        record->write_pixels = pixels;
+    } else {
+        return 0;
+    }
+    if (result != 0) {
+        record->read_pixels = 0;
+        record->write_pixels = 0;
+        record->locked = 0;
+        return 0;
+    }
+    record->lock_mode = mode;
+    record->pitch_bytes = descriptor.lPitch;
+    record->locked = 1;
+    return 1;
+}
+
+/* @original Gfx_SurfaceUnlockNative (IGN_WIN.EXE @ 0x0045C680, inferred surface backend)
+ * @fidelity EXACT */
+int Gfx_SurfaceUnlockNative(GfxSurfaceRecord *surface) {
+    volatile GfxSurfaceRecord *record;
+    LPDIRECTDRAWSURFACE object;
+
+    record = surface;
+    if (record->active == 0) {
+        return 0;
+    }
+    if (record->locked == 0) {
+        return 1;
+    }
+    object = record->surface;
+    if (object->lpVtbl->Unlock(object, (void *)&record->surface) != 0) {
+        return 0;
+    }
+    record->locked = 0;
+    record->lock_mode = 0;
+    return 1;
+}
+
+/* End native surface access implementation. */
 
 /* Native DirectInput lifecycle implementation. */
 #ifndef DIRECTINPUT_VERSION

@@ -222,6 +222,7 @@ def verify():
         'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
         'Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_SpriteOpenNative', 'Gfx_SpriteShutdownNative',
         'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
+        'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative',
         'Gfx_InitGraphicsPairStorage', 'Gfx_InitPairStorageControl', 'Gfx_InitSineTable',
         'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords',
         'Gfx_InitPrimitiveLineControl', 'Gfx_InitNamedPrimitiveDefault',
@@ -858,3 +859,5 @@ if __name__ == '__main__':
     verify_input_polling()
     from verify_input_timed import verify_input_timed
     verify_input_timed()
+    from verify_surface_access import verify_surface_access
+    verify_surface_access()

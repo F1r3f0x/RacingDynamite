@@ -1,5 +1,17 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Native surface access fields and SDK calls (2026-10-12)
+
+[Two real access routines](ghidra/windows_surface_access.md) pass 1,920 differential
+comparisons and native primary/backbuffer Lock/Unlock mode transitions. Five opaque
+record words now have verified lock/mode/read/write/pitch names; initialization
+0x56A40 regression is included. Full renewal, audit and exports pass for all 84 reconstructions at snapshot
+`af3bc931c777`. Staged gates and tracked hooks follow. Preserve the
+original field-address Unlock argument and undefined failed-descriptor transients.
+Next investigate authentic Clear/presentation/palette behavior with real access
+dependencies; do not silently correct DWORD-scaled pitch or invent native flips.
+Native complete rendering/startup/menus/audio/races and original toolchain remain open.
+
 ## Timed input subsystem (2026-10-12)
 
 [Six real input routines](ghidra/windows_input_timed.md) pass 6,448 differential

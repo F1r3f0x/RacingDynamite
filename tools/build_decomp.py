@@ -34,8 +34,6 @@ STARTUP_BOUNDARY_SOURCE += (
     'int Gfx_SurfaceClearNative(GfxSurfaceRecord *surface) { (void)surface; for (;;) {} }\n'
     'int Gfx_SurfacePresentNative(GfxSurfaceRecord *surface) { (void)surface; for (;;) {} }\n'
     'int Gfx_SurfaceReservedNative(void) { for (;;) {} }\n'
-    'int Gfx_SurfaceLockNative(GfxSurfaceRecord *surface, int mode) { (void)surface; (void)mode; for (;;) {} }\n'
-    'int Gfx_SurfaceUnlockNative(GfxSurfaceRecord *surface) { (void)surface; for (;;) {} }\n'
     'int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb) { (void)rgb; for (;;) {} }\n'
 )
 
@@ -81,7 +79,16 @@ SURFACE_SOURCE = ('#include <ddraw.h>\n#include <stddef.h>\n#include "geputget.h
     'typedef char surface_width_offset[(offsetof(GfxSurfaceRecord,width)==28)?1:-1];\n'
     'typedef char surface_height_offset[(offsetof(GfxSurfaceRecord,height)==32)?1:-1];\n'
     'typedef char surface_depth_offset[(offsetof(GfxSurfaceRecord,bit_depth)==36)?1:-1];\n'
+    'typedef char surface_locked_offset[(offsetof(GfxSurfaceRecord,locked)==8)?1:-1];\n'
+    'typedef char surface_mode_offset[(offsetof(GfxSurfaceRecord,lock_mode)==12)?1:-1];\n'
+    'typedef char surface_read_offset[(offsetof(GfxSurfaceRecord,read_pixels)==16)?1:-1];\n'
+    'typedef char surface_write_offset[(offsetof(GfxSurfaceRecord,write_pixels)==20)?1:-1];\n'
+    'typedef char surface_pitch_offset[(offsetof(GfxSurfaceRecord,pitch_bytes)==24)?1:-1];\n'
     'typedef char surface_descriptor_size[(sizeof(DDSURFACEDESC)==108)?1:-1];\n'
+    'typedef char surface_descriptor_pixels[(offsetof(DDSURFACEDESC,lpSurface)==36)?1:-1];\n'
+    'typedef char surface_descriptor_pitch[(offsetof(DDSURFACEDESC,lPitch)==16)?1:-1];\n'
+    'typedef char surface_lock_slot[(offsetof(IDirectDrawSurfaceVtbl,Lock)==0x64)?1:-1];\n'
+    'typedef char surface_unlock_slot[(offsetof(IDirectDrawSurfaceVtbl,Unlock)==0x80)?1:-1];\n'
     'typedef char surface_pointer_offset[(offsetof(GfxSurfaceRecord,surface)==44)?1:-1];\n'
     'typedef char surface_is_lost_slot[(offsetof(IDirectDrawSurfaceVtbl,IsLost)==0x60)?1:-1];\n'
     'typedef char surface_restore_slot[(offsetof(IDirectDrawSurfaceVtbl,Restore)==0x6c)?1:-1];\n'
@@ -110,6 +117,9 @@ SURFACE_SOURCE += _resource_source[_resource_source.index(_shutdown_marker):_res
 _rebuild_marker = '/* Native surface rebuild and its independently recovered palette backing. */'
 _rebuild_end = '/* End native surface rebuild. */'
 SURFACE_SOURCE += _resource_source[_resource_source.index(_rebuild_marker):_resource_source.index(_rebuild_end)]
+_access_marker = '/* Native surface access implementation. */'
+_access_end = '/* End native surface access implementation. */'
+SURFACE_SOURCE += _resource_source[_resource_source.index(_access_marker):_resource_source.index(_access_end)]
 _input_marker = '/* Native DirectInput lifecycle implementation. */'
 _input_end = '/* End native DirectInput lifecycle implementation. */'
 SURFACE_SOURCE += _resource_source[_resource_source.index(_input_marker):_resource_source.index(_input_end)]

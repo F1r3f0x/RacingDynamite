@@ -2,6 +2,10 @@
 #include <ddraw.h>
 #include <stdint.h>
 
+#ifdef SURFACE_TEST_ACCESS
+#define SURFACE_TEST_SHUTDOWN
+#endif
+
 #ifdef SURFACE_TEST_TIMED
 #define SURFACE_TEST_POLL
 #endif
@@ -62,11 +66,76 @@ static void *data_symbol(HMODULE module, const char *name) {
     return binding.object;
 }
 
+#ifdef SURFACE_TEST_ACCESS
+static void check_native_access(unsigned char *image, HMODULE compiled, int side, NativeRecord *record) {
+    typedef int (__cdecl *LockFn)(NativeRecord *, int);
+    typedef int (__cdecl *UnlockFn)(NativeRecord *);
+    union { unsigned char *bytes; FARPROC generic; LockFn lock; UnlockFn unlock; } binding;
+    LockFn lock;
+    UnlockFn unlock;
+    uint32_t captured[5];
+    int mode, next_mode, k;
+
+    if (side==0) {
+        binding.bytes=image+0x5c530;lock=binding.lock;
+        binding.bytes=image+0x5c680;unlock=binding.unlock;
+    } else {
+        binding.generic=symbol(compiled,"Gfx_SurfaceLockNative");lock=binding.lock;
+        binding.generic=symbol(compiled,"Gfx_SurfaceUnlockNative");unlock=binding.unlock;
+    }
+    for (mode=1; mode<=3; mode++) {
+        if (lock(record,mode)!=1 || record->opaque[0]!=1 || record->opaque[1]!=(uint32_t)mode ||
+                (mode==3 ? record->opaque[2]!=0 : record->opaque[2]==0) ||
+                (mode==1 ? record->opaque[3]!=0 : record->opaque[3]==0) || !record->opaque[4] ||
+                (mode==2 && record->opaque[2]!=record->opaque[3])) {
+            fail("FAIL actual native surface lock role/pitch\n",80);
+        }
+        for (k=0; k<5; k++) { captured[k]=record->opaque[k]; }
+        if (lock(record,mode)!=1) { fail("FAIL actual native same-mode lock\n",81); }
+        for (k=0; k<5; k++) {
+            if (record->opaque[k]!=captured[k]) { fail("FAIL actual native same-mode state\n",82); }
+        }
+        next_mode=mode==3 ? 1 : mode+1;
+        if (lock(record,next_mode)!=1 || record->opaque[0]!=1 || record->opaque[1]!=(uint32_t)next_mode ||
+                (next_mode==3 ? record->opaque[2]!=0 : record->opaque[2]==0) ||
+                (next_mode==1 ? record->opaque[3]!=0 : record->opaque[3]==0)) {
+            fail("FAIL actual native lock-mode transition\n",83);
+        }
+        for (k=0; k<5; k++) { captured[k]=record->opaque[k]; }
+        if (unlock(record)!=1 || record->opaque[0]!=0 || record->opaque[1]!=0) {
+            fail("FAIL actual native surface-field-address unlock\n",84);
+        }
+        for (k=2; k<5; k++) {
+            if (record->opaque[k]!=captured[k]) { fail("FAIL actual native stale pointers/pitch\n",85); }
+        }
+        if (unlock(record)!=1) { fail("FAIL actual native repeated unlock\n",86); }
+    }
+}
+#endif
+
 #ifdef SURFACE_TEST_POLL
+static void input_diagnostic_number(const char *label, uint32_t value) {
+    char digits[12];
+    unsigned int length, index;
+
+    output(label);length=0;
+    do { digits[length++]=(char)('0'+value%10);value/=10; } while (value);
+    for (index=0; index<length/2; index++) {
+        char temporary;
+        temporary=digits[index];digits[index]=digits[length-1-index];digits[length-1-index]=temporary;
+    }
+    digits[length++]='\n';digits[length]=0;output(digits);
+}
 static volatile LONG native_presses, native_releases, native_notifications;
+static volatile unsigned char *volatile *native_active_cursor;
+static volatile unsigned char *native_active_queue;
+static volatile uint32_t native_character_index;
 static void __cdecl native_key_observer(int pressed, int scan) {
     if (scan==30) {
-        if (pressed) { InterlockedIncrement(&native_presses); } else { InterlockedIncrement(&native_releases); }
+        if (pressed) {
+            native_character_index=(uint32_t)(*native_active_cursor-native_active_queue);
+            InterlockedIncrement(&native_presses);
+        } else { InterlockedIncrement(&native_releases); }
     }
 }
 static void __cdecl native_poll_observer(void) { InterlockedIncrement(&native_notifications); }
@@ -76,7 +145,7 @@ static void pump_input_window(void) {
         TranslateMessage(&message);DispatchMessageA(&message);
     }
 }
-static void check_native_poll(unsigned char *image, HMODULE compiled, int side, HWND window) {
+static void check_native_poll(unsigned char *image, HMODULE compiled, int side, HWND window, int ring_index) {
     typedef void (__cdecl *PollFn)(void);
     typedef void (__cdecl *KeyFn)(int,int);
     typedef void (CALLBACK *TimerFn)(UINT,UINT,DWORD_PTR,DWORD_PTR,DWORD_PTR);
@@ -115,6 +184,10 @@ static void check_native_poll(unsigned char *image, HMODULE compiled, int side, 
         queue=(volatile unsigned char *)data_symbol(compiled,"g_nativeCharacterQueue");
     }
     native_presses=0;native_releases=0;native_notifications=0;
+    native_active_queue=queue;
+    native_active_cursor=side==0 ? (volatile unsigned char *volatile *)(image+0x10de10) :
+        (volatile unsigned char *volatile *)data_symbol(compiled,"g_nativeCharacterQueueCursor");
+    native_character_index=0xffffffffu;
 #ifdef SURFACE_TEST_TIMED
     if (side==0) {
         reader.bytes=image+0x56070;read_held=reader.read;
@@ -138,6 +211,11 @@ static void check_native_poll(unsigned char *image, HMODULE compiled, int side, 
 #endif
         Sleep(10);pump_input_window();
     }
+    /* Foreground DirectInput is a real prerequisite. Observe the slot at the
+     * actual A callback instead of assuming unrelated events leave cursor0. */
+    if (GetForegroundWindow()!=window) { fail("FAIL native keyboard foreground prerequisite\n",74); }
+    native_presses=0;native_releases=0;native_character_index=0xffffffffu;
+    *native_active_cursor=queue+ring_index;
     bytes=(unsigned char *)&event;
     for (k=0; k<sizeof(event); k++) { bytes[k]=0; }
     event.type=INPUT_KEYBOARD;event.ki.wScan=30;event.ki.dwFlags=KEYEVENTF_SCANCODE;
@@ -163,7 +241,16 @@ static void check_native_poll(unsigned char *image, HMODULE compiled, int side, 
         poll();
 #endif
     }
-    if (failed || !native_releases || held[30]!=0 || events[30]!=0 || queue[0]!='A' || queue[32]!='A') {
+    if (failed || !native_releases || held[30]!=0 || events[30]!=0 || native_character_index>=32 ||
+            queue[native_character_index]!='A' || queue[native_character_index+32]!='A') {
+        input_diagnostic_number("native input side=",(uint32_t)side);
+        input_diagnostic_number("native input press check failed=",(uint32_t)failed);
+        input_diagnostic_number("native input presses=",(uint32_t)native_presses);
+        input_diagnostic_number("native input releases=",(uint32_t)native_releases);
+        input_diagnostic_number("native input held=",held[30]);input_diagnostic_number("native input event=",events[30]);
+        input_diagnostic_number("native input queue first=",queue[0]);input_diagnostic_number("native input queue mirror=",queue[32]);
+        input_diagnostic_number("native input observed A slot=",native_character_index);
+        input_diagnostic_number("native input foreground matches=",(uint32_t)(GetForegroundWindow()==window));
         fail("FAIL actual buffered native key press/release/ring\n",67);
     }
 #ifdef SURFACE_TEST_TIMED
@@ -553,6 +640,10 @@ void WINAPI NativeEntry(void) {
                 fail("FAIL native installed clipper\n",47);
             }
             installed->lpVtbl->Release(installed);
+#ifdef SURFACE_TEST_ACCESS
+            check_native_access(image,compiled,side,records[side][0]);
+            if (count) { check_native_access(image,compiled,side,records[side][1]); }
+#endif
 #ifdef SURFACE_TEST_INPUT
             for (input_cycle=0; input_cycle<2; input_cycle++) {
 #ifdef SURFACE_TEST_TIMED
@@ -569,7 +660,7 @@ void WINAPI NativeEntry(void) {
 #endif
                 owned_timer=0;
 #ifdef SURFACE_TEST_POLL
-                check_native_poll(image,compiled,side,window);
+                check_native_poll(image,compiled,side,window,input_cycle==0 ? 13 : 31);
 #endif
 #ifdef SURFACE_TEST_TIMED
                 owned_timer=*timer_id[side];
@@ -678,7 +769,9 @@ void WINAPI NativeEntry(void) {
         }
     }
     if (!UnregisterClassA("Ignition",instance)) { fail("FAIL native class disposal\n",49); }
-#ifdef SURFACE_TEST_INPUT
+#ifdef SURFACE_TEST_ACCESS
+    output("PASS native Win32/DirectDraw original versus C89 access: real lock roles/pitch, same-mode and changed-mode access, surface-field-address unlock, stale pointers/pitch and repeated unlock; primary/backbuffers in paired windowed0/1/4 scenarios\n");
+#elif defined(SURFACE_TEST_INPUT)
 #ifdef SURFACE_TEST_TIMED
     output("PASS native Win32/DirectDraw original versus C89 timed: actual asynchronous timer polling, buffered scan30, consumers, shutdown entry and reinit; paired windowed0/1/4; test-owned timer quiescence before teardown\n");
 #else
