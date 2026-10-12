@@ -2,6 +2,10 @@
 #include <ddraw.h>
 #include <stdint.h>
 
+#ifdef SURFACE_TEST_PRESENT
+#define SURFACE_TEST_SHUTDOWN
+#endif
+
 #ifdef SURFACE_TEST_CLEAR
 #define SURFACE_TEST_SHUTDOWN
 #endif
@@ -69,6 +73,52 @@ static void *data_symbol(HMODULE module, const char *name) {
     binding.function=symbol(module,name);
     return binding.object;
 }
+
+#ifdef SURFACE_TEST_PRESENT
+static void check_native_present(unsigned char *image, HMODULE compiled, int side,
+        NativeRecord *primary, NativeRecord *backbuffer, int count) {
+    typedef int (__cdecl *PresentFn)(NativeRecord *);
+    union { unsigned char *bytes; FARPROC generic; PresentFn present; OpenFn install; } binding;
+    PresentFn direct, entry;
+    PresentFn *installed;
+    OpenFn install;
+    DDSCAPS caps;
+    uint32_t active, kind;
+    int k;
+
+    if (side==0) {
+        binding.bytes=image+0x5c4b0;direct=binding.present;
+        binding.bytes=image+0x56c90;entry=binding.present;
+        binding.bytes=image+0x5b690;install=binding.install;
+        installed=(PresentFn *)(image+0x10eb88);
+    } else {
+        binding.generic=symbol(compiled,"Gfx_SurfacePresentNative");direct=binding.present;
+        binding.generic=symbol(compiled,"Gfx_PresentSurfaceNative");entry=binding.present;
+        binding.generic=symbol(compiled,"Gfx_InstallSurfaceDispatch");install=binding.install;
+        installed=(PresentFn *)data_symbol(compiled,"g_surfacePresent");
+    }
+    if (install()!=1 || *installed!=direct) { fail("FAIL native real Present installer\n",100); }
+    if (direct(primary)!=0 || entry(primary)!=0) { fail("FAIL native primary kind rejection\n",101); }
+    for (k=0; k<count; k++) {
+        if (backbuffer[k].surface->lpVtbl->GetCaps(backbuffer[k].surface,&caps)!=DD_OK ||
+                (caps.dwCaps&DDSCAPS_FLIP)) { fail("FAIL native offscreen caps boundary\n",102); }
+        if (direct(&backbuffer[k])!=0 || entry(&backbuffer[k])!=0) {
+            fail("FAIL native nonflip capability rejection\n",103);
+        }
+        active=backbuffer[k].active;kind=backbuffer[k].kind;
+        backbuffer[k].active=0;
+        if (direct(&backbuffer[k])!=0 || entry(&backbuffer[k])!=0) {
+            fail("FAIL native inactive presentation rejection\n",104);
+        }
+        backbuffer[k].active=active;backbuffer[k].kind=2;
+        if (direct(&backbuffer[k])!=0 || entry(&backbuffer[k])!=0) {
+            fail("FAIL native type2 presentation rejection\n",105);
+        }
+        backbuffer[k].kind=kind;
+    }
+}
+
+#endif
 
 #ifdef SURFACE_TEST_CLEAR
 static void check_native_clear(unsigned char *image, HMODULE compiled, int side, NativeRecord *record) {
@@ -714,6 +764,9 @@ void WINAPI NativeEntry(void) {
                 fail("FAIL native installed clipper\n",47);
             }
             installed->lpVtbl->Release(installed);
+#ifdef SURFACE_TEST_PRESENT
+            check_native_present(image,compiled,side,records[side][0],records[side][1],count);
+#endif
 #ifdef SURFACE_TEST_CLEAR
             if (count) { check_native_clear(image,compiled,side,records[side][1]); }
 #endif
@@ -846,7 +899,9 @@ void WINAPI NativeEntry(void) {
         }
     }
     if (!UnregisterClassA("Ignition",instance)) { fail("FAIL native class disposal\n",49); }
-#ifdef SURFACE_TEST_CLEAR
+#ifdef SURFACE_TEST_PRESENT
+    output("PASS native Win32/DirectDraw original versus C89 present: real GetCaps rejects nonflip offscreen surfaces, inactive and unsupported kinds through actual installed entry;72 calls; no native flip success proof\n");
+#elif defined(SURFACE_TEST_CLEAR)
     output("PASS native Win32/DirectDraw original versus C89 clear: bounded offscreen DWORD-scaled byte-pitch writes, mode restoration and real installed-table entry; 16 paired clears\n");
 #elif defined(SURFACE_TEST_ACCESS)
     output("PASS native Win32/DirectDraw original versus C89 access: real lock roles/pitch, same-mode and changed-mode access, surface-field-address unlock, stale pointers/pitch and repeated unlock; primary/backbuffers in paired windowed0/1/4 scenarios\n");

@@ -123,7 +123,8 @@ int Gfx_SurfaceClearNative(GfxSurfaceRecord *surface); /* VA 0x0045C3D0 */
 int Gfx_ClearSurfaceNative(GfxSurfaceRecord *surface); /* VA 0x00456BB0, installed-table entry */
 typedef int (*GfxSurfacePresentProc)(GfxSurfaceRecord *surface);
 extern GfxSurfacePresentProc volatile g_surfacePresent; /* VA 0x0050EB88 */
-int Gfx_SurfacePresentNative(GfxSurfaceRecord *surface); /* VA 0x0045C4B0; body unreconstructed */
+int Gfx_SurfacePresentNative(GfxSurfaceRecord *surface); /* VA 0x0045C4B0 */
+int Gfx_PresentSurfaceNative(GfxSurfaceRecord *surface); /* VA 0x00456C90, installed-table entry */
 typedef int (*GfxSurfaceReservedProc)(void);
 extern GfxSurfaceReservedProc volatile g_surfaceReserved; /* VA 0x0050EB8C */
 int Gfx_SurfaceReservedNative(void); /* VA 0x0045C520; body unreconstructed */

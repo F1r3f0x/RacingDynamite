@@ -224,6 +224,7 @@ def verify():
         'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
         'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative',
         'Gfx_SurfaceClearNative', 'Gfx_ClearSurfaceNative',
+        'Gfx_SurfacePresentNative', 'Gfx_PresentSurfaceNative',
         'Gfx_InitGraphicsPairStorage', 'Gfx_InitPairStorageControl', 'Gfx_InitSineTable',
         'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords',
         'Gfx_InitPrimitiveLineControl', 'Gfx_InitNamedPrimitiveDefault',
@@ -866,3 +867,5 @@ if __name__ == '__main__':
     verify_surface_access()
     from verify_surface_clear import verify_surface_clear
     verify_surface_clear()
+    from verify_surface_present import verify_surface_present
+    verify_surface_present()

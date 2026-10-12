@@ -2512,6 +2512,12 @@ int Gfx_ClearSurfaceNative(GfxSurfaceRecord *surface) {
     return g_surfaceClear(surface);
 }
 
+/* @original Gfx_PresentSurfaceNative (IGN_WIN.EXE @ 0x00456C90, inferred graphics entry)
+ * @fidelity EXACT */
+int Gfx_PresentSurfaceNative(GfxSurfaceRecord *surface) {
+    return g_surfacePresent(surface);
+}
+
 /* End native graphics lifecycle entry points. */
 
 /* Native surface access implementation. */
@@ -2643,6 +2649,35 @@ int Gfx_SurfaceClearNative(GfxSurfaceRecord *surface) {
         }
     }
     return 1;
+}
+
+/* @original Gfx_SurfacePresentNative (IGN_WIN.EXE @ 0x0045C4B0, inferred surface backend)
+ * @fidelity EXACT */
+int Gfx_SurfacePresentNative(GfxSurfaceRecord *surface) {
+    volatile GfxSurfaceRecord *record;
+    LPDIRECTDRAWSURFACE target, primary;
+    DDSCAPS caps;
+    HRESULT result;
+
+    record = surface;
+    if (record->storage_kind != 1) {
+        return 0;
+    }
+    if (record->active == 0) {
+        return 0;
+    }
+    target = record->surface;
+    target->lpVtbl->GetCaps(target, &caps);
+    /* The original ignores GetCaps HRESULT and reads its output regardless. */
+    if ((caps.dwCaps & DDSCAPS_FLIP) == 0) {
+        return 0;
+    }
+    do {
+        target = record->surface;
+        primary = g_nativePrimarySurface.surface;
+        result = primary->lpVtbl->Flip(primary, target, 0);
+    } while ((uint32_t)result == 0x8876021cu);
+    return result == 0;
 }
 
 /* End native surface access implementation. */

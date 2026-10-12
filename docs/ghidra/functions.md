@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:21647812d76d9a06bfdb0f3181e03fbc87aaedc38fe6c0fa0bf6d7dff09886ed -->
+<!-- snapshot:e607f844ec6e58b3d608656486e9883d81ab2d3735f6a57e8549afa1c3a0b6f4 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -406,7 +406,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00456C40` | `0x00056C40` | 15 | `Gfx_SurfaceSetPaletteDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x00456C50` | `0x00056C50` | 6 | `Gfx_SurfaceRestoreDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x00456C60` | `0x00056C60` | 35 | `Gfx_SurfaceConfigureSurfaceDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
-| `0x00456C90` | `0x00056C90` | 15 | `Gfx_SurfacePresentDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x00456C90` | `0x00056C90` | 15 | `Gfx_PresentSurfaceNative` | game | reconstructed | [windows_surface_present.md](windows_surface_present.md) |
 | `0x00456CA0` | `0x00056CA0` | 6 | `Gfx_CloseDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
 | `0x00456CB0` | `0x00056CB0` | 15 | `Gfx_OptionDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
 | `0x00456CC0` | `0x00056CC0` | 35 | `Gfx_ConfigureDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
@@ -552,7 +552,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045C160` | `0x0005C160` | 108 | `Gfx_SurfaceBlitNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x0045C1D0` | `0x0005C1D0` | 497 | `Gfx_SurfaceCopyPixelsNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x0045C3D0` | `0x0005C3D0` | 210 | `Gfx_SurfaceClearNative` | game | reconstructed | [windows_surface_clear.md](windows_surface_clear.md) |
-| `0x0045C4B0` | `0x0005C4B0` | 98 | `Gfx_SurfacePresentNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
+| `0x0045C4B0` | `0x0005C4B0` | 98 | `Gfx_SurfacePresentNative` | game | reconstructed | [windows_surface_present.md](windows_surface_present.md) |
 | `0x0045C520` | `0x0005C520` | 6 | `Gfx_SurfaceReservedNative` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x0045C530` | `0x0005C530` | 326 | `Gfx_SurfaceLockNative` | game | reconstructed | [windows_surface_access.md](windows_surface_access.md) |
 | `0x0045C680` | `0x0005C680` | 71 | `Gfx_SurfaceUnlockNative` | game | reconstructed | [windows_surface_access.md](windows_surface_access.md) |

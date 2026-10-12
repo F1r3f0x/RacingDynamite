@@ -1,5 +1,18 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Native presentation body and installed entry (2026-10-12)
+
+[Presentation evidence](ghidra/windows_surface_present.md), RVAs 0x5C4B0/0x56C90,
+now uses real SDK GetCaps/Flip and actual installation. Focused 3,860 differential
+comparisons, 72 native windowed rejection calls and eight actual paired fullscreen
+flips with 2,457,600 primary-pixel checks pass. Preserve the ignored
+GetCaps result, exact busy retry and live target/primary reloads. One mode/one
+backbuffer uses test-owned SDK fills and checked display restoration; full production
+rendering remains unverified. Full renewal, fidelity audit and exports pass for all 88 reconstructions, with
+27 scoped native records, at snapshot `e607f844ec6e`. Staged gates/hooks follow. Next authenticate palette and
+real rendering/startup/window-message dependencies. Original compiler and playable
+menus/audio/races remain incomplete.
+
 ## Native surface Clear and installed-table entry (2026-10-12)
 
 [Clear evidence](ghidra/windows_surface_clear.md), RVAs 0x5C3D0/0x56BB0,
