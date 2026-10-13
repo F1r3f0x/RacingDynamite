@@ -20,7 +20,7 @@ OUTPUT,PACKET = 0x7400000,STACK+0x1000
 ROUTINES = {
     'Gfx_EmitRawTriangleEdgeRecords':(0x24f1e0,51,'a236e05fa139724a52b65926d5407dead47076e422411d8a02528937d2c48811'),
     'Gfx_EmitCorrectedTriangleEdgeRecords':(0x24f220,70,'39c7e37061dbb0ba74b5e5735eee6081a8d152da7a6391807d978cc1e9c0bbe6')}
-GLOBALS = {'g_triangleEdgeSteps':(0x4baeac,24),
+GLOBALS = {'g_triangleEdgeSteps':(0x4baea4,32),
     'g_triangleEdgeUCorrections':(0x4badb4,32),'g_triangleEdgeVCorrections':(0x4badd4,32)}
 INPUTS = SPAN_INPUTS + ['tools/verify_edge_emitters.py']
 
@@ -124,7 +124,7 @@ def verify_edge_emitters(record=False):
             compare(name,seed,count,followup=True)
         for seed,count in enumerate((0x7fff,0x8000,0xffff,0x10000,0x10001,0x80000000,0x80000001)):
             compare(name,100+seed,count)
-        for n,size in [('g_triangleEdgeSteps',24),('g_triangleEdgeUCorrections',32),('g_triangleEdgeVCorrections',32)]:
+        for n,size in [('g_triangleEdgeSteps',32),('g_triangleEdgeUCorrections',32),('g_triangleEdgeVCorrections',32)]:
             for offset in range(0,size-11,4):
                 compare(name,200+offset,1,(n,offset),True)
         # An unmapped destination faults on the first authentic U-word store.

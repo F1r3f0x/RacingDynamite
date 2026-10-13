@@ -1,5 +1,19 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Runtime-free edge increments and first samples (2026-10-13)
+
+[Step evidence](ghidra/windows_edge_steps.md), RVA 0x24F4D0, reconstructs
+the complete initializer and verified32byte shared state in direct C89 renderer.
+Paired-word arithmetic removes missing wide-runtime callees while preserving
+original peculiar numerators, dy65/dy3 adjustments and actual IDIV faults.
+Focused1,314 differential calls, 740 faults, 605 aliases and 287 followups pass;
+416 emitter comparisons and existing span/slope native checks pass separately.
+Full108 renewal/audit/exports pass at snapshot `0bfc0061763a`, with 43 existing
+scoped native records; LF/index gates/hooks follow. No new native initializer/
+parent proof is claimed. Continue actual clipped-edge splitter/wrappers
+and gradients/triangle/sprite integration; original toolchain and playable game
+startup/menu/render/input/audio/race validation remain open.
+
 ## Right-endpoint edge clamp (2026-10-13)
 
 [Clamp evidence](ghidra/windows_edge_clamp.md), RVA 0x24F489, reconstructs

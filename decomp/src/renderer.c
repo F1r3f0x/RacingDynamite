@@ -10,10 +10,10 @@ volatile unsigned int g_triangleSpanTextureWord = 0;
 volatile unsigned int g_triangleSpanLookupWord = 0;
 volatile unsigned int g_triangleSpanLeftSampleStorage = 0;
 
-volatile GfxTriangleEdgeStepState g_triangleEdgeSteps = {0, 0, {0, 0, 0}, 0};
+volatile GfxTriangleEdgeStepState g_triangleEdgeSteps = {0, 0, 0, 0, 0, 0, 0, 0};
 volatile unsigned int g_triangleEdgeUCorrections[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 volatile unsigned int g_triangleEdgeVCorrections[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-typedef char GfxEdgeStepsMustBe24Bytes[(sizeof(GfxTriangleEdgeStepState) == 24) ? 1 : -1];
+typedef char GfxEdgeStepsMustBe32Bytes[(sizeof(GfxTriangleEdgeStepState) == 32) ? 1 : -1];
 typedef char GfxEdgeEmissionMustBe20Bytes[(sizeof(GfxTriangleEdgeEmission) == 20) ? 1 : -1];
 volatile GfxTriangleTextureGradients g_triangleTextureGradients = {0, 0};
 volatile int g_triangleClipRightFixed = 0;
@@ -33,6 +33,56 @@ typedef char GfxTextureGradientsMustBe8Bytes[(sizeof(GfxTriangleTextureGradients
     + ((((a) >> 16) * ((b) >> 16)) << 16) \
     - (((0u - ((a) >> 31)) & (b)) << 16) \
     - (((0u - ((b) >> 31)) & (a)) << 16))
+
+/* Signed paired-word numerator / signed word, returning a signed-word bit pattern.
+ * Restoring division avoids a missing wide runtime. Invalid quotients deliberately
+ * reach an actual i386 IDIV fault under the verified provisional compiler.
+ */
+#define GFX_EDGE_IDIV_WORDS(result, numerator_high, numerator_low, divisor_word) \
+    do { \
+        unsigned int divide_high = (numerator_high); \
+        unsigned int divide_low = (numerator_low); \
+        unsigned int divide_denominator = (divisor_word); \
+        unsigned int numerator_negative = divide_high >> 31; \
+        unsigned int quotient_negative = numerator_negative ^ (divide_denominator >> 31); \
+        unsigned int divide_invalid; \
+        unsigned int divide_remainder; \
+        unsigned int divide_quotient = 0; \
+        unsigned int divide_carry; \
+        unsigned int divide_bit; \
+        volatile int fault_numerator; \
+        volatile int fault_denominator; \
+        if (numerator_negative != 0) { \
+            divide_high = 0u - divide_high - (divide_low != 0); \
+            divide_low = 0u - divide_low; \
+        } \
+        if ((divide_denominator & 0x80000000u) != 0) { \
+            divide_denominator = 0u - divide_denominator; \
+        } \
+        divide_invalid = divide_denominator == 0 || divide_high >= divide_denominator; \
+        divide_remainder = divide_high; \
+        if (divide_invalid == 0) { \
+            for (divide_bit = 0; divide_bit < 32; divide_bit++) { \
+                divide_carry = divide_remainder >> 31; \
+                divide_remainder = (divide_remainder << 1) | (divide_low >> 31); \
+                divide_low <<= 1; \
+                divide_quotient <<= 1; \
+                if (divide_carry != 0 || divide_remainder >= divide_denominator) { \
+                    divide_remainder -= divide_denominator; \
+                    divide_quotient |= 1u; \
+                } \
+            } \
+            divide_invalid = divide_quotient > \
+                (quotient_negative != 0 ? 0x80000000u : 0x7fffffffu); \
+        } \
+        if (divide_invalid != 0) { \
+            fault_numerator = (int)divide_high; \
+            fault_denominator = 0; \
+            (result) = (unsigned int)(fault_numerator / fault_denominator); \
+        } else { \
+            (result) = quotient_negative != 0 ? 0u - divide_quotient : divide_quotient; \
+        } \
+    } while (0)
 
 /* @original Gfx_SetTriangleSpanCore (IGN_WIN.EXE @ 0x00467F1C, unknown original source)
  * @fidelity ADAPTED
@@ -295,4 +345,63 @@ void Gfx_ClampTriangleEdgeRightEndpoint(volatile GfxTriangleEdgePacket *edge) {
     edge->texture_v1 = endpoint_texture - correction;
     clip_right = g_triangleClipRightFixed;
     edge->x1 = clip_right;
+}
+
+/* @original Gfx_InitializeTriangleEdgeSteps (IGN_WIN.EXE @ 0x0064F4D0, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_InitializeTriangleEdgeSteps(const volatile GfxTriangleEdgePacket *edge) {
+    volatile unsigned int denominator;
+    volatile unsigned int delta;
+    unsigned int magnitude;
+    unsigned int numerator_high;
+    unsigned int numerator_low;
+    unsigned int quotient;
+    unsigned int fraction;
+    volatile unsigned int coordinate;
+    unsigned int step;
+    unsigned int adjustment;
+    denominator = (unsigned int)edge->y1;
+    denominator -= (unsigned int)edge->y0;
+    if (denominator <= 64u) {
+        delta = (unsigned int)edge->x1;
+        delta -= (unsigned int)edge->x0;
+        magnitude = (delta & 0x80000000u) != 0 ? 0u - delta : delta;
+        if (magnitude <= 65536u) {
+            denominator = 65u;
+        } else if (denominator <= 3u) {
+            denominator = 3u;
+        }
+    }
+    delta = edge->texture_v1;
+    delta -= edge->texture_v0;
+    numerator_high = 0u - (delta >> 31);
+    numerator_low = delta << 16;
+    GFX_EDGE_IDIV_WORDS(quotient, numerator_high, numerator_low, denominator);
+    g_triangleEdgeSteps.texture_v_step = quotient;
+    delta = edge->texture_u1;
+    delta -= edge->texture_u0;
+    numerator_high = 0u - (delta >> 31);
+    numerator_low = delta << 16;
+    GFX_EDGE_IDIV_WORDS(quotient, numerator_high, numerator_low, denominator);
+    g_triangleEdgeSteps.texture_u_step = quotient;
+    delta = (unsigned int)edge->x1;
+    delta -= (unsigned int)edge->x0;
+    numerator_high = GFX_EDGE_SAR(delta, 16);
+    numerator_low = delta << 16;
+    GFX_EDGE_IDIV_WORDS(quotient, numerator_high, numerator_low, denominator);
+    g_triangleEdgeSteps.x_step = quotient;
+    fraction = 256u - ((unsigned int)edge->y0 & 255u);
+    coordinate = edge->texture_u0 << 8;
+    step = g_triangleEdgeSteps.texture_u_step;
+    adjustment = fraction * step;
+    g_triangleEdgeSteps.initial_texture_u = coordinate + GFX_EDGE_SAR(adjustment, 8);
+    coordinate = edge->texture_v0 << 8;
+    step = g_triangleEdgeSteps.texture_v_step;
+    adjustment = fraction * step;
+    g_triangleEdgeSteps.initial_texture_v = coordinate + GFX_EDGE_SAR(adjustment, 8);
+    coordinate = (unsigned int)edge->x0 << 8;
+    step = g_triangleEdgeSteps.x_step;
+    g_triangleEdgeSteps.initial_x = coordinate + fraction * GFX_EDGE_SAR(step, 8);
 }

@@ -892,3 +892,5 @@ if __name__ == '__main__':
     verify_triangle_slope(record=True)
     from verify_edge_clamp import verify_edge_clamp
     verify_edge_clamp(record=True)
+    from verify_edge_steps import verify_edge_steps
+    verify_edge_steps(record=True)

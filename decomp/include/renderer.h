@@ -16,9 +16,13 @@ extern volatile unsigned int g_triangleSpanLeftSampleStorage; /* VA 0x004BAD70 *
 
 /* Distances are verified; intervening words are retained, not interpreted here. */
 typedef struct GfxTriangleEdgeStepState {
+    unsigned int initial_texture_u; /* VA 0x004BAEA4 */
+    unsigned int initial_texture_v; /* VA 0x004BAEA8 */
     unsigned int texture_u_step; /* VA 0x004BAEAC */
     unsigned int texture_v_step; /* VA 0x004BAEB0 */
-    unsigned int intervening_words[3]; /* VA 0x004BAEB4..BC */
+    unsigned int intervening_word; /* VA 0x004BAEB4, not consumed here */
+    volatile GfxTriangleSpanEdgeRecord *advanced_corrected_output; /* VA 0x004BAEB8 */
+    unsigned int initial_x; /* VA 0x004BAEBC */
     unsigned int x_step; /* VA 0x004BAEC0 */
 } GfxTriangleEdgeStepState;
 
@@ -55,6 +59,7 @@ typedef struct GfxTriangleTextureGradients {
 extern volatile GfxTriangleTextureGradients g_triangleTextureGradients;
 extern volatile int g_triangleClipRightFixed; /* VA 0x0063F2D0 */
 void Gfx_ClampTriangleEdgeRightEndpoint(volatile GfxTriangleEdgePacket *edge);
+void Gfx_InitializeTriangleEdgeSteps(const volatile GfxTriangleEdgePacket *edge);
 
 void Gfx_SetTriangleSpanState(unsigned int gradient_v, unsigned int gradient_u,
     unsigned int texture_word, unsigned int lookup_word);
