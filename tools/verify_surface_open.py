@@ -302,6 +302,30 @@ class Session(SurfaceSession):
             assert not uc.reg_read(UC_X86_REG_EFLAGS)&0x400
             assert uc.reg_read(UC_X86_REG_EAX)==result
 
+def native_probe_process(exe, runtime, expected, foreground_retry=False):
+    """Retry only exit74 before key injection; retain all real process results."""
+    import subprocess
+    attempts = []
+    for index in range(3 if foreground_retry else 1):
+        result = subprocess.run([str(exe)], cwd=runtime, capture_output=True,
+                                text=True, timeout=45)
+        attempts.append({'exit_code': result.returncode, 'stdout': result.stdout,
+                         'stderr': result.stderr})
+        variant = expected.rsplit(' ', 1)[-1].rstrip(':')
+        (runtime / (variant + '_attempt' + str(index + 1) + '.log')).write_text(
+            result.stdout + result.stderr, encoding='utf-8', newline='\n')
+        prerequisite = result.returncode == 74 and result.stdout.startswith((
+            'FAIL native keyboard foreground setup prerequisite',
+            'FAIL native keyboard foreground retention prerequisite'))
+        if not prerequisite:
+            break
+    (runtime / 'result.log').write_text(result.stdout + result.stderr,
+                                        encoding='utf-8', newline='\n')
+    if result.returncode or not result.stdout.startswith(expected):
+        raise RuntimeError(('Native surface probe failed', attempts))
+    return result, attempts
+
+
 def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False,poll_test=False,timed_test=False,access_test=False,clear_test=False,present_test=False):
     poll_test=poll_test or timed_test
     input_test=input_test or poll_test
@@ -324,9 +348,10 @@ def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False
     libraries=[];commands=[]
     if input_test:groups['WINMM']=['timeSetEvent@20','timeKillEvent@4']
     if poll_test:
-        groups['KERNEL32'].append('Sleep@4')
+        groups['KERNEL32']+=['Sleep@4','GetCurrentThreadId@0']
         groups['USER32']+=['PeekMessageA@20','TranslateMessage@4','DispatchMessageA@4',
-            'SetForegroundWindow@4','GetForegroundWindow@0','SetFocus@4','SendInput@12']
+            'SetForegroundWindow@4','GetForegroundWindow@0','SetFocus@4','SendInput@12',
+            'GetWindowThreadProcessId@8','AttachThreadInput@12']
     for module,exports in groups.items():
         definition=runtime/(module.lower()+'.def');lib=runtime/(module.lower()+'.lib')
         definition.write_text('LIBRARY '+module+'.dll\nEXPORTS\n'+
@@ -351,51 +376,48 @@ def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False
     elif rebuild:commands[-2].insert(1,'-DSURFACE_TEST_REBUILD')
     elif shutdown:commands[-2].insert(1,'-DSURFACE_TEST_SHUTDOWN')
     for command in commands[-2:]:subprocess.run(command,cwd=ROOT,check=True)
-    result=subprocess.run([str(exe)],cwd=runtime,capture_output=True,text=True,timeout=45)
-    (runtime/'result.log').write_text(result.stdout+result.stderr,encoding='utf-8',newline='\n')
     expected='PASS native Win32/DirectDraw original versus C89 '+('present:' if present_test else 'clear:' if clear_test else 'access:' if access_test else 'timed:' if timed_test else 'polling:' if poll_test else 'input:' if input_test else 'entry:' if entry else 'rebuild:' if rebuild else 'shutdown:' if shutdown else 'constructor:')
-    if result.returncode or not result.stdout.startswith(expected):
-        raise RuntimeError(('Native surface probe failed',result.returncode,result.stdout,result.stderr))
+    result, attempts = native_probe_process(exe, runtime, expected, poll_test)
     verify_target(copied)
     assert hashlib.sha256(dll.read_bytes()).digest()==hashlib.sha256((runtime/'surface_open_validation.dll').read_bytes()).digest()
     if present_test:
         return {'variant':'present','cases':3,'paired_executions':6,'direct_calls':36,'entry_calls':36,
-          'stdout':result.stdout,'exit_code':result.returncode,
+          'stdout':result.stdout,'exit_code':result.returncode,'prerequisite_attempts':attempts,
           'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
           'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
           'scope':'Actual paired original/C89 windowed primary/type1 offscreen capabilities, active/kind rejection and real installer/table entry;72 calls.',
           'limitations':'Offscreen rejection only: native flip success/fullscreen, infinite busy loops, failed GetCaps without outputs, native game/toolchain unverified.'}
     if clear_test:
         return {'variant':'clear','cases':2,'paired_executions':4,'clear_calls':16,
-          'stdout':result.stdout,'exit_code':result.returncode,
+          'stdout':result.stdout,'exit_code':result.returncode,'prerequisite_attempts':attempts,
           'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
           'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
           'scope':'Actual paired original/C89 offscreen clears through real Lock/Unlock and actual installer/table entry. Test-owned8x8 geometry in640x480 allocation; all four old modes, exact DWORD-scaled SDK byte-pitch pattern and every retained byte in32pitch rows.',
           'limitations':'Bounded offscreen data only; no full-frame rendering, fullscreen, native faults/reentry or playable game/original toolchain proof.'}
     if access_test:
         return {'variant':'access','cases':3,'paired_executions':6,'lock_invocations':90,'unlock_invocations':60,
-          'stdout':result.stdout,'exit_code':result.returncode,
+          'stdout':result.stdout,'exit_code':result.returncode,'prerequisite_attempts':attempts,
           'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
           'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
           'scope':'Actual paired original/C89 primary/backbuffer Lock/Unlock after windowed0/1/4 constructors: mode1/2/3 pointer roles and pitch, same-mode state, real changed-mode SDK unlock/relock, unusual surface-field-address argument, retained pointers/pitch and repeated unlock. Actual resource shutdown follows; original WndProc reference.',
           'limitations':'Native success/normal access only; lost device, failed Lock with absent descriptor outputs, arbitrary aliases/reentry, full native rendering/startup/menu/input/audio/races and original toolchain unverified.'}
     if timed_test:
         return {'variant':'timed','cases':3,'paired_executions':6,'input_cycles':12,
-          'stdout':result.stdout,'exit_code':result.returncode,
+          'stdout':result.stdout,'exit_code':result.returncode,'prerequisite_attempts':attempts,
           'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
           'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
           'scope':'Actual paired original/C89 timed setup and reinit use real multimedia timers and asynchronous production polling/notification. Twelve scan30 press/release cycles check raw held and consumed press/repeat state, mirrored character bytes, synchronous callback ABI and shutdown wrapper. Actual SDK/input/surface lifecycles with original WndProc reference.',
           'limitations':'Test-owned timer cancellation and50ms quiescence before production teardown; arbitrary asynchronous teardown/reentry/concurrency unverified. One scan code; no full game/startup/menu/render/audio/races/fullscreen/original compiler proof.'}
     if poll_test:
         return {'variant':'polling','cases':3,'paired_executions':6,'input_cycles':12,
-          'stdout':result.stdout,'exit_code':result.returncode,
+          'stdout':result.stdout,'exit_code':result.returncode,'prerequisite_attempts':attempts,
           'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
           'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
           'scope':'Actual paired original/C89 DirectInput buffered scan30 press/release from SendInput, held/event clearing, mirrored A character bytes, real callback and synchronous five-word timer callback; twelve input cycles across windowed0/1/4 constructors with actual shutdown and timer cancellation. Original WndProc reference boundary.',
           'limitations':'One representative scan code; no asynchronous timer dispatch, full game startup/menu/render/audio/race/fullscreen or original compiler/instruction equality proof.'}
     if input_test:
         return {'variant':'input','cases':4,'paired_executions':8,'init_executions':12,'shutdown_executions':14,
-          'stdout':result.stdout,'exit_code':result.returncode,
+          'stdout':result.stdout,'exit_code':result.returncode,'prerequisite_attempts':attempts,
           'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
           'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
           'scope':'Actual original/C89 DirectInput creation, keyboard setup and shutdown after real paired windowed surface constructors; twelve init/shutdown cycles plus two empty shutdowns. Six cycles cancel actual test-owned multimedia timers via production timeKillEvent, retaining timer metadata. Original WndProc reference boundary; allocating/timed input initializer and input event polling excluded. Acquire may fail due actual foreground state; authentic initialization still succeeds and flag remains Boolean.',
@@ -403,12 +425,12 @@ def native_surface(dll,shutdown=False,rebuild=False,entry=False,input_test=False
     if entry:
         return {'variant':'entry','cases':4,'paired_executions':8,
           'routine_executions':{'Gfx_Open':8,'Gfx_Rebuild':12,'Gfx_Shutdown':6,'Gfx_SpriteOpenNative':6,'Gfx_SpriteShutdownNative':6},
-          'stdout':result.stdout,'exit_code':result.returncode,
+          'stdout':result.stdout,'exit_code':result.returncode,'prerequisite_attempts':attempts,
           'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
           'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
           'scope':'Actual surface installer and graphics lifecycle wrappers through real surface/sprite bodies. Missing-class failure and paired registered windowed 0/1/4 scenarios with repeated rebuild and shutdown, real type2 releases and retained interfaces. Two sprite lifecycle slots bound by host to authenticated real bodies; full allocating sprite installer is outside native scope. Original WndProc reference boundary.',
           'limitations':'No rebuilt WndProc/full game/startup/menu/render/input/audio/races, fullscreen/lost-device native certification or original compiler/link layout/instruction equality.'}
-    return {'variant':'rebuild' if rebuild else 'shutdown' if shutdown else 'constructor','cases':3 if rebuild else 4,'paired_executions':6 if rebuild else 8,'lifecycle_invocations':12 if rebuild else 8 if shutdown else 0,'stdout':result.stdout,'exit_code':result.returncode,
+    return {'variant':'rebuild' if rebuild else 'shutdown' if shutdown else 'constructor','cases':3 if rebuild else 4,'paired_executions':6 if rebuild else 8,'lifecycle_invocations':12 if rebuild else 8 if shutdown else 0,'stdout':result.stdout,'exit_code':result.returncode,'prerequisite_attempts':attempts,
       'commands':[subprocess.list2cmdline(command) for command in commands]+[str(exe)],
       'host_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),
       'scope':('Native original/rebuilt windowed rebuild after actual constructors: 0/1/4 backbuffers, real type2 boundary releases, repeated clearing while primary/type1 references remain alive outside records; actual SDK surface queries prove retention. Real production shutdown follows; test-owned cleanup only releases interfaces intentionally lost from records and disposes HWND. Original WndProc reference boundary.' if rebuild else 'Native constructor plus actual original/rebuilt SDK shutdown: missing-class and registered windowed 0/1/4 backbuffers; real production releases including actual offscreen type2 bank boundaries, retained clipper/markers/geometry, HWND remains until test-owned window disposal. Original WndProc reference boundary; game/input paths prevented.' if shutdown else 'Native Win32/DirectDraw constructor: missing-class failure and registered windowed 0/1/4 backbuffer lifecycles. Actual authenticated original WndProc is an explicit reference class boundary; game/input/shutdown paths prevented, test-owned SDK cleanup.'),

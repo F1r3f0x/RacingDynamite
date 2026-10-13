@@ -1,5 +1,20 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Direct surface module migration (2026-10-12)
+
+[Migration evidence](ghidra/windows_surface_module.md) carries twelve unchanged
+verified routines and their DirectDraw backing into full C89 `surface.c` /
+`surface.h`. Platform backing and graphics entry wrappers retain their owners.
+Local PE routine hashes, whole-module build/link and thirteen freshness tests pass.
+Full renewal, fidelity audit and exports pass at snapshot `d17f20ac4617` with90 fresh
+compilation/emulation and29 scoped native records. Native foreground preparation
+now precedes authentic Acquire; bounded marker-specific prerequisite retries retain
+all attempts and never retry behavioral failures. Final polling/timed probes each
+passed first attempt; prior failed renewals remain documented. LF/index, staged
+gates and tracked hooks are required before commit. Continue authentic
+BltFast and pixel-copy behavior immediately afterward. Original toolchain and
+playable startup/menu/audio/race validation remain open.
+
 ## Palette oracle mapped-source correction (2026-10-12)
 
 The [palette verifier](ghidra/windows_surface_palette.md) now uses a mapped RGB

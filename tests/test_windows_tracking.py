@@ -101,10 +101,11 @@ class TrackingTests(unittest.TestCase):
         source=self.root/'decomp/src/mem.c';source.write_text(source.read_text().replace('00401080','00401081'))
         with self.assertRaises(ValueError):tracking.audit(self.root)
 
-    def test_shared_builder_tracks_direct_input_module_transitively(self):
+    def test_shared_builder_tracks_direct_modules_transitively(self):
         tracking.migrate(self.root)
         paths = ['tools/build_decomp.py', 'decomp/src/main.c', 'decomp/include/main.h',
-                 'decomp/src/input.c', 'decomp/include/input.h']
+                 'decomp/src/input.c', 'decomp/include/input.h',
+                 'decomp/src/surface.c', 'decomp/include/surface.h']
         for name in paths:
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -115,8 +116,15 @@ class TrackingTests(unittest.TestCase):
         run = snap['functions'][0]['latest_runs']['compilation']
         self.assertIn('decomp/src/input.c', run['input_paths'])
         self.assertIn('decomp/include/input.h', run['input_paths'])
+        self.assertIn('decomp/src/surface.c', run['input_paths'])
+        self.assertIn('decomp/include/surface.h', run['input_paths'])
         self.assertFalse(run['stale'])
         (self.root / 'decomp/src/input.c').write_text('changed input implementation\n')
+        self.assertTrue(tracking.snapshot(self.root)['functions'][0]['latest_runs']['compilation']['stale'])
+        tracking.record_run(0x1080, 'compilation', 'pass',
+            inputs=['decomp/src/mem.c', 'tools/build_decomp.py'], command='fixture', root=self.root)
+        (self.root / 'decomp/include/surface.h').write_text('changed surface layout\n',
+            encoding='utf-8', newline='\n')
         self.assertTrue(tracking.snapshot(self.root)['functions'][0]['latest_runs']['compilation']['stale'])
 
     def test_describe_source_updates_module_membership_on_relocation(self):

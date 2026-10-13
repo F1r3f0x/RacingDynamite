@@ -269,6 +269,32 @@ static void pump_input_window(void) {
         TranslateMessage(&message);DispatchMessageA(&message);
     }
 }
+/* Test-owned foreground preparation. Never relax the observed prerequisite.
+ * Share queues only for activation, detach before injected input or assertions. */
+static void prepare_input_foreground(HWND window) {
+    HWND foreground;
+    DWORD current_thread, foreground_thread;
+    BOOL attached;
+    unsigned int attempt;
+
+    current_thread=GetCurrentThreadId();
+    for (attempt=0; attempt<10 && GetForegroundWindow()!=window; attempt++) {
+        foreground=GetForegroundWindow();
+        foreground_thread=foreground ? GetWindowThreadProcessId(foreground,0) : 0;
+        attached=FALSE;
+        if (foreground_thread && foreground_thread!=current_thread) {
+            attached=AttachThreadInput(current_thread,foreground_thread,TRUE);
+        }
+        SetForegroundWindow(window);SetFocus(window);
+        if (attached && !AttachThreadInput(current_thread,foreground_thread,FALSE)) {
+            fail("FAIL native foreground queue detach\n",75);
+        }
+        pump_input_window();Sleep(10);
+    }
+    if (GetForegroundWindow()!=window) {
+        fail("FAIL native keyboard foreground setup prerequisite\n",74);
+    }
+}
 static void check_native_poll(unsigned char *image, HMODULE compiled, int side, HWND window, int ring_index) {
     typedef void (__cdecl *PollFn)(void);
     typedef void (__cdecl *KeyFn)(int,int);
@@ -328,7 +354,7 @@ static void check_native_poll(unsigned char *image, HMODULE compiled, int side, 
     if (!active_id) { fail("FAIL native timed input ID\n",69); }
 #endif
     *key_callback=native_key_observer;*poll_callback=native_poll_observer;
-    SetForegroundWindow(window);SetFocus(window);pump_input_window();
+    pump_input_window();
     for (attempt=0; attempt<10; attempt++) {
 #ifndef SURFACE_TEST_TIMED
         poll();
@@ -337,7 +363,7 @@ static void check_native_poll(unsigned char *image, HMODULE compiled, int side, 
     }
     /* Foreground DirectInput is a real prerequisite. Observe the slot at the
      * actual A callback instead of assuming unrelated events leave cursor0. */
-    if (GetForegroundWindow()!=window) { fail("FAIL native keyboard foreground prerequisite\n",74); }
+    if (GetForegroundWindow()!=window) { fail("FAIL native keyboard foreground retention prerequisite\n",74); }
     native_presses=0;native_releases=0;native_character_index=0xffffffffu;
     *native_active_cursor=queue+ring_index;
     bytes=(unsigned char *)&event;
@@ -776,6 +802,11 @@ void WINAPI NativeEntry(void) {
 #endif
 #ifdef SURFACE_TEST_INPUT
             for (input_cycle=0; input_cycle<2; input_cycle++) {
+#ifdef SURFACE_TEST_POLL
+                /* Acquire runs inside authentic initialization; focus must
+                 * already be established, not repaired after Acquire failed. */
+                prepare_input_foreground(window);
+#endif
 #ifdef SURFACE_TEST_TIMED
                 result=input_cycle==0 ? input_timed[side](10,300,30) : input_reinit[side]();
                 if (result!=1 || !*inputs[side] || !*keyboards[side] || *acquired[side]>1 ||

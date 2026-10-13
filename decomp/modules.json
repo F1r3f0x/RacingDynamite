@@ -95,7 +95,6 @@
       ],
       "responsibility": "Existing verified graphics, sprite and font routines pending focused module migration",
       "state": [
-        "surface dispatch and DirectDraw backing",
         "sprite resources and packing",
         "font registry",
         "primitive controls"
@@ -145,9 +144,7 @@
         "Gfx_InitSpritePackingState": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_gfx_sprite_packing_reset.md",
         "Gfx_InitSpriteWorkspaceA": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_gfx_sprite_workspaces.md",
         "Gfx_InitSpriteWorkspaceB": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_gfx_sprite_workspaces.md",
-        "Gfx_InitSurfaceRecords": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_lifecycle.md",
         "Gfx_InstallSpriteDispatch": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_gfx_sprite_dispatch.md",
-        "Gfx_InstallSurfaceDispatch": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_gfx_surface_dispatch.md",
         "Gfx_LinkSpritePackingNode": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_gfx_sprite_packing_links.md",
         "Gfx_Open": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_graphics_entry.md",
         "Gfx_PresentSurfaceNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_present.md",
@@ -159,18 +156,32 @@
         "Gfx_SpriteHandleOpNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_gfx_handleop.md",
         "Gfx_SpriteImageOpNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_gfx_imageop.md",
         "Gfx_SpriteOpenNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_graphics_entry.md",
-        "Gfx_SpriteShutdownNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_graphics_entry.md",
-        "Gfx_SurfaceClearNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_clear.md",
-        "Gfx_SurfaceConfigureNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_lifecycle.md",
-        "Gfx_SurfaceLockNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_access.md",
-        "Gfx_SurfaceOpenNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_open.md",
-        "Gfx_SurfacePresentNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_present.md",
-        "Gfx_SurfaceRebuildNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_rebuild.md",
-        "Gfx_SurfaceRestoreNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_lifecycle.md",
-        "Gfx_SurfaceSetPaletteNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_palette.md",
-        "Gfx_SurfaceShutdownNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_shutdown.md",
-        "Gfx_SurfaceUnlockNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_surface_access.md"
+        "Gfx_SpriteShutdownNative": "Retained verified routine pending direct module migration; binary contract: docs/ghidra/windows_graphics_entry.md"
       }
+    },
+    "surface": {
+      "source": "decomp/src/surface.c",
+      "header": "decomp/include/surface.h",
+      "symbol_prefixes": [
+        "Gfx_Surface",
+        "Gfx_InitSurfaceRecords",
+        "Gfx_InstallSurfaceDispatch"
+      ],
+      "responsibility": "Verified Windows DirectDraw surface records, dispatch and resource lifecycle",
+      "state": [
+        "48-byte primary/type1/type2 record banks",
+        "fourteen surface dispatch slots",
+        "DirectDraw interfaces and three palette entry banks",
+        "surface configuration and window reference"
+      ],
+      "dependencies": [
+        "Win32 platform instance/window backing in main.c",
+        "DirectDraw SDK",
+        "USER32/GDI32 SDK"
+      ],
+      "placement_reason": "Authenticated surface dispatch consumers and DirectDraw resource ownership form a focused production boundary; original source filename unknown. Mechanical migration precedes new rendering behavior.",
+      "build_mode": "direct",
+      "original_source": null
     }
   }
 }

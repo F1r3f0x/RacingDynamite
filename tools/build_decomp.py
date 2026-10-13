@@ -1,4 +1,4 @@
-"""Build focused Windows validation DLLs from full memory/input modules
+"""Build focused Windows validation DLLs from full memory/input/surface modules
 and remaining extracted verified production bodies. Not a playable rebuild.
 """
 import argparse
@@ -21,7 +21,6 @@ _resource_header = (ROOT / 'decomp/include/geputget.h').read_text(encoding='utf-
 _resource_source = (ROOT / 'decomp/src/geputget.c').read_text(encoding='utf-8-sig')
 STARTUP_BOUNDARY_SOURCE += '#include "geputget.h"\n'
 
-SURFACE_HEADER = _resource_header[_resource_header.index('/* Windows surface dispatch.'):_resource_header.index('#define MAX_FONTS')]
 STARTUP_BOUNDARY_SOURCE += (
     'int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4) { (void)option0; (void)option1; (void)option2; (void)option3; (void)option4; for (;;) {} }\n'
     'int Gfx_SurfaceBlitNative(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_y, int destination_x) { (void)source; (void)x; (void)y; (void)width; (void)height; (void)destination; (void)destination_y; (void)destination_x; for (;;) {} }\n'
@@ -47,44 +46,14 @@ _selector_end = _resource_source.index('\n}', _selector_start) + 2
 LISA_VERSION_SOURCE += (
     'extern void *malloc(unsigned int size);\n'
     'extern void free(void *pointer);\n'
-    + _resource_header[_resource_header.index('int Gfx_SelectBackend(int backend);'):
-        _resource_header.index('#define MAX_FONTS')]
+    + '#include "geputget.h"\n'
     + _resource_source[_selector_start:_selector_end] + '\n'
-    + _resource_source[_resource_source.index('/* Independently recovered Windows dispatch slots;'):
+    + _resource_source[_resource_source.index('/* Windows sprite dispatch words;'):
         _resource_source.index('/* Global font table matching')])
 
 _entry_marker = '/* Native graphics lifecycle entry points. */'
 _entry_end = '/* End native graphics lifecycle entry points. */'
 LISA_VERSION_SOURCE += _resource_source[_resource_source.index(_entry_marker):_resource_source.index(_entry_end)] + '\n'
-
-_surface_records_start = _resource_source.index('volatile GfxSurfaceRecord g_nativePrimarySurface;')
-_surface_records_end = _resource_source.index('/* Independently recovered Windows dispatch slots;')
-LISA_VERSION_SOURCE += _resource_source[_surface_records_start:_surface_records_end]
-
-# Compile the real COM method calls using the local Win32 SDK declarations.
-_restore_start = _resource_source.index('int Gfx_SurfaceRestoreNative(void)')
-_restore_end = _resource_source.index('\n}', _restore_start) + 2
-RESTORE_BODY = _resource_source[_restore_start:_restore_end]
-LISA_VERSION_SOURCE = LISA_VERSION_SOURCE.replace(RESTORE_BODY, 'int Gfx_SurfaceRestoreNative(void);')
-SURFACE_SOURCE = ('#include <ddraw.h>\n#include <stddef.h>\n#include "geputget.h"\n'
-    'typedef char surface_record_size[(sizeof(GfxSurfaceRecord)==48)?1:-1];\n'
-    'typedef char surface_width_offset[(offsetof(GfxSurfaceRecord,width)==28)?1:-1];\n'
-    'typedef char surface_height_offset[(offsetof(GfxSurfaceRecord,height)==32)?1:-1];\n'
-    'typedef char surface_depth_offset[(offsetof(GfxSurfaceRecord,bit_depth)==36)?1:-1];\n'
-    'typedef char surface_locked_offset[(offsetof(GfxSurfaceRecord,locked)==8)?1:-1];\n'
-    'typedef char surface_mode_offset[(offsetof(GfxSurfaceRecord,lock_mode)==12)?1:-1];\n'
-    'typedef char surface_read_offset[(offsetof(GfxSurfaceRecord,read_pixels)==16)?1:-1];\n'
-    'typedef char surface_write_offset[(offsetof(GfxSurfaceRecord,write_pixels)==20)?1:-1];\n'
-    'typedef char surface_pitch_offset[(offsetof(GfxSurfaceRecord,pitch_bytes)==24)?1:-1];\n'
-    'typedef char surface_descriptor_size[(sizeof(DDSURFACEDESC)==108)?1:-1];\n'
-    'typedef char surface_descriptor_pixels[(offsetof(DDSURFACEDESC,lpSurface)==36)?1:-1];\n'
-    'typedef char surface_descriptor_pitch[(offsetof(DDSURFACEDESC,lPitch)==16)?1:-1];\n'
-    'typedef char surface_lock_slot[(offsetof(IDirectDrawSurfaceVtbl,Lock)==0x64)?1:-1];\n'
-    'typedef char surface_unlock_slot[(offsetof(IDirectDrawSurfaceVtbl,Unlock)==0x80)?1:-1];\n'
-    'typedef char surface_pointer_offset[(offsetof(GfxSurfaceRecord,surface)==44)?1:-1];\n'
-    'typedef char surface_is_lost_slot[(offsetof(IDirectDrawSurfaceVtbl,IsLost)==0x60)?1:-1];\n'
-    'typedef char surface_restore_slot[(offsetof(IDirectDrawSurfaceVtbl,Restore)==0x6c)?1:-1];\n'
-    + RESTORE_BODY + '\n')
 
 # Standard C89 sin/cast body compiled separately with independently probed x87
 # flags. This provisional GCC/Clang mix does not identify the original compiler.
@@ -99,19 +68,8 @@ _window_marker = '/* Native Windows platform backing, independently verified fro
 _window_end = '/* End native Windows platform backing. */'
 WINDOW_HEADER = _window_header[_window_header.index(_window_marker):_window_header.index(_window_end)]
 WINDOW_SOURCE = _window_source[_window_source.index(_window_marker):_window_source.index(_window_end)]
-_open_marker = '/* Native surface constructor state; independently recovered Windows initializers. */'
-_open_end = '/* End native surface constructor. */'
-OPEN_SOURCE = _resource_source[_resource_source.index(_open_marker):_resource_source.index(_open_end)]
-SURFACE_SOURCE += '#include <string.h>\n' + WINDOW_HEADER + WINDOW_SOURCE + OPEN_SOURCE.replace('#include "main.h"', '')
-_shutdown_marker = '/* Native surface resource shutdown. */'
-_shutdown_end = '/* End native surface resource shutdown. */'
-SURFACE_SOURCE += _resource_source[_resource_source.index(_shutdown_marker):_resource_source.index(_shutdown_end)]
-_rebuild_marker = '/* Native surface rebuild and its independently recovered palette backing. */'
-_rebuild_end = '/* End native surface rebuild. */'
-SURFACE_SOURCE += _resource_source[_resource_source.index(_rebuild_marker):_resource_source.index(_rebuild_end)]
-_access_marker = '/* Native surface access implementation. */'
-_access_end = '/* End native surface access implementation. */'
-SURFACE_SOURCE += _resource_source[_resource_source.index(_access_marker):_resource_source.index(_access_end)]
+# Only authenticated platform data is extracted; no surface body extraction.
+PLATFORM_SOURCE = '#include <windows.h>\n' + WINDOW_HEADER + WINDOW_SOURCE
 INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'Input_PollNative',
     'Input_InitTimedNative', 'Input_ShutdownNativeEntry', 'Input_ReinitializeNative',
     'Input_ReadHeldNative', 'Input_ConsumePressNative', 'Input_ConsumeRepeatNative', 'g_nativeInputPeriod',
@@ -197,17 +155,19 @@ def compile_sine(stem):
     return obj, command
 
 def compile_surface(stem):
+    """Compile the entire production module, including SDK layout assertions."""
     cc = shutil.which('gcc')
     if not cc:
         raise RuntimeError('GCC i386 Win32 SDK compiler required')
-    source, obj = BUILD/(stem+'_surface.c'), BUILD/(stem+'_surface.obj')
-    source.write_text(SURFACE_SOURCE, encoding='utf-8', newline='\n')
+    source, obj = ROOT/'decomp/src/surface.c', BUILD/(stem+'_surface.obj')
     obj.unlink(missing_ok=True)
     command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
         '-Werror', '-O2', '-fno-inline', '-fno-optimize-sibling-calls', '-I', str(ROOT/'decomp/include'),
         '-c', str(source), '-o', str(obj)]
     print(subprocess.list2cmdline(command), flush=True)
     subprocess.run(command, cwd=ROOT, check=True)
+    if not obj.is_file() or not obj.stat().st_size:
+        raise RuntimeError('Fresh whole-module surface object required')
     return obj, command
 
 
@@ -240,7 +200,18 @@ def surface_import_libraries(stem):
             'MessageBoxA@16','ShowWindow@8'],
         'GDI32':['GetDeviceCaps@8'], 'DINPUT':['DirectInputCreateA@16'],
         'WINMM':['timeKillEvent@4','timeSetEvent@20']}
-    libraries = []
+    # Separate test boundary for main.c platform backing; never compile DOS main.
+    cc = shutil.which('gcc')
+    if not cc:
+        raise RuntimeError('GCC i386 Win32 SDK compiler required')
+    source, obj = BUILD/(stem+'_platform.c'), BUILD/(stem+'_platform.obj')
+    source.write_text(PLATFORM_SOURCE, encoding='utf-8', newline='\n')
+    obj.unlink(missing_ok=True)
+    command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
+        '-Werror', '-O2', '-c', str(source), '-o', str(obj)]
+    print(subprocess.list2cmdline(command), flush=True)
+    subprocess.run(command, cwd=ROOT, check=True)
+    libraries = [str(obj)]
     for dll,exports in groups.items():
         definition = BUILD/(stem+'_'+dll.lower()+'.def')
         lib = BUILD/(stem+'_'+dll.lower()+'.lib')

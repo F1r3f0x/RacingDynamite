@@ -194,12 +194,13 @@ def record_run(rva, kind, outcome, *, inputs, artifact=None, cases=0, command, d
     if kind not in KINDS or outcome not in ('pass','fail','different','unverified'):
         raise ValueError('Invalid verification kind or outcome')
     target, _ = load_target(root)
-    # Persist complete direct input and extracted platform dependencies of the
+    # Persist complete direct input/surface and extracted platform dependencies of the
     # shared builder even when a caller lists only the builder script.
     inputs = list(inputs)
     if 'tools/build_decomp.py' in inputs:
         inputs = list(dict.fromkeys(inputs + ['decomp/src/main.c', 'decomp/include/main.h',
-                                             'decomp/src/input.c', 'decomp/include/input.h']))
+                                             'decomp/src/input.c', 'decomp/include/input.h',
+                                             'decomp/src/surface.c', 'decomp/include/surface.h']))
     digest = input_hash(root, inputs)
     artifact_hash = sha(inside(root,artifact).read_bytes()) if artifact else None
     with connect(root, True) as conn:
