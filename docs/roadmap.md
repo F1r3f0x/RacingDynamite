@@ -1,5 +1,16 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Palette oracle mapped-source correction (2026-10-12)
+
+The [palette verifier](ghidra/windows_surface_palette.md) now uses a mapped RGB
+buffer and asserts72 normal copies and eight post-copy interface changes in both
+images. Focused1,424 comparisons pass; the old0x5000 buffer lay outside the0x4000
+arena, so its normal/mutation scope was overstated. Actual bank aliases and24 native
+SDK updates were valid. Production bodies remain unchanged. Full renewal, fidelity audit and exports pass
+at snapshot `c7c1048073f9` for 90 reconstructions and 29 scoped native records.
+LF/index checks, staged gates and hooks follow. Continue directly compiled renderer subsystem work;
+original toolchain and complete native game/menu/audio/race validation remain open.
+
 ## Native palette body and installed entry (2026-10-12)
 
 [Palette evidence](ghidra/windows_surface_palette.md), RVAs 0x5C6D0/0x56C40,

@@ -31,17 +31,21 @@ The production storage uses its actual SDK type in the SDK implementation unit;
 freestanding units do not need that declaration in their header. The initial
 header exposure failed strict compilation and was removed before validation.
 
-Before implementation,1,376 original-only independent-oracle cases and actual SDK
+Before implementation,1,376 original-only independent-oracle comparisons and actual SDK
 palette creation/update/readback authenticated the contract. Production C89 uses
 volatile byte reads/stores to retain interleaved alias-visible order and reloads
 the live interface. The nonreturning build fixture is replaced by the real body.
 No DOS implementation or modified original asset supplies production behavior.
 
 `uv run tools/verify_surface_palette.py` compiles the production body/entry and
-checks1,376 differential comparisons:1,012 body/364 entry,720 persistent follow-ups,
-296 faults and504 input/output alias comparisons. It checks constructor/rebuild
+checks1,424 differential comparisons:1,036 body/388 entry,768 persistent follow-ups,
+268 faults and504 input/output alias comparisons. It checks constructor/rebuild
 input banks while preserving them, retained randomized flags, null guard paths,
 HRESULTs, unmapped inputs/interfaces and eight post-copy interface-change cases.
+Assertions require72 normal mapped copies with768 source-byte reads and a real
+SetEntries boundary per copy. Each of eight post-copy changes must trigger in the
+oracle and both executing images; valid replacements must reach the new interface,
+while null/unmapped replacements must fault after the copy.
 An independent raw-offset oracle compares ordered byte/DWORD accesses, API arguments
 and snapshots, every record/arena and all three palette banks, preserved registers,
 caller stack/return and unrelated image bytes. Only verified dispatch/data-bank
@@ -67,3 +71,24 @@ Full renewal, fidelity audit and exports pass at snapshot `166b80e3a1ac`
 for all 90 reconstructions, with 29 scoped native records. LF working/index bytes,
 staged gates and tracked hooks follow. Continue real pixel blitting/copying/rendering and
 startup/window-message dependencies after this separate feature commit.
+
+
+## Mapped-source oracle correction (2026-10-12)
+
+The original verifier allocated a0x4000-byte arena but used ordinary RGB source
+at offset0x5000. Those comparisons really tested unmapped-input faults; the eight
+intended post-copy pointer changes never reached their trigger. Previously recorded
+runs were actual execution results, but their stated normal-source/mutation scope
+was too broad. Bank-alias comparisons and24 actual native SDK updates were valid.
+This repair places768 source bytes at mapped offset0x3000, asserts the allocation
+bound and successful normal-copy paths, and counts each executed pointer-change
+hook in both images. The corrected scope above supersedes the old claim. Production
+C89 and native helpers are unchanged. No validation result or fidelity label alone
+is treated as evidence that an intended path ran.
+
+Full workflow renewal, fidelity audit and exports pass at snapshot
+`c7c1048073f99c8342805ea00271840cd6970eb241c60f9c9ec1a33e2e53d43e`
+for 90 reconstructions and 29 scoped native records. LF working/index checks,
+staged gate and tracked hooks follow for this validation repair. The retained graphics_legacy module is an
+existing approved exception; this changes its oracle rather than adding a new
+subsystem or claiming the original source filename.
