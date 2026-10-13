@@ -5,9 +5,11 @@ import struct
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 import windows_tracking as tracking
+import db
 
 
 def fixture(root):
@@ -98,6 +100,55 @@ class TrackingTests(unittest.TestCase):
         tracking.migrate(self.root);self.assertEqual(tracking.audit(self.root)['summary']['functions'],2)
         source=self.root/'decomp/src/mem.c';source.write_text(source.read_text().replace('00401080','00401081'))
         with self.assertRaises(ValueError):tracking.audit(self.root)
+
+    def test_shared_builder_tracks_direct_input_module_transitively(self):
+        tracking.migrate(self.root)
+        paths = ['tools/build_decomp.py', 'decomp/src/main.c', 'decomp/include/main.h',
+                 'decomp/src/input.c', 'decomp/include/input.h']
+        for name in paths:
+            path = self.root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text('fixture input\n')
+        tracking.record_run(0x1080, 'compilation', 'pass',
+            inputs=['decomp/src/mem.c', 'tools/build_decomp.py'], command='fixture', root=self.root)
+        snap = tracking.snapshot(self.root)
+        run = snap['functions'][0]['latest_runs']['compilation']
+        self.assertIn('decomp/src/input.c', run['input_paths'])
+        self.assertIn('decomp/include/input.h', run['input_paths'])
+        self.assertFalse(run['stale'])
+        (self.root / 'decomp/src/input.c').write_text('changed input implementation\n')
+        self.assertTrue(tracking.snapshot(self.root)['functions'][0]['latest_runs']['compilation']['stale'])
+
+    def test_describe_source_updates_module_membership_on_relocation(self):
+        tracking.migrate(self.root)
+        with patch.object(db, 'ROOT', self.root), patch.object(db, 'connect',
+                side_effect=lambda writable=False: tracking.connect(self.root, writable)):
+            self.assertEqual(db.main(['describe', '0x1080', '--source', 'decomp/src/input.c']), 0)
+        with tracking.connect(self.root) as conn:
+            row = conn.execute('SELECT f.source_path,m.name,m.source_path FROM functions f '
+                'JOIN modules m ON m.id=f.module_id WHERE f.rva=4224').fetchone()
+            self.assertEqual(tuple(row), ('decomp/src/input.c', 'input.c', 'decomp/src/input.c'))
+
+    def test_snapshot_hashes_shared_files_once_but_refreshes_on_next_call(self):
+        tracking.migrate(self.root)
+        source = self.root / 'decomp/src/mem.c'
+        artifact = self.root / 'artifact.dll'
+        artifact.write_bytes(b'fresh')
+        for kind in ('compilation', 'emulation'):
+            tracking.record_run(0x1080, kind, 'pass', inputs=['decomp/src/mem.c'],
+                artifact='artifact.dll', command='fixture', root=self.root)
+        reads = []
+        original_read = Path.read_bytes
+        def read(path):
+            reads.append(path)
+            return original_read(path)
+        with patch.object(Path, 'read_bytes', read):
+            snap = tracking.snapshot(self.root)
+        self.assertEqual(reads.count(source), 1)
+        self.assertEqual(reads.count(artifact), 1)
+        self.assertFalse(snap['functions'][0]['latest_runs']['emulation']['stale'])
+        artifact.write_bytes(b'changed')
+        self.assertTrue(tracking.snapshot(self.root)['functions'][0]['latest_runs']['emulation']['stale'])
 
     def test_second_reconstructed_function_is_supported_and_fidelity_checked(self):
         tracking.migrate(self.root)

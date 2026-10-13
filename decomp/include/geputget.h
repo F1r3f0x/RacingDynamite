@@ -13,57 +13,7 @@ extern volatile const double g_nativeSineAmplitude;
 extern volatile int32_t g_nativeSineTable[4096];
 int32_t Gfx_InitSineTable(void); /* VA 0x00460740; last converted integer */
 
-/* Windows input callback ABI; semantic names, original symbols unknown. */
-typedef void (*InputKeyEventCallback)(int pressed, int scan_code);
-typedef void (*InputPollCallback)(void);
-extern InputKeyEventCallback volatile g_inputKeyEventCallback;
-extern InputPollCallback volatile g_inputPollCallback;
-void Input_ResetCallbacks(void);
 
-/* Native DirectInput lifecycle; independent Windows backing and SDK layouts. */
-struct IDirectInputA;
-struct IDirectInputDeviceA;
-extern struct IDirectInputA *volatile g_nativeDirectInput; /* VA0x0050DF60 */
-extern struct IDirectInputDeviceA *volatile g_nativeKeyboardDevice; /* VA0x0050E26C */
-extern volatile int32_t g_nativeKeyboardAcquired; /* VA0x0050E270 */
-extern volatile uint32_t g_nativeInputTimerActive; /* VA0x004BA65C */
-extern volatile unsigned int g_nativeInputTimerId; /* VA0x004BA658 */
-extern volatile uint32_t g_nativeInputClock; /* VA0x0049373C */
-extern volatile int32_t g_nativeRepeatDelay; /* VA0x0050DF64 */
-extern volatile int32_t g_nativeRepeatInterval; /* VA0x0050E274 */
-extern volatile uint32_t g_nativeRepeatEpoch; /* VA0x0050E268 */
-extern volatile uint32_t g_nativeInputPeriod; /* VA0x0050E67C */
-typedef union NativeCharacterRing {
-    unsigned char bytes[64];
-    uint32_t words[16];
-} NativeCharacterRing;
-extern volatile NativeCharacterRing g_nativeCharacterQueue; /* VA0x0050DE18 */
-extern volatile unsigned char *volatile g_nativeCharacterQueueCursor; /* VA0x0050DE10 */
-extern volatile unsigned char g_nativeCharacterQueueEnd; /* VA0x0050DE58 */
-typedef union NativeKeyboardByteState {
-    unsigned char bytes[256];
-    uint32_t words[64];
-} NativeKeyboardByteState;
-extern volatile NativeKeyboardByteState g_nativeKeyboardHeld; /* VA0x0050DE60 */
-extern volatile NativeKeyboardByteState g_nativeKeyboardPressEvents; /* VA0x0050DF68 */
-extern volatile unsigned char g_nativeKeyboardPressEdges[256]; /* VA0x0050E068 */
-extern volatile unsigned char g_nativeKeyboardPressLatch[256]; /* VA0x0050E168 */
-extern volatile uint32_t g_nativeRepeatCounters[256]; /* VA0x0050E278 */
-int Input_InitNative(int32_t repeat_delay, int32_t repeat_interval); /* VA0x00455AC0 */
-int Input_ShutdownNative(void); /* VA0x00455E20 */
-int Input_InitTimedNative(uint32_t period, int32_t repeat_delay, int32_t repeat_interval); /* VA0x00455C60 */
-int Input_ShutdownNativeEntry(void); /* VA0x00455EA0 */
-int Input_ReinitializeNative(void); /* VA0x00455EB0 */
-int Input_ReadHeldNative(int scan_code); /* VA0x00456070, low byte index */
-int Input_ConsumePressNative(int scan_code); /* VA0x00456080, low byte index */
-int Input_ConsumeRepeatNative(int scan_code); /* VA0x004560A0, low byte index */
-void Input_PollNative(void); /* VA0x00455EF0 */
-void Input_DispatchKeyNative(int pressed, int scan_code); /* VA0x004560C0 */
-void Input_QueueCharacterNative(int unused, int scan_code); /* VA0x004560E0 */
-void __stdcall Input_TimerCallbackNative(unsigned int timer_id, unsigned int message,
-    unsigned long user, unsigned long value1, unsigned long value2); /* VA0x00456160 */
-extern const unsigned char g_nativeCharacterMap[84]; /* VA0x004BA660 */
-/* End native DirectInput declarations. */
 
 
 /* Windows selector: one caller-cleanup stack dword; zero installs both tables.

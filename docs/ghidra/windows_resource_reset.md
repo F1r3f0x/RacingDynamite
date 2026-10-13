@@ -1,5 +1,9 @@
 # Windows input callback reset (formerly Gfx_ResetResourceFlags)
 
+Current reconstruction placement: `decomp/src/input.c` with `decomp/include/input.h`.
+See [the module migration](windows_input_module.md). Earlier `geputget.c` references
+below describe the historical feature layout; original source filenames remain unknown.
+
 ## Provenance and ownership
 
 Authentic Ignition/Ignition/IGN_WIN.EXE: PE32 i386, preferred base VA

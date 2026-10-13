@@ -1,425 +1,8 @@
-# Enforced agent workflow
-
-## Native palette body and installed entry (2026-10-12)
-
-[Palette evidence](ghidra/windows_surface_palette.md), RVAs 0x5C6D0/0x56C40,
-now uses real SDK SetEntries, a separately verified third entry bank and retained
-flag bytes. Focused 1,376 comparisons, 24 actual paired SDK updates and 48 null guards
-pass. The shared native host also preserves eight paired fullscreen presentation
-flips; RVAs 0x5C4B0/0x56C90 receive renewed evidence. Full renewal, fidelity audit and exports pass for all 90 reconstructions, with
-29 scoped native records, at snapshot `166b80e3a1ac`. Staged gates/hooks follow.
-Next reconstruct real pixel blitting/copying/rendering and startup/window-message
-dependencies. Palette object updates and test-owned frame fills do not complete
-production rendering; playable menus/audio/races and original toolchain remain open.
-
-## Native presentation body and installed entry (2026-10-12)
-
-[Presentation evidence](ghidra/windows_surface_present.md), RVAs 0x5C4B0/0x56C90,
-now uses real SDK GetCaps/Flip and actual installation. Focused 3,860 differential
-comparisons, 72 native windowed rejection calls and eight actual paired fullscreen
-flips with 2,457,600 primary-pixel checks pass. Preserve the ignored
-GetCaps result, exact busy retry and live target/primary reloads. One mode/one
-backbuffer uses test-owned SDK fills and checked display restoration; full production
-rendering remains unverified. Full renewal, fidelity audit and exports pass for all 88 reconstructions, with
-27 scoped native records, at snapshot `e607f844ec6e`. Staged gates/hooks follow. Next authenticate palette and
-real rendering/startup/window-message dependencies. Original compiler and playable
-menus/audio/races remain incomplete.
-
-## Native surface Clear and installed-table entry (2026-10-12)
-
-[Clear evidence](ghidra/windows_surface_clear.md), RVAs 0x5C3D0/0x56BB0,
-now uses real production Lock/Unlock and authentic installation. Focused 2,996
-comparisons and 16 actual paired bounded offscreen clears pass. Preserve the
-observed DWORD-scaled SDK byte-pitch bug and original mode restoration. Full
-renewal, fidelity audit and exports pass for all 86 reconstructions, with 25
-scoped native records, at snapshot `21647812d76d`. Staged gates/hooks follow. Next reconstruct authentic presentation,
-palette and real rendering/startup dependencies. Full-frame/native fault behavior,
-original compiler and playable menus/audio/races remain unresolved.
-
-## Native surface access validation (2026-10-12)
-
-`uv run tools/verify_surface_access.py` authenticates RVAs 0x5C530/0x5C680,
-compiles real SDK Lock/Unlock bodies and checks 1,920 differential comparisons,
-with 1,116 follow-ups, four faults and eight mutations. `SURFACE_TEST_ACCESS`
-adds actual paired primary/backbuffer mode access, automatic relocking, field-address
-Unlock and retained pointer/pitch checks (90 Lock/60 Unlock calls). Initializer
-0x56A40 requires fresh regression for the five named fields. See
-[contract and limits](ghidra/windows_surface_access.md), including undefined
-failed-descriptor transients. Finish full renewal/audit/export/check, LF/index,
-staged gate and tracked hooks; no complete native rendering/game proof is claimed.
-
-## Timed input subsystem validation (2026-10-12)
-
-`uv run tools/verify_input_timed.py` checks six authentic routine extents, the
-loader-zero period initializer, SDK data and real setup/shutdown/reinit contracts.
-Its 6,448 comparisons include 3,268 follow-ups, four faults and eighteen executed
-mutations. `SURFACE_TEST_TIMED` executes actual paired asynchronous multimedia
-timer polling, scan30 events and held/press/repeat consumers, with test-owned timer
-quiescence before teardown. Initialization 0x55AC0 and polling 0x55EF0 require fresh
-regression for the verified press-edge/latch names. Real timeSetEvent joins the
-authenticated SDK import contract. See [evidence and limits](ghidra/windows_input_timed.md).
-Finish full renewal, audit/export/check, LF/index checks, staged gate and hooks;
-native full game and arbitrary concurrent teardown remain unverified.
-
-## Native buffered input validation (2026-10-12)
-
-`uv run tools/verify_input_polling.py` authenticates FPO/hash and translation data,
-then validates RVAs 0x55EF0/0x560C0/0x560E0/0x56160 through the real four-routine
-production chain. Its 1,166 comparisons include 630 follow-ups, two faults and 24
-executed mutations. `SURFACE_TEST_POLL` adds actual original/C89 buffered scan30
-press/release, mirrored character bytes and synchronous five-word timer callback
-checks in twelve native input cycles. The original WndProc remains a reference
-boundary. Preserve initialization RVA 0x55AC0 regression for the ring backing type.
-See [evidence and limitations](ghidra/windows_input_polling.md). Run full completion,
-fidelity/export checks, LF working/index checks, staged gate and tracked hooks.
-No asynchronous timer dispatch or playable game completion is established.
-
-## Native input validation (2026-10-10)
-
-Run `uv run tools/verify_input_lifecycle.py` for native keyboard setup/shutdown
-RVAs0x55AC0/0x55E20. It authenticates FPO/hash and the complete SDK keyboard
-format, builds production C89 with real DINPUT/WINMM imports, then compares 272
-original/C executions including persistent state, faults, aliases and callbacks.
-Native host variant SURFACE_TEST_INPUT uses actual constructors, original/C
-DirectInput setup/shutdown and test-owned real multimedia timers cancelled by
-production shutdown; original WndProc remains a reference boundary. Input event
-polling and timed initializer are excluded. Finish full workflow/audit/export/check,
-LF working/index checks, staged gate and tracked hooks before a separate commit.
-See [evidence and limitations](ghidra/windows_input_lifecycle.md).
-
-## Native graphics entry validation (2026-10-10)
-
-Run `uv run tools/verify_graphics_entry.py` for RVAs 0x56BC0/0x56BE0/0x56BF0/
-0x56F20/0x56F30. It authenticates local PE/FPO and builds production C89 bodies,
-then executes 525 differential comparisons and four paired native entry scenarios.
-Real surface installation/lifecycle and sprite leaves execute; two sprite slots
-are explicitly bound by the native host, with allocating sprite installation outside
-its scope. Existing installer differential coverage remains in the full verifier.
-RVA0x56E60 binding-name changes require its existing fresh results and trailer too.
-See [evidence and limits](ghidra/windows_graphics_entry.md). Complete the full
-workflow, synchronized exports, LF working/index checks, staged gate and hooks
-before committing. Focused entry validation does not certify native full game parity.
-
-## Native surface rebuild (2026-10-10)
-
-[Surface rebuild](ghidra/windows_surface_rebuild.md), RVA0x5BD70, now implements
-actual SDK release/create/palette behavior with real initialization/restoration.
-Historical Close is renamed Rebuild. 360 comparisons include164 follow-ups,
-43 faults and22 executed mutations. Three paired native windowed scenarios execute
-two rebuilds plus production shutdown, proving record clearing while primary/type1
-interfaces remain alive outside records. Both palette buffers are tracked separately.
-Original WndProc is a reference boundary; native full game/startup/fullscreen/palette
-and original compiler/link configuration remain open. Next recover sprite shutdown
-and real graphics/WinMain dependencies. The focused DLL/host are not the rebuilt game.
-
-## Native graphics resource shutdown (2026-10-10)
-
-[Resource shutdown](ghidra/windows_surface_shutdown.md), RVA 0x5C060, now uses
-actual SDK Release methods with verified mode-conditioned bank ordering. The
-historical Reset name is corrected to Shutdown. 384 differential comparisons
-include 173 follow-ups, 51 faults, 18 executed mutations and shared interfaces.
-Four paired native constructor/shutdown scenarios use real interfaces, including
-type2 bank boundaries, and preserve stale clipper/markers/geometry/HWND behavior.
-The original WndProc remains a reference boundary; native full game/startup,
-fullscreen/palette branches and original compiler/link layout remain open.
-Next reconstruct surface rebuild RVA0x5BD70 and its caller dependencies.
-
-## Native surface constructor (2026-10-10)
-
-[Surface constructor](ghidra/windows_surface_open.md), RVA 0x5B740, has real C89
-Win32/GDI/DirectDraw behavior and real initialization/restoration dependencies.
-242 differential comparisons include 108 persistent follow-ups, four interface
-faults and 37 executed mutation calls. Four paired native scenarios pass actual
-API/COM execution: missing class and windowed 0/1/4 backbuffers, using authenticated
-original WndProc as a reference boundary. This does not certify a rebuilt WndProc
-or native game startup. Width/height/depth fields and real stdcall import libraries
-are independently verified. Native fullscreen/lost-device, complete game behavior
-and original compiler/link layout remain open. Next reconstruct actual display
-resource shutdown/rebuild and then input/WinMain dependencies. The focused DLL
-and probe remain validation artifacts.
-
-## Surface lifecycle dependencies (2026-10-09)
-
-[Surface lifecycle](ghidra/windows_surface_lifecycle.md) now reconstructs record
-initialization RVA 0x56A40, configure RVA 0x5B730 and restoration RVA 0x5C730.
-The 48-byte record layout and real SDK IsLost/Restore calls are verified; eight
-record words remain opaque. Focused contracts pass 48/48/1,160 comparisons,
-including 108 object/vtable faults, 106 callback mutation calls and persistent
-initialization/restoration. COM replies are modeled in emulation. Native
-DirectDraw/window/game parity, instruction equality and original compiler/link
-layout remain open. Next recover complete Open/Close/Reset and authentic
-WinMain/WndProc dependencies. The focused DLL is not a playable game.
-
-## Complete primitive initialization (2026-10-09)
-
-[Primitive startup](ghidra/windows_primitive_startup.md) now has all eight real
-C89 bodies: RVAs0x5E610,0x5F490,0x60740,0x607C0,0x5F640,0x5FA50,0x60B50,
-0x63AB0. Full chain and leaf contracts pass247 comparisons including96 persistent
-follow-ups,32 faults,18 aliases and12 mutations. Sine production executes native
-Win32 with4096 values in twelve masked x87 modes; its native evidence is confined
-to RVA0x60740. The full workflow renews59 reconstructed routines, retaining prior
-coverage. Coherent controls and a packed37-byte default are verified independently.
-GCC ordered x87 sin/cast compilation is provisional alongside current Clang/LLD;
-original compiler/link layout remains unresolved. Native heap/whole startup,
-menus/render/input/audio/races and unmasked/nonempty-x87/FPSW/fault-frame behavior
-remain unverified. A focused DLL is not a playable game. Next recover native
-surface initialization through its authentic Windows/DirectDraw dependencies.
-Earlier entries are historical.
-
-
-## Complete native sprite handle operation (2026-10-09)
-
-[HandleOp](ghidra/windows_gfx_handleop.md), VA 0x0045C830 / RVA 0x5C830, now
-executes production C89 with real ImageOp and all resource descendants. Its
-150 comparisons include 75 persistent follow-ups, 15 packed calls, six aliases,
-four CRT mutations and 14 faults. The full workflow renews all 51 reconstructed
-routines among 1,028 candidates. Static freelist/pool/scratch/cursor bindings,
-retained scratch tails and live origins after child calls are checked. Only CRT
-heap boundaries are modeled in this focused contract. Next recover complete
-primitive startup RVA 0x5E610 through its verified initialization dependency graph.
-Native startup/menus/render/input/audio/races, original compiler/link layout,
-instruction equality, arbitrary reentry and native fault frames/atomicity remain
-open. This focused DLL is not a playable game. Earlier entries are historical.
-
-
-## Complete native image operation (2026-10-09)
-
-[ImageOp](ghidra/windows_gfx_imageop.md), VA 0x00461360 / RVA 0x61360, now
-executes production C89 with real growth/string/storage/release/allocation
-helpers and coherent 16-byte image control. 361 differential comparisons include
-204 persistent follow-ups, 16 faults, eight aliases, six boundary mutation calls,
-16 packed calls and one bounded observation prefix. The full workflow renews
-all 50 reconstructed routines among 1,028 candidates, including default
-initialization RVA 0x611D0 and descriptor copying RVA 0x612E0 with the new backing.
-Next authenticate native handle-operation RVA 0x5C830 and its caller dependencies.
-CRT and primitive boundaries remain modeled; instruction equality, original
-toolchain/link layout and native startup/menu/render/input/audio/race validation
-remain open. Cross-page dword fault atomicity and arbitrary reentry are unverified.
-This focused DLL is not a playable game. Earlier entries are historical.
-
-
-## Generic pointer-table growth (2026-10-09)
-
-[Table growth](ghidra/windows_gfx_pointer_table.md), VA 0x0045F560 / RVA
-0x5F560, now executes production C89 through direct CRT malloc/free boundaries.
-363 differential comparisons include 153 persistent follow-ups, 45 faults, 93
-aliases, 15 boundary mutation calls, two zero-size mallocs and five bounded
-copy prefixes. Seven static caller sites cover six distinct controls. Full
-completion renews all 49 reconstructed routines among 1,028 candidates and
-retains all prior coverage. Next recover coherent ImageOp control layout and
-RVA 0x61360 with its real growth/string/storage/release dependencies.
-CRT/primitive/callbacks remain modeled; whole caller integration, instruction
-equality, original compiler/link layout and native heap/graphics/game/fault
-parity remain unverified. No playable rebuilt executable is certified.
-Earlier entries are historical.
-
-
-## Graphics allocated-string copy (2026-10-09)
-
-[Allocated-string copying](ghidra/windows_gfx_string.md), VA 0x00460480 /
-RVA 0x60480, now executes production C89 with real Gfx_AllocBytes. 941
-differential comparisons include 434 persistent follow-ups, seven faults, 226
-alias calls and 65 allocation-boundary mutation calls. A cross-page dword store
-is explicitly excluded for Unicorn partial-write behavior; native fault atomicity
-is unobserved. Full completion renews all 48 reconstructed routines among 1,028
-candidates and retains prior coverage. Next recover pointer-table growth RVA
-0x5F560 and ImageOp's coherent global control-block layout before the caller.
-CRT/primitive/callbacks remain modeled; instruction equality, original compiler/
-link layout and native heap/graphics/game/fault parity remain unverified.
-No playable rebuilt executable is certified. Earlier entries are historical.
-
-
-## Sprite packing storage release (2026-10-09)
-
-[Storage release](ghidra/windows_gfx_sprite_packing_release.md), VA 0x004618B0 /
-RVA 0x618B0, now executes production C89 with real aligned/byte free helpers.
-1,267 differential comparisons per binary include 603 persistent follow-ups,
-24 faults, 74 alias calls, 35 CRT mutation calls and four bounded cycle prefixes.
-Full completion renews all 47 reconstructed routines among 1,028 candidates and
-retains prior coverage. Next authenticate ImageOp RVA 0x61360's name-copy/table-
-growth dependencies, then reconstruct the complete native image operation.
-CRT/primitive/callbacks remain modeled; instruction equality, original compiler/
-link layout and native heap/graphics/game/fault parity remain unverified.
-No playable rebuilt executable is certified. Earlier entries are historical.
-
-
-## Graphics free dependencies (2026-10-09)
-
-[Byte/aligned free](ghidra/windows_gfx_free.md), RVAs 0x5F8B0/0x61A60,
-now execute production C89 through a real helper chain. 216/920 differential
-comparisons include 144/608 persistent follow-ups and eight aligned-header
-faults, retaining all existing coverage. Packing release RVA 0x618B0 is next,
-then native ImageOp RVA 0x61360 with its independently authenticated dependencies.
-Original compiler/link layout, instruction equality and native heap/graphics/
-game/fault parity remain unverified; the CRT is modeled. The current build is
-a focused validation DLL, not a playable rebuilt game. Earlier entries below
-are historical.
-
-
-## Sprite storage assignment (2026-10-09)
-
-[Storage assignment](ghidra/windows_gfx_sprite_packing_storage.md), RVA 0x61530,
-now executes production C89 with real packing/allocation/pixel dependencies.
-960 differential comparisons per binary include 424 persistent follow-ups,
-28 faults and two bounded cycle prefixes. Full completion renews all 44
-reconstructed routines among 1,028 candidates and retains prior coverage.
-Use `workflow.py complete --rva 0x61530` with explicit limitations, check LF
-working/index input bytes, synchronize exports and pass staged gate/hooks.
-Compilation and emulation are separate; instruction equality, original compiler/
-link layout, whole ImageOp integration and native graphics/heap/game/fault parity
-remain unverified. CRT/primitive/callbacks remain modeled; ImageOp/release/
-renderers remain unreconstructed. Earlier milestone entries below are historical.
-
-## Sprite descriptor pixel leaf (2026-10-09)
-
-[Pixel copying](ghidra/windows_gfx_sprite_pixels.md), VA 0x004612A0 / RVA
-0x612A0, now has production C89 preserving pointer capture order, signed live
-bounds, ordered byte/stride accesses, unsigned wrapping and forward overlap.
-Fresh compilation and 659 differential comparisons include 376 persistent
-follow-ups, 14 faults, 62 live-alias calls and ten wrapping calls. Full completion
-renews all 43 reconstructed routines among 1,028 candidates and retains existing
-packing/lifecycle/memory/font/file/backend coverage. Instruction equality,
-original compiler/link layout and native graphics/game/fault parity remain
-unverified. Storage RVA 0x61530 is the next separate production feature; both
-callers remain unreconstructed. No playable rebuilt executable is certified.
-Earlier milestone entries below are historical.
-
-
-## Storage assignment analysis completion (2026-10-09)
-
-[Storage and pixel-leaf contracts](ghidra/windows_gfx_sprite_packing_storage.md)
-at RVAs 0x61530/0x612A0 are analyzed only. Thirty-two original-only probes
-corroborate hand-derived expectations with modeled CRT malloc; they create no
-compilation/differential records. Complete with `workflow.py complete
---analysis-only --rva 0x61530 --rva 0x612A0` and an explicit limitation.
-Audit retained input/artifact freshness, synchronize exports, verify LF
-working/index input hashes and pass the staged gate/hooks. Shared production
-source, builder and verifiers remain unchanged; their 42 reconstructed routine
-records are retained, not newly rerun. Production reconstruction must add real
-pixel-leaf and storage differential contracts before ordinary completion.
-
-## Sprite packing bucket insertion (2026-10-09)
-
-[Bucket insertion](ghidra/windows_gfx_sprite_packing_buckets.md), VA 0x004616C0 /
-RVA 0x616C0, now has production C89 with the verified eight-byte bucket view.
-Real page/gap/link/allocation bodies preserve ordered copies/links, live rereads,
-wrapping range/pixel/table arithmetic, exact arena aliases and unchecked failure
-effects. 2,734 comparisons per binary include 1,140 persistent follow-ups, 127
-faults and two externally bounded cycle prefixes. All prior packing/lifecycle/
-memory/font/file/backend coverage remains. Inventory: 1,028 candidates, 42
-reconstructed routines. Storage assignment RVA 0x61530 and release RVA 0x618B0
-remain analysis-only; primitive/CRT/callbacks stay modeled. Instruction equality,
-original compiler/link layout and native graphics/heap/game parity are unverified.
-No playable rebuilt executable is certified. Earlier entries below are historical.
-
-
-## Sprite packing gap search (2026-10-08)
-
-[The bounded gap search](ghidra/windows_gfx_sprite_packing_gap.md), VA 0x00461870 /
-RVA 0x61870, is reconstructed in production C89. Signed prefix/gap comparisons,
-wrapping subtraction, three distinct returns and ordered read-only traversal
-are preserved without invented request/pointer/cycle guards. 1,835 differential
-comparisons per binary include 922 persistent follow-ups, 69 read faults and
-two externally bounded nonreturning cycle prefixes. Both callers are statically
-authenticated only. All prior allocation/page/link/reset/lifecycle/memory/font/
-file/backend coverage remains. Inventory: 1,028 candidates, 41 reconstructed.
-Instruction equality, original compiler/link layout and native graphics/heap/game
-parity remain unverified. Primitive/CRT/callbacks are modeled; packing callers
-and workspace renderers remain unreconstructed. No playable build is certified.
-
-
-## Sprite packing page allocation (2026-10-08)
-
-[Page allocation](ghidra/windows_gfx_sprite_packing_pages.md), RVA 0x617E0,
-is reconstructed with both [real allocation helpers](ghidra/windows_gfx_alloc_aligned.md).
-It retains ordered template copying, live head rereads, repair before publication,
-incidental EAX and unchecked failure effects. 1,574 page comparisons include
-816 persistent follow-ups, 134 real-dependency cases and six fault cases.
-The 48/512 standalone helper comparisons and all prior lifecycle/memory/font/
-file/backend suites remain. Inventory: 1,028 candidates, 40 reconstructed.
-CRT heap is modeled; packing callers remain unreconstructed. Instruction
-equality, original compiler/link layout and native graphics/heap/game parity
-remain unverified. No playable rebuilt executable is certified.
-
-
-## Graphics aligned allocation dependencies (2026-10-08)
-
-[Allocation dependencies](ghidra/windows_gfx_alloc_aligned.md), RVAs
-0x5F4A0/0x61840, now have readable production C89. The zero-size wrapper and
-unsigned aligned allocator retain unchecked failure behavior and back-pointer
-placement. 48/512 differential comparisons include 24/252 persistent repeats
-and eight aligned-helper fault cases; CRT malloc is modeled. Prior suites
-remain intact. Inventory: 1,028 candidates, 39 reconstructed routines.
-Page allocation RVA 0x617E0 remains the next separate feature. Instruction
-equality, original compiler/link layout and native heap/game parity are unverified.
-
-
-## Sprite packing node links (2026-10-08)
-
-[The link helper](ghidra/windows_gfx_sprite_packing_links.md), VA 0x00461690 /
-RVA 0x61690, now has production C89 preserving its ordered two-to-four node
-stores and incidental previous-pointer EAX. 864 standalone differential calls
-per binary include all null/distinct/exact-alias configurations and 464
-persistent follow-ups, including sixteen six-call relinking sequences. Node
-reads, traversal and calls are absent. Both callers are inspected statically;
-no packing-caller/startup integration is claimed. All prior coverage remains,
-including 810 packing resets / 922 real bodies and 280 default initializers /
-392 real bodies through the explicit modeled primitive driver. Full completion
-renews compilation/emulation evidence for all 37 reconstructed routines among
-1,028 candidates. Instruction equality, original compiler/link layout and native
-graphics/heap/game parity remain unverified. Packing callers are unreconstructed;
-primitive/CRT/callback boundaries remain modeled.
-
-## Sprite packing state reset (2026-10-08)
-
-[The packing reset](ghidra/windows_gfx_sprite_packing_reset.md), RVA 0x614D0,
-now has production C89 with an independently recovered 24-byte node template,
-257 opaque bucket pointers and separate page head. It preserves exact store
-order and repeated orphaning without free. 810 standalone comparisons include
-405 persistent repeats; 922 real executions per binary include 112 startups
-through the explicitly modeled primitive driver. Default initialization executes
-first. Four consumers have static ownership/layout analysis only; no consumer
-production or native packing parity is claimed. All prior suites remain intact.
-Inventory: 1,028 candidates, 36 reconstructed routines; instruction equality,
-original compiler/link layout and native graphics/heap/game parity unverified.
-Earlier milestone entries below are historical.
-
-
-## Default sprite descriptor initialization (2026-10-08)
-
-[The default initializer](ghidra/windows_gfx_default_descriptor.md), VA
-0x004611D0 / RVA 0x611D0, now has production C89 and independent differential
-coverage: 280 standalone comparisons (132 persistent repeats), exact eight
-ordered stores/no reads, arbitrary nine-word tail preservation and EAX=0.
-It executes 392 real bodies per binary, including 112 startups through an
-explicitly modeled primitive driver. The real primitive initializer remains
-unreconstructed and is not executed. Sixteen real helper/handle consumption
-chains add coverage; existing standalone comparison counts and all prior suites
-remain. Full completion renews compilation/emulation evidence for all 35
-reconstructed routines; inventory remains 1,028 candidates. Instruction equality,
-original compiler/link layout and native graphics/heap/game parity remain
-unverified. CRT/callbacks remain modeled and workspace consumers unreconstructed.
-Use `uv run python tools/workflow.py complete --rva 0x611D0` with an explicit
-limitation. Earlier milestone entries below are historical.
-
-
-## Real lazy sprite workspaces (2026-10-08)
-
-[Workspaces A/B](ghidra/windows_gfx_sprite_workspaces.md) at RVAs 0x5D840/0x5C9F0
-execute production C89 bodies through sprite installation, backend selection and
-18 lifecycle startups. Each adds 167 standalone comparisons, 83 persistent repeats
-and 757 total real executions per binary. All allocation-failure combinations,
-exact-zero/noncanonical flags, immediate pointer stores, skipped preservation and
-forced-zero orphaning are checked with CRT malloc modeled. Existing descriptor,
-handle, surface, banner, input, memory/font/file/backend coverage is retained.
-Four direct consumers are analyzed only; heap buffers remain opaque. Primitive
-startup, CRT and callbacks remain modeled. Instruction equality, original linked
-layout and native graphics/heap/game parity remain unverified. Full completion
-uses `uv run python tools/workflow.py complete --rva 0x5D840 --rva 0x5C9F0`;
-the verifier regenerates current compilation/emulation evidence for all 34 routines.
-
-`AGENTS.md` owns project policy. `tools/workflow.py` makes selected rules executable;
-it does not certify whether an implementation preserves the original game architecture.
+# Enforced Windows reconstruction workflow
+
+Current instructions live here; completed feature reports are preserved in
+[workflow history](workflow_history.md). The active reconstruction state and
+remaining game limitations are in [the plan](decomp_plan.md).
 
 ## Setup
 
@@ -438,10 +21,52 @@ by PowerShell on Windows. The pre-commit hook validates the index and
 the commit-msg hook checks Conventional Commits. Reconstruction source commits
 need an `RVA: 0x...` trailer. Multiple RVAs can use separate trailers.
 
+## Choose module ownership before implementation
+
+`decomp/modules.json` records our reconstruction boundaries, state ownership,
+dependencies, build mode and placement rationale. `original_source: null` means
+the original Windows translation-unit filename is unknown. An annotation or
+semantic subsystem grouping does not recover that filename.
+
+Preflight with RVAs requires `--module` (repeat for affected owning modules),
+`--placement-reason` and explicit `--file` entries for those module sources plus
+all other feature files. It saves that decision with the target diagnostics.
+An unidentified candidate can have a proposed owner; its eventual semantic name
+and source must satisfy the ownership rule before reconstruction is completed.
+
+New subsystems require a manifest entry and an appropriate production module.
+Migrated modules compile directly as complete C89 translation units. Input uses
+`decomp/src/input.c` / `decomp/include/input.h`, with its private state types and
+explicit Win32 platform bindings. See [migration evidence](ghidra/windows_input_module.md).
+The shared builder and three font/file link harnesses compile and link the entire
+input object; its bodies and header are no longer extracted from `geputget.c`.
+
+Remaining extracted modules have an `approved_symbols` map with a documented
+placement reason for each existing routine. A new routine cannot silently join
+`geputget.c`; prefer migrating its subsystem, or document a reviewed temporary
+exception in that map. The staged gate checks the staged manifest, unique
+reconstructed definitions and source/tracking agreement. The manifest does not
+certify unvalidated legacy bodies or prove fidelity by itself.
+
+Move one verified subsystem at a time, carrying its state and private declarations
+with it. Keep mechanical moves separate from behavior changes. Use
+`db.py describe <RVA> --source <path>` to update both source and module membership,
+retain the original binary/ABI evidence, and record the actual reconstruction
+stage using `set-status`. A source move does not promote an analysis stage.
+Rerun affected contracts and callers before completing a migration.
+
+`windows_tracking.record_run` includes full input source/header dependencies for
+shared-builder runs. Snapshot generation hashes each shared file once per call;
+the next call rereads it. No persistent hash cache or freshness bypass is used.
+Read/write text with explicit UTF-8. Tracked text uses LF via `.gitattributes`,
+so working/index hashes are reproducible
+on Windows. Finish source changes before validation and check those bytes before
+committing; cached metrics and dashboard snapshots do not refresh themselves.
+
 ## Start and finish a Windows feature
 
 ```powershell
-uv run python tools/workflow.py preflight --rva 0x5b410 --file decomp/src/mem.c
+uv run python tools/workflow.py preflight --rva 0x5b410 --module memory --placement-reason "Verified handle registry ownership" --file decomp/src/mem.c
 # Analyze, implement, describe/set-status by verified RVA, and extend the real verifier.
 uv run python tools/workflow.py complete --rva 0x5b410 --limitation "No native game runtime validation"
 # Review changes, stage explicit feature paths, then:
@@ -465,14 +90,10 @@ Completion takes an exclusive `build/workflow/completion.lock`, runs the current
 real Windows verifier, audits fidelity, requires fresh passing compilation and
 emulation for every requested RVA, exports and checks the exports. It writes
 `build/workflow/handoff.json` with snapshot ID, affected records/results and limitations.
-It never stages or commits. The verifier supports the five memory handle routines
-and extracted-production-C `Font_GetTextWidth` and `Font_DrawText` contracts;
-the latter executes the original sprite wrapper with a modeled renderer boundary.
-The native sprite backend `Gfx_DrawSpriteNative` at RVA `0x571B0` additionally
-uses extracted production C with GCC x87; its zero-argument downstream boundary
-is modeled after executing the original adapter and descriptor lookup separately.
-Rasterizer bodies and framebuffer output are unverified. Extend the verifier before
-completing a different reconstructed routine.
+It never stages or commits. The verifier runs the registered function-specific Windows contracts, including
+compilation, differential emulation and their applicable scoped native checks.
+Extend a real contract and result recording before completing a new routine.
+The focused DLLs are validation artifacts; they are not a playable rebuilt game.
 Compilation, instruction comparison, emulation and native execution remain separate
 evidence kinds. Differential emulation does not establish native game parity.
 
@@ -498,6 +119,7 @@ worktrees and one integration owner for harness, SQLite, exports and final commi
   Deleting a definition still tracked as reconstructed fails.
 - Newly introduced assembly tokens outside comments/string literals. Existing
   unmigrated routines are not certified; unchanged legacy definitions are allowed.
+- Module ownership, unique definitions, approved legacy placements and database/source agreement.
 - SQL, inventory, Markdown and both dashboard exports agree with the staged store.
 - Full local mode also runs the staged fidelity/export auditors against a temporary
   index snapshot. Only the fingerprinted original and `build/` result artifacts
@@ -537,47 +159,9 @@ Focused regression tests:
 
 ```powershell
 uv run python -m unittest discover -s tests -p test_workflow.py
+uv run python -m unittest discover -s tests -p test_module_ownership.py
+uv run python -m unittest discover -s tests -p test_windows_tracking.py
 ```
 
 For restricted execution environments with an unwritable default uv cache, set
 `$env:UV_CACHE_DIR = Join-Path (Get-Location) 'build/uv-cache'` before invoking uv.
-
-## Implementation validation (2026-10-07)
-
-The guard suite has 24 tests, including staged versus unstaged content, the CI HEAD
-snapshot, database-only promotions, missing inputs, stale artifacts, omitted exports,
-completion failure/lock handling, the analysis-only handoff and actual Windows hook
-launch/rejection (requires `uv`/`pwsh`). The existing Windows
-tracking and doctor suites also passed (10 and 4 tests respectively).
-
-The actual Windows verifier compiled the focused DLL and passed 1,946 differential
-emulation comparisons for RVAs `0x5B1F0`, `0x5B1B0`, `0x5B360`, `0x5B240`,
-`0x5B410`, plus eight original-only negative-cursor cases. Fresh records and exports
-use snapshot `a3bf7f86a261`; the fidelity audit and staged export check passed.
-Raw byte equality differed; instruction equality and native game parity are not
-claimed. No game routines or analysis-stage labels changed in this workflow feature.
-
-## Sprite installer validation follow-up (2026-10-08)
-
-The real verifier now supports Gfx_InstallSpriteDispatch at RVA 0x56E60,
-with sixteen typed globals, three explicit downstream models and preserved
-real surface/selector/lifecycle integration. See
-[the contract and validation scope](ghidra/windows_gfx_sprite_dispatch.md).
-Current coverage adds 306 sprite comparisons, 48 original-only consumer ABI
-checks and 43 original-only initializer contracts. Instruction equality and
-native graphics/game parity remain unverified.
-
-## Real sprite handle/helper follow-up (2026-10-08)
-
-[Handle initialization and descriptor copying](ghidra/windows_gfx_sprite_handles.md)
-reconstruct RVAs 0x5C7F0/0x612E0 and execute the real helper through real handles,
-sprite installation, selector and 18 lifecycle startups. Fresh coverage adds
-486 helper and 48 handle comparisons, plus 16 original-only default initializer
-checks; existing 306/266 sprite/surface installers, 532 selectors, 48/39 consumer
-ABI and 43 downstream contracts, banner/input/memory validation remain.
-Default initialization writes seven words and preserves nine; only live copies
-clear +0x18/+0x1C. Two workspace initializers and primitive/CRT/callback boundaries
-remain modeled. Strict C89 compilation and differential emulation pass;
-instruction equality, original compiler/link layout and native graphics/game
-parity remain unverified. Earlier model/opaque-descriptor descriptions are
-historical. Inventory: 1,028 candidates, 32 reconstructed routines.

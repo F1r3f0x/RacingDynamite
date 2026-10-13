@@ -1,5 +1,9 @@
 # Timed native input and state consumers (2026-10-12)
 
+Current reconstruction placement: `decomp/src/input.c` with `decomp/include/input.h`.
+See [the module migration](windows_input_module.md). Earlier `geputget.c` references
+below describe the historical feature layout; original source filenames remain unknown.
+
 The target remains the authentic standard Windows `IGN_WIN.EXE`, SHA256
 `7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782`,
 PE32 i386 with image base `0x00400000`. Local PE/FPO instructions, initializers,

@@ -17,6 +17,8 @@ jobs:
           python-version: '3.13'
       - name: Guard regression tests
         run: uv run --no-project --python 3.13 python -m unittest discover -s tests -p test_workflow.py
+      - name: Module ownership regression tests
+        run: uv run --no-project --python 3.13 python -m unittest discover -s tests -p test_module_ownership.py
       - name: Check committed snapshot (portable; no fidelity claim)
         shell: pwsh
         env:

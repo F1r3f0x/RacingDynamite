@@ -2,6 +2,7 @@
  * mem.c is the reconstruction module, inferred from adjacent handle consumers.
  */
 #include "mem.h"
+#include "input.h"
 #include <stddef.h>
 
 /* CRT caller-cleanup free boundary; native heap behavior is not reconstructed. */
@@ -13,7 +14,6 @@ extern void *malloc(size_t size);
  * VAs: 0x0045B4F0, 0x00455AB0, 0x0045E610, 0x00456AF0 respectively.
  */
 extern int Lisa_PrintVersion(void);
-extern void Input_ResetCallbacks(void);
 extern void Gfx_InitPrimitiveState(void);
 extern int Gfx_SelectBackend(int backend);
 

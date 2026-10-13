@@ -1,5 +1,20 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Module ownership and direct input compilation (2026-10-12)
+
+[Input migration](ghidra/windows_input_module.md) moves thirteen verified Windows
+routines into full production `input.c` / `input.h` without changing their bodies.
+Ownership manifest/preflight/staged guards prevent silent catch-all placement,
+source descriptions update module membership, and snapshot-local hashing retains
+freshness while avoiding repeated file reads. The current procedure is in
+[workflow](workflow.md); prior feature reports are in [workflow history](workflow_history.md).
+Full renewal passes at snapshot `6b811d6c4e9a`: 90 compilation/emulation records,
+29 scoped native records, 8,152 input comparisons and 52 guard/diagnostic tests.
+Original source filenames/compiler, instruction equality, complete input/game
+behavior and remaining module migrations stay open. A pre-existing palette oracle
+coverage gap is explicitly documented in the migration evidence and is owned by
+the rebuild chat for a separate validation repair after ownership release.
+
 ## Native palette body and installed entry (2026-10-12)
 
 [Palette evidence](ghidra/windows_surface_palette.md), RVAs 0x5C6D0/0x56C40,

@@ -1,5 +1,9 @@
 # Native Windows input lifecycle (in progress)
 
+Current reconstruction placement: `decomp/src/input.c` with `decomp/include/input.h`.
+See [the module migration](windows_input_module.md). Earlier `geputget.c` references
+below describe the historical feature layout; original source filenames remain unknown.
+
 Primary source is the authentic standard Windows `IGN_WIN.EXE`, SHA-256
 `7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782`.
 PE32 i386 preferred VA base is `0x00400000`. Local PE/FPO and SDK inspection

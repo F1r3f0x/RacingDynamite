@@ -43,6 +43,12 @@ class WorkflowTests(unittest.TestCase):
             conn.commit()
         tracking.export(self.root)
         self.source = 'decomp/src/mem.c'
+        (self.root / 'decomp/modules.json').write_text(json.dumps({'schema_version': 1,
+            'modules': {'memory': {'source': self.source, 'header': 'decomp/include/mem.h',
+                'symbol_prefixes': ['Foo'], 'responsibility': 'Fixture memory routine',
+                'state': ['fixture state'], 'dependencies': ['fixture CRT'],
+                'placement_reason': 'Fixture ownership', 'build_mode': 'direct',
+                'original_source': None}}}))
         self.original = (self.root / self.source).read_bytes()
         with tracking.connect(self.root, writable=True) as conn:
             conn.execute("UPDATE functions SET classification='game' WHERE rva=4224")
@@ -86,6 +92,41 @@ class WorkflowTests(unittest.TestCase):
         (self.root / self.source).write_text('')
         with self.assertRaisesRegex(ValueError, 'deleted definition'):
             workflow.policy(self.root, [self.source], {self.source: self.original})
+
+    def test_relocation_requires_one_definition_and_updated_tracking(self):
+        from module_ownership import validate
+        manifest = self.root / 'decomp/modules.json'
+        data = json.loads(manifest.read_text())
+        destination = 'decomp/src/moved.c'
+        data['modules']['memory']['source'] = destination
+        manifest.write_text(json.dumps(data))
+        (self.root / destination).write_bytes(self.original)
+        with tracking.connect(self.root, writable=True) as conn:
+            conn.execute('UPDATE functions SET source_path=? WHERE rva=4224', (destination,))
+        with self.assertRaisesRegex(ValueError, 'one definition'):
+            validate(self.root, workflow.records(self.root), workflow.functions)
+        (self.root / self.source).write_text('')
+        self.assertEqual(workflow.policy(self.root, [self.source, destination],
+            {self.source: self.original}), {0x1080})
+        validate(self.root, workflow.records(self.root), workflow.functions)
+
+    def test_unstaged_ownership_change_cannot_authorize_relocation(self):
+        from module_ownership import validate
+        self.stage_repo()
+        destination = 'decomp/src/moved.c'
+        (self.root / destination).write_bytes(self.original)
+        (self.root / self.source).write_text('')
+        with tracking.connect(self.root, writable=True) as conn:
+            conn.execute('UPDATE functions SET source_path=? WHERE rva=4224', (destination,))
+        subprocess.run(['git', '-C', str(self.root), 'add', self.source,
+                        destination, 'database/decomp.db'], check=True)
+        manifest = self.root / 'decomp/modules.json'
+        data = json.loads(manifest.read_text())
+        data['modules']['memory']['source'] = destination
+        manifest.write_text(json.dumps(data))
+        with workflow.staged_tree(self.root) as tree:
+            with self.assertRaisesRegex(ValueError, 'module owns'):
+                validate(tree, workflow.records(tree), workflow.functions)
 
     def test_originals_and_build_artifacts_rejected_even_if_deleted(self):
         for name in ['Ignition/Ignition/IGN_WIN.EXE', 'build/object.obj', 'decomp/raw/output.c']:
@@ -262,10 +303,11 @@ class WorkflowTests(unittest.TestCase):
     def test_real_windows_hook_launchers_and_message_rejection(self):
         self.stage_repo()
         for name in ['workflow.py', 'git_hooks.ps1', 'windows_tracking.py', 'decomp_doctor.py',
-                     'generate_dashboard.py', 'verify_fidelity.py', 'db.py']:
+                     'generate_dashboard.py', 'verify_fidelity.py', 'db.py', 'module_ownership.py']:
             destination = self.root / 'tools' / name
             destination.parent.mkdir(exist_ok=True)
-            shutil.copyfile(workflow.ROOT / 'tools' / name, destination)
+            destination.write_text((workflow.ROOT / 'tools' / name).read_text(encoding='utf-8-sig'),
+                                   encoding='utf-8', newline='\n')
         shutil.copytree(workflow.ROOT / '.githooks', self.root / '.githooks')
         subprocess.run(['git', '-C', str(self.root), 'add', 'tools', '.githooks'], check=True)
         subprocess.run(['git', '-C', str(self.root), 'config', 'core.hooksPath', '.githooks'], check=True)

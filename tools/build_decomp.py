@@ -1,6 +1,5 @@
-"""Compile only the verified Windows mem routines; link a validation DLL.
-
-This replaces the DOS build entry point. Other decomp modules are unmigrated.
+"""Build focused Windows validation DLLs from full memory/input modules
+and remaining extracted verified production bodies. Not a playable rebuild.
 """
 import argparse
 import shutil
@@ -20,11 +19,7 @@ STARTUP_EXPORTS = ['Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_ClearSurfaceN
 # Extract these verified production declarations/body, rather than duplicating C.
 _resource_header = (ROOT / 'decomp/include/geputget.h').read_text(encoding='utf-8-sig')
 _resource_source = (ROOT / 'decomp/src/geputget.c').read_text(encoding='utf-8-sig')
-STARTUP_BOUNDARY_SOURCE += (
-    _resource_header[_resource_header.index('typedef void (*InputKeyEventCallback)'):
-        _resource_header.index('#define MAX_FONTS')]
-    + _resource_source[_resource_source.index('InputKeyEventCallback volatile g_inputKeyEventCallback ='):
-        _resource_source.index('/*\n * @original Gfx_SelectBackend')])
+STARTUP_BOUNDARY_SOURCE += '#include "geputget.h"\n'
 
 SURFACE_HEADER = _resource_header[_resource_header.index('/* Windows surface dispatch.'):_resource_header.index('#define MAX_FONTS')]
 STARTUP_BOUNDARY_SOURCE += (
@@ -117,9 +112,6 @@ SURFACE_SOURCE += _resource_source[_resource_source.index(_rebuild_marker):_reso
 _access_marker = '/* Native surface access implementation. */'
 _access_end = '/* End native surface access implementation. */'
 SURFACE_SOURCE += _resource_source[_resource_source.index(_access_marker):_resource_source.index(_access_end)]
-_input_marker = '/* Native DirectInput lifecycle implementation. */'
-_input_end = '/* End native DirectInput lifecycle implementation. */'
-SURFACE_SOURCE += _resource_source[_resource_source.index(_input_marker):_resource_source.index(_input_end)]
 INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'Input_PollNative',
     'Input_InitTimedNative', 'Input_ShutdownNativeEntry', 'Input_ReinitializeNative',
     'Input_ReadHeldNative', 'Input_ConsumePressNative', 'Input_ConsumeRepeatNative', 'g_nativeInputPeriod',
@@ -219,6 +211,23 @@ def compile_surface(stem):
     return obj, command
 
 
+def compile_input(stem):
+    """Compile the entire production module; no source/header extraction."""
+    cc = shutil.which('gcc')
+    if not cc:
+        raise RuntimeError('GCC i386 Win32 SDK compiler required')
+    source, obj = ROOT/'decomp/src/input.c', BUILD/(stem+'_input.obj')
+    obj.unlink(missing_ok=True)
+    command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
+        '-Werror', '-O2', '-fno-inline', '-fno-optimize-sibling-calls',
+        '-I', str(ROOT/'decomp/include'), '-c', str(source), '-o', str(obj)]
+    print(subprocess.list2cmdline(command), flush=True)
+    subprocess.run(command, cwd=ROOT, check=True)
+    if not obj.is_file() or not obj.stat().st_size:
+        raise RuntimeError('Fresh whole-module input object required')
+    return obj, command
+
+
 def surface_import_libraries(stem):
     dlltool = shutil.which('llvm-dlltool')
     if not dlltool:
@@ -270,7 +279,8 @@ def build(compiler='clang', linker='lld-link', dll=DLL):
     banner_obj, _ = compile_banner(commands[0][:-4], dll.stem)
     sine_obj, _ = compile_sine(dll.stem)
     surface_obj, _ = compile_surface(dll.stem)
-    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj)] + surface_import_libraries(dll.stem))
+    input_obj, _ = compile_input(dll.stem)
+    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj), str(input_obj)] + surface_import_libraries(dll.stem))
     for command in commands:
         print(subprocess.list2cmdline(command), flush=True)
         subprocess.run(command, cwd=ROOT, check=True)

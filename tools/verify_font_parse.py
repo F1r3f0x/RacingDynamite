@@ -13,7 +13,7 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ESP, UC_X86_REG_EIP,
                               UC_X86_REG_EFLAGS)
 from verify_font_cleanup import FontLifecycleCPU, LIFECYCLE_FIELDS, SAVED, STACK, STOP
-from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine, compile_surface, surface_import_libraries
+from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine, compile_surface, compile_input, surface_import_libraries
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -135,7 +135,8 @@ extern void *Gfx_SpriteOp(void *desc, int op);
         [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/safeseh:no', '/base:0x10000000',
          '/out:' + str(dll), str(obj), str(stub_obj)] + ['/export:' + n for n in exports]]
     commands.insert(1, [cc, '--target=i686-pc-windows-msvc', '-std=c89', '-pedantic-errors',
-        '-Wall', '-Wextra', '-Werror', '-O2', '-ffreestanding', '-fno-builtin', '-c', str(stub), '-o', str(stub_obj)])
+        '-Wall', '-Wextra', '-Werror', '-O2', '-ffreestanding', '-fno-builtin',
+        '-I', str(ROOT / 'decomp/include'), '-c', str(stub), '-o', str(stub_obj)])
     if include_loader:
         # Separate translation unit prevents dead-argument optimization of unused.
         loader_path, loader_obj = BUILD / (stem + '_wrapper.c'), BUILD / (stem + '_wrapper.obj')
@@ -155,10 +156,11 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     banner_obj, banner_cmd = compile_banner(commands[0][:-4], dll.stem)
     sine_obj, sine_cmd = compile_sine(dll.stem)
     surface_obj, _ = compile_surface(dll.stem)
-    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj)] + surface_import_libraries(dll.stem))
+    input_obj, input_cmd = compile_input(dll.stem)
+    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj), str(input_obj)] + surface_import_libraries(dll.stem))
     for command in commands:
         subprocess.run(command, check=True)
-    return commands[:-1] + [banner_cmd, sine_cmd, commands[-1]]
+    return commands[:-1] + [banner_cmd, sine_cmd, input_cmd, commands[-1]]
 
 
 class ParserCPU(FontLifecycleCPU):

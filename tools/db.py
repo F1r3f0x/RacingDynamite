@@ -4,6 +4,7 @@ import argparse
 import json
 import sqlite3
 import sys
+from pathlib import Path
 from windows_tracking import ROOT, STAGES, connect, migrate, snapshot, export, audit, inside, load_target, pe_inventory, sha
 
 
@@ -110,6 +111,17 @@ def main(argv=None):
                         if value is not None:
                             if argument in ('source','evidence'):
                                 inside(ROOT,value)
+                            if argument == 'source':
+                                module_name = Path(value).name
+                                module = conn.execute('SELECT id,source_path FROM modules WHERE name=?',
+                                                      (module_name,)).fetchone()
+                                if module and module['source_path'] != value:
+                                    raise ValueError('Module filename already owns another source path')
+                                conn.execute('INSERT OR IGNORE INTO modules(name,source_path) VALUES (?,?)',
+                                             (module_name, value))
+                                module_id = conn.execute('SELECT id FROM modules WHERE name=?',
+                                                         (module_name,)).fetchone()['id']
+                                conn.execute('UPDATE functions SET module_id=? WHERE id=?', (module_id, fn['id']))
                             conn.execute(f'UPDATE functions SET {column}=? WHERE id=?',(value,fn['id']))
             print('Updated record; run db.py audit and db.py update to validate/export.')
         return 0

@@ -14,12 +14,20 @@ See `docs/decomp_plan.md` for the active plan and target fingerprint.
   or maintain a DOS build. Existing DOS code is untrusted implementation material,
   not a foundation that must be preserved. Recover behavior from `IGN_WIN.EXE`.
   Use 4-space indentation and no handwritten assembly or inline `__asm`.
+- Declare subsystem ownership in `decomp/modules.json` before reconstruction.
+  Preflight requires `--module` and `--placement-reason` with affected RVAs and
+  explicit source files. Record state ownership, dependencies and build mode;
+  keep reconstruction placement separate from unknown original source filenames.
+  New subsystems need an ownership rule rather than falling into `geputget.c`.
+  Compile migrated production modules directly, with explicit harness boundaries.
 - Retarget build, verification, database, symbol maps, and dashboards in place.
   Remove obsolete DOS scaffolding as part of the affected migration feature.
   Git history provides recovery of the old implementation; no duplicate DOS source
   archive is required. This documentation change itself does not replace code.
 - `src/`: C11/SDL2 source port, built with CMake; modernization follows verified reconstruction.
 - Tools: Python through `uv`. Use Windows PowerShell; do not run Linux package managers.
+  Read and write text with explicit UTF-8 encoding and LF newlines; Windows locale
+  defaults can corrupt Unicode and invalidate working/index provenance hashes.
 
 ## Non-negotiable constraints
 

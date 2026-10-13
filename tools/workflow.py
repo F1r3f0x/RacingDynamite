@@ -11,6 +11,7 @@ import sqlite3
 import subprocess
 import sys
 import tempfile
+import module_ownership
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPORTS = {'database/decomp.db', 'database/dump.sql', 'docs/tracking/windows_inventory.json',
@@ -136,6 +137,7 @@ def policy(root, paths, old_contents):
                 errors.append(f'{symbol}: deleted definition still marked reconstructed')
     if errors:
         raise ValueError('\n'.join(errors))
+    module_ownership.validate(root, rows, functions)
     return affected
 
 
@@ -211,6 +213,7 @@ def require_results(data, affected):
 
 def portable_exports(root):
     """Structural consistency without original binary/artifact availability."""
+    module_ownership.validate(root, records(root), functions)
     payload = json.loads((root / 'docs/tracking/windows_inventory.json').read_text(encoding='utf-8'))
     indexed = {fn['rva']: fn for fn in payload['functions']}
     rows = records(root)
@@ -315,6 +318,7 @@ def complete(root, rvas, analysis_only, limitations):
                                  for row in records(root)):
             raise ValueError('Analysis completion requires analyzed records, ABI, classification and evidence')
         if not analysis_only:
+            module_ownership.validate(root, records(root), functions)
             run(root, 'uv', 'run', 'tools/verify_matching.py')
         run(root, 'uv', 'run', 'python', 'tools/verify_fidelity.py')
         data = audit(root)
@@ -377,6 +381,8 @@ def main():
     preflight = sub.add_parser('preflight')
     preflight.add_argument('--rva', action='append', type=lambda x: int(x, 0), default=[])
     preflight.add_argument('--file', action='append', default=[])
+    preflight.add_argument('--module', action='append', default=[], help='Selected reconstruction module IDs')
+    preflight.add_argument('--placement-reason', default='', help='Why this feature belongs in those modules')
     complete_parser = sub.add_parser('complete')
     complete_parser.add_argument('--rva', action='append', type=lambda x: int(x, 0), required=True)
     complete_parser.add_argument('--analysis-only', action='store_true')
@@ -400,6 +406,8 @@ def main():
         elif args.command == 'preflight':
             from decomp_doctor import diagnose
             data = diagnose(ROOT)
+            data['placement'] = module_ownership.placement(ROOT, records(ROOT), args.rva,
+                args.file, args.module, args.placement_reason)
             data.update(affected_rvas=[hex(r) for r in args.rva], feature_files=args.file,
                         initial_git_status=git(ROOT, 'status', '--short').decode())
             for name in args.file:

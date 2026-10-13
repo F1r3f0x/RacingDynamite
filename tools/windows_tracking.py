@@ -177,20 +177,29 @@ def migrate(root=ROOT):
     return True
 
 
-def input_hash(root, paths):
-    return sha(canonical({p: sha(inside(root,p).read_bytes()) for p in sorted(paths)}).encode())
+def file_hash(root, path, cache=None):
+    # Cache only within one snapshot, never between calls or recording runs.
+    if cache is None:
+        return sha(inside(root, path).read_bytes())
+    if path not in cache:
+        cache[path] = sha(inside(root, path).read_bytes())
+    return cache[path]
+
+
+def input_hash(root, paths, cache=None):
+    return sha(canonical({p: file_hash(root, p, cache) for p in sorted(paths)}).encode())
 
 
 def record_run(rva, kind, outcome, *, inputs, artifact=None, cases=0, command, details=None, root=ROOT):
     if kind not in KINDS or outcome not in ('pass','fail','different','unverified'):
         raise ValueError('Invalid verification kind or outcome')
     target, _ = load_target(root)
-    # The shared builder now extracts real Win32 platform backing from main.
-    # Persist these transitive inputs so later main edits cannot leave evidence
-    # looking current merely because the caller listed only the builder script.
+    # Persist complete direct input and extracted platform dependencies of the
+    # shared builder even when a caller lists only the builder script.
     inputs = list(inputs)
     if 'tools/build_decomp.py' in inputs:
-        inputs = list(dict.fromkeys(inputs + ['decomp/src/main.c', 'decomp/include/main.h']))
+        inputs = list(dict.fromkeys(inputs + ['decomp/src/main.c', 'decomp/include/main.h',
+                                             'decomp/src/input.c', 'decomp/include/input.h']))
     digest = input_hash(root, inputs)
     artifact_hash = sha(inside(root,artifact).read_bytes()) if artifact else None
     with connect(root, True) as conn:
@@ -204,11 +213,11 @@ def record_run(rva, kind, outcome, *, inputs, artifact=None, cases=0, command, d
            artifact,artifact_hash,command,canonical(details or {})))
 
 
-def run_stale(run, root):
+def run_stale(run, root, cache=None):
     try:
-        if input_hash(root,json.loads(run['input_paths_json'])) != run['input_sha256']:
+        if input_hash(root,json.loads(run['input_paths_json']),cache) != run['input_sha256']:
             return True
-        if run['artifact_path'] and sha(inside(root,run['artifact_path']).read_bytes()) != run['artifact_sha256']:
+        if run['artifact_path'] and file_hash(root,run['artifact_path'],cache) != run['artifact_sha256']:
             return True
     except (OSError,ValueError):
         return True
@@ -233,8 +242,9 @@ def snapshot(root=ROOT):
                       LEFT JOIN modules m ON m.id=f.module_id ORDER BY rva''')]
         milestones = [dict(r) for r in conn.execute('SELECT * FROM milestones ORDER BY key')]
     grouped = {}
+    file_digests = {}
     for run in runs:
-        run['stale'] = run_stale(run,root)
+        run['stale'] = run_stale(run,root,file_digests)
         run['details'] = json.loads(run.pop('details_json'))
         run['input_paths'] = json.loads(run.pop('input_paths_json'))
         grouped.setdefault(run['function_id'],{})[run['kind']] = run
