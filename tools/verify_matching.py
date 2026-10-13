@@ -882,3 +882,5 @@ if __name__ == '__main__':
     verify_surface_blit()
     from verify_surface_copy import verify_surface_copy
     verify_surface_copy()
+    from verify_surface_constants import verify_surface_constants
+    verify_surface_constants()

@@ -21,11 +21,6 @@ _resource_header = (ROOT / 'decomp/include/geputget.h').read_text(encoding='utf-
 _resource_source = (ROOT / 'decomp/src/geputget.c').read_text(encoding='utf-8-sig')
 STARTUP_BOUNDARY_SOURCE += '#include "geputget.h"\n'
 
-STARTUP_BOUNDARY_SOURCE += (
-    'int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4) { (void)option0; (void)option1; (void)option2; (void)option3; (void)option4; for (;;) {} }\n'
-    'int Gfx_SurfaceReservedNative(void) { for (;;) {} }\n'
-)
-
 # Extract the native banner body and its existing public prototype verbatim.
 _lisa_header = (ROOT / 'decomp/include/lisa3d.h').read_text(encoding='utf-8-sig')
 _lisa_source = (ROOT / 'decomp/src/lisa3d.c').read_text(encoding='utf-8-sig')
@@ -98,7 +93,7 @@ SINE_EXPORTS = ['Gfx_InitSineTable', 'g_nativeSineTable', 'g_nativeSineStep',
     'g_nativeSineFullCircle', 'g_nativeSineAmplitude']
 
 SURFACE_EXPORTS = ['Gfx_InitSurfaceRecords', 'g_nativePrimarySurface',
-    'g_nativeType1Surfaces', 'g_nativeType2Surfaces', 'g_surfaceConfigure', 'g_surfaceOpen', 'g_surfaceRebuild', 'g_surfaceShutdown', 'g_surfaceConfigureSurface', 'g_surfaceBlit', 'g_surfaceCopyPixels', 'g_surfaceClear', 'g_surfacePresent', 'g_surfaceReserved', 'g_surfaceLock', 'g_surfaceUnlock', 'g_surfaceSetPalette', 'g_surfaceRestore', 'Gfx_SurfaceConfigureNative', 'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_SurfaceShutdownNative', 'Gfx_SurfaceConfigureSurfaceNative', 'Gfx_SurfaceBlitNative', 'Gfx_SurfaceBlitDispatch', 'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceCopyPixelsDispatch', 'Gfx_SurfaceClearNative', 'Gfx_SurfacePresentNative', 'Gfx_SurfaceReservedNative', 'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative', 'Gfx_SurfaceSetPaletteNative', 'Gfx_SurfaceRestoreNative'] + SURFACE_EXPORTS_EXTRA
+    'g_nativeType1Surfaces', 'g_nativeType2Surfaces', 'g_surfaceConfigure', 'g_surfaceOpen', 'g_surfaceRebuild', 'g_surfaceShutdown', 'g_surfaceConfigureSurface', 'g_surfaceBlit', 'g_surfaceCopyPixels', 'g_surfaceClear', 'g_surfacePresent', 'g_surfaceReserved', 'g_surfaceLock', 'g_surfaceUnlock', 'g_surfaceSetPalette', 'g_surfaceRestore', 'Gfx_SurfaceConfigureNative', 'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_SurfaceShutdownNative', 'Gfx_SurfaceConfigureSurfaceNative', 'Gfx_SurfaceConfigureSurfaceDispatch', 'Gfx_SurfaceBlitNative', 'Gfx_SurfaceBlitDispatch', 'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceCopyPixelsDispatch', 'Gfx_SurfaceClearNative', 'Gfx_SurfacePresentNative', 'Gfx_SurfaceReservedNative', 'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative', 'Gfx_SurfaceSetPaletteNative', 'Gfx_SurfaceRestoreNative'] + SURFACE_EXPORTS_EXTRA
 
 # Validation fixtures live separately from the extracted production installer.
 STARTUP_BOUNDARY_SOURCE += (

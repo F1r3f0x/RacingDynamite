@@ -40,7 +40,8 @@ extern GfxSurfaceShutdownProc volatile g_surfaceShutdown; /* VA 0x0050EB74 */
 int Gfx_SurfaceShutdownNative(void); /* VA 0x0045C060; resource shutdown, clipper pointer retained */
 typedef int (*GfxSurfaceConfigureSurfaceProc)(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4);
 extern GfxSurfaceConfigureSurfaceProc volatile g_surfaceConfigureSurface; /* VA 0x0050EB78 */
-int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4); /* VA 0x0045C150; body unreconstructed */
+int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4); /* VA 0x0045C150; returns2 without effects */
+int Gfx_SurfaceConfigureSurfaceDispatch(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4); /* VA 0x00456C60 */
 typedef int (*GfxSurfaceBlitProc)(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y);
 extern GfxSurfaceBlitProc volatile g_surfaceBlit; /* VA 0x0050EB7C */
 int Gfx_SurfaceBlitNative(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y); /* VA 0x0045C160 */
@@ -60,7 +61,7 @@ int Gfx_SurfacePresentNative(GfxSurfaceRecord *surface); /* VA 0x0045C4B0 */
 int Gfx_PresentSurfaceNative(GfxSurfaceRecord *surface); /* VA 0x00456C90, installed-table entry */
 typedef int (*GfxSurfaceReservedProc)(void);
 extern GfxSurfaceReservedProc volatile g_surfaceReserved; /* VA 0x0050EB8C */
-int Gfx_SurfaceReservedNative(void); /* VA 0x0045C520; body unreconstructed */
+int Gfx_SurfaceReservedNative(void); /* VA 0x0045C520; returns2 without effects */
 typedef int (*GfxSurfaceLockProc)(GfxSurfaceRecord *surface, int mode);
 extern GfxSurfaceLockProc volatile g_surfaceLock; /* VA 0x0050EB90 */
 int Gfx_SurfaceLockNative(GfxSurfaceRecord *surface, int mode); /* VA 0x0045C530 */

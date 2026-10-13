@@ -979,3 +979,31 @@ int Gfx_SurfaceCopyPixelsDispatch(const unsigned char *pixels, int stride,
     return g_surfaceCopyPixels(pixels, stride, source_x, source_y, width, height,
             destination, destination_x, destination_y);
 }
+
+/* @original Gfx_SurfaceConfigureSurfaceNative (IGN_WIN.EXE @ 0x0045C150, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1,
+        unsigned int option2, unsigned int option3, unsigned int option4) {
+    (void)option0;
+    (void)option1;
+    (void)option2;
+    (void)option3;
+    (void)option4;
+    return 2;
+}
+
+/* @original Gfx_SurfaceReservedNative (IGN_WIN.EXE @ 0x0045C520, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceReservedNative(void) {
+    return 2;
+}
+
+/* @original Gfx_SurfaceConfigureSurfaceDispatch (IGN_WIN.EXE @ 0x00456C60, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceConfigureSurfaceDispatch(unsigned int option0, unsigned int option1,
+        unsigned int option2, unsigned int option3, unsigned int option4) {
+    return g_surfaceConfigureSurface(option0, option1, option2, option3, option4);
+}

@@ -1,5 +1,18 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Surface constant bodies and configuration entry (2026-10-13)
+
+[Evidence](ghidra/windows_surface_constants.md), RVAs 0x5C150/0x5C520/0x56C60,
+closes the last surface-only fixture boundaries with directly compiled C89 bodies
+and the real installed forwarding entry. Focused 2,049 differential calls and
+72 paired native calls pass; return 2 is preserved without invented status meaning.
+Full 97-routine renewal, audit and exports pass at snapshot `8dbcc3c631d3`,
+with 36 scoped native records. LF/index gates and tracked hooks follow. Next close
+the verified texture-span setup/wrapper/leaf graph in a direct renderer module,
+with explicit internal C interfaces and documented register-ABI adaptation.
+Complete native game startup/menu/render/input/audio/races and original toolchain
+remain unresolved; the persistent playable-game goal stays active.
+
 ## Native byte-copy body and forwarding entry (2026-10-13)
 
 [Byte-copy evidence](ghidra/windows_surface_copy.md), RVAs0x5C1D0/0x56B70,
