@@ -888,3 +888,5 @@ if __name__ == '__main__':
     verify_texture_spans(record=True)
     from verify_edge_emitters import verify_edge_emitters
     verify_edge_emitters(record=True)
+    from verify_triangle_slope import verify_triangle_slope
+    verify_triangle_slope(record=True)

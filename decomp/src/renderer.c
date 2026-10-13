@@ -234,3 +234,21 @@ void Gfx_EmitCorrectedTriangleEdgeRecords(GfxTriangleEdgeEmission *emission) {
     emission->output = output;
     emission->count = count;
 }
+
+/* @original Gfx_ComputeTriangleEdgeSlope (IGN_WIN.EXE @ 0x0045D7A0, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_ComputeTriangleEdgeSlope(int x0, int y0, int x1, int y1) {
+    unsigned int numerator_word;
+    unsigned int denominator_word;
+    if (y0 == y1) {
+        if (x1 < x0) {
+            return (int)0x80010000u;
+        }
+        return 0x7fff0000;
+    }
+    numerator_word = ((unsigned int)x0 - (unsigned int)x1) << 8;
+    denominator_word = (unsigned int)y0 - (unsigned int)y1;
+    /* Verified i386 casts/IDIV retain original signed quotient and #DE behavior. */
+    return (int)numerator_word / (int)denominator_word;
+}

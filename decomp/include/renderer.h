@@ -36,6 +36,7 @@ extern volatile unsigned int g_triangleEdgeUCorrections[8]; /* VA 0x004BADB4 */
 extern volatile unsigned int g_triangleEdgeVCorrections[8]; /* VA 0x004BADD4 */
 void Gfx_EmitRawTriangleEdgeRecords(GfxTriangleEdgeEmission *emission);
 void Gfx_EmitCorrectedTriangleEdgeRecords(GfxTriangleEdgeEmission *emission);
+int Gfx_ComputeTriangleEdgeSlope(int x0, int y0, int x1, int y1);
 
 void Gfx_SetTriangleSpanState(unsigned int gradient_v, unsigned int gradient_u,
     unsigned int texture_word, unsigned int lookup_word);

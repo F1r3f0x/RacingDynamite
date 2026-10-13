@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:cb5157ea80c4ea5c7715bbee28338985365ff40f85b8393cadf7c5b66a308103 -->
+<!-- snapshot:ba3d21e1a6d13b167c538639cee657db57eb69d53b564c8760adf1fdb5012e0f -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -571,7 +571,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045C9F0` | `0x0005C9F0` | 84 | `Gfx_InitSpriteWorkspaceB` | game | reconstructed | [windows_gfx_sprite_workspaces.md](windows_gfx_sprite_workspaces.md) |
 | `0x0045CA50` | `0x0005CA50` | 1813 | `Gfx_RasterizeTexturedTriangle` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
 | `0x0045D170` | `0x0005D170` | 1569 | `Gfx_RasterizeClippedTriangle` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
-| `0x0045D7A0` | `0x0005D7A0` | 53 | `Gfx_ComputeTriangleEdgeSlope` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0045D7A0` | `0x0005D7A0` | 53 | `Gfx_ComputeTriangleEdgeSlope` | game | reconstructed | [windows_triangle_slope.md](windows_triangle_slope.md) |
 | `0x0045D7E0` | `0x0005D7E0` | 20 | `sub_0045D7E0` | unknown | unidentified | - |
 | `0x0045D800` | `0x0005D800` | 32 | `sub_0045D800` | unknown | unidentified | - |
 | `0x0045D820` | `0x0005D820` | 28 | `sub_0045D820` | unknown | unidentified | - |

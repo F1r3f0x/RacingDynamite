@@ -1,5 +1,20 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Native cdecl triangle-edge slope (2026-10-13)
+
+[Slope evidence](ghidra/windows_triangle_slope.md), RVA 0x5D7A0, reconstructs
+the real four-word cdecl helper in the direct C89 renderer. Wrapped numerator/
+denominator arithmetic, signed quotient and equal-Y sentinels remain authentic.
+Focused 1,025 differential cases include a real original/C IDIV exception;
+84 paired native normal calls pass. Full106 renewal/audit/exports pass at
+snapshot `ba3d21e1a6d1`, with 43 scoped native records; LF/index gates/hooks follow.
+Native SEH/unwinding and complete game/triangle
+integration are unverified. Continue real edge setup, gradients and clipping
+after the separate commit; original toolchain and playable-game validation stay open.
+Current wide-division lowering lacks verified 32bit runtime helpers; the real
+right-endpoint clamp is unblocked (signed product/shift links import-free).
+See slope evidence for the concrete dependency diagnostics.
+
 ## Raw and corrected edge record emitters (2026-10-13)
 
 [Emitter evidence](ghidra/windows_edge_emitters.md), RVAs 0x24F1E0/0x24F220,

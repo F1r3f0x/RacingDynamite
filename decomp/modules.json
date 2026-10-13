@@ -191,7 +191,8 @@
         "Gfx_DrawTriangleSpan",
         "Gfx_DrawClippedTriangleSpan",
         "Gfx_EmitRawTriangleEdgeRecords",
-        "Gfx_EmitCorrectedTriangleEdgeRecords"
+        "Gfx_EmitCorrectedTriangleEdgeRecords",
+        "Gfx_ComputeTriangleEdgeSlope"
       ],
       "responsibility": "Verified software texture compositing spans; triangle and sprite rasterization dependencies reconstructed incrementally",
       "state": [
