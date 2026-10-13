@@ -182,6 +182,27 @@
       "placement_reason": "Authenticated surface dispatch consumers and DirectDraw resource ownership form a focused production boundary; original source filename unknown. Mechanical migration precedes new rendering behavior.",
       "build_mode": "direct",
       "original_source": null
+    },
+    "renderer": {
+      "source": "decomp/src/renderer.c",
+      "header": "decomp/include/renderer.h",
+      "symbol_prefixes": [
+        "Gfx_SetTriangleSpan",
+        "Gfx_DrawTriangleSpan",
+        "Gfx_DrawClippedTriangleSpan"
+      ],
+      "responsibility": "Verified software texture compositing spans; triangle and sprite rasterization dependencies reconstructed incrementally",
+      "state": [
+        "span texture and compositing lookup words",
+        "packed coordinate step and low-byte step storage",
+        "cached left texture sample; upper storage bytes retained"
+      ],
+      "dependencies": [
+        "caller-owned mapped texture, compositing table and framebuffer storage; initialization remains external and unverified"
+      ],
+      "placement_reason": "Authenticated cdecl span wrappers and complete register leaves form one real dependency closure. Internal leaf interfaces use explicit C parameters with documented ABI adaptation; no register shim or invented rasterizer. Original source filename unknown.",
+      "build_mode": "direct",
+      "original_source": null
     }
   }
 }

@@ -884,3 +884,5 @@ if __name__ == '__main__':
     verify_surface_copy()
     from verify_surface_constants import verify_surface_constants
     verify_surface_constants()
+    from verify_texture_spans import verify_texture_spans
+    verify_texture_spans(record=True)

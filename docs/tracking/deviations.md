@@ -1,5 +1,20 @@
 # Master Authentic Divergence & Deviation Registry (FCTS)
 
+### DEV-007: Explicit C interfaces for Windows texture-span register leaves
+
+Authenticated standard IGN_WIN.EXE (SHA-256
+`7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782`),
+RVAs 0x67F1C/0x67F42/0x67F97, uses custom register inputs. Reconstruction
+passes the same inputs as typed C89 parameters inside the renderer module;
+the actual cdecl wrappers at 0x5C990/0x5C9B0/0x5C9D0 call complete C leaves.
+No assembly shim, synthetic callee or incidental EAX/flags contract is claimed.
+This ABI adaptation changes no intended compositing behavior and introduces
+no bug fix or toggle. Wrapped counters, zero-count left sampling, table-based
+compositing, persistent scratch and ordered accesses must retain original behavior.
+Differential and bounded paired native span-buffer validation pass; see
+[span evidence](../ghidra/windows_texture_spans.md). Original toolchain and complete
+triangle/sprite integration remain unresolved.
+
 > Existing entries are preserved legacy evidence and need per-entry binary/address validation. New Windows deviations must cite the fingerprinted `IGN_WIN.EXE`; DOS evidence must remain labeled `MAINDOS.EXE`. No existing address is reclassified by the target change.
 
 This registry serves as the **global technical inventory** of all intentional differences, original 1997 engine bug fixes, coordinate adaptations, and safety workarounds in **Racing Dynamite** relative to their recorded original binary. The active baseline is Windows `IGN_WIN.EXE`; `MAINDOS.EXE` is the secondary DOS reference.

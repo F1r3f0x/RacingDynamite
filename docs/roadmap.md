@@ -1,5 +1,18 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Texture span dependency closure (2026-10-13)
+
+[Span evidence](ghidra/windows_texture_spans.md) reconstructs setup and both
+compositing paths plus their wrappers in directly compiled renderer.c, RVAs
+0x5C990/0x67F1C/0x5C9B0/0x67F42/0x5C9D0/0x67F97. DEV-007 documents
+the explicit C interface replacing internal register inputs, with real complete
+leaves and no assembly shim. Focused 896 differential calls, 74 faults and
+64 paired native cases comparing 12,582,912 buffer bytes pass. Full 103-routine
+renewal, audit and exports pass at snapshot `b30e9897223a`, with 42 scoped native
+records. LF/index gates and tracked hooks follow. Continue
+real edge/gradient/triangle dependencies after that commit; original viewport/
+texture initialization and complete native playable game validation stay open.
+
 ## Surface constant bodies and configuration entry (2026-10-13)
 
 [Evidence](ghidra/windows_surface_constants.md), RVAs 0x5C150/0x5C520/0x56C60,
