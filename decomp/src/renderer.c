@@ -10,8 +10,15 @@ volatile unsigned int g_triangleSpanTextureWord = 0;
 volatile unsigned int g_triangleSpanLookupWord = 0;
 volatile unsigned int g_triangleSpanLeftSampleStorage = 0;
 
+volatile GfxTriangleEdgeStepState g_triangleEdgeSteps = {0, 0, {0, 0, 0}, 0};
+volatile unsigned int g_triangleEdgeUCorrections[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+volatile unsigned int g_triangleEdgeVCorrections[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+typedef char GfxEdgeStepsMustBe24Bytes[(sizeof(GfxTriangleEdgeStepState) == 24) ? 1 : -1];
+typedef char GfxEdgeEmissionMustBe20Bytes[(sizeof(GfxTriangleEdgeEmission) == 20) ? 1 : -1];
+
 /* Deliberately wrapped addresses from the verified 32-bit Windows ABI. */
 #define GFX_SPAN_BYTE(address) (*(volatile unsigned char *)(uintptr_t)(address))
+#define GFX_EDGE_SAR(value, shift) (((value) >> (shift)) | ((0u - ((value) >> 31)) << (32 - (shift))))
 
 /* @original Gfx_SetTriangleSpanCore (IGN_WIN.EXE @ 0x00467F1C, unknown original source)
  * @fidelity ADAPTED
@@ -145,4 +152,85 @@ void Gfx_DrawClippedTriangleSpanCore(unsigned char *destination, int count,
 void Gfx_DrawClippedTriangleSpan(unsigned char *destination, int count,
         unsigned int packed_uv, unsigned int integer_u) {
     Gfx_DrawClippedTriangleSpanCore(destination, count, packed_uv, integer_u);
+}
+
+/* @original Gfx_EmitRawTriangleEdgeRecords (IGN_WIN.EXE @ 0x0064F1E0, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_EmitRawTriangleEdgeRecords(GfxTriangleEdgeEmission *emission) {
+    unsigned int texture_v;
+    unsigned int texture_u;
+    unsigned int x;
+    unsigned int count;
+    unsigned int previous_low_count;
+    unsigned int x_step;
+    volatile GfxTriangleSpanEdgeRecord *output;
+    texture_v = emission->texture_v;
+    texture_u = emission->texture_u;
+    x = emission->x;
+    output = emission->output;
+    count = emission->count;
+    do {
+        output->texture_u = GFX_EDGE_SAR(texture_u, 16);
+        texture_u += g_triangleEdgeSteps.texture_u_step;
+        output->texture_v = GFX_EDGE_SAR(texture_v, 16);
+        texture_v += g_triangleEdgeSteps.texture_v_step;
+        x_step = g_triangleEdgeSteps.x_step;
+        output->x = (int)GFX_EDGE_SAR(x, 16);
+        x += x_step;
+        output = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)
+            ((unsigned int)(uintptr_t)output + 12u);
+        previous_low_count = count & 0xffffu;
+        count = (count & 0xffff0000u) | ((count - 1u) & 0xffffu);
+        /* DEC CX/JG: use the signed mathematical decrement, including OF. */
+    } while (previous_low_count > 1u && previous_low_count < 0x8000u);
+    emission->texture_v = texture_v;
+    emission->texture_u = texture_u;
+    emission->x = x;
+    emission->output = output;
+    emission->count = count;
+}
+
+/* @original Gfx_EmitCorrectedTriangleEdgeRecords (IGN_WIN.EXE @ 0x0064F220, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_EmitCorrectedTriangleEdgeRecords(GfxTriangleEdgeEmission *emission) {
+    unsigned int texture_v;
+    unsigned int texture_u;
+    unsigned int x;
+    unsigned int count;
+    unsigned int previous_count;
+    unsigned int bucket;
+    unsigned int corrected;
+    unsigned int x_step;
+    volatile GfxTriangleSpanEdgeRecord *output;
+    texture_v = emission->texture_v;
+    texture_u = emission->texture_u;
+    x = emission->x;
+    output = emission->output;
+    count = emission->count;
+    do {
+        bucket = (x >> 13) & 7u;
+        corrected = texture_u + g_triangleEdgeUCorrections[bucket];
+        output->texture_u = GFX_EDGE_SAR(corrected, 8);
+        texture_u += g_triangleEdgeSteps.texture_u_step;
+        corrected = texture_v + g_triangleEdgeVCorrections[bucket];
+        output->texture_v = GFX_EDGE_SAR(corrected, 8);
+        texture_v += g_triangleEdgeSteps.texture_v_step;
+        x_step = g_triangleEdgeSteps.x_step;
+        output->x = (int)GFX_EDGE_SAR(x, 16);
+        x += x_step;
+        output = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)
+            ((unsigned int)(uintptr_t)output + 12u);
+        previous_count = count;
+        count--;
+        /* DEC ECX/JG rejects signed-negative input even when decrement wraps. */
+    } while (previous_count > 1u && previous_count < 0x80000000u);
+    emission->texture_v = texture_v;
+    emission->texture_u = texture_u;
+    emission->x = x;
+    emission->output = output;
+    emission->count = count;
 }

@@ -886,3 +886,5 @@ if __name__ == '__main__':
     verify_surface_constants()
     from verify_texture_spans import verify_texture_spans
     verify_texture_spans(record=True)
+    from verify_edge_emitters import verify_edge_emitters
+    verify_edge_emitters(record=True)

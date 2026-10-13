@@ -1,5 +1,15 @@
 # Windows triangle execution and bounded contract recovery
 
+Follow-up reconstruction: [texture spans](windows_texture_spans.md) and
+[edge emitters](windows_edge_emitters.md) compile complete leaves in the direct
+renderer module with documented internal C interfaces (DEV-007). This removes
+their register-call boundary by reconstructing actual behavior, without assembly
+or synthetic callees. Full triangle/edge setup and native parent integration
+remain unresolved. Direct emitter boundary checks additionally establish raw
+DEC CX versus corrected DEC ECX, including signed-overflow-aware JG and mandatory
+first records for zero/negative counts; earlier ordinary-height fixtures did not
+cover those counter boundaries.
+
 Recovered 2026-10-07 from the authentic `Ignition/Ignition/IGN_WIN.EXE`:
 915,968 bytes, SHA-256
 `7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782`,

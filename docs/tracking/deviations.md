@@ -1,6 +1,6 @@
 # Master Authentic Divergence & Deviation Registry (FCTS)
 
-### DEV-007: Explicit C interfaces for Windows texture-span register leaves
+### DEV-007: Explicit C interfaces for Windows renderer register leaves
 
 Authenticated standard IGN_WIN.EXE (SHA-256
 `7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782`),
@@ -14,6 +14,14 @@ compositing, persistent scratch and ordered accesses must retain original behavi
 Differential and bounded paired native span-buffer validation pass; see
 [span evidence](../ghidra/windows_texture_spans.md). Original toolchain and complete
 triangle/sprite integration remain unresolved.
+
+Edge emitters at RVAs 0x24F1E0/0x24F220 use the same documented adaptation:
+a typed internal cursor carries original EAX/ESI/EDX/EBX/ECX inputs and outputs.
+The cursor is disjoint from output, as original register inputs have no aliased
+cursor storage. Full record/state effects and each updated register value are
+compared in [emitter evidence](../ghidra/windows_edge_emitters.md); native parent
+integration is pending. Original raw 16-bit and corrected 32-bit counter behavior,
+including overflow and zero/negative first records, is retained without a toggle.
 
 > Existing entries are preserved legacy evidence and need per-entry binary/address validation. New Windows deviations must cite the fingerprinted `IGN_WIN.EXE`; DOS evidence must remain labeled `MAINDOS.EXE`. No existing address is reclassified by the target change.
 

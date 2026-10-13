@@ -35,17 +35,17 @@ INPUTS = ['decomp/src/renderer.c','decomp/include/renderer.h','decomp/modules.js
 PRESERVED = (UC_X86_REG_EBX,UC_X86_REG_ESI,UC_X86_REG_EDI,UC_X86_REG_EBP)
 
 
-def build():
+def build(dll=DLL,exports=()):
     BUILD.mkdir(parents=True,exist_ok=True)
     gcc,linker = (shutil.which(n) for n in ('gcc','lld-link'))
     if not gcc or not linker:
         raise RuntimeError('Installed provisional GCC and LLD required')
-    obj = BUILD / 'texture_spans_renderer.obj'
+    obj = BUILD / (dll.stem + '_renderer.obj')
     commands = [[gcc,'-m32','-std=c89','-pedantic-errors','-Wall','-Wextra','-Werror',
         '-O2','-fno-inline','-fno-optimize-sibling-calls','-I',str(ROOT/'decomp/include'),
         '-c',str(ROOT/'decomp/src/renderer.c'),'-o',str(obj)],
         [linker,'/dll','/noentry','/nodefaultlib','/machine:x86','/safeseh:no',
-         '/base:0x10000000','/out:'+str(DLL),str(obj)] + ['/export:'+n for n in [*ROUTINES,*STATE]]]
+         '/base:0x10000000','/out:'+str(dll),str(obj)] + ['/export:'+n for n in [*ROUTINES,*STATE,*exports]]]
     for command in commands:
         subprocess.run(command,cwd=ROOT,check=True)
     return commands

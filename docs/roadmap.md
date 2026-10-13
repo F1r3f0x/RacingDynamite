@@ -1,5 +1,19 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Raw and corrected edge record emitters (2026-10-13)
+
+[Emitter evidence](ghidra/windows_edge_emitters.md), RVAs 0x24F1E0/0x24F220,
+reconstructs complete record generators in the direct C89 renderer module.
+DEV-007 explicitly carries original register inputs/outputs in a typed cursor.
+Raw low16 count wrapping and corrected signed32 behavior, live increment/table
+reads and mandatory first records are preserved. Focused 408 differential calls,
+192 followups, 64 aliases, ten faults and 298,822 records pass. Existing span
+differential/native coverage passes separately; new native emitter/parent
+execution is unverified. Full105 renewal/audit/exports pass at snapshot
+`cb5157ea80c4`, with 42 existing scoped native records; LF/index gates/hooks follow.
+Next pursue real cdecl slope and edge setup/gradient/clipping
+dependencies; complete native playable game and original toolchain remain open.
+
 ## Texture span dependency closure (2026-10-13)
 
 [Span evidence](ghidra/windows_texture_spans.md) reconstructs setup and both
