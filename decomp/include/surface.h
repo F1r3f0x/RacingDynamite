@@ -41,9 +41,10 @@ int Gfx_SurfaceShutdownNative(void); /* VA 0x0045C060; resource shutdown, clippe
 typedef int (*GfxSurfaceConfigureSurfaceProc)(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4);
 extern GfxSurfaceConfigureSurfaceProc volatile g_surfaceConfigureSurface; /* VA 0x0050EB78 */
 int Gfx_SurfaceConfigureSurfaceNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3, unsigned int option4); /* VA 0x0045C150; body unreconstructed */
-typedef int (*GfxSurfaceBlitProc)(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_y, int destination_x);
+typedef int (*GfxSurfaceBlitProc)(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y);
 extern GfxSurfaceBlitProc volatile g_surfaceBlit; /* VA 0x0050EB7C */
-int Gfx_SurfaceBlitNative(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_y, int destination_x); /* VA 0x0045C160; body unreconstructed */
+int Gfx_SurfaceBlitNative(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y); /* VA 0x0045C160 */
+int Gfx_SurfaceBlitDispatch(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y); /* VA 0x00456B30 */
 typedef int (*GfxSurfaceCopyPixelsProc)(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y);
 extern GfxSurfaceCopyPixelsProc volatile g_surfaceCopyPixels; /* VA 0x0050EB80 */
 int Gfx_SurfaceCopyPixelsNative(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y); /* VA 0x0045C1D0; body unreconstructed */

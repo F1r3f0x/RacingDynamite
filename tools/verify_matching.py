@@ -872,3 +872,5 @@ if __name__ == '__main__':
     verify_surface_present()
     from verify_surface_palette import verify_surface_palette
     verify_surface_palette()
+    from verify_surface_blit import verify_surface_blit
+    verify_surface_blit()

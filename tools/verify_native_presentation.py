@@ -7,9 +7,9 @@ def native_surface_host(dll, helper_path, runtime_name, call_site, calls, expect
     runtime=ROOT/'build/runtime'/runtime_name;runtime.mkdir(parents=True,exist_ok=True)
     shutil.copyfile(TARGET,runtime/'IGN_WIN.EXE');verify_target(runtime/'IGN_WIN.EXE')
     shutil.copyfile(dll,runtime/'surface_open_validation.dll')
-    source=(ROOT/'tools/native_surface_probe.c').read_text()
+    source=(ROOT/'tools/native_surface_probe.c').read_text(encoding='utf-8')
     marker='static void check_records(NativeRecord *primary, NativeRecord *bank1,'
-    helper=(ROOT/helper_path).read_text()
+    helper=(ROOT/helper_path).read_text(encoding='utf-8')
     assert marker in source;source=source.replace(marker,helper+marker,1)
     assert call_site in source
     source=source.replace(call_site,calls+call_site,1)

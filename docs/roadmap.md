@@ -1,5 +1,18 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Native BltFast body and forwarding entry (2026-10-12)
+
+[Blit evidence](ghidra/windows_surface_blit.md), RVAs0x5C160/0x56B30, now uses
+real surface records and SDK BltFast in the directly compiled surface module.
+Original FPO/instructions,9,990 original oracle cases and12 actual SDK copies
+precede implementation. Focused20,002 comparisons and24 paired native copies,
+98,304 destination pixels and96 inactive guards pass. Destination argument7=x,
+argument8=y is independently observed. Full renewal, fidelity audit and exports
+pass at snapshot `a62df57f1794`, with92 fresh compilation/emulation and31 scoped
+native records. LF/index, staged gates and tracked hooks follow.
+Continue real pixel copying and startup/rendering dependencies; production frames,
+playable menu/input/audio/races and original toolchain remain unresolved.
+
 ## Direct surface module migration (2026-10-12)
 
 [Migration evidence](ghidra/windows_surface_module.md) carries twelve unchanged

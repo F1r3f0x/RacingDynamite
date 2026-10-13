@@ -29,6 +29,7 @@ typedef char surface_unlock_slot[(offsetof(IDirectDrawSurfaceVtbl,Unlock)==0x80)
 typedef char surface_pointer_offset[(offsetof(GfxSurfaceRecord,surface)==44)?1:-1];
 typedef char surface_is_lost_slot[(offsetof(IDirectDrawSurfaceVtbl,IsLost)==0x60)?1:-1];
 typedef char surface_restore_slot[(offsetof(IDirectDrawSurfaceVtbl,Restore)==0x6c)?1:-1];
+typedef char surface_blit_fast_slot[(offsetof(IDirectDrawSurfaceVtbl,BltFast)==0x1c)?1:-1];
 
 volatile GfxSurfaceRecord g_nativePrimarySurface;
 volatile GfxSurfaceRecord g_nativeType1Surfaces[5];
@@ -817,3 +818,43 @@ int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb) {
 }
 
 /* End native surface access implementation. */
+
+/* @original Gfx_SurfaceBlitNative (IGN_WIN.EXE @ 0x0045C160, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceBlitNative(GfxSurfaceRecord *source, int x, int y,
+        int width, int height, GfxSurfaceRecord *destination,
+        int destination_x, int destination_y) {
+    volatile GfxSurfaceRecord *source_record;
+    volatile GfxSurfaceRecord *destination_record;
+    LPDIRECTDRAWSURFACE target;
+    LPDIRECTDRAWSURFACE input;
+    RECT rectangle;
+
+    source_record = source;
+    destination_record = destination;
+    if (source_record->active == 0) {
+        return 0;
+    }
+    if (destination_record->active == 0) {
+        return 0;
+    }
+    rectangle.left = x;
+    rectangle.top = y;
+    rectangle.right = (LONG)((uint32_t)x + (uint32_t)width);
+    target = destination_record->surface;
+    rectangle.bottom = (LONG)((uint32_t)y + (uint32_t)height);
+    input = source_record->surface;
+    return target->lpVtbl->BltFast(target, (DWORD)destination_x,
+            (DWORD)destination_y, input, &rectangle, DDBLTFAST_WAIT) == DD_OK;
+}
+
+/* @original Gfx_SurfaceBlitDispatch (IGN_WIN.EXE @ 0x00456B30, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceBlitDispatch(GfxSurfaceRecord *source, int x, int y,
+        int width, int height, GfxSurfaceRecord *destination,
+        int destination_x, int destination_y) {
+    return g_surfaceBlit(source, x, y, width, height, destination,
+            destination_x, destination_y);
+}
