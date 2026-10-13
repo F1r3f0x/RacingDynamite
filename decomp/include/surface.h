@@ -47,7 +47,9 @@ int Gfx_SurfaceBlitNative(GfxSurfaceRecord *source, int x, int y, int width, int
 int Gfx_SurfaceBlitDispatch(GfxSurfaceRecord *source, int x, int y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y); /* VA 0x00456B30 */
 typedef int (*GfxSurfaceCopyPixelsProc)(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y);
 extern GfxSurfaceCopyPixelsProc volatile g_surfaceCopyPixels; /* VA 0x0050EB80 */
-int Gfx_SurfaceCopyPixelsNative(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y); /* VA 0x0045C1D0; body unreconstructed */
+/* Width, stride and x offsets are bytes, independently of record bit depth. */
+int Gfx_SurfaceCopyPixelsNative(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y); /* VA 0x0045C1D0 */
+int Gfx_SurfaceCopyPixelsDispatch(const unsigned char *pixels, int stride, int source_x, int source_y, int width, int height, GfxSurfaceRecord *destination, int destination_x, int destination_y); /* VA 0x00456B70 */
 typedef int (*GfxSurfaceClearProc)(GfxSurfaceRecord *surface);
 extern GfxSurfaceClearProc volatile g_surfaceClear; /* VA 0x0050EB84 */
 int Gfx_SurfaceClearNative(GfxSurfaceRecord *surface); /* VA 0x0045C3D0 */

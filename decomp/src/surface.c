@@ -858,3 +858,124 @@ int Gfx_SurfaceBlitDispatch(GfxSurfaceRecord *source, int x, int y,
     return g_surfaceBlit(source, x, y, width, height, destination,
             destination_x, destination_y);
 }
+
+/* @original Gfx_SurfaceCopyPixelsNative (IGN_WIN.EXE @ 0x0045C1D0, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceCopyPixelsNative(const unsigned char *pixels, int stride,
+        int source_x, int source_y, int width, int height,
+        GfxSurfaceRecord *destination, int destination_x, int destination_y) {
+    volatile GfxSurfaceRecord *record;
+    volatile const uint32_t *source_words;
+    volatile uint32_t *destination_words;
+    int32_t original_mode;
+    uint32_t source_address, destination_address, pitch;
+    uint32_t source_cursor, destination_cursor;
+    uint32_t groups, groups_left, rows_left, count;
+    uint32_t leading, trailing, middle, index;
+
+    record = destination;
+    if (record->active == 0) {
+        return 0;
+    }
+    original_mode = record->lock_mode;
+    if (original_mode == 0) {
+        if (!Gfx_SurfaceLockNative(destination, 3)) {
+            return 0;
+        }
+    } else if (original_mode == 1) {
+        if (!Gfx_SurfaceUnlockNative(destination) ||
+                !Gfx_SurfaceLockNative(destination, 3)) {
+            return 0;
+        }
+    }
+    source_address = (uint32_t)(uintptr_t)pixels +
+            (uint32_t)stride * (uint32_t)source_y + (uint32_t)source_x;
+    pitch = (uint32_t)record->pitch_bytes;
+    destination_address = (uint32_t)(uintptr_t)record->write_pixels +
+            pitch * (uint32_t)destination_y + (uint32_t)destination_x;
+    if ((source_address & 3) == 0 && ((uint32_t)stride & 3) == 0 &&
+            width % 160 == 0) {
+        groups = (uint32_t)(width / 160);
+        rows_left = (uint32_t)height;
+        source_cursor = source_address;
+        destination_cursor = destination_address;
+        /* Authentic unchecked do/while counts include zero/negative inputs. */
+        do {
+            groups_left = groups;
+            do {
+                source_words = (volatile const uint32_t *)(uintptr_t)source_cursor;
+                destination_words = (volatile uint32_t *)(uintptr_t)destination_cursor;
+                /* Preserve the five original prefetch reads and their faults. */
+                (void)source_words[0];
+                (void)source_words[8];
+                (void)source_words[16];
+                (void)source_words[24];
+                (void)source_words[32];
+                for (index = 0; index < 40; index++) {
+                    destination_words[index] = source_words[index];
+                }
+                source_cursor += 160;
+                destination_cursor += 160;
+            } while (--groups_left != 0);
+            source_cursor += (uint32_t)stride - (uint32_t)width;
+            destination_cursor += pitch - (uint32_t)width;
+        } while (--rows_left != 0);
+    } else {
+        leading = (0u - destination_address) & 3;
+        trailing = (destination_address + (uint32_t)width) & 3;
+        middle = (uint32_t)((int32_t)((uint32_t)width - leading - trailing) / 4);
+        if (height > 0) {
+            rows_left = (uint32_t)height;
+            do {
+                source_cursor = source_address;
+                destination_cursor = destination_address;
+                count = leading;
+                while (count != 0) {
+                    *(volatile unsigned char *)(uintptr_t)destination_cursor =
+                            *(volatile const unsigned char *)(uintptr_t)source_cursor;
+                    source_cursor++;
+                    destination_cursor++;
+                    count--;
+                }
+                count = middle;
+                while (count != 0) {
+                    *(volatile uint32_t *)(uintptr_t)destination_cursor =
+                            *(volatile const uint32_t *)(uintptr_t)source_cursor;
+                    source_cursor += 4;
+                    destination_cursor += 4;
+                    count--;
+                }
+                count = trailing;
+                while (count != 0) {
+                    *(volatile unsigned char *)(uintptr_t)destination_cursor =
+                            *(volatile const unsigned char *)(uintptr_t)source_cursor;
+                    source_cursor++;
+                    destination_cursor++;
+                    count--;
+                }
+                source_address += (uint32_t)stride;
+                destination_address += pitch;
+            } while (--rows_left != 0);
+        }
+    }
+    if (record->lock_mode != original_mode) {
+        if (!Gfx_SurfaceUnlockNative(destination)) {
+            return 0;
+        }
+        if (original_mode != 0 && !Gfx_SurfaceLockNative(destination, original_mode)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+/* @original Gfx_SurfaceCopyPixelsDispatch (IGN_WIN.EXE @ 0x00456B70, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceCopyPixelsDispatch(const unsigned char *pixels, int stride,
+        int source_x, int source_y, int width, int height,
+        GfxSurfaceRecord *destination, int destination_x, int destination_y) {
+    return g_surfaceCopyPixels(pixels, stride, source_x, source_y, width, height,
+            destination, destination_x, destination_y);
+}

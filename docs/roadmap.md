@@ -1,5 +1,17 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Native byte-copy body and forwarding entry (2026-10-13)
+
+[Byte-copy evidence](ghidra/windows_surface_copy.md), RVAs0x5C1D0/0x56B70,
+uses real Lock/Unlock and verified byte units in full C89 surface.c. Original
+instructions/helpers and24 native copies precede implementation. Focused1,334
+comparisons,54 paired SDK copies and884,736 readback bytes pass, including forward
+overlap, all four modes and original invalid-size prefixes. Full renewal, fidelity
+audit and exports pass at snapshot `0d2549f92439`, with94 fresh compilation/emulation
+and33 scoped native records. Strict symbolic link dependencies are extended without
+an instruction-equality claim. LF/index, staged gates and hooks follow. Continue unblocked rendering/startup dependencies; native
+playable startup/menu/input/audio/races and original toolchain remain unresolved.
+
 ## Native BltFast body and forwarding entry (2026-10-12)
 
 [Blit evidence](ghidra/windows_surface_blit.md), RVAs0x5C160/0x56B30, now uses

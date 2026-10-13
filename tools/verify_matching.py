@@ -226,6 +226,8 @@ def verify():
         'Gfx_SurfaceClearNative', 'Gfx_ClearSurfaceNative',
         'Gfx_SurfacePresentNative', 'Gfx_PresentSurfaceNative',
         'Gfx_SurfaceSetPaletteNative', 'Gfx_SetPaletteNative',
+        'Gfx_SurfaceBlitNative', 'Gfx_SurfaceBlitDispatch',
+        'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceCopyPixelsDispatch',
         'Gfx_InitGraphicsPairStorage', 'Gfx_InitPairStorageControl', 'Gfx_InitSineTable',
         'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords',
         'Gfx_InitPrimitiveLineControl', 'Gfx_InitNamedPrimitiveDefault',
@@ -248,6 +250,10 @@ def verify():
     code_entries['DirectInputCreateA_import']=input_thunks[0]
     symbols['DirectInputCreateA_import']=input_thunks[0]
     expected_calls = {
+        # GCC merges equivalent initial-lock/restoration branches. Actual binary
+        # behavior is checked separately; retain all symbolic dependencies here.
+        'Gfx_SurfaceCopyPixelsNative': ['Gfx_SurfaceUnlockNative', 'Gfx_SurfaceUnlockNative',
+            'Gfx_SurfaceLockNative', 'Gfx_SurfaceLockNative'],
         'Gfx_SurfaceClearNative': ['Gfx_SurfaceUnlockNative', 'Gfx_SurfaceLockNative',
             'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative'],
         'Input_InitNative': ['DirectInputCreateA_import'],
@@ -874,3 +880,5 @@ if __name__ == '__main__':
     verify_surface_palette()
     from verify_surface_blit import verify_surface_blit
     verify_surface_blit()
+    from verify_surface_copy import verify_surface_copy
+    verify_surface_copy()
