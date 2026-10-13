@@ -1,5 +1,17 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Right-endpoint edge clamp (2026-10-13)
+
+[Clamp evidence](ghidra/windows_edge_clamp.md), RVA 0x24F489, reconstructs
+the real mutable-packet clamp in direct C89 renderer.c. DEV-007 adapts ESI
+to an explicit pointer; unsigned halfword products retain signed product bits
+without 64bit types/runtime helpers. Exact initial guard access order and live
+V-gradient/right reloads are preserved. Focused 1,028 differential calls,
+512 followups, 40 diagnostic mutations and four faults pass. Full107 renewal/
+audit/exports pass at snapshot `4d01660de828`, with 43 existing scoped native
+records; LF/index gates/hooks follow. No new native clamp/parent proof is claimed. Continue real edge setup/gradient/clipping dependencies and
+resolve wide division lowering; original toolchain/playable game remain open.
+
 ## Native cdecl triangle-edge slope (2026-10-13)
 
 [Slope evidence](ghidra/windows_triangle_slope.md), RVA 0x5D7A0, reconstructs

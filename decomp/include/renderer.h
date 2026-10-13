@@ -38,6 +38,24 @@ void Gfx_EmitRawTriangleEdgeRecords(GfxTriangleEdgeEmission *emission);
 void Gfx_EmitCorrectedTriangleEdgeRecords(GfxTriangleEdgeEmission *emission);
 int Gfx_ComputeTriangleEdgeSlope(int x0, int y0, int x1, int y1);
 
+typedef struct GfxTriangleEdgePacket {
+    int x0;
+    int y0;
+    int x1;
+    int y1;
+    unsigned int texture_u0;
+    unsigned int texture_v0;
+    unsigned int texture_u1;
+    unsigned int texture_v1;
+} GfxTriangleEdgePacket;
+typedef struct GfxTriangleTextureGradients {
+    int texture_u; /* VA 0x004BADA4 */
+    int texture_v; /* VA 0x004BADA8 */
+} GfxTriangleTextureGradients;
+extern volatile GfxTriangleTextureGradients g_triangleTextureGradients;
+extern volatile int g_triangleClipRightFixed; /* VA 0x0063F2D0 */
+void Gfx_ClampTriangleEdgeRightEndpoint(volatile GfxTriangleEdgePacket *edge);
+
 void Gfx_SetTriangleSpanState(unsigned int gradient_v, unsigned int gradient_u,
     unsigned int texture_word, unsigned int lookup_word);
 void Gfx_SetTriangleSpanCore(unsigned int gradient_v, unsigned int gradient_u,

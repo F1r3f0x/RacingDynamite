@@ -890,3 +890,5 @@ if __name__ == '__main__':
     verify_edge_emitters(record=True)
     from verify_triangle_slope import verify_triangle_slope
     verify_triangle_slope(record=True)
+    from verify_edge_clamp import verify_edge_clamp
+    verify_edge_clamp(record=True)

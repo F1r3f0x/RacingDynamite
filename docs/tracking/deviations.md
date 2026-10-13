@@ -23,6 +23,11 @@ compared in [emitter evidence](../ghidra/windows_edge_emitters.md); native paren
 integration is pending. Original raw 16-bit and corrected 32-bit counter behavior,
 including overflow and zero/negative first records, is retained without a toggle.
 
+Right-endpoint clamp RVA 0x24F489 adapts its ESI edge packet to an explicit
+volatile C pointer. Signed/wrapped products, packet fields, actual gradient/right
+state and live reload order are retained; see [clamp evidence](../ghidra/windows_edge_clamp.md).
+Incidental scratch registers/flags and native parent execution are unverified.
+
 > Existing entries are preserved legacy evidence and need per-entry binary/address validation. New Windows deviations must cite the fingerprinted `IGN_WIN.EXE`; DOS evidence must remain labeled `MAINDOS.EXE`. No existing address is reclassified by the target change.
 
 This registry serves as the **global technical inventory** of all intentional differences, original 1997 engine bug fixes, coordinate adaptations, and safety workarounds in **Racing Dynamite** relative to their recorded original binary. The active baseline is Windows `IGN_WIN.EXE`; `MAINDOS.EXE` is the secondary DOS reference.

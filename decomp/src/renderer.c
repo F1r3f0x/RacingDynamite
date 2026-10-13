@@ -15,10 +15,24 @@ volatile unsigned int g_triangleEdgeUCorrections[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 volatile unsigned int g_triangleEdgeVCorrections[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 typedef char GfxEdgeStepsMustBe24Bytes[(sizeof(GfxTriangleEdgeStepState) == 24) ? 1 : -1];
 typedef char GfxEdgeEmissionMustBe20Bytes[(sizeof(GfxTriangleEdgeEmission) == 20) ? 1 : -1];
+volatile GfxTriangleTextureGradients g_triangleTextureGradients = {0, 0};
+volatile int g_triangleClipRightFixed = 0;
+typedef char GfxEdgePacketMustBe32Bytes[(sizeof(GfxTriangleEdgePacket) == 32) ? 1 : -1];
+typedef char GfxTextureGradientsMustBe8Bytes[(sizeof(GfxTriangleTextureGradients) == 8) ? 1 : -1];
 
 /* Deliberately wrapped addresses from the verified 32-bit Windows ABI. */
 #define GFX_SPAN_BYTE(address) (*(volatile unsigned char *)(uintptr_t)(address))
 #define GFX_EDGE_SAR(value, shift) (((value) >> (shift)) | ((0u - ((value) >> 31)) << (32 - (shift))))
+/* Signed 32x32 product bits 16..47, expressed in C89 unsigned halfwords.
+ * Inputs are captured local words; sign corrections subtract multiples of 2^32.
+ */
+#define GFX_EDGE_MUL16(a, b) \
+    (((((a) & 0xffffu) * ((b) & 0xffffu)) >> 16) \
+    + ((a) & 0xffffu) * ((b) >> 16) \
+    + ((a) >> 16) * ((b) & 0xffffu) \
+    + ((((a) >> 16) * ((b) >> 16)) << 16) \
+    - (((0u - ((a) >> 31)) & (b)) << 16) \
+    - (((0u - ((b) >> 31)) & (a)) << 16))
 
 /* @original Gfx_SetTriangleSpanCore (IGN_WIN.EXE @ 0x00467F1C, unknown original source)
  * @fidelity ADAPTED
@@ -251,4 +265,34 @@ int Gfx_ComputeTriangleEdgeSlope(int x0, int y0, int x1, int y1) {
     denominator_word = (unsigned int)y0 - (unsigned int)y1;
     /* Verified i386 casts/IDIV retain original signed quotient and #DE behavior. */
     return (int)numerator_word / (int)denominator_word;
+}
+
+/* @original Gfx_ClampTriangleEdgeRightEndpoint (IGN_WIN.EXE @ 0x0064F489, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_ClampTriangleEdgeRightEndpoint(volatile GfxTriangleEdgePacket *edge) {
+    volatile int endpoint_x;
+    volatile int clip_right;
+    unsigned int distance;
+    unsigned int gradient_word;
+    unsigned int correction;
+    unsigned int endpoint_texture;
+    endpoint_x = edge->x1;
+    clip_right = g_triangleClipRightFixed;
+    if (clip_right >= endpoint_x) {
+        return;
+    }
+    distance = (unsigned int)edge->x1;
+    distance -= (unsigned int)g_triangleClipRightFixed;
+    gradient_word = (unsigned int)g_triangleTextureGradients.texture_u;
+    correction = GFX_EDGE_MUL16(distance, gradient_word);
+    endpoint_texture = edge->texture_u1;
+    edge->texture_u1 = endpoint_texture - correction;
+    gradient_word = (unsigned int)g_triangleTextureGradients.texture_v;
+    correction = GFX_EDGE_MUL16(distance, gradient_word);
+    endpoint_texture = edge->texture_v1;
+    edge->texture_v1 = endpoint_texture - correction;
+    clip_right = g_triangleClipRightFixed;
+    edge->x1 = clip_right;
 }

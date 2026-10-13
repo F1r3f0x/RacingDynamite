@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:ba3d21e1a6d13b167c538639cee657db57eb69d53b564c8760adf1fdb5012e0f -->
+<!-- snapshot:4d01660de828bf27a223ea48b82751830e815a642e05dfef20cd9d8ce399c118 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -1033,5 +1033,5 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0064F1E0` | `0x0024F1E0` | 51 | `Gfx_EmitRawTriangleEdgeRecords` | game | reconstructed | [windows_edge_emitters.md](windows_edge_emitters.md) |
 | `0x0064F220` | `0x0024F220` | 70 | `Gfx_EmitCorrectedTriangleEdgeRecords` | game | reconstructed | [windows_edge_emitters.md](windows_edge_emitters.md) |
 | `0x0064F270` | `0x0024F270` | 537 | `Gfx_ClipAndSplitTriangleEdge` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
-| `0x0064F489` | `0x0024F489` | 63 | `Gfx_ClampTriangleEdgeRightEndpoint` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0064F489` | `0x0024F489` | 63 | `Gfx_ClampTriangleEdgeRightEndpoint` | game | reconstructed | [windows_edge_clamp.md](windows_edge_clamp.md) |
 | `0x0064F4D0` | `0x0024F4D0` | 199 | `Gfx_InitializeTriangleEdgeSteps` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
