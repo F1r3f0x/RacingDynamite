@@ -111,4 +111,9 @@ void Gfx_DrawClippedTriangleSpan(unsigned char *destination, int count,
 void Gfx_DrawClippedTriangleSpanCore(unsigned char *destination, int count,
     unsigned int packed_uv, unsigned int integer_u);
 
+void Gfx_BuildCorrectedTriangleEdge(volatile GfxTriangleEdgePacket *edge,
+    volatile GfxTriangleEdgeBufferHeader *output);
+void Gfx_BuildRawTriangleEdge(volatile GfxTriangleEdgePacket *edge,
+    volatile GfxTriangleEdgeBufferHeader *output);
+
 #endif

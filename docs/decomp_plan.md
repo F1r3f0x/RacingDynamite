@@ -1,5 +1,15 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Ordinary edge wrappers (2026-10-13)
+
+[Ordinary edge evidence](ghidra/windows_ordinary_edges.md), RVAs0x24EC00/0x24EC40,
+closes actual initializer/emitter dependencies in readable production C89.
+Focused1,282 differential calls pass, with422 actual faults,568 packet/output
+aliases and430 persistent followups. Full113 renewal/audit/exports pass at
+snapshot `3e7c31572473`; all48 guard tests pass. LF/index gates/hooks follow.
+Next reconstruct authenticated gradients, then complete triangle/sprite/native
+frames. Native game validation and original toolchain remain unresolved.
+
 ## Clipped edge wrappers (2026-10-13)
 
 [Wrapper evidence](ghidra/windows_edge_wrappers.md), RVAs 0x24EFA0/0x24F0C0,

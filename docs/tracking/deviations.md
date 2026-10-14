@@ -390,3 +390,8 @@ Clipped edge wrappers RVAs 0x24EFA0/0x24F0C0 adapt ESI/EBX to typed packet/heade
 parameters with real production helper calls. JE-only zero tests, negative headers,
 live continuation state and access/fault prefixes are preserved. No incidental
 register output/native parent claim; see [wrapper evidence](../ghidra/windows_edge_wrappers.md).
+
+Ordinary wrappers RVAs0x24EC00/0x24EC40 use DEV-007 typed ESI/EBX parameters
+with real initializer/emitter dependencies. Zero-only skips and negative first
+records are retained; no incidental register/native parent claim. See
+[ordinary evidence](../ghidra/windows_ordinary_edges.md).

@@ -779,3 +779,61 @@ void Gfx_BuildClippedRawTriangleEdge(volatile GfxTriangleEdgePacket *edge,
         Gfx_EmitRawTriangleEdgeRecords(&emission);
     }
 }
+
+/* @original Gfx_BuildCorrectedTriangleEdge (IGN_WIN.EXE @ 0x0064EC00, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_BuildCorrectedTriangleEdge(volatile GfxTriangleEdgePacket *edge,
+        volatile GfxTriangleEdgeBufferHeader *output) {
+    unsigned int start_y;
+    unsigned int end_y;
+    unsigned int count;
+    GfxTriangleEdgeEmission emission;
+    start_y = (unsigned int)edge->y0;
+    start_y = GFX_EDGE_SAR(start_y, 8);
+    output->start_y = (int)start_y;
+    end_y = (unsigned int)edge->y1;
+    end_y = GFX_EDGE_SAR(end_y, 8);
+    count = end_y - start_y;
+    output->count = (int)count;
+    if (count != 0) {
+        Gfx_InitializeTriangleEdgeSteps(edge);
+        emission.count = (unsigned int)output->count;
+        emission.texture_v = g_triangleEdgeSteps.initial_texture_v;
+        emission.x = g_triangleEdgeSteps.initial_x;
+        emission.texture_u = g_triangleEdgeSteps.initial_texture_u;
+        emission.output = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)
+            ((unsigned int)(uintptr_t)output + 8u);
+        Gfx_EmitCorrectedTriangleEdgeRecords(&emission);
+    }
+}
+
+/* @original Gfx_BuildRawTriangleEdge (IGN_WIN.EXE @ 0x0064EC40, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_BuildRawTriangleEdge(volatile GfxTriangleEdgePacket *edge,
+        volatile GfxTriangleEdgeBufferHeader *output) {
+    unsigned int start_y;
+    unsigned int end_y;
+    unsigned int count;
+    GfxTriangleEdgeEmission emission;
+    start_y = (unsigned int)edge->y0;
+    start_y = GFX_EDGE_SAR(start_y, 8);
+    output->start_y = (int)start_y;
+    end_y = (unsigned int)edge->y1;
+    end_y = GFX_EDGE_SAR(end_y, 8);
+    count = end_y - start_y;
+    output->count = (int)count;
+    if (count != 0) {
+        Gfx_InitializeTriangleEdgeSteps(edge);
+        emission.count = (unsigned int)output->count;
+        emission.texture_v = g_triangleEdgeSteps.initial_texture_v;
+        emission.x = g_triangleEdgeSteps.initial_x;
+        emission.texture_u = g_triangleEdgeSteps.initial_texture_u;
+        emission.output = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)
+            ((unsigned int)(uintptr_t)output + 8u);
+        Gfx_EmitRawTriangleEdgeRecords(&emission);
+    }
+}

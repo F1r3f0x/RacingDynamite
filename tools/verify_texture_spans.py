@@ -41,7 +41,7 @@ RENDERER_EXPORTS = [
     'Gfx_BuildClippedCorrectedTriangleEdge','Gfx_BuildClippedRawTriangleEdge',
     'g_triangleEdgeSteps','g_triangleEdgeUCorrections','g_triangleEdgeVCorrections',
     'g_triangleTextureGradients','g_triangleViewportState','g_triangleEdgeSplit',
-    'g_triangleEdgeContinuation']
+    'g_triangleEdgeContinuation','Gfx_BuildCorrectedTriangleEdge','Gfx_BuildRawTriangleEdge']
 
 
 def validate_renderer_calls(pe):
@@ -52,9 +52,9 @@ def validate_renderer_calls(pe):
     calls=Counter(int(i.op_str,16) for i in instructions if i.mnemonic=='call')
     expected={symbols[n]:count for n,count in {
         'Gfx_SetTriangleSpanCore':1,'Gfx_DrawTriangleSpanCore':1,'Gfx_DrawClippedTriangleSpanCore':1,
-        'Gfx_ClipAndSplitTriangleEdge':2,'Gfx_InitializeTriangleEdgeSteps':4,
-        'Gfx_ClampTriangleEdgeRightEndpoint':2,'Gfx_EmitCorrectedTriangleEdgeRecords':2,
-        'Gfx_EmitRawTriangleEdgeRecords':2}.items()}
+        'Gfx_ClipAndSplitTriangleEdge':2,'Gfx_InitializeTriangleEdgeSteps':6,
+        'Gfx_ClampTriangleEdgeRightEndpoint':2,'Gfx_EmitCorrectedTriangleEdgeRecords':3,
+        'Gfx_EmitRawTriangleEdgeRecords':3}.items()}
     assert calls==expected,(calls,expected)
     return calls
 

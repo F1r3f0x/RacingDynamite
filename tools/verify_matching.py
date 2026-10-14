@@ -899,3 +899,6 @@ if __name__ == '__main__':
 
     from verify_edge_wrappers import verify_edge_wrappers
     verify_edge_wrappers(record=True)
+
+    from verify_ordinary_edges import verify_ordinary_edges
+    verify_ordinary_edges(record=True)
