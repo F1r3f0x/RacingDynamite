@@ -1,5 +1,21 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+See the [playable acceptance roadmap](windows_playable_roadmap.md) for remaining
+whole-game milestones and explicit toolchain/fidelity limits.
+
+## Sprite packet integration review (2026-10-14)
+
+[Packet evidence](ghidra/windows_sprite_packet.md), RVA `0x65BB5`, repairs the
+pending scalar draft using authenticated source-offset bits, signed dimensions,
+clipping exits and descending pipelined pixel writes in production C89.
+Focused 352 comparisons pass, including eight real faults and ordered reads,
+stores and overlapping source/frame buffers. Full workflow and commit pending.
+Transformed delegation remains an explicit test boundary; next close the complete
+packet-to-triangle path and native sprite frames, then native startup/menu/input/
+audio/races. Original compiler identity and playable game remain unresolved.
+Astra owns shared harness/SQLite/exports integration by user-authorized coordination;
+Sol released mutation ownership. Preserve unrelated work and original assets.
+
 ## Complete ordinary/clipped triangle parents (2026-10-14)
 
 [Parent evidence](ghidra/windows_triangle_parents.md), RVAs0x5CA50/0x5D170,

@@ -230,13 +230,34 @@ typedef char GfxTransformedSpriteScratchMustBe116Bytes[(sizeof(GfxTransformedSpr
 extern volatile GfxTransformedSpriteScratch g_transformedSpriteScratch;
 
 typedef struct GfxTransformedSpriteInput {
-    unsigned int unused_0;
-    const unsigned int *prepared;
-    const int *coefficients;
-    int position_x;
-    int position_y;
+    unsigned int unused_0; /* VA 0x004BAD34 */
+    const unsigned int *prepared; /* VA 0x004BAD38 */
+    const int *coefficients; /* VA 0x004BAD3C */
+    int position_x; /* VA 0x004BAD40 */
+    int position_y; /* VA 0x004BAD44 */
 } GfxTransformedSpriteInput;
+typedef char GfxTransformedSpriteInputMustBe20Bytes[(sizeof(GfxTransformedSpriteInput) == 20) ? 1 : -1];
+
+extern volatile unsigned int g_spriteBlitSource; /* VA 0x004BAD28 */
+extern volatile int g_spriteBlitWidth; /* VA 0x004BAD2C */
+extern volatile int g_spriteBlitHeight; /* VA 0x004BAD30 */
+extern volatile GfxTransformedSpriteInput g_transformedSpriteInput; /* VA 0x004BAD34 */
 
 void Gfx_PrepareTransformedSprite(const GfxTransformedSpriteInput *input);
+
+typedef struct GfxPoint2D {
+    int x;
+    int y;
+} GfxPoint2D;
+
+typedef struct GfxSpriteRasterPacket {
+    unsigned int type; /* 0x00 */
+    const GfxPoint2D *position; /* 0x04 */
+    const unsigned int *prepared; /* 0x08 */
+    const int *coefficients; /* 0x0C */
+} GfxSpriteRasterPacket;
+typedef char GfxSpriteRasterPacketMustBe16Bytes[(sizeof(GfxSpriteRasterPacket) == 16) ? 1 : -1];
+
+void Gfx_RasterizeSpritePacket(const GfxSpriteRasterPacket *packet);
 
 #endif

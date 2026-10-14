@@ -1974,3 +1974,167 @@ void Gfx_PrepareTransformedSprite(const GfxTransformedSpriteInput *input) {
 
     Gfx_RasterizeTexturedTriangle((const GfxTexturedTrianglePacket *)&g_transformedSpriteScratch.packet);
 }
+
+volatile unsigned int g_spriteBlitSource = 0; /* VA 0x004BAD28 */
+volatile int g_spriteBlitWidth = 0; /* VA 0x004BAD2C */
+volatile int g_spriteBlitHeight = 0; /* VA 0x004BAD30 */
+volatile GfxTransformedSpriteInput g_transformedSpriteInput = {0, 0, 0, 0, 0}; /* VA 0x004BAD34 */
+
+/*
+ * @original Gfx_RasterizeSpritePacket (IGN_WIN.EXE @ 0x00465BB5, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_RasterizeSpritePacket(const GfxSpriteRasterPacket *packet)
+{
+    const volatile GfxSpriteRasterPacket *live_packet = packet;
+    const volatile unsigned int *prepared;
+    const volatile GfxPoint2D *position;
+    unsigned int screen_x, screen_y, delta, previous;
+    unsigned int source, destination, rows, remaining;
+    unsigned int lookup_a, lookup_b, colors;
+
+    if (live_packet->coefficients != (const int *)0) {
+        position = live_packet->position;
+        g_transformedSpriteInput.position_x = position->x;
+        g_transformedSpriteInput.position_y = position->y;
+        g_transformedSpriteInput.prepared = live_packet->prepared;
+        g_transformedSpriteInput.coefficients = live_packet->coefficients;
+        Gfx_PrepareTransformedSprite((const GfxTransformedSpriteInput *)&g_transformedSpriteInput);
+        return;
+    }
+
+    prepared = live_packet->prepared;
+    source = prepared[3] & 0xffffff00u;
+    source |= *((const volatile unsigned char *)prepared + 9);
+    source += prepared[6];
+    g_spriteBlitSource = source;
+    previous = (unsigned int)((int)prepared[4] >> 8);
+    previous -= (unsigned int)((int)prepared[2] >> 8);
+    g_spriteBlitWidth = (int)previous;
+    previous = (unsigned int)((int)prepared[5] >> 8);
+    previous -= (unsigned int)((int)prepared[3] >> 8);
+    g_spriteBlitHeight = (int)previous;
+    position = live_packet->position;
+    screen_x = (unsigned int)position->x;
+    screen_y = (unsigned int)position->y;
+    screen_x -= prepared[0];
+    screen_y -= prepared[1];
+    screen_x = (unsigned int)((int)screen_x >> 8);
+    screen_y = (unsigned int)((int)screen_y >> 8);
+    if ((int)screen_y < g_triangleViewportState.clip_top_integer) {
+        delta = (unsigned int)g_triangleViewportState.clip_top_integer - screen_y;
+        previous = (unsigned int)g_spriteBlitHeight;
+        g_spriteBlitHeight = (int)(previous - delta);
+        if ((int)previous <= (int)delta) return;
+        g_spriteBlitSource += delta << 8;
+        screen_y = (unsigned int)g_triangleViewportState.clip_top_integer;
+    }
+    previous = screen_y + (unsigned int)g_spriteBlitHeight;
+    delta = (unsigned int)g_triangleViewportState.clip_bottom_integer;
+    if ((int)previous > (int)delta) {
+        delta = previous - delta;
+        previous = (unsigned int)g_spriteBlitHeight;
+        g_spriteBlitHeight = (int)(previous - delta);
+        if ((int)previous <= (int)delta) return;
+    }
+    if ((int)screen_x < g_triangleViewportState.clip_left_integer) {
+        delta = (unsigned int)g_triangleViewportState.clip_left_integer - screen_x;
+        previous = (unsigned int)g_spriteBlitWidth;
+        g_spriteBlitWidth = (int)(previous - delta);
+        if ((int)previous <= (int)delta) return;
+        g_spriteBlitSource += delta;
+        screen_x = (unsigned int)g_triangleViewportState.clip_left_integer;
+    }
+    previous = screen_x + (unsigned int)g_spriteBlitWidth;
+    delta = (unsigned int)g_triangleViewportState.clip_right_integer;
+    if ((int)previous > (int)delta) {
+        delta = previous - delta;
+        previous = (unsigned int)g_spriteBlitWidth;
+        g_spriteBlitWidth = (int)(previous - delta);
+        if ((int)previous <= (int)delta) return;
+    }
+    destination = screen_y * (unsigned int)g_triangleViewportState.row_stride;
+    prepared = live_packet->prepared;
+    destination += screen_x;
+    destination += (unsigned int)(uintptr_t)g_triangleViewportFramebuffer;
+    lookup_a = prepared[7];
+    rows = (unsigned int)g_spriteBlitHeight;
+    source = g_spriteBlitSource;
+    remaining = (unsigned int)g_spriteBlitWidth;
+    lookup_b = lookup_a;
+    /* Two prefetched lookup addresses feed descending four-byte stores.
+     * Keep their read/write order: source, lookup and frame may overlap.
+     * Lookup indexing replaces the low WORD of the supplied table address.
+     */
+#define SPRITE_BYTE(address) (*(volatile unsigned char *)(uintptr_t)(address))
+#define SPRITE_LOW(address, value) (((address) & 0xffffff00u) | (value))
+#define SPRITE_HIGH(address, value) (((address) & 0xffff00ffu) | ((unsigned int)(value) << 8))
+    do {
+        previous = remaining;
+        remaining -= 6u;
+        if ((int)previous < 6) {
+            remaining += 4u;
+            if ((int)remaining < 0) {
+                remaining += 1u;
+                if ((int)remaining < 0) goto sprite_next_row;
+                lookup_b = SPRITE_LOW(lookup_b, SPRITE_BYTE(destination));
+                lookup_b = SPRITE_HIGH(lookup_b, SPRITE_BYTE(source));
+                colors = SPRITE_BYTE(lookup_b);
+                goto sprite_first_pixel;
+            }
+            lookup_a = SPRITE_LOW(lookup_a, SPRITE_BYTE(destination + remaining + 1u));
+            lookup_b = SPRITE_HIGH(lookup_b, SPRITE_BYTE(source + remaining));
+            lookup_a = SPRITE_HIGH(lookup_a, SPRITE_BYTE(source + remaining + 1u));
+            lookup_b = SPRITE_LOW(lookup_b, SPRITE_BYTE(destination + remaining));
+            remaining -= 4u;
+            colors = (unsigned int)SPRITE_BYTE(lookup_a) << 8;
+        } else {
+            lookup_a = SPRITE_LOW(lookup_a, SPRITE_BYTE(destination + remaining + 5u));
+            lookup_b = SPRITE_HIGH(lookup_b, SPRITE_BYTE(source + remaining + 4u));
+            lookup_a = SPRITE_HIGH(lookup_a, SPRITE_BYTE(source + remaining + 5u));
+            lookup_b = SPRITE_LOW(lookup_b, SPRITE_BYTE(destination + remaining + 4u));
+            colors = (unsigned int)SPRITE_BYTE(lookup_a) << 8;
+            do {
+                lookup_a = SPRITE_LOW(lookup_a, SPRITE_BYTE(destination + remaining + 3u));
+                colors = (colors & 0xffffff00u) | SPRITE_BYTE(lookup_b);
+                lookup_a = SPRITE_HIGH(lookup_a, SPRITE_BYTE(source + remaining + 3u));
+                lookup_b = SPRITE_LOW(lookup_b, SPRITE_BYTE(destination + remaining + 2u));
+                colors <<= 16;
+                lookup_b = SPRITE_HIGH(lookup_b, SPRITE_BYTE(source + remaining + 2u));
+                colors = SPRITE_HIGH(colors, SPRITE_BYTE(lookup_a));
+                lookup_a = SPRITE_LOW(lookup_a, SPRITE_BYTE(destination + remaining + 1u));
+                colors = SPRITE_LOW(colors, SPRITE_BYTE(lookup_b));
+                lookup_b = SPRITE_LOW(lookup_b, SPRITE_BYTE(destination + remaining));
+                lookup_a = SPRITE_HIGH(lookup_a, SPRITE_BYTE(source + remaining + 1u));
+                *(volatile unsigned int *)(uintptr_t)(destination + remaining + 2u) = colors;
+                lookup_b = SPRITE_HIGH(lookup_b, SPRITE_BYTE(source + remaining));
+                remaining -= 4u;
+                colors = SPRITE_HIGH(colors, SPRITE_BYTE(lookup_a));
+            } while ((int)remaining >= 0);
+        }
+        SPRITE_BYTE(destination + remaining + 5u) = (unsigned char)(colors >> 8);
+        remaining += 3u;
+        colors = SPRITE_BYTE(lookup_b);
+        if ((int)remaining >= 0) {
+            do {
+                lookup_b = SPRITE_HIGH(lookup_b, SPRITE_BYTE(source + remaining));
+                SPRITE_BYTE(destination + remaining + 1u) = (unsigned char)colors;
+                lookup_b = SPRITE_LOW(lookup_b, SPRITE_BYTE(destination + remaining));
+                remaining -= 1u;
+                colors = SPRITE_BYTE(lookup_b);
+            } while ((int)remaining >= 0);
+        }
+    sprite_first_pixel:
+        SPRITE_BYTE(destination) = (unsigned char)colors;
+    sprite_next_row:
+        delta = (unsigned int)g_triangleViewportState.row_stride;
+        source += 256u;
+        destination += delta;
+        rows -= 1u;
+        remaining = (unsigned int)g_spriteBlitWidth;
+    } while (rows != 0);
+#undef SPRITE_HIGH
+#undef SPRITE_LOW
+#undef SPRITE_BYTE
+}
