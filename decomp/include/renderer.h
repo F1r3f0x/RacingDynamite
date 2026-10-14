@@ -57,9 +57,30 @@ typedef struct GfxTriangleTextureGradients {
     int texture_v; /* VA 0x004BADA8 */
 } GfxTriangleTextureGradients;
 extern volatile GfxTriangleTextureGradients g_triangleTextureGradients;
-extern volatile int g_triangleClipRightFixed; /* VA 0x0063F2D0 */
+typedef struct GfxTriangleViewportState {
+    int clip_top_fixed; /* VA 0x0063F2B0 */
+    int clip_bottom_integer;
+    int clip_top_integer;
+    int clip_right_integer;
+    int clip_left_integer;
+    int clip_bottom_fixed;
+    int row_stride;
+    int clip_left_fixed;
+    int clip_right_fixed; /* VA 0x0063F2D0 */
+} GfxTriangleViewportState;
+typedef struct GfxTriangleEdgeSplitState {
+    unsigned int active; /* VA 0x004BAEC8 */
+    int saved_x1;
+    int saved_y1;
+    unsigned int saved_texture_u1;
+    unsigned int saved_texture_v1;
+} GfxTriangleEdgeSplitState;
+extern volatile GfxTriangleViewportState g_triangleViewportState;
+extern volatile GfxTriangleEdgeSplitState g_triangleEdgeSplit;
+#define g_triangleClipRightFixed (g_triangleViewportState.clip_right_fixed)
 void Gfx_ClampTriangleEdgeRightEndpoint(volatile GfxTriangleEdgePacket *edge);
 void Gfx_InitializeTriangleEdgeSteps(const volatile GfxTriangleEdgePacket *edge);
+void Gfx_ClipAndSplitTriangleEdge(volatile GfxTriangleEdgePacket *edge);
 
 void Gfx_SetTriangleSpanState(unsigned int gradient_v, unsigned int gradient_u,
     unsigned int texture_word, unsigned int lookup_word);

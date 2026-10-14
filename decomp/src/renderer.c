@@ -16,7 +16,10 @@ volatile unsigned int g_triangleEdgeVCorrections[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 typedef char GfxEdgeStepsMustBe32Bytes[(sizeof(GfxTriangleEdgeStepState) == 32) ? 1 : -1];
 typedef char GfxEdgeEmissionMustBe20Bytes[(sizeof(GfxTriangleEdgeEmission) == 20) ? 1 : -1];
 volatile GfxTriangleTextureGradients g_triangleTextureGradients = {0, 0};
-volatile int g_triangleClipRightFixed = 0;
+volatile GfxTriangleViewportState g_triangleViewportState = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+volatile GfxTriangleEdgeSplitState g_triangleEdgeSplit = {0, 0, 0, 0, 0};
+typedef char GfxViewportMustBe36Bytes[(sizeof(GfxTriangleViewportState) == 36) ? 1 : -1];
+typedef char GfxSplitMustBe20Bytes[(sizeof(GfxTriangleEdgeSplitState) == 20) ? 1 : -1];
 typedef char GfxEdgePacketMustBe32Bytes[(sizeof(GfxTriangleEdgePacket) == 32) ? 1 : -1];
 typedef char GfxTextureGradientsMustBe8Bytes[(sizeof(GfxTriangleTextureGradients) == 8) ? 1 : -1];
 
@@ -82,6 +85,66 @@ typedef char GfxTextureGradientsMustBe8Bytes[(sizeof(GfxTriangleTextureGradients
         } else { \
             (result) = quotient_negative != 0 ? 0u - divide_quotient : divide_quotient; \
         } \
+    } while (0)
+
+#define GFX_EDGE_UDIV_WORDS(result, numerator_high, numerator_low, divisor_word) \
+    do { \
+        unsigned int unsigned_high = (numerator_high); \
+        unsigned int unsigned_low = (numerator_low); \
+        unsigned int unsigned_denominator = (divisor_word); \
+        unsigned int unsigned_quotient = 0; \
+        unsigned int unsigned_carry; \
+        unsigned int unsigned_bit; \
+        volatile unsigned int fault_numerator; \
+        volatile unsigned int fault_denominator; \
+        if (unsigned_denominator == 0 || unsigned_high >= unsigned_denominator) { \
+            fault_numerator = unsigned_high; \
+            fault_denominator = 0; \
+            (result) = fault_numerator / fault_denominator; \
+        } else { \
+            for (unsigned_bit = 0; unsigned_bit < 32; unsigned_bit++) { \
+                unsigned_carry = unsigned_high >> 31; \
+                unsigned_high = (unsigned_high << 1) | (unsigned_low >> 31); \
+                unsigned_low <<= 1; \
+                unsigned_quotient <<= 1; \
+                if (unsigned_carry != 0 || unsigned_high >= unsigned_denominator) { \
+                    unsigned_high -= unsigned_denominator; \
+                    unsigned_quotient |= 1u; \
+                } \
+            } \
+            (result) = unsigned_quotient; \
+        } \
+    } while (0)
+
+#define GFX_EDGE_PRODUCT_HIGH(result, product_a, product_b) \
+    do { \
+        unsigned int a_word = (product_a); \
+        unsigned int b_word = (product_b); \
+        unsigned int a_low = a_word & 65535u; \
+        unsigned int a_high = a_word >> 16; \
+        unsigned int b_low = b_word & 65535u; \
+        unsigned int b_high = b_word >> 16; \
+        unsigned int low_product = a_low * b_low; \
+        unsigned int cross_a = a_low * b_high; \
+        unsigned int cross_b = a_high * b_low; \
+        unsigned int product_carry = (low_product >> 16) \
+            + (cross_a & 65535u) + (cross_b & 65535u); \
+        (result) = a_high * b_high + (cross_a >> 16) + (cross_b >> 16) \
+            + (product_carry >> 16) - ((0u - (a_word >> 31)) & b_word) \
+            - ((0u - (b_word >> 31)) & a_word); \
+    } while (0)
+
+/* Inputs are volatile fields: capture end, start, then reread the destination. */
+#define GFX_EDGE_INTERPOLATE(destination, start, end, ratio, subtract) \
+    do { \
+        volatile unsigned int interpolation_delta = (unsigned int)(end); \
+        unsigned int interpolation_high; \
+        volatile unsigned int interpolation_old; \
+        interpolation_delta -= (unsigned int)(start); \
+        GFX_EDGE_PRODUCT_HIGH(interpolation_high, interpolation_delta << 1, (ratio)); \
+        interpolation_old = (unsigned int)(destination); \
+        (destination) = (subtract) ? interpolation_old - interpolation_high \
+            : interpolation_old + interpolation_high; \
     } while (0)
 
 /* @original Gfx_SetTriangleSpanCore (IGN_WIN.EXE @ 0x00467F1C, unknown original source)
@@ -404,4 +467,134 @@ void Gfx_InitializeTriangleEdgeSteps(const volatile GfxTriangleEdgePacket *edge)
     coordinate = (unsigned int)edge->x0 << 8;
     step = g_triangleEdgeSteps.x_step;
     g_triangleEdgeSteps.initial_x = coordinate + fraction * GFX_EDGE_SAR(step, 8);
+}
+
+/* @original Gfx_ClipAndSplitTriangleEdge (IGN_WIN.EXE @ 0x0064F270, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_ClipAndSplitTriangleEdge(volatile GfxTriangleEdgePacket *edge) {
+    volatile int coordinate;
+    volatile int bound;
+    volatile unsigned int denominator;
+    volatile unsigned int distance;
+    unsigned int ratio;
+    unsigned int correction;
+    unsigned int gradient_word;
+    volatile unsigned int old_texture;
+    coordinate = edge->y0;
+    bound = g_triangleViewportState.clip_top_fixed;
+    if (bound > coordinate) {
+        denominator = (unsigned int)edge->y1;
+        denominator -= (unsigned int)coordinate;
+        distance = (unsigned int)g_triangleViewportState.clip_top_fixed;
+        distance -= (unsigned int)coordinate;
+        GFX_EDGE_UDIV_WORDS(ratio, distance, 0, denominator);
+        ratio >>= 1;
+        GFX_EDGE_INTERPOLATE(edge->texture_v0, edge->texture_v0, edge->texture_v1, ratio, 0);
+        GFX_EDGE_INTERPOLATE(edge->texture_u0, edge->texture_u0, edge->texture_u1, ratio, 0);
+        GFX_EDGE_INTERPOLATE(edge->x0, edge->x0, edge->x1, ratio, 0);
+        bound = g_triangleViewportState.clip_top_fixed;
+        edge->y0 = bound;
+    }
+    coordinate = edge->y1;
+    bound = g_triangleViewportState.clip_bottom_fixed;
+    if (bound < coordinate) {
+        denominator = (unsigned int)coordinate;
+        denominator -= (unsigned int)edge->y0;
+        distance = (unsigned int)coordinate;
+        distance -= (unsigned int)g_triangleViewportState.clip_bottom_fixed;
+        GFX_EDGE_UDIV_WORDS(ratio, distance, 0, denominator);
+        ratio >>= 1;
+        GFX_EDGE_INTERPOLATE(edge->texture_v1, edge->texture_v0, edge->texture_v1, ratio, 1);
+        GFX_EDGE_INTERPOLATE(edge->texture_u1, edge->texture_u0, edge->texture_u1, ratio, 1);
+        GFX_EDGE_INTERPOLATE(edge->x1, edge->x0, edge->x1, ratio, 1);
+        bound = g_triangleViewportState.clip_bottom_fixed;
+        edge->y1 = bound;
+    }
+    g_triangleEdgeSplit.active = 0;
+    coordinate = edge->x0;
+    bound = g_triangleClipRightFixed;
+    if (bound < coordinate) {
+        coordinate = edge->x1;
+        bound = g_triangleClipRightFixed;
+        if (bound <= coordinate) {
+            distance = (unsigned int)edge->x1;
+            distance -= (unsigned int)g_triangleClipRightFixed;
+            gradient_word = (unsigned int)g_triangleTextureGradients.texture_u;
+            correction = GFX_EDGE_MUL16(distance, gradient_word);
+            old_texture = edge->texture_u1;
+            edge->texture_u1 = old_texture - correction;
+            gradient_word = (unsigned int)g_triangleTextureGradients.texture_v;
+            correction = GFX_EDGE_MUL16(distance, gradient_word);
+            old_texture = edge->texture_v1;
+            edge->texture_v1 = old_texture - correction;
+            bound = g_triangleClipRightFixed;
+            edge->x1 = bound;
+        } else {
+            g_triangleEdgeSplit.active = 1;
+            coordinate = edge->x1;
+            g_triangleEdgeSplit.saved_x1 = coordinate;
+            coordinate = edge->y1;
+            g_triangleEdgeSplit.saved_y1 = coordinate;
+            old_texture = edge->texture_u1;
+            g_triangleEdgeSplit.saved_texture_u1 = old_texture;
+            old_texture = edge->texture_v1;
+            g_triangleEdgeSplit.saved_texture_v1 = old_texture;
+            denominator = (unsigned int)edge->x0;
+            distance = (unsigned int)g_triangleClipRightFixed;
+            coordinate = edge->x1;
+            denominator -= (unsigned int)coordinate;
+            distance -= (unsigned int)coordinate;
+            GFX_EDGE_UDIV_WORDS(ratio, distance, 0, denominator);
+            ratio >>= 1;
+            GFX_EDGE_INTERPOLATE(edge->texture_u1, edge->texture_u0, edge->texture_u1, ratio, 1);
+            GFX_EDGE_INTERPOLATE(edge->texture_v1, edge->texture_v0, edge->texture_v1, ratio, 1);
+            GFX_EDGE_INTERPOLATE(edge->y1, edge->y0, edge->y1, ratio, 1);
+            bound = g_triangleClipRightFixed;
+            edge->x1 = bound;
+        }
+        distance = (unsigned int)edge->x0;
+        distance -= (unsigned int)g_triangleClipRightFixed;
+        gradient_word = (unsigned int)g_triangleTextureGradients.texture_u;
+        correction = GFX_EDGE_MUL16(distance, gradient_word);
+        old_texture = edge->texture_u0;
+        edge->texture_u0 = old_texture - correction;
+        gradient_word = (unsigned int)g_triangleTextureGradients.texture_v;
+        correction = GFX_EDGE_MUL16(distance, gradient_word);
+        old_texture = edge->texture_v0;
+        edge->texture_v0 = old_texture - correction;
+        bound = g_triangleClipRightFixed;
+        edge->x0 = bound;
+    }
+    /* Original outside-right path falls through into this live second check. */
+    coordinate = edge->x1;
+    bound = g_triangleClipRightFixed;
+    if (bound < coordinate) {
+        g_triangleEdgeSplit.active = 1;
+        coordinate = edge->x1;
+        g_triangleEdgeSplit.saved_x1 = coordinate;
+        coordinate = edge->y1;
+        g_triangleEdgeSplit.saved_y1 = coordinate;
+        old_texture = edge->texture_u1;
+        g_triangleEdgeSplit.saved_texture_u1 = old_texture;
+        old_texture = edge->texture_v1;
+        g_triangleEdgeSplit.saved_texture_v1 = old_texture;
+        coordinate = edge->x1;
+        distance = (unsigned int)coordinate;
+        denominator = (unsigned int)coordinate;
+        distance -= (unsigned int)g_triangleClipRightFixed;
+        denominator -= (unsigned int)edge->x0;
+        if (distance == denominator) {
+            ratio = 0xffffffffu;
+        } else {
+            GFX_EDGE_UDIV_WORDS(ratio, distance, 0, denominator);
+        }
+        ratio >>= 1;
+        GFX_EDGE_INTERPOLATE(edge->texture_u1, edge->texture_u0, edge->texture_u1, ratio, 1);
+        GFX_EDGE_INTERPOLATE(edge->texture_v1, edge->texture_v0, edge->texture_v1, ratio, 1);
+        GFX_EDGE_INTERPOLATE(edge->y1, edge->y0, edge->y1, ratio, 1);
+        bound = g_triangleClipRightFixed;
+        edge->x1 = bound;
+    }
 }

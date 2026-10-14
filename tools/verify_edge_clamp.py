@@ -18,7 +18,7 @@ if not __debug__:
 NAME='Gfx_ClampTriangleEdgeRightEndpoint'
 RVA=0x24f489
 DLL=BUILD/'edge_clamp_validation.dll'
-GLOBALS={'g_triangleTextureGradients':(0x4bada4,8),'g_triangleClipRightFixed':(0x63f2d0,4)}
+GLOBALS={'g_triangleTextureGradients':(0x4bada4,8),'g_triangleViewportState':(0x63f2b0,36)}
 INPUTS=SPAN_INPUTS+['tools/verify_edge_clamp.py']
 
 
@@ -28,6 +28,7 @@ class ClampSession(Session):
         if original:
             self.symbols[NAME]=0x400000+RVA
             self.symbols.update({n:a for n,(a,_) in GLOBALS.items()})
+            self.symbols['g_triangleClipRightFixed']=0x63f2d0
         self.address=address
         if address!=0:
             available=max(0,min(32,ARENA+0x30000-address))

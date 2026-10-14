@@ -44,6 +44,12 @@ def validation_symbols(pe):
     base = pe.OPTIONAL_HEADER.ImageBase
     symbols = {e.name.decode():base+e.address
         for e in pe.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
+    viewport = symbols.get('g_triangleViewportState')
+    if viewport is not None:
+        right = viewport + 32
+        if 'g_triangleClipRightFixed' in symbols and symbols['g_triangleClipRightFixed'] != right:
+            raise ValueError('Conflicting viewport right export')
+        symbols['g_triangleClipRightFixed'] = right
     control = symbols.get('g_nativeImageControl')
     if control is not None:
         for name,offset in (('g_nativeNextImageId',0),

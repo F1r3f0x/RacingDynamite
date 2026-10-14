@@ -1,5 +1,18 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Full edge splitter and viewport backing (2026-10-13)
+
+[Splitter evidence](ghidra/windows_edge_splitter.md), RVA0x24F270, reconstructs
+complete top/bottom/right clipping and split effects in direct C89 renderer.
+Verified36byte viewport and20byte saved-end state replace isolated right backing.
+Runtime-free unsigned division/high products retain authentic faults, ordered
+reloads and the live second-right/special-quotient path. Focused858 differential
+calls, 177 faults, 340 aliases and340 followups pass; clamp1028 stillpasses.
+Full109 renewal/audit/exports pass at snapshot `721d387ecc1d`, with43existing
+scoped native records; LF/index gates/hooks follow. No new native splitter/parent proof. Nextclose actual clipped-edge wrapper dependencies, then
+gradients/wholetriangle/sprite/nativeframes. Toolchain and playable startup/menu/
+input/audio/representative races remainunresolved; persistentgoal staysactive.
+
 ## Runtime-free edge increments and first samples (2026-10-13)
 
 [Step evidence](ghidra/windows_edge_steps.md), RVA 0x24F4D0, reconstructs

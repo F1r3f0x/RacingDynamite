@@ -1,5 +1,11 @@
 # Windows right-endpoint edge clamp
 
+Follow-up: [splitter reconstruction](windows_edge_splitter.md) migrates the right
+bound into the verified 36-byte viewport backing at 0x63F2B0, with the same right
+member at+32 and unchanged clamp body. Its existing contract compares the full
+viewport object and retains the exact right-member address through a scoped
+validation symbol alias. This is a backing migration, not native parent validation.
+
 Authenticated standard IGN_WIN.EXE, SHA-256
 `7665e4e736bfd6c90790cedbb27e2de7e98a167374eb77933533c54ef0dc8782`.
 Gfx_ClampTriangleEdgeRightEndpoint is an analysis name, not a recovered symbol.

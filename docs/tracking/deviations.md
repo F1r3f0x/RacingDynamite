@@ -34,6 +34,12 @@ behavior are validated against complete original instructions; flags/fault stack
 unwinding and native parent execution remain unverified. The unusual texture
 numerator and dy65/dy3 adjustments are preserved; see [step evidence](../ghidra/windows_edge_steps.md).
 
+Splitter RVA 0x24F270 similarly adapts ESI to a typed mutable packet and lowers
+unsigned DIV/signed high products using C89 words. Complete clipping, ordered
+state/packet effects, real fault prefixes and the live second-right check are
+verified; see [splitter evidence](../ghidra/windows_edge_splitter.md). Native parent,
+flags/fault-stack/unwinding equivalence remain unverified; no clipping bug fix is added.
+
 > Existing entries are preserved legacy evidence and need per-entry binary/address validation. New Windows deviations must cite the fingerprinted `IGN_WIN.EXE`; DOS evidence must remain labeled `MAINDOS.EXE`. No existing address is reclassified by the target change.
 
 This registry serves as the **global technical inventory** of all intentional differences, original 1997 engine bug fixes, coordinate adaptations, and safety workarounds in **Racing Dynamite** relative to their recorded original binary. The active baseline is Windows `IGN_WIN.EXE`; `MAINDOS.EXE` is the secondary DOS reference.
