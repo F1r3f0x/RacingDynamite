@@ -17,7 +17,7 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_ECX, UC_X86_REG_EDX,
     UC_X86_REG_ESP, UC_X86_REG_EIP, UC_X86_REG_EFLAGS)
 
 from verify_font_cleanup import SAVED, STACK, STOP
-from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine, compile_surface, compile_input, surface_import_libraries
+from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine, compile_surface, compile_input, compile_renderer, surface_import_libraries
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
 
@@ -136,7 +136,8 @@ def build_loader():
     sine_obj, _ = compile_sine(DLL.stem)
     surface_obj, _ = compile_surface(DLL.stem)
     input_obj, input_cmd = compile_input(DLL.stem)
-    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj), str(input_obj)] + surface_import_libraries(DLL.stem))
+    renderer_obj, renderer_cmd = compile_renderer(DLL.stem)
+    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj), str(input_obj), str(renderer_obj)] + surface_import_libraries(DLL.stem))
     for cmd in commands:
         subprocess.run(cmd, cwd=ROOT, check=True)
     assert all(p.is_file() and p.stat().st_size for p in [fobj, mobj, sobj, DLL])

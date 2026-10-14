@@ -31,6 +31,24 @@ volatile GfxTriangleGradientScratch g_triangleGradientScratch = {0, 0, 0, 0, 0, 
 typedef char GfxTriangleVerticesMustBe48Bytes[(sizeof(GfxTriangleVertexState) == 48) ? 1 : -1];
 typedef char GfxTriangleGradientScratchMustBe32Bytes[(sizeof(GfxTriangleGradientScratch) == 32) ? 1 : -1];
 
+volatile unsigned char *volatile g_spritePixels = 0;
+volatile int g_spriteClipLeftFixed = 0;
+volatile int g_spriteStride = 0;
+volatile int g_spriteClipRightFixed = 0;
+volatile int g_spriteClipTopFixed = 0;
+volatile int g_spriteClipBottomFixed = 0;
+volatile int g_spriteClipLeft = 0;
+volatile int g_spriteClipTop = 0;
+volatile int g_spriteClipRight = 0;
+volatile int g_spriteWidth = 0;
+volatile int g_spriteClipBottom = 0;
+volatile unsigned int g_spriteConfigOption = 0;
+volatile int g_spriteHeight = 0;
+volatile int g_triangleViewportHeight = 0;
+volatile unsigned char *volatile g_triangleViewportFramebuffer = 0;
+
+typedef char GfxSpriteStateMustBe40Bytes[(sizeof(GfxSpriteState) == 40) ? 1 : -1];
+
 /* Deliberately wrapped addresses from the verified 32-bit Windows ABI. */
 #define GFX_SPAN_BYTE(address) (*(volatile unsigned char *)(uintptr_t)(address))
 #define GFX_EDGE_SAR(value, shift) (((value) >> (shift)) | ((0u - ((value) >> 31)) << (32 - (shift))))
@@ -936,4 +954,134 @@ void Gfx_ComputeTriangleGradients(void) {
         table_word += step;
         g_triangleEdgeVCorrections[i] = table_word;
     }
+}
+
+/*
+ * @original Gfx_SpriteCloseNative (IGN_WIN.EXE @ 0x00456F40, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteCloseNative(void) {
+    return 1;
+}
+
+/*
+ * @original Gfx_SpriteOptionNative (IGN_WIN.EXE @ 0x00456F50, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteOptionNative(unsigned int option) {
+    (void)option;
+    return 0;
+}
+
+/*
+ * @original Gfx_SpriteConfigureNative (IGN_WIN.EXE @ 0x00456F60, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteConfigureNative(unsigned char *pixels, int stride, int width, int height, unsigned int option) {
+    g_spritePixels = pixels;
+    g_spriteStride = stride;
+    g_spriteWidth = width;
+    g_spriteHeight = height;
+    g_spriteConfigOption = option;
+    g_spriteClipLeft = 0;
+    g_spriteClipLeftFixed = 0;
+    g_spriteClipTop = 0;
+    g_spriteClipTopFixed = 0;
+    g_spriteClipRight = width;
+    g_spriteClipRightFixed = (int)((unsigned int)width << 8);
+    g_spriteClipBottom = height;
+    g_spriteClipBottomFixed = (int)((unsigned int)height << 8);
+
+    g_triangleViewportState.clip_left_integer = 0;
+    g_triangleViewportState.clip_top_integer = 0;
+    g_triangleViewportState.clip_right_integer = width;
+    g_triangleViewportState.clip_bottom_integer = height;
+    g_triangleViewportState.clip_left_fixed = 0;
+    g_triangleViewportState.clip_top_fixed = 0;
+    g_triangleViewportState.clip_right_fixed = (int)((unsigned int)width << 8);
+    g_triangleViewportState.clip_bottom_fixed = (int)((unsigned int)height << 8);
+    g_triangleViewportFramebuffer = pixels;
+    g_triangleViewportState.row_stride = stride;
+    g_triangleViewportHeight = height;
+    return 1;
+}
+
+/*
+ * @original Gfx_SpriteSetClipNative (IGN_WIN.EXE @ 0x00457020, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteSetClipNative(int left, int top, int right, int bottom) {
+    if (left < 0 || top < 0 || right <= left || bottom <= top ||
+        right > g_spriteWidth || bottom > g_spriteHeight) {
+        return 0;
+    }
+
+    g_spriteClipLeft = left;
+    g_spriteClipLeftFixed = (int)((unsigned int)left << 8);
+    g_spriteClipTop = top;
+    g_spriteClipTopFixed = (int)((unsigned int)top << 8);
+    g_spriteClipRight = right;
+    g_spriteClipRightFixed = (int)((unsigned int)right << 8);
+    g_spriteClipBottom = bottom;
+    g_spriteClipBottomFixed = (int)((unsigned int)bottom << 8);
+
+    g_triangleViewportState.clip_left_integer = left;
+    g_triangleViewportState.clip_top_integer = top;
+    g_triangleViewportState.clip_right_integer = right;
+    g_triangleViewportState.clip_bottom_integer = bottom;
+    g_triangleViewportState.clip_left_fixed = (int)((unsigned int)left << 8);
+    g_triangleViewportState.clip_top_fixed = (int)((unsigned int)top << 8);
+    g_triangleViewportState.clip_right_fixed = (int)((unsigned int)right << 8);
+    g_triangleViewportState.clip_bottom_fixed = (int)((unsigned int)bottom << 8);
+    return 1;
+}
+
+/*
+ * @original Gfx_SpriteGetStateNative (IGN_WIN.EXE @ 0x00457110, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteGetStateNative(GfxSpriteState *state) {
+    volatile GfxSpriteState *output = state;
+    int stride;
+    output->width = g_spriteWidth;
+    output->height = g_spriteHeight;
+    output->option = g_spriteConfigOption;
+    stride = g_spriteStride;
+    output->format = 3;
+    output->stride = stride;
+    output->pixels = (unsigned char *)g_spritePixels;
+    output->clip_left = g_spriteClipLeft;
+    output->clip_top = g_spriteClipTop;
+    output->clip_right = g_spriteClipRight;
+    output->clip_bottom = g_spriteClipBottom;
+    return 1;
+}
+
+/*
+ * @original Gfx_SpriteSetStateNative (IGN_WIN.EXE @ 0x00457170, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteSetStateNative(const GfxSpriteState *state) {
+    const volatile GfxSpriteState *input = state;
+    unsigned int option;
+    int height;
+    int width;
+    int stride;
+    unsigned char *pixels;
+    int bottom;
+    int right;
+    int top;
+    int left;
+    option = input->option;
+    height = input->height;
+    width = input->width;
+    stride = input->stride;
+    pixels = input->pixels;
+    Gfx_SpriteConfigureNative(pixels, stride, width, height, option);
+    bottom = input->clip_bottom;
+    right = input->clip_right;
+    top = input->clip_top;
+    left = input->clip_left;
+    Gfx_SpriteSetClipNative(left, top, right, bottom);
+    return 1;
 }

@@ -21,7 +21,7 @@ from unicorn.x86_const import (UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ESI,
     UC_X86_REG_EDI, UC_X86_REG_EBP, UC_X86_REG_ESP, UC_X86_REG_EIP,
     UC_X86_REG_EFLAGS)
 
-from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine, compile_surface, compile_input, surface_import_libraries
+from build_decomp import STARTUP_BOUNDARY_SOURCE, compile_banner, compile_sine, compile_surface, compile_input, compile_renderer, surface_import_libraries
 from windows_target import validate_platform_imports
 from windows_target import ROOT, BUILD, TARGET, verify_target
 from windows_tracking import record_run
@@ -222,10 +222,11 @@ extern void *Gfx_SpriteOp(void *desc, int op);
     sine_obj, sine_cmd = compile_sine(DLL.stem)
     surface_obj, _ = compile_surface(DLL.stem)
     input_obj, input_cmd = compile_input(DLL.stem)
-    link_cmd.extend([str(banner_obj), str(sine_obj), str(surface_obj), str(input_obj)] + surface_import_libraries(DLL.stem))
+    renderer_obj, renderer_cmd = compile_renderer(DLL.stem)
+    link_cmd.extend([str(banner_obj), str(sine_obj), str(surface_obj), str(input_obj), str(renderer_obj)] + surface_import_libraries(DLL.stem))
     subprocess.run(link_cmd, check=True)
     assert obj_path.stat().st_size and DLL.stat().st_size
-    return [compile_cmd, compile_stub_cmd, banner_cmd, sine_cmd, input_cmd, link_cmd]
+    return [compile_cmd, compile_stub_cmd, banner_cmd, sine_cmd, input_cmd, renderer_cmd, link_cmd]
 
 
 def execute_unload(pe, entry, fonts_addr, sprite_op_addr, font_id, fonts_data, seed, original=False):

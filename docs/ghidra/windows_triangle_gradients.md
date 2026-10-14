@@ -50,7 +50,10 @@ coordinates/UVs. Actual DIV/IDIV instructions are required on faults, with all
 partial stores compared. The complete renderer is import-free and its19 actual
 calls remain verified production helper targets; gradients add no callees.
 
-Full workflow renewal and snapshot/gates are pending. No native gradient/parent
+Full114 compilation/differential renewal, fidelity audit and synchronized exports
+passed at committed snapshot `168c99a0c897682abc28550c414ce3c829e2205406c16c4f9e1d2b28df3a03a2`,
+commit `a1b6590`. The committed inventory records114 fresh compilation/emulation
+and43 scoped native passes; no native gradient result was added. No native gradient/parent
 or playable game result is claimed. Existing43 scoped native records remain
 separate. Original NX behavior, original toolchain, concurrency and complete
 startup/menu/render/input/audio/races remain unresolved. Next integrate real

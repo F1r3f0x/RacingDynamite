@@ -221,6 +221,8 @@ def verify():
         'Input_ReadHeldNative', 'Input_ConsumePressNative', 'Input_ConsumeRepeatNative',
         'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch',
         'Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_SpriteOpenNative', 'Gfx_SpriteShutdownNative',
+        'Gfx_SpriteCloseNative', 'Gfx_SpriteOptionNative', 'Gfx_SpriteConfigureNative',
+        'Gfx_SpriteSetClipNative', 'Gfx_SpriteGetStateNative', 'Gfx_SpriteSetStateNative',
         'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
         'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative',
         'Gfx_SurfaceClearNative', 'Gfx_ClearSurfaceNative',
@@ -233,6 +235,13 @@ def verify():
         'Gfx_InitPrimitiveLineControl', 'Gfx_InitNamedPrimitiveDefault',
         'Gfx_SpriteHandleOpNative', 'Gfx_SpriteImageOpNative', 'Gfx_GrowPointerTable', 'Gfx_CopyAllocatedString', 'Gfx_ReleaseSpritePackingStorage', 'Gfx_FreeBytes', 'Gfx_FreeAlignedBytes', 'Gfx_AssignSpritePackingStorage', 'Gfx_CopySpriteDescriptorPixels', 'Gfx_AddSpritePackingBucket', 'Gfx_FindSpritePackingGap', 'Gfx_AddSpritePackingPage', 'Gfx_AllocBytes', 'Gfx_AllocAlignedBytes', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'Gfx_InitDefaultSpriteDescriptor', 'Gfx_InitSpritePackingState', 'Gfx_LinkSpritePackingNode',
         'Mem_DestroyPool', 'Mem_ShutdownPools', 'Mem_InitPools', 'Mem_CreatePool',
+        'Gfx_SetTriangleSpanState','Gfx_DrawTriangleSpan','Gfx_DrawClippedTriangleSpan',
+        'Gfx_SetTriangleSpanCore','Gfx_DrawTriangleSpanCore','Gfx_DrawClippedTriangleSpanCore',
+        'Gfx_BuildClippedCorrectedTriangleEdge','Gfx_BuildClippedRawTriangleEdge',
+        'Gfx_BuildCorrectedTriangleEdge','Gfx_BuildRawTriangleEdge',
+        'Gfx_EmitRawTriangleEdgeRecords','Gfx_EmitCorrectedTriangleEdgeRecords',
+        'Gfx_ComputeTriangleEdgeSlope','Gfx_ClampTriangleEdgeRightEndpoint',
+        'Gfx_InitializeTriangleEdgeSteps','Gfx_ClipAndSplitTriangleEdge','Gfx_ComputeTriangleGradients',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
     draw_iat=next(entry.address for group in rebuilt.DIRECTORY_ENTRY_IMPORT
@@ -271,6 +280,7 @@ def verify():
         'Gfx_InitPairStorageControl': ['Gfx_AllocBytes'],
         'Gfx_InitNamedPrimitiveDefault': ['Gfx_InitPairStorageControl', 'Gfx_AllocBytes'],
         'Gfx_SpriteHandleOpNative': ['Gfx_SpriteImageOpNative'] * 2,
+        'Gfx_SpriteSetStateNative': ['Gfx_SpriteConfigureNative', 'Gfx_SpriteSetClipNative'],
         'Gfx_SpriteImageOpNative': ['Gfx_GrowPointerTable','Gfx_FreeBytes',
             'Gfx_ReleaseSpritePackingStorage','Gfx_FreeBytes',
             'Gfx_ReleaseSpritePackingStorage','Gfx_FreeBytes','Gfx_AllocBytes',
@@ -295,6 +305,18 @@ def verify():
         'Mem_InitSystem': ['Lisa_PrintVersion', 'Mem_InitPools', 'Mem_InitHandles',
             'Input_ResetCallbacks', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend'],
         'Mem_ShutdownSystem': ['Mem_ShutdownHandles', 'Mem_ShutdownPools']}
+    expected_calls.update({
+        'Gfx_SetTriangleSpanState':['Gfx_SetTriangleSpanCore'],
+        'Gfx_DrawTriangleSpan':['Gfx_DrawTriangleSpanCore'],
+        'Gfx_DrawClippedTriangleSpan':['Gfx_DrawClippedTriangleSpanCore'],
+        'Gfx_BuildCorrectedTriangleEdge':['Gfx_InitializeTriangleEdgeSteps','Gfx_EmitCorrectedTriangleEdgeRecords'],
+        'Gfx_BuildRawTriangleEdge':['Gfx_InitializeTriangleEdgeSteps','Gfx_EmitRawTriangleEdgeRecords'],
+        'Gfx_BuildClippedCorrectedTriangleEdge':['Gfx_ClipAndSplitTriangleEdge','Gfx_InitializeTriangleEdgeSteps',
+            'Gfx_EmitCorrectedTriangleEdgeRecords','Gfx_ClampTriangleEdgeRightEndpoint',
+            'Gfx_InitializeTriangleEdgeSteps','Gfx_EmitCorrectedTriangleEdgeRecords'],
+        'Gfx_BuildClippedRawTriangleEdge':['Gfx_ClipAndSplitTriangleEdge','Gfx_InitializeTriangleEdgeSteps',
+            'Gfx_EmitRawTriangleEdgeRecords','Gfx_ClampTriangleEdgeRightEndpoint',
+            'Gfx_InitializeTriangleEdgeSteps','Gfx_EmitRawTriangleEdgeRecords']})
     assert len(direct_calls) == sum(map(len, expected_calls.values())), 'Unexpected direct helper dependency count'
     actual_calls = {}
     for call in direct_calls:
@@ -905,3 +927,5 @@ if __name__ == '__main__':
 
     from verify_triangle_gradients import verify_triangle_gradients
     verify_triangle_gradients(record=True)
+    from verify_viewport_setters import verify_viewport_setters
+    verify_viewport_setters(record=True)

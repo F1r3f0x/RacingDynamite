@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:168c99a0c897682abc28550c414ce3c829e2205406c16c4f9e1d2b28df3a03a2 -->
+<!-- snapshot:d76b20a5975120220a0cca3142514924345529541e7d860b99eff731513abe80 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -428,12 +428,12 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00456E60` | `0x00056E60` | 181 | `Gfx_InstallSpriteDispatch` | game | reconstructed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
 | `0x00456F20` | `0x00056F20` | 6 | `Gfx_SpriteOpenNative` | game | reconstructed | [windows_graphics_entry.md](windows_graphics_entry.md) |
 | `0x00456F30` | `0x00056F30` | 6 | `Gfx_SpriteShutdownNative` | game | reconstructed | [windows_graphics_entry.md](windows_graphics_entry.md) |
-| `0x00456F40` | `0x00056F40` | 6 | `Gfx_SpriteCloseNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456F50` | `0x00056F50` | 3 | `Gfx_SpriteOptionNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456F60` | `0x00056F60` | 187 | `Gfx_SpriteConfigureNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00457020` | `0x00057020` | 225 | `Gfx_SpriteSetClipNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00457110` | `0x00057110` | 92 | `Gfx_SpriteGetStateNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00457170` | `0x00057170` | 63 | `Gfx_SpriteSetStateNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
+| `0x00456F40` | `0x00056F40` | 6 | `Gfx_SpriteCloseNative` | game | reconstructed | [windows_viewport_setters.md](windows_viewport_setters.md) |
+| `0x00456F50` | `0x00056F50` | 3 | `Gfx_SpriteOptionNative` | game | reconstructed | [windows_viewport_setters.md](windows_viewport_setters.md) |
+| `0x00456F60` | `0x00056F60` | 187 | `Gfx_SpriteConfigureNative` | game | reconstructed | [windows_viewport_setters.md](windows_viewport_setters.md) |
+| `0x00457020` | `0x00057020` | 225 | `Gfx_SpriteSetClipNative` | game | reconstructed | [windows_viewport_setters.md](windows_viewport_setters.md) |
+| `0x00457110` | `0x00057110` | 92 | `Gfx_SpriteGetStateNative` | game | reconstructed | [windows_viewport_setters.md](windows_viewport_setters.md) |
+| `0x00457170` | `0x00057170` | 63 | `Gfx_SpriteSetStateNative` | game | reconstructed | [windows_viewport_setters.md](windows_viewport_setters.md) |
 | `0x004571B0` | `0x000571B0` | 145 | `Gfx_DrawSpriteNative` | game | reconstructed | [windows_sprite_backend.md](windows_sprite_backend.md) |
 | `0x00457250` | `0x00057250` | 96 | `Gfx_SpriteDrawListNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
 | `0x004572B0` | `0x000572B0` | 1 | `sub_004572B0` | unknown | unidentified | - |

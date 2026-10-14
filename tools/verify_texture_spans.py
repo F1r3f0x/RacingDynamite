@@ -44,6 +44,13 @@ RENDERER_EXPORTS = [
     'g_triangleEdgeContinuation','Gfx_BuildCorrectedTriangleEdge','Gfx_BuildRawTriangleEdge',
     'Gfx_ComputeTriangleGradients','g_triangleVertices','g_triangleGradientScratch']
 
+RENDERER_EXPORTS += ['Gfx_SpriteCloseNative','Gfx_SpriteOptionNative','Gfx_SpriteConfigureNative',
+    'Gfx_SpriteSetClipNative','Gfx_SpriteGetStateNative','Gfx_SpriteSetStateNative',
+    'g_spritePixels','g_spriteClipLeftFixed','g_spriteStride','g_spriteClipRightFixed',
+    'g_spriteClipTopFixed','g_spriteClipBottomFixed','g_spriteClipLeft','g_spriteClipTop',
+    'g_spriteClipRight','g_spriteWidth','g_spriteClipBottom','g_spriteConfigOption',
+    'g_spriteHeight','g_triangleViewportHeight','g_triangleViewportFramebuffer']
+
 
 def validate_renderer_calls(pe):
     symbols=validation_symbols(pe)
@@ -55,7 +62,8 @@ def validate_renderer_calls(pe):
         'Gfx_SetTriangleSpanCore':1,'Gfx_DrawTriangleSpanCore':1,'Gfx_DrawClippedTriangleSpanCore':1,
         'Gfx_ClipAndSplitTriangleEdge':2,'Gfx_InitializeTriangleEdgeSteps':6,
         'Gfx_ClampTriangleEdgeRightEndpoint':2,'Gfx_EmitCorrectedTriangleEdgeRecords':3,
-        'Gfx_EmitRawTriangleEdgeRecords':3}.items()}
+        'Gfx_EmitRawTriangleEdgeRecords':3,'Gfx_SpriteConfigureNative':1,
+        'Gfx_SpriteSetClipNative':1}.items()}
     assert calls==expected,(calls,expected)
     return calls
 

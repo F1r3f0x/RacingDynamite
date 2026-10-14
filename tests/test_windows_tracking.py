@@ -105,7 +105,9 @@ class TrackingTests(unittest.TestCase):
         tracking.migrate(self.root)
         paths = ['tools/build_decomp.py', 'decomp/src/main.c', 'decomp/include/main.h',
                  'decomp/src/input.c', 'decomp/include/input.h',
-                 'decomp/src/surface.c', 'decomp/include/surface.h']
+                 'decomp/src/surface.c', 'decomp/include/surface.h',
+                 'decomp/src/renderer.c', 'decomp/include/renderer.h',
+                 'tools/verify_texture_spans.py']
         for name in paths:
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -118,6 +120,9 @@ class TrackingTests(unittest.TestCase):
         self.assertIn('decomp/include/input.h', run['input_paths'])
         self.assertIn('decomp/src/surface.c', run['input_paths'])
         self.assertIn('decomp/include/surface.h', run['input_paths'])
+        self.assertIn('decomp/src/renderer.c', run['input_paths'])
+        self.assertIn('decomp/include/renderer.h', run['input_paths'])
+        self.assertIn('tools/verify_texture_spans.py', run['input_paths'])
         self.assertFalse(run['stale'])
         (self.root / 'decomp/src/input.c').write_text('changed input implementation\n')
         self.assertTrue(tracking.snapshot(self.root)['functions'][0]['latest_runs']['compilation']['stale'])
@@ -125,6 +130,11 @@ class TrackingTests(unittest.TestCase):
             inputs=['decomp/src/mem.c', 'tools/build_decomp.py'], command='fixture', root=self.root)
         (self.root / 'decomp/include/surface.h').write_text('changed surface layout\n',
             encoding='utf-8', newline='\n')
+        self.assertTrue(tracking.snapshot(self.root)['functions'][0]['latest_runs']['compilation']['stale'])
+
+        tracking.record_run(0x1080, 'compilation', 'pass',
+            inputs=['decomp/src/mem.c', 'tools/build_decomp.py'], command='fixture', root=self.root)
+        (self.root / 'decomp/src/renderer.c').write_text('changed renderer implementation\n', encoding='utf-8', newline='\n')
         self.assertTrue(tracking.snapshot(self.root)['functions'][0]['latest_runs']['compilation']['stale'])
 
     def test_describe_source_updates_module_membership_on_relocation(self):

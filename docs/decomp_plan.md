@@ -1,5 +1,18 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Direct viewport and state routines (2026-10-14)
+
+[Viewport evidence](ghidra/windows_viewport_setters.md), six RVAs0x56F40/50/60,
+0x57020,0x57110/70, closes real sprite configuration and triangle viewport writes.
+Production is directly compiled renderer C89; shared harness links real module
+and removes duplicate viewport backing. Focused2,448 comparisons pass, including
+14pointer faults and1,792followups; strict shared call-identity audit passes.
+Paired native viewport448calls compare records/all16state objects.
+Full120 renewal/audit/exports pass at snapshot `d76b20a59751`, with49 scoped
+native records and48 guardtests. LF/index gates/hooks follow. Gradient commit `a1b6590` passed full114 renewal at
+snapshot `168c99a0c897`; older pending text is corrected. Continue nativeviewport,
+wholetriangle/directworkspace/sprite integration; playablegame/toolchain stay open.
+
 ## Triangle gradients and correction tables (2026-10-13)
 
 [Gradient evidence](ghidra/windows_triangle_gradients.md), RVA0x24EA80,

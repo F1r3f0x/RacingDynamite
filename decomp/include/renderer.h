@@ -145,4 +145,39 @@ extern volatile GfxTriangleVertexState g_triangleVertices;
 extern volatile GfxTriangleGradientScratch g_triangleGradientScratch;
 void Gfx_ComputeTriangleGradients(void);
 
+typedef struct GfxSpriteState {
+    int width;
+    int height;
+    unsigned int option;
+    int clip_left;
+    int clip_top;
+    int clip_right;
+    int clip_bottom;
+    int stride;
+    int format;
+    unsigned char *pixels;
+} GfxSpriteState;
+extern volatile unsigned char *volatile g_spritePixels; /* VA 0x004BA6F8 */
+extern volatile int g_spriteClipLeftFixed; /* VA 0x0050EBF0 */
+extern volatile int g_spriteStride; /* VA 0x0050EBF4 */
+extern volatile int g_spriteClipRightFixed; /* VA 0x0050EBF8 */
+extern volatile int g_spriteClipTopFixed; /* VA 0x0050EC00 */
+extern volatile int g_spriteClipBottomFixed; /* VA 0x0050EC04 */
+extern volatile int g_spriteClipLeft; /* VA 0x0050ED20 */
+extern volatile int g_spriteClipTop; /* VA 0x0050ED24 */
+extern volatile int g_spriteClipRight; /* VA 0x0050ED28 */
+extern volatile int g_spriteWidth; /* VA 0x0050ED2C */
+extern volatile int g_spriteClipBottom; /* VA 0x0050ED30 */
+extern volatile unsigned int g_spriteConfigOption; /* VA 0x0050ED34 */
+extern volatile int g_spriteHeight; /* VA 0x0050ED38 */
+extern volatile int g_triangleViewportHeight; /* VA 0x0063F2AC */
+extern volatile unsigned char *volatile g_triangleViewportFramebuffer; /* VA 0x0063F2D4 */
+
+int Gfx_SpriteCloseNative(void);
+int Gfx_SpriteOptionNative(unsigned int option);
+int Gfx_SpriteConfigureNative(unsigned char *pixels, int stride, int width, int height, unsigned int option);
+int Gfx_SpriteSetClipNative(int left, int top, int right, int bottom);
+int Gfx_SpriteGetStateNative(GfxSpriteState *state);
+int Gfx_SpriteSetStateNative(const GfxSpriteState *state);
+
 #endif

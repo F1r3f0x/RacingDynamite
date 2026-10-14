@@ -201,7 +201,13 @@
         "Gfx_BuildCorrectedTriangleEdge",
         "Gfx_BuildRawTriangleEdge",
         "Gfx_ComputeTriangleGradients",
-        "Gfx_ComputeTriangleTextureGradients"
+        "Gfx_ComputeTriangleTextureGradients",
+        "Gfx_SpriteCloseNative",
+        "Gfx_SpriteOptionNative",
+        "Gfx_SpriteConfigureNative",
+        "Gfx_SpriteSetClipNative",
+        "Gfx_SpriteGetStateNative",
+        "Gfx_SpriteSetStateNative"
       ],
       "responsibility": "Verified software texture compositing spans; triangle and sprite rasterization dependencies reconstructed incrementally",
       "state": [
@@ -216,7 +222,8 @@
         "verified 20byte edge split flag and saved endpoint VA4BAEC8..D8",
         "verified corrected/raw secondary counts and raw advanced output pointer VA4BAEDC..E8, preserving intervening word",
         "verified48byte sorted geometry and UV input VA4BAD74..A0",
-        "verified32byte gradient intermediate backing VA4BADF4..4BAE10; heights, denominator, dx/interpolants and ratio"
+        "verified32byte gradient intermediate backing VA4BADF4..4BAE10; heights, denominator, dx/interpolants and ratio",
+        "verified sprite pixel/stride/dimension/integer and fixed clip words,40byte state transfer record, triangle framebuffer pointer/height; viewport backing shared with actual renderer"
       ],
       "dependencies": [
         "caller-owned mapped texture, compositing table and framebuffer storage; initialization remains external and unverified",

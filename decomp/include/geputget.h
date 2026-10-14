@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include "mem.h"
 #include "surface.h"
+#include "renderer.h"
 
 /* Native fixed sine construction; binary64 constants are independently verified.
  * The behavior compiler must preserve x87 FSIN and multiplication ordering. */
@@ -174,7 +175,6 @@ int Gfx_InitSpritePackingState(void); /* VA 0x004614D0; EAX=0 */
 GfxSpritePackingNode *Gfx_LinkSpritePackingNode(GfxSpritePackingNode *previous,
     GfxSpritePackingNode *current, GfxSpritePackingNode *next); /* VA 0x00461690 */
 int Gfx_CopySpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x004612E0 */
-typedef struct GfxSpriteState GfxSpriteState;
 typedef int (*GfxSpriteOpenProc)(void);
 extern GfxSpriteOpenProc volatile g_spriteOpen; /* VA 0x0050EBA0 */
 int Gfx_SpriteOpenNative(void); /* VA 0x00456F20 */
@@ -186,16 +186,16 @@ int Gfx_Rebuild(void); /* VA 0x00456BE0 */
 int Gfx_Shutdown(void); /* VA 0x00456BF0 */
 typedef int (*GfxSpriteCloseProc)(void);
 extern GfxSpriteCloseProc volatile g_spriteClose; /* VA 0x0050EBA8 */
-int Gfx_SpriteCloseNative(void); /* VA 0x00456F40; body unreconstructed */
+int Gfx_SpriteCloseNative(void); /* VA 0x00456F40 */
 typedef int (*GfxSpriteOptionProc)(unsigned int option);
 extern GfxSpriteOptionProc volatile g_spriteOption; /* VA 0x0050EBAC */
-int Gfx_SpriteOptionNative(unsigned int option); /* VA 0x00456F50; body unreconstructed */
+int Gfx_SpriteOptionNative(unsigned int option); /* VA 0x00456F50 */
 typedef int (*GfxSpriteConfigureProc)(unsigned char *pixels, int stride, int width, int height, unsigned int option);
 extern GfxSpriteConfigureProc volatile g_spriteConfigure; /* VA 0x0050EBB0 */
-int Gfx_SpriteConfigureNative(unsigned char *pixels, int stride, int width, int height, unsigned int option); /* VA 0x00456F60; body unreconstructed */
+int Gfx_SpriteConfigureNative(unsigned char *pixels, int stride, int width, int height, unsigned int option); /* VA 0x00456F60 */
 typedef int (*GfxSpriteSetClipProc)(int left, int top, int right, int bottom);
 extern GfxSpriteSetClipProc volatile g_spriteSetClip; /* VA 0x0050EBB4 */
-int Gfx_SpriteSetClipNative(int left, int top, int right, int bottom); /* VA 0x00457020; body unreconstructed */
+int Gfx_SpriteSetClipNative(int left, int top, int right, int bottom); /* VA 0x00457020 */
 typedef int (*GfxSpriteDrawListProc)(const unsigned int *list);
 extern GfxSpriteDrawListProc volatile g_spriteDrawList; /* VA 0x0050EBB8 */
 int Gfx_SpriteDrawListNative(const unsigned int *list); /* VA 0x00457250; body unreconstructed */
@@ -222,10 +222,10 @@ extern GfxSpriteReservedProc volatile g_spriteReserved; /* VA 0x0050EBE4 */
 int Gfx_SpriteReservedNative(unsigned int option); /* VA 0x00461A80; body unreconstructed */
 typedef int (*GfxSpriteGetStateProc)(GfxSpriteState *state);
 extern GfxSpriteGetStateProc volatile g_spriteGetState; /* VA 0x0050EBEC */
-int Gfx_SpriteGetStateNative(GfxSpriteState *state); /* VA 0x00457110; body unreconstructed */
+int Gfx_SpriteGetStateNative(GfxSpriteState *state); /* VA 0x00457110 */
 typedef int (*GfxSpriteSetStateProc)(const GfxSpriteState *state);
 extern GfxSpriteSetStateProc volatile g_spriteSetState; /* VA 0x0050EBE8 */
-int Gfx_SpriteSetStateNative(const GfxSpriteState *state); /* VA 0x00457170; body unreconstructed */
+int Gfx_SpriteSetStateNative(const GfxSpriteState *state); /* VA 0x00457170 */
 
 /* Separately owned lazy work buffers. Consumers use a two-dword header and
  * twelve-byte stepping, but a complete layout/capacity is not established. */

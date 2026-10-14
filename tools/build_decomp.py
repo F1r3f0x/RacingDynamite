@@ -97,20 +97,14 @@ SURFACE_EXPORTS = ['Gfx_InitSurfaceRecords', 'g_nativePrimarySurface',
 
 # Validation fixtures live separately from the extracted production installer.
 STARTUP_BOUNDARY_SOURCE += (
-    'int Gfx_SpriteCloseNative(void) { for (;;) {} }\n'
-    'int Gfx_SpriteOptionNative(unsigned int option) { (void)option; for (;;) {} }\n'
-    'int Gfx_SpriteConfigureNative(unsigned char *pixels, int stride, int width, int height, unsigned int option) { (void)pixels; (void)stride; (void)width; (void)height; (void)option; for (;;) {} }\n'
-    'int Gfx_SpriteSetClipNative(int left, int top, int right, int bottom) { (void)left; (void)top; (void)right; (void)bottom; for (;;) {} }\n'
     'int Gfx_SpriteDrawListNative(const unsigned int *list) { (void)list; for (;;) {} }\n'
     'int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform) { (void)handle; (void)position; (void)transform; for (;;) {} }\n'
     'int Gfx_SpriteCreateDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id) { (void)descriptor; (void)image_id; for (;;) {} }\n'
     'int Gfx_SpriteFreeDescriptorNative(GfxSpriteDescriptor *descriptor) { (void)descriptor; for (;;) {} }\n'
     'int Gfx_SpriteCopyDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id) { (void)descriptor; (void)image_id; for (;;) {} }\n'
     'int Gfx_SpriteReservedNative(unsigned int option) { (void)option; for (;;) {} }\n'
-    'int Gfx_SpriteGetStateNative(GfxSpriteState *state) { (void)state; for (;;) {} }\n'
-    'int Gfx_SpriteSetStateNative(const GfxSpriteState *state) { (void)state; for (;;) {} }\n'
 )
-SPRITE_EXPORTS = ['Gfx_GrowPointerTable', 'Gfx_CopyAllocatedString', 'Gfx_ReleaseSpritePackingStorage', 'Gfx_FreeBytes', 'Gfx_FreeAlignedBytes', 'Gfx_AssignSpritePackingStorage', 'Gfx_CopySpriteDescriptorPixels', 'Gfx_AddSpritePackingBucket', 'Gfx_FindSpritePackingGap', 'Gfx_AddSpritePackingPage', 'Gfx_AllocBytes', 'Gfx_AllocAlignedBytes', 'Gfx_InitSpritePackingState', 'Gfx_LinkSpritePackingNode', 'g_spritePackingTemplate', 'g_spritePackingBuckets', 'g_spritePackingPages', 'Gfx_InitDefaultSpriteDescriptor', 'g_nativeSpriteDefaultName', 'g_nativeImageControl', 'g_spriteOpen', 'Gfx_SpriteOpenNative', 'g_spriteShutdown', 'Gfx_SpriteShutdownNative', 'g_spriteClose', 'Gfx_SpriteCloseNative', 'g_spriteOption', 'Gfx_SpriteOptionNative', 'g_spriteConfigure', 'Gfx_SpriteConfigureNative', 'g_spriteSetClip', 'Gfx_SpriteSetClipNative', 'g_spriteDrawList', 'Gfx_SpriteDrawListNative', 'g_spriteDraw', 'Gfx_DrawSpriteNative', 'g_spriteHandleOp', 'Gfx_SpriteHandleOpNative', 'g_spriteImageOp', 'Gfx_SpriteImageOpNative', 'g_spriteCreateDescriptor', 'Gfx_SpriteCreateDescriptorNative', 'g_spriteFreeDescriptor', 'Gfx_SpriteFreeDescriptorNative', 'g_spriteCopyDescriptor', 'Gfx_SpriteCopyDescriptorNative', 'g_spriteReserved', 'Gfx_SpriteReservedNative', 'g_spriteGetState', 'Gfx_SpriteGetStateNative', 'g_spriteSetState', 'Gfx_SpriteSetStateNative', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'g_nativeSpriteFreeList', 'g_nativeSpriteHandles', 'g_nativeSpriteFreeCursor', 'g_nativeSpriteScratch', 'g_nativeSpriteDefault']
+SPRITE_EXPORTS = ['Gfx_GrowPointerTable', 'Gfx_CopyAllocatedString', 'Gfx_ReleaseSpritePackingStorage', 'Gfx_FreeBytes', 'Gfx_FreeAlignedBytes', 'Gfx_AssignSpritePackingStorage', 'Gfx_CopySpriteDescriptorPixels', 'Gfx_AddSpritePackingBucket', 'Gfx_FindSpritePackingGap', 'Gfx_AddSpritePackingPage', 'Gfx_AllocBytes', 'Gfx_AllocAlignedBytes', 'Gfx_InitSpritePackingState', 'Gfx_LinkSpritePackingNode', 'g_spritePackingTemplate', 'g_spritePackingBuckets', 'g_spritePackingPages', 'Gfx_InitDefaultSpriteDescriptor', 'g_nativeSpriteDefaultName', 'g_nativeImageControl', 'g_spriteOpen', 'Gfx_SpriteOpenNative', 'g_spriteShutdown', 'Gfx_SpriteShutdownNative', 'g_spriteClose', 'Gfx_SpriteCloseNative', 'g_spriteOption', 'Gfx_SpriteOptionNative', 'g_spriteConfigure', 'Gfx_SpriteConfigureNative', 'g_spriteSetClip', 'Gfx_SpriteSetClipNative', 'g_spriteDrawList', 'Gfx_SpriteDrawListNative', 'g_spriteDraw', 'Gfx_DrawSpriteNative', 'g_spriteHandleOp', 'Gfx_SpriteHandleOpNative', 'g_spriteImageOp', 'Gfx_SpriteImageOpNative', 'g_spriteCreateDescriptor', 'Gfx_SpriteCreateDescriptorNative', 'g_spriteFreeDescriptor', 'Gfx_SpriteFreeDescriptorNative', 'g_spriteCopyDescriptor', 'Gfx_SpriteCopyDescriptorNative', 'g_spriteReserved', 'Gfx_SpriteReservedNative', 'g_spriteGetState', 'Gfx_SpriteGetStateNative', 'g_spriteSetState', 'Gfx_SpriteSetStateNative', 'Gfx_InitSpriteWorkspaceA', 'Gfx_InitSpriteWorkspaceB', 'Gfx_InitSpriteHandles', 'Gfx_CopySpriteDescriptor', 'g_nativeSpriteFreeList', 'g_nativeSpriteHandles', 'g_nativeSpriteFreeCursor', 'g_nativeSpriteScratch', 'g_nativeSpriteDefault', 'g_spritePixels', 'g_spriteClipLeftFixed', 'g_spriteStride', 'g_spriteClipRightFixed', 'g_spriteClipTopFixed', 'g_spriteClipBottomFixed', 'g_spriteClipLeft', 'g_spriteClipTop', 'g_spriteClipRight', 'g_spriteWidth', 'g_spriteClipBottom', 'g_spriteConfigOption', 'g_spriteHeight', 'g_triangleViewportHeight', 'g_triangleViewportFramebuffer', 'g_triangleViewportState']
 
 WORKSPACE_EXPORTS = ['g_spriteWorkspace' + side + field for side in ('A', 'B')
     for field in ('Allocated', 'Count', 'Buffer0', 'Buffer1', 'Buffer2')]
@@ -217,6 +211,21 @@ def surface_import_libraries(stem):
     return libraries
 
 
+def compile_renderer(stem):
+    cc = shutil.which('gcc')
+    if not cc:
+        raise RuntimeError('GCC i386 required for the direct C89 renderer')
+    obj = BUILD/(stem+'_renderer.obj')
+    obj.unlink(missing_ok=True)
+    command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
+        '-Werror', '-O2', '-fno-inline', '-fno-optimize-sibling-calls',
+        '-I', str(ROOT/'decomp/include'), '-c', str(ROOT/'decomp/src/renderer.c'),
+        '-o', str(obj)]
+    print(subprocess.list2cmdline(command), flush=True)
+    subprocess.run(command, cwd=ROOT, check=True)
+    return obj, command
+
+
 def build(compiler='clang', linker='lld-link', dll=DLL):
     verify_target()
     cc, ld = shutil.which(compiler), shutil.which(linker)
@@ -239,12 +248,15 @@ def build(compiler='clang', linker='lld-link', dll=DLL):
          '/base:0x10000000', '/out:'+str(dll), str(obj), str(stub_obj)] +
         ['/export:'+s for s in EXPORTS],
     ]
+    from verify_texture_spans import ROUTINES, STATE, RENDERER_EXPORTS
+    commands[-1].extend('/export:'+name for name in sorted(set([*ROUTINES,*STATE,*RENDERER_EXPORTS])-set(EXPORTS)))
     commands.insert(1, commands[0][:-4] + ['-c', str(stub), '-o', str(stub_obj)])
     banner_obj, _ = compile_banner(commands[0][:-4], dll.stem)
     sine_obj, _ = compile_sine(dll.stem)
     surface_obj, _ = compile_surface(dll.stem)
     input_obj, _ = compile_input(dll.stem)
-    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj), str(input_obj)] + surface_import_libraries(dll.stem))
+    renderer_obj, _ = compile_renderer(dll.stem)
+    commands[-1].extend([str(banner_obj), str(sine_obj), str(surface_obj), str(input_obj), str(renderer_obj)] + surface_import_libraries(dll.stem))
     for command in commands:
         print(subprocess.list2cmdline(command), flush=True)
         subprocess.run(command, cwd=ROOT, check=True)
