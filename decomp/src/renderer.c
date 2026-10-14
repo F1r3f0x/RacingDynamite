@@ -2178,3 +2178,71 @@ void Gfx_SubmitSpriteRequest(void)
 
     Gfx_RasterizeSpritePacket((const GfxSpriteRasterPacket *)&g_spriteRasterPacket);
 }
+
+volatile unsigned int g_triangleDrawListStride = 4; /* VA 0x004BA704 */
+volatile unsigned int g_triangleWorkspacePacket[14] = {18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; /* VA 0x004BA718 */
+
+/*
+ * @original Gfx_SpriteDrawListCallback (IGN_WIN.EXE @ 0x004572B0, unknown original source)
+ * @fidelity EXACT
+ */
+void Gfx_SpriteDrawListCallback(unsigned int header)
+{
+    volatile unsigned int local_header = header;
+    (void)local_header;
+}
+
+/*
+ * @original Gfx_SubmitDrawListTriangleRequest (IGN_WIN.EXE @ 0x004572C0, unknown original source)
+ * @fidelity EXACT
+ */
+void Gfx_SubmitDrawListTriangleRequest(void)
+{
+    const unsigned int *const *request = (const unsigned int *const *)g_activeSpriteRequest;
+    const unsigned int *vertex0 = request[0];
+    const unsigned int *vertex1 = request[1];
+    const unsigned int *vertex2 = request[2];
+    const unsigned int *attrs = request[3];
+
+    g_triangleWorkspacePacket[1] = vertex0[0];
+    g_triangleWorkspacePacket[2] = vertex0[1];
+    g_triangleWorkspacePacket[3] = vertex1[0];
+    g_triangleWorkspacePacket[4] = vertex1[1];
+    g_triangleWorkspacePacket[5] = vertex2[0];
+    g_triangleWorkspacePacket[6] = vertex2[1];
+    g_triangleWorkspacePacket[7] = attrs[2];
+    g_triangleWorkspacePacket[8] = attrs[3];
+    g_triangleWorkspacePacket[9] = attrs[4];
+    g_triangleWorkspacePacket[10] = attrs[5];
+    g_triangleWorkspacePacket[11] = attrs[6];
+    g_triangleWorkspacePacket[12] = attrs[7];
+    g_triangleWorkspacePacket[13] = attrs[0];
+
+    Gfx_RasterizeWorkspaceATriangle((const GfxTexturedTrianglePacket *)g_triangleWorkspacePacket);
+}
+
+/*
+ * @original Gfx_SpriteDrawListNative (IGN_WIN.EXE @ 0x00457250, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteDrawListNative(const unsigned int *list)
+{
+    while (*list != 0) {
+        unsigned int header = *list++;
+        Gfx_SpriteDrawListCallback(header);
+        while (*list != 0) {
+            const unsigned int *batch = (const unsigned int *)(uintptr_t)(*list++);
+            g_activeSpriteRequest = (volatile GfxSpriteRequest *)batch;
+            if (*batch != 0) {
+                do {
+                    Gfx_SubmitDrawListTriangleRequest();
+                    g_activeSpriteRequest = (volatile GfxSpriteRequest *)(
+                        (const char *)g_activeSpriteRequest + (g_triangleDrawListStride << 2)
+                    );
+                } while (*(const unsigned int *)g_activeSpriteRequest != 0);
+            }
+        }
+        list++;
+    }
+    return 1;
+}

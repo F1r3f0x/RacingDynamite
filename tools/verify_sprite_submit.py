@@ -124,6 +124,7 @@ def build():
         'volatile GfxSpriteRequest *volatile g_activeSpriteRequest = 0;\n'
         'volatile GfxSpriteDescriptor g_nativeSpriteDefault = {{0}};\n'
         'volatile GfxPointerTable g_nativeImageControl = {{0, 0}, 0, (uint32_t *)0};\n\n'
+        'void Gfx_RasterizeWorkspaceATriangle(const GfxTexturedTrianglePacket *packet) { (void)packet; }\n\n'
         + desc_copy + '\n'
     )
     helper_source.write_text(helper_code, encoding='utf-8', newline='\n')

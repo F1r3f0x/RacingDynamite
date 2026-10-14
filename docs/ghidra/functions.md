@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:823d02fb4b9648119d346d35fc32d425dc035f3c16714b8eb2dd8e91e928f17c -->
+<!-- snapshot:71e696780705acaab80400a5f18b3b58042a2ab96c41ff0f6b706577fec05553 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -435,9 +435,9 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00457110` | `0x00057110` | 92 | `Gfx_SpriteGetStateNative` | game | reconstructed | [windows_viewport_setters.md](windows_viewport_setters.md) |
 | `0x00457170` | `0x00057170` | 63 | `Gfx_SpriteSetStateNative` | game | reconstructed | [windows_viewport_setters.md](windows_viewport_setters.md) |
 | `0x004571B0` | `0x000571B0` | 145 | `Gfx_DrawSpriteNative` | game | reconstructed | [windows_sprite_backend.md](windows_sprite_backend.md) |
-| `0x00457250` | `0x00057250` | 96 | `Gfx_SpriteDrawListNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x004572B0` | `0x000572B0` | 1 | `sub_004572B0` | unknown | unidentified | - |
-| `0x004572C0` | `0x000572C0` | 173 | `sub_004572C0` | unknown | unidentified | - |
+| `0x00457250` | `0x00057250` | 96 | `Gfx_SpriteDrawListNative` | game | reconstructed | [windows_sprite_draw_list.md](windows_sprite_draw_list.md) |
+| `0x004572B0` | `0x000572B0` | 1 | `Gfx_SpriteDrawListCallback` | game | reconstructed | [windows_sprite_draw_list.md](windows_sprite_draw_list.md) |
+| `0x004572C0` | `0x000572C0` | 173 | `Gfx_SubmitDrawListTriangleRequest` | game | reconstructed | [windows_sprite_draw_list.md](windows_sprite_draw_list.md) |
 | `0x00457370` | `0x00057370` | 167 | `Gfx_SubmitSpriteRequest` | game | reconstructed | [windows_sprite_submit.md](windows_sprite_submit.md) |
 | `0x00457420` | `0x00057420` | 123 | `sub_00457420` | unknown | unidentified | - |
 | `0x004574A0` | `0x000574A0` | 230 | `File_LoadToMemory` | game | reconstructed | [windows_file_load.md](windows_file_load.md) |

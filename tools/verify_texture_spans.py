@@ -58,7 +58,9 @@ RENDERER_EXPORTS += ['Gfx_RasterizeTexturedTriangle','Gfx_RasterizeClippedTriang
     'Gfx_PrepareTransformedSprite','g_transformedSpriteScratch',
     'Gfx_RasterizeSpritePacket','g_spriteBlitSource','g_spriteBlitWidth','g_spriteBlitHeight','g_transformedSpriteInput',
     'Gfx_SubmitSpriteRequest','Gfx_CopySpriteDescriptor','g_spritePreparedStorage','g_spriteRasterPacket','g_spriteRenderLookup',
-    'g_activeSpriteRequest','g_nativeSpriteDefault','g_nativeImageControl']
+    'g_activeSpriteRequest','g_nativeSpriteDefault','g_nativeImageControl',
+    'Gfx_SpriteDrawListCallback','Gfx_SubmitDrawListTriangleRequest','Gfx_SpriteDrawListNative',
+    'g_triangleDrawListStride','g_triangleWorkspacePacket','Gfx_RasterizeWorkspaceATriangle']
 
 
 def validate_renderer_calls(pe):
@@ -79,7 +81,9 @@ def validate_renderer_calls(pe):
         'Gfx_BuildRawTriangleEdge':3,'Gfx_BuildCorrectedTriangleEdge':3,
         'Gfx_RasterizeClippedTriangle':1,'Gfx_RasterizeTexturedTriangle':2,
         'Gfx_PrepareTransformedSprite':1,'Gfx_RasterizeSpritePacket':1,
-        'Gfx_CopySpriteDescriptor':1}.items()}
+        'Gfx_CopySpriteDescriptor':1,
+        'Gfx_SpriteDrawListCallback':1,'Gfx_SubmitDrawListTriangleRequest':1,
+        'Gfx_RasterizeWorkspaceATriangle':1}.items()}
     assert calls==expected,(calls,expected)
     return calls
 
@@ -111,6 +115,7 @@ def build(dll=DLL,exports=()):
         'volatile GfxSpriteRequest *volatile g_activeSpriteRequest = 0;\n'
         'volatile GfxSpriteDescriptor g_nativeSpriteDefault = {{0}};\n'
         'volatile GfxPointerTable g_nativeImageControl = {{0, 0}, 0, (uint32_t *)0};\n\n'
+        'void Gfx_RasterizeWorkspaceATriangle(const GfxTexturedTrianglePacket *packet) { (void)packet; }\n\n'
         + desc_copy + '\n'
     )
     storage_source.write_text(storage_code, encoding='utf-8', newline='\n')

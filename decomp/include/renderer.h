@@ -266,4 +266,12 @@ extern volatile unsigned int g_spriteRenderLookup; /* VA 0x0063F2D8 */
 
 void Gfx_SubmitSpriteRequest(void);
 
+extern volatile unsigned int g_triangleDrawListStride; /* VA 0x004BA704 */
+extern volatile unsigned int g_triangleWorkspacePacket[14]; /* VA 0x004BA718 */
+
+void Gfx_SpriteDrawListCallback(unsigned int header);
+void Gfx_SubmitDrawListTriangleRequest(void);
+int Gfx_SpriteDrawListNative(const unsigned int *list);
+void Gfx_RasterizeWorkspaceATriangle(const GfxTexturedTrianglePacket *packet);
+
 #endif

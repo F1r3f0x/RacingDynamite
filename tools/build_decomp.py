@@ -97,7 +97,8 @@ SURFACE_EXPORTS = ['Gfx_InitSurfaceRecords', 'g_nativePrimarySurface',
 
 # Validation fixtures live separately from the extracted production installer.
 STARTUP_BOUNDARY_SOURCE += (
-    'int Gfx_SpriteDrawListNative(const unsigned int *list) { (void)list; for (;;) {} }\n'
+    '#include "renderer.h"\n'
+    'void Gfx_RasterizeWorkspaceATriangle(const GfxTexturedTrianglePacket *packet) { (void)packet; for (;;) {} }\n'
     'int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform) { (void)handle; (void)position; (void)transform; for (;;) {} }\n'
 )
 SPRITE_DISPATCH_EXPORTS = [

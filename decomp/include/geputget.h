@@ -200,7 +200,7 @@ extern GfxSpriteSetClipProc volatile g_spriteSetClip; /* VA 0x0050EBB4 */
 int Gfx_SpriteSetClipNative(int left, int top, int right, int bottom); /* VA 0x00457020 */
 typedef int (*GfxSpriteDrawListProc)(const unsigned int *list);
 extern GfxSpriteDrawListProc volatile g_spriteDrawList; /* VA 0x0050EBB8 */
-int Gfx_SpriteDrawListNative(const unsigned int *list); /* VA 0x00457250; body unreconstructed */
+int Gfx_SpriteDrawListNative(const unsigned int *list); /* VA 0x00457250; reconstructed in renderer.c */
 typedef int (*GfxSpriteDrawProc)(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform);
 extern GfxSpriteDrawProc volatile g_spriteDraw; /* VA 0x0050EBBC */
 int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform); /* VA 0x004571B0; separately reconstructed */
