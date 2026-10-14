@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:15939e16fb4702e768cf78b51858fce59241ab025b84835713783d2463f79327 -->
+<!-- snapshot:5ac2f39dcefd6bf9d5945cc0f178b251bc610dca53b5eae458042468bc2bde1b -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -741,7 +741,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00468C40` | `0x00068C40` | 16 | `sub_00468C40` | unknown | unidentified | - |
 | `0x00468C50` | `0x00068C50` | 15 | `sub_00468C50` | unknown | unidentified | - |
 | `0x00468C60` | `0x00068C60` | 15 | `sub_00468C60` | unknown | unidentified | - |
-| `0x00468C70` | `0x00068C70` | 631 | `Gfx_PrepareTransformedSprite` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x00468C70` | `0x00068C70` | 631 | `Gfx_PrepareTransformedSprite` | game | reconstructed | [windows_transformed_sprite.md](windows_transformed_sprite.md) |
 | `0x00469100` | `0x00069100` | 112 | `_fclose` | crt | named | [windows_crt.md](windows_crt.md) |
 | `0x00469170` | `0x00069170` | 328 | `_fread` | crt | named | [windows_crt.md](windows_crt.md) |
 | `0x004692C0` | `0x000692C0` | 148 | `_calloc` | crt | named | [windows_crt.md](windows_crt.md) |

@@ -208,4 +208,35 @@ extern volatile int g_triangleRasterMaximumX; /* VA0x0051A9F8 */
 void Gfx_RasterizeTexturedTriangle(const GfxTexturedTrianglePacket *packet);
 void Gfx_RasterizeClippedTriangle(const GfxTexturedTrianglePacket *packet);
 
+/* Verified 116-byte transformed sprite scratch state at VA 0x004BAF1C. */
+typedef struct GfxTransformedSpriteScratch {
+    int corner0_x; /* VA 0x004BAF1C */
+    int corner0_y; /* VA 0x004BAF20 */
+    int corner1_x; /* VA 0x004BAF24 */
+    int corner1_y; /* VA 0x004BAF28 */
+    int corner2_x; /* VA 0x004BAF2C */
+    int corner2_y; /* VA 0x004BAF30 */
+    int corner3_x; /* VA 0x004BAF34 */
+    int corner3_y; /* VA 0x004BAF38 */
+    unsigned int param_u0; /* VA 0x004BAF3C */
+    unsigned int param_v0; /* VA 0x004BAF40 */
+    unsigned int param_u1; /* VA 0x004BAF44 */
+    unsigned int param_v1; /* VA 0x004BAF48 */
+    unsigned char *lookup;  /* VA 0x004BAF4C */
+    unsigned char *texture; /* VA 0x004BAF50 */
+    GfxTexturedTrianglePacket packet; /* VA 0x004BAF54 */
+} GfxTransformedSpriteScratch;
+typedef char GfxTransformedSpriteScratchMustBe116Bytes[(sizeof(GfxTransformedSpriteScratch) == 116) ? 1 : -1];
+extern volatile GfxTransformedSpriteScratch g_transformedSpriteScratch;
+
+typedef struct GfxTransformedSpriteInput {
+    unsigned int unused_0;
+    const unsigned int *prepared;
+    const int *coefficients;
+    int position_x;
+    int position_y;
+} GfxTransformedSpriteInput;
+
+void Gfx_PrepareTransformedSprite(const GfxTransformedSpriteInput *input);
+
 #endif

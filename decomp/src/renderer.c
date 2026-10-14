@@ -1874,3 +1874,103 @@ void Gfx_RasterizeClippedTriangle(const GfxTexturedTrianglePacket *packet) {
         }
     }
 }
+
+volatile GfxTransformedSpriteScratch g_transformedSpriteScratch; /* VA 0x004BAF1C */
+
+/*
+ * @original Gfx_PrepareTransformedSprite (IGN_WIN.EXE @ 0x00468C70, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_PrepareTransformedSprite(const GfxTransformedSpriteInput *input) {
+    const unsigned int *prepared = input->prepared;
+    const int *coefficients = input->coefficients;
+    int position_x = input->position_x;
+    int position_y = input->position_y;
+    int ox;
+    int oy;
+    int c0;
+    int c1;
+    int c2;
+    int c3;
+    int dx_span;
+    int dy_span;
+    int corner0_x;
+    int corner0_y;
+    int dx_rot_x;
+    int dx_rot_y;
+    int dy_rot_x;
+    int dy_rot_y;
+
+    g_transformedSpriteScratch.param_u0 = prepared[3];
+    g_transformedSpriteScratch.param_v0 = prepared[5] - 0x10u;
+    g_transformedSpriteScratch.param_u1 = prepared[2];
+    g_transformedSpriteScratch.param_v1 = prepared[4] - 0x10u;
+    g_transformedSpriteScratch.lookup = (unsigned char *)(uintptr_t)prepared[7];
+    g_transformedSpriteScratch.texture = (unsigned char *)(uintptr_t)prepared[6];
+
+    c0 = coefficients[0];
+    c1 = coefficients[1];
+    c2 = coefficients[2];
+    c3 = coefficients[3];
+    ox = (int)prepared[0];
+    oy = (int)prepared[1];
+
+    corner0_x = (int)(GFX_EDGE_MUL16((unsigned int)-ox, (unsigned int)c0)
+              + GFX_EDGE_MUL16((unsigned int)-oy, (unsigned int)c2));
+    corner0_y = (int)(GFX_EDGE_MUL16((unsigned int)-ox, (unsigned int)c1)
+              + GFX_EDGE_MUL16((unsigned int)-oy, (unsigned int)c3));
+
+    dx_span = (int)prepared[4] - 0x10 - (int)prepared[2];
+    dx_rot_y = (int)GFX_EDGE_MUL16((unsigned int)dx_span, (unsigned int)c1);
+    dx_rot_x = (int)GFX_EDGE_MUL16((unsigned int)dx_span, (unsigned int)c0);
+
+    dy_span = (int)prepared[5] - 0x10 - (int)prepared[3];
+    dy_rot_y = (int)GFX_EDGE_MUL16((unsigned int)dy_span, (unsigned int)c3);
+    dy_rot_x = (int)GFX_EDGE_MUL16((unsigned int)dy_span, (unsigned int)c2);
+
+    g_transformedSpriteScratch.corner0_x = corner0_x + position_x;
+    g_transformedSpriteScratch.corner0_y = corner0_y + position_y;
+    g_transformedSpriteScratch.corner1_x = corner0_x + dx_rot_x + position_x;
+    g_transformedSpriteScratch.corner1_y = corner0_y + dx_rot_y + position_y;
+    g_transformedSpriteScratch.corner2_x = corner0_x + dy_rot_x + position_x;
+    g_transformedSpriteScratch.corner2_y = corner0_y + dy_rot_y + position_y;
+    g_transformedSpriteScratch.corner3_x = corner0_x + dy_rot_x + dx_rot_x + position_x;
+    g_transformedSpriteScratch.corner3_y = corner0_y + dy_rot_y + dx_rot_y + position_y;
+
+    /* Triangle 1: corners 0, 1, 2 */
+    g_transformedSpriteScratch.packet.x0 = g_transformedSpriteScratch.corner0_x;
+    g_transformedSpriteScratch.packet.y0 = g_transformedSpriteScratch.corner0_y;
+    g_transformedSpriteScratch.packet.x1 = g_transformedSpriteScratch.corner1_x;
+    g_transformedSpriteScratch.packet.y1 = g_transformedSpriteScratch.corner1_y;
+    g_transformedSpriteScratch.packet.x2 = g_transformedSpriteScratch.corner2_x;
+    g_transformedSpriteScratch.packet.y2 = g_transformedSpriteScratch.corner2_y;
+    g_transformedSpriteScratch.packet.texture_u0 = g_transformedSpriteScratch.param_u1;
+    g_transformedSpriteScratch.packet.texture_v0 = g_transformedSpriteScratch.param_u0;
+    g_transformedSpriteScratch.packet.texture_u1 = g_transformedSpriteScratch.param_v1;
+    g_transformedSpriteScratch.packet.texture_v1 = g_transformedSpriteScratch.param_u0;
+    g_transformedSpriteScratch.packet.texture_u2 = g_transformedSpriteScratch.param_u1;
+    g_transformedSpriteScratch.packet.texture_v2 = g_transformedSpriteScratch.param_v0;
+    g_transformedSpriteScratch.packet.texture = g_transformedSpriteScratch.texture;
+    g_transformedSpriteScratch.packet.lookup = g_transformedSpriteScratch.lookup;
+
+    Gfx_RasterizeTexturedTriangle((const GfxTexturedTrianglePacket *)&g_transformedSpriteScratch.packet);
+
+    /* Triangle 2: corners 1, 2, 3 */
+    g_transformedSpriteScratch.packet.x0 = g_transformedSpriteScratch.corner1_x;
+    g_transformedSpriteScratch.packet.y0 = g_transformedSpriteScratch.corner1_y;
+    g_transformedSpriteScratch.packet.x1 = g_transformedSpriteScratch.corner2_x;
+    g_transformedSpriteScratch.packet.y1 = g_transformedSpriteScratch.corner2_y;
+    g_transformedSpriteScratch.packet.x2 = g_transformedSpriteScratch.corner3_x;
+    g_transformedSpriteScratch.packet.y2 = g_transformedSpriteScratch.corner3_y;
+    g_transformedSpriteScratch.packet.texture_u0 = g_transformedSpriteScratch.param_v1;
+    g_transformedSpriteScratch.packet.texture_v0 = g_transformedSpriteScratch.param_u0;
+    g_transformedSpriteScratch.packet.texture_u1 = g_transformedSpriteScratch.param_u1;
+    g_transformedSpriteScratch.packet.texture_v1 = g_transformedSpriteScratch.param_v0;
+    g_transformedSpriteScratch.packet.texture_u2 = g_transformedSpriteScratch.param_v1;
+    g_transformedSpriteScratch.packet.texture_v2 = g_transformedSpriteScratch.param_v0;
+    g_transformedSpriteScratch.packet.texture = g_transformedSpriteScratch.texture;
+    g_transformedSpriteScratch.packet.lookup = g_transformedSpriteScratch.lookup;
+
+    Gfx_RasterizeTexturedTriangle((const GfxTexturedTrianglePacket *)&g_transformedSpriteScratch.packet);
+}

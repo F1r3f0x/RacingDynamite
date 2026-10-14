@@ -255,6 +255,7 @@ def verify():
         'Gfx_ComputeTriangleEdgeSlope','Gfx_ClampTriangleEdgeRightEndpoint',
         'Gfx_InitializeTriangleEdgeSteps','Gfx_ClipAndSplitTriangleEdge','Gfx_ComputeTriangleGradients',
         'Gfx_RasterizeTexturedTriangle','Gfx_RasterizeClippedTriangle',
+        'Gfx_PrepareTransformedSprite',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
     draw_iat=next(entry.address for group in rebuilt.DIRECTORY_ENTRY_IMPORT
@@ -349,7 +350,9 @@ def verify():
             'Gfx_BuildRawTriangleEdge','Gfx_BuildCorrectedTriangleEdge','Gfx_BuildRawTriangleEdge',
             'Gfx_DrawTriangleSpan','Gfx_DrawTriangleSpan','Gfx_RasterizeClippedTriangle',
             'Gfx_BuildCorrectedTriangleEdge','Gfx_BuildRawTriangleEdge','Gfx_BuildCorrectedTriangleEdge',
-            'Gfx_DrawTriangleSpan','Gfx_DrawTriangleSpan']})
+            'Gfx_DrawTriangleSpan','Gfx_DrawTriangleSpan'],
+        'Gfx_PrepareTransformedSprite':[
+            'Gfx_RasterizeTexturedTriangle','Gfx_RasterizeTexturedTriangle']})
     assert len(direct_calls) == sum(map(len, expected_calls.values())), 'Unexpected direct helper dependency count'
     actual_calls = {}
     for call in direct_calls:
@@ -974,3 +977,6 @@ if __name__ == '__main__':
 
     from verify_surface_dispatch import verify_surface_dispatch
     verify_surface_dispatch(record=True)
+
+    from verify_transformed_sprite import verify_transformed_sprite
+    verify_transformed_sprite(record=True)

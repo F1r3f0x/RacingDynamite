@@ -54,7 +54,8 @@ RENDERER_EXPORTS += ['Gfx_SpriteCloseNative','Gfx_SpriteOptionNative','Gfx_Sprit
 RENDERER_EXPORTS += ['Gfx_RasterizeTexturedTriangle','Gfx_RasterizeClippedTriangle',
     'g_triangleOrdinaryPacket','g_triangleClippedPacket','g_triangleRasterTexture',
     'g_triangleRasterCursor','g_triangleRasterMinimumX','g_triangleRasterMaximumX',
-    'g_spriteWorkspaceBBuffer0','g_spriteWorkspaceBBuffer1','g_spriteWorkspaceBBuffer2']
+    'g_spriteWorkspaceBBuffer0','g_spriteWorkspaceBBuffer1','g_spriteWorkspaceBBuffer2',
+    'Gfx_PrepareTransformedSprite','g_transformedSpriteScratch']
 
 
 def validate_renderer_calls(pe):
@@ -73,7 +74,7 @@ def validate_renderer_calls(pe):
         'Gfx_BuildClippedRawTriangleEdge':3,'Gfx_BuildClippedCorrectedTriangleEdge':3,
         'Gfx_DrawClippedTriangleSpan':4,'Gfx_DrawTriangleSpan':8,
         'Gfx_BuildRawTriangleEdge':3,'Gfx_BuildCorrectedTriangleEdge':3,
-        'Gfx_RasterizeClippedTriangle':1}.items()}
+        'Gfx_RasterizeClippedTriangle':1,'Gfx_RasterizeTexturedTriangle':2}.items()}
     assert calls==expected,(calls,expected)
     return calls
 

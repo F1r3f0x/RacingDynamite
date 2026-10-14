@@ -233,7 +233,8 @@
         "Gfx_SpriteGetStateNative",
         "Gfx_SpriteSetStateNative",
         "Gfx_RasterizeTexturedTriangle",
-        "Gfx_RasterizeClippedTriangle"
+        "Gfx_RasterizeClippedTriangle",
+        "Gfx_PrepareTransformedSprite"
       ],
       "responsibility": "Verified software texture compositing spans; triangle and sprite rasterization dependencies reconstructed incrementally",
       "state": [
