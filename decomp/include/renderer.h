@@ -180,4 +180,32 @@ int Gfx_SpriteSetClipNative(int left, int top, int right, int bottom);
 int Gfx_SpriteGetStateNative(GfxSpriteState *state);
 int Gfx_SpriteSetStateNative(const GfxSpriteState *state);
 
+/* RVA0x5CA50 cdecl input. Field0 is not consumed; original source/type names unknown. */
+typedef struct GfxTexturedTrianglePacket {
+    unsigned int unused_word;
+    int x0;
+    int y0;
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    unsigned int texture_u0;
+    unsigned int texture_v0;
+    unsigned int texture_u1;
+    unsigned int texture_v1;
+    unsigned int texture_u2;
+    unsigned int texture_v2;
+    unsigned char *texture;
+    unsigned char *lookup;
+} GfxTexturedTrianglePacket;
+typedef char GfxTrianglePacketMustBe60Bytes[(sizeof(GfxTexturedTrianglePacket) == 60) ? 1 : -1];
+extern volatile GfxTriangleEdgePacket g_triangleOrdinaryPacket; /* VA0x0051A9A0 */
+extern volatile GfxTriangleEdgePacket g_triangleClippedPacket; /* VA0x0051AA00 */
+extern unsigned char *volatile g_triangleRasterTexture; /* VA0x0051A9C4 */
+extern volatile unsigned int g_triangleRasterCursor; /* VA0x0051A9D0, wrapped pixel address */
+extern volatile int g_triangleRasterMinimumX; /* VA0x0051A9D4 */
+extern volatile int g_triangleRasterMaximumX; /* VA0x0051A9F8 */
+void Gfx_RasterizeTexturedTriangle(const GfxTexturedTrianglePacket *packet);
+void Gfx_RasterizeClippedTriangle(const GfxTexturedTrianglePacket *packet);
+
 #endif

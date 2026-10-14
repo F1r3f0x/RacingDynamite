@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "geputget.h" /* Verified workspaceB storage remains owned by graphics_legacy. */
 #include <stdint.h>
 
 typedef char GfxSpanWordMustBe32Bits[(sizeof(unsigned int) == 4) ? 1 : -1];
@@ -48,6 +49,13 @@ volatile int g_triangleViewportHeight = 0;
 volatile unsigned char *volatile g_triangleViewportFramebuffer = 0;
 
 typedef char GfxSpriteStateMustBe40Bytes[(sizeof(GfxSpriteState) == 40) ? 1 : -1];
+
+volatile GfxTriangleEdgePacket g_triangleOrdinaryPacket = {0, 0, 0, 0, 0, 0, 0, 0};
+volatile GfxTriangleEdgePacket g_triangleClippedPacket = {0, 0, 0, 0, 0, 0, 0, 0};
+unsigned char *volatile g_triangleRasterTexture = 0;
+volatile unsigned int g_triangleRasterCursor = 0;
+volatile int g_triangleRasterMinimumX = 0;
+volatile int g_triangleRasterMaximumX = 0;
 
 /* Deliberately wrapped addresses from the verified 32-bit Windows ABI. */
 #define GFX_SPAN_BYTE(address) (*(volatile unsigned char *)(uintptr_t)(address))
@@ -1084,4 +1092,785 @@ int Gfx_SpriteSetStateNative(const GfxSpriteState *state) {
     left = input->clip_left;
     Gfx_SpriteSetClipNative(left, top, right, bottom);
     return 1;
+}
+
+/* @original Gfx_RasterizeTexturedTriangle (IGN_WIN.EXE @ 0x0045CA50, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_RasterizeTexturedTriangle(const GfxTexturedTrianglePacket *packet) {
+    const volatile GfxTexturedTrianglePacket *input = packet;
+    int x_start;
+    int y_start;
+    int x_end;
+    int y_end;
+    volatile int comparison;
+    volatile int bound;
+    unsigned int u_start;
+    unsigned int v_start;
+    unsigned int u_end;
+    unsigned int v_end;
+    unsigned int texture_word;
+    unsigned int lookup_word;
+    unsigned int gradient_u;
+    unsigned int gradient_v;
+    unsigned int frame_word;
+    int long_slope;
+    int short_slope;
+    volatile GfxTriangleEdgeBufferHeader *output;
+    volatile GfxTriangleSpanEdgeRecord *left_record;
+    volatile GfxTriangleSpanEdgeRecord *right_record;
+    unsigned int left_base;
+    unsigned int right_base;
+    unsigned int left_offset;
+    unsigned int right_offset;
+    unsigned int processed_rows;
+    int count;
+    int left_x;
+    int right_x;
+    unsigned int texture_u;
+    unsigned int texture_v;
+    unsigned int integer_u;
+    unsigned int packed_uv;
+    unsigned int span_count;
+    unsigned int destination;
+    unsigned int stride;
+    g_triangleVertices.x0 = input->x0;
+    g_triangleVertices.y0 = input->y0;
+    g_triangleVertices.x1 = input->x1;
+    g_triangleVertices.y1 = input->y1;
+    g_triangleVertices.x2 = input->x2;
+    g_triangleVertices.y2 = input->y2;
+    g_triangleVertices.texture_u0 = input->texture_u0;
+    g_triangleVertices.texture_v0 = input->texture_v0;
+    g_triangleVertices.texture_u1 = input->texture_u1;
+    g_triangleVertices.texture_v1 = input->texture_v1;
+    g_triangleVertices.texture_u2 = input->texture_u2;
+    frame_word = (unsigned int)(uintptr_t)g_triangleViewportFramebuffer;
+    g_triangleVertices.texture_v2 = input->texture_v2;
+    x_end = g_triangleVertices.x1;
+    texture_word = (unsigned int)(uintptr_t)input->texture;
+    comparison = g_triangleVertices.x0;
+    g_triangleRasterTexture = (unsigned char *)(uintptr_t)texture_word;
+    g_triangleRasterCursor = frame_word;
+    if (comparison > x_end) {
+        x_start = g_triangleVertices.x0;
+        g_triangleRasterMinimumX = x_end;
+        g_triangleRasterMaximumX = x_start;
+    } else {
+        x_end = g_triangleVertices.x1;
+        x_start = g_triangleVertices.x0;
+        g_triangleRasterMaximumX = x_end;
+        g_triangleRasterMinimumX = x_start;
+    }
+    bound = g_triangleRasterMaximumX;
+    comparison = g_triangleVertices.x2;
+    x_end = g_triangleVertices.x2;
+    if (comparison > bound) {
+        g_triangleRasterMaximumX = x_end;
+    } else {
+        comparison = g_triangleRasterMinimumX;
+        if (comparison > x_end) {
+            g_triangleRasterMinimumX = x_end;
+        }
+    }
+    y_end = g_triangleVertices.y2;
+    comparison = g_triangleVertices.y0;
+    if (comparison > y_end) {
+        y_start = g_triangleVertices.y0;
+        v_end = g_triangleVertices.texture_v2;
+        x_end = g_triangleVertices.x2;
+        g_triangleVertices.y2 = y_start;
+        x_start = g_triangleVertices.x0;
+        g_triangleVertices.y0 = y_end;
+        v_start = g_triangleVertices.texture_v0;
+        g_triangleVertices.x2 = x_start;
+        g_triangleVertices.texture_v2 = v_start;
+        g_triangleVertices.texture_v0 = v_end;
+        u_end = g_triangleVertices.texture_u2;
+        u_start = g_triangleVertices.texture_u0;
+        g_triangleVertices.x0 = x_end;
+        g_triangleVertices.texture_u2 = u_start;
+        g_triangleVertices.texture_u0 = u_end;
+    }
+    y_end = g_triangleVertices.y1;
+    comparison = g_triangleVertices.y0;
+    if (comparison > y_end) {
+        y_start = g_triangleVertices.y0;
+        v_end = g_triangleVertices.texture_v1;
+        x_end = g_triangleVertices.x1;
+        g_triangleVertices.y1 = y_start;
+        x_start = g_triangleVertices.x0;
+        g_triangleVertices.y0 = y_end;
+        v_start = g_triangleVertices.texture_v0;
+        g_triangleVertices.x1 = x_start;
+        g_triangleVertices.texture_v1 = v_start;
+        g_triangleVertices.texture_v0 = v_end;
+        u_end = g_triangleVertices.texture_u1;
+        u_start = g_triangleVertices.texture_u0;
+        g_triangleVertices.x0 = x_end;
+        g_triangleVertices.texture_u1 = u_start;
+        g_triangleVertices.texture_u0 = u_end;
+    } else {
+        y_end = g_triangleVertices.y1;
+        comparison = g_triangleVertices.y2;
+        if (comparison < y_end) {
+            y_start = g_triangleVertices.y2;
+            v_end = g_triangleVertices.texture_v1;
+            x_end = g_triangleVertices.x1;
+            g_triangleVertices.y1 = y_start;
+            x_start = g_triangleVertices.x2;
+            g_triangleVertices.y2 = y_end;
+            v_start = g_triangleVertices.texture_v2;
+            g_triangleVertices.x1 = x_start;
+            g_triangleVertices.texture_v1 = v_start;
+            g_triangleVertices.texture_v2 = v_end;
+            u_end = g_triangleVertices.texture_u1;
+            u_start = g_triangleVertices.texture_u2;
+            g_triangleVertices.x2 = x_end;
+            g_triangleVertices.texture_u1 = u_start;
+            g_triangleVertices.texture_u2 = u_end;
+        }
+    }
+    bound = g_triangleViewportState.clip_top_fixed;
+    comparison = g_triangleVertices.y0;
+    if (comparison < bound) {
+        Gfx_RasterizeClippedTriangle(packet);
+        return;
+    }
+    bound = g_triangleViewportState.clip_bottom_fixed;
+    comparison = g_triangleVertices.y2;
+    if (comparison > bound) {
+        Gfx_RasterizeClippedTriangle(packet);
+        return;
+    }
+    bound = g_triangleViewportState.clip_right_fixed;
+    comparison = g_triangleRasterMaximumX;
+    if (comparison > bound) {
+        Gfx_RasterizeClippedTriangle(packet);
+        return;
+    }
+    bound = g_triangleViewportState.clip_left_fixed;
+    comparison = g_triangleRasterMinimumX;
+    if (comparison < bound) {
+        Gfx_RasterizeClippedTriangle(packet);
+        return;
+    }
+    Gfx_ComputeTriangleGradients();
+    lookup_word = (unsigned int)(uintptr_t)input->lookup;
+    texture_word = (unsigned int)(uintptr_t)g_triangleRasterTexture;
+    gradient_u = (unsigned int)g_triangleTextureGradients.texture_u;
+    gradient_v = (unsigned int)g_triangleTextureGradients.texture_v;
+    Gfx_SetTriangleSpanState(gradient_v, gradient_u, texture_word, lookup_word);
+    y_end = g_triangleVertices.y2;
+    x_end = g_triangleVertices.x2;
+    y_start = g_triangleVertices.y0;
+    x_start = g_triangleVertices.x0;
+    long_slope = Gfx_ComputeTriangleEdgeSlope(x_start, y_start, x_end, y_end);
+    y_end = g_triangleVertices.y1;
+    x_end = g_triangleVertices.x1;
+    y_start = g_triangleVertices.y0;
+    x_start = g_triangleVertices.x0;
+    short_slope = Gfx_ComputeTriangleEdgeSlope(x_start, y_start, x_end, y_end);
+    y_start = g_triangleVertices.y0;
+    x_end = g_triangleVertices.x1;
+    x_start = g_triangleVertices.x0;
+    g_triangleOrdinaryPacket.y0 = y_start;
+    u_start = g_triangleVertices.texture_u0;
+    g_triangleOrdinaryPacket.x0 = x_start;
+    y_end = g_triangleVertices.y1;
+    g_triangleOrdinaryPacket.x1 = x_end;
+    v_start = g_triangleVertices.texture_v0;
+    g_triangleOrdinaryPacket.y1 = y_end;
+    u_end = g_triangleVertices.texture_u1;
+    g_triangleOrdinaryPacket.texture_u0 = u_start;
+    v_end = g_triangleVertices.texture_v1;
+    g_triangleOrdinaryPacket.texture_v0 = v_start;
+    g_triangleOrdinaryPacket.texture_u1 = u_end;
+    g_triangleOrdinaryPacket.texture_v1 = v_end;
+    if (long_slope > short_slope) {
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+        Gfx_BuildRawTriangleEdge(&g_triangleOrdinaryPacket, output);
+        x_start = g_triangleVertices.x0;
+        y_start = g_triangleVertices.y0;
+        x_end = g_triangleVertices.x2;
+        g_triangleOrdinaryPacket.x0 = x_start;
+        y_end = g_triangleVertices.y2;
+        g_triangleOrdinaryPacket.y0 = y_start;
+        u_start = g_triangleVertices.texture_u0;
+        g_triangleOrdinaryPacket.x1 = x_end;
+        v_start = g_triangleVertices.texture_v0;
+        g_triangleOrdinaryPacket.y1 = y_end;
+        u_end = g_triangleVertices.texture_u2;
+        g_triangleOrdinaryPacket.texture_u0 = u_start;
+        v_end = g_triangleVertices.texture_v2;
+        g_triangleOrdinaryPacket.texture_v0 = v_start;
+        g_triangleOrdinaryPacket.texture_u1 = u_end;
+        g_triangleOrdinaryPacket.texture_v1 = v_end;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer1;
+        Gfx_BuildCorrectedTriangleEdge(&g_triangleOrdinaryPacket, output);
+        x_start = g_triangleVertices.x1;
+        y_start = g_triangleVertices.y1;
+        x_end = g_triangleVertices.x2;
+        g_triangleOrdinaryPacket.x0 = x_start;
+        y_end = g_triangleVertices.y2;
+        g_triangleOrdinaryPacket.y0 = y_start;
+        u_start = g_triangleVertices.texture_u1;
+        g_triangleOrdinaryPacket.x1 = x_end;
+        v_start = g_triangleVertices.texture_v1;
+        g_triangleOrdinaryPacket.y1 = y_end;
+        u_end = g_triangleVertices.texture_u2;
+        g_triangleOrdinaryPacket.texture_u0 = u_start;
+        v_end = g_triangleVertices.texture_v2;
+        g_triangleOrdinaryPacket.texture_v0 = v_start;
+        g_triangleOrdinaryPacket.texture_u1 = u_end;
+        g_triangleOrdinaryPacket.texture_v1 = v_end;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+        Gfx_BuildRawTriangleEdge(&g_triangleOrdinaryPacket, output);
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+        y_start = output->start_y;
+        stride = (unsigned int)g_triangleViewportState.row_stride;
+        g_triangleRasterCursor += (unsigned int)y_start * stride;
+        processed_rows = 0;
+        left_offset = 0;
+        right_offset = 0;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+        count = output->count;
+        if (count > 0) {
+            do {
+                left_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer0;
+                right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer1;
+                left_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(left_base + left_offset + 8u);
+                right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                texture_u = right_record->texture_u;
+                left_x = left_record->x;
+                integer_u = GFX_EDGE_SAR(texture_u, 8);
+                texture_v = right_record->texture_v;
+                packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                right_x = right_record->x;
+                span_count = (unsigned int)right_x - (unsigned int)left_x - 1u;
+                destination = g_triangleRasterCursor;
+                destination += (unsigned int)left_x + 1u;
+                Gfx_DrawTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                    packed_uv, integer_u, (const GfxTriangleSpanEdgeRecord *)left_record);
+                stride = (unsigned int)g_triangleViewportState.row_stride;
+                output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+                g_triangleRasterCursor += stride;
+                left_offset += 12u;
+                right_offset += 12u;
+                processed_rows++;
+                count = output->count;
+            } while (count > (int)processed_rows);
+        }
+        right_offset = processed_rows * 12u;
+        left_offset = 0;
+        processed_rows = 0;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+        count = output->count;
+        if (count > 0) {
+            do {
+                left_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer2;
+                right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer1;
+                left_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(left_base + left_offset + 8u);
+                right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                texture_u = right_record->texture_u;
+                left_x = left_record->x;
+                integer_u = GFX_EDGE_SAR(texture_u, 8);
+                texture_v = right_record->texture_v;
+                packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                right_x = right_record->x;
+                span_count = (unsigned int)right_x - (unsigned int)left_x - 1u;
+                destination = g_triangleRasterCursor;
+                destination += (unsigned int)left_x + 1u;
+                Gfx_DrawTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                    packed_uv, integer_u, (const GfxTriangleSpanEdgeRecord *)left_record);
+                stride = (unsigned int)g_triangleViewportState.row_stride;
+                output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+                g_triangleRasterCursor += stride;
+                left_offset += 12u;
+                right_offset += 12u;
+                processed_rows++;
+                count = output->count;
+            } while (count > (int)processed_rows);
+        }
+    } else {
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+        Gfx_BuildCorrectedTriangleEdge(&g_triangleOrdinaryPacket, output);
+        x_start = g_triangleVertices.x0;
+        y_start = g_triangleVertices.y0;
+        x_end = g_triangleVertices.x2;
+        g_triangleOrdinaryPacket.x0 = x_start;
+        y_end = g_triangleVertices.y2;
+        g_triangleOrdinaryPacket.y0 = y_start;
+        u_start = g_triangleVertices.texture_u0;
+        g_triangleOrdinaryPacket.x1 = x_end;
+        v_start = g_triangleVertices.texture_v0;
+        g_triangleOrdinaryPacket.y1 = y_end;
+        u_end = g_triangleVertices.texture_u2;
+        g_triangleOrdinaryPacket.texture_u0 = u_start;
+        v_end = g_triangleVertices.texture_v2;
+        g_triangleOrdinaryPacket.texture_v0 = v_start;
+        g_triangleOrdinaryPacket.texture_u1 = u_end;
+        g_triangleOrdinaryPacket.texture_v1 = v_end;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer1;
+        Gfx_BuildRawTriangleEdge(&g_triangleOrdinaryPacket, output);
+        x_start = g_triangleVertices.x1;
+        y_start = g_triangleVertices.y1;
+        x_end = g_triangleVertices.x2;
+        g_triangleOrdinaryPacket.x0 = x_start;
+        y_end = g_triangleVertices.y2;
+        g_triangleOrdinaryPacket.y0 = y_start;
+        u_start = g_triangleVertices.texture_u1;
+        g_triangleOrdinaryPacket.x1 = x_end;
+        v_start = g_triangleVertices.texture_v1;
+        g_triangleOrdinaryPacket.y1 = y_end;
+        u_end = g_triangleVertices.texture_u2;
+        g_triangleOrdinaryPacket.texture_u0 = u_start;
+        v_end = g_triangleVertices.texture_v2;
+        g_triangleOrdinaryPacket.texture_v0 = v_start;
+        g_triangleOrdinaryPacket.texture_u1 = u_end;
+        g_triangleOrdinaryPacket.texture_v1 = v_end;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+        Gfx_BuildCorrectedTriangleEdge(&g_triangleOrdinaryPacket, output);
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer1;
+        y_start = output->start_y;
+        stride = (unsigned int)g_triangleViewportState.row_stride;
+        g_triangleRasterCursor += (unsigned int)y_start * stride;
+        processed_rows = 0;
+        left_offset = 0;
+        right_offset = 0;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+        count = output->count;
+        if (count > 0) {
+            do {
+                left_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer1;
+                right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer0;
+                left_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(left_base + left_offset + 8u);
+                right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                texture_u = right_record->texture_u;
+                left_x = left_record->x;
+                integer_u = GFX_EDGE_SAR(texture_u, 8);
+                texture_v = right_record->texture_v;
+                packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                right_x = right_record->x;
+                span_count = (unsigned int)right_x - (unsigned int)left_x - 1u;
+                destination = g_triangleRasterCursor;
+                destination += (unsigned int)left_x + 1u;
+                Gfx_DrawTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                    packed_uv, integer_u, (const GfxTriangleSpanEdgeRecord *)left_record);
+                stride = (unsigned int)g_triangleViewportState.row_stride;
+                output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+                g_triangleRasterCursor += stride;
+                left_offset += 12u;
+                right_offset += 12u;
+                processed_rows++;
+                count = output->count;
+            } while (count > (int)processed_rows);
+        }
+        left_offset = processed_rows * 12u;
+        right_offset = 0;
+        processed_rows = 0;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+        count = output->count;
+        if (count > 0) {
+            do {
+                left_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer1;
+                right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer2;
+                left_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(left_base + left_offset + 8u);
+                right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                texture_u = right_record->texture_u;
+                left_x = left_record->x;
+                integer_u = GFX_EDGE_SAR(texture_u, 8);
+                texture_v = right_record->texture_v;
+                packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                right_x = right_record->x;
+                span_count = (unsigned int)right_x - (unsigned int)left_x - 1u;
+                destination = g_triangleRasterCursor;
+                destination += (unsigned int)left_x + 1u;
+                Gfx_DrawTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                    packed_uv, integer_u, (const GfxTriangleSpanEdgeRecord *)left_record);
+                stride = (unsigned int)g_triangleViewportState.row_stride;
+                output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+                g_triangleRasterCursor += stride;
+                left_offset += 12u;
+                right_offset += 12u;
+                processed_rows++;
+                count = output->count;
+            } while (count > (int)processed_rows);
+        }
+    }
+}
+
+/* @original Gfx_RasterizeClippedTriangle (IGN_WIN.EXE @ 0x0045D170, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_RasterizeClippedTriangle(const GfxTexturedTrianglePacket *packet) {
+    const volatile GfxTexturedTrianglePacket *input = packet;
+    int x_start;
+    int y_start;
+    int x_end;
+    int y_end;
+    volatile int comparison;
+    volatile int bound;
+    unsigned int u_start;
+    unsigned int v_start;
+    unsigned int u_end;
+    unsigned int v_end;
+    unsigned int texture_word;
+    unsigned int lookup_word;
+    unsigned int gradient_u;
+    unsigned int gradient_v;
+    int long_slope;
+    int short_slope;
+    volatile GfxTriangleEdgeBufferHeader *output;
+    volatile GfxTriangleSpanEdgeRecord *left_record;
+    volatile GfxTriangleSpanEdgeRecord *right_record;
+    unsigned int left_base;
+    unsigned int right_base;
+    unsigned int left_offset;
+    unsigned int right_offset;
+    unsigned int processed_rows;
+    int count;
+    int left_x;
+    int right_x;
+    unsigned int texture_u;
+    unsigned int texture_v;
+    unsigned int integer_u;
+    unsigned int packed_uv;
+    unsigned int span_count;
+    unsigned int destination;
+    unsigned int stride;
+    int clip_left;
+    bound = g_triangleViewportState.clip_top_fixed;
+    comparison = g_triangleVertices.y2;
+    if (comparison < bound) {
+        return;
+    }
+    bound = g_triangleViewportState.clip_bottom_fixed;
+    comparison = g_triangleVertices.y0;
+    if (comparison > bound) {
+        return;
+    }
+    bound = g_triangleViewportState.clip_right_fixed;
+    comparison = g_triangleRasterMinimumX;
+    if (comparison > bound) {
+        return;
+    }
+    bound = g_triangleViewportState.clip_left_fixed;
+    comparison = g_triangleRasterMaximumX;
+    if (comparison < bound) {
+        return;
+    }
+    Gfx_ComputeTriangleGradients();
+    texture_word = (unsigned int)(uintptr_t)g_triangleRasterTexture;
+    lookup_word = (unsigned int)(uintptr_t)input->lookup;
+    gradient_u = (unsigned int)g_triangleTextureGradients.texture_u;
+    gradient_v = (unsigned int)g_triangleTextureGradients.texture_v;
+    Gfx_SetTriangleSpanState(gradient_v, gradient_u, texture_word, lookup_word);
+    y_end = g_triangleVertices.y2;
+    x_end = g_triangleVertices.x2;
+    y_start = g_triangleVertices.y1;
+    x_start = g_triangleVertices.x1;
+    long_slope = Gfx_ComputeTriangleEdgeSlope(x_start, y_start, x_end, y_end);
+    y_end = g_triangleVertices.y1;
+    x_end = g_triangleVertices.x1;
+    y_start = g_triangleVertices.y0;
+    x_start = g_triangleVertices.x0;
+    short_slope = Gfx_ComputeTriangleEdgeSlope(x_start, y_start, x_end, y_end);
+    y_start = g_triangleVertices.y0;
+    x_end = g_triangleVertices.x1;
+    x_start = g_triangleVertices.x0;
+    g_triangleClippedPacket.y0 = y_start;
+    u_start = g_triangleVertices.texture_u0;
+    g_triangleClippedPacket.x0 = x_start;
+    y_end = g_triangleVertices.y1;
+    g_triangleClippedPacket.x1 = x_end;
+    v_start = g_triangleVertices.texture_v0;
+    g_triangleClippedPacket.y1 = y_end;
+    u_end = g_triangleVertices.texture_u1;
+    g_triangleClippedPacket.texture_u0 = u_start;
+    v_end = g_triangleVertices.texture_v1;
+    g_triangleClippedPacket.texture_v0 = v_start;
+    g_triangleClippedPacket.texture_u1 = u_end;
+    g_triangleClippedPacket.texture_v1 = v_end;
+    if (long_slope > short_slope) {
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+        Gfx_BuildClippedRawTriangleEdge(&g_triangleClippedPacket, output);
+        x_start = g_triangleVertices.x0;
+        y_start = g_triangleVertices.y0;
+        x_end = g_triangleVertices.x2;
+        g_triangleClippedPacket.x0 = x_start;
+        y_end = g_triangleVertices.y2;
+        g_triangleClippedPacket.y0 = y_start;
+        u_start = g_triangleVertices.texture_u0;
+        g_triangleClippedPacket.x1 = x_end;
+        v_start = g_triangleVertices.texture_v0;
+        g_triangleClippedPacket.y1 = y_end;
+        u_end = g_triangleVertices.texture_u2;
+        g_triangleClippedPacket.texture_u0 = u_start;
+        v_end = g_triangleVertices.texture_v2;
+        g_triangleClippedPacket.texture_v0 = v_start;
+        g_triangleClippedPacket.texture_u1 = u_end;
+        g_triangleClippedPacket.texture_v1 = v_end;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer1;
+        Gfx_BuildClippedCorrectedTriangleEdge(&g_triangleClippedPacket, output);
+        x_start = g_triangleVertices.x1;
+        y_start = g_triangleVertices.y1;
+        x_end = g_triangleVertices.x2;
+        g_triangleClippedPacket.x0 = x_start;
+        y_end = g_triangleVertices.y2;
+        g_triangleClippedPacket.y0 = y_start;
+        u_start = g_triangleVertices.texture_u1;
+        g_triangleClippedPacket.x1 = x_end;
+        v_start = g_triangleVertices.texture_v1;
+        g_triangleClippedPacket.y1 = y_end;
+        u_end = g_triangleVertices.texture_u2;
+        g_triangleClippedPacket.texture_u0 = u_start;
+        v_end = g_triangleVertices.texture_v2;
+        g_triangleClippedPacket.texture_v0 = v_start;
+        g_triangleClippedPacket.texture_u1 = u_end;
+        g_triangleClippedPacket.texture_v1 = v_end;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+        Gfx_BuildClippedRawTriangleEdge(&g_triangleClippedPacket, output);
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+        y_start = output->start_y;
+        stride = (unsigned int)g_triangleViewportState.row_stride;
+        g_triangleRasterCursor += (unsigned int)y_start * stride;
+        processed_rows = 0;
+        left_offset = 0;
+        right_offset = 0;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+        count = output->count;
+        if (count > 0) {
+            do {
+                left_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer0;
+                left_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(left_base + left_offset + 8u);
+                left_x = left_record->x;
+                clip_left = g_triangleViewportState.clip_left_integer;
+                if (clip_left > left_x) {
+                    right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer1;
+                    right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                    texture_u = right_record->texture_u;
+                    integer_u = GFX_EDGE_SAR(texture_u, 8);
+                    texture_v = right_record->texture_v;
+                    packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                    right_x = right_record->x;
+                    clip_left = g_triangleViewportState.clip_left_integer;
+                    span_count = (unsigned int)right_x - (unsigned int)clip_left;
+                    clip_left = g_triangleViewportState.clip_left_integer;
+                    destination = (unsigned int)clip_left + g_triangleRasterCursor;
+                    Gfx_DrawClippedTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                        packed_uv, integer_u);
+                } else {
+                    right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer1;
+                    right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                    texture_u = right_record->texture_u;
+                    integer_u = GFX_EDGE_SAR(texture_u, 8);
+                    texture_v = right_record->texture_v;
+                    packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                    right_x = right_record->x;
+                    span_count = (unsigned int)right_x - (unsigned int)left_x - 1u;
+                    destination = g_triangleRasterCursor;
+                    destination += (unsigned int)left_x + 1u;
+                    Gfx_DrawTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                    packed_uv, integer_u, (const GfxTriangleSpanEdgeRecord *)left_record);
+                }
+                stride = (unsigned int)g_triangleViewportState.row_stride;
+                left_offset += 12u;
+                right_offset += 12u;
+                processed_rows++;
+                g_triangleRasterCursor += stride;
+                output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+                count = output->count;
+            } while (count > (int)processed_rows);
+        }
+        right_offset = processed_rows * 12u;
+        left_offset = 0;
+        processed_rows = 0;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+        count = output->count;
+        if (count > 0) {
+            do {
+                left_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer2;
+                left_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(left_base + left_offset + 8u);
+                left_x = left_record->x;
+                clip_left = g_triangleViewportState.clip_left_integer;
+                if (clip_left > left_x) {
+                    right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer1;
+                    right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                    texture_u = right_record->texture_u;
+                    integer_u = GFX_EDGE_SAR(texture_u, 8);
+                    texture_v = right_record->texture_v;
+                    packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                    right_x = right_record->x;
+                    clip_left = g_triangleViewportState.clip_left_integer;
+                    span_count = (unsigned int)right_x - (unsigned int)clip_left;
+                    clip_left = g_triangleViewportState.clip_left_integer;
+                    destination = (unsigned int)clip_left + g_triangleRasterCursor;
+                    Gfx_DrawClippedTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                        packed_uv, integer_u);
+                } else {
+                    right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer1;
+                    right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                    texture_u = right_record->texture_u;
+                    integer_u = GFX_EDGE_SAR(texture_u, 8);
+                    texture_v = right_record->texture_v;
+                    packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                    right_x = right_record->x;
+                    span_count = (unsigned int)right_x - (unsigned int)left_x - 1u;
+                    destination = g_triangleRasterCursor;
+                    destination += (unsigned int)left_x + 1u;
+                    Gfx_DrawTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                    packed_uv, integer_u, (const GfxTriangleSpanEdgeRecord *)left_record);
+                }
+                stride = (unsigned int)g_triangleViewportState.row_stride;
+                left_offset += 12u;
+                right_offset += 12u;
+                processed_rows++;
+                g_triangleRasterCursor += stride;
+                output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+                count = output->count;
+            } while (count > (int)processed_rows);
+        }
+    } else {
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+        Gfx_BuildClippedCorrectedTriangleEdge(&g_triangleClippedPacket, output);
+        x_start = g_triangleVertices.x0;
+        y_start = g_triangleVertices.y0;
+        x_end = g_triangleVertices.x2;
+        g_triangleClippedPacket.x0 = x_start;
+        y_end = g_triangleVertices.y2;
+        g_triangleClippedPacket.y0 = y_start;
+        u_start = g_triangleVertices.texture_u0;
+        g_triangleClippedPacket.x1 = x_end;
+        v_start = g_triangleVertices.texture_v0;
+        g_triangleClippedPacket.y1 = y_end;
+        u_end = g_triangleVertices.texture_u2;
+        g_triangleClippedPacket.texture_u0 = u_start;
+        v_end = g_triangleVertices.texture_v2;
+        g_triangleClippedPacket.texture_v0 = v_start;
+        g_triangleClippedPacket.texture_u1 = u_end;
+        g_triangleClippedPacket.texture_v1 = v_end;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer1;
+        Gfx_BuildClippedRawTriangleEdge(&g_triangleClippedPacket, output);
+        x_start = g_triangleVertices.x1;
+        y_start = g_triangleVertices.y1;
+        x_end = g_triangleVertices.x2;
+        g_triangleClippedPacket.x0 = x_start;
+        y_end = g_triangleVertices.y2;
+        g_triangleClippedPacket.y0 = y_start;
+        u_start = g_triangleVertices.texture_u1;
+        g_triangleClippedPacket.x1 = x_end;
+        v_start = g_triangleVertices.texture_v1;
+        g_triangleClippedPacket.y1 = y_end;
+        u_end = g_triangleVertices.texture_u2;
+        g_triangleClippedPacket.texture_u0 = u_start;
+        v_end = g_triangleVertices.texture_v2;
+        g_triangleClippedPacket.texture_v0 = v_start;
+        g_triangleClippedPacket.texture_u1 = u_end;
+        g_triangleClippedPacket.texture_v1 = v_end;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+        Gfx_BuildClippedCorrectedTriangleEdge(&g_triangleClippedPacket, output);
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer1;
+        y_start = output->start_y;
+        stride = (unsigned int)g_triangleViewportState.row_stride;
+        g_triangleRasterCursor += (unsigned int)y_start * stride;
+        processed_rows = 0;
+        left_offset = 0;
+        right_offset = 0;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+        count = output->count;
+        if (count > 0) {
+            do {
+                left_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer1;
+                left_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(left_base + left_offset + 8u);
+                left_x = left_record->x;
+                clip_left = g_triangleViewportState.clip_left_integer;
+                if (clip_left > left_x) {
+                    right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer0;
+                    right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                    texture_u = right_record->texture_u;
+                    integer_u = GFX_EDGE_SAR(texture_u, 8);
+                    texture_v = right_record->texture_v;
+                    packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                    right_x = right_record->x;
+                    clip_left = g_triangleViewportState.clip_left_integer;
+                    span_count = (unsigned int)right_x - (unsigned int)clip_left;
+                    clip_left = g_triangleViewportState.clip_left_integer;
+                    destination = (unsigned int)clip_left + g_triangleRasterCursor;
+                    Gfx_DrawClippedTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                        packed_uv, integer_u);
+                } else {
+                    right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer0;
+                    right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                    texture_u = right_record->texture_u;
+                    integer_u = GFX_EDGE_SAR(texture_u, 8);
+                    texture_v = right_record->texture_v;
+                    packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                    right_x = right_record->x;
+                    span_count = (unsigned int)right_x - (unsigned int)left_x - 1u;
+                    destination = g_triangleRasterCursor;
+                    destination += (unsigned int)left_x + 1u;
+                    Gfx_DrawTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                    packed_uv, integer_u, (const GfxTriangleSpanEdgeRecord *)left_record);
+                }
+                stride = (unsigned int)g_triangleViewportState.row_stride;
+                left_offset += 12u;
+                right_offset += 12u;
+                processed_rows++;
+                g_triangleRasterCursor += stride;
+                output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer0;
+                count = output->count;
+            } while (count > (int)processed_rows);
+        }
+        left_offset = processed_rows * 12u;
+        right_offset = 0;
+        processed_rows = 0;
+        output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+        count = output->count;
+        if (count > 0) {
+            do {
+                left_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer1;
+                left_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(left_base + left_offset + 8u);
+                left_x = left_record->x;
+                clip_left = g_triangleViewportState.clip_left_integer;
+                if (clip_left > left_x) {
+                    right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer2;
+                    right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                    texture_u = right_record->texture_u;
+                    integer_u = GFX_EDGE_SAR(texture_u, 8);
+                    texture_v = right_record->texture_v;
+                    packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                    right_x = right_record->x;
+                    clip_left = g_triangleViewportState.clip_left_integer;
+                    span_count = (unsigned int)right_x - (unsigned int)clip_left;
+                    clip_left = g_triangleViewportState.clip_left_integer;
+                    destination = (unsigned int)clip_left + g_triangleRasterCursor;
+                    Gfx_DrawClippedTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                        packed_uv, integer_u);
+                } else {
+                    right_base = (unsigned int)(uintptr_t)g_spriteWorkspaceBBuffer2;
+                    right_record = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)(right_base + right_offset + 8u);
+                    texture_u = right_record->texture_u;
+                    integer_u = GFX_EDGE_SAR(texture_u, 8);
+                    texture_v = right_record->texture_v;
+                    packed_uv = (texture_v & 65535u) + (texture_u << 24);
+                    right_x = right_record->x;
+                    span_count = (unsigned int)right_x - (unsigned int)left_x - 1u;
+                    destination = g_triangleRasterCursor;
+                    destination += (unsigned int)left_x + 1u;
+                    Gfx_DrawTriangleSpan((unsigned char *)(uintptr_t)destination, (int)span_count,
+                    packed_uv, integer_u, (const GfxTriangleSpanEdgeRecord *)left_record);
+                }
+                stride = (unsigned int)g_triangleViewportState.row_stride;
+                left_offset += 12u;
+                g_triangleRasterCursor += stride;
+                output = (volatile GfxTriangleEdgeBufferHeader *)g_spriteWorkspaceBBuffer2;
+                right_offset += 12u;
+                processed_rows++;
+                count = output->count;
+            } while (count > (int)processed_rows);
+        }
+    }
 }

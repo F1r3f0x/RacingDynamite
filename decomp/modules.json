@@ -207,7 +207,9 @@
         "Gfx_SpriteConfigureNative",
         "Gfx_SpriteSetClipNative",
         "Gfx_SpriteGetStateNative",
-        "Gfx_SpriteSetStateNative"
+        "Gfx_SpriteSetStateNative",
+        "Gfx_RasterizeTexturedTriangle",
+        "Gfx_RasterizeClippedTriangle"
       ],
       "responsibility": "Verified software texture compositing spans; triangle and sprite rasterization dependencies reconstructed incrementally",
       "state": [
@@ -223,11 +225,14 @@
         "verified corrected/raw secondary counts and raw advanced output pointer VA4BAEDC..E8, preserving intervening word",
         "verified48byte sorted geometry and UV input VA4BAD74..A0",
         "verified32byte gradient intermediate backing VA4BADF4..4BAE10; heights, denominator, dx/interpolants and ratio",
-        "verified sprite pixel/stride/dimension/integer and fixed clip words,40byte state transfer record, triangle framebuffer pointer/height; viewport backing shared with actual renderer"
+        "verified sprite pixel/stride/dimension/integer and fixed clip words,40byte state transfer record, triangle framebuffer pointer/height; viewport backing shared with actual renderer",
+        "verified ordinary/clipped32byte mutable edge packets VA51A9A0/51AA00",
+        "verified triangle texture pointer51A9C4, frame cursor51A9D0, presort signed Xmin51A9D4/Xmax51A9F8"
       ],
       "dependencies": [
         "caller-owned mapped texture, compositing table and framebuffer storage; initialization remains external and unverified",
-        "real gradient and edge-step initialization remain external pending reconstruction; caller supplies authenticated shared state"
+        "real gradient and edge-step initialization remain external pending reconstruction; caller supplies authenticated shared state",
+        "Borrow verified graphics_legacy workspaceB buffers0/1/2; actual production-owned slots/init at RVA5C9F0, no duplicate storage or success-returning allocation substitute"
       ],
       "placement_reason": "Authenticated cdecl span wrappers and complete register leaves form one real dependency closure. Internal leaf interfaces use explicit C parameters with documented ABI adaptation; no register shim or invented rasterizer. Original source filename unknown.",
       "build_mode": "direct",

@@ -242,6 +242,7 @@ def verify():
         'Gfx_EmitRawTriangleEdgeRecords','Gfx_EmitCorrectedTriangleEdgeRecords',
         'Gfx_ComputeTriangleEdgeSlope','Gfx_ClampTriangleEdgeRightEndpoint',
         'Gfx_InitializeTriangleEdgeSteps','Gfx_ClipAndSplitTriangleEdge','Gfx_ComputeTriangleGradients',
+        'Gfx_RasterizeTexturedTriangle','Gfx_RasterizeClippedTriangle',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
     draw_iat=next(entry.address for group in rebuilt.DIRECTORY_ENTRY_IMPORT
@@ -317,6 +318,21 @@ def verify():
         'Gfx_BuildClippedRawTriangleEdge':['Gfx_ClipAndSplitTriangleEdge','Gfx_InitializeTriangleEdgeSteps',
             'Gfx_EmitRawTriangleEdgeRecords','Gfx_ClampTriangleEdgeRightEndpoint',
             'Gfx_InitializeTriangleEdgeSteps','Gfx_EmitRawTriangleEdgeRecords']})
+    expected_calls.update({
+        'Gfx_RasterizeClippedTriangle':[
+            'Gfx_ComputeTriangleGradients','Gfx_SetTriangleSpanState',
+            'Gfx_ComputeTriangleEdgeSlope','Gfx_ComputeTriangleEdgeSlope',
+            'Gfx_BuildClippedRawTriangleEdge','Gfx_BuildClippedCorrectedTriangleEdge','Gfx_BuildClippedRawTriangleEdge',
+            'Gfx_DrawClippedTriangleSpan','Gfx_DrawTriangleSpan','Gfx_DrawClippedTriangleSpan','Gfx_DrawTriangleSpan',
+            'Gfx_BuildClippedCorrectedTriangleEdge','Gfx_BuildClippedRawTriangleEdge','Gfx_BuildClippedCorrectedTriangleEdge',
+            'Gfx_DrawClippedTriangleSpan','Gfx_DrawTriangleSpan','Gfx_DrawClippedTriangleSpan','Gfx_DrawTriangleSpan'],
+        'Gfx_RasterizeTexturedTriangle':[
+            'Gfx_ComputeTriangleGradients','Gfx_SetTriangleSpanState',
+            'Gfx_ComputeTriangleEdgeSlope','Gfx_ComputeTriangleEdgeSlope',
+            'Gfx_BuildRawTriangleEdge','Gfx_BuildCorrectedTriangleEdge','Gfx_BuildRawTriangleEdge',
+            'Gfx_DrawTriangleSpan','Gfx_DrawTriangleSpan','Gfx_RasterizeClippedTriangle',
+            'Gfx_BuildCorrectedTriangleEdge','Gfx_BuildRawTriangleEdge','Gfx_BuildCorrectedTriangleEdge',
+            'Gfx_DrawTriangleSpan','Gfx_DrawTriangleSpan']})
     assert len(direct_calls) == sum(map(len, expected_calls.values())), 'Unexpected direct helper dependency count'
     actual_calls = {}
     for call in direct_calls:
@@ -929,3 +945,6 @@ if __name__ == '__main__':
     verify_triangle_gradients(record=True)
     from verify_viewport_setters import verify_viewport_setters
     verify_viewport_setters(record=True)
+
+    from verify_triangles import verify_triangles
+    verify_triangles(record=True)

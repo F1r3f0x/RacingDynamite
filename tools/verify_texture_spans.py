@@ -30,7 +30,7 @@ ROUTINES = {
     'Gfx_DrawTriangleSpanCore': (0x67f42,85,'2d40bc4ff2b77b85bdba551897c8fc3ad8cf7437670fa2bff0afaa59aa827309'),
     'Gfx_DrawClippedTriangleSpan': (0x5c9d0,28,'fa88078708ae1fc6bd627bf2fd66459e95f5595bcc828ec82e108d4d7b2bf31e'),
     'Gfx_DrawClippedTriangleSpanCore': (0x67f97,53,'b5ca9a8fa2762fafec0f0b81c28c95a7136d797e931800496e82aa6d7607fbab')}
-INPUTS = ['decomp/src/renderer.c','decomp/include/renderer.h','decomp/modules.json',
+INPUTS = ['decomp/src/geputget.c','decomp/include/geputget.h','decomp/src/renderer.c','decomp/include/renderer.h','decomp/modules.json',
     'decomp/target.json','tools/verify_texture_spans.py','tools/windows_target.py','tools/windows_tracking.py',
     'tools/native_texture_spans.c','tools/native_sine_probe.c']
 PRESERVED = (UC_X86_REG_EBX,UC_X86_REG_ESI,UC_X86_REG_EDI,UC_X86_REG_EBP)
@@ -51,6 +51,11 @@ RENDERER_EXPORTS += ['Gfx_SpriteCloseNative','Gfx_SpriteOptionNative','Gfx_Sprit
     'g_spriteClipRight','g_spriteWidth','g_spriteClipBottom','g_spriteConfigOption',
     'g_spriteHeight','g_triangleViewportHeight','g_triangleViewportFramebuffer']
 
+RENDERER_EXPORTS += ['Gfx_RasterizeTexturedTriangle','Gfx_RasterizeClippedTriangle',
+    'g_triangleOrdinaryPacket','g_triangleClippedPacket','g_triangleRasterTexture',
+    'g_triangleRasterCursor','g_triangleRasterMinimumX','g_triangleRasterMaximumX',
+    'g_spriteWorkspaceBBuffer0','g_spriteWorkspaceBBuffer1','g_spriteWorkspaceBBuffer2']
+
 
 def validate_renderer_calls(pe):
     symbols=validation_symbols(pe)
@@ -63,7 +68,12 @@ def validate_renderer_calls(pe):
         'Gfx_ClipAndSplitTriangleEdge':2,'Gfx_InitializeTriangleEdgeSteps':6,
         'Gfx_ClampTriangleEdgeRightEndpoint':2,'Gfx_EmitCorrectedTriangleEdgeRecords':3,
         'Gfx_EmitRawTriangleEdgeRecords':3,'Gfx_SpriteConfigureNative':1,
-        'Gfx_SpriteSetClipNative':1}.items()}
+        'Gfx_SpriteSetClipNative':1,'Gfx_ComputeTriangleGradients':2,
+        'Gfx_SetTriangleSpanState':2,'Gfx_ComputeTriangleEdgeSlope':4,
+        'Gfx_BuildClippedRawTriangleEdge':3,'Gfx_BuildClippedCorrectedTriangleEdge':3,
+        'Gfx_DrawClippedTriangleSpan':4,'Gfx_DrawTriangleSpan':8,
+        'Gfx_BuildRawTriangleEdge':3,'Gfx_BuildCorrectedTriangleEdge':3,
+        'Gfx_RasterizeClippedTriangle':1}.items()}
     assert calls==expected,(calls,expected)
     return calls
 
@@ -80,6 +90,15 @@ def build(dll=DLL,exports=()):
         [linker,'/dll','/noentry','/nodefaultlib','/machine:x86','/safeseh:no',
          '/base:0x10000000','/out:'+str(dll),str(obj)] + ['/export:'+n for n in
             sorted(set([*ROUTINES,*STATE,*RENDERER_EXPORTS,*exports]))]]
+    legacy=(ROOT/'decomp/src/geputget.c').read_text(encoding='utf-8')
+    storage=legacy[legacy.index('volatile uint32_t g_spriteWorkspaceAAllocated'):
+        legacy.index('/*\n * @original Gfx_InitSpriteWorkspaceA')]
+    storage_source=BUILD/(dll.stem+'_workspace_storage.c')
+    storage_obj=BUILD/(dll.stem+'_workspace_storage.obj')
+    storage_source.write_text('#include "geputget.h"\n'+storage,encoding='utf-8',newline='\n')
+    storage_cmd=commands[0][:-4]+['-c',str(storage_source),'-o',str(storage_obj)]
+    commands.insert(1,storage_cmd)
+    commands[-1].append(str(storage_obj))
     for command in commands:
         subprocess.run(command,cwd=ROOT,check=True)
     return commands

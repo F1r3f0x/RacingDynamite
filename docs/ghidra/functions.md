@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:d76b20a5975120220a0cca3142514924345529541e7d860b99eff731513abe80 -->
+<!-- snapshot:8b8bef4f634bdb19aef77bd2e5a7740f98dc5624fa3c7bb51e27a7481bf33f73 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -569,8 +569,8 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045C9B0` | `0x0005C9B0` | 32 | `Gfx_DrawTriangleSpan` | game | reconstructed | [windows_texture_spans.md](windows_texture_spans.md) |
 | `0x0045C9D0` | `0x0005C9D0` | 28 | `Gfx_DrawClippedTriangleSpan` | game | reconstructed | [windows_texture_spans.md](windows_texture_spans.md) |
 | `0x0045C9F0` | `0x0005C9F0` | 84 | `Gfx_InitSpriteWorkspaceB` | game | reconstructed | [windows_gfx_sprite_workspaces.md](windows_gfx_sprite_workspaces.md) |
-| `0x0045CA50` | `0x0005CA50` | 1813 | `Gfx_RasterizeTexturedTriangle` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
-| `0x0045D170` | `0x0005D170` | 1569 | `Gfx_RasterizeClippedTriangle` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0045CA50` | `0x0005CA50` | 1813 | `Gfx_RasterizeTexturedTriangle` | game | reconstructed | [windows_triangle_parents.md](windows_triangle_parents.md) |
+| `0x0045D170` | `0x0005D170` | 1569 | `Gfx_RasterizeClippedTriangle` | game | reconstructed | [windows_triangle_parents.md](windows_triangle_parents.md) |
 | `0x0045D7A0` | `0x0005D7A0` | 53 | `Gfx_ComputeTriangleEdgeSlope` | game | reconstructed | [windows_triangle_slope.md](windows_triangle_slope.md) |
 | `0x0045D7E0` | `0x0005D7E0` | 20 | `sub_0045D7E0` | unknown | unidentified | - |
 | `0x0045D800` | `0x0005D800` | 32 | `sub_0045D800` | unknown | unidentified | - |

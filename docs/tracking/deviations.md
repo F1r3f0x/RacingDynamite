@@ -400,3 +400,10 @@ Gradient RVA0x24EA80 uses DEV-007 internal C89 ABI: original EAX/EBX/EDX
 scratch outputs are not exposed. Complete arithmetic, correction tables and
 ordered divide-fault prefixes remain authentic. No nativeparent/flags/faultstack
 claim; see [gradient evidence](../ghidra/windows_triangle_gradients.md).
+
+Triangle parents RVAs0x5CA50/0x5D170 use DEV-007 typed internal renderer
+helpers while retaining public cdecl packets and original effects/control flow.
+Incidental scratch register/flags outputs are not exposed. Full differential
+access/state/frame/fault-prefix and paired nativeframe checks pass; mappedNX,
+workspace fixture/nativeallocator and game boundaries remain explicit. See
+[parent evidence](../ghidra/windows_triangle_parents.md).

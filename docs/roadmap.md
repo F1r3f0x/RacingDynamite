@@ -1,5 +1,18 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Complete ordinary/clipped triangle parents (2026-10-14)
+
+[Parent evidence](ghidra/windows_triangle_parents.md), RVAs0x5CA50/0x5D170,
+closes real renderer helpers and borrowed verified workspace storage in C89.
+Focused1,139 comparisons/530followups/9faults pass; all earlier312ordinary and
+60clipped fixtures retained. Native48paired parent calls match complete frame,
+edge and shared-state bytes using real configure/clip helpers. Loader/NX and
+caller-owned workspace boundaries remain explicit. Full122renewal/audit/exports
+pass at snapshot `c0ae71a8e923`, with51scopednative records and48guardtests.
+LF/index gates/hooks follow.
+Next realsprite/workspace/startup integration and nativegame menus/input/audio/
+races; original compiler remains unresolved and playablegoal stays active.
+
 ## Direct viewport and state routines (2026-10-14)
 
 [Viewport evidence](ghidra/windows_viewport_setters.md), six RVAs0x56F40/50/60,
