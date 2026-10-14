@@ -3,6 +3,18 @@
 See the [playable acceptance roadmap](windows_playable_roadmap.md) for remaining
 whole-game milestones and explicit toolchain/fidelity limits.
 
+## Sprite submission adapter reconstruction (2026-10-14)
+
+[Submission evidence](ghidra/windows_sprite_submit.md), RVA `0x57370`, reconstructs
+`Gfx_SubmitSpriteRequest` in `decomp/src/renderer.c`. Resolves the former adapter
+analysis blocker by connecting descriptor lookup (`0x612E0`) and packet preparation
+to `Gfx_RasterizeSpritePacket` (`0x65BB5`) via the documented `DEV-007` typed C interface.
+264 differential trials pass (168 exhaustive lookup permutations with post-lookup perturbation
+hooks, 32 transformed sprite delegations, and 64 valid full-pipeline blits with byte-for-byte
+framebuffer pixel matching).
+Next in sprite pipeline: `0x57250` (`Gfx_SpriteDrawListNative`), then remaining triangle rasterizers
+and native startup/menus/input/audio/race validation.
+
 ## Sprite packet integration review (2026-10-14)
 
 [Packet evidence](ghidra/windows_sprite_packet.md), RVA `0x65BB5`, repairs the

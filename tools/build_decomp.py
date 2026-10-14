@@ -19,7 +19,7 @@ STARTUP_EXPORTS = ['Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_ClearSurfaceN
 # Extract these verified production declarations/body, rather than duplicating C.
 _resource_header = (ROOT / 'decomp/include/geputget.h').read_text(encoding='utf-8-sig')
 _resource_source = (ROOT / 'decomp/src/geputget.c').read_text(encoding='utf-8-sig')
-STARTUP_BOUNDARY_SOURCE += '#include "geputget.h"\n'
+STARTUP_BOUNDARY_SOURCE += '#include "geputget.h"\nvolatile GfxSpriteRequest *volatile g_activeSpriteRequest;\n'
 
 # Extract the native banner body and its existing public prototype verbatim.
 _lisa_header = (ROOT / 'decomp/include/lisa3d.h').read_text(encoding='utf-8-sig')

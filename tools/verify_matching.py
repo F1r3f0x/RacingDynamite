@@ -257,6 +257,7 @@ def verify():
         'Gfx_RasterizeTexturedTriangle','Gfx_RasterizeClippedTriangle',
         'Gfx_PrepareTransformedSprite',
         'Gfx_RasterizeSpritePacket',
+        'Gfx_SubmitSpriteRequest',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
     draw_iat=next(entry.address for group in rebuilt.DIRECTORY_ENTRY_IMPORT
@@ -355,7 +356,9 @@ def verify():
         'Gfx_PrepareTransformedSprite':[
             'Gfx_RasterizeTexturedTriangle','Gfx_RasterizeTexturedTriangle'],
         'Gfx_RasterizeSpritePacket':[
-            'Gfx_PrepareTransformedSprite']})
+            'Gfx_PrepareTransformedSprite'],
+        'Gfx_SubmitSpriteRequest':[
+            'Gfx_CopySpriteDescriptor', 'Gfx_RasterizeSpritePacket']})
     assert len(direct_calls) == sum(map(len, expected_calls.values())), 'Unexpected direct helper dependency count'
     actual_calls = {}
     for call in direct_calls:
@@ -986,3 +989,6 @@ if __name__ == '__main__':
 
     from verify_sprite_packet import verify_sprite_packet
     verify_sprite_packet(record=True)
+
+    from verify_sprite_submit import verify_sprite_submit
+    verify_sprite_submit(record=True)

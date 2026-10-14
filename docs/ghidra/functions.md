@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:b720571ce9034a46779cef8de10d5790a27147aa0f97a33c7c320f5c6ade55f2 -->
+<!-- snapshot:823d02fb4b9648119d346d35fc32d425dc035f3c16714b8eb2dd8e91e928f17c -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -438,7 +438,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00457250` | `0x00057250` | 96 | `Gfx_SpriteDrawListNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
 | `0x004572B0` | `0x000572B0` | 1 | `sub_004572B0` | unknown | unidentified | - |
 | `0x004572C0` | `0x000572C0` | 173 | `sub_004572C0` | unknown | unidentified | - |
-| `0x00457370` | `0x00057370` | 167 | `Gfx_SubmitSpriteRequest` | game | analyzed | [windows_sprite_adapter.md](windows_sprite_adapter.md) |
+| `0x00457370` | `0x00057370` | 167 | `Gfx_SubmitSpriteRequest` | game | reconstructed | [windows_sprite_submit.md](windows_sprite_submit.md) |
 | `0x00457420` | `0x00057420` | 123 | `sub_00457420` | unknown | unidentified | - |
 | `0x004574A0` | `0x000574A0` | 230 | `File_LoadToMemory` | game | reconstructed | [windows_file_load.md](windows_file_load.md) |
 | `0x00457590` | `0x00057590` | 84 | `sub_00457590` | unknown | unidentified | - |

@@ -56,7 +56,9 @@ RENDERER_EXPORTS += ['Gfx_RasterizeTexturedTriangle','Gfx_RasterizeClippedTriang
     'g_triangleRasterCursor','g_triangleRasterMinimumX','g_triangleRasterMaximumX',
     'g_spriteWorkspaceBBuffer0','g_spriteWorkspaceBBuffer1','g_spriteWorkspaceBBuffer2',
     'Gfx_PrepareTransformedSprite','g_transformedSpriteScratch',
-    'Gfx_RasterizeSpritePacket','g_spriteBlitSource','g_spriteBlitWidth','g_spriteBlitHeight','g_transformedSpriteInput']
+    'Gfx_RasterizeSpritePacket','g_spriteBlitSource','g_spriteBlitWidth','g_spriteBlitHeight','g_transformedSpriteInput',
+    'Gfx_SubmitSpriteRequest','Gfx_CopySpriteDescriptor','g_spritePreparedStorage','g_spriteRasterPacket','g_spriteRenderLookup',
+    'g_activeSpriteRequest','g_nativeSpriteDefault','g_nativeImageControl']
 
 
 def validate_renderer_calls(pe):
@@ -76,7 +78,8 @@ def validate_renderer_calls(pe):
         'Gfx_DrawClippedTriangleSpan':4,'Gfx_DrawTriangleSpan':8,
         'Gfx_BuildRawTriangleEdge':3,'Gfx_BuildCorrectedTriangleEdge':3,
         'Gfx_RasterizeClippedTriangle':1,'Gfx_RasterizeTexturedTriangle':2,
-        'Gfx_PrepareTransformedSprite':1}.items()}
+        'Gfx_PrepareTransformedSprite':1,'Gfx_RasterizeSpritePacket':1,
+        'Gfx_CopySpriteDescriptor':1}.items()}
     assert calls==expected,(calls,expected)
     return calls
 
@@ -93,12 +96,24 @@ def build(dll=DLL,exports=()):
         [linker,'/dll','/noentry','/nodefaultlib','/machine:x86','/safeseh:no',
          '/base:0x10000000','/out:'+str(dll),str(obj)] + ['/export:'+n for n in
             sorted(set([*ROUTINES,*STATE,*RENDERER_EXPORTS,*exports]))]]
-    legacy=(ROOT/'decomp/src/geputget.c').read_text(encoding='utf-8')
-    storage=legacy[legacy.index('volatile uint32_t g_spriteWorkspaceAAllocated'):
-        legacy.index('/*\n * @original Gfx_InitSpriteWorkspaceA')]
-    storage_source=BUILD/(dll.stem+'_workspace_storage.c')
-    storage_obj=BUILD/(dll.stem+'_workspace_storage.obj')
-    storage_source.write_text('#include "geputget.h"\n'+storage,encoding='utf-8',newline='\n')
+    legacy = (ROOT / 'decomp/src/geputget.c').read_text(encoding='utf-8')
+    storage = legacy[legacy.index('volatile uint32_t g_spriteWorkspaceAAllocated'):
+                     legacy.index('/*\n * @original Gfx_InitSpriteWorkspaceA')]
+    desc_start = legacy.index('/*\n * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0')
+    desc_end = legacy.index('/*\n * @original Gfx_InitSpriteHandles', desc_start)
+    desc_copy = legacy[desc_start:desc_end]
+    storage_source = BUILD / (dll.stem + '_workspace_storage.c')
+    storage_obj = BUILD / (dll.stem + '_workspace_storage.obj')
+    storage_code = (
+        '#include "geputget.h"\n'
+        '#include "renderer.h"\n\n'
+        + storage + '\n'
+        'volatile GfxSpriteRequest *volatile g_activeSpriteRequest = 0;\n'
+        'volatile GfxSpriteDescriptor g_nativeSpriteDefault = {{0}};\n'
+        'volatile GfxPointerTable g_nativeImageControl = {{0, 0}, 0, (uint32_t *)0};\n\n'
+        + desc_copy + '\n'
+    )
+    storage_source.write_text(storage_code, encoding='utf-8', newline='\n')
     storage_cmd=commands[0][:-4]+['-c',str(storage_source),'-o',str(storage_obj)]
     commands.insert(1,storage_cmd)
     commands[-1].append(str(storage_obj))

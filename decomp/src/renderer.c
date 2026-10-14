@@ -2138,3 +2138,43 @@ void Gfx_RasterizeSpritePacket(const GfxSpriteRasterPacket *packet)
 #undef SPRITE_LOW
 #undef SPRITE_BYTE
 }
+
+volatile unsigned int g_spritePreparedStorage[8] = {0, 0, 0, 0, 0, 0, 0, 0}; /* VA 0x004BA758 */
+volatile GfxSpriteRasterPacket g_spriteRasterPacket = {
+    4u,
+    (const GfxPoint2D *)0,
+    (const unsigned int *)g_spritePreparedStorage,
+    (const int *)0
+}; /* VA 0x004BA778 */
+volatile unsigned int g_spriteRenderLookup = 0; /* VA 0x0063F2D8 */
+
+/*
+ * @original Gfx_SubmitSpriteRequest (IGN_WIN.EXE @ 0x00457370, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_SubmitSpriteRequest(void)
+{
+    GfxSpriteDescriptor local_descriptor;
+    volatile GfxSpriteRequest *request = g_activeSpriteRequest;
+    GfxSpriteHandle *handle;
+    unsigned int word4;
+
+    g_spriteRasterPacket.position = (const GfxPoint2D *)request->position;
+    g_spriteRasterPacket.coefficients = (const int *)request->coefficients;
+    handle = request->handle;
+
+    Gfx_CopySpriteDescriptor(&local_descriptor, handle->image_id);
+
+    g_spritePreparedStorage[0] = (unsigned int)handle->origin_x;
+    word4 = local_descriptor.words[4];
+    g_spritePreparedStorage[1] = (unsigned int)handle->origin_y;
+    g_spritePreparedStorage[2] = (word4 & 0xFFu) << 8;
+    g_spritePreparedStorage[3] = word4 & 0xFF00u;
+    g_spritePreparedStorage[6] = word4 & 0xFFFF0000u;
+    g_spritePreparedStorage[4] = (local_descriptor.words[1] << 8) + g_spritePreparedStorage[2];
+    g_spritePreparedStorage[5] = (local_descriptor.words[2] << 8) + g_spritePreparedStorage[3];
+    g_spritePreparedStorage[7] = g_spriteRenderLookup;
+
+    Gfx_RasterizeSpritePacket((const GfxSpriteRasterPacket *)&g_spriteRasterPacket);
+}

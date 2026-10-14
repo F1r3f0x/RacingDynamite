@@ -260,4 +260,10 @@ typedef char GfxSpriteRasterPacketMustBe16Bytes[(sizeof(GfxSpriteRasterPacket) =
 
 void Gfx_RasterizeSpritePacket(const GfxSpriteRasterPacket *packet);
 
+extern volatile unsigned int g_spritePreparedStorage[8]; /* VA 0x004BA758 */
+extern volatile GfxSpriteRasterPacket g_spriteRasterPacket; /* VA 0x004BA778 */
+extern volatile unsigned int g_spriteRenderLookup; /* VA 0x0063F2D8 */
+
+void Gfx_SubmitSpriteRequest(void);
+
 #endif
