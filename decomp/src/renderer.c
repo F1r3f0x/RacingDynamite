@@ -26,6 +26,11 @@ typedef char GfxEdgeContinuationMustBe16Bytes[(sizeof(GfxTriangleEdgeContinuatio
 typedef char GfxEdgePacketMustBe32Bytes[(sizeof(GfxTriangleEdgePacket) == 32) ? 1 : -1];
 typedef char GfxTextureGradientsMustBe8Bytes[(sizeof(GfxTriangleTextureGradients) == 8) ? 1 : -1];
 
+volatile GfxTriangleVertexState g_triangleVertices = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+volatile GfxTriangleGradientScratch g_triangleGradientScratch = {0, 0, 0, 0, 0, 0, 0, 0};
+typedef char GfxTriangleVerticesMustBe48Bytes[(sizeof(GfxTriangleVertexState) == 48) ? 1 : -1];
+typedef char GfxTriangleGradientScratchMustBe32Bytes[(sizeof(GfxTriangleGradientScratch) == 32) ? 1 : -1];
+
 /* Deliberately wrapped addresses from the verified 32-bit Windows ABI. */
 #define GFX_SPAN_BYTE(address) (*(volatile unsigned char *)(uintptr_t)(address))
 #define GFX_EDGE_SAR(value, shift) (((value) >> (shift)) | ((0u - ((value) >> 31)) << (32 - (shift))))
@@ -835,5 +840,100 @@ void Gfx_BuildRawTriangleEdge(volatile GfxTriangleEdgePacket *edge,
         emission.output = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)
             ((unsigned int)(uintptr_t)output + 8u);
         Gfx_EmitRawTriangleEdgeRecords(&emission);
+    }
+}
+
+/* @original Gfx_ComputeTriangleGradients (IGN_WIN.EXE @ 0x0064EA80, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_ComputeTriangleGradients(void) {
+    unsigned int value;
+    unsigned int height;
+    unsigned int original_height;
+    unsigned int denominator;
+    unsigned int ratio;
+    unsigned int high;
+    unsigned int step;
+    unsigned int table_word;
+    unsigned int i;
+    value = (unsigned int)g_triangleVertices.y1;
+    value -= (unsigned int)g_triangleVertices.y0;
+    g_triangleGradientScratch.height01 = value;
+    original_height = (unsigned int)g_triangleVertices.y2;
+    original_height -= (unsigned int)g_triangleVertices.y0;
+    g_triangleGradientScratch.height02 = original_height;
+    if (original_height == 0) {
+        g_triangleGradientScratch.height02 = 1;
+    }
+    height = g_triangleGradientScratch.height01;
+    if (original_height == height) {
+        ratio = 0x7fffffffu;
+    } else {
+        denominator = g_triangleGradientScratch.height02;
+        GFX_EDGE_UDIV_WORDS(ratio, height, 0, denominator);
+        ratio >>= 1;
+    }
+    g_triangleGradientScratch.ratio = ratio;
+    value = (unsigned int)g_triangleVertices.x1;
+    value -= (unsigned int)g_triangleVertices.x0;
+    g_triangleGradientScratch.delta_x01 = value;
+    value = (unsigned int)g_triangleVertices.x2;
+    value -= (unsigned int)g_triangleVertices.x0;
+    value += value;
+    ratio = g_triangleGradientScratch.ratio;
+    GFX_EDGE_PRODUCT_HIGH(high, value, ratio);
+    g_triangleGradientScratch.interpolated_x = high;
+    value = (unsigned int)g_triangleVertices.texture_u2;
+    value -= (unsigned int)g_triangleVertices.texture_u0;
+    value += value;
+    ratio = g_triangleGradientScratch.ratio;
+    GFX_EDGE_PRODUCT_HIGH(high, value, ratio);
+    g_triangleGradientScratch.interpolated_u = high;
+    value = (unsigned int)g_triangleVertices.texture_v2;
+    value -= (unsigned int)g_triangleVertices.texture_v0;
+    value += value;
+    ratio = g_triangleGradientScratch.ratio;
+    GFX_EDGE_PRODUCT_HIGH(high, value, ratio);
+    g_triangleGradientScratch.interpolated_v = high;
+    value = g_triangleGradientScratch.interpolated_x;
+    value -= g_triangleGradientScratch.delta_x01;
+    if ((int)value >= -2 && (int)value <= 2) {
+        value = (GFX_EDGE_SAR(value, 2) | 1u) << 2;
+    }
+    g_triangleGradientScratch.denominator = value;
+    value = g_triangleGradientScratch.interpolated_u;
+    value -= g_triangleVertices.texture_u1;
+    value += g_triangleVertices.texture_u0;
+    high = GFX_EDGE_SAR(value, 16);
+    value <<= 16;
+    denominator = g_triangleGradientScratch.denominator;
+    GFX_EDGE_IDIV_WORDS(value, high, value, denominator);
+    g_triangleTextureGradients.texture_u = (int)value;
+    step = 0u - value;
+    step = GFX_EDGE_SAR(step, 3);
+    table_word = step;
+    g_triangleEdgeUCorrections[0] = 0;
+    g_triangleEdgeUCorrections[1] = table_word;
+    for (i = 2; i < 8; i++) {
+        table_word += step;
+        g_triangleEdgeUCorrections[i] = table_word;
+    }
+    value = g_triangleGradientScratch.interpolated_v;
+    value -= g_triangleVertices.texture_v1;
+    value += g_triangleVertices.texture_v0;
+    high = GFX_EDGE_SAR(value, 16);
+    value <<= 16;
+    denominator = g_triangleGradientScratch.denominator;
+    GFX_EDGE_IDIV_WORDS(value, high, value, denominator);
+    g_triangleTextureGradients.texture_v = (int)value;
+    step = 0u - value;
+    step = GFX_EDGE_SAR(step, 3);
+    table_word = step;
+    g_triangleEdgeVCorrections[0] = 0;
+    g_triangleEdgeVCorrections[1] = table_word;
+    for (i = 2; i < 8; i++) {
+        table_word += step;
+        g_triangleEdgeVCorrections[i] = table_word;
     }
 }

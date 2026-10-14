@@ -302,13 +302,85 @@ class Session(SurfaceSession):
             assert not uc.reg_read(UC_X86_REG_EFLAGS)&0x400
             assert uc.reg_read(UC_X86_REG_EAX)==result
 
+def run_probe_on_desktop(exe, runtime, timeout=45):
+    import ctypes
+    from ctypes import wintypes
+    k = ctypes.windll.kernel32
+
+    class STARTUPINFOW(ctypes.Structure):
+        _fields_ = [
+            ('cb', wintypes.DWORD), ('lpReserved', wintypes.LPWSTR),
+            ('lpDesktop', wintypes.LPWSTR), ('lpTitle', wintypes.LPWSTR),
+            ('dwX', wintypes.DWORD), ('dwY', wintypes.DWORD),
+            ('dwXSize', wintypes.DWORD), ('dwYSize', wintypes.DWORD),
+            ('dwXCountChars', wintypes.DWORD), ('dwYCountChars', wintypes.DWORD),
+            ('dwFillAttribute', wintypes.DWORD), ('dwFlags', wintypes.DWORD),
+            ('wShowWindow', wintypes.WORD), ('cbReserved2', wintypes.WORD),
+            ('lpReserved2', ctypes.c_void_p), ('hStdInput', wintypes.HANDLE),
+            ('hStdOutput', wintypes.HANDLE), ('hStdError', wintypes.HANDLE)
+        ]
+
+    class PROCESS_INFORMATION(ctypes.Structure):
+        _fields_ = [
+            ('hProcess', wintypes.HANDLE), ('hThread', wintypes.HANDLE),
+            ('dwProcessId', wintypes.DWORD), ('dwThreadId', wintypes.DWORD)
+        ]
+
+    class SECURITY_ATTRIBUTES(ctypes.Structure):
+        _fields_ = [('nLength', wintypes.DWORD), ('lpSecurityDescriptor', ctypes.c_void_p), ('bInheritHandle', wintypes.BOOL)]
+
+    sa = SECURITY_ATTRIBUTES()
+    sa.nLength = ctypes.sizeof(SECURITY_ATTRIBUTES)
+    sa.bInheritHandle = True
+
+    h_read, h_write = wintypes.HANDLE(), wintypes.HANDLE()
+    if not k.CreatePipe(ctypes.byref(h_read), ctypes.byref(h_write), ctypes.byref(sa), 0):
+        import subprocess
+        return subprocess.run([str(exe)], cwd=runtime, capture_output=True, text=True, timeout=timeout)
+    k.SetHandleInformation(h_read, 1, 0)
+
+    si = STARTUPINFOW()
+    si.cb = ctypes.sizeof(STARTUPINFOW)
+    si.lpDesktop = 'WinSta0\\Default'
+    si.dwFlags = 0x100
+    si.hStdOutput = h_write
+    si.hStdError = h_write
+    pi = PROCESS_INFORMATION()
+
+    res = k.CreateProcessW(None, str(exe), None, None, True, 0, None, str(runtime), ctypes.byref(si), ctypes.byref(pi))
+    k.CloseHandle(h_write)
+    if not res:
+        k.CloseHandle(h_read)
+        import subprocess
+        return subprocess.run([str(exe)], cwd=runtime, capture_output=True, text=True, timeout=timeout)
+
+    k.WaitForSingleObject(pi.hProcess, int(timeout * 1000))
+    code = wintypes.DWORD()
+    k.GetExitCodeProcess(pi.hProcess, ctypes.byref(code))
+    k.CloseHandle(pi.hProcess)
+    k.CloseHandle(pi.hThread)
+
+    out = []
+    buf = ctypes.create_string_buffer(4096)
+    read = wintypes.DWORD()
+    while k.ReadFile(h_read, buf, 4096, ctypes.byref(read), None) and read.value > 0:
+        out.append(buf.raw[:read.value])
+    k.CloseHandle(h_read)
+    text = b''.join(out).decode('utf-8', errors='replace')
+    class Result:
+        pass
+    r = Result()
+    r.returncode = code.value
+    r.stdout = text
+    r.stderr = ''
+    return r
+
+
 def native_probe_process(exe, runtime, expected, foreground_retry=False):
     """Retry only exit74 before key injection; retain all real process results."""
-    import subprocess
     attempts = []
     for index in range(3 if foreground_retry else 1):
-        result = subprocess.run([str(exe)], cwd=runtime, capture_output=True,
-                                text=True, timeout=45)
+        result = run_probe_on_desktop(exe, runtime, timeout=45)
         attempts.append({'exit_code': result.returncode, 'stdout': result.stdout,
                          'stderr': result.stderr})
         variant = expected.rsplit(' ', 1)[-1].rstrip(':')

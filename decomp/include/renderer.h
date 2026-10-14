@@ -116,4 +116,33 @@ void Gfx_BuildCorrectedTriangleEdge(volatile GfxTriangleEdgePacket *edge,
 void Gfx_BuildRawTriangleEdge(volatile GfxTriangleEdgePacket *edge,
     volatile GfxTriangleEdgeBufferHeader *output);
 
+/* Verified shared triangle input and gradient intermediates; original filenames unknown. */
+typedef struct GfxTriangleVertexState {
+    int x0; /* VA 0x004BAD74 */
+    int y0;
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    unsigned int texture_u0;
+    unsigned int texture_v0;
+    unsigned int texture_u1;
+    unsigned int texture_v1;
+    unsigned int texture_u2;
+    unsigned int texture_v2; /* VA 0x004BADA0 */
+} GfxTriangleVertexState;
+typedef struct GfxTriangleGradientScratch {
+    unsigned int height01; /* VA 0x004BADF4 */
+    unsigned int height02;
+    unsigned int denominator;
+    unsigned int delta_x01;
+    unsigned int interpolated_x;
+    unsigned int interpolated_u;
+    unsigned int interpolated_v;
+    unsigned int ratio; /* VA 0x004BAE10 */
+} GfxTriangleGradientScratch;
+extern volatile GfxTriangleVertexState g_triangleVertices;
+extern volatile GfxTriangleGradientScratch g_triangleGradientScratch;
+void Gfx_ComputeTriangleGradients(void);
+
 #endif

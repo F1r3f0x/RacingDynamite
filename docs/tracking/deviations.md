@@ -395,3 +395,8 @@ Ordinary wrappers RVAs0x24EC00/0x24EC40 use DEV-007 typed ESI/EBX parameters
 with real initializer/emitter dependencies. Zero-only skips and negative first
 records are retained; no incidental register/native parent claim. See
 [ordinary evidence](../ghidra/windows_ordinary_edges.md).
+
+Gradient RVA0x24EA80 uses DEV-007 internal C89 ABI: original EAX/EBX/EDX
+scratch outputs are not exposed. Complete arithmetic, correction tables and
+ordered divide-fault prefixes remain authentic. No nativeparent/flags/faultstack
+claim; see [gradient evidence](../ghidra/windows_triangle_gradients.md).

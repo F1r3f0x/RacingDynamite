@@ -41,7 +41,8 @@ RENDERER_EXPORTS = [
     'Gfx_BuildClippedCorrectedTriangleEdge','Gfx_BuildClippedRawTriangleEdge',
     'g_triangleEdgeSteps','g_triangleEdgeUCorrections','g_triangleEdgeVCorrections',
     'g_triangleTextureGradients','g_triangleViewportState','g_triangleEdgeSplit',
-    'g_triangleEdgeContinuation','Gfx_BuildCorrectedTriangleEdge','Gfx_BuildRawTriangleEdge']
+    'g_triangleEdgeContinuation','Gfx_BuildCorrectedTriangleEdge','Gfx_BuildRawTriangleEdge',
+    'Gfx_ComputeTriangleGradients','g_triangleVertices','g_triangleGradientScratch']
 
 
 def validate_renderer_calls(pe):

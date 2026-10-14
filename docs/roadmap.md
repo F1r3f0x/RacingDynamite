@@ -1,5 +1,15 @@
 # Ignition (1997) Source Port Master Implementation Roadmap
 
+## Triangle gradients and correction tables (2026-10-13)
+
+[Gradient evidence](ghidra/windows_triangle_gradients.md), RVA0x24EA80,
+reconstructs complete runtime-free C89 gradients and correction table output.
+Verified48byte vertex and32byte scratch backings close real edge dependencies.
+Focused2,260 differential calls pass, with516 actualdividefaults and872followups.
+Full renewal/snapshot/gates pending; no nativegradient/game claim. Continue
+wholetriangle parents, realviewport setters, directworkspace migration and
+nativeframes. Original toolchain and playablegame validation remain open.
+
 ## Ordinary edge wrappers (2026-10-13)
 
 [Ordinary edge evidence](ghidra/windows_ordinary_edges.md), RVAs0x24EC00/0x24EC40,

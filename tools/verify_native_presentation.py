@@ -29,7 +29,8 @@ def native_surface_host(dll, helper_path, runtime_name, call_site, calls, expect
      '-Werror','-Wno-cast-function-type','-O2','-ffreestanding','-fno-builtin','-mno-sse','-c',str(host),'-o',str(obj)],check=True)
     subprocess.run([shutil.which('lld-link'),'/entry:NativeEntry@0','/subsystem:console','/nodefaultlib','/machine:x86',
      '/safeseh:no','/base:0x20000000','/dynamicbase:no','/out:'+str(exe),str(obj)]+libs,check=True)
-    result=subprocess.run([str(exe)],cwd=runtime,capture_output=True,text=True,timeout=45)
+    from verify_surface_open import run_probe_on_desktop
+    result=run_probe_on_desktop(exe,runtime,timeout=45)
     (runtime/'result.log').write_text(result.stdout+result.stderr,encoding='utf-8',newline='\n')
     verify_target(runtime/'IGN_WIN.EXE')
     assert result.returncode==0 and all(marker in result.stdout for marker in expected),(result.returncode,result.stdout,result.stderr)

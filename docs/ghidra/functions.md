@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:3e7c31572473cde694b32ca5732dc00d57dcfe1f773d3a91585d7adc8aff8055 -->
+<!-- snapshot:168c99a0c897682abc28550c414ce3c829e2205406c16c4f9e1d2b28df3a03a2 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -1025,7 +1025,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00478980` | `0x00078980` | 160 | `x64toa` | crt | named | [windows_crt.md](windows_crt.md) |
 | `0x00478A20` | `0x00078A20` | 32 | `sub_00478A20` | unknown | unidentified | - |
 | `0x00478A40` | `0x00078A40` | 187 | `__strupr` | crt | named | [windows_crt.md](windows_crt.md) |
-| `0x0064EA80` | `0x0024EA80` | 380 | `Gfx_ComputeTriangleTextureGradients` | game | analyzed | [windows_triangle.md](windows_triangle.md) |
+| `0x0064EA80` | `0x0024EA80` | 380 | `Gfx_ComputeTriangleGradients` | game | reconstructed | [windows_triangle_gradients.md](windows_triangle_gradients.md) |
 | `0x0064EC00` | `0x0024EC00` | 59 | `Gfx_BuildCorrectedTriangleEdge` | game | reconstructed | [windows_ordinary_edges.md](windows_ordinary_edges.md) |
 | `0x0064EC40` | `0x0024EC40` | 59 | `Gfx_BuildRawTriangleEdge` | game | reconstructed | [windows_ordinary_edges.md](windows_ordinary_edges.md) |
 | `0x0064EFA0` | `0x0024EFA0` | 282 | `Gfx_BuildClippedCorrectedTriangleEdge` | game | reconstructed | [windows_edge_wrappers.md](windows_edge_wrappers.md) |
