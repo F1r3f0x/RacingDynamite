@@ -227,7 +227,31 @@ extern GfxSpriteGetStateProc volatile g_spriteGetState; /* VA 0x0050EBEC */
 int Gfx_SpriteGetStateNative(GfxSpriteState *state); /* VA 0x00457110 */
 typedef int (*GfxSpriteSetStateProc)(const GfxSpriteState *state);
 extern GfxSpriteSetStateProc volatile g_spriteSetState; /* VA 0x0050EBE8 */
-int Gfx_SpriteSetStateNative(const GfxSpriteState *state); /* VA 0x00457170 */
+typedef int (*GfxSpriteUninstalled2Proc)(unsigned int arg0, unsigned int arg1);
+typedef int (*GfxSpriteUninstalled1Proc)(unsigned int arg0);
+extern GfxSpriteUninstalled2Proc volatile g_spriteUninstalled56D60; /* VA 0x0050EBC4 */
+extern GfxSpriteUninstalled1Proc volatile g_spriteUninstalled56D80; /* VA 0x0050EBC8 */
+extern GfxSpriteUninstalled2Proc volatile g_spriteUninstalled56D90; /* VA 0x0050EBCC */
+extern GfxSpriteUninstalled1Proc volatile g_spriteUninstalled56DB0; /* VA 0x0050EBD0 */
+
+int Gfx_CloseDispatch(void); /* VA 0x00456CA0 */
+int Gfx_OptionDispatch(unsigned int option); /* VA 0x00456CB0 */
+int Gfx_ConfigureDispatch(unsigned char *pixels, int stride, int width, int height, unsigned int option); /* VA 0x00456CC0 */
+int Gfx_SetClipDispatch(int left, int top, int right, int bottom); /* VA 0x00456CF0 */
+int Gfx_DrawListDispatch(const unsigned int *list); /* VA 0x00456D10 */
+int Gfx_DrawDispatch(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform); /* VA 0x00456D20 */
+GfxSpriteHandle *Gfx_HandleOpDispatch(const GfxSpriteDescriptor *descriptor, GfxSpriteHandle *handle); /* VA 0x00456D40 */
+int Gfx_UninstalledDispatch_56D60(unsigned int arg0, unsigned int arg1); /* VA 0x00456D60 */
+int Gfx_UninstalledDispatch_56D80(unsigned int arg0); /* VA 0x00456D80 */
+int Gfx_UninstalledDispatch_56D90(unsigned int arg0, unsigned int arg1); /* VA 0x00456D90 */
+int Gfx_UninstalledDispatch_56DB0(unsigned int arg0); /* VA 0x00456DB0 */
+int Gfx_ImageOpDispatch(const GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x00456DC0 */
+int Gfx_CreateDescriptorDispatch(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x00456DE0 */
+int Gfx_FreeDescriptorDispatch(GfxSpriteDescriptor *descriptor); /* VA 0x00456E00 */
+int Gfx_CopyDescriptorDispatch(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x00456E10 */
+int Gfx_ReservedDispatch(unsigned int option); /* VA 0x00456E30 */
+int Gfx_GetStateDispatch(GfxSpriteState *state); /* VA 0x00456E40 */
+int Gfx_SetStateDispatch(const GfxSpriteState *state); /* VA 0x00456E50 */
 
 /* Separately owned lazy work buffers. Consumers use a two-dword header and
  * twelve-byte stepping, but a complete layout/capacity is not established. */

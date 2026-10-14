@@ -29,7 +29,7 @@ int Gfx_SelectBackend(int backend) {
     return 1;
 }
 
-/* Windows sprite dispatch words; four intervening words are not installed. */
+/* Windows sprite dispatch words; 20 dwords from 0x0050EBA0 to 0x0050EBF0. */
 GfxSpriteOpenProc volatile g_spriteOpen = 0; /* VA 0x0050EBA0 */
 GfxSpriteShutdownProc volatile g_spriteShutdown = 0; /* VA 0x0050EBA4 */
 GfxSpriteCloseProc volatile g_spriteClose = 0; /* VA 0x0050EBA8 */
@@ -39,13 +39,161 @@ GfxSpriteSetClipProc volatile g_spriteSetClip = 0; /* VA 0x0050EBB4 */
 GfxSpriteDrawListProc volatile g_spriteDrawList = 0; /* VA 0x0050EBB8 */
 GfxSpriteDrawProc volatile g_spriteDraw = 0; /* VA 0x0050EBBC */
 GfxSpriteHandleOpProc volatile g_spriteHandleOp = 0; /* VA 0x0050EBC0 */
-GfxSpriteImageOpProc volatile g_spriteImageOp = 0; /* VA 0x0050EBD8 */
+GfxSpriteUninstalled2Proc volatile g_spriteUninstalled56D60 = 0; /* VA 0x0050EBC4 */
+GfxSpriteUninstalled1Proc volatile g_spriteUninstalled56D80 = 0; /* VA 0x0050EBC8 */
+GfxSpriteUninstalled2Proc volatile g_spriteUninstalled56D90 = 0; /* VA 0x0050EBCC */
+GfxSpriteUninstalled1Proc volatile g_spriteUninstalled56DB0 = 0; /* VA 0x0050EBD0 */
 GfxSpriteCreateDescriptorProc volatile g_spriteCreateDescriptor = 0; /* VA 0x0050EBD4 */
+GfxSpriteImageOpProc volatile g_spriteImageOp = 0; /* VA 0x0050EBD8 */
 GfxSpriteFreeDescriptorProc volatile g_spriteFreeDescriptor = 0; /* VA 0x0050EBDC */
 GfxSpriteCopyDescriptorProc volatile g_spriteCopyDescriptor = 0; /* VA 0x0050EBE0 */
 GfxSpriteReservedProc volatile g_spriteReserved = 0; /* VA 0x0050EBE4 */
-GfxSpriteGetStateProc volatile g_spriteGetState = 0; /* VA 0x0050EBEC */
 GfxSpriteSetStateProc volatile g_spriteSetState = 0; /* VA 0x0050EBE8 */
+GfxSpriteGetStateProc volatile g_spriteGetState = 0; /* VA 0x0050EBEC */
+
+/*
+ * @original Gfx_CloseDispatch (IGN_WIN.EXE @ 0x00456CA0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_CloseDispatch(void) {
+    return g_spriteClose();
+}
+
+/*
+ * @original Gfx_OptionDispatch (IGN_WIN.EXE @ 0x00456CB0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_OptionDispatch(unsigned int option) {
+    return g_spriteOption(option);
+}
+
+/*
+ * @original Gfx_ConfigureDispatch (IGN_WIN.EXE @ 0x00456CC0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_ConfigureDispatch(unsigned char *pixels, int stride, int width, int height, unsigned int option) {
+    return g_spriteConfigure(pixels, stride, width, height, option);
+}
+
+/*
+ * @original Gfx_SetClipDispatch (IGN_WIN.EXE @ 0x00456CF0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SetClipDispatch(int left, int top, int right, int bottom) {
+    return g_spriteSetClip(left, top, right, bottom);
+}
+
+/*
+ * @original Gfx_DrawListDispatch (IGN_WIN.EXE @ 0x00456D10, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_DrawListDispatch(const unsigned int *list) {
+    return g_spriteDrawList(list);
+}
+
+/*
+ * @original Gfx_DrawDispatch (IGN_WIN.EXE @ 0x00456D20, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_DrawDispatch(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform) {
+    return g_spriteDraw(handle, position, transform);
+}
+
+/*
+ * @original Gfx_HandleOpDispatch (IGN_WIN.EXE @ 0x00456D40, geputget.c)
+ * @fidelity EXACT
+ */
+GfxSpriteHandle *Gfx_HandleOpDispatch(const GfxSpriteDescriptor *descriptor, GfxSpriteHandle *handle) {
+    return g_spriteHandleOp(descriptor, handle);
+}
+
+/*
+ * @original Gfx_UninstalledDispatch_56D60 (IGN_WIN.EXE @ 0x00456D60, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_UninstalledDispatch_56D60(unsigned int arg0, unsigned int arg1) {
+    return g_spriteUninstalled56D60(arg0, arg1);
+}
+
+/*
+ * @original Gfx_UninstalledDispatch_56D80 (IGN_WIN.EXE @ 0x00456D80, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_UninstalledDispatch_56D80(unsigned int arg0) {
+    return g_spriteUninstalled56D80(arg0);
+}
+
+/*
+ * @original Gfx_UninstalledDispatch_56D90 (IGN_WIN.EXE @ 0x00456D90, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_UninstalledDispatch_56D90(unsigned int arg0, unsigned int arg1) {
+    return g_spriteUninstalled56D90(arg0, arg1);
+}
+
+/*
+ * @original Gfx_UninstalledDispatch_56DB0 (IGN_WIN.EXE @ 0x00456DB0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_UninstalledDispatch_56DB0(unsigned int arg0) {
+    return g_spriteUninstalled56DB0(arg0);
+}
+
+/*
+ * @original Gfx_ImageOpDispatch (IGN_WIN.EXE @ 0x00456DC0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_ImageOpDispatch(const GfxSpriteDescriptor *descriptor, int image_id) {
+    return g_spriteImageOp(descriptor, image_id);
+}
+
+/*
+ * @original Gfx_CreateDescriptorDispatch (IGN_WIN.EXE @ 0x00456DE0, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_CreateDescriptorDispatch(GfxSpriteDescriptor *descriptor, int image_id) {
+    return g_spriteCreateDescriptor(descriptor, image_id);
+}
+
+/*
+ * @original Gfx_FreeDescriptorDispatch (IGN_WIN.EXE @ 0x00456E00, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_FreeDescriptorDispatch(GfxSpriteDescriptor *descriptor) {
+    return g_spriteFreeDescriptor(descriptor);
+}
+
+/*
+ * @original Gfx_CopyDescriptorDispatch (IGN_WIN.EXE @ 0x00456E10, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_CopyDescriptorDispatch(GfxSpriteDescriptor *descriptor, int image_id) {
+    return g_spriteCopyDescriptor(descriptor, image_id);
+}
+
+/*
+ * @original Gfx_ReservedDispatch (IGN_WIN.EXE @ 0x00456E30, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_ReservedDispatch(unsigned int option) {
+    return g_spriteReserved(option);
+}
+
+/*
+ * @original Gfx_GetStateDispatch (IGN_WIN.EXE @ 0x00456E40, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_GetStateDispatch(GfxSpriteState *state) {
+    return g_spriteGetState(state);
+}
+
+/*
+ * @original Gfx_SetStateDispatch (IGN_WIN.EXE @ 0x00456E50, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SetStateDispatch(const GfxSpriteState *state) {
+    return g_spriteSetState(state);
+}
 
 /*
  * @original Gfx_InstallSpriteDispatch (IGN_WIN.EXE @ 0x00456E60, geputget.c)

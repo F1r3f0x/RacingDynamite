@@ -226,6 +226,14 @@ def verify():
         'Gfx_SpriteCreateDescriptorNative', 'Gfx_SpriteFreeDescriptorNative',
         'Gfx_SpriteCopyDescriptorNative', 'Gfx_SpriteReservedNative',
         'Gfx_CreateSpriteDescriptor', 'Gfx_FreeSpriteDescriptor',
+        'Gfx_CloseDispatch', 'Gfx_OptionDispatch', 'Gfx_ConfigureDispatch',
+        'Gfx_SetClipDispatch', 'Gfx_DrawListDispatch', 'Gfx_DrawDispatch',
+        'Gfx_HandleOpDispatch', 'Gfx_UninstalledDispatch_56D60',
+        'Gfx_UninstalledDispatch_56D80', 'Gfx_UninstalledDispatch_56D90',
+        'Gfx_UninstalledDispatch_56DB0', 'Gfx_ImageOpDispatch',
+        'Gfx_CreateDescriptorDispatch', 'Gfx_FreeDescriptorDispatch',
+        'Gfx_CopyDescriptorDispatch', 'Gfx_ReservedDispatch',
+        'Gfx_GetStateDispatch', 'Gfx_SetStateDispatch',
         'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
         'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative',
         'Gfx_SurfaceClearNative', 'Gfx_ClearSurfaceNative',
@@ -959,3 +967,6 @@ if __name__ == '__main__':
 
     from verify_sprite_descriptors import verify_sprite_descriptors
     verify_sprite_descriptors(record=True)
+
+    from verify_sprite_dispatch import verify_sprite_dispatch
+    verify_sprite_dispatch(record=True)

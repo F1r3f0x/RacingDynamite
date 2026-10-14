@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:b676e3707c34b9495684671cb31daa059c0ce909a7bc94c10bfed5022b28ce90 -->
+<!-- snapshot:bf2496f08668d4b7afd58d0bb35e0b9bd08686b6a1f582ea687d5368b6ecbee5 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -407,24 +407,24 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00456C50` | `0x00056C50` | 6 | `Gfx_SurfaceRestoreDispatch` | game | analyzed | [windows_gfx_surface_dispatch.md](windows_gfx_surface_dispatch.md) |
 | `0x00456C60` | `0x00056C60` | 35 | `Gfx_SurfaceConfigureSurfaceDispatch` | game | reconstructed | [windows_surface_constants.md](windows_surface_constants.md) |
 | `0x00456C90` | `0x00056C90` | 15 | `Gfx_PresentSurfaceNative` | game | reconstructed | [windows_surface_present.md](windows_surface_present.md) |
-| `0x00456CA0` | `0x00056CA0` | 6 | `Gfx_CloseDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456CB0` | `0x00056CB0` | 15 | `Gfx_OptionDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456CC0` | `0x00056CC0` | 35 | `Gfx_ConfigureDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456CF0` | `0x00056CF0` | 30 | `Gfx_SetClipDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456D10` | `0x00056D10` | 15 | `Gfx_DrawListDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456D20` | `0x00056D20` | 25 | `Gfx_DrawDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456D40` | `0x00056D40` | 20 | `Gfx_HandleOpDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456D60` | `0x00056D60` | 20 | `Gfx_UninstalledDispatch_56D60` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456D80` | `0x00056D80` | 15 | `Gfx_UninstalledDispatch_56D80` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456D90` | `0x00056D90` | 20 | `Gfx_UninstalledDispatch_56D90` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456DB0` | `0x00056DB0` | 15 | `Gfx_UninstalledDispatch_56DB0` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456DC0` | `0x00056DC0` | 20 | `Gfx_ImageOpDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456DE0` | `0x00056DE0` | 20 | `Gfx_CreateDescriptorDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456E00` | `0x00056E00` | 15 | `Gfx_FreeDescriptorDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456E10` | `0x00056E10` | 20 | `Gfx_CopyDescriptorDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456E30` | `0x00056E30` | 15 | `Gfx_ReservedDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456E40` | `0x00056E40` | 15 | `Gfx_GetStateDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x00456E50` | `0x00056E50` | 15 | `Gfx_SetStateDispatch` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
+| `0x00456CA0` | `0x00056CA0` | 6 | `Gfx_CloseDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456CB0` | `0x00056CB0` | 15 | `Gfx_OptionDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456CC0` | `0x00056CC0` | 35 | `Gfx_ConfigureDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456CF0` | `0x00056CF0` | 30 | `Gfx_SetClipDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456D10` | `0x00056D10` | 15 | `Gfx_DrawListDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456D20` | `0x00056D20` | 25 | `Gfx_DrawDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456D40` | `0x00056D40` | 20 | `Gfx_HandleOpDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456D60` | `0x00056D60` | 20 | `Gfx_UninstalledDispatch_56D60` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456D80` | `0x00056D80` | 15 | `Gfx_UninstalledDispatch_56D80` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456D90` | `0x00056D90` | 20 | `Gfx_UninstalledDispatch_56D90` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456DB0` | `0x00056DB0` | 15 | `Gfx_UninstalledDispatch_56DB0` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456DC0` | `0x00056DC0` | 20 | `Gfx_ImageOpDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456DE0` | `0x00056DE0` | 20 | `Gfx_CreateDescriptorDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456E00` | `0x00056E00` | 15 | `Gfx_FreeDescriptorDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456E10` | `0x00056E10` | 20 | `Gfx_CopyDescriptorDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456E30` | `0x00056E30` | 15 | `Gfx_ReservedDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456E40` | `0x00056E40` | 15 | `Gfx_GetStateDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
+| `0x00456E50` | `0x00056E50` | 15 | `Gfx_SetStateDispatch` | game | reconstructed | [windows_sprite_dispatch.md](windows_sprite_dispatch.md) |
 | `0x00456E60` | `0x00056E60` | 181 | `Gfx_InstallSpriteDispatch` | game | reconstructed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
 | `0x00456F20` | `0x00056F20` | 6 | `Gfx_SpriteOpenNative` | game | reconstructed | [windows_graphics_entry.md](windows_graphics_entry.md) |
 | `0x00456F30` | `0x00056F30` | 6 | `Gfx_SpriteShutdownNative` | game | reconstructed | [windows_graphics_entry.md](windows_graphics_entry.md) |
