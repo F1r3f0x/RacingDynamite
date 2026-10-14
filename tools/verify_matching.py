@@ -240,6 +240,7 @@ def verify():
         'Gfx_SurfacePresentNative', 'Gfx_PresentSurfaceNative',
         'Gfx_SurfaceSetPaletteNative', 'Gfx_SetPaletteNative',
         'Gfx_SurfaceBlitNative', 'Gfx_SurfaceBlitDispatch',
+        'Gfx_SurfaceConfigureDispatch', 'Gfx_SurfaceLockDispatch', 'Gfx_SurfaceUnlockDispatch', 'Gfx_SurfaceRestoreDispatch',
         'Gfx_SurfaceCopyPixelsNative', 'Gfx_SurfaceCopyPixelsDispatch',
         'Gfx_InitGraphicsPairStorage', 'Gfx_InitPairStorageControl', 'Gfx_InitSineTable',
         'Gfx_EnablePrimitiveControl', 'Gfx_InitSecondaryDefaultWords',
@@ -970,3 +971,6 @@ if __name__ == '__main__':
 
     from verify_sprite_dispatch import verify_sprite_dispatch
     verify_sprite_dispatch(record=True)
+
+    from verify_surface_dispatch import verify_surface_dispatch
+    verify_surface_dispatch(record=True)

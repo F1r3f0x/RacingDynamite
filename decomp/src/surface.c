@@ -1007,3 +1007,32 @@ int Gfx_SurfaceConfigureSurfaceDispatch(unsigned int option0, unsigned int optio
         unsigned int option2, unsigned int option3, unsigned int option4) {
     return g_surfaceConfigureSurface(option0, option1, option2, option3, option4);
 }
+
+/* @original Gfx_SurfaceConfigureDispatch (IGN_WIN.EXE @ 0x00456B10, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceConfigureDispatch(unsigned int option0, unsigned int option1,
+        unsigned int option2, unsigned int option3) {
+    return g_surfaceConfigure(option0, option1, option2, option3);
+}
+
+/* @original Gfx_SurfaceLockDispatch (IGN_WIN.EXE @ 0x00456C10, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceLockDispatch(GfxSurfaceRecord *surface, int mode) {
+    return g_surfaceLock(surface, mode);
+}
+
+/* @original Gfx_SurfaceUnlockDispatch (IGN_WIN.EXE @ 0x00456C30, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceUnlockDispatch(GfxSurfaceRecord *surface) {
+    return g_surfaceUnlock(surface);
+}
+
+/* @original Gfx_SurfaceRestoreDispatch (IGN_WIN.EXE @ 0x00456C50, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_SurfaceRestoreDispatch(void) {
+    return g_surfaceRestore();
+}

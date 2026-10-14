@@ -29,6 +29,7 @@ int Gfx_InitSurfaceRecords(void); /* VA 0x00456A40; EAX=1 */
 typedef int (*GfxSurfaceConfigureProc)(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3);
 extern GfxSurfaceConfigureProc volatile g_surfaceConfigure; /* VA 0x0050EB68 */
 int Gfx_SurfaceConfigureNative(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3); /* VA 0x0045B730 */
+int Gfx_SurfaceConfigureDispatch(unsigned int option0, unsigned int option1, unsigned int option2, unsigned int option3); /* VA 0x00456B10 */
 typedef int (*GfxSurfaceOpenProc)(void);
 extern GfxSurfaceOpenProc volatile g_surfaceOpen; /* VA 0x0050EB6C */
 int Gfx_SurfaceOpenNative(void); /* VA 0x0045B740 */
@@ -65,9 +66,11 @@ int Gfx_SurfaceReservedNative(void); /* VA 0x0045C520; returns2 without effects 
 typedef int (*GfxSurfaceLockProc)(GfxSurfaceRecord *surface, int mode);
 extern GfxSurfaceLockProc volatile g_surfaceLock; /* VA 0x0050EB90 */
 int Gfx_SurfaceLockNative(GfxSurfaceRecord *surface, int mode); /* VA 0x0045C530 */
+int Gfx_SurfaceLockDispatch(GfxSurfaceRecord *surface, int mode); /* VA 0x00456C10 */
 typedef int (*GfxSurfaceUnlockProc)(GfxSurfaceRecord *surface);
 extern GfxSurfaceUnlockProc volatile g_surfaceUnlock; /* VA 0x0050EB94 */
 int Gfx_SurfaceUnlockNative(GfxSurfaceRecord *surface); /* VA 0x0045C680 */
+int Gfx_SurfaceUnlockDispatch(GfxSurfaceRecord *surface); /* VA 0x00456C30 */
 typedef int (*GfxSurfaceSetPaletteProc)(const unsigned char *rgb);
 extern GfxSurfaceSetPaletteProc volatile g_surfaceSetPalette; /* VA 0x0050EB98 */
 int Gfx_SurfaceSetPaletteNative(const unsigned char *rgb); /* VA 0x0045C6D0 */
@@ -75,6 +78,7 @@ int Gfx_SetPaletteNative(const unsigned char *rgb); /* VA 0x00456C40, installed-
 typedef int (*GfxSurfaceRestoreProc)(void);
 extern GfxSurfaceRestoreProc volatile g_surfaceRestore; /* VA 0x0050EB9C */
 int Gfx_SurfaceRestoreNative(void); /* VA 0x0045C730 */
+int Gfx_SurfaceRestoreDispatch(void); /* VA 0x00456C50 */
 
 int Gfx_InstallSurfaceDispatch(void); /* VA 0x0045B690 */
 
