@@ -14,6 +14,11 @@ extern volatile unsigned int g_triangleSpanTextureWord; /* VA 0x004BAD68 */
 extern volatile unsigned int g_triangleSpanLookupWord; /* VA 0x004BAD6C */
 extern volatile unsigned int g_triangleSpanLeftSampleStorage; /* VA 0x004BAD70 */
 
+extern volatile unsigned int g_triangleSpanWorkspaceAByteStep; /* VA 0x004BAEFC */
+extern volatile unsigned int g_triangleSpanWorkspaceAPackedStep; /* VA 0x004BAF00 */
+extern volatile unsigned int g_triangleSpanWorkspaceATextureWord; /* VA 0x004BAF04 */
+extern volatile unsigned int g_triangleSpanWorkspaceALeftSample; /* VA 0x004BAF0C */
+
 /* Distances are verified; intervening words are retained, not interpreted here. */
 typedef struct GfxTriangleEdgeStepState {
     unsigned int initial_texture_u; /* VA 0x004BAEA4 */
@@ -273,5 +278,21 @@ void Gfx_SpriteDrawListCallback(unsigned int header);
 void Gfx_SubmitDrawListTriangleRequest(void);
 int Gfx_SpriteDrawListNative(const unsigned int *list);
 void Gfx_RasterizeWorkspaceATriangle(const GfxTexturedTrianglePacket *packet);
+
+void Gfx_SetWorkspaceATriangleSpanCore(unsigned int gradient_v, unsigned int gradient_u,
+    unsigned int texture_word);
+void Gfx_SetWorkspaceATriangleSpanState(unsigned int gradient_v, unsigned int gradient_u,
+    unsigned int texture_word);
+void Gfx_DrawWorkspaceATriangleSpanCore(unsigned char *destination, int count,
+    unsigned int packed_uv, unsigned int integer_u,
+    const GfxTriangleSpanEdgeRecord *left);
+void Gfx_DrawWorkspaceATriangleSpan(unsigned char *destination, int count,
+    unsigned int packed_uv, unsigned int integer_u,
+    const GfxTriangleSpanEdgeRecord *left);
+void Gfx_DrawWorkspaceAClippedTriangleSpanCore(unsigned char *destination, int count,
+    unsigned int packed_uv, unsigned int integer_u);
+void Gfx_DrawWorkspaceAClippedTriangleSpan(unsigned char *destination, int count,
+    unsigned int packed_uv, unsigned int integer_u);
+int Gfx_ComputeWorkspaceATriangleSlope(int x0, int y0, int x1, int y1);
 
 #endif

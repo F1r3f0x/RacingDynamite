@@ -60,7 +60,13 @@ RENDERER_EXPORTS += ['Gfx_RasterizeTexturedTriangle','Gfx_RasterizeClippedTriang
     'Gfx_SubmitSpriteRequest','Gfx_CopySpriteDescriptor','g_spritePreparedStorage','g_spriteRasterPacket','g_spriteRenderLookup',
     'g_activeSpriteRequest','g_nativeSpriteDefault','g_nativeImageControl',
     'Gfx_SpriteDrawListCallback','Gfx_SubmitDrawListTriangleRequest','Gfx_SpriteDrawListNative',
-    'g_triangleDrawListStride','g_triangleWorkspacePacket','Gfx_RasterizeWorkspaceATriangle']
+    'g_triangleDrawListStride','g_triangleWorkspacePacket','Gfx_RasterizeWorkspaceATriangle',
+    'Gfx_SetWorkspaceATriangleSpanCore','Gfx_SetWorkspaceATriangleSpanState',
+    'Gfx_DrawWorkspaceATriangleSpanCore','Gfx_DrawWorkspaceATriangleSpan',
+    'Gfx_DrawWorkspaceAClippedTriangleSpanCore','Gfx_DrawWorkspaceAClippedTriangleSpan',
+    'Gfx_ComputeWorkspaceATriangleSlope',
+    'g_triangleSpanWorkspaceAByteStep','g_triangleSpanWorkspaceAPackedStep',
+    'g_triangleSpanWorkspaceATextureWord','g_triangleSpanWorkspaceALeftSample']
 
 
 def validate_renderer_calls(pe):
@@ -83,7 +89,9 @@ def validate_renderer_calls(pe):
         'Gfx_PrepareTransformedSprite':1,'Gfx_RasterizeSpritePacket':1,
         'Gfx_CopySpriteDescriptor':1,
         'Gfx_SpriteDrawListCallback':1,'Gfx_SubmitDrawListTriangleRequest':1,
-        'Gfx_RasterizeWorkspaceATriangle':1}.items()}
+        'Gfx_RasterizeWorkspaceATriangle':1,
+        'Gfx_SetWorkspaceATriangleSpanCore':1,'Gfx_DrawWorkspaceATriangleSpanCore':1,
+        'Gfx_DrawWorkspaceAClippedTriangleSpanCore':1}.items()}
     assert calls==expected,(calls,expected)
     return calls
 

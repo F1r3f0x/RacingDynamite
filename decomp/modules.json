@@ -239,7 +239,11 @@
         "Gfx_SubmitSpriteRequest",
         "Gfx_SpriteDrawListCallback",
         "Gfx_SubmitDrawListTriangleRequest",
-        "Gfx_SpriteDrawListNative"
+        "Gfx_SpriteDrawListNative",
+        "Gfx_SetWorkspaceATriangleSpan",
+        "Gfx_DrawWorkspaceATriangleSpan",
+        "Gfx_DrawWorkspaceAClippedTriangleSpan",
+        "Gfx_ComputeWorkspaceATriangleSlope"
       ],
       "responsibility": "Verified software texture compositing spans; triangle and sprite rasterization dependencies reconstructed incrementally",
       "state": [
@@ -259,7 +263,8 @@
         "verified ordinary/clipped32byte mutable edge packets VA51A9A0/51AA00",
         "verified triangle texture pointer51A9C4, frame cursor51A9D0, presort signed Xmin51A9D4/Xmax51A9F8",
         "Verified sprite blit source/width/height VA004BAD28..004BAD30 and transformed input packet VA004BAD34..004BAD47; owned by renderer.c",
-        "Verified 4-byte draw list stride VA004BA704 and 56-byte triangle workspace packet VA004BA718..004BA74C; owned by renderer.c"
+        "Verified 4-byte draw list stride VA004BA704 and 56-byte triangle workspace packet VA004BA718..004BA74C; owned by renderer.c",
+        "Verified Workspace A triangle span state VA004BAEFC..004BAF0C: byte step, packed step, texture word, left sample; owned by renderer.c"
       ],
       "dependencies": [
         "caller-owned mapped texture, compositing table and framebuffer storage; initialization remains external and unverified",

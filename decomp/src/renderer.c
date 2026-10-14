@@ -2246,3 +2246,141 @@ int Gfx_SpriteDrawListNative(const unsigned int *list)
     }
     return 1;
 }
+
+volatile unsigned int g_triangleSpanWorkspaceAByteStep = 0;
+volatile unsigned int g_triangleSpanWorkspaceAPackedStep = 0;
+volatile unsigned int g_triangleSpanWorkspaceATextureWord = 0;
+volatile unsigned int g_triangleSpanWorkspaceALeftSample = 0;
+
+/* @original Gfx_SetWorkspaceATriangleSpanCore (IGN_WIN.EXE @ 0x00468030, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_SetWorkspaceATriangleSpanCore(unsigned int gradient_v, unsigned int gradient_u,
+        unsigned int texture_word) {
+    unsigned int negative_v;
+    unsigned int negative_u;
+    unsigned int rotated_u;
+    negative_v = 0u - gradient_v;
+    negative_u = 0u - gradient_u;
+    negative_v >>= 8;
+    g_triangleSpanWorkspaceATextureWord = texture_word;
+    rotated_u = (negative_u >> 16) | (negative_u << 16);
+    GFX_SPAN_BYTE(&g_triangleSpanWorkspaceAByteStep) = (unsigned char)rotated_u;
+    g_triangleSpanWorkspaceAPackedStep = (rotated_u & 0xffff0000u) | (negative_v & 0xffffu);
+}
+
+/* @original Gfx_SetWorkspaceATriangleSpanState (IGN_WIN.EXE @ 0x0045D7E0, unknown original source)
+ * @fidelity EXACT
+ */
+void Gfx_SetWorkspaceATriangleSpanState(unsigned int gradient_v, unsigned int gradient_u,
+        unsigned int texture_word) {
+    Gfx_SetWorkspaceATriangleSpanCore(gradient_v, gradient_u, texture_word);
+}
+
+/* @original Gfx_DrawWorkspaceATriangleSpanCore (IGN_WIN.EXE @ 0x00468050, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_DrawWorkspaceATriangleSpanCore(unsigned char *destination, int count,
+        unsigned int packed_uv, unsigned int integer_u,
+        const GfxTriangleSpanEdgeRecord *left) {
+    unsigned int texture;
+    unsigned int byte_step;
+    unsigned int packed_step;
+    unsigned int remaining;
+    unsigned int previous_uv;
+    unsigned int carry;
+    unsigned int address;
+    unsigned char source_byte;
+    texture = g_triangleSpanWorkspaceATextureWord;
+    texture = (texture & 0xffffff00u) | GFX_SPAN_BYTE((uintptr_t)left + 4u);
+    texture = (texture & 0xffff00ffu) | ((unsigned int)GFX_SPAN_BYTE(left) << 8);
+    source_byte = GFX_SPAN_BYTE(texture);
+    GFX_SPAN_BYTE(&g_triangleSpanWorkspaceALeftSample) = source_byte;
+    texture = (texture & 0xffff0000u) | (integer_u & 0xffffu);
+    byte_step = GFX_SPAN_BYTE(&g_triangleSpanWorkspaceAByteStep);
+    packed_step = g_triangleSpanWorkspaceAPackedStep;
+    remaining = (unsigned int)count - 1u;
+    while ((remaining & 0x80000000u) == 0u) {
+        previous_uv = packed_uv;
+        packed_uv += packed_step;
+        carry = packed_uv < previous_uv;
+        texture = (texture & 0xffff00ffu) | (packed_uv & 0xff00u);
+        texture = (texture & 0xffffff00u) | ((texture + byte_step + carry) & 0xffu);
+        address = (unsigned int)(uintptr_t)destination + remaining;
+        source_byte = GFX_SPAN_BYTE(texture);
+        GFX_SPAN_BYTE(address) = source_byte;
+        remaining--;
+    }
+    if (remaining == 0xffffffffu) {
+        source_byte = GFX_SPAN_BYTE(&g_triangleSpanWorkspaceALeftSample);
+        address = (unsigned int)(uintptr_t)destination + remaining;
+        GFX_SPAN_BYTE(address) = source_byte;
+    }
+}
+
+/* @original Gfx_DrawWorkspaceATriangleSpan (IGN_WIN.EXE @ 0x0045D800, unknown original source)
+ * @fidelity EXACT
+ */
+void Gfx_DrawWorkspaceATriangleSpan(unsigned char *destination, int count,
+        unsigned int packed_uv, unsigned int integer_u,
+        const GfxTriangleSpanEdgeRecord *left) {
+    Gfx_DrawWorkspaceATriangleSpanCore(destination, count, packed_uv, integer_u, left);
+}
+
+/* @original Gfx_DrawWorkspaceAClippedTriangleSpanCore (IGN_WIN.EXE @ 0x004680C6, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_DrawWorkspaceAClippedTriangleSpanCore(unsigned char *destination, int count,
+        unsigned int packed_uv, unsigned int integer_u) {
+    unsigned int texture;
+    unsigned int byte_step;
+    unsigned int packed_step;
+    unsigned int remaining;
+    unsigned int previous_uv;
+    unsigned int carry;
+    unsigned int address;
+    unsigned char source_byte;
+    texture = (g_triangleSpanWorkspaceATextureWord & 0xffff0000u) | (integer_u & 0xffffu);
+    byte_step = GFX_SPAN_BYTE(&g_triangleSpanWorkspaceAByteStep);
+    packed_step = g_triangleSpanWorkspaceAPackedStep;
+    remaining = (unsigned int)count - 1u;
+    while ((remaining & 0x80000000u) == 0u) {
+        previous_uv = packed_uv;
+        packed_uv += packed_step;
+        carry = packed_uv < previous_uv;
+        texture = (texture & 0xffff00ffu) | (packed_uv & 0xff00u);
+        texture = (texture & 0xffffff00u) | ((texture + byte_step + carry) & 0xffu);
+        address = (unsigned int)(uintptr_t)destination + remaining;
+        source_byte = GFX_SPAN_BYTE(texture);
+        GFX_SPAN_BYTE(address) = source_byte;
+        remaining--;
+    }
+}
+
+/* @original Gfx_DrawWorkspaceAClippedTriangleSpan (IGN_WIN.EXE @ 0x0045D820, unknown original source)
+ * @fidelity EXACT
+ */
+void Gfx_DrawWorkspaceAClippedTriangleSpan(unsigned char *destination, int count,
+        unsigned int packed_uv, unsigned int integer_u) {
+    Gfx_DrawWorkspaceAClippedTriangleSpanCore(destination, count, packed_uv, integer_u);
+}
+
+/* @original Gfx_ComputeWorkspaceATriangleSlope (IGN_WIN.EXE @ 0x0045E5D0, unknown original source)
+ * @fidelity EXACT
+ */
+int Gfx_ComputeWorkspaceATriangleSlope(int x0, int y0, int x1, int y1) {
+    unsigned int numerator_word;
+    unsigned int denominator_word;
+    if (y0 == y1) {
+        if (x0 > x1) {
+            return (int)0x80010000u;
+        }
+        return 0x7fff0000;
+    }
+    numerator_word = ((unsigned int)x0 - (unsigned int)x1) << 8;
+    denominator_word = (unsigned int)y0 - (unsigned int)y1;
+    return (int)numerator_word / (int)denominator_word;
+}
