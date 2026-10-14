@@ -1043,6 +1043,48 @@ void Gfx_AssignSpritePackingStorage(GfxSpriteDescriptor *descriptor) {
 }
 
 /*
+ * @original Gfx_CreateSpriteDescriptor (IGN_WIN.EXE @ 0x00461210, geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_CreateSpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id) {
+    const volatile GfxSpriteDescriptor *source;
+    int word;
+    int size;
+    void *pixels;
+
+    source = &g_nativeSpriteDefault;
+    if (image_id > 0 && image_id < g_nativeImageCapacity) {
+        if (g_nativeImageRecords[image_id] != 0) {
+            source = g_nativeImageRecords[image_id];
+        }
+    }
+
+    for (word = 0; word < 16; ++word) {
+        descriptor->words[word] = source->words[word];
+    }
+
+    Gfx_CopyAllocatedString((const char *)source->words[0], (char **)descriptor);
+    descriptor->words[6] = descriptor->words[0];
+
+    size = (int)descriptor->words[2] * (int)descriptor->words[1];
+    pixels = Gfx_AllocBytes(size);
+    descriptor->words[4] = (uint32_t)(size_t)pixels;
+    descriptor->words[5] = descriptor->words[1];
+
+    Gfx_CopySpriteDescriptorPixels((const GfxSpriteDescriptor *)source, descriptor);
+    descriptor->words[7] = descriptor->words[4];
+}
+
+/*
+ * @original Gfx_FreeSpriteDescriptor (IGN_WIN.EXE @ 0x004614B0, geputget.c)
+ * @fidelity EXACT
+ */
+void Gfx_FreeSpriteDescriptor(GfxSpriteDescriptor *descriptor) {
+    Gfx_FreeBytes((void *)descriptor->words[6]);
+    Gfx_FreeBytes((void *)descriptor->words[7]);
+}
+
+/*
  * @original Gfx_CopySpriteDescriptor (IGN_WIN.EXE @ 0x004612E0, geputget.c)
  * @fidelity EXACT
  */
@@ -1863,6 +1905,42 @@ int Gfx_SpriteOpenNative(void) {
  */
 int Gfx_SpriteShutdownNative(void) {
     return 1;
+}
+
+/*
+ * @original Gfx_SpriteCreateDescriptorNative (IGN_WIN.EXE @ 0x0045C920, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteCreateDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id) {
+    Gfx_CreateSpriteDescriptor(descriptor, image_id);
+    return 1;
+}
+
+/*
+ * @original Gfx_SpriteFreeDescriptorNative (IGN_WIN.EXE @ 0x0045C940, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteFreeDescriptorNative(GfxSpriteDescriptor *descriptor) {
+    Gfx_FreeSpriteDescriptor(descriptor);
+    return 1;
+}
+
+/*
+ * @original Gfx_SpriteCopyDescriptorNative (IGN_WIN.EXE @ 0x0045C960, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteCopyDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id) {
+    Gfx_CopySpriteDescriptor(descriptor, image_id);
+    return 1;
+}
+
+/*
+ * @original Gfx_SpriteReservedNative (IGN_WIN.EXE @ 0x00461A80, geputget.c)
+ * @fidelity EXACT
+ */
+int Gfx_SpriteReservedNative(unsigned int option) {
+    (void)option;
+    return 0;
 }
 
 /*

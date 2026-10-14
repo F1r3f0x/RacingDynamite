@@ -223,6 +223,9 @@ def verify():
         'Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_SpriteOpenNative', 'Gfx_SpriteShutdownNative',
         'Gfx_SpriteCloseNative', 'Gfx_SpriteOptionNative', 'Gfx_SpriteConfigureNative',
         'Gfx_SpriteSetClipNative', 'Gfx_SpriteGetStateNative', 'Gfx_SpriteSetStateNative',
+        'Gfx_SpriteCreateDescriptorNative', 'Gfx_SpriteFreeDescriptorNative',
+        'Gfx_SpriteCopyDescriptorNative', 'Gfx_SpriteReservedNative',
+        'Gfx_CreateSpriteDescriptor', 'Gfx_FreeSpriteDescriptor',
         'Gfx_SurfaceOpenNative', 'Gfx_SurfaceRebuildNative', 'Gfx_InitSurfaceRecords', 'Gfx_SurfaceRestoreNative',
         'Gfx_SurfaceLockNative', 'Gfx_SurfaceUnlockNative',
         'Gfx_SurfaceClearNative', 'Gfx_ClearSurfaceNative',
@@ -282,6 +285,11 @@ def verify():
         'Gfx_InitNamedPrimitiveDefault': ['Gfx_InitPairStorageControl', 'Gfx_AllocBytes'],
         'Gfx_SpriteHandleOpNative': ['Gfx_SpriteImageOpNative'] * 2,
         'Gfx_SpriteSetStateNative': ['Gfx_SpriteConfigureNative', 'Gfx_SpriteSetClipNative'],
+        'Gfx_SpriteCreateDescriptorNative': ['Gfx_CreateSpriteDescriptor'],
+        'Gfx_SpriteFreeDescriptorNative': ['Gfx_FreeSpriteDescriptor'],
+        'Gfx_SpriteCopyDescriptorNative': ['Gfx_CopySpriteDescriptor'],
+        'Gfx_CreateSpriteDescriptor': ['Gfx_CopyAllocatedString', 'Gfx_AllocBytes', 'Gfx_CopySpriteDescriptorPixels'],
+        'Gfx_FreeSpriteDescriptor': ['Gfx_FreeBytes', 'Gfx_FreeBytes'],
         'Gfx_SpriteImageOpNative': ['Gfx_GrowPointerTable','Gfx_FreeBytes',
             'Gfx_ReleaseSpritePackingStorage','Gfx_FreeBytes',
             'Gfx_ReleaseSpritePackingStorage','Gfx_FreeBytes','Gfx_AllocBytes',
@@ -948,3 +956,6 @@ if __name__ == '__main__':
 
     from verify_triangles import verify_triangles
     verify_triangles(record=True)
+
+    from verify_sprite_descriptors import verify_sprite_descriptors
+    verify_sprite_descriptors(record=True)

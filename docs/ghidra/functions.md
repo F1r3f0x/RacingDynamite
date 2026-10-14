@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:8b8bef4f634bdb19aef77bd2e5a7740f98dc5624fa3c7bb51e27a7481bf33f73 -->
+<!-- snapshot:b676e3707c34b9495684671cb31daa059c0ce909a7bc94c10bfed5022b28ce90 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -561,9 +561,9 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045C7F0` | `0x0005C7F0` | 62 | `Gfx_InitSpriteHandles` | game | reconstructed | [windows_gfx_sprite_handles.md](windows_gfx_sprite_handles.md) |
 | `0x0045C830` | `0x0005C830` | 207 | `Gfx_SpriteHandleOpNative` | game | reconstructed | [windows_gfx_handleop.md](windows_gfx_handleop.md) |
 | `0x0045C900` | `0x0005C900` | 19 | `sub_0045C900` | unknown | unidentified | - |
-| `0x0045C920` | `0x0005C920` | 24 | `Gfx_SpriteCreateDescriptorNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x0045C940` | `0x0005C940` | 19 | `Gfx_SpriteFreeDescriptorNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
-| `0x0045C960` | `0x0005C960` | 24 | `Gfx_SpriteCopyDescriptorNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
+| `0x0045C920` | `0x0005C920` | 24 | `Gfx_SpriteCreateDescriptorNative` | game | reconstructed | [windows_sprite_descriptors.md](windows_sprite_descriptors.md) |
+| `0x0045C940` | `0x0005C940` | 19 | `Gfx_SpriteFreeDescriptorNative` | game | reconstructed | [windows_sprite_descriptors.md](windows_sprite_descriptors.md) |
+| `0x0045C960` | `0x0005C960` | 24 | `Gfx_SpriteCopyDescriptorNative` | game | reconstructed | [windows_sprite_descriptors.md](windows_sprite_descriptors.md) |
 | `0x0045C980` | `0x0005C980` | 14 | `sub_0045C980` | unknown | unidentified | - |
 | `0x0045C990` | `0x0005C990` | 24 | `Gfx_SetTriangleSpanState` | game | reconstructed | [windows_texture_spans.md](windows_texture_spans.md) |
 | `0x0045C9B0` | `0x0005C9B0` | 32 | `Gfx_DrawTriangleSpan` | game | reconstructed | [windows_texture_spans.md](windows_texture_spans.md) |
@@ -642,11 +642,11 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00460F90` | `0x00060F90` | 539 | `sub_00460F90` | unknown | unidentified | - |
 | `0x004611B0` | `0x000611B0` | 31 | `sub_004611B0` | unknown | unidentified | - |
 | `0x004611D0` | `0x000611D0` | 53 | `Gfx_InitDefaultSpriteDescriptor` | game | reconstructed | [windows_gfx_default_descriptor.md](windows_gfx_default_descriptor.md) |
-| `0x00461210` | `0x00061210` | 143 | `Gfx_CreateSpriteDescriptor` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
+| `0x00461210` | `0x00061210` | 143 | `Gfx_CreateSpriteDescriptor` | game | reconstructed | [windows_sprite_descriptors.md](windows_sprite_descriptors.md) |
 | `0x004612A0` | `0x000612A0` | 61 | `Gfx_CopySpriteDescriptorPixels` | game | reconstructed | [windows_gfx_sprite_pixels.md](windows_gfx_sprite_pixels.md) |
 | `0x004612E0` | `0x000612E0` | 114 | `Gfx_CopySpriteDescriptor` | game | reconstructed | [windows_gfx_sprite_handles.md](windows_gfx_sprite_handles.md) |
 | `0x00461360` | `0x00061360` | 329 | `Gfx_SpriteImageOpNative` | game | reconstructed | [windows_gfx_imageop.md](windows_gfx_imageop.md) |
-| `0x004614B0` | `0x000614B0` | 31 | `Gfx_FreeSpriteDescriptor` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
+| `0x004614B0` | `0x000614B0` | 31 | `Gfx_FreeSpriteDescriptor` | game | reconstructed | [windows_sprite_descriptors.md](windows_sprite_descriptors.md) |
 | `0x004614D0` | `0x000614D0` | 61 | `Gfx_InitSpritePackingState` | game | reconstructed | [windows_gfx_sprite_packing_reset.md](windows_gfx_sprite_packing_reset.md) |
 | `0x00461510` | `0x00061510` | 3 | `sub_00461510` | unknown | unidentified | - |
 | `0x00461520` | `0x00061520` | 1 | `sub_00461520` | unknown | unidentified | - |
@@ -658,7 +658,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00461870` | `0x00061870` | 62 | `Gfx_FindSpritePackingGap` | game | reconstructed | [windows_gfx_sprite_packing_gap.md](windows_gfx_sprite_packing_gap.md) |
 | `0x004618B0` | `0x000618B0` | 419 | `Gfx_ReleaseSpritePackingStorage` | game | reconstructed | [windows_gfx_sprite_packing_release.md](windows_gfx_sprite_packing_release.md) |
 | `0x00461A60` | `0x00061A60` | 17 | `Gfx_FreeAlignedBytes` | game | reconstructed | [windows_gfx_free.md](windows_gfx_free.md) |
-| `0x00461A80` | `0x00061A80` | 3 | `Gfx_SpriteReservedNative` | game | analyzed | [windows_gfx_sprite_dispatch.md](windows_gfx_sprite_dispatch.md) |
+| `0x00461A80` | `0x00061A80` | 3 | `Gfx_SpriteReservedNative` | game | reconstructed | [windows_sprite_descriptors.md](windows_sprite_descriptors.md) |
 | `0x00461A90` | `0x00061A90` | 260 | `sub_00461A90` | unknown | unidentified | - |
 | `0x00461BA0` | `0x00061BA0` | 448 | `sub_00461BA0` | unknown | unidentified | - |
 | `0x00461D60` | `0x00061D60` | 312 | `sub_00461D60` | unknown | unidentified | - |

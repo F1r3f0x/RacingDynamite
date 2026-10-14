@@ -110,6 +110,8 @@ typedef struct GfxSpritePixelView {
 /* Incidental EAX retains source; both arguments use caller cleanup. */
 const GfxSpriteDescriptor *Gfx_CopySpriteDescriptorPixels(
     const GfxSpriteDescriptor *source, const GfxSpriteDescriptor *destination); /* VA 0x004612A0 */
+void Gfx_CreateSpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x00461210 */
+void Gfx_FreeSpriteDescriptor(GfxSpriteDescriptor *descriptor); /* VA 0x004614B0 */
 
 /* Incidental, path-dependent EAX is discarded by the image-operation caller. */
 void Gfx_AssignSpritePackingStorage(GfxSpriteDescriptor *descriptor); /* VA 0x00461530 */
@@ -210,16 +212,16 @@ extern GfxSpriteImageOpProc volatile g_spriteImageOp; /* VA 0x0050EBD8 */
 int Gfx_SpriteImageOpNative(const GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x00461360; body unreconstructed */
 typedef int (*GfxSpriteCreateDescriptorProc)(GfxSpriteDescriptor *descriptor, int image_id);
 extern GfxSpriteCreateDescriptorProc volatile g_spriteCreateDescriptor; /* VA 0x0050EBD4 */
-int Gfx_SpriteCreateDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x0045C920; body unreconstructed */
+int Gfx_SpriteCreateDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x0045C920 */
 typedef int (*GfxSpriteFreeDescriptorProc)(GfxSpriteDescriptor *descriptor);
 extern GfxSpriteFreeDescriptorProc volatile g_spriteFreeDescriptor; /* VA 0x0050EBDC */
-int Gfx_SpriteFreeDescriptorNative(GfxSpriteDescriptor *descriptor); /* VA 0x0045C940; body unreconstructed */
+int Gfx_SpriteFreeDescriptorNative(GfxSpriteDescriptor *descriptor); /* VA 0x0045C940 */
 typedef int (*GfxSpriteCopyDescriptorProc)(GfxSpriteDescriptor *descriptor, int image_id);
 extern GfxSpriteCopyDescriptorProc volatile g_spriteCopyDescriptor; /* VA 0x0050EBE0 */
-int Gfx_SpriteCopyDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x0045C960; body unreconstructed */
+int Gfx_SpriteCopyDescriptorNative(GfxSpriteDescriptor *descriptor, int image_id); /* VA 0x0045C960 */
 typedef int (*GfxSpriteReservedProc)(unsigned int option);
 extern GfxSpriteReservedProc volatile g_spriteReserved; /* VA 0x0050EBE4 */
-int Gfx_SpriteReservedNative(unsigned int option); /* VA 0x00461A80; body unreconstructed */
+int Gfx_SpriteReservedNative(unsigned int option); /* VA 0x00461A80 */
 typedef int (*GfxSpriteGetStateProc)(GfxSpriteState *state);
 extern GfxSpriteGetStateProc volatile g_spriteGetState; /* VA 0x0050EBEC */
 int Gfx_SpriteGetStateNative(GfxSpriteState *state); /* VA 0x00457110 */
