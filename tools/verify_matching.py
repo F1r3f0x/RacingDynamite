@@ -896,3 +896,6 @@ if __name__ == '__main__':
     verify_edge_steps(record=True)
     from verify_edge_splitter import verify_edge_splitter
     verify_edge_splitter(record=True)
+
+    from verify_edge_wrappers import verify_edge_wrappers
+    verify_edge_wrappers(record=True)

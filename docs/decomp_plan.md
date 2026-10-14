@@ -1,5 +1,16 @@
 # Ignition Master Decompilation Plan (Windows Target)
 
+## Clipped edge wrappers (2026-10-13)
+
+[Wrapper evidence](ghidra/windows_edge_wrappers.md), RVAs 0x24EFA0/0x24F0C0,
+closes real splitter/initializer/clamp/emitter dependencies in direct C89 renderer.
+JE-only zero checks preserve negative headers and mandatory first records.
+Focused 1,284 differential calls include 420 faults, 568 packet/output aliases
+and 432 persistent followups. Full111 renewal/audit/exports pass at snapshot
+`bdf9392387ee`; all48 guard tests pass. LF/index gates/hooks follow. No native
+wrapper/game proof is claimed. Continue ordinary wrappers, gradients and complete
+triangle/sprite/native frames; original toolchain and playable game remain open.
+
 ## Full edge splitter and viewport backing (2026-10-13)
 
 [Splitter evidence](ghidra/windows_edge_splitter.md), RVA0x24F270, reconstructs

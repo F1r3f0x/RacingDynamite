@@ -385,3 +385,8 @@ float pitch = (float)curve_val / 22050.0f;
 1. **Root Cause**: Each vehicle's `ENGINE.INF` file defines a 200-sample table ($200 \times \text{int32} = 800\text{ bytes}$) mapping normalized speed to acoustic pitch. When using turbo boost on top-speed vehicles (e.g. Vegas or Red Monster), instantaneous vehicle speed exceeded `max_speed`, pushing `sample_idx` past 199.
 2. **1997 Symptom**: The code read adjacent heap memory, multiplied arbitrary bytes by 600, and added 20,000 Hz. This caused pitch frequency wrap-around into negative numbers, high-pitched screeching audio glitches, or muted the engine voice channel completely until speed dropped.
 3. **Port Solution**: `DEV-006` clamps `sample_idx` to 199 and smoothly extrapolates frequency under `GameFixOptions.fix_audio`.
+
+Clipped edge wrappers RVAs 0x24EFA0/0x24F0C0 adapt ESI/EBX to typed packet/header
+parameters with real production helper calls. JE-only zero tests, negative headers,
+live continuation state and access/fault prefixes are preserved. No incidental
+register output/native parent claim; see [wrapper evidence](../ghidra/windows_edge_wrappers.md).

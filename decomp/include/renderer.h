@@ -82,6 +82,22 @@ void Gfx_ClampTriangleEdgeRightEndpoint(volatile GfxTriangleEdgePacket *edge);
 void Gfx_InitializeTriangleEdgeSteps(const volatile GfxTriangleEdgePacket *edge);
 void Gfx_ClipAndSplitTriangleEdge(volatile GfxTriangleEdgePacket *edge);
 
+typedef struct GfxTriangleEdgeBufferHeader {
+    int start_y;
+    int count;
+} GfxTriangleEdgeBufferHeader;
+typedef struct GfxTriangleEdgeContinuationState {
+    int corrected_count; /* VA 0x004BAEDC */
+    unsigned int intervening_word; /* VA 0x004BAEE0 */
+    volatile GfxTriangleSpanEdgeRecord *raw_advanced_output; /* VA 0x004BAEE4 */
+    int raw_count; /* VA 0x004BAEE8 */
+} GfxTriangleEdgeContinuationState;
+extern volatile GfxTriangleEdgeContinuationState g_triangleEdgeContinuation;
+void Gfx_BuildClippedCorrectedTriangleEdge(volatile GfxTriangleEdgePacket *edge,
+    volatile GfxTriangleEdgeBufferHeader *output);
+void Gfx_BuildClippedRawTriangleEdge(volatile GfxTriangleEdgePacket *edge,
+    volatile GfxTriangleEdgeBufferHeader *output);
+
 void Gfx_SetTriangleSpanState(unsigned int gradient_v, unsigned int gradient_u,
     unsigned int texture_word, unsigned int lookup_word);
 void Gfx_SetTriangleSpanCore(unsigned int gradient_v, unsigned int gradient_u,

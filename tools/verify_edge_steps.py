@@ -10,7 +10,7 @@ import pefile
 from capstone import Cs,CS_ARCH_X86,CS_MODE_32
 from unicorn import UcError,UC_ERR_EXCEPTION
 from unicorn.x86_const import UC_X86_REG_ESI,UC_X86_REG_ESP,UC_X86_REG_EIP,UC_X86_REG_EFLAGS
-from verify_texture_spans import Session,build,STACK,STOP,ARENA,PRESERVED,INPUTS as SPAN_INPUTS
+from verify_texture_spans import Session,build,validate_renderer_calls,STACK,STOP,ARENA,PRESERVED,INPUTS as SPAN_INPUTS
 from windows_target import ROOT,BUILD,verify_target
 from windows_tracking import record_run
 
@@ -78,14 +78,7 @@ def verify_edge_steps(record=False):
     assert original.get_data(0xbaea4,32)==bytes(32)
     commands=build(dll=DLL,exports=[NAME,GLOBAL])
     compiled=pefile.PE(str(DLL));assert not getattr(compiled,'DIRECTORY_ENTRY_IMPORT',[])
-    from windows_target import validation_symbols
-    symbols=validation_symbols(compiled)
-    text=next(s for s in compiled.sections if s.Name.rstrip(b'\0')==b'.text')
-    decoded=list(Cs(CS_ARCH_X86,CS_MODE_32).disasm(text.get_data()[:text.Misc_VirtualSize],
-        compiled.OPTIONAL_HEADER.ImageBase+text.VirtualAddress))
-    calls=[int(i.op_str,16) for i in decoded if i.mnemonic=='call']
-    assert len(calls)==3 and set(calls)=={symbols[n] for n in
-        ('Gfx_SetTriangleSpanCore','Gfx_DrawTriangleSpanCore','Gfx_DrawClippedTriangleSpanCore')}
+    validate_renderer_calls(compiled)
     debug=next(d.struct for d in original.DIRECTORY_ENTRY_DEBUG if d.struct.Type==3)
     fpo={r for r,*_ in struct.iter_unpack('<IIIHH',
         original.__data__[debug.PointerToRawData:debug.PointerToRawData+debug.SizeOfData])}

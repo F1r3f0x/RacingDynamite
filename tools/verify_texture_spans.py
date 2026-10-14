@@ -9,6 +9,7 @@ import random
 import shutil
 import struct
 import subprocess
+from collections import Counter
 import pefile
 from capstone import Cs, CS_ARCH_X86, CS_MODE_32
 from unicorn import Uc, UcError, UC_ARCH_X86, UC_MODE_32, UC_HOOK_MEM_READ, UC_HOOK_MEM_WRITE, UC_HOOK_MEM_INVALID
@@ -33,6 +34,29 @@ INPUTS = ['decomp/src/renderer.c','decomp/include/renderer.h','decomp/modules.js
     'decomp/target.json','tools/verify_texture_spans.py','tools/windows_target.py','tools/windows_tracking.py',
     'tools/native_texture_spans.c','tools/native_sine_probe.c']
 PRESERVED = (UC_X86_REG_EBX,UC_X86_REG_ESI,UC_X86_REG_EDI,UC_X86_REG_EBP)
+RENDERER_EXPORTS = [
+    'Gfx_EmitRawTriangleEdgeRecords','Gfx_EmitCorrectedTriangleEdgeRecords',
+    'Gfx_ComputeTriangleEdgeSlope','Gfx_ClampTriangleEdgeRightEndpoint',
+    'Gfx_InitializeTriangleEdgeSteps','Gfx_ClipAndSplitTriangleEdge',
+    'Gfx_BuildClippedCorrectedTriangleEdge','Gfx_BuildClippedRawTriangleEdge',
+    'g_triangleEdgeSteps','g_triangleEdgeUCorrections','g_triangleEdgeVCorrections',
+    'g_triangleTextureGradients','g_triangleViewportState','g_triangleEdgeSplit',
+    'g_triangleEdgeContinuation']
+
+
+def validate_renderer_calls(pe):
+    symbols=validation_symbols(pe)
+    section=next(s for s in pe.sections if s.Name.rstrip(b'\0')==b'.text')
+    instructions=list(Cs(CS_ARCH_X86,CS_MODE_32).disasm(section.get_data()[:section.Misc_VirtualSize],
+        pe.OPTIONAL_HEADER.ImageBase+section.VirtualAddress))
+    calls=Counter(int(i.op_str,16) for i in instructions if i.mnemonic=='call')
+    expected={symbols[n]:count for n,count in {
+        'Gfx_SetTriangleSpanCore':1,'Gfx_DrawTriangleSpanCore':1,'Gfx_DrawClippedTriangleSpanCore':1,
+        'Gfx_ClipAndSplitTriangleEdge':2,'Gfx_InitializeTriangleEdgeSteps':4,
+        'Gfx_ClampTriangleEdgeRightEndpoint':2,'Gfx_EmitCorrectedTriangleEdgeRecords':2,
+        'Gfx_EmitRawTriangleEdgeRecords':2}.items()}
+    assert calls==expected,(calls,expected)
+    return calls
 
 
 def build(dll=DLL,exports=()):
@@ -45,7 +69,8 @@ def build(dll=DLL,exports=()):
         '-O2','-fno-inline','-fno-optimize-sibling-calls','-I',str(ROOT/'decomp/include'),
         '-c',str(ROOT/'decomp/src/renderer.c'),'-o',str(obj)],
         [linker,'/dll','/noentry','/nodefaultlib','/machine:x86','/safeseh:no',
-         '/base:0x10000000','/out:'+str(dll),str(obj)] + ['/export:'+n for n in [*ROUTINES,*STATE,*exports]]]
+         '/base:0x10000000','/out:'+str(dll),str(obj)] + ['/export:'+n for n in
+            sorted(set([*ROUTINES,*STATE,*RENDERER_EXPORTS,*exports]))]]
     for command in commands:
         subprocess.run(command,cwd=ROOT,check=True)
     return commands
@@ -195,12 +220,7 @@ def verify_texture_spans(record=False,native=True):
     commands = build()
     compiled = pefile.PE(str(DLL))
     assert not getattr(compiled,'DIRECTORY_ENTRY_IMPORT',[]),'Unexpected render dependency'
-    symbols = validation_symbols(compiled)
-    section = next(s for s in compiled.sections if s.Name.rstrip(b'\0')==b'.text')
-    instructions = list(Cs(CS_ARCH_X86,CS_MODE_32).disasm(
-        section.get_data()[:section.Misc_VirtualSize],compiled.OPTIONAL_HEADER.ImageBase+section.VirtualAddress))
-    calls = [int(i.op_str,16) for i in instructions if i.mnemonic=='call']
-    assert len(calls)==3 and set(calls)=={symbols[n] for n in ROUTINES if n.endswith('Core')},calls
+    validate_renderer_calls(compiled)
     coverage = {n:{'comparisons':0,'faults':0,'followups':0} for n in ROUTINES}
     for seed in range(80):
         rng = random.Random(seed)

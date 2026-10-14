@@ -20,6 +20,9 @@ volatile GfxTriangleViewportState g_triangleViewportState = {0, 0, 0, 0, 0, 0, 0
 volatile GfxTriangleEdgeSplitState g_triangleEdgeSplit = {0, 0, 0, 0, 0};
 typedef char GfxViewportMustBe36Bytes[(sizeof(GfxTriangleViewportState) == 36) ? 1 : -1];
 typedef char GfxSplitMustBe20Bytes[(sizeof(GfxTriangleEdgeSplitState) == 20) ? 1 : -1];
+volatile GfxTriangleEdgeContinuationState g_triangleEdgeContinuation = {0, 0, 0, 0};
+typedef char GfxEdgeHeaderMustBe8Bytes[(sizeof(GfxTriangleEdgeBufferHeader) == 8) ? 1 : -1];
+typedef char GfxEdgeContinuationMustBe16Bytes[(sizeof(GfxTriangleEdgeContinuationState) == 16) ? 1 : -1];
 typedef char GfxEdgePacketMustBe32Bytes[(sizeof(GfxTriangleEdgePacket) == 32) ? 1 : -1];
 typedef char GfxTextureGradientsMustBe8Bytes[(sizeof(GfxTriangleTextureGradients) == 8) ? 1 : -1];
 
@@ -596,5 +599,183 @@ void Gfx_ClipAndSplitTriangleEdge(volatile GfxTriangleEdgePacket *edge) {
         GFX_EDGE_INTERPOLATE(edge->y1, edge->y0, edge->y1, ratio, 1);
         bound = g_triangleClipRightFixed;
         edge->x1 = bound;
+    }
+}
+
+/* @original Gfx_BuildClippedCorrectedTriangleEdge (IGN_WIN.EXE @ 0x0064EFA0, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_BuildClippedCorrectedTriangleEdge(volatile GfxTriangleEdgePacket *edge,
+        volatile GfxTriangleEdgeBufferHeader *output) {
+    volatile int endpoint_y;
+    volatile int bound;
+    unsigned int start_y;
+    unsigned int end_y;
+    volatile unsigned int count;
+    volatile unsigned int texture;
+    volatile int coordinate;
+    GfxTriangleEdgeEmission emission;
+    endpoint_y = edge->y1;
+    bound = g_triangleViewportState.clip_top_fixed;
+    if (bound >= endpoint_y) {
+        output->count = 0;
+        bound = g_triangleViewportState.clip_top_integer;
+        output->start_y = bound;
+        return;
+    }
+    endpoint_y = edge->y0;
+    bound = g_triangleViewportState.clip_bottom_fixed;
+    if (bound <= endpoint_y) {
+        output->count = 0;
+        bound = g_triangleViewportState.clip_bottom_integer;
+        output->start_y = bound;
+        return;
+    }
+    Gfx_ClipAndSplitTriangleEdge(edge);
+    g_triangleEdgeSteps.advanced_corrected_output = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)
+        ((unsigned int)(uintptr_t)output + 8u);
+    start_y = (unsigned int)edge->y0;
+    start_y = GFX_EDGE_SAR(start_y, 8);
+    output->start_y = (int)start_y;
+    end_y = (unsigned int)edge->y1;
+    end_y = GFX_EDGE_SAR(end_y, 8);
+    count = end_y - start_y;
+    output->count = (int)count;
+    if (count != 0) {
+        Gfx_InitializeTriangleEdgeSteps(edge);
+        emission.count = (unsigned int)output->count;
+        emission.texture_v = g_triangleEdgeSteps.initial_texture_v;
+        emission.x = g_triangleEdgeSteps.initial_x;
+        emission.texture_u = g_triangleEdgeSteps.initial_texture_u;
+        emission.output = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)
+            ((unsigned int)(uintptr_t)output + 8u);
+        Gfx_EmitCorrectedTriangleEdgeRecords(&emission);
+        g_triangleEdgeSteps.advanced_corrected_output = emission.output;
+    }
+    if (g_triangleEdgeSplit.active != 1u) {
+        return;
+    }
+    coordinate = edge->x1;
+    edge->x0 = coordinate;
+    coordinate = edge->y1;
+    edge->y0 = coordinate;
+    texture = edge->texture_u1;
+    edge->texture_u0 = texture;
+    texture = edge->texture_v1;
+    edge->texture_v0 = texture;
+    coordinate = g_triangleEdgeSplit.saved_x1;
+    edge->x1 = coordinate;
+    coordinate = g_triangleEdgeSplit.saved_y1;
+    edge->y1 = coordinate;
+    texture = g_triangleEdgeSplit.saved_texture_u1;
+    edge->texture_u1 = texture;
+    texture = g_triangleEdgeSplit.saved_texture_v1;
+    edge->texture_v1 = texture;
+    Gfx_ClampTriangleEdgeRightEndpoint(edge);
+    end_y = (unsigned int)edge->y1;
+    start_y = (unsigned int)edge->y0;
+    end_y = GFX_EDGE_SAR(end_y, 8);
+    start_y = GFX_EDGE_SAR(start_y, 8);
+    count = end_y - start_y;
+    g_triangleEdgeContinuation.corrected_count = (int)count;
+    if (count != 0) {
+        output->count = (int)((unsigned int)output->count + count);
+        Gfx_InitializeTriangleEdgeSteps(edge);
+        emission.count = (unsigned int)g_triangleEdgeContinuation.corrected_count;
+        emission.texture_v = g_triangleEdgeSteps.initial_texture_v;
+        emission.x = g_triangleEdgeSteps.initial_x;
+        emission.texture_u = g_triangleEdgeSteps.initial_texture_u;
+        emission.output = g_triangleEdgeSteps.advanced_corrected_output;
+        Gfx_EmitCorrectedTriangleEdgeRecords(&emission);
+    }
+}
+
+/* @original Gfx_BuildClippedRawTriangleEdge (IGN_WIN.EXE @ 0x0064F0C0, unknown original source)
+ * @fidelity ADAPTED
+ * @deviation DEV-007
+ */
+void Gfx_BuildClippedRawTriangleEdge(volatile GfxTriangleEdgePacket *edge,
+        volatile GfxTriangleEdgeBufferHeader *output) {
+    volatile int endpoint_y;
+    volatile int bound;
+    unsigned int start_y;
+    unsigned int end_y;
+    volatile unsigned int count;
+    volatile unsigned int texture;
+    volatile int coordinate;
+    GfxTriangleEdgeEmission emission;
+    endpoint_y = edge->y1;
+    bound = g_triangleViewportState.clip_top_fixed;
+    if (bound >= endpoint_y) {
+        output->count = 0;
+        bound = g_triangleViewportState.clip_top_integer;
+        output->start_y = bound;
+        return;
+    }
+    endpoint_y = edge->y0;
+    bound = g_triangleViewportState.clip_bottom_fixed;
+    if (bound <= endpoint_y) {
+        output->count = 0;
+        bound = g_triangleViewportState.clip_bottom_integer;
+        output->start_y = bound;
+        return;
+    }
+    Gfx_ClipAndSplitTriangleEdge(edge);
+    g_triangleEdgeContinuation.raw_advanced_output = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)
+        ((unsigned int)(uintptr_t)output + 8u);
+    start_y = (unsigned int)edge->y0;
+    start_y = GFX_EDGE_SAR(start_y, 8);
+    output->start_y = (int)start_y;
+    end_y = (unsigned int)edge->y1;
+    end_y = GFX_EDGE_SAR(end_y, 8);
+    count = end_y - start_y;
+    output->count = (int)count;
+    if (count != 0) {
+        Gfx_InitializeTriangleEdgeSteps(edge);
+        emission.count = (unsigned int)output->count;
+        emission.texture_v = g_triangleEdgeSteps.initial_texture_v;
+        emission.x = g_triangleEdgeSteps.initial_x;
+        emission.texture_u = g_triangleEdgeSteps.initial_texture_u;
+        emission.output = (volatile GfxTriangleSpanEdgeRecord *)(uintptr_t)
+            ((unsigned int)(uintptr_t)output + 8u);
+        Gfx_EmitRawTriangleEdgeRecords(&emission);
+        g_triangleEdgeContinuation.raw_advanced_output = emission.output;
+    }
+    if (g_triangleEdgeSplit.active != 1u) {
+        return;
+    }
+    coordinate = edge->x1;
+    edge->x0 = coordinate;
+    coordinate = edge->y1;
+    edge->y0 = coordinate;
+    texture = edge->texture_u1;
+    edge->texture_u0 = texture;
+    texture = edge->texture_v1;
+    edge->texture_v0 = texture;
+    coordinate = g_triangleEdgeSplit.saved_x1;
+    edge->x1 = coordinate;
+    coordinate = g_triangleEdgeSplit.saved_y1;
+    edge->y1 = coordinate;
+    texture = g_triangleEdgeSplit.saved_texture_u1;
+    edge->texture_u1 = texture;
+    texture = g_triangleEdgeSplit.saved_texture_v1;
+    edge->texture_v1 = texture;
+    Gfx_ClampTriangleEdgeRightEndpoint(edge);
+    end_y = (unsigned int)edge->y1;
+    start_y = (unsigned int)edge->y0;
+    end_y = GFX_EDGE_SAR(end_y, 8);
+    start_y = GFX_EDGE_SAR(start_y, 8);
+    count = end_y - start_y;
+    g_triangleEdgeContinuation.raw_count = (int)count;
+    if (count != 0) {
+        output->count = (int)((unsigned int)output->count + count);
+        Gfx_InitializeTriangleEdgeSteps(edge);
+        emission.count = (unsigned int)g_triangleEdgeContinuation.raw_count;
+        emission.texture_v = g_triangleEdgeSteps.initial_texture_v;
+        emission.x = g_triangleEdgeSteps.initial_x;
+        emission.texture_u = g_triangleEdgeSteps.initial_texture_u;
+        emission.output = g_triangleEdgeContinuation.raw_advanced_output;
+        Gfx_EmitRawTriangleEdgeRecords(&emission);
     }
 }

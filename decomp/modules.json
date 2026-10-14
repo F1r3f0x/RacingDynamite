@@ -195,7 +195,9 @@
         "Gfx_ComputeTriangleEdgeSlope",
         "Gfx_ClampTriangleEdgeRightEndpoint",
         "Gfx_InitializeTriangleEdgeSteps",
-        "Gfx_ClipAndSplitTriangleEdge"
+        "Gfx_ClipAndSplitTriangleEdge",
+        "Gfx_BuildClippedCorrectedTriangleEdge",
+        "Gfx_BuildClippedRawTriangleEdge"
       ],
       "responsibility": "Verified software texture compositing spans; triangle and sprite rasterization dependencies reconstructed incrementally",
       "state": [
@@ -207,7 +209,8 @@
         "verified triangle U/V gradients and fixed-point right clip bound; their real initialization remains pending",
         "verified 32byte edge-step backing from VA4BAEA4: initial U/V, U/V increments, preserved word, advanced corrected record pointer, initial X and X increment",
         "verified 36byte viewport backing VA63F2B0..D0, fixed and integer bounds/stride",
-        "verified 20byte edge split flag and saved endpoint VA4BAEC8..D8"
+        "verified 20byte edge split flag and saved endpoint VA4BAEC8..D8",
+        "verified corrected/raw secondary counts and raw advanced output pointer VA4BAEDC..E8, preserving intervening word"
       ],
       "dependencies": [
         "caller-owned mapped texture, compositing table and framebuffer storage; initialization remains external and unverified",

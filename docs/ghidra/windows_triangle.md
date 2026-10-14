@@ -250,12 +250,12 @@ The routine performs sequential top, bottom, and right clipping:
 - `Gfx_BuildClippedRawTriangleEdge`, VA `0x0064F0C0` / RVA `0x24F0C0`, 282 bytes through RET at `0x0064F1D9`.
 
 Both wrappers take ESI=mutable edge packet, EBX=output buffer pointer; saves EBP; clobbers working registers.
-1. Trivial rejection: if `y1 <= clip_top`, stores `[ebx] = clip_top_int`, `[ebx+4] = 0`, returns. If `y0 >= clip_bottom`, stores `[ebx] = clip_bottom_int`, `[ebx+4] = 0`, returns.
+1. Trivial rejection: if `y1 <= clip_top`, stores `[ebx+4] = 0` before `[ebx] = clip_top_int`, returns. If `y0 >= clip_bottom`, stores `[ebx+4] = 0` before `[ebx] = clip_bottom_int`, returns.
 2. Segment 1: calls splitter `0x64F270`. Sets `[ebx] = startY = y0 >> 8` and `[ebx+4] = count1 = (y1 >> 8) - startY`.
-   If `count1 > 0`: calls step initializer `0x64F4D0` and edge emitter (`0x64F220` for corrected, `0x64F1E0` for raw).
+   If `count1 != 0`: calls step initializer `0x64F4D0` and edge emitter (`0x64F220` for corrected, `0x64F1E0` for raw).
    Stores advanced record pointer at `0x004BAEB8` (corrected) or `0x004BAEE4` (raw).
 3. Segment 2 (if split flag `0x004BAEC8 == 1`): replaces endpoint 0 with segment 1 endpoint 1; restores endpoint 1 from saved quartet `0x004BAECC–D8`. Calls clamp helper `0x64F489`.
-   Computes `count2 = (y1 >> 8) - (y0 >> 8)`. If `count2 > 0`: adds `count2` to header count `[ebx+4]`, calls step initializer `0x64F4D0`, and calls edge emitter appending `count2` records contiguously after segment 1.
+   Computes `count2 = (y1 >> 8) - (y0 >> 8)`. If `count2 != 0`: adds `count2` to header count `[ebx+4]`, calls step initializer `0x64F4D0`, and calls edge emitter appending `count2` records contiguously after segment 1.
 
 ## Left-clipped spans and access order (RVAs 0x5C9D0, 0x67F97)
 
@@ -292,3 +292,6 @@ The clipping and splitting contracts are completely recovered and validated by i
 - The outer ESI packet interface at `0x00465BB5` and the register ABIs across `0x24...` edge routines (ESI edge packet, EBX output buffer, EAX/ESI/EDX/EBX/ECX record emitter) are native register calling conventions lacking portable C89 representations without assembly.
 - AGENTS.md strictly forbids handwritten assembly or inline `__asm`.
 - Therefore this milestone completes as a bounded analysis feature. No production C, instruction comparison, or differential emulation is claimed for these routines.
+
+Clipped wrapper reconstruction now independently verifies JE-only zero tests,
+including negative headers and mandatory first records. See [wrapper evidence](windows_edge_wrappers.md). Earlier positive-count wording was corrected from authenticated instructions.

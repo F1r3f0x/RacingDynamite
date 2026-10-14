@@ -10,7 +10,7 @@ import pefile
 from capstone import Cs,CS_ARCH_X86,CS_MODE_32
 from unicorn import UcError,UC_ERR_EXCEPTION
 from unicorn.x86_const import UC_X86_REG_ESI,UC_X86_REG_ESP,UC_X86_REG_EIP,UC_X86_REG_EFLAGS
-from verify_texture_spans import Session,build,STACK,STOP,ARENA,PRESERVED,INPUTS as SPAN_INPUTS
+from verify_texture_spans import Session,build,validate_renderer_calls,STACK,STOP,ARENA,PRESERVED,INPUTS as SPAN_INPUTS
 from windows_target import ROOT,BUILD,verify_target
 from windows_tracking import record_run
 
@@ -89,14 +89,7 @@ def verify_edge_splitter(record=False):
     assert original.get_data(0xbaec8,20)==bytes(20)
     commands=build(dll=DLL,exports=[NAME,*GLOBALS])
     compiled=pefile.PE(str(DLL));assert not getattr(compiled,'DIRECTORY_ENTRY_IMPORT',[])
-    from windows_target import validation_symbols
-    symbols=validation_symbols(compiled)
-    section=next(s for s in compiled.sections if s.Name.rstrip(b'\0')==b'.text')
-    decoded=list(Cs(CS_ARCH_X86,CS_MODE_32).disasm(section.get_data()[:section.Misc_VirtualSize],
-        compiled.OPTIONAL_HEADER.ImageBase+section.VirtualAddress))
-    calls=[int(i.op_str,16) for i in decoded if i.mnemonic=='call']
-    assert len(calls)==3 and set(calls)=={symbols[n] for n in
-        ('Gfx_SetTriangleSpanCore','Gfx_DrawTriangleSpanCore','Gfx_DrawClippedTriangleSpanCore')}
+    validate_renderer_calls(compiled)
     viewport=[256,30,1,30,1,29*256+255,64,256,29*256+255]
     rng=random.Random(RVA)
     coverage={'comparisons':0,'followups':0,'faults':0,'aliases':0,'live_rechecks':0}
