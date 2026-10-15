@@ -28,6 +28,14 @@ volatile int32_t g_nativeInitGuard = 0; /* VA 0x004937B0 */
 volatile int32_t g_nativeShutdownGuard = 0; /* VA 0x004937B4 */
 volatile uint32_t g_nativeLastFrameTime = 0; /* VA 0x0049373C */
 
+volatile int32_t g_gameMainState = 0; /* VA 0x00639394 */
+volatile int32_t g_gameMenuState = 0; /* VA 0x00563C3C */
+volatile int32_t g_gameMenuSelected = 0; /* VA 0x00563D9C */
+volatile int32_t g_gameRaceLoadStage = 0; /* VA 0x00553290 */
+volatile int32_t g_gameInRace = 0; /* VA 0x00525E5C */
+volatile int32_t g_gameFlag563BF4 = 0; /* VA 0x00563BF4 */
+volatile int32_t g_gameGraphicsInitErrorFlag = 0; /* VA 0x0054F970 */
+
 /*
  * @original WinMain (IGN_WIN.EXE @ 0x004120A0, platform.c)
  * @fidelity EXACT
@@ -255,4 +263,30 @@ void Game_ShutdownSubsystems(void) {
 void Game_SetPalette(const void *palette_container) {
     const unsigned char *data = *(const unsigned char * const *)palette_container;
     Gfx_SetPaletteNative(data + 0x10);
+}
+
+/*
+ * @original Game_InitGame (IGN_WIN.EXE @ 0x00417270, platform.c)
+ * @fidelity EXACT
+ */
+int32_t Game_InitGame(void) {
+    g_gameMainState = 2;
+    g_gameMenuState = 0;
+    g_gameMenuSelected = 0;
+    g_gameRaceLoadStage = 0;
+    g_gameInRace = 0;
+    g_gameFlag563BF4 = 0;
+    g_gameGraphicsInitErrorFlag = 0;
+    Game_InitResources();
+    Game_InitState();
+    return 1;
+}
+
+/*
+ * @original Game_ShutdownGame (IGN_WIN.EXE @ 0x00417E90, platform.c)
+ * @fidelity EXACT
+ */
+int32_t Game_ShutdownGame(void) {
+    Game_CleanupResources();
+    return 0;
 }

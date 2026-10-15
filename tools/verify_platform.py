@@ -36,7 +36,9 @@ ROUTINES = {
     'Game_InitSubsystems': (0x12500, 47, 'e96334c54403bffb6aadf238c02d5b1078ec74d724cd419db84d743d09ef5218'),
     'Game_PostClose': (0x12530, 21, 'a4273cc806e5f6887cc388279cff7dd3c3d31bda16354480f1552d4b351d5939'),
     'Game_ShutdownSubsystems': (0x12550, 10, '9d322da9798d57756f64a6ddfe80ceb7eeab3e0cf8d01337a3b6a3a9f1d4dfc2'),
-    'Game_SetPalette': (0x12560, 19, '20949484266a1eb89c69091e72f67c67ae9b6615b115a5e47463892fdc25dbf0')
+    'Game_SetPalette': (0x12560, 19, '20949484266a1eb89c69091e72f67c67ae9b6615b115a5e47463892fdc25dbf0'),
+    'Game_InitGame': (0x17270, 58, 'ca67f09b7bb19c2a7e24331ea64f2e29e8d81019fc94ef8e71f3831d27a3348a'),
+    'Game_ShutdownGame': (0x17E90, 8, '2620d36c50712bde0380c5fafff9f1a14cd0efed596e6a107823739cbb966aa2')
 }
 
 EXPECTED_FPO = {
@@ -47,7 +49,9 @@ EXPECTED_FPO = {
     0x12500: (47, 0, 0, 0),
     0x12530: (21, 0, 0, 262),
     0x12550: (10, 0, 0, 0),
-    0x12560: (19, 0, 1, 0)
+    0x12560: (19, 0, 1, 0),
+    0x17270: (58, 0, 0, 0),
+    0x17E90: (8, 0, 0, 0)
 }
 
 GLOBALS = {
@@ -72,6 +76,13 @@ GLOBALS = {
     'g_nativeInitGuard': (0x4937B0, 4),
     'g_nativeShutdownGuard': (0x4937B4, 4),
     'g_nativeLastFrameTime': (0x49373C, 4),
+    'g_gameMainState': (0x639394, 4),
+    'g_gameMenuState': (0x563C3C, 4),
+    'g_gameMenuSelected': (0x563D9C, 4),
+    'g_gameRaceLoadStage': (0x553290, 4),
+    'g_gameInRace': (0x525E5C, 4),
+    'g_gameFlag563BF4': (0x563BF4, 4),
+    'g_gameGraphicsInitErrorFlag': (0x54F970, 4),
 }
 
 TRACKING_INPUTS = [
@@ -148,9 +159,10 @@ int Input_InitNative(void) { return 1; }
 int Input_ShutdownNative(void) { return 1; }
 int Mem_InitSystem(void) { return 1; }
 int Mem_ShutdownSystem(void) { return 1; }
-int Game_InitGame(void) { return 1; }
 int Game_UpdateFrame(void) { return 1; }
-int Game_ShutdownGame(void) { return 1; }
+int Game_InitResources(void) { return 1; }
+int Game_InitState(void) { return 1; }
+int Game_CleanupResources(void) { return 1; }
 ''', encoding='utf-8')
 
     fixture_obj = BUILD / 'platform_fixtures.obj'
@@ -181,7 +193,8 @@ int Game_ShutdownGame(void) { return 1; }
         'Gfx_SelectBackend', 'Gfx_Open', 'Gfx_Shutdown',
         'Gfx_SetPaletteNative', 'Input_InitNative', 'Input_ShutdownNative',
         'Mem_InitSystem', 'Mem_ShutdownSystem',
-        'Game_InitGame', 'Game_UpdateFrame', 'Game_ShutdownGame'
+        'Game_UpdateFrame', 'Game_InitResources', 'Game_InitState',
+        'Game_CleanupResources'
     ]
     exports = list(ROUTINES.keys()) + list(GLOBALS.keys()) + fixture_exports
     link_cmd = [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/safeseh:no',
@@ -223,6 +236,9 @@ SLOT_PEEK_MESSAGE = 29
 SLOT_GET_MESSAGE = 30
 SLOT_TRANSLATE_MESSAGE = 31
 SLOT_DISPATCH_MESSAGE = 32
+SLOT_GAME_INIT_RESOURCES = 33
+SLOT_GAME_INIT_STATE = 34
+SLOT_GAME_CLEANUP_RESOURCES = 35
 
 class MockContext:
     def __init__(self):
@@ -314,9 +330,10 @@ class PlatformSession:
         hook_sub(0x456c40, SLOT_GFX_SET_PALETTE)
         hook_sub(0x45b170, SLOT_MEM_INIT_SYSTEM)
         hook_sub(0x45b1a0, SLOT_MEM_SHUTDOWN_SYSTEM)
-        hook_sub(0x417270, SLOT_GAME_INIT_GAME)
         hook_sub(0x4172b0, SLOT_GAME_UPDATE_FRAME)
-        hook_sub(0x417e90, SLOT_GAME_SHUTDOWN_GAME)
+        hook_sub(0x417ea0, SLOT_GAME_INIT_RESOURCES)
+        hook_sub(0x4184c0, SLOT_GAME_INIT_STATE)
+        hook_sub(0x420b70, SLOT_GAME_CLEANUP_RESOURCES)
 
     def _patch_dll_iat_and_calls(self, pe):
         iat_map = {
@@ -359,9 +376,10 @@ class PlatformSession:
         hook_sym('Gfx_SetPaletteNative', SLOT_GFX_SET_PALETTE)
         hook_sym('Mem_InitSystem', SLOT_MEM_INIT_SYSTEM)
         hook_sym('Mem_ShutdownSystem', SLOT_MEM_SHUTDOWN_SYSTEM)
-        hook_sym('Game_InitGame', SLOT_GAME_INIT_GAME)
         hook_sym('Game_UpdateFrame', SLOT_GAME_UPDATE_FRAME)
-        hook_sym('Game_ShutdownGame', SLOT_GAME_SHUTDOWN_GAME)
+        hook_sym('Game_InitResources', SLOT_GAME_INIT_RESOURCES)
+        hook_sym('Game_InitState', SLOT_GAME_INIT_STATE)
+        hook_sym('Game_CleanupResources', SLOT_GAME_CLEANUP_RESOURCES)
 
         # Patch IAT entries from pe.DIRECTORY_ENTRY_IMPORT
         if hasattr(pe, 'DIRECTORY_ENTRY_IMPORT'):
@@ -583,20 +601,26 @@ class PlatformSession:
             uc.reg_write(UC_X86_REG_ESP, sp + 4)
             uc.reg_write(UC_X86_REG_EIP, ret_addr)
 
-        elif slot == SLOT_GAME_INIT_GAME:
-            self.ctx.calls.append(('Game_InitGame',))
-            uc.reg_write(UC_X86_REG_EAX, 1)
-            uc.reg_write(UC_X86_REG_ESP, sp + 4)
-            uc.reg_write(UC_X86_REG_EIP, ret_addr)
-
         elif slot == SLOT_GAME_UPDATE_FRAME:
             self.ctx.calls.append(('Game_UpdateFrame',))
             uc.reg_write(UC_X86_REG_EAX, 1)
             uc.reg_write(UC_X86_REG_ESP, sp + 4)
             uc.reg_write(UC_X86_REG_EIP, ret_addr)
 
-        elif slot == SLOT_GAME_SHUTDOWN_GAME:
-            self.ctx.calls.append(('Game_ShutdownGame',))
+        elif slot == SLOT_GAME_INIT_RESOURCES:
+            self.ctx.calls.append(('Game_InitResources',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_GAME_INIT_STATE:
+            self.ctx.calls.append(('Game_InitState',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_GAME_CLEANUP_RESOURCES:
+            self.ctx.calls.append(('Game_CleanupResources',))
             uc.reg_write(UC_X86_REG_EAX, 1)
             uc.reg_write(UC_X86_REG_ESP, sp + 4)
             uc.reg_write(UC_X86_REG_EIP, ret_addr)
@@ -993,9 +1017,54 @@ def run_tests():
             assert state_orig[k] == state_dll[k]
         total_comparisons += 1
 
+    # 9. Test Game_InitGame
+    for seed in range(30):
+        rng = random.Random(seed + 700)
+        state = {
+            'g_gameMainState': rng.randint(-1000, 1000),
+            'g_gameMenuState': rng.randint(-1000, 1000),
+            'g_gameMenuSelected': rng.randint(-1000, 1000),
+            'g_gameRaceLoadStage': rng.randint(-1000, 1000),
+            'g_gameInRace': rng.randint(-1000, 1000),
+            'g_gameFlag563BF4': rng.randint(-1000, 1000),
+            'g_gameGraphicsInitErrorFlag': rng.randint(-1000, 1000),
+        }
+        ret_orig, calls_orig, state_orig = sess_orig.invoke('Game_InitGame', (), state)
+        ret_dll, calls_dll, state_dll = sess_dll.invoke('Game_InitGame', (), state)
+
+        assert ret_orig == ret_dll == 1, f"InitGame ret mismatch: {ret_orig} vs {ret_dll}"
+        assert calls_orig == calls_dll == [('Game_InitResources',), ('Game_InitState',)], f"InitGame calls mismatch:\norig: {calls_orig}\ndll: {calls_dll}"
+        for k in GLOBALS:
+            assert state_orig[k] == state_dll[k], f"InitGame state mismatch on {k}"
+        assert struct.unpack('<i', state_orig['g_gameMainState'])[0] == 2
+        for flag in ['g_gameMenuState', 'g_gameMenuSelected', 'g_gameRaceLoadStage', 'g_gameInRace', 'g_gameFlag563BF4', 'g_gameGraphicsInitErrorFlag']:
+            assert struct.unpack('<i', state_orig[flag])[0] == 0
+        total_comparisons += 1
+
+    # 10. Test Game_ShutdownGame
+    for seed in range(30):
+        rng = random.Random(seed + 800)
+        state = {
+            'g_gameMainState': rng.randint(-1000, 1000),
+            'g_gameMenuState': rng.randint(-1000, 1000),
+            'g_gameMenuSelected': rng.randint(-1000, 1000),
+            'g_gameRaceLoadStage': rng.randint(-1000, 1000),
+            'g_gameInRace': rng.randint(-1000, 1000),
+            'g_gameFlag563BF4': rng.randint(-1000, 1000),
+            'g_gameGraphicsInitErrorFlag': rng.randint(-1000, 1000),
+        }
+        ret_orig, calls_orig, state_orig = sess_orig.invoke('Game_ShutdownGame', (), state)
+        ret_dll, calls_dll, state_dll = sess_dll.invoke('Game_ShutdownGame', (), state)
+
+        assert ret_orig == ret_dll == 0, f"ShutdownGame ret mismatch: {ret_orig} vs {ret_dll}"
+        assert calls_orig == calls_dll == [('Game_CleanupResources',)], f"ShutdownGame calls mismatch:\norig: {calls_orig}\ndll: {calls_dll}"
+        for k in GLOBALS:
+            assert state_orig[k] == state_dll[k], f"ShutdownGame state mismatch on {k}"
+        total_comparisons += 1
+
     print(f"PASS: {total_comparisons} differential trials passed with byte-for-byte state and event parity.")
 
-    # Record runs for all 8 RVAs
+    # Record runs for all 10 RVAs
     for name, (rva, _, _) in ROUTINES.items():
         for kind in ('compilation', 'emulation'):
             record_run(

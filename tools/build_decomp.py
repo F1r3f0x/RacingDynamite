@@ -12,6 +12,9 @@ STARTUP_BOUNDARY_SOURCE = (
     'unsigned int validation_gfxDispatchWords[4];\n'
     'int Lisa_PrintVersion(void);\n'
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
+    'int Game_InitResources(void) { return 1; }\n'
+    'int Game_InitState(void) { return 1; }\n'
+    'int Game_CleanupResources(void) { return 1; }\n'
     '')
 STARTUP_EXPORTS = ['Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_ClearSurfaceNative', 'Gfx_PresentSurfaceNative', 'Gfx_SetPaletteNative', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
     'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
@@ -66,7 +69,11 @@ PLATFORM_EXPORTS = [
     'g_nativeAccumulatedActiveTime', 'g_nativeLastActiveTime',
     'g_nativeUnknownPlatformPtr', 'g_nativeStage', 'g_nativeInitGuard',
     'g_nativeShutdownGuard', 'g_nativeLastFrameTime',
+    'g_gameMainState', 'g_gameMenuState', 'g_gameMenuSelected',
+    'g_gameRaceLoadStage', 'g_gameInRace', 'g_gameFlag563BF4',
+    'g_gameGraphicsInitErrorFlag',
     'Game_InitGame', 'Game_UpdateFrame', 'Game_ShutdownGame',
+    'Game_InitResources', 'Game_InitState', 'Game_CleanupResources',
     '__divdi3'
 ]
 INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'Input_PollNative',
@@ -106,9 +113,7 @@ STARTUP_BOUNDARY_SOURCE += (
     '#include "renderer.h"\n'
     '#include <stdint.h>\n'
     'int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform) { (void)handle; (void)position; (void)transform; for (;;) {} }\n'
-    'int32_t Game_InitGame(void) { for (;;) {} }\n'
     'int32_t Game_UpdateFrame(void) { for (;;) {} }\n'
-    'int32_t Game_ShutdownGame(void) { for (;;) {} }\n'
 )
 SPRITE_DISPATCH_EXPORTS = [
     'Gfx_CloseDispatch', 'Gfx_OptionDispatch', 'Gfx_ConfigureDispatch',

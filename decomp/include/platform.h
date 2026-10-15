@@ -25,6 +25,14 @@ extern volatile int32_t g_nativeInitGuard; /* VA 0x004937B0 */
 extern volatile int32_t g_nativeShutdownGuard; /* VA 0x004937B4 */
 extern volatile uint32_t g_nativeLastFrameTime; /* VA 0x0049373C */
 
+extern volatile int32_t g_gameMainState; /* VA 0x00639394 */
+extern volatile int32_t g_gameMenuState; /* VA 0x00563C3C */
+extern volatile int32_t g_gameMenuSelected; /* VA 0x00563D9C */
+extern volatile int32_t g_gameRaceLoadStage; /* VA 0x00553290 */
+extern volatile int32_t g_gameInRace; /* VA 0x00525E5C */
+extern volatile int32_t g_gameFlag563BF4; /* VA 0x00563BF4 */
+extern volatile int32_t g_gameGraphicsInitErrorFlag; /* VA 0x0054F970 */
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
 int32_t Game_ProcessFrame(void);
 LRESULT CALLBACK Game_WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -34,9 +42,12 @@ void Game_PostClose(void);
 void Game_ShutdownSubsystems(void);
 void Game_SetPalette(const void *palette_container);
 
-/* Forward declarations for downstream frame callbacks */
+/* Game lifecycle entry points and downstream dependencies */
 int32_t Game_InitGame(void);
 int32_t Game_UpdateFrame(void);
 int32_t Game_ShutdownGame(void);
+int32_t Game_InitResources(void);
+int32_t Game_InitState(void);
+int32_t Game_CleanupResources(void);
 
 #endif /* IGNITION_PLATFORM_H */
