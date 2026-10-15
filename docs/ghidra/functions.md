@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:e44cc3b11751d464d0bcdae378b9d119e57474d3a7459a8fd8e310ca8bd02861 -->
+<!-- snapshot:70bdd19237fcb363caa2fb3b7cf8d77bb57f346e3ee42f9aff91ed2dc91cc46e -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -576,8 +576,8 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x0045D800` | `0x0005D800` | 32 | `Gfx_DrawWorkspaceATriangleSpan` | game | reconstructed | [windows_workspace_a_spans.md](windows_workspace_a_spans.md) |
 | `0x0045D820` | `0x0005D820` | 28 | `Gfx_DrawWorkspaceAClippedTriangleSpan` | game | reconstructed | [windows_workspace_a_spans.md](windows_workspace_a_spans.md) |
 | `0x0045D840` | `0x0005D840` | 84 | `Gfx_InitSpriteWorkspaceA` | game | reconstructed | [windows_gfx_sprite_workspaces.md](windows_gfx_sprite_workspaces.md) |
-| `0x0045D8A0` | `0x0005D8A0` | 1805 | `Gfx_RasterizeWorkspaceATriangle` | game | analyzed | [windows_gfx_sprite_workspaces.md](windows_gfx_sprite_workspaces.md) |
-| `0x0045DFB0` | `0x0005DFB0` | 1561 | `Gfx_RasterizeWorkspaceAClippedTriangle` | game | analyzed | [windows_gfx_sprite_workspaces.md](windows_gfx_sprite_workspaces.md) |
+| `0x0045D8A0` | `0x0005D8A0` | 1805 | `Gfx_RasterizeWorkspaceATriangle` | game | reconstructed | [windows_workspace_a_triangles.md](windows_workspace_a_triangles.md) |
+| `0x0045DFB0` | `0x0005DFB0` | 1561 | `Gfx_RasterizeWorkspaceAClippedTriangle` | game | reconstructed | [windows_workspace_a_triangles.md](windows_workspace_a_triangles.md) |
 | `0x0045E5D0` | `0x0005E5D0` | 53 | `Gfx_ComputeWorkspaceATriangleSlope` | game | reconstructed | [windows_workspace_a_spans.md](windows_workspace_a_spans.md) |
 | `0x0045E610` | `0x0005E610` | 326 | `Gfx_InitPrimitiveState` | game | reconstructed | [windows_primitive_startup.md](windows_primitive_startup.md) |
 | `0x0045E760` | `0x0005E760` | 284 | `sub_0045E760` | unknown | unidentified | - |

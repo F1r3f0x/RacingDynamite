@@ -61,12 +61,16 @@ RENDERER_EXPORTS += ['Gfx_RasterizeTexturedTriangle','Gfx_RasterizeClippedTriang
     'g_activeSpriteRequest','g_nativeSpriteDefault','g_nativeImageControl',
     'Gfx_SpriteDrawListCallback','Gfx_SubmitDrawListTriangleRequest','Gfx_SpriteDrawListNative',
     'g_triangleDrawListStride','g_triangleWorkspacePacket','Gfx_RasterizeWorkspaceATriangle',
+    'Gfx_RasterizeWorkspaceAClippedTriangle',
     'Gfx_SetWorkspaceATriangleSpanCore','Gfx_SetWorkspaceATriangleSpanState',
     'Gfx_DrawWorkspaceATriangleSpanCore','Gfx_DrawWorkspaceATriangleSpan',
     'Gfx_DrawWorkspaceAClippedTriangleSpanCore','Gfx_DrawWorkspaceAClippedTriangleSpan',
     'Gfx_ComputeWorkspaceATriangleSlope',
     'g_triangleSpanWorkspaceAByteStep','g_triangleSpanWorkspaceAPackedStep',
-    'g_triangleSpanWorkspaceATextureWord','g_triangleSpanWorkspaceALeftSample']
+    'g_triangleSpanWorkspaceATextureWord','g_triangleSpanWorkspaceALeftSample',
+    'g_triangleWorkspaceAOrdinaryPacket','g_triangleWorkspaceAClippedPacket',
+    'g_triangleWorkspaceARasterTexture','g_triangleWorkspaceARasterCursor',
+    'g_triangleWorkspaceARasterMinimumX','g_triangleWorkspaceARasterMaximumX']
 
 
 def validate_renderer_calls(pe):
@@ -80,16 +84,18 @@ def validate_renderer_calls(pe):
         'Gfx_ClipAndSplitTriangleEdge':2,'Gfx_InitializeTriangleEdgeSteps':6,
         'Gfx_ClampTriangleEdgeRightEndpoint':2,'Gfx_EmitCorrectedTriangleEdgeRecords':3,
         'Gfx_EmitRawTriangleEdgeRecords':3,'Gfx_SpriteConfigureNative':1,
-        'Gfx_SpriteSetClipNative':1,'Gfx_ComputeTriangleGradients':2,
+        'Gfx_SpriteSetClipNative':1,'Gfx_ComputeTriangleGradients':4,
         'Gfx_SetTriangleSpanState':2,'Gfx_ComputeTriangleEdgeSlope':4,
-        'Gfx_BuildClippedRawTriangleEdge':3,'Gfx_BuildClippedCorrectedTriangleEdge':3,
+        'Gfx_BuildClippedRawTriangleEdge':6,'Gfx_BuildClippedCorrectedTriangleEdge':6,
         'Gfx_DrawClippedTriangleSpan':4,'Gfx_DrawTriangleSpan':8,
-        'Gfx_BuildRawTriangleEdge':3,'Gfx_BuildCorrectedTriangleEdge':3,
+        'Gfx_BuildRawTriangleEdge':6,'Gfx_BuildCorrectedTriangleEdge':6,
         'Gfx_RasterizeClippedTriangle':1,'Gfx_RasterizeTexturedTriangle':2,
         'Gfx_PrepareTransformedSprite':1,'Gfx_RasterizeSpritePacket':1,
         'Gfx_CopySpriteDescriptor':1,
         'Gfx_SpriteDrawListCallback':1,'Gfx_SubmitDrawListTriangleRequest':1,
-        'Gfx_RasterizeWorkspaceATriangle':1,
+        'Gfx_RasterizeWorkspaceATriangle':1,'Gfx_RasterizeWorkspaceAClippedTriangle':1,
+        'Gfx_SetWorkspaceATriangleSpanState':2,'Gfx_ComputeWorkspaceATriangleSlope':4,
+        'Gfx_DrawWorkspaceATriangleSpan':8,'Gfx_DrawWorkspaceAClippedTriangleSpan':4,
         'Gfx_SetWorkspaceATriangleSpanCore':1,'Gfx_DrawWorkspaceATriangleSpanCore':1,
         'Gfx_DrawWorkspaceAClippedTriangleSpanCore':1}.items()}
     assert calls==expected,(calls,expected)
@@ -103,7 +109,7 @@ def build(dll=DLL,exports=()):
         raise RuntimeError('Installed provisional GCC and LLD required')
     obj = BUILD / (dll.stem + '_renderer.obj')
     commands = [[gcc,'-m32','-std=c89','-pedantic-errors','-Wall','-Wextra','-Werror',
-        '-O2','-fno-inline','-fno-optimize-sibling-calls','-I',str(ROOT/'decomp/include'),
+        '-O2','-fno-inline','-fno-optimize-sibling-calls','-fno-ipa-icf','-I',str(ROOT/'decomp/include'),
         '-c',str(ROOT/'decomp/src/renderer.c'),'-o',str(obj)],
         [linker,'/dll','/noentry','/nodefaultlib','/machine:x86','/safeseh:no',
          '/base:0x10000000','/out:'+str(dll),str(obj)] + ['/export:'+n for n in
@@ -123,7 +129,6 @@ def build(dll=DLL,exports=()):
         'volatile GfxSpriteRequest *volatile g_activeSpriteRequest = 0;\n'
         'volatile GfxSpriteDescriptor g_nativeSpriteDefault = {{0}};\n'
         'volatile GfxPointerTable g_nativeImageControl = {{0, 0}, 0, (uint32_t *)0};\n\n'
-        'void Gfx_RasterizeWorkspaceATriangle(const GfxTexturedTrianglePacket *packet) { (void)packet; }\n\n'
         + desc_copy + '\n'
     )
     storage_source.write_text(storage_code, encoding='utf-8', newline='\n')

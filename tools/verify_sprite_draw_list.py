@@ -122,10 +122,12 @@ def build():
         '#include "geputget.h"\n'
         '#include "renderer.h"\n\n'
         'volatile GfxSpriteRequest *volatile g_activeSpriteRequest = 0;\n'
+        'GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer0 = 0;\n'
+        'GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer1 = 0;\n'
+        'GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceABuffer2 = 0;\n'
         'GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer0 = 0;\n'
         'GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer1 = 0;\n'
         'GfxSpriteWorkspaceBuffer *volatile g_spriteWorkspaceBBuffer2 = 0;\n'
-        'void Gfx_RasterizeWorkspaceATriangle(const GfxTexturedTrianglePacket *packet) { (void)packet; }\n'
         'int Gfx_CopySpriteDescriptor(GfxSpriteDescriptor *descriptor, int image_id) {\n'
         '    (void)descriptor;\n'
         '    (void)image_id;\n'
@@ -147,7 +149,7 @@ def build():
     commands = [
         [
             gcc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra', '-Werror',
-            '-O2', '-fno-inline', '-fno-optimize-sibling-calls',
+            '-O2', '-fno-inline', '-fno-optimize-sibling-calls', '-fno-ipa-icf',
             '-I', str(ROOT / 'decomp/include'),
             '-c', str(ROOT / 'decomp/src/renderer.c'),
             '-o', str(obj_renderer)

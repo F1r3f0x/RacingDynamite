@@ -268,6 +268,8 @@ def verify():
         'Gfx_DrawWorkspaceAClippedTriangleSpan',
         'Gfx_DrawWorkspaceAClippedTriangleSpanCore',
         'Gfx_ComputeWorkspaceATriangleSlope',
+        'Gfx_RasterizeWorkspaceATriangle',
+        'Gfx_RasterizeWorkspaceAClippedTriangle',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
     draw_iat=next(entry.address for group in rebuilt.DIRECTORY_ENTRY_IMPORT
@@ -378,7 +380,22 @@ def verify():
         'Gfx_DrawWorkspaceATriangleSpan':[
             'Gfx_DrawWorkspaceATriangleSpanCore'],
         'Gfx_DrawWorkspaceAClippedTriangleSpan':[
-            'Gfx_DrawWorkspaceAClippedTriangleSpanCore']})
+            'Gfx_DrawWorkspaceAClippedTriangleSpanCore'],
+        'Gfx_RasterizeWorkspaceATriangle':[
+            'Gfx_ComputeTriangleGradients','Gfx_SetWorkspaceATriangleSpanState',
+            'Gfx_ComputeWorkspaceATriangleSlope','Gfx_ComputeWorkspaceATriangleSlope',
+            'Gfx_BuildRawTriangleEdge','Gfx_BuildCorrectedTriangleEdge','Gfx_BuildRawTriangleEdge',
+            'Gfx_DrawWorkspaceATriangleSpan','Gfx_DrawWorkspaceATriangleSpan',
+            'Gfx_RasterizeWorkspaceAClippedTriangle',
+            'Gfx_BuildCorrectedTriangleEdge','Gfx_BuildRawTriangleEdge','Gfx_BuildCorrectedTriangleEdge',
+            'Gfx_DrawWorkspaceATriangleSpan','Gfx_DrawWorkspaceATriangleSpan'],
+        'Gfx_RasterizeWorkspaceAClippedTriangle':[
+            'Gfx_ComputeTriangleGradients','Gfx_SetWorkspaceATriangleSpanState',
+            'Gfx_ComputeWorkspaceATriangleSlope','Gfx_ComputeWorkspaceATriangleSlope',
+            'Gfx_BuildClippedRawTriangleEdge','Gfx_BuildClippedCorrectedTriangleEdge','Gfx_BuildClippedRawTriangleEdge',
+            'Gfx_DrawWorkspaceAClippedTriangleSpan','Gfx_DrawWorkspaceATriangleSpan','Gfx_DrawWorkspaceAClippedTriangleSpan','Gfx_DrawWorkspaceATriangleSpan',
+            'Gfx_BuildClippedCorrectedTriangleEdge','Gfx_BuildClippedRawTriangleEdge','Gfx_BuildClippedCorrectedTriangleEdge',
+            'Gfx_DrawWorkspaceAClippedTriangleSpan','Gfx_DrawWorkspaceATriangleSpan','Gfx_DrawWorkspaceAClippedTriangleSpan','Gfx_DrawWorkspaceATriangleSpan']})
     assert len(direct_calls) == sum(map(len, expected_calls.values())), 'Unexpected direct helper dependency count'
     actual_calls = {}
     for call in direct_calls:
@@ -1018,3 +1035,6 @@ if __name__ == '__main__':
 
     from verify_workspace_a_spans import main as verify_workspace_a_spans
     verify_workspace_a_spans()
+
+    from verify_workspace_a_triangles import main as verify_workspace_a_triangles
+    verify_workspace_a_triangles()

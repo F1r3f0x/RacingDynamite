@@ -98,7 +98,6 @@ SURFACE_EXPORTS = ['Gfx_InitSurfaceRecords', 'g_nativePrimarySurface',
 # Validation fixtures live separately from the extracted production installer.
 STARTUP_BOUNDARY_SOURCE += (
     '#include "renderer.h"\n'
-    'void Gfx_RasterizeWorkspaceATriangle(const GfxTexturedTrianglePacket *packet) { (void)packet; for (;;) {} }\n'
     'int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform) { (void)handle; (void)position; (void)transform; for (;;) {} }\n'
 )
 SPRITE_DISPATCH_EXPORTS = [
@@ -227,7 +226,7 @@ def compile_renderer(stem):
     obj = BUILD/(stem+'_renderer.obj')
     obj.unlink(missing_ok=True)
     command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
-        '-Werror', '-O2', '-fno-inline', '-fno-optimize-sibling-calls',
+        '-Werror', '-O2', '-fno-inline', '-fno-optimize-sibling-calls', '-fno-ipa-icf',
         '-I', str(ROOT/'decomp/include'), '-c', str(ROOT/'decomp/src/renderer.c'),
         '-o', str(obj)]
     print(subprocess.list2cmdline(command), flush=True)

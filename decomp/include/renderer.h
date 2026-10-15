@@ -295,4 +295,13 @@ void Gfx_DrawWorkspaceAClippedTriangleSpan(unsigned char *destination, int count
     unsigned int packed_uv, unsigned int integer_u);
 int Gfx_ComputeWorkspaceATriangleSlope(int x0, int y0, int x1, int y1);
 
+extern volatile GfxTriangleEdgePacket g_triangleWorkspaceAOrdinaryPacket; /* VA 0x0051AA28 */
+extern const unsigned char *volatile g_triangleWorkspaceARasterTexture; /* VA 0x0051AA48 */
+extern volatile unsigned int g_triangleWorkspaceARasterCursor; /* VA 0x0051AA54 */
+extern volatile int g_triangleWorkspaceARasterMinimumX; /* VA 0x0051AA58 */
+extern volatile int g_triangleWorkspaceARasterMaximumX; /* VA 0x0051AA78 */
+extern volatile GfxTriangleEdgePacket g_triangleWorkspaceAClippedPacket; /* VA 0x0051AA80 */
+
+void Gfx_RasterizeWorkspaceAClippedTriangle(const GfxTexturedTrianglePacket *packet);
+
 #endif

@@ -234,6 +234,8 @@
         "Gfx_SpriteSetStateNative",
         "Gfx_RasterizeTexturedTriangle",
         "Gfx_RasterizeClippedTriangle",
+        "Gfx_RasterizeWorkspaceATriangle",
+        "Gfx_RasterizeWorkspaceAClippedTriangle",
         "Gfx_PrepareTransformedSprite",
         "Gfx_RasterizeSpritePacket",
         "Gfx_SubmitSpriteRequest",
@@ -264,12 +266,13 @@
         "verified triangle texture pointer51A9C4, frame cursor51A9D0, presort signed Xmin51A9D4/Xmax51A9F8",
         "Verified sprite blit source/width/height VA004BAD28..004BAD30 and transformed input packet VA004BAD34..004BAD47; owned by renderer.c",
         "Verified 4-byte draw list stride VA004BA704 and 56-byte triangle workspace packet VA004BA718..004BA74C; owned by renderer.c",
-        "Verified Workspace A triangle span state VA004BAEFC..004BAF0C: byte step, packed step, texture word, left sample; owned by renderer.c"
+        "Verified Workspace A triangle span state VA004BAEFC..004BAF0C: byte step, packed step, texture word, left sample; owned by renderer.c",
+        "Verified Workspace A triangle rasterization state VA0051AA28..0051AA9C: ordinary packet, raster texture, cursor, X min/max, clipped packet; owned by renderer.c"
       ],
       "dependencies": [
         "caller-owned mapped texture, compositing table and framebuffer storage; initialization remains external and unverified",
         "real gradient and edge-step initialization remain external pending reconstruction; caller supplies authenticated shared state",
-        "Borrow verified graphics_legacy workspaceB buffers0/1/2; actual production-owned slots/init at RVA5C9F0, no duplicate storage or success-returning allocation substitute",
+        "Borrow verified graphics_legacy workspaceB buffers0/1/2 and workspaceA buffers0/1/2; actual production-owned slots/init at RVA5C9F0 and RVA5D840, no duplicate storage or success-returning allocation substitute",
         "Sprite packet invokes real Gfx_PrepareTransformedSprite; focused packet verifier intercepts that call explicitly, while production links the complete renderer dependency"
       ],
       "placement_reason": "Authenticated cdecl span wrappers and complete register leaves form one real dependency closure. Internal leaf interfaces use explicit C parameters with documented ABI adaptation; no register shim or invented rasterizer. Original source filename unknown.",
