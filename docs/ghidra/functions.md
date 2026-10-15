@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:159a63862dd4163588077de808510b4918bd247b9571cec143fa30e06d4bb81e -->
+<!-- snapshot:27de19fa1737520aedc5691f5d9abbf6a74bdf8265b293e53b988d6996b61744 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -468,12 +468,12 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00457ED0` | `0x00057ED0` | 51 | `sub_00457ED0` | unknown | unidentified | - |
 | `0x00457F10` | `0x00057F10` | 72 | `sub_00457F10` | unknown | unidentified | - |
 | `0x00457F60` | `0x00057F60` | 82 | `sub_00457F60` | unknown | unidentified | - |
-| `0x00457FC0` | `0x00057FC0` | 31 | `sub_00457FC0` | unknown | unidentified | - |
+| `0x00457FC0` | `0x00057FC0` | 31 | `Audio_StopCD` | game | reconstructed | [windows_audio_cd.md](windows_audio_cd.md) |
 | `0x00457FE0` | `0x00057FE0` | 78 | `sub_00457FE0` | unknown | unidentified | - |
 | `0x00458030` | `0x00058030` | 6 | `sub_00458030` | unknown | unidentified | - |
-| `0x00458040` | `0x00058040` | 89 | `sub_00458040` | unknown | unidentified | - |
-| `0x004580A0` | `0x000580A0` | 31 | `sub_004580A0` | unknown | unidentified | - |
-| `0x004580C0` | `0x000580C0` | 31 | `sub_004580C0` | unknown | unidentified | - |
+| `0x00458040` | `0x00058040` | 89 | `Audio_OpenCD` | game | reconstructed | [windows_audio_cd.md](windows_audio_cd.md) |
+| `0x004580A0` | `0x000580A0` | 31 | `Audio_CloseCD` | game | reconstructed | [windows_audio_cd.md](windows_audio_cd.md) |
+| `0x004580C0` | `0x000580C0` | 31 | `Audio_EjectCD` | game | reconstructed | [windows_audio_cd.md](windows_audio_cd.md) |
 | `0x004580E0` | `0x000580E0` | 122 | `sub_004580E0` | unknown | unidentified | - |
 | `0x00458160` | `0x00058160` | 80 | `sub_00458160` | unknown | unidentified | - |
 | `0x004581B0` | `0x000581B0` | 134 | `sub_004581B0` | unknown | unidentified | - |
@@ -500,7 +500,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00459580` | `0x00059580` | 288 | `sub_00459580` | unknown | unidentified | - |
 | `0x004596A0` | `0x000596A0` | 885 | `sub_004596A0` | unknown | unidentified | - |
 | `0x00459A20` | `0x00059A20` | 775 | `sub_00459A20` | unknown | unidentified | - |
-| `0x00459D30` | `0x00059D30` | 3 | `sub_00459D30` | unknown | unidentified | - |
+| `0x00459D30` | `0x00059D30` | 3 | `Audio_ShutdownSound` | game | reconstructed | [windows_audio_cd.md](windows_audio_cd.md) |
 | `0x00459D40` | `0x00059D40` | 205 | `sub_00459D40` | unknown | unidentified | - |
 | `0x00459E10` | `0x00059E10` | 97 | `sub_00459E10` | unknown | unidentified | - |
 | `0x00459E80` | `0x00059E80` | 683 | `sub_00459E80` | unknown | unidentified | - |

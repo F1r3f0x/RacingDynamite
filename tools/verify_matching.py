@@ -277,7 +277,8 @@ def verify():
         'WinMain', 'Game_ProcessFrame', 'Game_InitGame', 'Game_UpdateFrame', 'Game_ShutdownGame',
         'Game_InitResources', 'Game_InitState', 'Game_CleanupResources',
         'Audio_CheckCDMediaPresent', 'Audio_InitCDTracks',
-        'Audio_StopCD', 'Audio_CloseCD', 'Audio_ShutdownSound',
+        'Audio_StopCD', 'Audio_OpenCD', 'Audio_CloseCD', 'Audio_EjectCD',
+        'Audio_ShutdownSound',
         'Menu_FreeBackground', 'Log_Printf', 'Log_Shutdown']}
     draw_iat=next(entry.address for group in rebuilt.DIRECTORY_ENTRY_IMPORT
         for entry in group.imports if group.dll==b'DDRAW.dll' and entry.name==b'DirectDrawCreate')
@@ -1060,3 +1061,6 @@ if __name__ == '__main__':
 
     from verify_platform import run_tests as verify_platform
     verify_platform()
+
+    from verify_audio import run_tests as verify_audio
+    verify_audio()

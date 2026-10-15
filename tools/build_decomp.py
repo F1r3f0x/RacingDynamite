@@ -15,9 +15,6 @@ STARTUP_BOUNDARY_SOURCE = (
     'int Game_InitResources(void) { return 1; }\n'
     'int Audio_CheckCDMediaPresent(void) { return 1; }\n'
     'int Audio_InitCDTracks(void) { return 1; }\n'
-    'int Audio_StopCD(void) { return 1; }\n'
-    'int Audio_CloseCD(void) { return 1; }\n'
-    'int Audio_ShutdownSound(void) { return 0; }\n'
     'void Menu_FreeBackground(void) {}\n'
     'int Log_Printf(const char *format, ...) { (void)format; return 1; }\n'
     'int Log_Shutdown(void) { return 1; }\n'
@@ -85,9 +82,12 @@ PLATFORM_EXPORTS = [
     'Game_InitGame', 'Game_UpdateFrame', 'Game_ShutdownGame',
     'Game_InitResources', 'Game_InitState', 'Game_CleanupResources',
     'Audio_CheckCDMediaPresent', 'Audio_InitCDTracks',
-    'Audio_StopCD', 'Audio_CloseCD', 'Audio_ShutdownSound',
     'Menu_FreeBackground', 'Log_Printf', 'Log_Shutdown',
     '__divdi3'
+]
+AUDIO_EXPORTS = [
+    'Audio_StopCD', 'Audio_OpenCD', 'Audio_CloseCD', 'Audio_EjectCD',
+    'Audio_ShutdownSound', 'g_cdAudioReturnString'
 ]
 INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'Input_PollNative',
     'Input_InitTimedNative', 'Input_ShutdownNativeEntry', 'Input_ReinitializeNative',
@@ -150,7 +150,7 @@ EXPORTS = WORKSPACE_EXPORTS + ['validation_gfxDispatchWords', 'Lisa_PrintVersion
            'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'free', 'malloc',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',
            'g_memHandleCallbacks', 'g_memHandleFlags', 'g_memPendingContext',
-           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS + SURFACE_EXPORTS + SPRITE_EXPORTS + SINE_EXPORTS + PRIMITIVE_EXPORTS + INPUT_EXPORTS + PLATFORM_EXPORTS
+           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS + SURFACE_EXPORTS + SPRITE_EXPORTS + SINE_EXPORTS + PRIMITIVE_EXPORTS + INPUT_EXPORTS + PLATFORM_EXPORTS + AUDIO_EXPORTS
 
 def compile_banner(flags, stem):
     # Separate TU: the production calls must not see the nonreturning printf
@@ -252,6 +252,23 @@ LONGLONG __divdi3(LONGLONG a, LONGLONG b) {
     return [str(obj), str(div_obj)], command
 
 
+def compile_audio(stem):
+    """Compile the entire production audio module."""
+    cc = shutil.which('gcc')
+    if not cc:
+        raise RuntimeError('GCC i386 Win32 SDK compiler required')
+    source, obj = ROOT/'decomp/src/audio.c', BUILD/(stem+'_audio.obj')
+    obj.unlink(missing_ok=True)
+    command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
+        '-Werror', '-O2', '-fno-inline', '-fno-optimize-sibling-calls',
+        '-I', str(ROOT/'decomp/include'), '-c', str(source), '-o', str(obj)]
+    print(subprocess.list2cmdline(command), flush=True)
+    subprocess.run(command, cwd=ROOT, check=True)
+    if not obj.is_file() or not obj.stat().st_size:
+        raise RuntimeError('Fresh whole-module audio object required')
+    return obj, command
+
+
 def surface_import_libraries(stem):
     dlltool = shutil.which('llvm-dlltool')
     if not dlltool:
@@ -266,10 +283,11 @@ def surface_import_libraries(stem):
             'PostMessageA@16','LoadCursorA@8','LoadIconA@8','RegisterClassA@4',
             'PeekMessageA@20','GetMessageA@16','TranslateMessage@4','DispatchMessageA@4'],
         'GDI32':['GetDeviceCaps@8','GetStockObject@4'], 'DINPUT':['DirectInputCreateA@16'],
-        'WINMM':['timeKillEvent@4','timeSetEvent@20','timeGetTime@0','timeBeginPeriod@4','timeEndPeriod@4'],
+        'WINMM':['timeKillEvent@4','timeSetEvent@20','timeGetTime@0','timeBeginPeriod@4','timeEndPeriod@4','mciSendStringA@16'],
         'KERNEL32':['QueryPerformanceCounter@4','QueryPerformanceFrequency@4']}
     platform_objs, _ = compile_platform(stem)
-    libraries = list(platform_objs)
+    audio_obj, _ = compile_audio(stem)
+    libraries = list(platform_objs) + [str(audio_obj)]
     for dll,exports in groups.items():
         definition = BUILD/(stem+'_'+dll.lower()+'.def')
         lib = BUILD/(stem+'_'+dll.lower()+'.lib')

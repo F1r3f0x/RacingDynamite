@@ -73,6 +73,7 @@ def validate_platform_imports(pe):
         ('DINPUT.dll', 'DirectInputCreateA'), ('WINMM.dll', 'timeKillEvent'),
         ('WINMM.dll', 'timeSetEvent'), ('WINMM.dll', 'timeGetTime'),
         ('WINMM.dll', 'timeBeginPeriod'), ('WINMM.dll', 'timeEndPeriod'),
+        ('WINMM.dll', 'mciSendStringA'),
         ('KERNEL32.dll', 'QueryPerformanceCounter'),
         ('KERNEL32.dll', 'QueryPerformanceFrequency')
     }

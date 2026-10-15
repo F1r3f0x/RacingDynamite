@@ -303,6 +303,26 @@
       "placement_reason": "Authentic Windows window procedure, message handling, high-resolution timer and lifecycle orchestration form the core platform translation unit.",
       "build_mode": "direct",
       "original_source": null
+    },
+    "audio": {
+      "source": "decomp/src/audio.c",
+      "header": "decomp/include/audio.h",
+      "symbol_prefixes": [
+        "Audio_",
+        "Sound_"
+      ],
+      "responsibility": "Authentic Windows MCI CD audio and sound interface routines",
+      "state": [
+        "CD audio return string buffer",
+        "CD media present flag",
+        "CD track table and playback state"
+      ],
+      "dependencies": [
+        "Win32 WinMM MCI API"
+      ],
+      "placement_reason": "Authentic Windows MCI CD audio and sound interface routines form the dedicated audio subsystem.",
+      "build_mode": "direct",
+      "original_source": null
     }
   }
 }
