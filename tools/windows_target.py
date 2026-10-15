@@ -69,9 +69,12 @@ def validate_platform_imports(pe):
     """
     expected = {
         ('DDRAW.dll', 'DirectDrawCreate'), ('GDI32.dll', 'GetDeviceCaps'),
+        ('GDI32.dll', 'GetStockObject'),
         ('DINPUT.dll', 'DirectInputCreateA'), ('WINMM.dll', 'timeKillEvent'),
         ('WINMM.dll', 'timeSetEvent'), ('WINMM.dll', 'timeGetTime'),
-        ('KERNEL32.dll', 'QueryPerformanceCounter')
+        ('WINMM.dll', 'timeBeginPeriod'), ('WINMM.dll', 'timeEndPeriod'),
+        ('KERNEL32.dll', 'QueryPerformanceCounter'),
+        ('KERNEL32.dll', 'QueryPerformanceFrequency')
     }
     expected.update(('USER32.dll', name) for name in (
         'GetSystemMetrics', 'CreateWindowExA', 'UpdateWindow', 'SetFocus', 'GetDC',
@@ -79,7 +82,8 @@ def validate_platform_imports(pe):
         'AdjustWindowRectEx', 'SetWindowPos', 'SystemParametersInfoA', 'GetWindowRect',
         'MessageBoxA', 'ShowWindow', 'PostQuitMessage', 'GetClientRect',
         'ClientToScreen', 'DefWindowProcA', 'SetCursor', 'DestroyWindow',
-        'PostMessageA'))
+        'PostMessageA', 'LoadCursorA', 'LoadIconA', 'RegisterClassA',
+        'PeekMessageA', 'GetMessageA', 'TranslateMessage', 'DispatchMessageA'))
     actual={(group.dll.decode(),entry.name.decode() if entry.name else '')
         for group in getattr(pe,'DIRECTORY_ENTRY_IMPORT',()) for entry in group.imports}
     if actual!=expected:

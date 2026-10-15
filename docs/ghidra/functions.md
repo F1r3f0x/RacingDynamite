@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:8054a566b5489f1076f682b74e7efabf99c724e6f8e7fdbdbaf868a1ffa25ba8 -->
+<!-- snapshot:479a0ee74736b68cd6127a70585e8e72dd78ace2f1651bfdc43a6a021983a92a -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -114,8 +114,8 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00411B10` | `0x00011B10` | 47 | `sub_00411B10` | unknown | unidentified | - |
 | `0x00411B40` | `0x00011B40` | 627 | `sub_00411B40` | unknown | unidentified | - |
 | `0x00411DC0` | `0x00011DC0` | 734 | `sub_00411DC0` | unknown | unidentified | - |
-| `0x004120A0` | `0x000120A0` | 390 | `sub_004120A0` | unknown | unidentified | - |
-| `0x00412230` | `0x00012230` | 154 | `sub_00412230` | unknown | unidentified | - |
+| `0x004120A0` | `0x000120A0` | 390 | `WinMain` | game | reconstructed | [windows_platform_main.md](windows_platform_main.md) |
+| `0x00412230` | `0x00012230` | 154 | `Game_ProcessFrame` | game | reconstructed | [windows_platform_main.md](windows_platform_main.md) |
 | `0x004122D0` | `0x000122D0` | 400 | `Game_WindowProc` | game | reconstructed | [windows_platform.md](windows_platform.md) |
 | `0x00412460` | `0x00012460` | 152 | `Game_GetTime` | game | reconstructed | [windows_platform.md](windows_platform.md) |
 | `0x00412500` | `0x00012500` | 47 | `Game_InitSubsystems` | game | reconstructed | [windows_platform.md](windows_platform.md) |

@@ -29,6 +29,8 @@ HOOK_BASE = 0x8000000
 PRESERVED = [UC_X86_REG_EBX, UC_X86_REG_ESI, UC_X86_REG_EDI, UC_X86_REG_EBP]
 
 ROUTINES = {
+    'WinMain': (0x120A0, 390, '3460e40b77123335ede23ae49d122053a852b6398f037253ce07ca5520b2a88c'),
+    'Game_ProcessFrame': (0x12230, 154, '4c50ba4401d440b7c1caa09ce8d55047f8d9eb38b235b81ebe5edbfcfae8153f'),
     'Game_WindowProc': (0x122D0, 400, '461e5b4afef4dd9642c7ce031556749db188c41ea06480eab871723b337452e0'),
     'Game_GetTime': (0x12460, 152, 'bd900f4be8ea23b0f2e49bcdb780f817e1896e172c75c66ea448f30985fa909b'),
     'Game_InitSubsystems': (0x12500, 47, 'e96334c54403bffb6aadf238c02d5b1078ec74d724cd419db84d743d09ef5218'),
@@ -38,6 +40,8 @@ ROUTINES = {
 }
 
 EXPECTED_FPO = {
+    0x120A0: (390, 17, 4, 5148),
+    0x12230: (154, 0, 0, 0),
     0x122D0: (400, 0, 4, 775),
     0x12460: (152, 0, 0, 522),
     0x12500: (47, 0, 0, 0),
@@ -63,6 +67,11 @@ GLOBALS = {
     'g_nativeAccumulatedActiveTime': (0x4937AC, 4),
     'g_nativeLastActiveTime': (0x4937B8, 4),
     'g_nativeFullscreen': (0x493728, 4),
+    'g_nativeUnknownPlatformPtr': (0x4C53A0, 4),
+    'g_nativeStage': (0x493734, 4),
+    'g_nativeInitGuard': (0x4937B0, 4),
+    'g_nativeShutdownGuard': (0x4937B4, 4),
+    'g_nativeLastFrameTime': (0x49373C, 4),
 }
 
 TRACKING_INPUTS = [
@@ -137,6 +146,11 @@ int Gfx_Shutdown(void) { return 1; }
 int Gfx_SetPaletteNative(const unsigned char *rgb) { (void)rgb; return 1; }
 int Input_InitNative(void) { return 1; }
 int Input_ShutdownNative(void) { return 1; }
+int Mem_InitSystem(void) { return 1; }
+int Mem_ShutdownSystem(void) { return 1; }
+int Game_InitGame(void) { return 1; }
+int Game_UpdateFrame(void) { return 1; }
+int Game_ShutdownGame(void) { return 1; }
 ''', encoding='utf-8')
 
     fixture_obj = BUILD / 'platform_fixtures.obj'
@@ -148,9 +162,13 @@ int Input_ShutdownNative(void) { return 1; }
     groups = {
         'USER32': ['PostQuitMessage@4', 'GetSystemMetrics@4', 'SetRect@20',
                    'GetClientRect@8', 'ClientToScreen@8', 'DefWindowProcA@16',
-                   'SetCursor@4', 'DestroyWindow@4', 'PostMessageA@16'],
-        'KERNEL32': ['QueryPerformanceCounter@4'],
-        'WINMM': ['timeGetTime@0']
+                   'SetCursor@4', 'DestroyWindow@4', 'PostMessageA@16',
+                   'LoadCursorA@8', 'LoadIconA@8', 'RegisterClassA@4',
+                   'PeekMessageA@20', 'GetMessageA@16', 'TranslateMessage@4',
+                   'DispatchMessageA@4'],
+        'KERNEL32': ['QueryPerformanceCounter@4', 'QueryPerformanceFrequency@4'],
+        'GDI32': ['GetStockObject@4'],
+        'WINMM': ['timeGetTime@0', 'timeBeginPeriod@4', 'timeEndPeriod@4']
     }
     for dll_name, exports in groups.items():
         def_file = BUILD / f'plat_test_{dll_name.lower()}.def'
@@ -161,7 +179,9 @@ int Input_ShutdownNative(void) { return 1; }
 
     fixture_exports = [
         'Gfx_SelectBackend', 'Gfx_Open', 'Gfx_Shutdown',
-        'Gfx_SetPaletteNative', 'Input_InitNative', 'Input_ShutdownNative'
+        'Gfx_SetPaletteNative', 'Input_InitNative', 'Input_ShutdownNative',
+        'Mem_InitSystem', 'Mem_ShutdownSystem',
+        'Game_InitGame', 'Game_UpdateFrame', 'Game_ShutdownGame'
     ]
     exports = list(ROUTINES.keys()) + list(GLOBALS.keys()) + fixture_exports
     link_cmd = [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/safeseh:no',
@@ -187,6 +207,22 @@ SLOT_INPUT_INIT = 13
 SLOT_INPUT_SHUTDOWN = 14
 SLOT_GFX_SELECT_BACKEND = 15
 SLOT_GFX_SET_PALETTE = 16
+SLOT_LOAD_CURSOR = 17
+SLOT_LOAD_ICON = 18
+SLOT_GET_STOCK_OBJECT = 19
+SLOT_REGISTER_CLASS = 20
+SLOT_QPF = 21
+SLOT_TIME_BEGIN_PERIOD = 22
+SLOT_TIME_END_PERIOD = 23
+SLOT_MEM_INIT_SYSTEM = 24
+SLOT_MEM_SHUTDOWN_SYSTEM = 25
+SLOT_GAME_INIT_GAME = 26
+SLOT_GAME_UPDATE_FRAME = 27
+SLOT_GAME_SHUTDOWN_GAME = 28
+SLOT_PEEK_MESSAGE = 29
+SLOT_GET_MESSAGE = 30
+SLOT_TRANSLATE_MESSAGE = 31
+SLOT_DISPATCH_MESSAGE = 32
 
 class MockContext:
     def __init__(self):
@@ -199,6 +235,11 @@ class MockContext:
         self.screen_cy = 480
         self.client_rect = (0, 0, 640, 480)
         self.screen_offset = (10, 20)
+        self.register_class_result = 0x1234
+        self.qpf_result = 1
+        self.qpf_value = 3579545
+        self.messages = []
+        self.post_close_quits = False
 
 class PlatformSession:
     def __init__(self, pe, is_original):
@@ -215,7 +256,7 @@ class PlatformSession:
 
         self.uc.mem_map(HOOK_BASE, 0x10000)
         # Fill hook slots with NOPs and RET to avoid invalid read
-        for slot in range(32):
+        for slot in range(64):
             self.uc.mem_write(HOOK_BASE + slot * 16, b'\x90\x90\x90\x90\xc3')
 
         self.symbols = {}
@@ -247,6 +288,17 @@ class PlatformSession:
         self.uc.mem_write(0x64c448, struct.pack('<I', self._hook_slot_addr(SLOT_DEF_WINDOW_PROC)))
         self.uc.mem_write(0x64c38c, struct.pack('<I', self._hook_slot_addr(SLOT_QPC)))
         self.uc.mem_write(0x64c47c, struct.pack('<I', self._hook_slot_addr(SLOT_TIME_GET_TIME)))
+        self.uc.mem_write(0x64c2cc, struct.pack('<I', self._hook_slot_addr(SLOT_QPF)))
+        self.uc.mem_write(0x64c2c4, struct.pack('<I', self._hook_slot_addr(SLOT_GET_STOCK_OBJECT)))
+        self.uc.mem_write(0x64c430, struct.pack('<I', self._hook_slot_addr(SLOT_LOAD_CURSOR)))
+        self.uc.mem_write(0x64c454, struct.pack('<I', self._hook_slot_addr(SLOT_LOAD_ICON)))
+        self.uc.mem_write(0x64c458, struct.pack('<I', self._hook_slot_addr(SLOT_REGISTER_CLASS)))
+        self.uc.mem_write(0x64c44c, struct.pack('<I', self._hook_slot_addr(SLOT_PEEK_MESSAGE)))
+        self.uc.mem_write(0x64c450, struct.pack('<I', self._hook_slot_addr(SLOT_GET_MESSAGE)))
+        self.uc.mem_write(0x64c3ec, struct.pack('<I', self._hook_slot_addr(SLOT_TRANSLATE_MESSAGE)))
+        self.uc.mem_write(0x64c3f0, struct.pack('<I', self._hook_slot_addr(SLOT_DISPATCH_MESSAGE)))
+        self.uc.mem_write(0x64c470, struct.pack('<I', self._hook_slot_addr(SLOT_TIME_BEGIN_PERIOD)))
+        self.uc.mem_write(0x64c478, struct.pack('<I', self._hook_slot_addr(SLOT_TIME_END_PERIOD)))
 
         # Subroutines in IGN_WIN.EXE: replace their entry with jump to hook
         def hook_sub(addr, slot):
@@ -260,6 +312,11 @@ class PlatformSession:
         hook_sub(0x455e20, SLOT_INPUT_SHUTDOWN)
         hook_sub(0x456af0, SLOT_GFX_SELECT_BACKEND)
         hook_sub(0x456c40, SLOT_GFX_SET_PALETTE)
+        hook_sub(0x45b170, SLOT_MEM_INIT_SYSTEM)
+        hook_sub(0x45b1a0, SLOT_MEM_SHUTDOWN_SYSTEM)
+        hook_sub(0x417270, SLOT_GAME_INIT_GAME)
+        hook_sub(0x4172b0, SLOT_GAME_UPDATE_FRAME)
+        hook_sub(0x417e90, SLOT_GAME_SHUTDOWN_GAME)
 
     def _patch_dll_iat_and_calls(self, pe):
         iat_map = {
@@ -274,6 +331,17 @@ class PlatformSession:
             'DefWindowProcA': SLOT_DEF_WINDOW_PROC,
             'QueryPerformanceCounter': SLOT_QPC,
             'timeGetTime': SLOT_TIME_GET_TIME,
+            'LoadCursorA': SLOT_LOAD_CURSOR,
+            'LoadIconA': SLOT_LOAD_ICON,
+            'GetStockObject': SLOT_GET_STOCK_OBJECT,
+            'RegisterClassA': SLOT_REGISTER_CLASS,
+            'QueryPerformanceFrequency': SLOT_QPF,
+            'timeBeginPeriod': SLOT_TIME_BEGIN_PERIOD,
+            'timeEndPeriod': SLOT_TIME_END_PERIOD,
+            'PeekMessageA': SLOT_PEEK_MESSAGE,
+            'GetMessageA': SLOT_GET_MESSAGE,
+            'TranslateMessage': SLOT_TRANSLATE_MESSAGE,
+            'DispatchMessageA': SLOT_DISPATCH_MESSAGE,
         }
         # In our DLL, hook fixture functions
         def hook_sym(name, slot):
@@ -289,6 +357,11 @@ class PlatformSession:
         hook_sym('Input_ShutdownNative', SLOT_INPUT_SHUTDOWN)
         hook_sym('Gfx_SelectBackend', SLOT_GFX_SELECT_BACKEND)
         hook_sym('Gfx_SetPaletteNative', SLOT_GFX_SET_PALETTE)
+        hook_sym('Mem_InitSystem', SLOT_MEM_INIT_SYSTEM)
+        hook_sym('Mem_ShutdownSystem', SLOT_MEM_SHUTDOWN_SYSTEM)
+        hook_sym('Game_InitGame', SLOT_GAME_INIT_GAME)
+        hook_sym('Game_UpdateFrame', SLOT_GAME_UPDATE_FRAME)
+        hook_sym('Game_ShutdownGame', SLOT_GAME_SHUTDOWN_GAME)
 
         # Patch IAT entries from pe.DIRECTORY_ENTRY_IMPORT
         if hasattr(pe, 'DIRECTORY_ENTRY_IMPORT'):
@@ -306,6 +379,11 @@ class PlatformSession:
                 offset = address - self.symbols[n]
                 if 0 <= offset < size:
                     return va + offset
+        for n, (rva, _, _) in ROUTINES.items():
+            if n in self.symbols and self.symbols[n] == address:
+                return 0x400000 + rva
+        if STACK <= address < STACK + 0x10000:
+            return 0x7000000
         return address
 
     def _hook_code(self, uc, address, size, user_data):
@@ -381,6 +459,8 @@ class PlatformSession:
         elif slot == SLOT_POST_MESSAGE:
             hwnd, msg, wp, lp = struct.unpack('<4I', uc.mem_read(sp + 4, 16))
             self.ctx.calls.append(('PostMessageA', hwnd, msg, wp, lp))
+            if self.ctx.post_close_quits and msg == 0x10:
+                self.ctx.messages.append((0x12, 0, 0))
             uc.reg_write(UC_X86_REG_EAX, 1)
             uc.reg_write(UC_X86_REG_ESP, sp + 20)
             uc.reg_write(UC_X86_REG_EIP, ret_addr)
@@ -437,11 +517,136 @@ class PlatformSession:
             uc.reg_write(UC_X86_REG_ESP, sp + 4)  # cdecl
             uc.reg_write(UC_X86_REG_EIP, ret_addr)
 
+        elif slot == SLOT_LOAD_CURSOR:
+            hinst, cname = struct.unpack('<2I', uc.mem_read(sp + 4, 8))
+            self.ctx.calls.append(('LoadCursorA', hinst, cname))
+            uc.reg_write(UC_X86_REG_EAX, 0x5001)
+            uc.reg_write(UC_X86_REG_ESP, sp + 12)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_LOAD_ICON:
+            hinst, iname = struct.unpack('<2I', uc.mem_read(sp + 4, 8))
+            self.ctx.calls.append(('LoadIconA', hinst, iname))
+            uc.reg_write(UC_X86_REG_EAX, 0x6001)
+            uc.reg_write(UC_X86_REG_ESP, sp + 12)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_GET_STOCK_OBJECT:
+            obj = struct.unpack('<I', uc.mem_read(sp + 4, 4))[0]
+            self.ctx.calls.append(('GetStockObject', obj))
+            uc.reg_write(UC_X86_REG_EAX, 0x7001)
+            uc.reg_write(UC_X86_REG_ESP, sp + 8)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_REGISTER_CLASS:
+            wndclass_ptr = struct.unpack('<I', uc.mem_read(sp + 4, 4))[0]
+            style, wndproc, extra1, extra2, hinst, hicon, hcursor, hbr, menu, cls = struct.unpack(
+                '<10I', uc.mem_read(wndclass_ptr, 40))
+            self.ctx.calls.append(('RegisterClassA', style, self.canonical(wndproc), extra1, extra2,
+                                   hinst, hicon, hcursor, hbr, menu, self.canonical(cls)))
+            uc.reg_write(UC_X86_REG_EAX, self.ctx.register_class_result)
+            uc.reg_write(UC_X86_REG_ESP, sp + 8)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_QPF:
+            ptr = struct.unpack('<I', uc.mem_read(sp + 4, 4))[0]
+            self.ctx.calls.append(('QueryPerformanceFrequency', self.canonical(ptr)))
+            if self.ctx.qpf_result:
+                uc.mem_write(ptr, struct.pack('<q', self.ctx.qpf_value))
+            uc.reg_write(UC_X86_REG_EAX, self.ctx.qpf_result)
+            uc.reg_write(UC_X86_REG_ESP, sp + 8)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_TIME_BEGIN_PERIOD:
+            p = struct.unpack('<I', uc.mem_read(sp + 4, 4))[0]
+            self.ctx.calls.append(('timeBeginPeriod', p))
+            uc.reg_write(UC_X86_REG_EAX, 0)
+            uc.reg_write(UC_X86_REG_ESP, sp + 8)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_TIME_END_PERIOD:
+            p = struct.unpack('<I', uc.mem_read(sp + 4, 4))[0]
+            self.ctx.calls.append(('timeEndPeriod', p))
+            uc.reg_write(UC_X86_REG_EAX, 0)
+            uc.reg_write(UC_X86_REG_ESP, sp + 8)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_MEM_INIT_SYSTEM:
+            self.ctx.calls.append(('Mem_InitSystem',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_MEM_SHUTDOWN_SYSTEM:
+            self.ctx.calls.append(('Mem_ShutdownSystem',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_GAME_INIT_GAME:
+            self.ctx.calls.append(('Game_InitGame',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_GAME_UPDATE_FRAME:
+            self.ctx.calls.append(('Game_UpdateFrame',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_GAME_SHUTDOWN_GAME:
+            self.ctx.calls.append(('Game_ShutdownGame',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_PEEK_MESSAGE:
+            ptr, hwnd, min_m, max_m, rm = struct.unpack('<5I', uc.mem_read(sp + 4, 20))
+            self.ctx.calls.append(('PeekMessageA', self.canonical(ptr), hwnd, min_m, max_m, rm))
+            if len(self.ctx.messages) > 0:
+                msg, wp, lp = self.ctx.messages[0]
+                uc.mem_write(ptr, struct.pack('<7I', 0, msg, wp, lp, 0, 0, 0))
+                uc.reg_write(UC_X86_REG_EAX, 1)
+            else:
+                uc.reg_write(UC_X86_REG_EAX, 0)
+            uc.reg_write(UC_X86_REG_ESP, sp + 24)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_GET_MESSAGE:
+            ptr, hwnd, min_m, max_m = struct.unpack('<4I', uc.mem_read(sp + 4, 16))
+            self.ctx.calls.append(('GetMessageA', self.canonical(ptr), hwnd, min_m, max_m))
+            if len(self.ctx.messages) > 0:
+                msg, wp, lp = self.ctx.messages.pop(0)
+            else:
+                msg, wp, lp = (0x12, 0, 0)
+            uc.mem_write(ptr, struct.pack('<7I', 0, msg, wp, lp, 0, 0, 0))
+            ret = 0 if msg == 0x12 else 1
+            uc.reg_write(UC_X86_REG_EAX, ret)
+            uc.reg_write(UC_X86_REG_ESP, sp + 20)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_TRANSLATE_MESSAGE:
+            ptr = struct.unpack('<I', uc.mem_read(sp + 4, 4))[0]
+            msg, wp, lp = struct.unpack('<3I', uc.mem_read(ptr + 4, 12))
+            self.ctx.calls.append(('TranslateMessage', msg, wp, lp))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 8)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_DISPATCH_MESSAGE:
+            ptr = struct.unpack('<I', uc.mem_read(sp + 4, 4))[0]
+            msg, wp, lp = struct.unpack('<3I', uc.mem_read(ptr + 4, 12))
+            self.ctx.calls.append(('DispatchMessageA', msg, wp, lp))
+            uc.reg_write(UC_X86_REG_EAX, 0)
+            uc.reg_write(UC_X86_REG_ESP, sp + 8)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
     def invoke(self, name, args=(), state_init=None, ctx_init=None):
         self.ctx.calls = []
         if ctx_init:
             for k, v in ctx_init.items():
-                setattr(self.ctx, k, v)
+                setattr(self.ctx, k, list(v) if isinstance(v, list) else v)
         if state_init:
             for k, val in state_init.items():
                 addr = self.symbols[k]
@@ -653,9 +858,144 @@ def run_tests():
         assert calls_orig == [('Gfx_SetPaletteNative', expected_arg)]
         total_comparisons += 1
 
+    # 7. Test Game_ProcessFrame
+    for seed in range(25):
+        rng = random.Random(seed + 500)
+        for stage in [0, 1, 2, 3]:
+            for init_guard in [0, 1]:
+                for shutdown_guard in [0, 1]:
+                    for freq_avail in [0, 1]:
+                        time_val = rng.randint(1000, 500000)
+                        state = {
+                            'g_nativeStage': stage,
+                            'g_nativeInitGuard': init_guard,
+                            'g_nativeShutdownGuard': shutdown_guard,
+                            'g_nativePerfFrequencyAvailable': freq_avail,
+                            'g_nativeLastFrameTime': 0,
+                        }
+                        ctx = {'time_value': time_val}
+                        ret_orig, calls_orig, state_orig = sess_orig.invoke('Game_ProcessFrame', (), state, ctx)
+                        ret_dll, calls_dll, state_dll = sess_dll.invoke('Game_ProcessFrame', (), state, ctx)
+
+                        assert ret_orig == ret_dll, f"ProcessFrame ret mismatch for stage={stage}, init={init_guard}, shut={shutdown_guard}: {ret_orig} vs {ret_dll}"
+                        assert calls_orig == calls_dll, f"ProcessFrame calls mismatch for stage={stage}, init={init_guard}, shut={shutdown_guard}:\norig: {calls_orig}\ndll: {calls_dll}"
+                        for k in GLOBALS:
+                            assert state_orig[k] == state_dll[k], f"ProcessFrame state mismatch on {k}"
+                        total_comparisons += 1
+
+    # 8. Test WinMain
+    for seed in range(15):
+        rng = random.Random(seed + 600)
+        hinst = 0x400000 + rng.randint(0x1000, 0x9000)
+        hprev = 0
+        cmdline = 0
+        show_cmd = 1
+
+        # Trial A: RegisterClass fails
+        ctx = {'register_class_result': 0}
+        ret_orig, calls_orig, state_orig = sess_orig.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), {}, ctx)
+        ret_dll, calls_dll, state_dll = sess_dll.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), {}, ctx)
+        assert ret_orig == ret_dll == 0
+        assert calls_orig == calls_dll
+        for k in GLOBALS:
+            assert state_orig[k] == state_dll[k]
+        total_comparisons += 1
+
+        # Trial B: Subsystems init fails
+        ctx = {'register_class_result': 1, 'open_result': 0, 'qpf_result': 1, 'messages': [(0x12, 0, 0)]}
+        ret_orig, calls_orig, state_orig = sess_orig.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), {}, ctx)
+        ret_dll, calls_dll, state_dll = sess_dll.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), {}, ctx)
+        assert ret_orig == ret_dll == 0
+        assert calls_orig == calls_dll
+        for k in GLOBALS:
+            assert state_orig[k] == state_dll[k]
+        total_comparisons += 1
+
+        # Trial C: Inactive app, direct messages then quit
+        exit_code = rng.randint(1, 100)
+        ctx = {
+            'register_class_result': 1,
+            'open_result': 1,
+            'input_init_result': 1,
+            'qpf_result': 1,
+            'messages': [(0x100, 0x41, 0), (0x12, exit_code, 0)]
+        }
+        state = {'g_nativeIsAppActive': 0}
+        ret_orig, calls_orig, state_orig = sess_orig.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), state, ctx)
+        ret_dll, calls_dll, state_dll = sess_dll.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), state, ctx)
+        assert ret_orig == ret_dll == exit_code
+        assert calls_orig == calls_dll
+        for k in GLOBALS:
+            assert state_orig[k] == state_dll[k]
+        total_comparisons += 1
+
+        # Trial D: Active app, message available then quit (timer fallback)
+        exit_code = rng.randint(1, 100)
+        ctx = {
+            'register_class_result': 1,
+            'open_result': 1,
+            'input_init_result': 1,
+            'qpf_result': 0,
+            'messages': [(0x100, 0x42, 0), (0x12, exit_code, 0)]
+        }
+        state = {'g_nativeIsAppActive': 1}
+        ret_orig, calls_orig, state_orig = sess_orig.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), state, ctx)
+        ret_dll, calls_dll, state_dll = sess_dll.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), state, ctx)
+        assert ret_orig == ret_dll == exit_code
+        assert calls_orig == calls_dll
+        for k in GLOBALS:
+            assert state_orig[k] == state_dll[k]
+        total_comparisons += 1
+
+        # Trial E: Active app, idle frame (stage 2 shutdown -> Game_PostClose -> quit)
+        ctx = {
+            'register_class_result': 1,
+            'open_result': 1,
+            'input_init_result': 1,
+            'qpf_result': 1,
+            'post_close_quits': True,
+            'messages': []
+        }
+        state = {
+            'g_nativeIsAppActive': 1,
+            'g_nativeStage': 2,
+            'g_nativeShutdownGuard': 0,
+            'g_nativeWindow': 0x30000 + seed,
+        }
+        ret_orig, calls_orig, state_orig = sess_orig.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), state, ctx)
+        ret_dll, calls_dll, state_dll = sess_dll.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), state, ctx)
+        assert ret_orig == ret_dll == 0
+        assert calls_orig == calls_dll
+        for k in GLOBALS:
+            assert state_orig[k] == state_dll[k]
+        total_comparisons += 1
+
+        # Trial F: Active app, idle frame stage 0 init, then WM_QUIT
+        exit_code = rng.randint(1, 100)
+        ctx = {
+            'register_class_result': 1,
+            'open_result': 1,
+            'input_init_result': 1,
+            'qpf_result': 1,
+            'messages': [(0x12, exit_code, 0)]
+        }
+        state = {
+            'g_nativeIsAppActive': 1,
+            'g_nativeStage': 0,
+            'g_nativeInitGuard': 0,
+            'g_nativeWindow': 0x30000 + seed,
+        }
+        ret_orig, calls_orig, state_orig = sess_orig.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), state, ctx)
+        ret_dll, calls_dll, state_dll = sess_dll.invoke('WinMain', (hinst, hprev, cmdline, show_cmd), state, ctx)
+        assert ret_orig == ret_dll == exit_code
+        assert calls_orig == calls_dll
+        for k in GLOBALS:
+            assert state_orig[k] == state_dll[k]
+        total_comparisons += 1
+
     print(f"PASS: {total_comparisons} differential trials passed with byte-for-byte state and event parity.")
 
-    # Record runs for all 6 RVAs
+    # Record runs for all 8 RVAs
     for name, (rva, _, _) in ROUTINES.items():
         for kind in ('compilation', 'emulation'):
             record_run(
@@ -670,7 +1010,7 @@ def run_tests():
                     'symbol': name,
                     'trials': total_comparisons if kind == 'emulation' else 0,
                     'differential_oracle': 'authentic IGN_WIN.EXE in Unicorn emulation' if kind == 'emulation' else None,
-                    'scope': 'C89 platform window procedure and lifecycle compilation' if kind == 'compilation' else 'differential emulation',
+                    'scope': 'C89 platform window procedure, application entry, and lifecycle compilation' if kind == 'compilation' else 'differential emulation',
                 }
             )
     print("Recorded verification runs into database.")

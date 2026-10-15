@@ -273,7 +273,8 @@ def verify():
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
         'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf',
         'Game_WindowProc', 'Game_GetTime', 'Game_InitSubsystems', 'Game_PostClose',
-        'Game_ShutdownSubsystems', 'Game_SetPalette', '__divdi3']}
+        'Game_ShutdownSubsystems', 'Game_SetPalette', '__divdi3',
+        'WinMain', 'Game_ProcessFrame', 'Game_InitGame', 'Game_UpdateFrame', 'Game_ShutdownGame']}
     draw_iat=next(entry.address for group in rebuilt.DIRECTORY_ENTRY_IMPORT
         for entry in group.imports if group.dll==b'DDRAW.dll' and entry.name==b'DirectDrawCreate')
     draw_thunks=[instruction.address for instruction in generated
@@ -403,7 +404,9 @@ def verify():
         'Game_InitSubsystems': ['Gfx_SelectBackend', 'Gfx_Open', 'Input_InitNative'],
         'Game_ShutdownSubsystems': ['Gfx_Shutdown', 'Input_ShutdownNative'],
         'Game_WindowProc': ['Game_ShutdownSubsystems', 'Input_ShutdownNative', 'Gfx_Shutdown', 'Gfx_Open', 'Input_InitNative'],
-        'Game_SetPalette': ['Gfx_SetPaletteNative']})
+        'Game_SetPalette': ['Gfx_SetPaletteNative'],
+        'WinMain': ['Mem_InitSystem', 'Game_InitSubsystems', 'Game_ProcessFrame', 'Game_PostClose'],
+        'Game_ProcessFrame': ['Game_GetTime', 'Game_ShutdownGame', 'Mem_ShutdownSystem', 'Game_GetTime', 'Game_UpdateFrame', 'Game_GetTime', 'Game_InitGame']})
     assert len(direct_calls) == sum(map(len, expected_calls.values())), 'Unexpected direct helper dependency count'
     actual_calls = {}
     for call in direct_calls:

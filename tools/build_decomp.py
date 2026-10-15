@@ -56,6 +56,7 @@ SINE_BODY = _resource_source[_sine_start:_sine_end]
 LISA_VERSION_SOURCE = LISA_VERSION_SOURCE.replace(SINE_BODY, 'int32_t Gfx_InitSineTable(void);')
 SINE_SOURCE = '#include <math.h>\n#include "geputget.h"\n' + SINE_BODY + '\n'
 PLATFORM_EXPORTS = [
+    'WinMain', 'Game_ProcessFrame',
     'Game_WindowProc', 'Game_GetTime', 'Game_InitSubsystems',
     'Game_PostClose', 'Game_ShutdownSubsystems', 'Game_SetPalette',
     'g_nativeCursor', 'g_nativeWindowRect', 'g_nativeIsAppActive',
@@ -63,6 +64,9 @@ PLATFORM_EXPORTS = [
     'g_nativePerfFrequency', 'g_nativePerfFrequencyAvailable',
     'g_nativeStartCounter', 'g_nativeCurrentCounter',
     'g_nativeAccumulatedActiveTime', 'g_nativeLastActiveTime',
+    'g_nativeUnknownPlatformPtr', 'g_nativeStage', 'g_nativeInitGuard',
+    'g_nativeShutdownGuard', 'g_nativeLastFrameTime',
+    'Game_InitGame', 'Game_UpdateFrame', 'Game_ShutdownGame',
     '__divdi3'
 ]
 INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'Input_PollNative',
@@ -100,7 +104,11 @@ SURFACE_EXPORTS = ['Gfx_InitSurfaceRecords', 'g_nativePrimarySurface',
 # Validation fixtures live separately from the extracted production installer.
 STARTUP_BOUNDARY_SOURCE += (
     '#include "renderer.h"\n'
+    '#include <stdint.h>\n'
     'int Gfx_DrawSpriteNative(GfxSpriteHandle *handle, Point2D *position, const GfxSpriteTransform *transform) { (void)handle; (void)position; (void)transform; for (;;) {} }\n'
+    'int32_t Game_InitGame(void) { for (;;) {} }\n'
+    'int32_t Game_UpdateFrame(void) { for (;;) {} }\n'
+    'int32_t Game_ShutdownGame(void) { for (;;) {} }\n'
 )
 SPRITE_DISPATCH_EXPORTS = [
     'Gfx_CloseDispatch', 'Gfx_OptionDispatch', 'Gfx_ConfigureDispatch',
@@ -237,10 +245,11 @@ def surface_import_libraries(stem):
             'SetWindowPos@28','SystemParametersInfoA@16','GetWindowRect@8',
             'MessageBoxA@16','ShowWindow@8','PostQuitMessage@4','GetClientRect@8',
             'ClientToScreen@8','DefWindowProcA@16','SetCursor@4','DestroyWindow@4',
-            'PostMessageA@16'],
-        'GDI32':['GetDeviceCaps@8'], 'DINPUT':['DirectInputCreateA@16'],
-        'WINMM':['timeKillEvent@4','timeSetEvent@20','timeGetTime@0'],
-        'KERNEL32':['QueryPerformanceCounter@4']}
+            'PostMessageA@16','LoadCursorA@8','LoadIconA@8','RegisterClassA@4',
+            'PeekMessageA@20','GetMessageA@16','TranslateMessage@4','DispatchMessageA@4'],
+        'GDI32':['GetDeviceCaps@8','GetStockObject@4'], 'DINPUT':['DirectInputCreateA@16'],
+        'WINMM':['timeKillEvent@4','timeSetEvent@20','timeGetTime@0','timeBeginPeriod@4','timeEndPeriod@4'],
+        'KERNEL32':['QueryPerformanceCounter@4','QueryPerformanceFrequency@4']}
     platform_objs, _ = compile_platform(stem)
     libraries = list(platform_objs)
     for dll,exports in groups.items():

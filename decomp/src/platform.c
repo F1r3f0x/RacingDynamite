@@ -1,6 +1,7 @@
 #include "platform.h"
 #include "surface.h"
 #include "geputget.h"
+#include "mem.h"
 
 /* Input subsystem entry points called without arguments in IGN_WIN.EXE */
 int Input_InitNative();
@@ -21,6 +22,112 @@ volatile LARGE_INTEGER g_nativeStartCounter = {{0, 0}}; /* VA 0x004C5368 */
 volatile LARGE_INTEGER g_nativeCurrentCounter = {{0, 0}}; /* VA 0x004C5378 */
 volatile uint32_t g_nativeAccumulatedActiveTime = 0; /* VA 0x004937AC */
 volatile uint32_t g_nativeLastActiveTime = 0; /* VA 0x004937B8 */
+const void * volatile g_nativeUnknownPlatformPtr = 0; /* VA 0x004C53A0 */
+volatile int32_t g_nativeStage = 0; /* VA 0x00493734 */
+volatile int32_t g_nativeInitGuard = 0; /* VA 0x004937B0 */
+volatile int32_t g_nativeShutdownGuard = 0; /* VA 0x004937B4 */
+volatile uint32_t g_nativeLastFrameTime = 0; /* VA 0x0049373C */
+
+/*
+ * @original WinMain (IGN_WIN.EXE @ 0x004120A0, platform.c)
+ * @fidelity EXACT
+ */
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
+    MSG msg;
+    WNDCLASSA wc;
+    (void)hPrevInstance;
+    (void)lpCmdLine;
+    (void)nShowCmd;
+
+    g_nativeUnknownPlatformPtr = (const void *)0x00479558;
+    g_nativeWindowInstance = hInstance;
+    g_nativeCursor = LoadCursorA(NULL, MAKEINTRESOURCEA(32512));
+
+    wc.style = CS_DBLCLKS; /* 8 */
+    wc.lpfnWndProc = Game_WindowProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = g_nativeWindowInstance;
+    wc.hIcon = LoadIconA(NULL, MAKEINTRESOURCEA(32512));
+    wc.hCursor = g_nativeCursor;
+    wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH); /* 4 */
+    wc.lpszMenuName = NULL;
+    wc.lpszClassName = g_nativeWindowClassName;
+
+    if (!RegisterClassA(&wc)) {
+        return 0;
+    }
+
+    if (QueryPerformanceFrequency((LARGE_INTEGER *)&g_nativePerfFrequency)) {
+        g_nativePerfFrequencyAvailable = 1;
+        QueryPerformanceCounter((LARGE_INTEGER *)&g_nativeStartCounter);
+    } else {
+        g_nativePerfFrequencyAvailable = 0;
+        timeBeginPeriod(1);
+    }
+
+    Mem_InitSystem();
+    if (!Game_InitSubsystems()) {
+        return 0;
+    }
+
+    for (;;) {
+        if (g_nativeIsAppActive != 0) {
+            if (PeekMessageA(&msg, NULL, 0, 0, PM_NOREMOVE)) {
+                if (!GetMessageA(&msg, NULL, 0, 0)) {
+                    return (int)msg.wParam;
+                }
+                TranslateMessage(&msg);
+                DispatchMessageA(&msg);
+            } else {
+                if (!Game_ProcessFrame()) {
+                    Game_PostClose();
+                }
+            }
+        } else {
+            if (!GetMessageA(&msg, NULL, 0, 0)) {
+                return (int)msg.wParam;
+            }
+            TranslateMessage(&msg);
+            DispatchMessageA(&msg);
+        }
+    }
+}
+
+/*
+ * @original Game_ProcessFrame (IGN_WIN.EXE @ 0x00412230, platform.c)
+ * @fidelity EXACT
+ */
+int32_t Game_ProcessFrame(void) {
+    int32_t stage = g_nativeStage;
+    if (stage == 0) {
+        if (g_nativeInitGuard == 0) {
+            g_nativeInitGuard = 1;
+            g_nativeLastFrameTime = Game_GetTime();
+            Game_InitGame();
+            g_nativeStage = 1;
+            return 1;
+        }
+    } else if (stage == 1) {
+        if (g_nativeShutdownGuard == 0) {
+            g_nativeLastFrameTime = Game_GetTime();
+            Game_UpdateFrame();
+            return 1;
+        }
+    } else if (stage == 2) {
+        if (g_nativeShutdownGuard == 0) {
+            g_nativeLastFrameTime = Game_GetTime();
+            Game_ShutdownGame();
+            Mem_ShutdownSystem();
+            if (g_nativePerfFrequencyAvailable == 0) {
+                timeEndPeriod(1);
+            }
+            g_nativeShutdownGuard = 1;
+            return 0;
+        }
+    }
+    return 1;
+}
 
 /*
  * @original Game_WindowProc (IGN_WIN.EXE @ 0x004122D0, platform.c)
