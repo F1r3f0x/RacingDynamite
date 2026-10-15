@@ -13,9 +13,14 @@ STARTUP_BOUNDARY_SOURCE = (
     'int Lisa_PrintVersion(void);\n'
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
     'int Game_InitResources(void) { return 1; }\n'
-    'int Game_CleanupResources(void) { return 1; }\n'
     'int Audio_CheckCDMediaPresent(void) { return 1; }\n'
     'int Audio_InitCDTracks(void) { return 1; }\n'
+    'int Audio_StopCD(void) { return 1; }\n'
+    'int Audio_CloseCD(void) { return 1; }\n'
+    'int Audio_ShutdownSound(void) { return 0; }\n'
+    'void Menu_FreeBackground(void) {}\n'
+    'int Log_Printf(const char *format, ...) { (void)format; return 1; }\n'
+    'int Log_Shutdown(void) { return 1; }\n'
     '')
 STARTUP_EXPORTS = ['Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_ClearSurfaceNative', 'Gfx_PresentSurfaceNative', 'Gfx_SetPaletteNative', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
     'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
@@ -75,9 +80,13 @@ PLATFORM_EXPORTS = [
     'g_gameGraphicsInitErrorFlag',
     'g_cdAudioMediaPresent', 'g_gameConfigValues', 'g_CameraShakeActive',
     'g_gameStateFlag5530DC',
+    'g_gameSysGfxHandles', 'g_gameMouseCursorHandle', 'g_gameTotalSeconds',
+    'g_gameTotalFrames', 'g_gameMainPoolId',
     'Game_InitGame', 'Game_UpdateFrame', 'Game_ShutdownGame',
     'Game_InitResources', 'Game_InitState', 'Game_CleanupResources',
     'Audio_CheckCDMediaPresent', 'Audio_InitCDTracks',
+    'Audio_StopCD', 'Audio_CloseCD', 'Audio_ShutdownSound',
+    'Menu_FreeBackground', 'Log_Printf', 'Log_Shutdown',
     '__divdi3'
 ]
 INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'Input_PollNative',

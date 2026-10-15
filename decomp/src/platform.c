@@ -312,3 +312,44 @@ int32_t Game_InitState(void) {
     g_gameMainState = 1;
     return 1;
 }
+
+volatile int32_t g_gameSysGfxHandles[4] = {0, 0, 0, 0}; /* VA 0x0054F960 */
+volatile int32_t g_gameMouseCursorHandle = 0; /* VA 0x00552D84 */
+volatile int32_t g_gameTotalSeconds = 0; /* VA 0x0049498C */
+volatile int32_t g_gameTotalFrames = 0; /* VA 0x00494988 */
+volatile int32_t g_gameMainPoolId = 0; /* VA 0x005530E8 */
+
+/*
+ * @original Game_CleanupResources (IGN_WIN.EXE @ 0x00420B70, platform.c)
+ * @fidelity EXACT
+ */
+int32_t Game_CleanupResources(void) {
+    volatile int32_t *cursor;
+    int32_t seconds;
+    int32_t avg_fps;
+
+    Audio_StopCD();
+    cursor = g_gameSysGfxHandles;
+    Audio_CloseCD();
+    Audio_ShutdownSound();
+    Menu_FreeBackground();
+
+    do {
+        int32_t handle = *cursor;
+        cursor++;
+        Gfx_HandleOpDispatch(NULL, (GfxSpriteHandle *)(uintptr_t)handle);
+    } while (cursor < g_gameSysGfxHandles + 4);
+
+    Gfx_HandleOpDispatch(NULL, (GfxSpriteHandle *)(uintptr_t)g_gameMouseCursorHandle);
+
+    seconds = g_gameTotalSeconds;
+    if (seconds == 0) {
+        seconds = 1;
+    }
+    g_gameTotalSeconds = seconds;
+    avg_fps = g_gameTotalFrames / seconds;
+    Log_Printf("Ignition has been shutdown normaly. Average framerate:%d\n", avg_fps);
+    Log_Shutdown();
+
+    return Mem_DestroyPool(g_gameMainPoolId);
+}

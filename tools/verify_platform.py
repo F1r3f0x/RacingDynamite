@@ -39,7 +39,8 @@ ROUTINES = {
     'Game_SetPalette': (0x12560, 19, '20949484266a1eb89c69091e72f67c67ae9b6615b115a5e47463892fdc25dbf0'),
     'Game_InitGame': (0x17270, 58, 'ca67f09b7bb19c2a7e24331ea64f2e29e8d81019fc94ef8e71f3831d27a3348a'),
     'Game_ShutdownGame': (0x17E90, 8, '2620d36c50712bde0380c5fafff9f1a14cd0efed596e6a107823739cbb966aa2'),
-    'Game_InitState': (0x184C0, 60, 'e1dc62b410b9864791e22d06c66fcc1bfed21de5c207ef533f2ab615c09b517f')
+    'Game_InitState': (0x184C0, 60, 'e1dc62b410b9864791e22d06c66fcc1bfed21de5c207ef533f2ab615c09b517f'),
+    'Game_CleanupResources': (0x20B70, 130, 'f2025078735e3667dfcde47cb6da7f80639335d9865dbdd8f894ef24566ac291')
 }
 
 EXPECTED_FPO = {
@@ -53,7 +54,8 @@ EXPECTED_FPO = {
     0x12560: (19, 0, 1, 0),
     0x17270: (58, 0, 0, 0),
     0x17E90: (8, 0, 0, 0),
-    0x184C0: (60, 0, 0, 0)
+    0x184C0: (60, 0, 0, 0),
+    0x20B70: (130, 0, 0, 257)
 }
 
 GLOBALS = {
@@ -89,6 +91,11 @@ GLOBALS = {
     'g_gameConfigValues': (0x50F2CC, 16),
     'g_CameraShakeActive': (0x4949E0, 4),
     'g_gameStateFlag5530DC': (0x5530DC, 4),
+    'g_gameSysGfxHandles': (0x54F960, 16),
+    'g_gameMouseCursorHandle': (0x552D84, 4),
+    'g_gameTotalSeconds': (0x49498C, 4),
+    'g_gameTotalFrames': (0x494988, 4),
+    'g_gameMainPoolId': (0x5530E8, 4),
 }
 
 TRACKING_INPUTS = [
@@ -167,9 +174,16 @@ int Mem_InitSystem(void) { return 1; }
 int Mem_ShutdownSystem(void) { return 1; }
 int Game_UpdateFrame(void) { return 1; }
 int Game_InitResources(void) { return 1; }
-int Game_CleanupResources(void) { return 1; }
 int Audio_CheckCDMediaPresent(void) { return 1; }
 int Audio_InitCDTracks(void) { return 1; }
+int Audio_StopCD(void) { return 1; }
+int Audio_CloseCD(void) { return 1; }
+int Audio_ShutdownSound(void) { return 0; }
+void Menu_FreeBackground(void) {}
+void *Gfx_HandleOpDispatch(const void *desc, void *handle) { (void)desc; (void)handle; return 0; }
+int Log_Printf(const char *fmt, ...) { (void)fmt; return 1; }
+int Log_Shutdown(void) { return 1; }
+int Mem_DestroyPool(int pool_id) { (void)pool_id; return 1; }
 ''', encoding='utf-8')
 
     fixture_obj = BUILD / 'platform_fixtures.obj'
@@ -201,8 +215,10 @@ int Audio_InitCDTracks(void) { return 1; }
         'Gfx_SetPaletteNative', 'Input_InitNative', 'Input_ShutdownNative',
         'Mem_InitSystem', 'Mem_ShutdownSystem',
         'Game_UpdateFrame', 'Game_InitResources',
-        'Game_CleanupResources', 'Audio_CheckCDMediaPresent',
-        'Audio_InitCDTracks'
+        'Audio_CheckCDMediaPresent', 'Audio_InitCDTracks',
+        'Audio_StopCD', 'Audio_CloseCD', 'Audio_ShutdownSound',
+        'Menu_FreeBackground', 'Gfx_HandleOpDispatch',
+        'Log_Printf', 'Log_Shutdown', 'Mem_DestroyPool'
     ]
     exports = list(ROUTINES.keys()) + list(GLOBALS.keys()) + fixture_exports
     link_cmd = [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/safeseh:no',
@@ -249,6 +265,14 @@ SLOT_GAME_INIT_STATE = 34
 SLOT_GAME_CLEANUP_RESOURCES = 35
 SLOT_AUDIO_CHECK_CD = 36
 SLOT_AUDIO_INIT_CD = 37
+SLOT_AUDIO_STOP_CD = 38
+SLOT_AUDIO_CLOSE_CD = 39
+SLOT_AUDIO_SHUTDOWN_SOUND = 40
+SLOT_MENU_FREE_BACKGROUND = 41
+SLOT_GFX_HANDLE_OP = 42
+SLOT_LOG_PRINTF = 43
+SLOT_LOG_SHUTDOWN = 44
+SLOT_MEM_DESTROY_POOL = 45
 
 class MockContext:
     def __init__(self):
@@ -342,9 +366,16 @@ class PlatformSession:
         hook_sub(0x45b1a0, SLOT_MEM_SHUTDOWN_SYSTEM)
         hook_sub(0x4172b0, SLOT_GAME_UPDATE_FRAME)
         hook_sub(0x417ea0, SLOT_GAME_INIT_RESOURCES)
-        hook_sub(0x420b70, SLOT_GAME_CLEANUP_RESOURCES)
         hook_sub(0x457b50, SLOT_AUDIO_CHECK_CD)
         hook_sub(0x457da0, SLOT_AUDIO_INIT_CD)
+        hook_sub(0x457fc0, SLOT_AUDIO_STOP_CD)
+        hook_sub(0x4580a0, SLOT_AUDIO_CLOSE_CD)
+        hook_sub(0x459d30, SLOT_AUDIO_SHUTDOWN_SOUND)
+        hook_sub(0x401840, SLOT_MENU_FREE_BACKGROUND)
+        hook_sub(0x456d40, SLOT_GFX_HANDLE_OP)
+        hook_sub(0x45b5c0, SLOT_LOG_PRINTF)
+        hook_sub(0x45b590, SLOT_LOG_SHUTDOWN)
+        hook_sub(0x45b080, SLOT_MEM_DESTROY_POOL)
 
     def _patch_dll_iat_and_calls(self, pe):
         iat_map = {
@@ -389,9 +420,16 @@ class PlatformSession:
         hook_sym('Mem_ShutdownSystem', SLOT_MEM_SHUTDOWN_SYSTEM)
         hook_sym('Game_UpdateFrame', SLOT_GAME_UPDATE_FRAME)
         hook_sym('Game_InitResources', SLOT_GAME_INIT_RESOURCES)
-        hook_sym('Game_CleanupResources', SLOT_GAME_CLEANUP_RESOURCES)
         hook_sym('Audio_CheckCDMediaPresent', SLOT_AUDIO_CHECK_CD)
         hook_sym('Audio_InitCDTracks', SLOT_AUDIO_INIT_CD)
+        hook_sym('Audio_StopCD', SLOT_AUDIO_STOP_CD)
+        hook_sym('Audio_CloseCD', SLOT_AUDIO_CLOSE_CD)
+        hook_sym('Audio_ShutdownSound', SLOT_AUDIO_SHUTDOWN_SOUND)
+        hook_sym('Menu_FreeBackground', SLOT_MENU_FREE_BACKGROUND)
+        hook_sym('Gfx_HandleOpDispatch', SLOT_GFX_HANDLE_OP)
+        hook_sym('Log_Printf', SLOT_LOG_PRINTF)
+        hook_sym('Log_Shutdown', SLOT_LOG_SHUTDOWN)
+        hook_sym('Mem_DestroyPool', SLOT_MEM_DESTROY_POOL)
 
         # Patch IAT entries from pe.DIRECTORY_ENTRY_IMPORT
         if hasattr(pe, 'DIRECTORY_ENTRY_IMPORT'):
@@ -639,6 +677,56 @@ class PlatformSession:
 
         elif slot == SLOT_GAME_CLEANUP_RESOURCES:
             self.ctx.calls.append(('Game_CleanupResources',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_AUDIO_STOP_CD:
+            self.ctx.calls.append(('Audio_StopCD',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_AUDIO_CLOSE_CD:
+            self.ctx.calls.append(('Audio_CloseCD',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_AUDIO_SHUTDOWN_SOUND:
+            self.ctx.calls.append(('Audio_ShutdownSound',))
+            uc.reg_write(UC_X86_REG_EAX, 0)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_MENU_FREE_BACKGROUND:
+            self.ctx.calls.append(('Menu_FreeBackground',))
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_GFX_HANDLE_OP:
+            desc, handle = struct.unpack('<2I', uc.mem_read(sp + 4, 8))
+            self.ctx.calls.append(('Gfx_HandleOpDispatch', desc, handle))
+            uc.reg_write(UC_X86_REG_EAX, 0)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_LOG_PRINTF:
+            fmt, val = struct.unpack('<2I', uc.mem_read(sp + 4, 8))
+            self.ctx.calls.append(('Log_Printf', val))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_LOG_SHUTDOWN:
+            self.ctx.calls.append(('Log_Shutdown',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_MEM_DESTROY_POOL:
+            pool_id = struct.unpack('<I', uc.mem_read(sp + 4, 4))[0]
+            self.ctx.calls.append(('Mem_DestroyPool', pool_id))
             uc.reg_write(UC_X86_REG_EAX, 1)
             uc.reg_write(UC_X86_REG_ESP, sp + 4)
             uc.reg_write(UC_X86_REG_EIP, ret_addr)
@@ -1071,6 +1159,11 @@ def run_tests():
     # 10. Test Game_ShutdownGame
     for seed in range(30):
         rng = random.Random(seed + 800)
+        handles = [rng.randint(1, 0x10000) for _ in range(4)]
+        cursor_handle = rng.randint(1, 0x10000)
+        sec = rng.randint(0, 500)
+        frames = rng.randint(0, 50000)
+        pool = rng.randint(1, 100)
         state = {
             'g_gameMainState': rng.randint(-1000, 1000),
             'g_gameMenuState': rng.randint(-1000, 1000),
@@ -1079,12 +1172,33 @@ def run_tests():
             'g_gameInRace': rng.randint(-1000, 1000),
             'g_gameFlag563BF4': rng.randint(-1000, 1000),
             'g_gameGraphicsInitErrorFlag': rng.randint(-1000, 1000),
+            'g_gameSysGfxHandles': struct.pack('<4i', *handles),
+            'g_gameMouseCursorHandle': cursor_handle,
+            'g_gameTotalSeconds': sec,
+            'g_gameTotalFrames': frames,
+            'g_gameMainPoolId': pool,
         }
         ret_orig, calls_orig, state_orig = sess_orig.invoke('Game_ShutdownGame', (), state)
         ret_dll, calls_dll, state_dll = sess_dll.invoke('Game_ShutdownGame', (), state)
 
         assert ret_orig == ret_dll == 0, f"ShutdownGame ret mismatch: {ret_orig} vs {ret_dll}"
-        assert calls_orig == calls_dll == [('Game_CleanupResources',)], f"ShutdownGame calls mismatch:\norig: {calls_orig}\ndll: {calls_dll}"
+        exp_sec = 1 if sec == 0 else sec
+        avg_fps = frames // exp_sec
+        expected_calls = [
+            ('Audio_StopCD',),
+            ('Audio_CloseCD',),
+            ('Audio_ShutdownSound',),
+            ('Menu_FreeBackground',),
+            ('Gfx_HandleOpDispatch', 0, handles[0]),
+            ('Gfx_HandleOpDispatch', 0, handles[1]),
+            ('Gfx_HandleOpDispatch', 0, handles[2]),
+            ('Gfx_HandleOpDispatch', 0, handles[3]),
+            ('Gfx_HandleOpDispatch', 0, cursor_handle),
+            ('Log_Printf', avg_fps),
+            ('Log_Shutdown',),
+            ('Mem_DestroyPool', pool),
+        ]
+        assert calls_orig == calls_dll == expected_calls, f"ShutdownGame calls mismatch:\norig: {calls_orig}\ndll: {calls_dll}"
         for k in GLOBALS:
             assert state_orig[k] == state_dll[k], f"ShutdownGame state mismatch on {k}"
         total_comparisons += 1
@@ -1114,6 +1228,47 @@ def run_tests():
         assert struct.unpack('<i', state_orig['g_CameraShakeActive'])[0] == cfg[3]
         assert struct.unpack('<i', state_orig['g_gameStateFlag5530DC'])[0] == 1
         assert struct.unpack('<i', state_orig['g_gameMainState'])[0] == 1
+        total_comparisons += 1
+
+    # 12. Test Game_CleanupResources
+    for seed in range(50):
+        rng = random.Random(seed + 1000)
+        handles = [rng.randint(1, 0x100000) for _ in range(4)]
+        cursor_handle = rng.randint(1, 0x100000)
+        sec = rng.choice([0, 1, 2, 5, 10, 60, 300, 1234])
+        frames = rng.randint(0, 100000)
+        pool = rng.randint(1, 500)
+        state = {
+            'g_gameSysGfxHandles': struct.pack('<4i', *handles),
+            'g_gameMouseCursorHandle': cursor_handle,
+            'g_gameTotalSeconds': sec,
+            'g_gameTotalFrames': frames,
+            'g_gameMainPoolId': pool,
+        }
+        ret_orig, calls_orig, state_orig = sess_orig.invoke('Game_CleanupResources', (), state)
+        ret_dll, calls_dll, state_dll = sess_dll.invoke('Game_CleanupResources', (), state)
+
+        assert ret_orig == ret_dll == 1, f"CleanupResources ret mismatch: {ret_orig} vs {ret_dll}"
+        exp_sec = 1 if sec == 0 else sec
+        avg_fps = frames // exp_sec
+        expected_calls = [
+            ('Audio_StopCD',),
+            ('Audio_CloseCD',),
+            ('Audio_ShutdownSound',),
+            ('Menu_FreeBackground',),
+            ('Gfx_HandleOpDispatch', 0, handles[0]),
+            ('Gfx_HandleOpDispatch', 0, handles[1]),
+            ('Gfx_HandleOpDispatch', 0, handles[2]),
+            ('Gfx_HandleOpDispatch', 0, handles[3]),
+            ('Gfx_HandleOpDispatch', 0, cursor_handle),
+            ('Log_Printf', avg_fps),
+            ('Log_Shutdown',),
+            ('Mem_DestroyPool', pool),
+        ]
+        assert calls_orig == calls_dll == expected_calls, f"CleanupResources calls mismatch:\norig: {calls_orig}\ndll: {calls_dll}"
+        for k in GLOBALS:
+            assert state_orig[k] == state_dll[k], f"CleanupResources state mismatch on {k}"
+        assert struct.unpack('<i', state_orig['g_gameTotalSeconds'])[0] == exp_sec
         total_comparisons += 1
 
     print(f"PASS: {total_comparisons} differential trials passed with byte-for-byte state and event parity.")

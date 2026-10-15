@@ -36,6 +36,11 @@ extern volatile int32_t g_cdAudioMediaPresent; /* VA 0x0050EF4C */
 extern volatile int32_t g_gameConfigValues[4]; /* VA 0x0050F2CC */
 extern volatile int32_t g_CameraShakeActive; /* VA 0x004949E0 */
 extern volatile int32_t g_gameStateFlag5530DC; /* VA 0x005530DC */
+extern volatile int32_t g_gameSysGfxHandles[4]; /* VA 0x0054F960 */
+extern volatile int32_t g_gameMouseCursorHandle; /* VA 0x00552D84 */
+extern volatile int32_t g_gameTotalSeconds; /* VA 0x0049498C */
+extern volatile int32_t g_gameTotalFrames; /* VA 0x00494988 */
+extern volatile int32_t g_gameMainPoolId; /* VA 0x005530E8 */
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
 int32_t Game_ProcessFrame(void);
@@ -57,5 +62,13 @@ int32_t Game_CleanupResources(void);
 /* Audio subsystem entry points called by Game_InitState */
 int32_t Audio_CheckCDMediaPresent(void);
 int32_t Audio_InitCDTracks(void);
+
+/* Subsystem cleanup routines called by Game_CleanupResources */
+int32_t Audio_StopCD(void);
+int32_t Audio_CloseCD(void);
+int32_t Audio_ShutdownSound(void);
+void Menu_FreeBackground(void);
+int32_t Log_Printf(const char *format, ...);
+int32_t Log_Shutdown(void);
 
 #endif /* IGNITION_PLATFORM_H */

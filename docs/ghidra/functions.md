@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:92c274fb581aed7557ad478aea7684c5feff92348ee388cecb7f757b13e4c3b2 -->
+<!-- snapshot:159a63862dd4163588077de808510b4918bd247b9571cec143fa30e06d4bb81e -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -190,7 +190,7 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00420240` | `0x00020240` | 1571 | `sub_00420240` | unknown | unidentified | - |
 | `0x00420870` | `0x00020870` | 273 | `sub_00420870` | unknown | unidentified | - |
 | `0x00420990` | `0x00020990` | 467 | `sub_00420990` | unknown | unidentified | - |
-| `0x00420B70` | `0x00020B70` | 130 | `sub_00420B70` | unknown | unidentified | - |
+| `0x00420B70` | `0x00020B70` | 130 | `Game_CleanupResources` | game | reconstructed | [windows_game_cleanup_resources.md](windows_game_cleanup_resources.md) |
 | `0x00420C00` | `0x00020C00` | 263 | `sub_00420C00` | unknown | unidentified | - |
 | `0x00420D10` | `0x00020D10` | 325 | `sub_00420D10` | unknown | unidentified | - |
 | `0x00420E60` | `0x00020E60` | 65 | `sub_00420E60` | unknown | unidentified | - |
