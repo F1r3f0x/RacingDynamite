@@ -82,4 +82,6 @@ int Gfx_SurfaceRestoreDispatch(void); /* VA 0x00456C50 */
 
 int Gfx_InstallSurfaceDispatch(void); /* VA 0x0045B690 */
 
+extern volatile int32_t g_nativeFullscreen; /* VA 0x00493728 */
+
 #endif

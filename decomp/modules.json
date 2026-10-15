@@ -278,6 +278,31 @@
       "placement_reason": "Authenticated cdecl span wrappers and complete register leaves form one real dependency closure. Internal leaf interfaces use explicit C parameters with documented ABI adaptation; no register shim or invented rasterizer. Original source filename unknown.",
       "build_mode": "direct",
       "original_source": null
+    },
+    "platform": {
+      "source": "decomp/src/platform.c",
+      "header": "decomp/include/platform.h",
+      "symbol_prefixes": [
+        "Game_",
+        "WinMain"
+      ],
+      "responsibility": "Verified Windows window procedure, timer, and lifecycle helpers",
+      "state": [
+        "native window and instance handles",
+        "native window rect and cursor",
+        "active app state and initialization flag",
+        "display mode change flag",
+        "performance timer state and accumulated active time"
+      ],
+      "dependencies": [
+        "Win32 User32/Gdi32/Kernel32/WinMM APIs",
+        "surface module",
+        "input module",
+        "graphics_legacy module"
+      ],
+      "placement_reason": "Authentic Windows window procedure, message handling, high-resolution timer and lifecycle orchestration form the core platform translation unit.",
+      "build_mode": "direct",
+      "original_source": null
     }
   }
 }

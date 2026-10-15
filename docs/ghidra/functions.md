@@ -1,6 +1,6 @@
 # Windows function inventory
 
-<!-- snapshot:70bdd19237fcb363caa2fb3b7cf8d77bb57f346e3ee42f9aff91ed2dc91cc46e -->
+<!-- snapshot:8054a566b5489f1076f682b74e7efabf99c724e6f8e7fdbdbaf868a1ffa25ba8 -->
 
 Generated from active SQLite for `Ignition/Ignition/IGN_WIN.EXE`.
 FPO-seeded inventory coverage is incomplete; status is not overall game completion.
@@ -116,12 +116,12 @@ FPO-seeded inventory coverage is incomplete; status is not overall game completi
 | `0x00411DC0` | `0x00011DC0` | 734 | `sub_00411DC0` | unknown | unidentified | - |
 | `0x004120A0` | `0x000120A0` | 390 | `sub_004120A0` | unknown | unidentified | - |
 | `0x00412230` | `0x00012230` | 154 | `sub_00412230` | unknown | unidentified | - |
-| `0x004122D0` | `0x000122D0` | 400 | `Game_WindowProc` | game | analyzed | [windows_surface_open.md](windows_surface_open.md) |
-| `0x00412460` | `0x00012460` | 152 | `sub_00412460` | unknown | unidentified | - |
-| `0x00412500` | `0x00012500` | 47 | `sub_00412500` | unknown | unidentified | - |
-| `0x00412530` | `0x00012530` | 21 | `sub_00412530` | unknown | unidentified | - |
-| `0x00412550` | `0x00012550` | 10 | `sub_00412550` | unknown | unidentified | - |
-| `0x00412560` | `0x00012560` | 19 | `sub_00412560` | unknown | unidentified | - |
+| `0x004122D0` | `0x000122D0` | 400 | `Game_WindowProc` | game | reconstructed | [windows_platform.md](windows_platform.md) |
+| `0x00412460` | `0x00012460` | 152 | `Game_GetTime` | game | reconstructed | [windows_platform.md](windows_platform.md) |
+| `0x00412500` | `0x00012500` | 47 | `Game_InitSubsystems` | game | reconstructed | [windows_platform.md](windows_platform.md) |
+| `0x00412530` | `0x00012530` | 21 | `Game_PostClose` | game | reconstructed | [windows_platform.md](windows_platform.md) |
+| `0x00412550` | `0x00012550` | 10 | `Game_ShutdownSubsystems` | game | reconstructed | [windows_platform.md](windows_platform.md) |
+| `0x00412560` | `0x00012560` | 19 | `Game_SetPalette` | game | reconstructed | [windows_platform.md](windows_platform.md) |
 | `0x00412580` | `0x00012580` | 131 | `sub_00412580` | unknown | unidentified | - |
 | `0x00412610` | `0x00012610` | 48 | `sub_00412610` | unknown | unidentified | - |
 | `0x00412640` | `0x00012640` | 35 | `sub_00412640` | unknown | unidentified | - |

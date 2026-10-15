@@ -67,13 +67,19 @@ def validate_platform_imports(pe):
     Validation DLLs containing real surface/input lifecycle bodies import APIs.
     This replaces the obsolete no-import assumption, not the dependency audit.
     """
-    expected={('DDRAW.dll','DirectDrawCreate'),('GDI32.dll','GetDeviceCaps'),
-        ('DINPUT.dll','DirectInputCreateA'),('WINMM.dll','timeKillEvent'),('WINMM.dll','timeSetEvent')}
-    expected.update(('USER32.dll',name) for name in (
-        'GetSystemMetrics','CreateWindowExA','UpdateWindow','SetFocus','GetDC',
-        'ReleaseDC','GetWindowLongA','SetWindowLongA','SetRect','GetMenu',
-        'AdjustWindowRectEx','SetWindowPos','SystemParametersInfoA','GetWindowRect',
-        'MessageBoxA','ShowWindow'))
+    expected = {
+        ('DDRAW.dll', 'DirectDrawCreate'), ('GDI32.dll', 'GetDeviceCaps'),
+        ('DINPUT.dll', 'DirectInputCreateA'), ('WINMM.dll', 'timeKillEvent'),
+        ('WINMM.dll', 'timeSetEvent'), ('WINMM.dll', 'timeGetTime'),
+        ('KERNEL32.dll', 'QueryPerformanceCounter')
+    }
+    expected.update(('USER32.dll', name) for name in (
+        'GetSystemMetrics', 'CreateWindowExA', 'UpdateWindow', 'SetFocus', 'GetDC',
+        'ReleaseDC', 'GetWindowLongA', 'SetWindowLongA', 'SetRect', 'GetMenu',
+        'AdjustWindowRectEx', 'SetWindowPos', 'SystemParametersInfoA', 'GetWindowRect',
+        'MessageBoxA', 'ShowWindow', 'PostQuitMessage', 'GetClientRect',
+        'ClientToScreen', 'DefWindowProcA', 'SetCursor', 'DestroyWindow',
+        'PostMessageA'))
     actual={(group.dll.decode(),entry.name.decode() if entry.name else '')
         for group in getattr(pe,'DIRECTORY_ENTRY_IMPORT',()) for entry in group.imports}
     if actual!=expected:

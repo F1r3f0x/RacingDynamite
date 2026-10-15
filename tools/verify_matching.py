@@ -271,7 +271,9 @@ def verify():
         'Gfx_RasterizeWorkspaceATriangle',
         'Gfx_RasterizeWorkspaceAClippedTriangle',
         'Mem_Free', 'Mem_Alloc', 'Mem_ReleaseHandleId', 'Mem_ShutdownHandles',
-        'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf']}
+        'Mem_RegisterHandle', 'Mem_NextHandleId', 'Mem_InitHandles', 'free', 'malloc', 'printf',
+        'Game_WindowProc', 'Game_GetTime', 'Game_InitSubsystems', 'Game_PostClose',
+        'Game_ShutdownSubsystems', 'Game_SetPalette', '__divdi3']}
     draw_iat=next(entry.address for group in rebuilt.DIRECTORY_ENTRY_IMPORT
         for entry in group.imports if group.dll==b'DDRAW.dll' and entry.name==b'DirectDrawCreate')
     draw_thunks=[instruction.address for instruction in generated
@@ -396,6 +398,12 @@ def verify():
             'Gfx_DrawWorkspaceAClippedTriangleSpan','Gfx_DrawWorkspaceATriangleSpan','Gfx_DrawWorkspaceAClippedTriangleSpan','Gfx_DrawWorkspaceATriangleSpan',
             'Gfx_BuildClippedCorrectedTriangleEdge','Gfx_BuildClippedRawTriangleEdge','Gfx_BuildClippedCorrectedTriangleEdge',
             'Gfx_DrawWorkspaceAClippedTriangleSpan','Gfx_DrawWorkspaceATriangleSpan','Gfx_DrawWorkspaceAClippedTriangleSpan','Gfx_DrawWorkspaceATriangleSpan']})
+    expected_calls.update({
+        'Game_GetTime': ['__divdi3'],
+        'Game_InitSubsystems': ['Gfx_SelectBackend', 'Gfx_Open', 'Input_InitNative'],
+        'Game_ShutdownSubsystems': ['Gfx_Shutdown', 'Input_ShutdownNative'],
+        'Game_WindowProc': ['Game_ShutdownSubsystems', 'Input_ShutdownNative', 'Gfx_Shutdown', 'Gfx_Open', 'Input_InitNative'],
+        'Game_SetPalette': ['Gfx_SetPaletteNative']})
     assert len(direct_calls) == sum(map(len, expected_calls.values())), 'Unexpected direct helper dependency count'
     actual_calls = {}
     for call in direct_calls:
@@ -1038,3 +1046,6 @@ if __name__ == '__main__':
 
     from verify_workspace_a_triangles import main as verify_workspace_a_triangles
     verify_workspace_a_triangles()
+
+    from verify_platform import run_tests as verify_platform
+    verify_platform()

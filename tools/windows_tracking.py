@@ -202,6 +202,7 @@ def record_run(rva, kind, outcome, *, inputs, artifact=None, cases=0, command, d
                                              'decomp/src/input.c', 'decomp/include/input.h',
                                              'decomp/src/surface.c', 'decomp/include/surface.h',
                                              'decomp/src/renderer.c', 'decomp/include/renderer.h',
+                                             'decomp/src/platform.c', 'decomp/include/platform.h',
                                              'tools/verify_texture_spans.py']))
     digest = input_hash(root, inputs)
     artifact_hash = sha(inside(root,artifact).read_bytes()) if artifact else None

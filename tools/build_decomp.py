@@ -55,14 +55,16 @@ _sine_end = _resource_source.index('\n}', _sine_start) + 2
 SINE_BODY = _resource_source[_sine_start:_sine_end]
 LISA_VERSION_SOURCE = LISA_VERSION_SOURCE.replace(SINE_BODY, 'int32_t Gfx_InitSineTable(void);')
 SINE_SOURCE = '#include <math.h>\n#include "geputget.h"\n' + SINE_BODY + '\n'
-_window_header = (ROOT/'decomp/include/main.h').read_text(encoding='utf-8-sig')
-_window_source = (ROOT/'decomp/src/main.c').read_text(encoding='utf-8-sig')
-_window_marker = '/* Native Windows platform backing, independently verified from WinMain/Open. */'
-_window_end = '/* End native Windows platform backing. */'
-WINDOW_HEADER = _window_header[_window_header.index(_window_marker):_window_header.index(_window_end)]
-WINDOW_SOURCE = _window_source[_window_source.index(_window_marker):_window_source.index(_window_end)]
-# Only authenticated platform data is extracted; no surface body extraction.
-PLATFORM_SOURCE = '#include <windows.h>\n' + WINDOW_HEADER + WINDOW_SOURCE
+PLATFORM_EXPORTS = [
+    'Game_WindowProc', 'Game_GetTime', 'Game_InitSubsystems',
+    'Game_PostClose', 'Game_ShutdownSubsystems', 'Game_SetPalette',
+    'g_nativeCursor', 'g_nativeWindowRect', 'g_nativeIsAppActive',
+    'g_nativeInitialized', 'g_nativeIsChangingDisplayMode',
+    'g_nativePerfFrequency', 'g_nativePerfFrequencyAvailable',
+    'g_nativeStartCounter', 'g_nativeCurrentCounter',
+    'g_nativeAccumulatedActiveTime', 'g_nativeLastActiveTime',
+    '__divdi3'
+]
 INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'Input_PollNative',
     'Input_InitTimedNative', 'Input_ShutdownNativeEntry', 'Input_ReinitializeNative',
     'Input_ReadHeldNative', 'Input_ConsumePressNative', 'Input_ConsumeRepeatNative', 'g_nativeInputPeriod',
@@ -122,7 +124,7 @@ EXPORTS = WORKSPACE_EXPORTS + ['validation_gfxDispatchWords', 'Lisa_PrintVersion
            'Mem_ReleaseHandleId', 'Mem_Free', 'Mem_Alloc', 'g_memPools', 'free', 'malloc',
            'g_memHandleContexts', 'g_memHandleParameters', 'g_memRegisteredHandleIds',
            'g_memHandleCallbacks', 'g_memHandleFlags', 'g_memPendingContext',
-           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS + SURFACE_EXPORTS + SPRITE_EXPORTS + SINE_EXPORTS + PRIMITIVE_EXPORTS + INPUT_EXPORTS
+           'g_memPendingCallback', 'g_memPendingParameter'] + STARTUP_EXPORTS + SURFACE_EXPORTS + SPRITE_EXPORTS + SINE_EXPORTS + PRIMITIVE_EXPORTS + INPUT_EXPORTS + PLATFORM_EXPORTS
 
 def compile_banner(flags, stem):
     # Separate TU: the production calls must not see the nonreturning printf
@@ -183,6 +185,47 @@ def compile_input(stem):
     return obj, command
 
 
+def compile_platform(stem):
+    """Compile the entire production platform module and 64-bit division helper."""
+    cc = shutil.which('gcc')
+    if not cc:
+        raise RuntimeError('GCC i386 Win32 SDK compiler required')
+    source, obj = ROOT/'decomp/src/platform.c', BUILD/(stem+'_platform.obj')
+    obj.unlink(missing_ok=True)
+    command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
+        '-Werror', '-O2', '-fno-inline', '-fno-optimize-sibling-calls',
+        '-I', str(ROOT/'decomp/include'), '-c', str(source), '-o', str(obj)]
+    print(subprocess.list2cmdline(command), flush=True)
+    subprocess.run(command, cwd=ROOT, check=True)
+    if not obj.is_file() or not obj.stat().st_size:
+        raise RuntimeError('Fresh whole-module platform object required')
+
+    div_source = BUILD/(stem+'_div64.c')
+    div_obj = BUILD/(stem+'_div64.obj')
+    div_source.write_text('''#include <windows.h>
+LONGLONG __divdi3(LONGLONG a, LONGLONG b) {
+    unsigned __int64 ua, ub, rem = 0, quot = 0;
+    int i, neg = 0;
+    if (b == 0) return 0;
+    if (a < 0) { ua = (unsigned __int64)(-a); neg = !neg; } else { ua = (unsigned __int64)a; }
+    if (b < 0) { ub = (unsigned __int64)(-b); neg = !neg; } else { ub = (unsigned __int64)b; }
+    for (i = 63; i >= 0; i--) {
+        rem = (rem << 1) | ((ua >> i) & 1);
+        if (rem >= ub) {
+            rem -= ub;
+            quot |= ((unsigned __int64)1 << i);
+        }
+    }
+    return neg ? -(LONGLONG)quot : (LONGLONG)quot;
+}
+''', encoding='utf-8', newline='\n')
+    div_command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
+        '-Werror', '-O2', '-c', str(div_source), '-o', str(div_obj)]
+    print(subprocess.list2cmdline(div_command), flush=True)
+    subprocess.run(div_command, cwd=ROOT, check=True)
+    return [str(obj), str(div_obj)], command
+
+
 def surface_import_libraries(stem):
     dlltool = shutil.which('llvm-dlltool')
     if not dlltool:
@@ -192,21 +235,14 @@ def surface_import_libraries(stem):
             'SetFocus@4','GetDC@4','ReleaseDC@8','GetWindowLongA@8',
             'SetWindowLongA@12','SetRect@20','GetMenu@4','AdjustWindowRectEx@16',
             'SetWindowPos@28','SystemParametersInfoA@16','GetWindowRect@8',
-            'MessageBoxA@16','ShowWindow@8'],
+            'MessageBoxA@16','ShowWindow@8','PostQuitMessage@4','GetClientRect@8',
+            'ClientToScreen@8','DefWindowProcA@16','SetCursor@4','DestroyWindow@4',
+            'PostMessageA@16'],
         'GDI32':['GetDeviceCaps@8'], 'DINPUT':['DirectInputCreateA@16'],
-        'WINMM':['timeKillEvent@4','timeSetEvent@20']}
-    # Separate test boundary for main.c platform backing; never compile DOS main.
-    cc = shutil.which('gcc')
-    if not cc:
-        raise RuntimeError('GCC i386 Win32 SDK compiler required')
-    source, obj = BUILD/(stem+'_platform.c'), BUILD/(stem+'_platform.obj')
-    source.write_text(PLATFORM_SOURCE, encoding='utf-8', newline='\n')
-    obj.unlink(missing_ok=True)
-    command = [cc, '-m32', '-std=c89', '-pedantic-errors', '-Wall', '-Wextra',
-        '-Werror', '-O2', '-c', str(source), '-o', str(obj)]
-    print(subprocess.list2cmdline(command), flush=True)
-    subprocess.run(command, cwd=ROOT, check=True)
-    libraries = [str(obj)]
+        'WINMM':['timeKillEvent@4','timeSetEvent@20','timeGetTime@0'],
+        'KERNEL32':['QueryPerformanceCounter@4']}
+    platform_objs, _ = compile_platform(stem)
+    libraries = list(platform_objs)
     for dll,exports in groups.items():
         definition = BUILD/(stem+'_'+dll.lower()+'.def')
         lib = BUILD/(stem+'_'+dll.lower()+'.lib')
