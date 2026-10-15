@@ -38,7 +38,8 @@ ROUTINES = {
     'Game_ShutdownSubsystems': (0x12550, 10, '9d322da9798d57756f64a6ddfe80ceb7eeab3e0cf8d01337a3b6a3a9f1d4dfc2'),
     'Game_SetPalette': (0x12560, 19, '20949484266a1eb89c69091e72f67c67ae9b6615b115a5e47463892fdc25dbf0'),
     'Game_InitGame': (0x17270, 58, 'ca67f09b7bb19c2a7e24331ea64f2e29e8d81019fc94ef8e71f3831d27a3348a'),
-    'Game_ShutdownGame': (0x17E90, 8, '2620d36c50712bde0380c5fafff9f1a14cd0efed596e6a107823739cbb966aa2')
+    'Game_ShutdownGame': (0x17E90, 8, '2620d36c50712bde0380c5fafff9f1a14cd0efed596e6a107823739cbb966aa2'),
+    'Game_InitState': (0x184C0, 60, 'e1dc62b410b9864791e22d06c66fcc1bfed21de5c207ef533f2ab615c09b517f')
 }
 
 EXPECTED_FPO = {
@@ -51,7 +52,8 @@ EXPECTED_FPO = {
     0x12550: (10, 0, 0, 0),
     0x12560: (19, 0, 1, 0),
     0x17270: (58, 0, 0, 0),
-    0x17E90: (8, 0, 0, 0)
+    0x17E90: (8, 0, 0, 0),
+    0x184C0: (60, 0, 0, 0)
 }
 
 GLOBALS = {
@@ -83,6 +85,10 @@ GLOBALS = {
     'g_gameInRace': (0x525E5C, 4),
     'g_gameFlag563BF4': (0x563BF4, 4),
     'g_gameGraphicsInitErrorFlag': (0x54F970, 4),
+    'g_cdAudioMediaPresent': (0x50EF4C, 4),
+    'g_gameConfigValues': (0x50F2CC, 16),
+    'g_CameraShakeActive': (0x4949E0, 4),
+    'g_gameStateFlag5530DC': (0x5530DC, 4),
 }
 
 TRACKING_INPUTS = [
@@ -161,8 +167,9 @@ int Mem_InitSystem(void) { return 1; }
 int Mem_ShutdownSystem(void) { return 1; }
 int Game_UpdateFrame(void) { return 1; }
 int Game_InitResources(void) { return 1; }
-int Game_InitState(void) { return 1; }
 int Game_CleanupResources(void) { return 1; }
+int Audio_CheckCDMediaPresent(void) { return 1; }
+int Audio_InitCDTracks(void) { return 1; }
 ''', encoding='utf-8')
 
     fixture_obj = BUILD / 'platform_fixtures.obj'
@@ -193,8 +200,9 @@ int Game_CleanupResources(void) { return 1; }
         'Gfx_SelectBackend', 'Gfx_Open', 'Gfx_Shutdown',
         'Gfx_SetPaletteNative', 'Input_InitNative', 'Input_ShutdownNative',
         'Mem_InitSystem', 'Mem_ShutdownSystem',
-        'Game_UpdateFrame', 'Game_InitResources', 'Game_InitState',
-        'Game_CleanupResources'
+        'Game_UpdateFrame', 'Game_InitResources',
+        'Game_CleanupResources', 'Audio_CheckCDMediaPresent',
+        'Audio_InitCDTracks'
     ]
     exports = list(ROUTINES.keys()) + list(GLOBALS.keys()) + fixture_exports
     link_cmd = [ld, '/dll', '/noentry', '/nodefaultlib', '/machine:x86', '/safeseh:no',
@@ -239,6 +247,8 @@ SLOT_DISPATCH_MESSAGE = 32
 SLOT_GAME_INIT_RESOURCES = 33
 SLOT_GAME_INIT_STATE = 34
 SLOT_GAME_CLEANUP_RESOURCES = 35
+SLOT_AUDIO_CHECK_CD = 36
+SLOT_AUDIO_INIT_CD = 37
 
 class MockContext:
     def __init__(self):
@@ -332,8 +342,9 @@ class PlatformSession:
         hook_sub(0x45b1a0, SLOT_MEM_SHUTDOWN_SYSTEM)
         hook_sub(0x4172b0, SLOT_GAME_UPDATE_FRAME)
         hook_sub(0x417ea0, SLOT_GAME_INIT_RESOURCES)
-        hook_sub(0x4184c0, SLOT_GAME_INIT_STATE)
         hook_sub(0x420b70, SLOT_GAME_CLEANUP_RESOURCES)
+        hook_sub(0x457b50, SLOT_AUDIO_CHECK_CD)
+        hook_sub(0x457da0, SLOT_AUDIO_INIT_CD)
 
     def _patch_dll_iat_and_calls(self, pe):
         iat_map = {
@@ -378,8 +389,9 @@ class PlatformSession:
         hook_sym('Mem_ShutdownSystem', SLOT_MEM_SHUTDOWN_SYSTEM)
         hook_sym('Game_UpdateFrame', SLOT_GAME_UPDATE_FRAME)
         hook_sym('Game_InitResources', SLOT_GAME_INIT_RESOURCES)
-        hook_sym('Game_InitState', SLOT_GAME_INIT_STATE)
         hook_sym('Game_CleanupResources', SLOT_GAME_CLEANUP_RESOURCES)
+        hook_sym('Audio_CheckCDMediaPresent', SLOT_AUDIO_CHECK_CD)
+        hook_sym('Audio_InitCDTracks', SLOT_AUDIO_INIT_CD)
 
         # Patch IAT entries from pe.DIRECTORY_ENTRY_IMPORT
         if hasattr(pe, 'DIRECTORY_ENTRY_IMPORT'):
@@ -613,8 +625,14 @@ class PlatformSession:
             uc.reg_write(UC_X86_REG_ESP, sp + 4)
             uc.reg_write(UC_X86_REG_EIP, ret_addr)
 
-        elif slot == SLOT_GAME_INIT_STATE:
-            self.ctx.calls.append(('Game_InitState',))
+        elif slot == SLOT_AUDIO_CHECK_CD:
+            self.ctx.calls.append(('Audio_CheckCDMediaPresent',))
+            uc.reg_write(UC_X86_REG_EAX, 1)
+            uc.reg_write(UC_X86_REG_ESP, sp + 4)
+            uc.reg_write(UC_X86_REG_EIP, ret_addr)
+
+        elif slot == SLOT_AUDIO_INIT_CD:
+            self.ctx.calls.append(('Audio_InitCDTracks',))
             uc.reg_write(UC_X86_REG_EAX, 1)
             uc.reg_write(UC_X86_REG_ESP, sp + 4)
             uc.reg_write(UC_X86_REG_EIP, ret_addr)
@@ -1020,6 +1038,8 @@ def run_tests():
     # 9. Test Game_InitGame
     for seed in range(30):
         rng = random.Random(seed + 700)
+        cd_present = rng.choice([0, 1])
+        cfg = [rng.randint(1, 100) for _ in range(4)]
         state = {
             'g_gameMainState': rng.randint(-1000, 1000),
             'g_gameMenuState': rng.randint(-1000, 1000),
@@ -1028,15 +1048,22 @@ def run_tests():
             'g_gameInRace': rng.randint(-1000, 1000),
             'g_gameFlag563BF4': rng.randint(-1000, 1000),
             'g_gameGraphicsInitErrorFlag': rng.randint(-1000, 1000),
+            'g_cdAudioMediaPresent': cd_present,
+            'g_CameraShakeActive': rng.randint(-1000, 1000),
+            'g_gameStateFlag5530DC': rng.randint(-1000, 1000),
+            'g_gameConfigValues': struct.pack('<4i', *cfg),
         }
         ret_orig, calls_orig, state_orig = sess_orig.invoke('Game_InitGame', (), state)
         ret_dll, calls_dll, state_dll = sess_dll.invoke('Game_InitGame', (), state)
 
         assert ret_orig == ret_dll == 1, f"InitGame ret mismatch: {ret_orig} vs {ret_dll}"
-        assert calls_orig == calls_dll == [('Game_InitResources',), ('Game_InitState',)], f"InitGame calls mismatch:\norig: {calls_orig}\ndll: {calls_dll}"
+        expected_calls = [('Game_InitResources',), ('Audio_CheckCDMediaPresent',)]
+        if cd_present == 1:
+            expected_calls.append(('Audio_InitCDTracks',))
+        assert calls_orig == calls_dll == expected_calls, f"InitGame calls mismatch:\norig: {calls_orig}\ndll: {calls_dll}"
         for k in GLOBALS:
             assert state_orig[k] == state_dll[k], f"InitGame state mismatch on {k}"
-        assert struct.unpack('<i', state_orig['g_gameMainState'])[0] == 2
+        assert struct.unpack('<i', state_orig['g_gameMainState'])[0] == 1
         for flag in ['g_gameMenuState', 'g_gameMenuSelected', 'g_gameRaceLoadStage', 'g_gameInRace', 'g_gameFlag563BF4', 'g_gameGraphicsInitErrorFlag']:
             assert struct.unpack('<i', state_orig[flag])[0] == 0
         total_comparisons += 1
@@ -1062,9 +1089,36 @@ def run_tests():
             assert state_orig[k] == state_dll[k], f"ShutdownGame state mismatch on {k}"
         total_comparisons += 1
 
+    # 11. Test Game_InitState
+    for seed in range(40):
+        rng = random.Random(seed + 900)
+        cd_present = rng.choice([0, 1])
+        cfg = [rng.randint(-50000, 50000) for _ in range(4)]
+        state = {
+            'g_cdAudioMediaPresent': cd_present,
+            'g_gameConfigValues': struct.pack('<4i', *cfg),
+            'g_CameraShakeActive': rng.randint(-1000, 1000),
+            'g_gameStateFlag5530DC': rng.randint(-1000, 1000),
+            'g_gameMainState': rng.randint(-1000, 1000),
+        }
+        ret_orig, calls_orig, state_orig = sess_orig.invoke('Game_InitState', (), state)
+        ret_dll, calls_dll, state_dll = sess_dll.invoke('Game_InitState', (), state)
+
+        assert ret_orig == ret_dll == 1, f"InitState ret mismatch: {ret_orig} vs {ret_dll}"
+        expected_calls = [('Audio_CheckCDMediaPresent',)]
+        if cd_present == 1:
+            expected_calls.append(('Audio_InitCDTracks',))
+        assert calls_orig == calls_dll == expected_calls, f"InitState calls mismatch:\norig: {calls_orig}\ndll: {calls_dll}"
+        for k in GLOBALS:
+            assert state_orig[k] == state_dll[k], f"InitState state mismatch on {k}"
+        assert struct.unpack('<i', state_orig['g_CameraShakeActive'])[0] == cfg[3]
+        assert struct.unpack('<i', state_orig['g_gameStateFlag5530DC'])[0] == 1
+        assert struct.unpack('<i', state_orig['g_gameMainState'])[0] == 1
+        total_comparisons += 1
+
     print(f"PASS: {total_comparisons} differential trials passed with byte-for-byte state and event parity.")
 
-    # Record runs for all 10 RVAs
+    # Record runs for all 11 RVAs
     for name, (rva, _, _) in ROUTINES.items():
         for kind in ('compilation', 'emulation'):
             record_run(

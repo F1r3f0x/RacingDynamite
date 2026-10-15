@@ -32,6 +32,10 @@ extern volatile int32_t g_gameRaceLoadStage; /* VA 0x00553290 */
 extern volatile int32_t g_gameInRace; /* VA 0x00525E5C */
 extern volatile int32_t g_gameFlag563BF4; /* VA 0x00563BF4 */
 extern volatile int32_t g_gameGraphicsInitErrorFlag; /* VA 0x0054F970 */
+extern volatile int32_t g_cdAudioMediaPresent; /* VA 0x0050EF4C */
+extern volatile int32_t g_gameConfigValues[4]; /* VA 0x0050F2CC */
+extern volatile int32_t g_CameraShakeActive; /* VA 0x004949E0 */
+extern volatile int32_t g_gameStateFlag5530DC; /* VA 0x005530DC */
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
 int32_t Game_ProcessFrame(void);
@@ -49,5 +53,9 @@ int32_t Game_ShutdownGame(void);
 int32_t Game_InitResources(void);
 int32_t Game_InitState(void);
 int32_t Game_CleanupResources(void);
+
+/* Audio subsystem entry points called by Game_InitState */
+int32_t Audio_CheckCDMediaPresent(void);
+int32_t Audio_InitCDTracks(void);
 
 #endif /* IGNITION_PLATFORM_H */

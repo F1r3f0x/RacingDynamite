@@ -35,6 +35,10 @@ volatile int32_t g_gameRaceLoadStage = 0; /* VA 0x00553290 */
 volatile int32_t g_gameInRace = 0; /* VA 0x00525E5C */
 volatile int32_t g_gameFlag563BF4 = 0; /* VA 0x00563BF4 */
 volatile int32_t g_gameGraphicsInitErrorFlag = 0; /* VA 0x0054F970 */
+volatile int32_t g_cdAudioMediaPresent = 0; /* VA 0x0050EF4C */
+volatile int32_t g_gameConfigValues[4] = {0, 0, 0, 0}; /* VA 0x0050F2CC */
+volatile int32_t g_CameraShakeActive = 0; /* VA 0x004949E0 */
+volatile int32_t g_gameStateFlag5530DC = 0; /* VA 0x005530DC */
 
 /*
  * @original WinMain (IGN_WIN.EXE @ 0x004120A0, platform.c)
@@ -289,4 +293,22 @@ int32_t Game_InitGame(void) {
 int32_t Game_ShutdownGame(void) {
     Game_CleanupResources();
     return 0;
+}
+
+/*
+ * @original Game_InitState (IGN_WIN.EXE @ 0x004184C0, platform.c)
+ * @fidelity EXACT
+ */
+int32_t Game_InitState(void) {
+    int32_t ecx;
+    Audio_CheckCDMediaPresent();
+    if (g_cdAudioMediaPresent == 1) {
+        Audio_InitCDTracks();
+    }
+    for (ecx = 8; ecx < 16; ecx += 4) {
+        g_CameraShakeActive = *(volatile int32_t *)((char *)g_gameConfigValues + ecx);
+    }
+    g_gameStateFlag5530DC = 1;
+    g_gameMainState = 1;
+    return 1;
 }

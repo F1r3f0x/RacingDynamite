@@ -13,8 +13,9 @@ STARTUP_BOUNDARY_SOURCE = (
     'int Lisa_PrintVersion(void);\n'
     'int printf(const char *format, ...) { (void)format; for (;;) {} }\n'
     'int Game_InitResources(void) { return 1; }\n'
-    'int Game_InitState(void) { return 1; }\n'
     'int Game_CleanupResources(void) { return 1; }\n'
+    'int Audio_CheckCDMediaPresent(void) { return 1; }\n'
+    'int Audio_InitCDTracks(void) { return 1; }\n'
     '')
 STARTUP_EXPORTS = ['Gfx_Open', 'Gfx_Rebuild', 'Gfx_Shutdown', 'Gfx_ClearSurfaceNative', 'Gfx_PresentSurfaceNative', 'Gfx_SetPaletteNative', 'Gfx_InitPrimitiveState', 'Gfx_SelectBackend',
     'Gfx_InstallSurfaceDispatch', 'Gfx_InstallSpriteDispatch']
@@ -72,8 +73,11 @@ PLATFORM_EXPORTS = [
     'g_gameMainState', 'g_gameMenuState', 'g_gameMenuSelected',
     'g_gameRaceLoadStage', 'g_gameInRace', 'g_gameFlag563BF4',
     'g_gameGraphicsInitErrorFlag',
+    'g_cdAudioMediaPresent', 'g_gameConfigValues', 'g_CameraShakeActive',
+    'g_gameStateFlag5530DC',
     'Game_InitGame', 'Game_UpdateFrame', 'Game_ShutdownGame',
     'Game_InitResources', 'Game_InitState', 'Game_CleanupResources',
+    'Audio_CheckCDMediaPresent', 'Audio_InitCDTracks',
     '__divdi3'
 ]
 INPUT_EXPORTS = ['Input_InitNative', 'Input_ShutdownNative', 'Input_PollNative',

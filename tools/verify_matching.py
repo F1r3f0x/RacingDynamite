@@ -275,7 +275,8 @@ def verify():
         'Game_WindowProc', 'Game_GetTime', 'Game_InitSubsystems', 'Game_PostClose',
         'Game_ShutdownSubsystems', 'Game_SetPalette', '__divdi3',
         'WinMain', 'Game_ProcessFrame', 'Game_InitGame', 'Game_UpdateFrame', 'Game_ShutdownGame',
-        'Game_InitResources', 'Game_InitState', 'Game_CleanupResources']}
+        'Game_InitResources', 'Game_InitState', 'Game_CleanupResources',
+        'Audio_CheckCDMediaPresent', 'Audio_InitCDTracks']}
     draw_iat=next(entry.address for group in rebuilt.DIRECTORY_ENTRY_IMPORT
         for entry in group.imports if group.dll==b'DDRAW.dll' and entry.name==b'DirectDrawCreate')
     draw_thunks=[instruction.address for instruction in generated
@@ -409,7 +410,8 @@ def verify():
         'WinMain': ['Mem_InitSystem', 'Game_InitSubsystems', 'Game_ProcessFrame', 'Game_PostClose'],
         'Game_ProcessFrame': ['Game_GetTime', 'Game_ShutdownGame', 'Mem_ShutdownSystem', 'Game_GetTime', 'Game_UpdateFrame', 'Game_GetTime', 'Game_InitGame'],
         'Game_InitGame': ['Game_InitResources', 'Game_InitState'],
-        'Game_ShutdownGame': ['Game_CleanupResources']})
+        'Game_ShutdownGame': ['Game_CleanupResources'],
+        'Game_InitState': ['Audio_CheckCDMediaPresent', 'Audio_InitCDTracks']})
     assert len(direct_calls) == sum(map(len, expected_calls.values())), 'Unexpected direct helper dependency count'
     actual_calls = {}
     for call in direct_calls:
